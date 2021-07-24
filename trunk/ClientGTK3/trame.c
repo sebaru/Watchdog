@@ -744,6 +744,38 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     else return("black");
   }
 /******************************************************************************************************************************/
+/* Trame_load_encadre: Prépare un pixbuf pour l'encadre en parametre                                                          */
+/* Entrée: la taille de lencadre, la couleur, son libellé                                                                     */
+/* Sortie: le pixbuf                                                                                                          */
+/******************************************************************************************************************************/
+ static GdkPixbuf *Trame_load_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
+  { RsvgHandle *handle;
+    gchar encadre[512];
+    gchar *html_couleur = Trame_color_to_html ( couleur );
+    gint largeur=64*ligne;
+    gint hauteur=64*colonne;
+    g_snprintf( encadre, sizeof(encadre),
+                "<svg viewBox='0 0 %d %d' >"
+                "<text text-anchor='middle' x='%d' y='12' "
+                "      font-size='14px' font-family='Bitstream' font-style='italic' fill='black' stroke='black'>%s</text> "
+                "<rect x='5' y='20' rx='15' width='%d' height='%d' "
+                "      fill='none' stroke='%s' stroke-width='4'  />"
+                "</svg>",
+                largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, html_couleur
+              );
+printf("%s: New encadre %s\n", __func__, encadre );
+    GError *error = NULL;
+    handle = rsvg_handle_new_from_data ( encadre, strlen(encadre), &error );
+    if (handle)
+     { GdkPixbuf *pixbuf = rsvg_handle_get_pixbuf ( handle );
+       g_object_unref ( handle );
+       return(pixbuf);
+     }
+    printf("%s: Load encadre failed: %s\n", __func__, error->message );
+    g_error_free(error);
+    return(NULL);
+  }
+/******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
@@ -759,34 +791,10 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     gchar *forme = Json_get_string ( visuel, "forme" );
     if ( g_str_has_prefix ( forme, "encadre_" ) )
-     { RsvgHandle *handle;
-       gchar encadre[512];
-       gchar *color = Trame_color_to_html ( Json_get_string ( visuel, "color" ) );
-       gint colonne, ligne;
+     { gint ligne, colonne;
        if ( sscanf ( forme, "encadre_%dx%d", &ligne, &colonne ) != 2 ) return;
-       gint largeur=64*ligne;
-       gint hauteur=64*colonne;
-       g_snprintf( encadre, sizeof(encadre),
-                   "<svg viewBox='0 0 %d %d' >"
-                   "<text text-anchor='middle' x='%d' y='12' "
-                   "      font-size='14px' font-family='Bitstream' font-style='italic' fill='black' stroke='black'>%s</text> "
-                   "<rect x='5' y='20' rx='15' width='%d' height='%d' "
-                   "      fill='none' stroke='%s' stroke-width='4'  />"
-                   "</svg>",
-                   largeur+10, hauteur+25, (largeur+10)/2, Json_get_string ( visuel, "libelle" ), largeur, hauteur, color
-                 );
-printf("%s: New %s: %s\n", __func__, forme, encadre );
-       GError *error = NULL;
-       handle = rsvg_handle_new_from_data ( encadre, strlen(encadre), &error );
-       if (handle)
-        { pixbuf = rsvg_handle_get_pixbuf ( handle );
-          g_object_unref ( handle );
-          /*gdk_pixbuf_save ( pixbuf, "test.png", "png", NULL, NULL );*/
-        }
-       else
-        { printf("%s: Chargement visuel complexe '%s' failed: %s\n", __func__, forme, error->message );
-          g_error_free(error);
-        }
+       pixbuf = Trame_load_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
+                                     Json_get_string ( visuel, "libelle" ) );
      }
 
     if (pixbuf)
@@ -798,6 +806,23 @@ printf("%s: New %s: %s\n", __func__, forme, encadre );
        printf("%s : width = %d, height=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
      }
     else { printf("%s: Chargement visuel complexe '%s' pixbuf failed\n", __func__, forme ); }
+  }
+/******************************************************************************************************************************/
+/* Trame_rafraichir_visuel_complexe: Met a jour un visuel complexe                                                            */
+/* Entrée: le motif du synoptique et son nouveau statut                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Trame_rafraichir_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
+  {
+    if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
+    if ( g_str_has_prefix ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre_" ) )
+     { gint ligne, colonne;
+       if ( sscanf ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre_%dx%d", &ligne, &colonne ) != 2 ) return;
+       trame_motif->pixbuf = Trame_load_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
+                                                  Json_get_string ( visuel, "libelle" ) );
+      
+     }
+    if (trame_motif->pixbuf) g_object_set( trame_motif->item, "pixbuf", trame_motif->pixbuf, NULL );
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
