@@ -77,7 +77,7 @@
     Json_node_add_bool   ( element, "bit_danger_fixe",      Dls_data_get_MONO ( dls->tech_id, "MEMSSP_DANGER_FIXE", &dls->vars.bit_danger_fixe ) );
     Json_node_add_bool   ( element, "bit_secu_pers_ok",     Dls_data_get_MONO ( dls->tech_id, "MEMSSP_OK", &dls->vars.bit_secupers_ok ) );
 
-    Json_node_add_bool   ( element, "bit_acquit",           Dls_data_get_MONO ( dls->tech_id, "OSYN_ACQUIT", &dls->vars.bit_acquit ) );
+    Json_node_add_bool   ( element, "bit_acquit",           Dls_data_get_DI   ( dls->tech_id, "OSYN_ACQUIT", &dls->vars.bit_acquit ) );
     JsonArray *comm_array = Json_node_add_array  ( element, "bit_Comms" );
     GSList *liste = dls->Arbre_Comm;
     while(liste)

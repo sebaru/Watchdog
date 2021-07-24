@@ -540,7 +540,7 @@
     g_free(dls_syn);
   }
 /******************************************************************************************************************************/
-/* Dls_recalculer_arbre_syn: Calcule l'arbre des synoptiques                                                                  */
+/* Dls_arbre_dls_syn_erase: Efface l'arbre des synoptiques                                                                    */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
@@ -549,7 +549,7 @@
     Partage->com_dls.Dls_syns = NULL;
   }
 /******************************************************************************************************************************/
-/* Dls_recalculer_arbre_syn: Calcule l'arbre des synoptiques                                                                  */
+/* Dls_recalculer_arbre_dls_syn: Calcule l'arbre des synoptiques                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
@@ -558,7 +558,7 @@
     Partage->com_dls.Dls_syns = Dls_recalculer_arbre_syn_for_id (1);
   }
 /******************************************************************************************************************************/
-/* Charger_plugins: Ouverture de toutes les librairies possibles pour le DLS                                                  */
+/* Dls_Charger_plugins: Ouverture de toutes les librairies possibles pour le DLS                                              */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
@@ -575,7 +575,7 @@
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Dls_Debug_plugin_reel: Active le debug d'un plugin                                                                         */
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -591,7 +591,7 @@
      }
   }
 /******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Dls_Undebug_plugin_reel: Désactive le debug d'un plugin                                                                    */
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -607,8 +607,8 @@
      }
   }
 /******************************************************************************************************************************/
-/* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
-/* Entrée: l'ID du plugin                                                                                                     */
+/* Dls_Debug_plugin: Active ou non le debug d'un plugin                                                                       */
+/* Entrée: le tech_id et le choix actif ou non                                                                                */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Dls_Debug_plugin ( gchar *tech_id, gboolean actif )
@@ -616,7 +616,7 @@
           else Dls_foreach_plugins ( tech_id, Dls_Undebug_plugin_reel );
   }
 /******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Dls_acquitter_plugin_reel: Acquitte le synoptique si il est en parametre                                                   */
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -625,7 +625,7 @@
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { Info_new( Config.log, plugin->vars.debug, LOG_NOTICE,
                  "%s: '%s' acquitté ('%s')", __func__, plugin->tech_id, plugin->shortname );
-       Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "OSYN_ACQUIT", &plugin->vars.bit_acquit, TRUE );
+       Envoyer_commande_dls_data ( plugin->tech_id, "OSYN_ACQUIT" );
      }
   }
 /******************************************************************************************************************************/
@@ -648,7 +648,7 @@
      { struct DLS_PLUGIN *plugin = plugins->data;
        Info_new( Config.log, plugin->vars.debug, LOG_NOTICE,
                  "%s: '%s' acquitté ('%s')", __func__, plugin->tech_id, plugin->shortname );
-       Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "OSYN_ACQUIT", &plugin->vars.bit_acquit, TRUE );
+       Envoyer_commande_dls_data ( plugin->tech_id, "OSYN_ACQUIT" );
        plugins=g_slist_next(plugins);
      }
   }
