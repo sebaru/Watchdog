@@ -125,7 +125,6 @@ Watchdogd/Modbus/Makefile \
 Watchdogd/Imsgs/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \
-Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
 Watchdogd/Radio/Makefile \
