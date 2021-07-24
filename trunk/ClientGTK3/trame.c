@@ -723,6 +723,27 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Trame_color_to_html: Convertir une couleur en francais en couleur html                                                     */
+/* Entrée: la couleur 'DLS'                                                                                                   */
+/* Sortie: un buffer static                                                                                                   */
+/******************************************************************************************************************************/
+ static gchar *Trame_color_to_html ( gchar *color )
+  {
+         if (!strcasecmp(color, "rouge"))     { return("red");       }
+    else if (!strcasecmp(color, "vert"))      { return("green");     }
+    else if (!strcasecmp(color, "bleu"))      { return("blue");      }
+    else if (!strcasecmp(color, "cyan"))      { return("lightblue"); }
+    else if (!strcasecmp(color, "jaune"))     { return("yellow");    }
+    else if (!strcasecmp(color, "orange"))    { return("orange");    }
+    else if (!strcasecmp(color, "blanc"))     { return("white");     }
+    else if (!strcasecmp(color, "kaki"))      { return("darkgreen"); }
+    else if (!strcasecmp(color, "gris"))      { return("gray");      }
+    else if (!strcasecmp(color, "marron"))    { return("brown");     }
+    else if (!strcasecmp(color, "grisfonce")) { return("darkgray");  }
+    else if (!strcasecmp(color, "noir"))      { return("black");     }
+    else return("black");
+  }
+/******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
@@ -737,23 +758,26 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     GdkPixbuf *pixbuf = NULL;
 
     gchar *forme = Json_get_string ( visuel, "forme" );
-    if ( !strcmp ( forme, "encadre_1x1" ) )
+    if ( g_str_has_prefix ( forme, "encadre_" ) )
      { RsvgHandle *handle;
-       gchar encadre_1x1[512];
-       gchar *color = Json_get_string ( visuel, "color" );
-       color="white";
-       g_snprintf( encadre_1x1, sizeof(encadre_1x1),
-                   "<svg viewBox='0 0 150 170' >"
-                   "<text text-anchor='middle' x='75' y='12' "
-                   "      font-family='Verdana' font-size='14px' fill='white' stroke='white'>%s</text> "
-                   "<rect x='5' y='20' rx='20' width='140' height='140' "
+       gchar encadre[512];
+       gchar *color = Trame_color_to_html ( Json_get_string ( visuel, "color" ) );
+       gint colonne, ligne;
+       if ( sscanf ( forme, "encadre_%dx%d", &ligne, &colonne ) != 2 ) return;
+       gint largeur=64*ligne;
+       gint hauteur=64*colonne;
+       g_snprintf( encadre, sizeof(encadre),
+                   "<svg viewBox='0 0 %d %d' >"
+                   "<text text-anchor='middle' x='%d' y='12' "
+                   "      font-size='14px' font-family='Bitstream' font-style='italic' fill='black' stroke='black'>%s</text> "
+                   "<rect x='5' y='20' rx='15' width='%d' height='%d' "
                    "      fill='none' stroke='%s' stroke-width='4'  />"
                    "</svg>",
-                   Json_get_string ( visuel, "libelle" ), color
+                   largeur+10, hauteur+25, (largeur+10)/2, Json_get_string ( visuel, "libelle" ), largeur, hauteur, color
                  );
-printf("%s: New %s: %s\n", __func__, forme, encadre_1x1 );
+printf("%s: New %s: %s\n", __func__, forme, encadre );
        GError *error = NULL;
-       handle = rsvg_handle_new_from_data ( encadre_1x1, strlen(encadre_1x1), &error );
+       handle = rsvg_handle_new_from_data ( encadre, strlen(encadre), &error );
        if (handle)
         { pixbuf = rsvg_handle_get_pixbuf ( handle );
           g_object_unref ( handle );
