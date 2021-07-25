@@ -9,7 +9,7 @@
    viewBox="0 0 508 508"
    style="enable-background:new 0 0 508 508;"
    xml:space="preserve"
-   sodipodi:docname="pile_pleine.svg"
+   sodipodi:docname="pile_100.svg"
    inkscape:version="1.1 (c68e22c387, 2021-05-23)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -62,15 +62,15 @@
    d="M330,198.4v32.4c0,2-1.6,3.6-3.6,3.6H181.6c-2,0-3.6-1.6-3.6-3.6v-32.4c0-2,1.6-3.6,3.6-3.6h144.8  C328.4,194.8,330,196.4,330,198.4z"
    id="path14" />
 <path
-   style="fill:#fffd5b;fill-opacity:1"
+   style="fill:#4cdb83;fill-opacity:1"
    d="M330,252.4v32.4c0,2-1.6,3.6-3.6,3.6H181.6c-2,0-3.6-1.6-3.6-3.6v-32.4c0-2,1.6-3.6,3.6-3.6h144.8  C328.4,248.8,330,250.4,330,252.4z"
    id="path16" />
 <path
-   style="fill:#ffd05b"
+   style="fill:#4cdb83"
    d="M330,306.8v32.4c0,2-1.6,3.6-3.6,3.6H181.6c-2,0-3.6-1.6-3.6-3.6v-32.4c0-2,1.6-3.6,3.6-3.6h144.8  C328.4,303.2,330,304.8,330,306.8z"
    id="path18" />
 <path
-   style="fill:#FF7058;"
+   style="fill:#4cdb83"
    d="M330,360.8v32.4c0,2-1.6,3.6-3.6,3.6H181.6c-2,0-3.6-1.6-3.6-3.6v-32.4c0-2,1.6-3.6,3.6-3.6h144.8  C328.4,357.2,330,358.8,330,360.8z"
    id="path20" />
 <g

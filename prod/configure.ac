@@ -113,10 +113,7 @@ AC_OUTPUT( \
 Makefile \
 Include/Makefile \
 Commun/Makefile \
-ClientGTK2/Include/Makefile \
 Commun/Reseaux/Makefile \
-ClientGTK2/Config_cli/Makefile \
-ClientGTK2/Makefile \
 ClientGTK3/Makefile \
 ClientGTK3/Include/Makefile \
 Watchdogd/Makefile \
@@ -128,7 +125,6 @@ Watchdogd/Modbus/Makefile \
 Watchdogd/Imsgs/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \
-Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
 Watchdogd/Radio/Makefile \

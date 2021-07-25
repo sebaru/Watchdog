@@ -200,6 +200,7 @@
  extern void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+ extern void Trame_rafraichir_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel );
  extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, gchar *color );
  extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gchar *color );
  extern void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno );
