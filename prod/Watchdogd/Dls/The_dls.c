@@ -201,9 +201,9 @@
     Dls_data_get_DI ( tech_id, acronyme, &di );
     if (!di) { Dls_data_set_DI ( NULL, tech_id, acronyme, &di, TRUE ); }
 
-    pthread_mutex_lock( &Partage->com_dls.synchro );
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, di );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a un du bit DI '%s:%s' demandée", __func__, tech_id, acronyme );
   }
 /******************************************************************************************************************************/
@@ -212,7 +212,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Set_cde_exterieure ( void )
-  { pthread_mutex_lock( &Partage->com_dls.synchro );
+  { pthread_mutex_lock( &Partage->com_dls.synchro_data );
     while( Partage->com_dls.Set_Dls_Data )                                                  /* A-t-on une entrée a allumer ?? */
      { struct DLS_DI *di = Partage->com_dls.Set_Dls_Data->data;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a 1 du bit DI %s:%s",
@@ -221,7 +221,7 @@
        Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, di );
        Dls_data_set_DI ( NULL, NULL, NULL, (gpointer *)&di, TRUE );                              /* Mise a un du bit d'entrée */
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
 /******************************************************************************************************************************/
 /* Reset_cde_exterieure: Mise à zero des bits de commande exterieure                                                          */
@@ -229,7 +229,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Reset_cde_exterieure ( void )
-  { pthread_mutex_lock( &Partage->com_dls.synchro );
+  { pthread_mutex_lock( &Partage->com_dls.synchro_data );
     while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { struct DLS_DI *di = Partage->com_dls.Reset_Dls_Data->data;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
@@ -237,7 +237,7 @@
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, di );
        Dls_data_set_DI ( NULL, NULL, NULL, (gpointer *)&di, FALSE );                             /* Mise a un du bit d'entrée */
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
 /******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
