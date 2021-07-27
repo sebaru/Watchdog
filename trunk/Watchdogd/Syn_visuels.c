@@ -40,11 +40,9 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src, gchar *forme_src )
+ gboolean Mnemo_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src, gchar *forme_src )
   { gchar *acro, *libelle, *forme;
-    gchar requete[1024];
     gboolean retour;
-    struct DB *db;
 
 /******************************************** Préparation de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
@@ -71,35 +69,48 @@
        return(FALSE);
      }
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       g_free(forme);
-       g_free(libelle);
-       g_free(acro);
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s SET "
-                "syn_id=%d, tech_id='%s', acronyme='%s', forme='%s', icone='-1', libelle='%s', access_level=0, "
-                "posx='150', posy='150', larg='-1', haut='-1', angle='0', auto_create=1 "
-                "ON DUPLICATE KEY UPDATE syn_id=VALUES(syn_id), forme=VALUES(forme), libelle=VALUES(libelle)",
-                NOM_TABLE_MOTIF, plugin->syn_id, plugin->tech_id, acro, forme, libelle );
-    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET forme='%s', libelle='%s' "
-                "WHERE tech_id='%s' AND acronyme='%s';",
-                NOM_TABLE_MOTIF, forme, libelle, plugin->tech_id, acro );
-    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
-
+    retour = SQL_Write_new( "INSERT INTO mnemos_VISUEL SET "
+                            "tech_id='%s', acronyme='%s', forme='%s', libelle='%s' /*access_level=0,*/ "
+                            "ON DUPLICATE KEY UPDATE forme=VALUES(forme), libelle=VALUES(libelle)",
+                            plugin->tech_id, acro, forme, libelle );
     g_free(forme);
     g_free(libelle);
     g_free(acro);
 
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
+    return (retour);
+  }
+/******************************************************************************************************************************/
+/* Synoptique_auto_create_VISUEL: Création automatique d'un visuel depuis la compilation DLS                                  */
+/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/******************************************************************************************************************************/
+ gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *target_tech_id_src, gchar *target_acronyme_src )
+  { gchar *target_tech_id, *target_acro;
+    gboolean retour;
+
+/******************************************** Préparation de la base du mnemo *************************************************/
+    target_acro = Normaliser_chaine ( target_acronyme_src );                                 /* Formatage correct des chaines */
+    if ( !target_acro )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
+       return(FALSE);
+     }
+
+    target_tech_id = Normaliser_chaine ( target_tech_id_src );                               /* Formatage correct des chaines */
+    if ( !target_tech_id )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation tech_id impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(target_acro);
+       return(FALSE);
+     }
+
+    retour = SQL_Write_new ( "INSERT INTO syns_visuels SET "
+                             "tech_id='%s', mnemo_id=(SELECT id FROM mnemos_VISUEL WHERE tech_id='%s' AND acronyme='%s'), "
+                             "posx='150', posy='150', angle='0', scale='1' "
+                             "ON DUPLICATE KEY UPDATE mnemo_id=mnemo_id",
+                             plugin->tech_id, target_tech_id, target_acro );
+    g_free(target_tech_id);
+    g_free(target_acro);
     return (retour);
   }
 /******************************************************************************************************************************/

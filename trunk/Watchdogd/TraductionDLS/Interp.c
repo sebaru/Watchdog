@@ -389,7 +389,7 @@
 
     alias_g = Get_alias_par_acronyme(tech_id_g,acro_g);                                                /* On recupere l'alias */
     if (!alias_g)
-     { alias_g = Set_new_external_alias(tech_id_g,acro_g,NULL); }                    /* Si dependance externe, on va chercher */
+     { alias_g = New_external_alias(tech_id_g,acro_g,NULL); }                    /* Si dependance externe, on va chercher */
 
     if (!alias_g)
      { if (tech_id_g) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_g, acro_g );/* si l'alias n'existe pas */
@@ -413,7 +413,7 @@
 
        alias_d = Get_alias_par_acronyme(tech_id_d,acro_d);                                             /* On recupere l'alias */
        if (!alias_d)
-        { alias_d = Set_new_external_alias(tech_id_d,acro_d,NULL); }                 /* Si dependance externe, on va chercher */
+        { alias_d = New_external_alias(tech_id_d,acro_d,NULL); }                 /* Si dependance externe, on va chercher */
 
        if (!alias_d)
         { if (tech_id_d) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_d, acro_d );        /* si l'alias n'existe pas */
@@ -556,7 +556,7 @@
 
     alias = Get_alias_par_acronyme(tech_id,acro);                                                      /* On recupere l'alias */
     if (!alias)
-     { alias = Set_new_external_alias(tech_id,acro,NULL); }                          /* Si dependance externe, on va chercher */
+     { alias = New_external_alias(tech_id,acro,NULL); }                          /* Si dependance externe, on va chercher */
     if (!alias)
      { if (tech_id) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );                 /* si l'alias n'existe pas */
                else Emettre_erreur_new( "'%s' is not defined", acro );                             /* si l'alias n'existe pas */
@@ -1124,24 +1124,37 @@
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
- struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme, GList *options )
+ struct ALIAS *New_external_alias( gchar *tech_id, gchar *acronyme, GList *options )
   { struct ALIAS *alias=NULL;
-    gint classe;
 
     if ( tech_id && !strcmp( tech_id, Dls_plugin.tech_id) )
-     { Emettre_erreur_new( "Un LINK ne peut etre que local (tech_id '%s' interdit)", tech_id );
+     { Emettre_erreur_new( "Un LINK ne peut pas etre local (tech_id '%s' interdit)", tech_id );
        return(NULL);
      }
 
     if (!tech_id) tech_id=Dls_plugin.tech_id;     /* Cas d'usage : bit créé par un thread, n'ayant pas été defini dans le DLS */
 
-    if ( (classe=Rechercher_DICO_type ( tech_id, acronyme )) != -1 )
-     { alias = New_alias ( tech_id, acronyme, classe, options ); }
-    else if ( (classe=Rechercher_DICO_type ( "SYS", acronyme )) != -1 )
-     { alias = New_alias ( "SYS", acronyme, classe, options ); }
-    else { return(NULL); }                                                         /* Si pas trouvé en externe, retourne NULL */
+    JsonNode *result = Rechercher_DICO ( tech_id, acronyme );
+    if (!result) { return(NULL); }
+    else if ( Json_has_member ( result, "classe_int" ) && Json_get_int ( result, "classe_int" ) != -1 )
+     { alias = New_alias ( tech_id, acronyme, Json_get_int ( result, "classe_int" ), options );
+       json_node_unref ( result );
+     }
+    else if ( Json_has_member ( result, "classe" ) && !strcmp ( Json_get_string ( result, "classe" ), "VISUEL" ) )
+     { alias = New_alias ( tech_id, acronyme, MNEMO_MOTIF, options );
+       json_node_unref ( result );
+     }
+    else
+     { json_node_unref ( result );
+       result = Rechercher_DICO ( "SYS", acronyme );
+       if (!result) { return(NULL); }
 
-    if (alias)
+       if ( Json_has_member ( result, "classe_int" ) && Json_get_int ( result, "classe_int" ) != -1 )
+        { alias = New_alias ( "SYS", acronyme, Json_get_int ( result, "classe_int" ), options ); }
+       else { json_node_unref(result); return(NULL); }                             /* Si pas trouvé en externe, retourne NULL */
+     }
+
+    if (alias)                                                                 /* Si trouvé, on considère que le bit est used */
      { alias->used     = 1;
        Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
      }
@@ -1525,8 +1538,14 @@
                    break;
                  }
                 case MNEMO_MOTIF:
-                 { gchar *forme = Get_option_chaine( alias->options, T_FORME, "none" );
-                   Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme );
+                 { if (!strcmp(alias->tech_id, Dls_plugin.tech_id))                                   /* Si alias est interne */
+                    { gchar *forme = Get_option_chaine( alias->options, T_FORME, "none" );
+                      Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme );
+                      Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+                    }
+                   else                                                            /* Création du LINK vers le visuel externe */
+                    { Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme ); }
+
                    break;
                  }
                 case MNEMO_CPT_IMP:

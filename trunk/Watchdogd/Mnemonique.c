@@ -67,4 +67,25 @@
     Libere_DB_SQL( &db );
     return(result);
   }
+/******************************************************************************************************************************/
+/* Rechercher_type_bit: Recherche le type d'un bit matérialisé par son tech_id:acronyme                                       */
+/* Entrée: le tech_id et acronyme                                                                                             */
+/* Sortie: -1 si erreur                                                                                                       */
+/******************************************************************************************************************************/
+ JsonNode *Rechercher_DICO ( gchar *tech_id, gchar *acronyme )
+  { JsonNode *result = Json_node_create ();
+    if (!result) return(NULL);
+
+    gboolean retour = SQL_Select_to_json_node ( result, NULL,
+                                                "SELECT * FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'",
+                                                tech_id, acronyme
+                                              );
+    if (!retour)
+     { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Erreur de recherche de '%s:%s' dans le dictionnaire", __func__,
+                 tech_id, acronyme );
+       json_node_unref(result);
+       result = NULL;
+     }
+    return(result);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

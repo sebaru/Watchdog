@@ -49,7 +49,8 @@
  extern gboolean Retirer_synoptiqueDB ( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern gboolean Modifier_synoptiqueDB( struct CMD_TYPE_SYNOPTIQUE *syn );
 
- extern gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src, gchar *forme_src );
+ extern gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *target_tech_id_src, gchar *target_acronyme_src );
+ extern gboolean Mnemo_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src, gchar *forme_src );
  extern gboolean Retirer_motifDB ( struct CMD_TYPE_MOTIF *motif );
  extern gint Ajouter_motifDB ( struct CMD_TYPE_MOTIF *motif );
  extern gboolean Recuperer_motifDB ( struct DB **db, gint id_syn );

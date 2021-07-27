@@ -64,9 +64,8 @@
     g_snprintf( lib->description, sizeof(lib->description), description );
     g_snprintf( lib->version,     sizeof(lib->version),     version );
     Modifier_configDB ( lib->name, "thread_version", lib->version );
-    g_snprintf( chaine, sizeof(chaine), "INSERT INTO thread_classe SET thread=UPPER('%s'), classe=UPPER('%s') "
-                                        "ON DUPLICATE KEY UPDATE classe=VALUES(classe)", lib->name, classe );
-    SQL_Write ( chaine );
+    SQL_Write_new ( "INSERT INTO thread_classe SET thread=UPPER('%s'), classe=UPPER('%s') "
+                    "ON DUPLICATE KEY UPDATE classe=VALUES(classe)", lib->name, classe );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage du thread '%s' (v%s) de classe '%s' -> TID = %p", __func__,
               lib->name, lib->version, classe, pthread_self() );
     lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
