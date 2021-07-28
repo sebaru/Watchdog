@@ -140,8 +140,7 @@
     GooCanvasItem *item;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
-    struct CMD_TYPE_COMMENT *comment;
-    gint   layer;                                                                      /* Groupe de deplacement du motif */
+    JsonNode *comment;
     gint   selection;
   };
 
@@ -207,8 +206,7 @@
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
  extern struct TRAME_ITEM_MOTIF *Trame_ajout_visuel ( gint flag, struct TRAME *trame, JsonNode *visuel );
- extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
-                                                            struct CMD_TYPE_COMMENT *comm );
+ extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame, JsonNode *comment );
  extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
                                                          struct CMD_TYPE_PASSERELLE *pass );
  extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame, JsonNode *cadran );

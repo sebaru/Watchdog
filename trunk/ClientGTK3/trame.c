@@ -131,11 +131,11 @@
     Trame_del_SVG (trame_pass->item_2);                                                  /* Désactive la gestion clignotement */
     Trame_del_SVG (trame_pass->item_3);                                                  /* Désactive la gestion clignotement */
   }
-/**********************************************************************************************************/
-/* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
-/* Sortie: rieng                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_del_item: Efface un item de la trame                                                                                 */
+/* Entrée: un item                                                                                                            */
+/* Sortie: rieng                                                                                                              */
+/******************************************************************************************************************************/
  void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm )
   { if (trame_comm->item_groupe) goo_canvas_item_remove( trame_comm->item_groupe );
   }
@@ -241,11 +241,11 @@
 
     cairo_matrix_init_identity ( &trame_comment->transform );
     cairo_matrix_translate ( &trame_comment->transform,
-                             (gdouble)trame_comment->comment->position_x,
-                             (gdouble)trame_comment->comment->position_y
+                             (gdouble)Json_get_int ( trame_comment->comment, "posx" ),
+                             (gdouble)Json_get_int ( trame_comment->comment, "posy" )
                            );
 
-    cairo_matrix_rotate ( &trame_comment->transform, (gdouble)trame_comment->comment->angle*FACTEUR_PI );
+    cairo_matrix_rotate ( &trame_comment->transform, (gdouble)Json_get_int ( trame_comment->comment, "angle" )*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_comment->transform, 1.0, 1.0 );
 
     goo_canvas_item_set_transform ( trame_comment->item_groupe, &trame_comment->transform );
@@ -844,9 +844,9 @@ printf("%s: New encadre %s\n", __func__, encadre );
     trame_motif->visuel = visuel;
     trame_motif->page   = trame->page;
     trame_motif->type   = TYPE_MOTIF;
-    gint groupe = Json_get_int ( visuel, "groupe" );
     if (flag)
      { struct TYPE_INFO_ATELIER *infos = trame->page->infos;                     /* Pointeur sur les infos de la page atelier */
+       gint groupe = Json_get_int ( visuel, "groupe" );
        if (infos->groupe_max < groupe) infos->groupe_max = groupe;
      }
 
@@ -993,36 +993,33 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
     pthread_mutex_unlock ( &trame->lock );
   }
-/**********************************************************************************************************/
-/* Trame_ajout_commentaire: Ajoute un commentaire sur le visuel                                           */
-/* Entrée: une structure commentaire, la trame de reference                                               */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
- struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire ( gint flag, struct TRAME *trame,
-                                                      struct CMD_TYPE_COMMENT *comm )
+/******************************************************************************************************************************/
+/* Trame_ajout_commentaire: Ajoute un commentaire sur le visuel                                                               */
+/* Entrée: une structure commentaire, la trame de reference                                                                   */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
+ struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire ( gint flag, struct TRAME *trame, JsonNode *comment )
   { struct TRAME_ITEM_COMMENT *trame_comm;
-    guint couleur;
 
-    if (!(trame && comm)) return(NULL);
+    if (!(trame && comment)) return(NULL);
     trame_comm = g_try_malloc0( sizeof(struct TRAME_ITEM_COMMENT) );
     if (!trame_comm) return(NULL);
-    couleur = ((guint)comm->rouge<<24) + ((guint)comm->vert<<16) + ((guint)comm->bleu<<8) + 0xFF;
 
-#ifdef DEBUG_TRAME
-printf("New comment %s %s \n", comm->libelle, comm->font );
-#endif
     trame_comm->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );        /* Groupe COMMENT */
 
     trame_comm->item = goo_canvas_text_new ( trame_comm->item_groupe,
-                                             comm->libelle, 0.0, 0.0, -1, GOO_CANVAS_ANCHOR_CENTER,
-                                               "font", comm->font,
-                                               "fill_color_rgba", couleur,
-                                               NULL );
-    trame_comm->comment = comm;
+                                             Json_get_string ( comment, "libelle" ), 0.0, 0.0, -1, GOO_CANVAS_ANCHOR_CENTER,
+                                            "font", Json_get_string( comment, "font"),
+                                            "fill_color", Json_get_string ( comment, "def_color" ),
+                                            NULL );
+    trame_comm->comment = comment;
     trame_comm->type = TYPE_COMMENTAIRE;
-    pthread_mutex_lock ( &trame->lock );
-    trame->trame_items = g_list_append( trame->trame_items, trame_comm );
-    pthread_mutex_unlock ( &trame->lock );
+    trame_comm->page   = trame->page;
+    if (flag)
+     { struct TYPE_INFO_ATELIER *infos = trame->page->infos;                     /* Pointeur sur les infos de la page atelier */
+       gint groupe = Json_get_int ( comment, "groupe" );
+       if (infos->groupe_max < groupe) infos->groupe_max = groupe;
+     }
 
     if ( flag )
      { trame_comm->select_mi = goo_canvas_rect_new (trame_comm->item_groupe,
@@ -1033,6 +1030,9 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
      }
 
     Trame_rafraichir_comment ( trame_comm );
+    pthread_mutex_lock ( &trame->lock );
+    trame->trame_items = g_list_append( trame->trame_items, trame_comm );
+    pthread_mutex_unlock ( &trame->lock );
     return(trame_comm);
   }
 /******************************************************************************************************************************/

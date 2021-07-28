@@ -54,44 +54,6 @@
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     gtk_widget_set_sensitive( infos->Spin_grid, gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON(infos->Check_grid) ) );
   }
-
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Menu_ajouter_motif: Ajout d'un motif                                                                                       */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Menu_ajouter_motif ( struct TYPE_INFO_ATELIER *infos )
-  { Choisir_motif_a_ajouter (); }
-/******************************************************************************************************************************/
-/* Menu_ajouter_commentaire: Ajout d'un commentaire                                                                           */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Menu_ajouter_commentaire ( struct TYPE_INFO_ATELIER *infos )
-  { Creer_fenetre_ajout_commentaire (); }
-/******************************************************************************************************************************/
-/* Menu_ajouter_cadran: Ajout d'un cadran                                                                                     */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Menu_ajouter_cadran ( struct TYPE_INFO_ATELIER *infos )
-  { Menu_ajouter_editer_cadran ( NULL ); }
-/******************************************************************************************************************************/
-/* Menu_ajouter_passerelle: Ajout d'une passerelle                                                                            */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Menu_ajouter_passerelle ( struct TYPE_INFO_ATELIER *infos )
-  { Creer_fenetre_ajout_passerelle (); }
-/******************************************************************************************************************************/
-/* Menu_effacer_message: Retrait des messages selectionnés                                                                    */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Menu_effacer_motif ( void )
-  { Effacer_selection(); }
-#endif
 /******************************************************************************************************************************/
 /* Menu_enregistrer_synoptique: Envoi des données au serveur                                                                  */
 /* Entrée: rien                                                                                                               */
@@ -276,60 +238,6 @@
     gtk_button_set_always_show_image( GTK_BUTTON(bouton), TRUE );
     gtk_widget_set_tooltip_text ( bouton, "Ajouter un motif dans la page" );
     //g_signal_connect_swapped( G_OBJECT(bouton), "clicked", G_CALLBACK(Menu_ajouter_motif), page );
-
-
-#ifdef bouh
-    menu_bar= gtk_menu_bar_new();
-    gtk_menu_bar_set_pack_direction (GTK_MENU_BAR(menu_bar), GTK_PACK_DIRECTION_TTB );
-    gtk_box_pack_start( GTK_BOX(vboite), menu_bar, TRUE, TRUE, 0 );
-
-/******************************************************* Sous menu motif ******************************************************/
-    menu_main = gtk_image_menu_item_new_with_label ( _("Ajouter un item") );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
-
-    ssmenu = gtk_menu_new();
-    menu_bouton = gtk_image_menu_item_new_with_label ( _("Motifs") );
-    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Menu_ajouter_motif), infos );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
-
-    menu_bouton = gtk_image_menu_item_new_with_label ( _("Comments") );
-    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Menu_ajouter_commentaire), infos );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
-
-    menu_bouton = gtk_image_menu_item_new_with_label ( _("Passerelles") );
-    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Menu_ajouter_passerelle), infos );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
-
-    menu_bouton = gtk_image_menu_item_new_with_label ( _("Cadrans") );
-    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Menu_ajouter_cadran), infos );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
-
-    menu_bouton = gtk_image_menu_item_new_with_label ( _("Cameras") );
-    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Menu_ajouter_camera_sup), infos );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
-
-    gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );
-/****************************************************** Sous menu palette *****************************************************/
-    menu_main = gtk_image_menu_item_new_with_label ( _("Gerer les palettes") );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
-    ssmenu = gtk_menu_new();
-    menu_bouton = gtk_image_menu_item_new_from_stock ( GTK_STOCK_JUMP_TO, NULL );
-    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Creer_fenetre_ajout_palette), infos );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
-    gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );
-
-/**************************************************** Menu remove *************************************************************/
-    menu_main = gtk_image_menu_item_new_with_label ( _("Retirer les items") );
-    g_signal_connect_swapped( G_OBJECT(menu_main), "activate",
-                              G_CALLBACK(Menu_effacer_motif), infos );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
-#endif
 /******************************************************** fin *****************************************************************/
     gtk_widget_show_all( page->child );
     gchar titre[80];
@@ -343,24 +251,4 @@
     Json_node_foreach_array_element ( infos->syn, "cameras",     Afficher_une_camera, page );
     Json_node_foreach_array_element ( infos->syn, "cadrans",     Afficher_un_cadran, page );
   }
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Cacher_un_message: Enleve un message de la liste des messages                                                              */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Proto_cacher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TYPE_INFO_ATELIER *infos;
-
-    infos = Rechercher_infos_atelier_par_id_syn ( motif->syn_id );
-    trame_motif = Id_vers_trame_motif( infos, motif->id );
-    if (!trame_motif) return;
-    Deselectionner( infos, (struct TRAME_ITEM *)trame_motif );                      /* Au cas ou il aurait été selectionné... */
-    Trame_del_item( trame_motif );
-    infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_motif );
-    g_free(trame_motif);
-    printf("Proto_cacher_un_motif_atelier fin..\n");
-  }
-#endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

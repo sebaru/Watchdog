@@ -2341,7 +2341,13 @@ encore:
        SQL_Write_new ("ALTER TABLE syns_visuels ADD UNIQUE (`tech_id`,`mnemo_id`)");
      }
 
-    database_version = 5868;
+    if (database_version < 5870)
+     { SQL_Write_new ("ALTER TABLE syns_comments ADD `color` VARCHAR(16) DEFAULT 'black' AFTER `blue`");
+       SQL_Write_new ("ALTER TABLE syns_comments DROP `rouge`, DROP `vert`, DROP `blue`, DROP `def_color`");
+       SQL_Write_new ("ALTER TABLE syns_comments CHANGE `color` `def_color` VARCHAR(16) DEFAULT 'white'");
+     }
+
+     database_version = 5870;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );

@@ -132,20 +132,21 @@ printf("%s, Compare trame_motif %p item %p\n", __func__, trame_motif, trame_item
                    }
                 }
                break;
+*/
           case TYPE_COMMENTAIRE:
                trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
-               if (trame_comm->layer == layer)
+               local_groupe = Json_get_int ( trame_comm->comment, "groupe" );
+               if ( (local_groupe !=0 && local_groupe == groupe) || trame_comm == trame_item )
                 { if (!trame_comm->selection)
                    { g_object_set( trame_comm->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      trame_comm->selection = TRUE;
                      infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                    }
                  }
-                break;*/
+                break;
           case TYPE_CADRAN:
                trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
                local_groupe = Json_get_int ( trame_cadran->cadran, "groupe" );
-printf("%s, Compare trame_cadran %p item %p\n", __func__, trame_cadran, trame_item );
                if ( (local_groupe !=0 && local_groupe == groupe) || trame_cadran == trame_item )
                if ( Json_get_int ( trame_cadran->cadran, "groupe" ) == groupe || groupe==0 )
                 { if (!trame_cadran->selection)
@@ -209,18 +210,16 @@ printf("%s, Compare trame_cadran %p item %p\n", __func__, trame_cadran, trame_it
 
           case TYPE_COMMENTAIRE:
                trame_comm = ((struct TRAME_ITEM_COMMENT *)(selection->data));
-               new_x = trame_comm->comment->position_x+dx;
-               new_y = trame_comm->comment->position_y+dy;
+               new_x = 1.0*Json_get_int ( trame_comm->comment, "posx" ) + dx;
+               new_y = 1.0*Json_get_int ( trame_comm->comment, "posy" ) + dy;
 
                if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(infos->Check_grid)))
                 { new_x = new_x/largeur_grille * largeur_grille;
                   new_y = new_y/largeur_grille * largeur_grille;
                 }
 
-               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
-                { trame_comm->comment->position_x = new_x; }
-               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
-                { trame_comm->comment->position_y = new_y; }
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { Json_node_add_int ( trame_comm->comment, "posx", new_x ); }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { Json_node_add_int ( trame_comm->comment, "posy", new_y ); }
                Trame_rafraichir_comment(trame_comm);                                                        /* Refresh visuel */
                break;
 
@@ -504,7 +503,7 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
           }
          case TYPE_COMMENTAIRE:
           { struct TRAME_ITEM_COMMENT *trame_comm = selection->data;
-            trame_comm->comment->angle = angle;
+            Json_node_add_int ( trame_comm->comment, "angle", angle );
             Trame_rafraichir_comment(trame_comm);
             break;
           }
@@ -537,7 +536,6 @@ printf("%s: scale=%f\n", __func__, scale );
        { case TYPE_MOTIF:
           { struct TRAME_ITEM_MOTIF *trame_motif = selection->data;
             Json_node_add_double ( trame_motif->visuel, "scale", scale );
-            printf("%s: scale == %f\n", __func__, Json_get_double ( trame_motif->visuel, "scale" ) );
             Trame_rafraichir_motif(trame_motif);
             break;
           }
@@ -549,7 +547,7 @@ printf("%s: scale=%f\n", __func__, scale );
           }
          case TYPE_COMMENTAIRE:
           { struct TRAME_ITEM_COMMENT *trame_comm = selection->data;
-            trame_comm->comment->angle = scale;
+            /*Json_node_add_double ( trame_comm->comment, "scale", scale );*/
             Trame_rafraichir_comment(trame_comm);
             break;
           }
