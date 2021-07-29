@@ -401,7 +401,7 @@
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
         { case TYPE_PASSERELLE:
                 { struct TRAME_ITEM_PASS *trame_pass = objet->data;
-                  if (trame_pass->pass->syn_cible_id == Json_get_int ( element, "id" ))
+                  if ( Json_get_int ( trame_pass->pass, "syn_cible_id" ) == Json_get_int ( element, "id" ))
                    { Updater_un_syn_vars( trame_pass, element );
                    }
                 }

@@ -253,8 +253,10 @@ printf("Afficher_propriete: debut\n");
                                if (!infos->Selection) { return; }
                                switch ( *((gint *)(infos->Selection->data)) )               /* Mise a jour des entrys positions */
                                 { case TYPE_PASSERELLE:
-                                       x = ((struct TRAME_ITEM_PASS *)infos->Selection->data)->pass->position_x;
-                                       y = ((struct TRAME_ITEM_PASS *)infos->Selection->data)->pass->position_y;
+                                        { struct TRAME_ITEM_PASS *trame_pass = infos->Selection->data;
+                                          x = 1.0*Json_get_int ( trame_pass->pass, "posx" );
+                                          y = 1.0*Json_get_int ( trame_pass->pass, "posy" );
+                                        }
                                        break;
                                   case TYPE_COMMENTAIRE:
                                         { struct TRAME_ITEM_COMMENT *trame_comm = infos->Selection->data;
@@ -518,9 +520,12 @@ printf("Afficher_propriete: debut\n");
 
     struct PAGE_NOTEBOOK *page = trame_pass->page;
 
-    Clic_general( page, event, trame_pass, trame_pass->layer );                                      /* Fonction de base clic */
-    Mettre_a_jour_position( trame_pass->page, trame_pass->pass->position_x, trame_pass->pass->position_y, trame_pass->pass->angle, 1 );
-
+    Clic_general( page, event, trame_pass, Json_get_int ( trame_pass, "groupe" ) );                  /* Fonction de base clic */
+    Mettre_a_jour_position( page, Json_get_int ( trame_pass->pass, "posx" ),
+                                  Json_get_int ( trame_pass->pass, "posy" ),
+                                  Json_get_int ( trame_pass->pass, "angle" ),
+                                  Json_get_int ( trame_pass->pass, "scale" )
+                          );
     Mettre_a_jour_description( page, 0, "Gateway" );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)

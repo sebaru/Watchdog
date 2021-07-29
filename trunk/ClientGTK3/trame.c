@@ -260,11 +260,11 @@
 
     cairo_matrix_init_identity ( &trame_pass->transform );
     cairo_matrix_translate ( &trame_pass->transform,
-                             (gdouble)trame_pass->pass->position_x,
-                             (gdouble)trame_pass->pass->position_y
+                             (gdouble)Json_get_int ( trame_pass->pass, "posx" ),
+                             (gdouble)Json_get_int ( trame_pass->pass, "posy" )
                            );
 
-    cairo_matrix_rotate ( &trame_pass->transform, (gdouble)trame_pass->pass->angle*FACTEUR_PI );
+    cairo_matrix_rotate ( &trame_pass->transform, (gdouble)Json_get_int ( trame_pass->pass, "angle" )*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_pass->transform, 1.0, 1.0 );
 
     goo_canvas_item_set_transform ( trame_pass->item_groupe, &trame_pass->transform );
@@ -1079,7 +1079,7 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
 /* Entrée: une structure passerelle, la trame de reference                                                                    */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, struct CMD_TYPE_PASSERELLE *pass )
+ struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, JsonNode *pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     gint taillex, tailley;
 
@@ -1087,12 +1087,13 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
     trame_pass = g_try_malloc0( sizeof(struct TRAME_ITEM_PASS) );
     if (!trame_pass) return(NULL);
 
+    gchar *nom_page = Json_get_string ( pass, "page" );
     trame_pass->page   = trame->page;
     trame_pass->pass   = pass;
     trame_pass->type   = TYPE_PASSERELLE;
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
     tailley = 15;
-    taillex = strlen(pass->libelle) * 11;
+    taillex = strlen(nom_page) * 11;
     trame_pass->item_fond = goo_canvas_rect_new( trame_pass->item_groupe,
                                                  (double)-60.0,
                                                  (double)-(tailley/2+10.0),
@@ -1103,7 +1104,7 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
                                                  NULL);
 
     trame_pass->item_texte = goo_canvas_text_new( trame_pass->item_groupe,
-                                                  pass->libelle, 10.0, 0.0,
+                                                  nom_page, 10.0, 0.0,
                                                   -1, GOO_CANVAS_ANCHOR_WEST,
                                                   "font", "courier bold 14",
                                                   "fill-color", "white",
@@ -1112,7 +1113,6 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
     trame_pass->item_1 = Trame_new_SVG ( trame, trame_pass->item_groupe, "Pignon", "vert", 0, 25, 25, -58, -15 );
     trame_pass->item_2 = Trame_new_SVG ( trame, trame_pass->item_groupe, "Bouclier2", "vert", 0, 20, 20, -32, -13 );
     trame_pass->item_3 = Trame_new_SVG ( trame, trame_pass->item_groupe, "Croix_rouge", "vert", 0, 15, 15, -10, -10 );
-    printf("Nouvelle passerelle: %d, %p, %p, %p\n", pass->syn_id, trame_pass->item_1, trame_pass->item_2, trame_pass->item_3 );
 
     if ( flag )
      { trame_pass->select_mi = goo_canvas_rect_new (trame_pass->item_groupe,
@@ -1121,7 +1121,7 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
                                                     "stroke_color", "black", NULL);
        g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
      }
-    else g_object_set ( G_OBJECT(trame_pass->item_groupe), "tooltip", pass->libelle, NULL );
+    else g_object_set ( G_OBJECT(trame_pass->item_groupe), "tooltip", nom_page, NULL );
 
 
     Trame_rafraichir_passerelle ( trame_pass );

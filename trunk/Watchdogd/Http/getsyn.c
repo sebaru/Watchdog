@@ -339,7 +339,8 @@ end:
             Json_has_member ( element, "posx" ) &&
             Json_has_member ( element, "posy" ) &&
             Json_has_member ( element, "groupe" ) &&
-            Json_has_member ( element, "angle" )
+            Json_has_member ( element, "angle" ) &&
+            Json_has_member ( element, "scale" )
            ) )
      { return; }
 
@@ -348,9 +349,54 @@ end:
                    "INNER JOIN syns ON syns.id=dls.syn_id "
                    "SET posx='%d', posy='%d', groupe='%d', angle='%d', scale='%f' "
                    "WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
-                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ), Json_get_int( element, "angle" ),
+                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ), 
+                   Json_get_int( element, "groupe" ), Json_get_int( element, "angle" ),
                    Json_get_double( element, "scale" ),
-                   Json_get_int( element, "groupe" ), Json_get_int( element, "id" ), session->access_level );
+                   Json_get_int( element, "id" ), session->access_level );
+ }
+/******************************************************************************************************************************/
+/* Http_get_syn_save_un_cadran: Enregistre un cadran en base de données                                                       */
+/* Entrée: les données JSON recu de la requete HTTP                                                                           */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_syn_save_un_comment (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct HTTP_CLIENT_SESSION *session = user_data;
+    if ( ! (Json_has_member ( element, "id" ) &&
+            Json_has_member ( element, "posx" ) &&
+            Json_has_member ( element, "posy" ) &&
+            Json_has_member ( element, "groupe" ) &&
+            Json_has_member ( element, "angle" )
+           ) )
+     { return; }
+
+    SQL_Write_new( "UPDATE syns_comments "
+                   "SET posx='%d', posy='%d', groupe='%d', angle='%d' "
+                   "WHERE id='%d'",
+                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ),
+                   Json_get_int( element, "groupe" ), Json_get_int( element, "angle" ),
+                   Json_get_int( element, "id" ) );
+ }
+/******************************************************************************************************************************/
+/* Http_get_syn_save_un_cadran: Enregistre un cadran en base de données                                                       */
+/* Entrée: les données JSON recu de la requete HTTP                                                                           */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_syn_save_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { struct HTTP_CLIENT_SESSION *session = user_data;
+    if ( ! (Json_has_member ( element, "id" ) &&
+            Json_has_member ( element, "posx" ) &&
+            Json_has_member ( element, "posy" ) &&
+            Json_has_member ( element, "groupe" ) &&
+            Json_has_member ( element, "angle" )
+           ) )
+     { return; }
+
+    SQL_Write_new( "UPDATE syns_pass "
+                   "SET posx='%d', posy='%d', groupe='%d', angle='%d' "
+                   "WHERE id='%d'",
+                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ),
+                   Json_get_int( element, "groupe" ), Json_get_int( element, "angle" ),
+                   Json_get_int( element, "id" ) );
  }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -374,6 +420,12 @@ end:
 
     if ( Json_has_member ( request, "cadrans" ) )
      { Json_node_foreach_array_element ( request, "cadrans", Http_syn_save_un_cadran, session ); }
+
+    if ( Json_has_member ( request, "comments" ) )
+     { Json_node_foreach_array_element ( request, "comments", Http_syn_save_un_comment, session ); }
+
+    if ( Json_has_member ( request, "passerelles" ) )
+     { Json_node_foreach_array_element ( request, "passerelle", Http_syn_save_une_passerelle, session ); }
 
     json_node_unref(request);
   }

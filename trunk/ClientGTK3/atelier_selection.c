@@ -110,7 +110,6 @@
         { case TYPE_MOTIF:
                trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
                local_groupe = Json_get_int ( trame_motif->visuel, "groupe" );
-printf("%s, Compare trame_motif %p item %p\n", __func__, trame_motif, trame_item );
                if ( (local_groupe !=0 && local_groupe == groupe) || trame_motif == trame_item )
                 { if (!trame_motif->selection)
                    { g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
@@ -122,17 +121,17 @@ printf("%s, Compare trame_motif %p item %p\n", __func__, trame_motif, trame_item
                    }
                 }
                break;
-/*          case TYPE_PASSERELLE:
+          case TYPE_PASSERELLE:
                trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
-               if (trame_pass->layer == layer)
-                { if (!trame_pass->selection)
+               local_groupe = Json_get_int ( trame_pass->pass, "groupe" );
+               if ( (local_groupe !=0 && local_groupe == groupe) || trame_pass == trame_item )
+                { if (!trame_motif->selection)
                    { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      trame_pass->selection = TRUE;
                      infos->Selection = g_slist_prepend( infos->Selection, objet->data );
                    }
                 }
                break;
-*/
           case TYPE_COMMENTAIRE:
                trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
                local_groupe = Json_get_int ( trame_comm->comment, "groupe" );
@@ -195,16 +194,16 @@ printf("%s, Compare trame_motif %p item %p\n", __func__, trame_motif, trame_item
        switch ( *((gint *)selection->data) )
         { case TYPE_PASSERELLE:
                trame_pass = ((struct TRAME_ITEM_PASS *)(selection->data));
-               new_x = trame_pass->pass->position_x+dx;
-               new_y = trame_pass->pass->position_y+dy;
+               new_x = 1.0*Json_get_int ( trame_pass->pass, "posx" ) + dx;
+               new_y = 1.0*Json_get_int ( trame_pass->pass, "posy" ) + dy;
 
                if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(infos->Check_grid)))
                 { new_x = new_x/largeur_grille * largeur_grille;
                   new_y = new_y/largeur_grille * largeur_grille;
                 }
 
-               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { trame_pass->pass->position_x = new_x; }
-               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { trame_pass->pass->position_y = new_y; }
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { Json_node_add_int ( trame_pass->pass, "posx", new_x ); }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { Json_node_add_int ( trame_pass->pass, "posy", new_y ); }
                Trame_rafraichir_passerelle(trame_pass);                                                     /* Refresh visuel */
                break;
 
@@ -497,7 +496,7 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
           }
          case TYPE_PASSERELLE:
           { struct TRAME_ITEM_PASS *trame_pass = selection->data;
-            trame_pass->pass->angle = angle;
+            Json_node_add_int ( trame_pass->pass, "angle", angle );
             Trame_rafraichir_passerelle(trame_pass);
             break;
           }
@@ -541,13 +540,13 @@ printf("%s: scale=%f\n", __func__, scale );
           }
          case TYPE_PASSERELLE:
           { struct TRAME_ITEM_PASS *trame_pass = selection->data;
-            trame_pass->pass->angle = scale;
+            Json_node_add_double ( trame_pass->pass, "scale", scale );
             Trame_rafraichir_passerelle(trame_pass);
             break;
           }
          case TYPE_COMMENTAIRE:
           { struct TRAME_ITEM_COMMENT *trame_comm = selection->data;
-            /*Json_node_add_double ( trame_comm->comment, "scale", scale );*/
+            Json_node_add_double ( trame_comm->comment, "scale", scale );
             Trame_rafraichir_comment(trame_comm);
             break;
           }

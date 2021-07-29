@@ -42,7 +42,7 @@
            event->type == GDK_BUTTON_PRESS)
        ) return(FALSE);
 
-    Demander_synoptique_supervision ( trame_pass->page->client, trame_pass->pass->syn_cible_id );
+    Demander_synoptique_supervision ( trame_pass->page->client, Json_get_int ( trame_pass->pass, "syn_cible_id" ) );
     return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

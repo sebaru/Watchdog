@@ -2347,7 +2347,12 @@ encore:
        SQL_Write_new ("ALTER TABLE syns_comments CHANGE `color` `def_color` VARCHAR(16) DEFAULT 'white'");
      }
 
-     database_version = 5870;
+    if (database_version < 5871)
+     { SQL_Write_new ("ALTER TABLE syns_comments ADD `groupe` INT(11) NOT NULL DEFAULT '0'");
+       SQL_Write_new ("ALTER TABLE syns_pass ADD `groupe` INT(11) NOT NULL DEFAULT '0'");
+     }
+
+    database_version = 5871;
 fin:
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
