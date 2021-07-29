@@ -578,7 +578,6 @@
     json_array_foreach_element ( Json_get_array ( infos->syn, "visuels" ),      Afficher_un_motif, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ),  Afficher_une_passerelle, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),     Afficher_un_commentaire, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),      Afficher_une_camera, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),      Afficher_un_cadran, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "etat_visuels" ), Updater_les_visuels_by_array, page );
     Json_node_foreach_array_element ( infos->syn, "syn_vars", Updater_les_syn_vars, page );

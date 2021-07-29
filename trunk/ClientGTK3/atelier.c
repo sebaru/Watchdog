@@ -248,7 +248,6 @@
     Json_node_foreach_array_element ( infos->syn, "visuels",     Afficher_un_motif, page );
     Json_node_foreach_array_element ( infos->syn, "passerelles", Afficher_une_passerelle, page );
     Json_node_foreach_array_element ( infos->syn, "comments",    Afficher_un_commentaire, page );
-    Json_node_foreach_array_element ( infos->syn, "cameras",     Afficher_une_camera, page );
     Json_node_foreach_array_element ( infos->syn, "cadrans",     Afficher_un_cadran, page );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
