@@ -317,12 +317,12 @@ console.debug(data);
                                }
                      };
        var ctx = document.getElementById(idChart).getContext('2d');
-       if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
-       Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
+       if (ctx)
+        { if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
+          Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
+          setTimeout ( function()                                                                         /* Un ping tous les jours */
+           { Charger_plusieurs_courbes ( idChart, tableau_map, period ); }, 60000 );
+        }
      });
-
-    /*if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
-    else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
-    else setInterval( function() { window.location.reload(); }, 600000);*/
 	 }
 /*----------------------------------------------------------------------------------------------------------------------------*/

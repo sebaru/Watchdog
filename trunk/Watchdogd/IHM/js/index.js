@@ -5,7 +5,10 @@
 
  function Ping ()
   { setTimeout ( function()                                                                         /* Un ping tous les jours */
-     { Send_to_API ( "GET", "/api/ping", null, function () { Ping(); }, null );
+     { Send_to_API ( "GET", "/api/ping", null, function ()
+        { if (WTDWebSocket && WTDWebSocket.readyState != "OPEN") Load_websocket();
+          Ping();
+        }, null );
      }, 60000 );
   }
 /******************************************************************************************************************************/
