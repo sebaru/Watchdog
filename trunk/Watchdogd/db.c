@@ -2389,6 +2389,7 @@ fin:
                     "('check',            'png',  'by_mode'       ),"
                     "('thermometre',      'png',  'by_mode_color' ),"
                     "('haut_parleur',     'png',  'by_mode_color' ),"
+                    "('bouton',           'none', 'complexe'      ),"
                     "('encadre_1x1',      'none', 'complexe'      ),"
                     "('encadre_1x2',      'none', 'complexe'      ),"
                     "('encadre_1x3',      'none', 'complexe'      ),"

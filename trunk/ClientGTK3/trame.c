@@ -780,6 +780,38 @@ printf("%s: New encadre %s\n", __func__, encadre );
     return(NULL);
   }
 /******************************************************************************************************************************/
+/* Trame_load_bouton: Prépare un pixbuf pour le bouton en parametre                                                           */
+/* Entrée: la couleur et le contenu du bouton                                                                                 */
+/* Sortie: le pixbuf                                                                                                          */
+/******************************************************************************************************************************/
+ static GdkPixbuf *Trame_load_bouton ( gchar *couleur, gchar *libelle )
+  { RsvgHandle *handle;
+    gchar bouton[512];
+    gchar *html_couleur = Trame_color_to_html ( couleur );
+    gint largeur=14*strlen(libelle);
+    gint hauteur=32;
+    g_snprintf( bouton, sizeof(bouton),
+                "<svg viewBox='0 0 %d %d' >"
+                "<rect x='0' y='0' rx='15' width='%d' height='%d' "
+                "      fill='%s' stroke='none' />"
+                "<text text-anchor='middle' x='%d' y='%d' "
+                "      font-size='14px' font-family='Bitstream' font-style='italic' fill='white' stroke='white'>%s</text> "
+                "</svg>",
+                largeur, hauteur, largeur, hauteur, html_couleur, largeur/2, hauteur/2, libelle
+              );
+printf("%s: New button %s\n", __func__, bouton );
+    GError *error = NULL;
+    handle = rsvg_handle_new_from_data ( bouton, strlen(bouton), &error );
+    if (handle)
+     { GdkPixbuf *pixbuf = rsvg_handle_get_pixbuf ( handle );
+       g_object_unref ( handle );
+       return(pixbuf);
+     }
+    printf("%s: Load bouton failed: %s\n", __func__, error->message );
+    g_error_free(error);
+    return(NULL);
+  }
+/******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
@@ -800,6 +832,8 @@ printf("%s: New encadre %s\n", __func__, encadre );
        pixbuf = Trame_load_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
                                      Json_get_string ( visuel, "libelle" ) );
      }
+    else if ( g_str_has_prefix ( forme, "bouton" ) )
+     { pixbuf = Trame_load_bouton ( Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) ); }
 
     if (pixbuf)
      { trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
