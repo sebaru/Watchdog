@@ -4,7 +4,7 @@
  function Tableau_New ( )
   { $('#idModalEditTitre').text ( "Ajouter un tableau" );
     Select_from_api ( "idModalEditPage", "/api/syn/list", null, "synoptiques", "id", function (item)
-     { return ( item.page+" - "+htmlEncode(item.libelle) ); });
+     { return ( item.page+" - "+htmlEncode(item.libelle) ); }, Get_url_parameter("syn_id") );
 
     $('#idModalEditLibelle').val( "" );
     $('#idModalEditValider').attr( "onclick", "Tableau_Set(null)" );
@@ -60,22 +60,26 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { $('#idTableTableau').DataTable(
+  { syn_id = Get_url_parameter("syn_id");
+    if (syn_id != null)
+     {  parametres = { "syn_id": syn_id }; }
+    else parametres = {};
+    $('#idTableTableau').DataTable(
        { pageLength : 25,
          fixedHeader: true,
-         ajax: {	url : "/api/tableau/list",	type : "GET", dataSrc: "tableaux",
+         ajax: {	url : "/api/tableau/list",	type : "GET", data: parametres, dataSrc: "tableaux",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",
          columns:
-          [ { "data": "page", "title":"Synoptique", "className": "align-middle text-center" },
+          [ { "data": "page", "title":"Page", "className": "align-middle text-center" },
             { "data": "titre", "title":"Titre", "className": "align-middle" },
             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "secondary", "Voir le tableau", "Redirect", "/"+item.page, "chart-line", null );
-                  boutons += Bouton_actions_add ( "primary", "Configurer", "Show_Modal_Tableau_Edit", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer les courbes", "Redirect", "/tech/tableau_map/"+item.id, "pen", null );
+                  /*boutons += Bouton_actions_add ( "secondary", "Voir le tableau", "Redirect", "/"+item.page, "chart-line", null );*/
+                  boutons += Bouton_actions_add ( "outline-primary", "Configurer", "Show_Modal_Tableau_Edit", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-secondary", "Editer les courbes", "Redirect", "/tech/tableau_map?tebleau_id="+item.id, "pen", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer ce tableau", "Show_Modal_Tableau_Delete", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);

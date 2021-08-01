@@ -325,4 +325,12 @@ console.debug(data);
         }
      });
 	 }
+/******************************************************************************************************************************/
+/* Get_url_parameter : Recupere un parametre de recherche dans l'URL                                                          */
+/******************************************************************************************************************************/
+ function Get_url_parameter ( name )
+  { const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    return (urlParams.get(name));
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -177,9 +177,10 @@
             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Ouvrir l'atelier", "Redirect", '/tech/atelier/'+item.id, "image", null );
+                  /*boutons += Bouton_actions_add ( "outline-primary", "Ouvrir l'atelier", "Redirect", '/tech/atelier/'+item.id, "image", null );*/
                   boutons += Bouton_actions_add ( "outline-primary", "Configurer", "Show_Modal_Syn_Edit", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "outline-primary", "Ajouter un synoptique fils", "Show_Modal_Syn_Add", item.id, "plus", null );
+                  boutons += Bouton_actions_add ( "outline-success", "Ajouter un synoptique fils", "Show_Modal_Syn_Add", item.id, "plus", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Voir les tableaux", "Redirect", '/tech/tableau?syn_id='+item.id, "chart-line", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer le synoptique", "Show_Modal_Syn_Del", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
