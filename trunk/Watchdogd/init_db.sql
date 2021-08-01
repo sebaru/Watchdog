@@ -495,7 +495,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
 
 CREATE TABLE IF NOT EXISTS `syns_visuels` (
   `visuel_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `mnemo_id INT(11) NULL DEFAULT NULL,
+  `mnemo_id` INT(11) NULL DEFAULT NULL,
   `auto_create` tinyint(1) NULL DEFAULT NULL,
   `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
   `icone` INT(11) NOT NULL DEFAULT '0',
