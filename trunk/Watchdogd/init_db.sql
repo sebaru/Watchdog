@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS `tableau` (
  `titre` VARCHAR(128) UNIQUE NOT NULL,
  `syn_id` INT(11) NOT NULL,
  `date_create` DATETIME NOT NULL DEFAULT NOW(),
- PRIMARY KEY (`id`)
+ PRIMARY KEY (`id`),
  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
  ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
@@ -517,7 +517,7 @@ CREATE TABLE IF NOT EXISTS `syns_visuels` (
   `def_color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "gray",
   `clic_tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `clic_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`visuel_id`),
   UNIQUE (`tech_id`, `acronyme`, `auto_create`),
   UNIQUE (`tech_id`,`mnemo_id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
