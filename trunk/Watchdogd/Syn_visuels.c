@@ -105,10 +105,10 @@
      }
 
     retour = SQL_Write_new ( "INSERT INTO syns_visuels SET "
-                             "tech_id='%s', mnemo_id=(SELECT id FROM mnemos_VISUEL WHERE tech_id='%s' AND acronyme='%s'), "
+                             "dls_id='%d', mnemo_id=(SELECT id FROM mnemos_VISUEL WHERE tech_id='%s' AND acronyme='%s'), "
                              "posx='150', posy='150', angle='0', scale='1' "
                              "ON DUPLICATE KEY UPDATE mnemo_id=mnemo_id",
-                             plugin->tech_id, target_tech_id, target_acro );
+                             plugin->id, target_tech_id, target_acro );
     g_free(target_tech_id);
     g_free(target_acro);
     return (retour);

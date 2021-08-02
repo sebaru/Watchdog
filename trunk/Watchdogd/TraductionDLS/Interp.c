@@ -1541,10 +1541,9 @@
                  { if (!strcmp(alias->tech_id, Dls_plugin.tech_id))                                   /* Si alias est interne */
                     { gchar *forme = Get_option_chaine( alias->options, T_FORME, "none" );
                       Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme );
-                      Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
                     }
-                   else                                                            /* Création du LINK vers le visuel externe */
-                    { Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme ); }
+                                                                                   /* Création du LINK vers le visuel externe */
+                   Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
 
                    break;
                  }

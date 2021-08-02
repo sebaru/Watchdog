@@ -304,7 +304,6 @@ end:
     if ( ! (Json_has_member ( element, "visuel_id" ) &&
             Json_has_member ( element, "posx" ) &&
             Json_has_member ( element, "posy" ) &&
-            Json_has_member ( element, "def_color" ) &&
             Json_has_member ( element, "angle" ) &&
             Json_has_member ( element, "gestion" ) &&
             Json_has_member ( element, "libelle" ) &&
@@ -313,21 +312,16 @@ end:
            ) )
      { return; }
 
-    gchar *def_color = Normaliser_chaine( Json_get_string ( element, "def_color" ) );
-
     SQL_Write_new( "UPDATE syns_visuels AS visu "
-                   "INNER JOIN dls ON dls.tech_id=syns_visuel.tech_id "
+                   "INNER JOIN dls ON dls.id=visu.dls_id "
                    "INNER JOIN syns AS s ON dls.syn_id = s.id SET "
                    "visu.posx='%d', visu.posy='%d', visu.groupe='%d',"
-                   "visu.def_color='%s', visu.angle='%d', visu.scale='%f', visu.gestion='%d' "
+                   "visu.angle='%d', visu.scale='%f', visu.gestion='%d' "
                    " WHERE visu.visuel_id='%d' AND s.access_level<'%d'",
                    Json_get_int( element, "posx" ), Json_get_int( element, "posy" ), Json_get_int( element, "groupe" ),
-                   def_color,
-                   Json_get_int( element, "angle" ), Json_get_double(element,"scale"), Json_get_int( element," gestion" ),
+                   Json_get_int( element, "angle" ), Json_get_double(element,"scale"), Json_get_int( element,"gestion" ),
                    Json_get_int( element, "visuel_id" ), session->access_level );
-
-    g_free(def_color);
- }
+  }
 /******************************************************************************************************************************/
 /* Http_get_syn_save_un_cadran: Enregistre un cadran en base de données                                                       */
 /* Entrée: les données JSON recu de la requete HTTP                                                                           */
@@ -715,11 +709,11 @@ end:
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
                                     "SELECT m.*,v.*,i.*,dls.shortname AS dls_shortname FROM syns_visuels AS v "
                                     "LEFT JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
-                                    "LEFT JOIN dls ON dls.tech_id=v.tech_id "
+                                    "LEFT JOIN dls ON dls.id=v.dls_id "
                                     "LEFT JOIN icone AS i ON i.forme=m.forme "
                                     "LEFT JOIN syns AS s ON dls.syn_id=s.id "
-                                    "WHERE (s.id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d'",
-                                     syn_id, session->access_level, session->access_level, syn_id) == FALSE)
+                                    "WHERE (s.id='%d' AND s.access_level<=%d AND m.access_level<=%d)",
+                                     syn_id, session->access_level, session->access_level) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref(synoptique);
           return;

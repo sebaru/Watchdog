@@ -409,7 +409,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_VISUEL` (
   `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
   `libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL,
   `access_level` INT(11) NOT NULL DEFAULT '0',
-  `def_color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "gray",
+  `def_color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "gray",
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`, `acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -495,13 +495,8 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
 
 CREATE TABLE IF NOT EXISTS `syns_visuels` (
   `visuel_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `mnemo_id` INT(11) NULL DEFAULT NULL,
-  `auto_create` tinyint(1) NULL DEFAULT NULL,
-  `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
-  `icone` INT(11) NOT NULL DEFAULT '0',
-  `syn_id` INT(11) NOT NULL DEFAULT '0',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `access_level` INT(11) NOT NULL DEFAULT '0',
+  `mnemo_id` INT(11) NOT NULL,
+  `dls_id` INT(11) NOT NULL,
   `rafraich` INT(11) NOT NULL DEFAULT '0',
   `posx` INT(11) NOT NULL DEFAULT '0',
   `posy` INT(11) NOT NULL DEFAULT '0',
@@ -512,15 +507,10 @@ CREATE TABLE IF NOT EXISTS `syns_visuels` (
   `dialog` INT(11) NOT NULL DEFAULT '0',
   `gestion` INT(11) NOT NULL DEFAULT '0',
   `groupe` INT(11) NOT NULL DEFAULT '0',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `def_color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "gray",
-  `clic_tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `clic_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`visuel_id`),
-  UNIQUE (`tech_id`, `acronyme`, `auto_create`),
-  UNIQUE (`tech_id`,`mnemo_id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  UNIQUE (`dls_id`, `mnemo_id`),
+  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_VISUEL` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------

@@ -745,7 +745,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     else if (!strcasecmp(color, "marron"))    { return("brown");     }
     else if (!strcasecmp(color, "grisfonce")) { return("darkgray");  }
     else if (!strcasecmp(color, "noir"))      { return("black");     }
-    else return("black");
+    else return(color);
   }
 /******************************************************************************************************************************/
 /* Trame_load_encadre: Prépare un pixbuf pour l'encadre en parametre                                                          */
@@ -789,15 +789,15 @@ printf("%s: New encadre %s\n", __func__, encadre );
     gchar bouton[512];
     gchar *html_couleur = Trame_color_to_html ( couleur );
     gint largeur=14*strlen(libelle);
-    gint hauteur=32;
+    gint hauteur=28;
     g_snprintf( bouton, sizeof(bouton),
                 "<svg viewBox='0 0 %d %d' >"
-                "<rect x='0' y='0' rx='15' width='%d' height='%d' "
+                "<rect x='0' y='0' rx='10' width='%d' height='%d' "
                 "      fill='%s' stroke='none' />"
                 "<text text-anchor='middle' x='%d' y='%d' "
-                "      font-size='14px' font-family='Bitstream' font-style='italic' fill='white' stroke='white'>%s</text> "
+                "      font-size='14px' font-family='Bitstream' font-style='' fill='white' stroke='white'>%s</text> "
                 "</svg>",
-                largeur, hauteur, largeur, hauteur, html_couleur, largeur/2, hauteur/2, libelle
+                largeur, hauteur, largeur, hauteur, html_couleur, largeur/2, hauteur/2+5, libelle
               );
 printf("%s: New button %s\n", __func__, bouton );
     GError *error = NULL;
@@ -829,11 +829,11 @@ printf("%s: New button %s\n", __func__, bouton );
     if ( g_str_has_prefix ( forme, "encadre_" ) )
      { gint ligne, colonne;
        if ( sscanf ( forme, "encadre_%dx%d", &ligne, &colonne ) != 2 ) return;
-       pixbuf = Trame_load_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
+       pixbuf = Trame_load_encadre ( ligne, colonne,  Json_get_string ( visuel, "def_color" ),
                                      Json_get_string ( visuel, "libelle" ) );
      }
     else if ( g_str_has_prefix ( forme, "bouton" ) )
-     { pixbuf = Trame_load_bouton ( Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) ); }
+     { pixbuf = Trame_load_bouton ( Json_get_string ( visuel, "def_color" ), Json_get_string ( visuel, "libelle" ) ); }
 
     if (pixbuf)
      { trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
