@@ -45,18 +45,9 @@
  extern gboolean Recuperer_synoptiqueDB ( struct DB **db );
  extern gboolean Recuperer_synoptiqueDB_enfant ( struct DB **db_retour, gint id_parent );
  extern struct CMD_TYPE_SYNOPTIQUE *Recuperer_synoptiqueDB_suite( struct DB **db );
- extern gint Ajouter_synoptiqueDB ( struct CMD_TYPE_SYNOPTIQUE *syn );
- extern gboolean Retirer_synoptiqueDB ( struct CMD_TYPE_SYNOPTIQUE *syn );
- extern gboolean Modifier_synoptiqueDB( struct CMD_TYPE_SYNOPTIQUE *syn );
 
  extern gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *target_tech_id_src, gchar *target_acronyme_src );
  extern gboolean Mnemo_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src, gchar *forme_src );
- extern gboolean Retirer_motifDB ( struct CMD_TYPE_MOTIF *motif );
- extern gint Ajouter_motifDB ( struct CMD_TYPE_MOTIF *motif );
- extern gboolean Recuperer_motifDB ( struct DB **db, gint id_syn );
- extern struct CMD_TYPE_MOTIF *Recuperer_motifDB_suite( struct DB **db );
- extern struct CMD_TYPE_MOTIF *Rechercher_motifDB ( guint id );
- extern gboolean Modifier_motifDB( struct CMD_TYPE_MOTIF *motif );
  extern void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit );
 
  extern gboolean Retirer_commentDB ( struct CMD_TYPE_COMMENT *comment );
@@ -72,13 +63,6 @@
  extern struct CMD_TYPE_PASSERELLE *Recuperer_passerelleDB_suite( struct DB **db );
  extern struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( guint id );
  extern gboolean Modifier_passerelleDB( struct CMD_TYPE_PASSERELLE *pass );
-
- extern gboolean Retirer_paletteDB ( struct CMD_TYPE_PALETTE *pass );
- extern gint Ajouter_paletteDB ( struct CMD_TYPE_PALETTE *pass );
- extern gboolean Recuperer_paletteDB ( struct DB **db, gint id_syn );
- extern struct CMD_TYPE_PALETTE *Recuperer_paletteDB_suite( struct DB **db );
- extern struct CMD_TYPE_PALETTE *Rechercher_paletteDB ( guint id );
- extern gboolean Modifier_paletteDB( struct CMD_TYPE_PALETTE *pass );
 
  extern gboolean Retirer_cadranDB ( struct CMD_TYPE_CADRAN *cadran );
  extern gint Ajouter_cadranDB ( struct CMD_TYPE_CADRAN *cadran );
