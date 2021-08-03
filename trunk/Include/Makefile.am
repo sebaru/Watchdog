@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 
 noinst_HEADERS =  Erreur.h Reseaux.h \
-                  Reseaux_gtk_message.h Reseaux_connexion.h Reseaux_icone.h \
+                  Reseaux_icone.h \
                   Reseaux_synoptique.h \
 		  Reseaux_supervision.h Reseaux_atelier.h \
                   Reseaux_admin.h \

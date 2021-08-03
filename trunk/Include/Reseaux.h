@@ -32,8 +32,6 @@
  #include <pthread.h>
  #include <openssl/ssl.h>
  #include "Erreur.h"
- #include "Reseaux_gtk_message.h"
- #include "Reseaux_connexion.h"
  #include "Reseaux_synoptique.h"
  #include "Reseaux_dls.h"
  #include "Reseaux_mnemonique.h"
