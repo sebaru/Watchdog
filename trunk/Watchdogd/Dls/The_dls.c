@@ -905,7 +905,7 @@ end:
          (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||
          (ai->archivage == 4 && ai->last_arch + 864000 <= Partage->top)
        )
-     { Ajouter_arch_by_nom( ai->acronyme, ai->tech_id, ai->val_ech );                                  /* Archivage si besoin */
+     { Ajouter_arch( ai->tech_id, ai->acronyme, ai->val_ech );                                         /* Archivage si besoin */
        ai->last_arch = Partage->top;
      }
   }
@@ -1034,7 +1034,7 @@ end:
          (cpt_imp->archivage == 3 && cpt_imp->last_arch + 36000  <= Partage->top) ||
          (cpt_imp->archivage == 4 && cpt_imp->last_arch + 864000 <= Partage->top)
        )
-     { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 );                /* Archivage si besoin */
+     { Ajouter_arch( cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur*1.0 );                       /* Archivage si besoin */
        cpt_imp->last_arch = Partage->top;
      }
   }
@@ -1122,7 +1122,7 @@ end:
              Partage->audit_bit_interne_per_sec++;
            }
           if (cpt_h->last_arch + 600 < Partage->top)
-           { Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
+           { Ajouter_arch( cpt_h->tech_id, cpt_h->acronyme, 1.0*cpt_h->valeur );
              cpt_h->last_arch = Partage->top;
            }
         }
@@ -1579,7 +1579,7 @@ end:
          (reg->archivage == 3 && reg->last_arch + 36000  <= Partage->top) ||
          (reg->archivage == 4 && reg->last_arch + 864000 <= Partage->top)
        )
-     { Ajouter_arch_by_nom( reg->acronyme, reg->tech_id, reg->valeur );                                /* Archivage si besoin */
+     { Ajouter_arch( reg->tech_id, reg->acronyme, reg->valeur );                                       /* Archivage si besoin */
        reg->last_arch = Partage->top;
      }
   }

@@ -34,11 +34,11 @@
  #define NOM_TABLE_ARCH    "histo_bit"
 
  struct ARCHDB
-  { guint  date_sec;                                                                                      /* Date de la photo */
-    guint  date_usec;                                                                                     /* Date de la photo */
-    gchar  nom[NBR_CARAC_ACRONYME];
-    gchar  tech_id[NBR_CARAC_TECHID];
-    gfloat valeur;                                                                           /* Valeur de l'entrée analogique */
+  { guint   date_sec;                                                                                     /* Date de la photo */
+    guint   date_usec;                                                                                    /* Date de la photo */
+    gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
+    gdouble valeur;                                                                          /* Valeur de l'entrée analogique */
   };
 
  struct COM_ARCH                                                                                   /* Communication vers ARCH */
@@ -60,7 +60,7 @@
 /******************************************* Définitions des prototypes *******************************************************/
  extern void Run_arch ( void );                                                                             /* Dans Archive.c */
  extern gint Arch_Clear_list ( void );
- extern void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur );
+ extern void Ajouter_arch( gchar *tech_id, gchar *nom, gdouble valeur );
  extern gboolean Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
  extern void Admin_arch_json ( SoupMessage *msg, const char *path, GHashTable *query, gint access_level );
  extern void Arch_Update_SQL_Partitions_thread ( void );
