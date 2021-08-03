@@ -45,25 +45,6 @@
  #include "client.h"
 
 /**********************************************************************************************************/
-/* Reduire_en_vignette: Met un motif aux dimensions de vignette                                           */
-/* Entrée: Le trame_motif souhaité                                                                        */
-/* Sortie: niet                                                                                           */
-/**********************************************************************************************************/
- void Reduire_en_vignette ( struct CMD_TYPE_MOTIF *motif )
-  { if ( motif && (motif->largeur>TAILLE_ICONE_X || motif->hauteur>TAILLE_ICONE_Y ) )
-     { double facteur;
-       facteur = (gdouble)motif->hauteur/motif->largeur;
-       if (facteur>=1.0)
-        { motif->largeur = (guint)((double)TAILLE_ICONE_Y/facteur);
-          motif->hauteur = TAILLE_ICONE_Y;
-        }
-       else
-        { motif->largeur = TAILLE_ICONE_X;
-          motif->hauteur = (guint)((double)TAILLE_ICONE_X*facteur);
-        }
-     }
-  }
-/**********************************************************************************************************/
 /* Trame_new_item: Renvoi un nouveau item, completement vierge                                            */
 /* Entrée: kedal                                                                                          */
 /* Sortie: une structure TRAME_ITEM_MOTIF                                                                 */

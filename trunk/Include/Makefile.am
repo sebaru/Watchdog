@@ -5,8 +5,7 @@
 #**********************************************************************************************************/
 
 noinst_HEADERS =  Erreur.h Reseaux.h \
-                  Reseaux_synoptique.h \
-		  Reseaux_supervision.h Reseaux_atelier.h \
+		  Reseaux_supervision.h \
                   boule_bleue.xpm boule_verte.xpm boule_rouge.xpm boule_jaune.xpm boule_orange.xpm
 
 MAINTAINERCLEANFILES = Makefile.in

@@ -13,7 +13,7 @@ Watchdogd_SOURCES = Watchdogd.c process.c Archive.c archiveDB.c admin_arch.c \
 		    Mnemo_Horloges.c Mnemo_BOOL.c Mnemo_AO.c Mnemo_WATCHDOG.c \
 		    Mnemo_Tempo.c Histo_msgs.c distrib_Events.c \
                     distrib_MSGxxx.c distrib_Ixxx.c mail.c http.c \
-                    Synoptiques.c Syn_visuels.c Syn_comment.c Syn_passerelle.c Syn_cadran.c
+                    Synoptiques.c Syn_visuels.c Syn_comment.c Syn_cadran.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 		    TraductionDLS/libtradDLS.la \

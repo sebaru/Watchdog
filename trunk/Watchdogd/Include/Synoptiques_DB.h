@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Synoptiques_DB.h     Déclaration structure internes des synoptiques watchdog         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      jeu 25 sep 2003 16:33:06 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Synoptiques_DB.h     Déclaration structure internes des synoptiques watchdog                             */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          jeu 25 sep 2003 16:33:06 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Synoptiques_DB.h
  * This file is part of Watchdog
@@ -40,24 +40,10 @@
  #define NOM_TABLE_CAMERASUP      "syns_camerasup"
  #define NOM_TABLE_SCENARIO       "syns_scenario"
 
-/*************************************** Définitions des prototypes ***************************************/
+/************************************************ Définitions des prototypes **************************************************/
  extern gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *target_tech_id_src, gchar *target_acronyme_src );
  extern gboolean Mnemo_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src, gchar *forme_src );
  extern void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit );
-
- extern gboolean Retirer_commentDB ( struct CMD_TYPE_COMMENT *comment );
- extern gint Ajouter_commentDB ( struct CMD_TYPE_COMMENT *comment );
- extern gboolean Recuperer_commentDB ( struct DB **db, gint id_syn );
- extern struct CMD_TYPE_COMMENT *Recuperer_commentDB_suite( struct DB **db );
- extern struct CMD_TYPE_COMMENT *Rechercher_commentDB ( guint id );
- extern gboolean Modifier_commentDB( struct CMD_TYPE_COMMENT *comment );
-
- extern gboolean Retirer_passerelleDB ( struct CMD_TYPE_PASSERELLE *pass );
- extern gint Ajouter_passerelleDB ( struct CMD_TYPE_PASSERELLE *pass );
- extern gboolean Recuperer_passerelleDB ( struct DB **db, gint id_syn );
- extern struct CMD_TYPE_PASSERELLE *Recuperer_passerelleDB_suite( struct DB **db );
- extern struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( guint id );
- extern gboolean Modifier_passerelleDB( struct CMD_TYPE_PASSERELLE *pass );
 
  extern gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *tech_id, gchar *acronyme, gchar *forme_src,
                                           gdouble min, gdouble max,
@@ -66,4 +52,4 @@
                                           gint nb_decimal );
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

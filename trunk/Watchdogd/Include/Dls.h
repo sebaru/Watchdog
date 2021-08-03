@@ -70,8 +70,8 @@
     gchar shortname[64];
     gchar tech_id[NBR_CARAC_TECHID];
     gchar package[130];
-    gchar syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    gchar syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    gchar syn_parent_page[NBR_CARAC_TECHID];
+    gchar syn_page[NBR_CARAC_TECHID];
     guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint id;
     gboolean on;

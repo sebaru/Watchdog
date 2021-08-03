@@ -189,7 +189,7 @@ printf("Afficher_propriete: debut\n");
 /******************************************************************************************************************************/
  static void Mettre_a_jour_description ( struct PAGE_NOTEBOOK *page, gint icone_id, gchar *description )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
-    gchar chaine[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];
+    gchar chaine[256];
 
     snprintf( chaine, sizeof(chaine), "%4d - %s", icone_id, description );
     gtk_entry_set_text( GTK_ENTRY(infos->Entry_libelle), chaine );
