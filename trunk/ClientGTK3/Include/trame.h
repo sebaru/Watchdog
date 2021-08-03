@@ -69,7 +69,6 @@
         TYPE_COMMENTAIRE,
         TYPE_MOTIF,
         TYPE_CADRAN,
-        TYPE_CAMERA_SUP
       };
 
  struct TRAME_ITEM_SVG
@@ -156,25 +155,11 @@
     gint   selection;
   };
 
- struct TRAME_ITEM_CAMERA_SUP
-  { gint type;                                                                                              /* Type de l'item */
-    struct PAGE_NOTEBOOK *page;
-    GooCanvasItem *item;
-    cairo_matrix_t transform;
-    GooCanvasItem *item_groupe;
-    GooCanvasItem *select_mi;
-
-    struct CMD_TYPE_CAMERASUP *camera_sup;
-    gint   layer;                                                                      /* Groupe de deplacement du motif */
-    gint selection;
-  };
-
  struct TRAME_ITEM
   { union { struct TRAME_ITEM_MOTIF motif;
             struct TRAME_ITEM_PASS pass;
             struct TRAME_ITEM_COMMENT comment;
             struct TRAME_ITEM_CADRAN cadran;
-            struct TRAME_ITEM_CAMERA_SUP camera_sup;
           };
   };
 
@@ -197,7 +182,6 @@
  extern void Trame_rafraichir_comment ( struct TRAME_ITEM_COMMENT *trame_comment );
  extern void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
- extern void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern void Trame_rafraichir_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel );
  extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, gchar *color );
  extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gchar *color );
@@ -211,13 +195,10 @@
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
- extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
-                                                               struct CMD_TYPE_CAMERASUP *camera_sup );
  extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
  extern void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern struct TRAME *Trame_creer_trame ( struct PAGE_NOTEBOOK *page, guint taille_x, guint taille_y, char *coul, guint grille );
  extern void Trame_effacer_trame ( struct TRAME *trame );
  extern void Trame_detruire_trame ( struct TRAME *trame );

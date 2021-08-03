@@ -59,31 +59,11 @@
  extern struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( guint id );
  extern gboolean Modifier_passerelleDB( struct CMD_TYPE_PASSERELLE *pass );
 
- extern gboolean Retirer_cadranDB ( struct CMD_TYPE_CADRAN *cadran );
- extern gint Ajouter_cadranDB ( struct CMD_TYPE_CADRAN *cadran );
- extern gboolean Recuperer_cadranDB ( struct DB **db, gint id_syn );
- extern struct CMD_TYPE_CADRAN *Recuperer_cadranDB_suite( struct DB **db );
- extern struct CMD_TYPE_CADRAN *Rechercher_cadranDB ( guint id );
- extern gboolean Modifier_cadranDB( struct CMD_TYPE_CADRAN *cadran );
  extern gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *tech_id, gchar *acronyme, gchar *forme_src,
                                           gdouble min, gdouble max,
                                           gdouble seuil_ntb, gdouble seuil_nb,
                                           gdouble seuil_nh, gdouble seuil_nth,
                                           gint nb_decimal );
-
- extern gboolean Retirer_camera_supDB ( gint id );
- extern gint Ajouter_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup );
- extern gint Modifier_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup );
- extern gboolean Recuperer_camera_supDB ( struct DB **db_retour, gint syn_id );
- extern struct CMD_TYPE_CAMERASUP *Recuperer_camera_supDB_suite( struct DB **db_orig );
-  extern struct CMD_TYPE_CAMERASUP *Rechercher_camera_supDB ( guint id );
-
- extern gboolean Retirer_scenarioDB ( guint id );
- extern gint Ajouter_scenarioDB ( struct CMD_TYPE_SCENARIO *scenario );
- extern gboolean Recuperer_scenarioDB ( struct DB **db, gint id_syn );
- extern struct CMD_TYPE_SCENARIO *Recuperer_scenarioDB_suite( struct DB **db );
- extern struct CMD_TYPE_SCENARIO *Rechercher_scenarioDB ( guint id );
- extern gboolean Modifier_scenarioDB( struct CMD_TYPE_SCENARIO *scenario );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

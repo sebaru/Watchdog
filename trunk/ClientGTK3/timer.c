@@ -143,7 +143,6 @@
           case TYPE_COMMENTAIRE:
                                  break;
           case TYPE_CADRAN:      break;
-          case TYPE_CAMERA_SUP : break;
           /*default: printf("Timer: type inconnu\n" );*/
         }
        liste_motifs=liste_motifs->next;

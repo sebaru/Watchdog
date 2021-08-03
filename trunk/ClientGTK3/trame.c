@@ -91,16 +91,6 @@
     g_list_free( trame_motif->images );
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
   }
-/**********************************************************************************************************/
-/* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
-/* Sortie: rieng                                                                                          */
-/**********************************************************************************************************/
- void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
-  {
-    if (trame_camera_sup->item_groupe) goo_canvas_item_remove( trame_camera_sup->item_groupe );
-    if (trame_camera_sup->select_mi) goo_canvas_item_remove( trame_camera_sup->select_mi );
-  }
 /******************************************************************************************************************************/
 /* Trame_del_svg: Libere la mémoire liée à un objet de type SVG                                                               */
 /* Entrée: le SVG                                                                                                             */
@@ -212,24 +202,6 @@
                               );
        goo_canvas_item_set_transform ( trame_motif->select_bg, &trame_motif->transform_bg );
      }
-  }
-/******************************************************************************************************************************/
-/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre                                  */
-/* Entrée: la structure graphique TRAME_MOTIF                                                                                 */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
-  { if (!(trame_camera_sup && trame_camera_sup->camera_sup)) return;
-    cairo_matrix_init_identity ( &trame_camera_sup->transform );
-    cairo_matrix_translate ( &trame_camera_sup->transform,
-                             (gdouble)trame_camera_sup->camera_sup->posx,
-                             (gdouble)trame_camera_sup->camera_sup->posy
-                           );
-
-    cairo_matrix_rotate ( &trame_camera_sup->transform, 0.0 );
-    cairo_matrix_scale  ( &trame_camera_sup->transform, 1.0, 1.0 );
-
-    goo_canvas_item_set_transform ( trame_camera_sup->item_groupe, &trame_camera_sup->transform );
   }
 /**********************************************************************************************************/
 /* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
@@ -954,51 +926,6 @@ printf("%s: New button %s\n", __func__, bouton );
     else if (!flag) g_object_set ( G_OBJECT(trame_motif->item_groupe), "tooltip", Json_get_string ( visuel, "libelle" ), NULL );
     return(trame_motif);
   }
-/******************************************************************************************************************************/
-/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                                                 */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
-/* Sortie: la structure referencant la camera de supervision, ou NULL si erreur                                               */
-/******************************************************************************************************************************/
- struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
-                                                        struct CMD_TYPE_CAMERASUP *camera_sup )
-  { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-    GdkPixbuf *pixbuf;
-
-    if (!(trame && camera_sup)) return(NULL);
-
-    trame_camera_sup = g_try_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
-    if (!trame_camera_sup) return(NULL);
-    trame_camera_sup->camera_sup = camera_sup;
-    trame_camera_sup->page = trame->page;
-    pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                      /* Chargement du fichier Camera */
-    if (!pixbuf)
-     { //Download_gif ( 1, 0 );
-       pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                   /* Chargement du fichier Camera */
-       if (!pixbuf) { g_free(trame_camera_sup); return(NULL); }
-     }
-
-    trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );    /* Groupe MOTIF */
-    if (!flag) g_object_set ( G_OBJECT(trame_camera_sup->item_groupe), "tooltip", camera_sup->libelle, NULL );
-
-    trame_camera_sup->item = goo_canvas_image_new ( trame_camera_sup->item_groupe,
-                                                    pixbuf,
-                                                    -gdk_pixbuf_get_width(pixbuf)/2.0, -gdk_pixbuf_get_height(pixbuf)/2.0,
-                                                    NULL );
-
-/*       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
-       goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
-                                                         -1, GOO_CANVAS_ANCHOR_CENTER,
-                                                         "fill-color", "yellow",
-                                                         "font", "arial bold 14",
-                                                         NULL);*/
-    Trame_rafraichir_camera_sup ( trame_camera_sup );
-
-    trame_camera_sup->type = TYPE_CAMERA_SUP;
-    pthread_mutex_lock ( &trame->lock );
-    trame->trame_items = g_list_append( trame->trame_items, trame_camera_sup );
-    pthread_mutex_unlock ( &trame->lock );
-    return(trame_camera_sup);
-  }
 /**********************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
@@ -1281,7 +1208,6 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
     struct TRAME_ITEM_COMMENT *trame_comm;
     struct TRAME_ITEM_PASS *trame_pass;
     struct TRAME_ITEM_CADRAN *trame_cadran;
-    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
 
     pthread_mutex_lock ( &trame->lock );
@@ -1305,11 +1231,6 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
           case TYPE_MOTIF:  trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
                             Trame_del_item( trame_motif );
                             g_free(trame_motif);
-                            break;
-          case TYPE_CAMERA_SUP:
-                            trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
-                            Trame_del_camera_sup( trame_camera_sup );
-                            g_free(trame_camera_sup);
                             break;
           default: printf("Trame_effacer_trame: type inconnu\n");
         }

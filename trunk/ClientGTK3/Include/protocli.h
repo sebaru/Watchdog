@@ -58,7 +58,6 @@
     TYPE_PAGE_HISTO_MSGS,                                                                         /* Parcours de l'historique */
     TYPE_PAGE_ATELIER,                                                                   /* Il s'agit d'un atelier synoptique */
     TYPE_PAGE_SUPERVISION,                                                                /* Supervision graphique synoptique */
-    TYPE_PAGE_CAMERA,                                                                                   /* Gestion des camera */
     TYPE_PAGE_ADMIN,                                               /* Page de gestion des commandes/requests d'administration */
     TYPE_PAGE_HORLOGE
   };
@@ -140,14 +139,6 @@
     gint Appui;
   };
 
- enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
-  {  COL_CAM_ID,
-     COL_CAM_NUM,
-     COL_CAM_LOCATION,
-     COL_CAM_LIBELLE,
-     NBR_COL_CAM
-  };
-
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
  extern GtkWidget *Creer_page_histo( struct CLIENT *Client );                                           /* Dans liste_histo.c */
  extern void Reset_page_histo( struct CLIENT *client );
@@ -184,8 +175,6 @@
                              struct TRAME_ITEM_PASS *trame_pass );
  extern void Clic_sur_cadran ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                                struct TRAME_ITEM_CADRAN *trame_cadran );
- extern void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                                   struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
                                                                                                   /* Dans atelier_selection.c */
  extern void Tout_deselectionner ( struct PAGE_NOTEBOOK *page );
  extern void Selectionner ( struct PAGE_NOTEBOOK *page, gpointer trame_item, gint groupe );
@@ -217,8 +206,6 @@
  extern void Afficher_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
                                                                                                      /* Dans atelier_cadran.c */
  extern void Afficher_un_cadran (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
-                                                                                                     /* Dans atelier_camera.c */
- extern void Afficher_une_camera (JsonArray *array, guint index, JsonNode *element, gpointer user_data);
 
                                                                                                         /* Dans supervision.c */
  extern void Menu_want_supervision_accueil( struct CLIENT *client );
@@ -229,7 +216,6 @@
 
                                                                                                 /* Dans supervision_comment.c */
 
-                                                                                                 /* Dans supervision_camera.c */
                                                                                              /* Dans supervision_passerelle.c */
  extern gboolean Supervision_clic_passerelle (GooCanvasItem *canvasitem, GooCanvasItem *target,
                                               GdkEvent *event, struct TRAME_ITEM_PASS *trame_pass );

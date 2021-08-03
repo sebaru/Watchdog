@@ -47,7 +47,6 @@
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
-    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GSList *objet;
 
     objet = infos->Selection;
@@ -76,11 +75,6 @@
                g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
                trame_cadran->selection = FALSE;
                break;
-          case TYPE_CAMERA_SUP:
-               trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
-               g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-               trame_camera_sup->selection = FALSE;
-               break;
           default: printf("Tout_deselectionner: type inconnu\n" );
         }
        objet=g_slist_next(objet);
@@ -100,7 +94,6 @@
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
-    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     gint local_groupe;
     GList *objet;
     printf("%s: Selectionner item %p, groupe %d\n", __func__, trame_item, groupe );
@@ -155,16 +148,6 @@
                    }
                 }
                break;
-/*           case TYPE_CAMERA_SUP:
-                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
-                if (trame_camera_sup->layer == layer)
-                 { if (!trame_camera_sup->selection)
-                    { g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                      trame_camera_sup->selection = TRUE;
-                      infos->Selection = g_slist_prepend( infos->Selection, objet->data );
-                    }
-                 }
-               break;*/
           default: printf("Selectionner: type inconnu\n" );
         }
        objet=objet->next;
@@ -182,7 +165,6 @@
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
-    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GSList *selection;
     gint largeur_grille;
     gint dx, dy, new_x, new_y;
@@ -252,22 +234,6 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
                if ( 0<new_y && new_y<TAILLE_SYNOPTIQUE_Y ) { Json_node_add_int ( trame_motif->visuel, "posy", new_y); }
                Trame_rafraichir_motif(trame_motif);                                                         /* Refresh visuel */
                break;
-          case TYPE_CAMERA_SUP:
-               trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)(selection->data));
-               new_x = trame_camera_sup->camera_sup->posx+dx;
-               new_y = trame_camera_sup->camera_sup->posy+dy;
-
-               if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(infos->Check_grid)))
-                { new_x = new_x/largeur_grille * largeur_grille;
-                  new_y = new_y/largeur_grille * largeur_grille;
-                }
-
-               if ( 0<new_x && new_x<TAILLE_SYNOPTIQUE_X )
-                { trame_camera_sup->camera_sup->posx = new_x; }
-               if ( 0<new_y && new_y<TAILLE_SYNOPTIQUE_Y )
-                { trame_camera_sup->camera_sup->posy = new_y; }
-               Trame_rafraichir_camera_sup(trame_camera_sup);                                               /* Refresh visuel */
-               break;
           default: printf("Deplacer_selection: type inconnu\n" );
         }
        selection = selection->next;
@@ -286,7 +252,6 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
-    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *selection;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
@@ -316,11 +281,6 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CADRAN,
                               (gchar *)trame_cadran->cadran, sizeof( struct CMD_TYPE_CADRAN ) );
                break;
-          case TYPE_CAMERA_SUP:
-               trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,
-                              (gchar *)trame_camera_sup->camera_sup, sizeof( struct CMD_TYPE_CAMERASUP ) );
-               break;
           default: /*Selection = g_list_remove( Selection, Selection->data );*/
                    printf("Dupliquer_selection: type inconnu\n" );
         }
@@ -339,12 +299,10 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
-    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct CMD_TYPE_MOTIF id_motif;
     struct CMD_TYPE_COMMENT id_comment;
     struct CMD_TYPE_CADRAN id_cadran;
     struct CMD_TYPE_PASSERELLE id_pass;
-    struct CMD_TYPE_CAMERASUP id_camera_sup;
     GList *selection;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
@@ -380,14 +338,6 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
                id_cadran.id = trame_cadran->cadran->id;
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CADRAN,
                               (gchar *)&id_cadran, sizeof( struct CMD_TYPE_CADRAN ) );
-               break;
-          case TYPE_CAMERA_SUP:
-               trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
-               id_camera_sup.id = trame_camera_sup->camera_sup->id;
-               memcpy( &id_camera_sup.libelle, trame_camera_sup->camera_sup->libelle,
-                       sizeof(id_camera_sup.libelle) );
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,
-                              (gchar *)&id_camera_sup, sizeof( struct CMD_TYPE_CAMERASUP ) );
                break;
           default: /*Selection = g_list_remove( Selection, Selection->data );*/
                    printf("Effacer_selection: type inconnu\n" );
@@ -429,9 +379,6 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
              Json_node_add_int ( trame_cadran->cadran, "groupe", new_groupe );
              break;
            }
-/*          case TYPE_CAMERA_SUP:
-               ((struct TRAME_ITEM_CAMERA_SUP *)selection->data)->groupe_dpl = new_groupe;
-               break;*/
           default: printf("Fusionner_selection: type inconnu\n" );
         }
        selection = selection->next;
@@ -467,9 +414,6 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
              Json_node_add_int ( trame_cadran->cadran, "groupe", ++infos->groupe_max );
              break;
            }
-         /*case TYPE_CAMERA_SUP:
-              ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection.trame_camera_sup)->groupe_dpl = Nouveau_groupe();
-              break;*/
          default: printf("Detacher_selection: type inconnu\n" );
        }
     printf("Fin detacher_selection\n");
@@ -512,8 +456,6 @@ printf("newx=%d, newy=%d\n", new_x, new_y);
             Trame_rafraichir_cadran(trame_cadran);
             break;
           }
-         case TYPE_CAMERA_SUP: break;
-         default: printf("Rotationner_selection: type inconnu\n" );
        }
       selection = g_slist_next(selection);
      }
@@ -556,7 +498,6 @@ printf("%s: scale=%f\n", __func__, scale );
             Trame_rafraichir_cadran(trame_cadran);
             break;
           }
-         case TYPE_CAMERA_SUP: break;
          default: printf("Rotationner_selection: type inconnu\n" );
        }
       selection = g_slist_next(selection);

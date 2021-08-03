@@ -276,10 +276,6 @@ printf("Afficher_propriete: debut\n");
                                           y = 1.0*Json_get_int ( trame_cadran->cadran, "posy" );
                                         }
                                        break;
-                                  case TYPE_CAMERA_SUP:
-                                       x = ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection->data)->camera_sup->posx;
-                                       y = ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection->data)->camera_sup->posy;
-                                       break;
                                   default: printf("Clic_general: type inconnu\n" );
                                            x=-1; y=-1;
                                 }
@@ -520,7 +516,7 @@ printf("Afficher_propriete: debut\n");
 
     struct PAGE_NOTEBOOK *page = trame_pass->page;
 
-    Clic_general( page, event, trame_pass, Json_get_int ( trame_pass, "groupe" ) );                  /* Fonction de base clic */
+    Clic_general( page, event, trame_pass, Json_get_int ( trame_pass->pass, "groupe" ) );            /* Fonction de base clic */
     Mettre_a_jour_position( page, Json_get_int ( trame_pass->pass, "posx" ),
                                   Json_get_int ( trame_pass->pass, "posy" ),
                                   Json_get_int ( trame_pass->pass, "angle" ),

@@ -105,17 +105,6 @@
     gint    nb_decimal;                                                                       /* Nombre de decimal a afficher */
   };
 
-/************************************************* Gestion des cameras de supervision *****************************************/
- struct CMD_TYPE_CAMERASUP
-  { gint  id;
-    gint  syn_id;
-    gint  camera_src_id;
-    gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                                                 /* "ChSeb" */
-    gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                                                   /* Libelle de la camera */
-    gint  posx;
-    gint  posy;
-  };
-
 /************************************************* Gestion des Scenario *******************************************************/
  struct CMD_TYPE_SCENARIO
   { gint  id;

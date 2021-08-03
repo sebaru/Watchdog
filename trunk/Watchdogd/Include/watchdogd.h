@@ -43,7 +43,6 @@
  #include "Config.h"
  #include "Archive.h"
  #include "Message_DB.h"
- #include "Camera_DB.h"
  #include "Histo_DB.h"
  #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"
