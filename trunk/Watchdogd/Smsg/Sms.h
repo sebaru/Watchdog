@@ -36,7 +36,7 @@
     GSM_Error gammu_send_status;
     GSM_StateMachine *gammu_machine;
     INI_Section *gammu_cfg;
-    gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];                                                       /* Tech_id du téléphone */
+    gchar tech_id[NBR_CARAC_TECHID];                                                                  /* Tech_id du téléphone */
     gchar description[80];                                         /* Une description du téléphone ou sa position par exemple */
     gchar ovh_service_name[16];                                                                     /* Login de connexion OVH */
     gchar ovh_application_key[33];                                                                            /* Clef API OVH */

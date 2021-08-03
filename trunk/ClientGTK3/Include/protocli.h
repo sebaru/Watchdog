@@ -93,14 +93,6 @@
     GtkWidget *Liste_mnemonique;                                      /* GtkTreeView pour la gestion des mnemoniques Watchdog */
   };
 
- struct TYPE_INFO_SOURCE_DLS
-  { GtkWidget *text;                                  /* Pour les plugins DLS, ici est placé le widget TextView correspondant */
-    struct CMD_TYPE_PLUGIN_DLS rezo_dls;
-    GtkWidget *F_mnemo;
-    GtkWidget *Option_type;
-    GtkWidget *Spin_num;
-  };
-
  struct TYPE_INFO_HISTO_MSGS
   { SoupWebsocketConnection *websocket;
     GtkListStore *Liste_histo_msgs;                                      /* GtkTreeView pour la gestion des messages Watchdog */

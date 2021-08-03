@@ -40,45 +40,6 @@
  #define NBR_CARAC_ACRO_SYN_MNEMONIQUE       20
  #define NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8  (2*NBR_CARAC_ACRO_SYN_MNEMONIQUE)
 
- enum
-  { MNEMO_BISTABLE,                                                                   /* Definitions des types de mnemoniques */
-    MNEMO_MONOSTABLE,
-    MNEMO_TEMPO,
-    MNEMO_ENTREE,
-    MNEMO_SORTIE,
-    MNEMO_ENTREE_ANA,
-    MNEMO_SORTIE_ANA,
-    MNEMO_MOTIF,
-    MNEMO_CPTH,
-    MNEMO_CPT_IMP,
-    MNEMO_REGISTRE,
-    MNEMO_HORLOGE,
-    MNEMO_MSG,
-    MNEMO_BUS,
-    MNEMO_DIGITAL_OUTPUT,
-    MNEMO_WATCHDOG,
-    NBR_TYPE_MNEMO
-  };
-
-/***************************************************** Base de tous les mnemos ************************************************/
- struct CMD_TYPE_MNEMO_BASE                                                     /* Informations partagées par tous les mnémos */
-  { guint id;                                                                    /* ID unique du mnemonique dans la structure */
-    guint type;                                                                                    /* Type du bit interne lié */
-    gint  num;                                                                             /* Numéro du bit lié au mnemonique */
-    guint dls_id;                                                                             /* Numéro du plugin DLS associé */
-    guint syn_id;                                                                             /* Numéro du synoptique associé */
-    gchar  syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
-    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar  dls_tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-    gchar  ev_host[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-    gchar  ev_thread[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-    gchar  ev_text[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-    gchar  tableau[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
-    gchar  acro_syn[ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];         /* Acronyme présenté sur le synoptique, en mode cadran */
-  };
 
 /**************************************************** AddOns pour les Analog Input ********************************************/
  enum
@@ -124,23 +85,12 @@
   };
 
 /******************************************************* Suite des structures *************************************************/
- struct CMD_TYPE_MNEMONIQUES
-  { guint nbr_mnemos;                                                    /* Nombre de structure CMD_TYPE_MNEMONIQUE suivantes */
-    struct CMD_TYPE_MNEMO_BASE mnemo[];
-  };
 
  struct CMD_TYPE_NUM_MNEMONIQUE
   { guint type;
     guint num;
   };
 
- struct CMD_TYPE_MNEMO_FULL
-  { struct CMD_TYPE_MNEMO_BASE mnemo_base;
-    union { struct CMD_TYPE_MNEMO_AI mnemo_ai;
-            struct CMD_TYPE_MNEMO_CPT_IMP mnemo_cptimp;
-            struct CMD_TYPE_MNEMO_REGISTRE mnemo_r;
-          };
-  };
 
  enum
   { SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,                                          /* Ajout d'un groupe dans la liste cliente */

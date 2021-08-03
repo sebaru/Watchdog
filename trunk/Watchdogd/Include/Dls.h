@@ -27,11 +27,32 @@
  #ifndef _DLS_H_
   #define _DLS_H_
 
- #include "Reseaux.h"
  #include "Module_dls.h"
 
  #define NOM_TABLE_DLS         "dls"
+ #define NBR_CARAC_TECHID      32
+ #define NBR_CARAC_ACRONYME    64
 
+ enum
+  { MNEMO_BISTABLE,                                                                   /* Definitions des types de mnemoniques */
+    MNEMO_MONOSTABLE,
+    MNEMO_TEMPO,
+    MNEMO_ENTREE,
+    MNEMO_SORTIE,
+    MNEMO_ENTREE_ANA,
+    MNEMO_SORTIE_ANA,
+    MNEMO_MOTIF,
+    MNEMO_CPTH,
+    MNEMO_CPT_IMP,
+    MNEMO_REGISTRE,
+    MNEMO_HORLOGE,
+    MNEMO_MSG,
+    MNEMO_BUS,
+    MNEMO_DIGITAL_OUTPUT,
+    MNEMO_WATCHDOG,
+    NBR_TYPE_MNEMO
+  };
+  
  enum                                                                                  /* Code retour de la compilation D.L.S */
   { DLS_COMPIL_NEVER_COMPILED_YET,
     DLS_COMPIL_EXPORT_DB_FAILED,
@@ -45,9 +66,9 @@
   };
 
  struct DLS_PLUGIN
-  { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    gchar shortname[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+  { gchar nom[128];
+    gchar shortname[64];
+    gchar tech_id[NBR_CARAC_TECHID];
     gchar package[130];
     gchar syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
@@ -81,8 +102,8 @@
   };
 
  struct DLS_TEMPO                                                                           /* Définition d'une temporisation */
-  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+  { gchar   acronyme[NBR_CARAC_ACRONYME];
+    gchar   tech_id[NBR_CARAC_TECHID];
     gboolean init;                                   /* True si les données delai_on/off min_on/off ont bien été positionnées */
     guint status;                                                                               /* Statut de la temporisation */
     guint date_on;                                                              /* date a partir de laquelle la tempo sera ON */
@@ -96,8 +117,8 @@
   };
 
  struct DLS_AI
-  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+  { gchar   acronyme[NBR_CARAC_ACRONYME];
+    gchar   tech_id[NBR_CARAC_TECHID];
     gfloat  min;
     gfloat  max;
     guint   type;                                                                                  /* Type de gestion de l'EA */
@@ -110,8 +131,8 @@
    };
 
  struct DLS_AO
-  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+  { gchar   acronyme[NBR_CARAC_ACRONYME];
+    gchar   tech_id[NBR_CARAC_TECHID];
     gfloat  min;
     gfloat  max;
     guint   type;                                                                                  /* Type de gestion de l'EA */
@@ -135,14 +156,14 @@
   };
 
  struct DLS_WATCHDOG
-  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
     gint    top;
   };
 
  struct DLS_BOOL
-  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
     gint    classe; /* Monostable/bistable */
     gboolean etat;                                                                                      /* Etat actuel du bit */
     gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
@@ -151,24 +172,24 @@
   };
 
  struct DLS_DI
-  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
     gboolean etat;
     gboolean edge_up;
     gboolean edge_down;
   };
 
  struct DLS_DO
-  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
     gboolean etat;
     gboolean edge_up;
     gboolean edge_down;
   };
 
  struct DLS_CI
-  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
     gint    valeur;
     gint    val_en_cours1;                                                    /* valeur en cours pour le calcul via les ratio */
     gfloat  ratio;
@@ -183,8 +204,8 @@
   };
 
  struct DLS_CH
-  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
     guint valeur;
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
     guint old_top;                                                                         /* Date de debut du comptage du CH */
@@ -192,8 +213,8 @@
   };
 
  struct DLS_VISUEL
-  { gchar    tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar    acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar    tech_id[NBR_CARAC_TECHID];
+    gchar    acronyme[NBR_CARAC_ACRONYME];
     gchar    mode[32];
     gchar    color[16];
     gboolean cligno;
@@ -203,8 +224,8 @@
   };
 
  struct DLS_MESSAGES
-  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
     gboolean etat;
     gboolean etat_update;
     gint last_change;
@@ -217,8 +238,8 @@
   };
 
  struct DLS_REGISTRE
-  { gchar  tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+  { gchar  tech_id[NBR_CARAC_TECHID];
+    gchar  acronyme[NBR_CARAC_ACRONYME];
     gfloat valeur;
     gchar  unite[32];
     gint   archivage;

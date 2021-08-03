@@ -33,11 +33,9 @@
  #include <openssl/ssl.h>
  #include "Erreur.h"
  #include "Reseaux_synoptique.h"
- #include "Reseaux_dls.h"
  #include "Reseaux_mnemonique.h"
  #include "Reseaux_supervision.h"
  #include "Reseaux_atelier.h"
- #include "Reseaux_admin.h"
 
  #define TIMEOUT_BUFFER_PLEIN   30                              /* 1 seconde max d'attente de disponibilite du tampon d'envoi */
 

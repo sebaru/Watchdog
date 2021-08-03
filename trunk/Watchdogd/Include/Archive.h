@@ -36,8 +36,8 @@
  struct ARCHDB
   { guint  date_sec;                                                                                      /* Date de la photo */
     guint  date_usec;                                                                                     /* Date de la photo */
-    gchar  nom[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar  tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar  nom[NBR_CARAC_ACRONYME];
+    gchar  tech_id[NBR_CARAC_TECHID];
     gfloat valeur;                                                                           /* Valeur de l'entrée analogique */
   };
 
