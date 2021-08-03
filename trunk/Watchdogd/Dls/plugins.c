@@ -496,36 +496,46 @@
      { dls_syn->Dls_plugins = g_slist_append( dls_syn->Dls_plugins, plugin ); }
   }
 /******************************************************************************************************************************/
-/* Dls_recalculer_arbre_syn_for_id: Calcule l'arbre de dependance des synooptique                                             */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Rien                                                                                                               */
+/* Dls_recalculer_arbre_syn_for_id: Calcule l'arbre de dependance des synooptiques                                            */
+/* Entrée: l'id du synoptique a traiter, a travers le json array                                                              */
+/* Sortie: L'arbre DLS est mis à jour                                                                                         */
 /******************************************************************************************************************************/
- static struct DLS_SYN *Dls_recalculer_arbre_syn_for_id ( gint id )
-  { struct DB *db;
+ static void Dls_recalculer_arbre_syn_for_childs ( JsonArray *ids, guint index, JsonNode *element, gpointer data )
+  { struct DLS_SYN *dls_syn_parent = data;
+    gint id;
+    if (!dls_syn_parent) id = 1;
+    else id = Json_get_int ( element, "id" );
+
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Starting for syn id '%d'", __func__, id );
     struct DLS_SYN *dls_syn = g_try_malloc0( sizeof(struct DLS_SYN) );
     if (!dls_syn)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for id '%s'", __func__, id );
-       return(NULL);
+       return;
      }
     dls_syn->syn_id = id;
 
     Dls_foreach_plugins ( dls_syn, Dls_Add_plugin_to_dls_syn );
 
-    if ( ! Recuperer_synoptiqueDB_enfant( &db, id ) ) return(dls_syn);                             /* Si pas de connexion DB */
-    struct CMD_TYPE_SYNOPTIQUE *syn;
-    while ( (syn = Recuperer_synoptiqueDB_suite( &db )) != NULL )
-     { if (syn->id != 1)                                                          /* Pas de bouclage sur le synoptique root ! */
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-                    "%s: Loading sub syns for syn '%d' '%s' (parent '%d')", __func__, syn->id, syn->page, id );
-          dls_syn->Dls_sub_syns = g_slist_append( dls_syn->Dls_sub_syns, Dls_recalculer_arbre_syn_for_id ( syn->id ) );
-        }
-       g_free(syn);
+    JsonNode *syn_enfants = Json_node_create ();
+    if (!syn_enfants)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for id '%s'", __func__, id );
+       g_free(dls_syn);
+       return;
      }
-    return(dls_syn);
+
+    SQL_Select_to_json_node ( syn_enfants, "enfants",
+                              "SELECT id FROM syns "
+                              "WHERE parent_id='%d' AND id!=1",                        /* Pas de bouclage sur le synoptique 1 */
+                              id );
+
+    Json_node_foreach_array_element ( syn_enfants, "enfants", Dls_recalculer_arbre_syn_for_childs, dls_syn );
+    if (dls_syn_parent)
+     { dls_syn_parent->Dls_sub_syns = g_slist_append ( dls_syn_parent->Dls_sub_syns, dls_syn ); }
+    else
+     { Partage->com_dls.Dls_syns = dls_syn; }
   }
 /******************************************************************************************************************************/
-/* Dls_recalculer_arbre_syn_for_id: Calcule l'arbre de dependance des synooptique                                             */
+/* Dls_arbre_dls_syn_erase_syn: Supprime le dls_syn en parametre de l'arbre des synoptique                                    */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
@@ -555,7 +565,7 @@
 /******************************************************************************************************************************/
  void Dls_recalculer_arbre_dls_syn ( void )
   { Dls_arbre_dls_syn_erase();
-    Partage->com_dls.Dls_syns = Dls_recalculer_arbre_syn_for_id (1);
+    Dls_recalculer_arbre_syn_for_childs (NULL, 0, NULL, NULL);
   }
 /******************************************************************************************************************************/
 /* Dls_Charger_plugins: Ouverture de toutes les librairies possibles pour le DLS                                              */

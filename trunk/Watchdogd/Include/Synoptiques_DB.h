@@ -41,11 +41,6 @@
  #define NOM_TABLE_SCENARIO       "syns_scenario"
 
 /*************************************** Définitions des prototypes ***************************************/
- extern struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( guint id );
- extern gboolean Recuperer_synoptiqueDB ( struct DB **db );
- extern gboolean Recuperer_synoptiqueDB_enfant ( struct DB **db_retour, gint id_parent );
- extern struct CMD_TYPE_SYNOPTIQUE *Recuperer_synoptiqueDB_suite( struct DB **db );
-
  extern gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *target_tech_id_src, gchar *target_acronyme_src );
  extern gboolean Mnemo_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src, gchar *forme_src );
  extern void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit );

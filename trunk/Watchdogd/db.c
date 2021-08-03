@@ -2390,6 +2390,7 @@ fin:
                     "('thermometre',      'png',  'by_mode_color' ),"
                     "('haut_parleur',     'png',  'by_mode_color' ),"
                     "('bouton',           'none', 'complexe'      ),"
+                    "('bloc_maintenance', 'none', 'complexe'      ),"
                     "('encadre_1x1',      'none', 'complexe'      ),"
                     "('encadre_1x2',      'none', 'complexe'      ),"
                     "('encadre_1x3',      'none', 'complexe'      ),"
