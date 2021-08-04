@@ -378,177 +378,6 @@ printf("Charger_pixbuf_file: %s\n", fichier );
             }
      }
   }
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Satellite_Receive_response : Recupere la reponse du serveur (master)                                                       */
-/* Entrée : Les informations à sauvegarder                                                                                    */
-/******************************************************************************************************************************/
- static size_t CB_Receive_gif_data( char *ptr, size_t size, size_t nmemb, void *userdata )
-  { gchar *new_buffer;
-    printf("%s: %d*%d octets received", __func__, size, nmemb );
-    new_buffer = g_try_realloc ( Gif_received_buffer, Gif_received_size +  size*nmemb );
-    if (!new_buffer)                                                 /* Si erreur, on arrete le transfert */
-     { printf( "%s: Memory Error realloc", __func__ );
-       g_free(Gif_received_buffer);
-       Gif_received_buffer = NULL;
-       return(-1);
-     } else Gif_received_buffer = new_buffer;
-    memcpy( Gif_received_buffer + Gif_received_size, ptr, size*nmemb );
-    Gif_received_size += size*nmemb;
-    return(size*nmemb);
-  }
-/**********************************************************************************************************/
-/* Download_gif: Tente de récupérer un .gif depuis le serveur                                             */
-/* Entrée: l'id et le mode attendu                                                                        */
-/* Sortie: FALSE si probleme                                                                              */
-/**********************************************************************************************************/
- static gboolean Download_gif ( gint id, gint mode )
-  { gchar erreur[CURL_ERROR_SIZE+1];
-    struct curl_slist *slist = NULL;
-    long http_response;
-    gchar url[128];
-    CURLcode res;
-    CURL *curl;
-
-    Gif_received_buffer = NULL;                                     /* Init du tampon de reception à NULL */
-    Gif_received_size = 0;                                          /* Init du tampon de reception à NULL */
-    http_response = 0;
-
-    curl = curl_easy_init();                                            /* Preparation de la requete CURL */
-    if (!curl)
-     { printf( "Download_gif: cURL init failed" );
-       return(FALSE);
-     }
-
-    if (mode) g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%d.gif.%02d", id, mode );
-         else g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%d.gif", id );
-    printf( "%s: Trying to get %s", __func__, url );
-    curl_easy_setopt(curl, CURLOPT_URL, url );
-       /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
-       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
-       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buf->use);*/
-       /*slist = curl_slist_append(slist, "Content-Type: application/xml");*/
-/*       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
-       curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE );
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
-/*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
-/*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
-/*       curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
-       curl_easy_setopt(curl, CURLOPT_SSLKEY, Cfg_satellite.https_file_key );
-       g_snprintf( chaine, sizeof(chaine), "./%s", Cfg_satellite.https_file_cert );
-       curl_easy_setopt(curl, CURLOPT_SSLCERT, chaine );*/
-
-    res = curl_easy_perform(curl);
-    if (res)
-     { printf( "%s: Error : Could not connect", __func__ );
-       curl_easy_cleanup(curl);
-       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
-       return(FALSE);
-     }
-    if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK) http_response = 401;
-    curl_easy_cleanup(curl);
-    curl_slist_free_all(slist);
-
-    if (http_response != 200)                                                                /* HTTP 200 OK ? */
-     { printf(
-                "%s: Gif %s not received (HTTP_CODE = %d)!", __func__, url, http_response );
-       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
-       return(FALSE);
-     }
-    else
-     { gchar nom_fichier[80];
-       gint fd;
-       if (mode) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", id, mode );
-            else g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", id );
-       printf(
-                "%s: Saving GIF id %d, mode %d, size %d -> %s", __func__, id, mode, Gif_received_size, nom_fichier );
-       unlink(nom_fichier);
-       fd = open( nom_fichier, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
-       if (fd>0)
-        { write( fd, Gif_received_buffer, Gif_received_size );
-          close (fd);
-        }
-       else
-        { printf(
-                   "Download_gif : Unable to save file %s", nom_fichier );
-        }
-       g_free(Gif_received_buffer);
-       Gif_received_buffer = NULL;
-       if (fd<=0) return(FALSE);
-     }
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Download_icon : Tente de récupérer un fichier depuis le serveur commun abls-habitat.fr                                     */
-/* Entrée: le nom de fichier a télécharger                                                                                    */
-/* Sortie: FALSE si probleme                                                                                                  */
-/******************************************************************************************************************************/
- static gboolean Download_icon ( gchar *file )
-  { gchar erreur[CURL_ERROR_SIZE+1];
-    struct curl_slist *slist = NULL;
-    long http_response;
-    gchar url[128];
-    CURLcode res;
-    CURL *curl;
-
-    Gif_received_buffer = NULL;                                                         /* Init du tampon de reception à NULL */
-    Gif_received_size = 0;                                                              /* Init du tampon de reception à NULL */
-    http_response = 0;
-
-    curl = curl_easy_init();                                                                /* Preparation de la requete CURL */
-    if (!curl)
-     { printf( "%s: cURL init failed for %s", __func__, file );
-       return(FALSE);
-     }
-    printf( "%s: Trying to download %s", __func__, file );
-
-    g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%s", file );
-    printf( "%s: Trying to get %s", __func__, url );
-    curl_easy_setopt(curl, CURLOPT_URL, url );
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE );
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
-
-    res = curl_easy_perform(curl);
-    if (res)
-     { printf( "%s: Error : Could not connect", __func__ );
-       curl_easy_cleanup(curl);
-       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
-       return(FALSE);
-     }
-    if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK) http_response = 401;
-    curl_easy_cleanup(curl);
-    curl_slist_free_all(slist);
-
-    if (http_response != 200)                                                                                /* HTTP 200 OK ? */
-     { printf(
-                "%s: URL %s not received (HTTP_CODE = %d)!", __func__, url, http_response );
-       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
-       return(FALSE);
-     }
-    else
-     { gint fd;
-       printf( "%s: Saving FILE %s", __func__, file );
-       unlink(file);
-       fd = open( file, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
-       if (fd>0)
-        { write( fd, Gif_received_buffer, Gif_received_size );
-          close (fd);
-        }
-       else
-        { printf( "%s: Unable to save file %s", __func__, file ); }
-       g_free(Gif_received_buffer);
-       Gif_received_buffer = NULL;
-       if (fd<=0) return(FALSE);
-     }
-    printf( "%s: %s downloaded", __func__, file );
-    return(TRUE);
-  }
-#endif
 /******************************************************************************************************************************/
 /* Add_single_icone_to_item : Chargement d'un icone (ID+Mode) dans l'item en parametre                                        */
 /* Entrée: L'item, l'icone_id et le mode attendu                                                                              */
@@ -680,28 +509,6 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Trame_color_to_html: Convertir une couleur en francais en couleur html                                                     */
-/* Entrée: la couleur 'DLS'                                                                                                   */
-/* Sortie: un buffer static                                                                                                   */
-/******************************************************************************************************************************/
- static gchar *Trame_color_to_html ( gchar *color )
-  {
-         if (!strcasecmp(color, "rouge"))     { return("red");       }
-    else if (!strcasecmp(color, "vert"))      { return("green");     }
-    else if (!strcasecmp(color, "bleu"))      { return("blue");      }
-    else if (!strcasecmp(color, "cyan"))      { return("lightblue"); }
-    else if (!strcasecmp(color, "jaune"))     { return("yellow");    }
-    else if (!strcasecmp(color, "orange"))    { return("orange");    }
-    else if (!strcasecmp(color, "blanc"))     { return("white");     }
-    else if (!strcasecmp(color, "kaki"))      { return("darkgreen"); }
-    else if (!strcasecmp(color, "gris"))      { return("gray");      }
-    else if (!strcasecmp(color, "marron"))    { return("brown");     }
-    else if (!strcasecmp(color, "grisfonce")) { return("darkgray");  }
-    else if (!strcasecmp(color, "noir"))      { return("black");     }
-    else if (!color)                          { return("black");     }
-    else return(color);
-  }
-/******************************************************************************************************************************/
 /* Make_svg_bouton: Renvoie la chaine SVG pour faire un bouton                                                                */
 /* Entrée: les parametres du bouton                                                                                           */
 /* Sortie: la chaine de caractere                                                                                             */
@@ -743,7 +550,6 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /******************************************************************************************************************************/
  static GdkPixbuf *Trame_load_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
   { gchar encadre[512];
-    gchar *html_couleur = Trame_color_to_html ( couleur );
     gint largeur=64*ligne;
     gint hauteur=64*colonne;
     g_snprintf( encadre, sizeof(encadre),
@@ -753,7 +559,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
                 "<rect x='5' y='20' rx='15' width='%d' height='%d' "
                 "      fill='none' stroke='%s' stroke-width='4'  />"
                 "</svg>",
-                largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, html_couleur
+                largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, couleur
               );
 printf("%s: New encadre %s\n", __func__, encadre );
     return ( Trame_render_svg_top_pixbuf ( encadre ) );
@@ -765,12 +571,11 @@ printf("%s: New encadre %s\n", __func__, encadre );
 /******************************************************************************************************************************/
  static GdkPixbuf *Trame_load_bouton ( gchar *couleur, gchar *libelle )
   { gchar viewbox[512], *bouton;
-    gchar *html_couleur = Trame_color_to_html ( couleur );
 
     bzero ( viewbox, sizeof(viewbox) );
     g_strlcat ( viewbox, "<svg>", sizeof(viewbox) );
 
-    bouton = Make_svg_bouton ( 0, 0, html_couleur, libelle );
+    bouton = Make_svg_bouton ( 0, 0, couleur, libelle );
     g_strlcat ( viewbox, bouton, sizeof(viewbox) );
     g_free(bouton);
 

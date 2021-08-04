@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Include/Synoptiques_DB.h     Déclaration structure internes des synoptiques watchdog                             */
+/* Watchdogd/Include/Synoptiques_DB.h     DÃ©claration structure internes des synoptiques watchdog                             */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                          jeu 25 sep 2003 16:33:06 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -40,9 +40,10 @@
  #define NOM_TABLE_CAMERASUP      "syns_camerasup"
  #define NOM_TABLE_SCENARIO       "syns_scenario"
 
-/************************************************ Définitions des prototypes **************************************************/
+/************************************************ DÃ©finitions des prototypes **************************************************/
  extern gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *target_tech_id_src, gchar *target_acronyme_src );
- extern gboolean Mnemo_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src, gchar *forme_src );
+ extern gboolean Mnemo_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src,
+                                            gchar *forme_src, gchar *couleur_src );
  extern void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit );
 
  extern gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *tech_id, gchar *acronyme, gchar *forme_src,

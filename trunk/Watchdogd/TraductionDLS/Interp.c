@@ -902,36 +902,25 @@
  struct ACTION *New_action_visuel( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
     int taille, mode;
-    gchar *color;
 
     gchar *mode_string = Get_option_chaine ( options, MODE, NULL );
     if (mode_string == NULL) mode = Get_option_entier ( options, MODE, 0   );
-    gint   coul    = Get_option_entier ( options, COLOR, 0  );
+    gchar *couleur = Get_option_chaine ( options, T_COLOR, "black" );
     gint   cligno  = Get_option_entier ( options, CLIGNO, 0 );
     gchar *libelle = Get_option_chaine ( options, T_LIBELLE, "pas de libellé" );
     taille = 768;
     action = New_action();
     action->alors = New_chaine( taille );
-    switch (coul)
-     { case ROUGE   : color="rouge"; break;
-       case VERT    : color="vert"; break;
-       case BLEU    : color="bleu"; break;
-       case JAUNE   : color="jaune"; break;
-       case ORANGE  : color="orange"; break;
-       case BLANC   : color="blanc"; break;
-       case GRIS    : color="gris"; break;
-       case KAKI    : color="kaki"; break;
-       default      : color="noir";
-     }
+
     if (mode_string==NULL)
      { g_snprintf( action->alors, taille,
                    "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%d\", \"%s\", %d, \"%s\" );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno, libelle );
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, couleur, cligno, libelle );
      }
     else
      { g_snprintf( action->alors, taille,
                    "  Dls_data_set_VISUEL( vars, \"%s\", \"%s\", &_%s_%s, \"%s\", \"%s\", %d, \"%s\" );\n",
-                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode_string, color, cligno, libelle );
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode_string, couleur, cligno, libelle );
      }
 
     return(action);
@@ -1538,11 +1527,10 @@
                    break;
                  }
                 case MNEMO_MOTIF:
-                 { if (!strcmp(alias->tech_id, Dls_plugin.tech_id))                                   /* Si alias est interne */
-                    { gchar *forme = Get_option_chaine( alias->options, T_FORME, "none" );
-                      Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme );
-                    }
-                                                                                   /* Création du LINK vers le visuel externe */
+                 { gchar *forme   = Get_option_chaine( alias->options, T_FORME, "none" );
+                   gchar *couleur = Get_option_chaine( alias->options, T_COLOR, "black" );
+                   Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, couleur );
+                                                                                                        /* Création du visuel */
                    Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
                    break;
                  }
@@ -1660,6 +1648,11 @@
                                                     );
                       Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
                     }
+                   break;
+                 }
+                case MNEMO_MOTIF:
+                 {                                                                 /* Création du LINK vers le visuel externe */
+                   Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
                    break;
                  }
               }
