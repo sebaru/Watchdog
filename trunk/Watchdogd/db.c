@@ -2391,15 +2391,7 @@ fin:
                     "('haut_parleur',     'png',  'by_mode_color' ),"
                     "('bouton',           'none', 'complexe'      ),"
                     "('bloc_maintenance', 'none', 'complexe'      ),"
-                    "('encadre_1x1',      'none', 'complexe'      ),"
-                    "('encadre_1x2',      'none', 'complexe'      ),"
-                    "('encadre_1x3',      'none', 'complexe'      ),"
-                    "('encadre_2x1',      'none', 'complexe'      ),"
-                    "('encadre_2x2',      'none', 'complexe'      ),"
-                    "('encadre_2x3',      'none', 'complexe'      ),"
-                    "('encadre_3x1',      'none', 'complexe'      ),"
-                    "('encadre_3x2',      'none', 'complexe'      ),"
-                    "('encadre_3x3',      'none', 'complexe'      );"
+                    "('encadre',          'none', 'complexe'      );"
                   );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

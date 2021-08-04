@@ -698,7 +698,43 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     else if (!strcasecmp(color, "marron"))    { return("brown");     }
     else if (!strcasecmp(color, "grisfonce")) { return("darkgray");  }
     else if (!strcasecmp(color, "noir"))      { return("black");     }
+    else if (!color)                          { return("black");     }
     else return(color);
+  }
+/******************************************************************************************************************************/
+/* Make_svg_bouton: Renvoie la chaine SVG pour faire un bouton                                                                */
+/* Entrée: les parametres du bouton                                                                                           */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ static gchar *Make_svg_bouton ( gint posx, gint posy, gchar *couleur, gchar *libelle )
+  { gchar bouton[512];
+    gint largeur=14*strlen(libelle);
+    gint hauteur=28;
+    g_snprintf( bouton, sizeof(bouton),
+                "<rect x='%d' y='%d' rx='10' width='%d' height='%d' "
+                "      fill='%s' stroke='none' />"
+                "<text text-anchor='middle' x='%d' y='%d' "
+                "      font-size='14px' font-family='Bitstream' font-style='' fill='white' stroke='white'>%s</text> ",
+                posx, posy, largeur, hauteur, couleur, posx+largeur/2, posy+hauteur/2+5, libelle );
+    return(g_strdup (bouton));
+  }
+/******************************************************************************************************************************/
+/* Trame_render_svg_to_pixbuf : rendre un svg en un pixbuf                                                                    */
+/* Entrée: la chaine de caractere SVG                                                                                         */
+/* Sortie: le pixbuf                                                                                                          */
+/******************************************************************************************************************************/
+ static GdkPixbuf *Trame_render_svg_top_pixbuf ( gchar *svg )
+  { GError *error = NULL;
+    RsvgHandle *handle;
+    handle = rsvg_handle_new_from_data ( svg, strlen(svg), &error );
+    if (handle)
+     { GdkPixbuf *pixbuf = rsvg_handle_get_pixbuf ( handle );
+       g_object_unref ( handle );
+       return(pixbuf);
+     }
+    printf("%s: Load SVG failed: %s\n", __func__, error->message );
+    g_error_free(error);
+    return(NULL);
   }
 /******************************************************************************************************************************/
 /* Trame_load_encadre: Prépare un pixbuf pour l'encadre en parametre                                                          */
@@ -706,8 +742,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Sortie: le pixbuf                                                                                                          */
 /******************************************************************************************************************************/
  static GdkPixbuf *Trame_load_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
-  { RsvgHandle *handle;
-    gchar encadre[512];
+  { gchar encadre[512];
     gchar *html_couleur = Trame_color_to_html ( couleur );
     gint largeur=64*ligne;
     gint hauteur=64*colonne;
@@ -721,16 +756,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
                 largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, html_couleur
               );
 printf("%s: New encadre %s\n", __func__, encadre );
-    GError *error = NULL;
-    handle = rsvg_handle_new_from_data ( encadre, strlen(encadre), &error );
-    if (handle)
-     { GdkPixbuf *pixbuf = rsvg_handle_get_pixbuf ( handle );
-       g_object_unref ( handle );
-       return(pixbuf);
-     }
-    printf("%s: Load encadre failed: %s\n", __func__, error->message );
-    g_error_free(error);
-    return(NULL);
+    return ( Trame_render_svg_top_pixbuf ( encadre ) );
   }
 /******************************************************************************************************************************/
 /* Trame_load_bouton: Prépare un pixbuf pour le bouton en parametre                                                           */
@@ -738,32 +764,20 @@ printf("%s: New encadre %s\n", __func__, encadre );
 /* Sortie: le pixbuf                                                                                                          */
 /******************************************************************************************************************************/
  static GdkPixbuf *Trame_load_bouton ( gchar *couleur, gchar *libelle )
-  { RsvgHandle *handle;
-    gchar bouton[512];
+  { gchar viewbox[512], *bouton;
     gchar *html_couleur = Trame_color_to_html ( couleur );
-    gint largeur=14*strlen(libelle);
-    gint hauteur=28;
-    g_snprintf( bouton, sizeof(bouton),
-                "<svg viewBox='0 0 %d %d' >"
-                "<rect x='0' y='0' rx='10' width='%d' height='%d' "
-                "      fill='%s' stroke='none' />"
-                "<text text-anchor='middle' x='%d' y='%d' "
-                "      font-size='14px' font-family='Bitstream' font-style='' fill='white' stroke='white'>%s</text> "
-                "</svg>",
-                largeur, hauteur, largeur, hauteur, html_couleur, largeur/2, hauteur/2+5, libelle
-              );
-printf("%s: New button %s\n", __func__, bouton );
-    GError *error = NULL;
-    handle = rsvg_handle_new_from_data ( bouton, strlen(bouton), &error );
-    if (handle)
-     { GdkPixbuf *pixbuf = rsvg_handle_get_pixbuf ( handle );
-       g_object_unref ( handle );
-       return(pixbuf);
-     }
-    printf("%s: Load bouton failed: %s\n", __func__, error->message );
-    g_error_free(error);
-    return(NULL);
+
+    bzero ( viewbox, sizeof(viewbox) );
+    g_strlcat ( viewbox, "<svg>", sizeof(viewbox) );
+
+    bouton = Make_svg_bouton ( 0, 0, html_couleur, libelle );
+    g_strlcat ( viewbox, bouton, sizeof(viewbox) );
+    g_free(bouton);
+
+    g_strlcat ( viewbox, "</svg>", sizeof(viewbox) );
+    return ( Trame_render_svg_top_pixbuf ( viewbox ) );
   }
+
 /******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
@@ -779,13 +793,17 @@ printf("%s: New button %s\n", __func__, bouton );
     GdkPixbuf *pixbuf = NULL;
 
     gchar *forme = Json_get_string ( visuel, "forme" );
-    if ( g_str_has_prefix ( forme, "encadre_" ) )
+    if ( !strcasecmp ( forme, "encadre" ) )
      { gint ligne, colonne;
-       if ( sscanf ( forme, "encadre_%dx%d", &ligne, &colonne ) != 2 ) return;
+       if ( Json_has_member ( visuel, "mode" ) )
+        { if ( sscanf ( Json_get_string ( visuel, "mode" ), "%dx%d", &ligne, &colonne ) != 2 )
+            { ligne = colonne = 1; }
+        }
+       else { ligne = colonne = 1; }
        pixbuf = Trame_load_encadre ( ligne, colonne,  Json_get_string ( visuel, "def_color" ),
                                      Json_get_string ( visuel, "libelle" ) );
      }
-    else if ( g_str_has_prefix ( forme, "bouton" ) )
+    else if ( !strcasecmp ( forme, "bouton" ) )
      { pixbuf = Trame_load_bouton ( Json_get_string ( visuel, "def_color" ), Json_get_string ( visuel, "libelle" ) ); }
 
     if (pixbuf)
@@ -806,9 +824,13 @@ printf("%s: New button %s\n", __func__, bouton );
  void Trame_rafraichir_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
   {
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
-    if ( g_str_has_prefix ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre_" ) )
+    if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre" ) )
      { gint ligne, colonne;
-       if ( sscanf ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre_%dx%d", &ligne, &colonne ) != 2 ) return;
+       if ( Json_has_member ( visuel, "mode" ) )
+        { if ( sscanf ( Json_get_string ( visuel, "mode" ), "%dx%d", &ligne, &colonne ) != 2 )
+            { ligne = colonne = 1; }
+        }
+       else { ligne = colonne = 1; }
        trame_motif->pixbuf = Trame_load_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
                                                   Json_get_string ( visuel, "libelle" ) );
 

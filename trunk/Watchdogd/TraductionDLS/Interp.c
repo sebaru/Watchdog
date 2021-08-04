@@ -1544,7 +1544,6 @@
                     }
                                                                                    /* Création du LINK vers le visuel externe */
                    Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
-
                    break;
                  }
                 case MNEMO_CPT_IMP:
