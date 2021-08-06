@@ -37,52 +37,37 @@
 /******************************************************************************************************************************/
  void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct PAGE_NOTEBOOK *page = user_data;
-    struct TRAME_ITEM_MOTIF *trame_motif;
+    struct TYPE_INFO_SUPERVISION *infos_supervision;
+    struct TYPE_INFO_ATELIER     *infos_atelier;
 
 printf("%s : %s:%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get_string ( element, "acronyme" ) );
     if (!page) return;
 
-    if (page->type == TYPE_PAGE_SUPERVISION)
-     { struct TYPE_INFO_SUPERVISION *infos=page->infos;
-       trame_motif = Trame_ajout_visuel ( FALSE, infos->Trame, element );
-       if (!trame_motif)
-        { printf("Erreur creation d'un nouveau motif\n");
-          return;                                                          /* Ajout d'un test anti seg-fault */
+    if (page->type == TYPE_PAGE_SUPERVISION)  { infos_supervision = page->infos; }
+    else if (page->type == TYPE_PAGE_ATELIER) { infos_atelier     = page->infos; }
+    else return;
+
+
+    if ( Json_has_member ( element, "ihm_affichage" ) )
+     { if (!strcasecmp( Json_get_string ( element, "ihm_affichage" ), "complexe" ) )
+        { Trame_ajout_visuel_complexe ( (page->type == TYPE_PAGE_SUPERVISION ? infos_supervision->Trame
+                                                                             : infos_atelier->Trame_atelier),
+                                        element );
         }
-       g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( element, "def_color" ) );
-       trame_motif->mode   = 0;                                                     /* Sauvegarde etat motif */
-       trame_motif->cligno = 0;                                                     /* Sauvegarde etat motif */
-       g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
-                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
-                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
-       /*Updater_un_visuel ( trame_motif, element );*/
+       else
+        { Trame_ajout_visuel_simple   ( (page->type == TYPE_PAGE_SUPERVISION ? infos_supervision->Trame
+                                                                             : infos_atelier->Trame_atelier),
+                                        element );
+        }
+       return;
+     }
+ 
+    if (page->type == TYPE_PAGE_SUPERVISION)
+     { Trame_ajout_visuel_old ( FALSE, infos_supervision->Trame, element );
      }
     else if (page->type == TYPE_PAGE_ATELIER)
      { struct TYPE_INFO_ATELIER *infos=page->infos;
-       trame_motif = Trame_ajout_visuel ( TRUE, infos->Trame_atelier, element );
-       if (!trame_motif) { return; }                                                                           /* Si probleme */
-       g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-press-event",   G_CALLBACK(Agrandir_hg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-release-event", G_CALLBACK(Agrandir_hg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hg), "motion-notify-event",  G_CALLBACK(Agrandir_hg), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-press-event",   G_CALLBACK(Agrandir_hd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-release-event", G_CALLBACK(Agrandir_hd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hd), "motion-notify-event",  G_CALLBACK(Agrandir_hd), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-press-event",   G_CALLBACK(Agrandir_bg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-release-event", G_CALLBACK(Agrandir_bg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bg), "motion-notify-event",  G_CALLBACK(Agrandir_bg), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-press-event",   G_CALLBACK(Agrandir_bd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-release-event", G_CALLBACK(Agrandir_bd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bd), "motion-notify-event",  G_CALLBACK(Agrandir_bd), trame_motif );
+       Trame_ajout_visuel_old ( TRUE, infos_atelier->Trame_atelier, element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

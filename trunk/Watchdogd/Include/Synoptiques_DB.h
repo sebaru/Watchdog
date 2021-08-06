@@ -47,10 +47,10 @@
  extern void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit );
 
  extern gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *tech_id, gchar *acronyme, gchar *forme_src,
-                                          gdouble min, gdouble max,
-                                          gdouble seuil_ntb, gdouble seuil_nb,
-                                          gdouble seuil_nh, gdouble seuil_nth,
-                                          gint nb_decimal );
+                                                 gdouble min, gdouble max,
+                                                 gdouble seuil_ntb, gdouble seuil_nb,
+                                                 gdouble seuil_nh, gdouble seuil_nth,
+                                                 gint nb_decimal );
 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

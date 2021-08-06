@@ -188,7 +188,9 @@
  extern void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno );
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
- extern struct TRAME_ITEM_MOTIF *Trame_ajout_visuel ( gint flag, struct TRAME *trame, JsonNode *visuel );
+ extern gboolean Trame_ajout_visuel_complexe ( struct TRAME *trame, JsonNode *visuel );
+ extern gboolean Trame_ajout_visuel_simple ( struct TRAME *trame, JsonNode *visuel );
+ extern void Trame_ajout_visuel ( gint flag, struct TRAME *trame, JsonNode *visuel );
  extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame, JsonNode *comment );
  extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, JsonNode *pass );
  extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame, JsonNode *cadran );
