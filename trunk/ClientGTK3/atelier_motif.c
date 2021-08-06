@@ -50,24 +50,15 @@ printf("%s : %s:%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get
 
     if ( Json_has_member ( element, "ihm_affichage" ) )
      { if (!strcasecmp( Json_get_string ( element, "ihm_affichage" ), "complexe" ) )
-        { Trame_ajout_visuel_complexe ( (page->type == TYPE_PAGE_SUPERVISION ? infos_supervision->Trame
-                                                                             : infos_atelier->Trame_atelier),
-                                        element );
-        }
+        { Trame_ajout_visuel_complexe ( page, element ); }
        else
-        { Trame_ajout_visuel_simple   ( (page->type == TYPE_PAGE_SUPERVISION ? infos_supervision->Trame
-                                                                             : infos_atelier->Trame_atelier),
-                                        element );
-        }
+        { Trame_ajout_visuel_simple   ( page, element ); }
        return;
      }
  
     if (page->type == TYPE_PAGE_SUPERVISION)
-     { Trame_ajout_visuel_old ( FALSE, infos_supervision->Trame, element );
-     }
+     { Trame_ajout_visuel_old ( FALSE, infos_supervision->Trame, element ); }
     else if (page->type == TYPE_PAGE_ATELIER)
-     { struct TYPE_INFO_ATELIER *infos=page->infos;
-       Trame_ajout_visuel_old ( TRUE, infos_atelier->Trame_atelier, element );
-     }
+     { Trame_ajout_visuel_old ( TRUE, infos_atelier->Trame_atelier, element ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
