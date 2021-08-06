@@ -97,6 +97,7 @@
     GooCanvasItem *item_acro_syn;
     GList *images;                                                         /* Toutes les images présentes dans le fichier GIF */
     GList *image;                                                                     /* Image en cours d'affichage à l'écran */
+    GSList *items;                                                                      /* Liste des GooCanvas Item du visuel */
     GdkPixbuf *pixbuf;                                                               /* Pixbuf colorié et visualisé à l'écran */
     guchar num_image;                                                             /* Numero de l'image actuellement présentée */
     guchar nbr_images;                                                                   /* Nombre total d'image dans le .gif */

@@ -487,11 +487,20 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        g_object_set( trame_motif->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
        g_object_set( trame_motif->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
 
-       g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
+       if (trame_motif->item)
+        { g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
+        }
+       else 
+        { g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
+        }
 
        g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-press-event",   G_CALLBACK(Agrandir_hg), trame_motif );
        g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-release-event", G_CALLBACK(Agrandir_hg), trame_motif );
@@ -574,6 +583,73 @@ printf("%s: New bouton %s\n", __func__, bouton );
               );
 printf("%s: New encadre %s\n", __func__, encadre );
     return ( g_strdup(encadre) );
+  }
+/******************************************************************************************************************************/
+/* Trame_load_encadre: Prépare un pixbuf pour l'encadre en parametre                                                          */
+/* Entrée: la taille de lencadre, la couleur, son libellé                                                                     */
+/* Sortie: le pixbuf                                                                                                          */
+/******************************************************************************************************************************/
+ static gboolean Trame_ajout_visuel_bloc_maintenance ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
+  { struct TRAME *trame;
+         if (page->type == TYPE_PAGE_SUPERVISION) trame = ((struct TYPE_INFO_SUPERVISION *)page->infos)->Trame;
+    else if (page->type == TYPE_PAGE_ATELIER)     trame = ((struct TYPE_INFO_ATELIER *)page->infos)->Trame_atelier;
+    else return(FALSE);
+
+    struct TRAME_ITEM_MOTIF *trame_motif = Trame_new_item();
+    if (!trame_motif) { printf("%s: Erreur mémoire\n", __func__); return(FALSE); }
+
+    trame_motif->visuel = visuel;
+    trame_motif->page   = page;
+    trame_motif->type   = TYPE_MOTIF;
+    trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
+    /*g_snprintf( trame_motif->mode, sizeof(trame_motif->mode), "%s", Json_get_string ( visuel, "mode" ) );*/
+
+    trame_motif->image  = NULL;
+    trame_motif->images = NULL;
+    trame_motif->nbr_images  = 0;
+    trame_motif->gif_largeur = 0;
+    trame_motif->gif_hauteur = 0;
+    
+    /* if mode== */
+    gchar *couleur_service     = "blue";
+    gchar *couleur_maintenance = "orange";
+
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
+
+    gchar *bouton_service = Trame_Make_svg_bouton ( 0, 0, couleur_service, "  Service  " );
+    trame_motif->items = g_slist_append ( trame_motif->items,
+                                          goo_canvas_image_new ( trame_motif->item_groupe,
+                                                                 Trame_render_svg_to_pixbuf ( bouton_service ),
+                                                                 -77, -34.0, NULL )
+                                        );
+    g_free(bouton_service);
+    
+    gchar *bouton_maintenance = Trame_Make_svg_bouton ( 0, 0, couleur_maintenance, "Maintenance" );
+    trame_motif->items = g_slist_append ( trame_motif->items,
+                                          goo_canvas_image_new ( trame_motif->item_groupe,
+                                                                 Trame_render_svg_to_pixbuf ( bouton_maintenance ),
+                                                                 -77, 6.0, NULL )
+                                        );
+    g_free(bouton_maintenance);
+
+    GooCanvasBounds bounds;
+    goo_canvas_item_get_bounds ( trame_motif->item_groupe, &bounds );
+    trame_motif->gif_largeur = (gint)bounds.x2-bounds.x1;
+    trame_motif->gif_hauteur = (gint)bounds.y2-bounds.y1;
+printf("%s: gif_largeur=%d, gif_hauteur=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
+    Trame_set_handlers ( trame_motif );
+printf("%s: set handler okd\n", __func__ );
+    Trame_rafraichir_motif ( trame_motif );
+printf("%s: rafraichir motif ok \n", __func__ );
+
+
+
+printf("%s: New bloc maintenance\n", __func__ );
+    pthread_mutex_lock ( &trame->lock );
+    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    pthread_mutex_unlock ( &trame->lock );
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
@@ -702,8 +778,9 @@ printf("%s: New encadre %s\n", __func__, encadre );
 /******************************************************************************************************************************/
  gboolean Trame_ajout_visuel_complexe ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
   { gchar *forme = Json_get_string ( visuel, "forme" );
-         if ( !strcasecmp ( forme, "encadre" ) ) { return ( Trame_ajout_visuel_encadre ( page, visuel ) ); }
-    else if ( !strcasecmp ( forme, "bouton" ) )  { return ( Trame_ajout_visuel_bouton ( page, visuel ) ); }
+         if ( !strcasecmp ( forme, "encadre" ) )           { return ( Trame_ajout_visuel_encadre          ( page, visuel ) ); }
+    else if ( !strcasecmp ( forme, "bouton" ) )            { return ( Trame_ajout_visuel_bouton           ( page, visuel ) ); }
+    else if ( !strcasecmp ( forme, "bloc_maintenance" ) )  { return ( Trame_ajout_visuel_bloc_maintenance ( page, visuel ) ); }
     return(FALSE);
   }
 /******************************************************************************************************************************/
