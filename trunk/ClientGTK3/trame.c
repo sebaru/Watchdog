@@ -149,8 +149,8 @@
 
        cairo_matrix_rotate ( &trame_motif->transform_hd, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_hd,
-                                ((gdouble)trame_motif->gif_largeur/2),
-                                -((gdouble)trame_motif->gif_hauteur/2)
+                                ((gdouble)trame_motif->gif_largeur/2)*scale,
+                                -((gdouble)trame_motif->gif_hauteur/2)*scale
                               );
        goo_canvas_item_set_transform ( trame_motif->select_hd, &trame_motif->transform_hd );
 
@@ -158,8 +158,8 @@
        cairo_matrix_translate ( &trame_motif->transform_bd, (gdouble)position_x, (gdouble)position_y );
        cairo_matrix_rotate ( &trame_motif->transform_bd, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_bd,
-                                ((gdouble)trame_motif->gif_largeur/2),
-                                ((gdouble)trame_motif->gif_hauteur/2)
+                                ((gdouble)trame_motif->gif_largeur/2)*scale,
+                                ((gdouble)trame_motif->gif_hauteur/2)*scale
                               );
        goo_canvas_item_set_transform ( trame_motif->select_bd, &trame_motif->transform_bd );
 
@@ -168,8 +168,8 @@
 
        cairo_matrix_rotate ( &trame_motif->transform_hg, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_hg,
-                                -((gdouble)trame_motif->gif_largeur/2),
-                                -((gdouble)trame_motif->gif_hauteur/2)
+                                -((gdouble)trame_motif->gif_largeur/2)*scale,
+                                -((gdouble)trame_motif->gif_hauteur/2)*scale
                               );
        goo_canvas_item_set_transform ( trame_motif->select_hg, &trame_motif->transform_hg );
 
@@ -178,8 +178,8 @@
 
        cairo_matrix_rotate ( &trame_motif->transform_bg, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_bg,
-                                -((gdouble)trame_motif->gif_largeur/2),
-                                ((gdouble)trame_motif->gif_hauteur/2)
+                                -((gdouble)trame_motif->gif_largeur/2)*scale,
+                                ((gdouble)trame_motif->gif_hauteur/2)*scale
                               );
        goo_canvas_item_set_transform ( trame_motif->select_bg, &trame_motif->transform_bg );
      }
