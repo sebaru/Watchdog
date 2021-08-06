@@ -72,9 +72,9 @@
 
     if (acro && libelle && forme && couleur)
      { retour = SQL_Write_new( "INSERT INTO mnemos_VISUEL SET "
-                               "tech_id='%s', acronyme='%s', forme='%s', libelle='%s', def_color='%s' /*access_level=0,*/ "
+                               "tech_id='%s', acronyme='%s', forme='%s', libelle='%s', color='%s' /*access_level=0,*/ "
                                "ON DUPLICATE KEY UPDATE forme=VALUES(forme), libelle=VALUES(libelle),"
-                               "def_color=VALUES(def_color)",
+                               "color=VALUES(color)",
                                plugin->tech_id, acro, forme, libelle, couleur );
      } else retour = FALSE;
     if (acro)    g_free(acro);

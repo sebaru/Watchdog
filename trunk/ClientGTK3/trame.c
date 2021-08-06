@@ -594,7 +594,7 @@ printf("%s: New encadre %s\n", __func__, encadre );
     trame_motif->type   = TYPE_MOTIF;
     trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
     trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
-    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "def_color" ) );
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
 
     trame_motif->image  = NULL;
     trame_motif->images = NULL;
@@ -608,7 +608,7 @@ printf("%s: New encadre %s\n", __func__, encadre );
          { ligne = colonne = 1; }
      }
     else { ligne = colonne = 1; }
-    gchar *svg = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "def_color" ),
+    gchar *svg = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
                                           Json_get_string ( visuel, "libelle" ) );
     trame_motif->pixbuf = Trame_render_svg_to_pixbuf ( svg );
     g_free(svg);
@@ -658,7 +658,7 @@ printf("%s: New encadre %s\n", __func__, encadre );
     trame_motif->type   = TYPE_MOTIF;
     trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
     trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
-    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "def_color" ) );
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
 
     trame_motif->image  = NULL;
     trame_motif->images = NULL;
@@ -666,7 +666,7 @@ printf("%s: New encadre %s\n", __func__, encadre );
     trame_motif->gif_largeur = 0;
     trame_motif->gif_hauteur = 0;
 
-    gchar *svg = Trame_Make_svg_bouton ( 0, 0, Json_get_string ( visuel, "def_color" ), Json_get_string ( visuel, "libelle" ) );
+    gchar *svg = Trame_Make_svg_bouton ( 0, 0, Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) );
     trame_motif->pixbuf = Trame_render_svg_to_pixbuf ( svg );
     g_free(svg);
 
@@ -747,7 +747,7 @@ printf("%s: New encadre %s\n", __func__, encadre );
     trame_motif->visuel = visuel;
     trame_motif->page   = page;
     trame_motif->type   = TYPE_MOTIF;
-    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "def_color" ) );
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
 
     gchar *forme         = Json_get_string ( visuel, "forme" );
     gchar *ihm_affichage = Json_get_string ( visuel, "ihm_affichage" );
@@ -832,7 +832,7 @@ printf("%s: New encadre %s\n", __func__, encadre );
     trame_motif->type   = TYPE_MOTIF;
     trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
     trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
-    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "def_color" ) );
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
   
     if (flag)
      { struct TYPE_INFO_ATELIER *infos = trame->page->infos;                     /* Pointeur sur les infos de la page atelier */
@@ -849,7 +849,7 @@ printf("%s: New encadre %s\n", __func__, encadre );
        return;
      }
 
-    Trame_peindre_motif( trame_motif, Json_get_string ( visuel, "def_color" ) );
+    Trame_peindre_motif( trame_motif, Json_get_string ( visuel, "color" ) );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
@@ -937,7 +937,7 @@ printf("%s: New encadre %s\n", __func__, encadre );
                                    struct TRAME_ITEM_MOTIF *trame_motif )
   { trame_motif->image = trame_motif->images;
 
-    Trame_choisir_frame( trame_motif, 0, Json_get_string ( trame_motif->visuel, "def_color" ) );
+    Trame_choisir_frame( trame_motif, 0, Json_get_string ( trame_motif->visuel, "color" ) );
 #ifdef DEBUG_TRAME
 printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->motif->hauteur );
 #endif
@@ -973,7 +973,7 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
     trame_comm->item = goo_canvas_text_new ( trame_comm->item_groupe,
                                              Json_get_string ( comment, "libelle" ), 0.0, 0.0, -1, GOO_CANVAS_ANCHOR_CENTER,
                                             "font", Json_get_string( comment, "font"),
-                                            "fill_color", Json_get_string ( comment, "def_color" ),
+                                            "fill_color", Json_get_string ( comment, "color" ),
                                             NULL );
     trame_comm->comment = comment;
     trame_comm->type = TYPE_COMMENTAIRE;

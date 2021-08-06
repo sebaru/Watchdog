@@ -2352,8 +2352,17 @@ encore:
        SQL_Write_new ("ALTER TABLE syns_pass ADD `groupe` INT(11) NOT NULL DEFAULT '0'");
      }
 
-    database_version = 5871;
+    if (database_version < 5895)
+     { SQL_Write_new ("ALTER TABLE syns_comments CHANGE `def_color` "
+                      "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'white'");
+       SQL_Write_new ("ALTER TABLE syns_rectangles CHANGE `def_color` "
+                      "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray'");
+       SQL_Write_new ("ALTER TABLE mnemos_VISUEL CHANGE `def_color` "
+                      "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray'");
+     }
+
 fin:
+    database_version = 5895;
     g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
     Lancer_requete_SQL ( db, requete );
 
