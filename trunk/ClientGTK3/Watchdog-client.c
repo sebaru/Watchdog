@@ -36,7 +36,6 @@
 /**************************************** Définitions des prototypes programme ************************************************/
  #include "protocli.h"
  #include "config.h"
- #include "Erreur.h"
  #include "client.h"
  #include "ClientResources.h"
 
