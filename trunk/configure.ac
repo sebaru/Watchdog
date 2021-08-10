@@ -113,7 +113,6 @@ AC_OUTPUT( \
 Makefile \
 Include/Makefile \
 Commun/Makefile \
-Commun/Reseaux/Makefile \
 ClientGTK3/Makefile \
 ClientGTK3/Include/Makefile \
 Watchdogd/Makefile \

@@ -34,7 +34,6 @@
  #include <curl/curl.h>
  #include <json-glib/json-glib.h>
 
- #include "Reseaux.h"
  #include "client.h"
  #include "trame.h"
 

@@ -28,7 +28,6 @@
 #ifndef _SYNOPTIQUES_H_
  #define _SYNOPTIQUES_H_
 
- #include "Reseaux.h"
  #include "Db.h"
 
  #define NOM_TABLE_SYNOPTIQUE     "syns"

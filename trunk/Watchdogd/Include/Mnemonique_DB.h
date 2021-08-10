@@ -29,7 +29,6 @@
  #define _MNEMONIQUE_H_
 
  #include <glib.h>
- #include "Reseaux.h"
  #include "Db.h"
 
  #define NOM_TABLE_MNEMO          "mnemos"

@@ -4,6 +4,6 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-noinst_HEADERS =  Erreur.h Reseaux.h
+noinst_HEADERS =  Erreur.h
 
 MAINTAINERCLEANFILES = Makefile.in

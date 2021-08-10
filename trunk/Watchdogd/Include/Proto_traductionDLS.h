@@ -29,6 +29,7 @@
  #define _PROTO_TRADDLS_H_
 
  #include <glib.h>
+ #include <stdio.h>
  #include "Erreur.h"
 
  enum { TRAD_DLS_OK,                                                                   /* Retour de la fonction Traduire DLS. */

@@ -28,7 +28,6 @@
 #ifndef _HISTO_H_
  #define _HISTO_H_
 
- #include "Reseaux.h"
  #include "Db.h"
  #include "Message_DB.h"
 

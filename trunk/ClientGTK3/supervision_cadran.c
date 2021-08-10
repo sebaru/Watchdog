@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include "Reseaux.h"
  #include "trame.h"
 /***************************************** Définitions des prototypes programme ***********************************************/
  #include "protocli.h"

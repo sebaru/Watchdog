@@ -27,7 +27,6 @@
 
  #include <sys/time.h>
 
- #include "Reseaux.h"
  #include "trame.h"
 
 /********************************************* Définitions des prototypes programme *******************************************/
@@ -219,7 +218,7 @@
      { Trame_rafraichir_visuel_complexe( trame_motif, motif );
        return;
      }
-     
+
     switch( Json_get_int ( trame_motif->visuel, "gestion" ) )
      { case TYPE_INERTE: break;                                              /* Si le motif est inerte, nous n'y touchons pas */
        case TYPE_STATIQUE:

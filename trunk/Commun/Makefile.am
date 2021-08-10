@@ -4,13 +4,8 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-SUBDIRS = Reseaux
-
 lib_LTLIBRARIES = libwatchdog.la
 libwatchdog_la_SOURCES = Erreur.c
-
-libwatchdog_la_LIBADD  = Reseaux/librezo.la
-# Trame/libtrame.la
 
 libwatchdog_la_LDFLAGS = `pkg-config --libs openssl` -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
 
