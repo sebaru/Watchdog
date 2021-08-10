@@ -364,7 +364,7 @@
              "Libere_DB_SQL: Deconnexion effective (DB%07d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
-    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, taille, TRUE );
+    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, (gdouble)taille, TRUE );
   }
 /******************************************************************************************************************************/
 /* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */

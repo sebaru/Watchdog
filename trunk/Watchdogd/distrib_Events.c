@@ -72,7 +72,7 @@ suite_AO:
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_AO '%s':'%s' = %f to Slave/Bus (reste %d)", __func__,
-              ao->tech_id, ao->acronyme, ao->val_ech, reste );
+              ao->tech_id, ao->acronyme, ao->valeur, reste );
 
     RootNode = Json_node_create ();
     if (RootNode)

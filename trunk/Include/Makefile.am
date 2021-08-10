@@ -4,7 +4,6 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-noinst_HEADERS =  Erreur.h Reseaux.h \
-                  boule_bleue.xpm boule_verte.xpm boule_rouge.xpm boule_jaune.xpm boule_orange.xpm
+noinst_HEADERS =  Erreur.h Reseaux.h
 
 MAINTAINERCLEANFILES = Makefile.in

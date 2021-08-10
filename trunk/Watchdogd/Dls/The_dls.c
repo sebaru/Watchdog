@@ -822,7 +822,7 @@ end:
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble val_avant_ech, gboolean in_range )
+ void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble valeur, gboolean in_range )
   { struct DLS_AI *ai;
 
     if (!ai_p || !*ai_p)
@@ -846,66 +846,21 @@ end:
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding AI '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding AI '%s:%s'=%f", __func__, tech_id, acronyme, valeur );
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
       }
     else ai = (struct DLS_AI *)*ai_p;
 
-    if ( (ai->val_avant_ech != val_avant_ech) || (ai->inrange != in_range) )
-     { ai->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
-
-       switch ( ai->type )
-        { case ENTREEANA_NON_INTERP:
-               ai->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
-               ai->inrange = in_range;
-               break;
-          case ENTREEANA_4_20_MA_10BITS:
-               if (val_avant_ech < 100)                                                /* 204) Modification du range pour 4mA */
-                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
-                  ai->inrange = 0;
-                }
-               else
-                { if (val_avant_ech < 204) val_avant_ech = 204;                                         /* Valeur à l'echelle */
-                  ai->val_ech = (gfloat) ((val_avant_ech-204)*(ai->max - ai->min))/820.0 + ai->min;
-                  ai->inrange = 1;
-                }
-               break;
-          case ENTREEANA_4_20_MA_12BITS:
-               if (val_avant_ech < 400)
-                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
-                  ai->inrange = 0;
-                }
-               else
-                { if (val_avant_ech < 816) val_avant_ech = 816;                                         /* Valeur à l'echelle */
-                  ai->val_ech = (gfloat) ((val_avant_ech-816)*(ai->max - ai->min))/3280.0 + ai->min;
-                  ai->inrange = 1;
-                }
-               break;
-          case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
-               if (in_range)
-                { ai->val_ech = (gfloat) (val_avant_ech*(ai->max - ai->min))/4095.0 + ai->min; }
-               ai->inrange = in_range;                                           /* InRange dependant d'un autre champ ModBus */
-               break;
-          case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
-               if (val_avant_ech > -2000 && val_avant_ech < 8500)
-                { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */
-                  ai->inrange = 1;
-                }
-               else { ai->val_ech = 0.0; ai->inrange = 0; }
-               break;
-          default:
-               ai->val_ech = 0.0;
-               ai->inrange = 0;
-        }
-     }
+    ai->valeur  = valeur;
+    ai->inrange = in_range;
 
     if ( (ai->archivage == 1 && ai->last_arch + 50     <= Partage->top) ||
          (ai->archivage == 2 && ai->last_arch + 600    <= Partage->top) ||
          (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||
          (ai->archivage == 4 && ai->last_arch + 864000 <= Partage->top)
        )
-     { Ajouter_arch( ai->tech_id, ai->acronyme, ai->val_ech );                                         /* Archivage si besoin */
+     { Ajouter_arch( ai->tech_id, ai->acronyme, ai->valeur );                                         /* Archivage si besoin */
        ai->last_arch = Partage->top;
      }
   }
@@ -913,7 +868,7 @@ end:
 /* Met à jour la sortie analogique à partir de sa valeur avant mise a l'echelle                                               */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *ao_p, float val_avant_ech )
+ void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *ao_p, gdouble valeur )
   { struct DLS_AO *ao;
 
     if (!ao_p || !*ao_p)
@@ -943,23 +898,14 @@ end:
       }
     else ao = (struct DLS_AO *)*ao_p;
 
-    if (ao->val_avant_ech != val_avant_ech)
-     { ao->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
+    ao->valeur = valeur;                                                            /* Archive au mieux toutes les 5 secondes */
 
-       switch ( ao->type )
-        { case 0: /*SORTIEANA_NON_INTERP:*/
-               ao->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
-               break;
-          default:
-               ao->val_ech = 0.0;
-        }
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
-       Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "%s: ligne %04d: Changing DLS_AO '%s:%s'=%f/%f", __func__,
-                 (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->val_avant_ech, ao->val_ech );
-     }
+    pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
+    Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "%s: ligne %04d: Changing DLS_AO '%s:%s'=%f", __func__,
+              (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->valeur );
 
  /* Pensez a ajouter l'archivage */
 
@@ -1158,12 +1104,12 @@ end:
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gfloat Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
+ gdouble Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
   { struct DLS_AI *ai;
     GSList *liste;
     if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
      { ai = (struct DLS_AI *)*ai_p;
-       return( ai->val_ech );
+       return( ai->valeur );
      }
     if (!tech_id || !acronyme) return(0.0);
 
@@ -1176,18 +1122,18 @@ end:
 
     if (!liste) return(0.0);
     if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
-    return( ai->val_ech );
+    return( ai->valeur );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gfloat Dls_data_get_AO ( gchar *tech_id, gchar *acronyme, gpointer *ao_p )
+ gdouble Dls_data_get_AO ( gchar *tech_id, gchar *acronyme, gpointer *ao_p )
   { struct DLS_AO *ao;
     GSList *liste;
     if (ao_p && *ao_p)                                                               /* Si pointeur d'acceleration disponible */
      { ao = (struct DLS_AO *)*ao_p;
-       return( ao->val_avant_ech );
+       return( ao->valeur );
      }
     if (!tech_id || !acronyme) return(0.0);
 
@@ -1200,7 +1146,7 @@ end:
 
     if (!liste) return(0.0);
     if (ao_p) *ao_p = (gpointer)ao;                                                 /* Sauvegarde pour acceleration si besoin */
-    return( ao->val_avant_ech );
+    return( ao->valeur );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
@@ -1923,17 +1869,17 @@ end:
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
-          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold, TRUE );
+          Dls_data_set_AI ( "SYS", "DLS_BIT_PER_SEC", &dls_bit_per_sec, (gdouble)Partage->audit_bit_interne_per_sec_hold, TRUE );
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          Dls_data_set_AI ( "SYS", "DLS_TOUR_PER_SEC", &dls_tour_per_sec, Partage->audit_tour_dls_per_sec_hold, TRUE );
+          Dls_data_set_AI ( "SYS", "DLS_TOUR_PER_SEC", &dls_tour_per_sec, (gdouble)Partage->audit_tour_dls_per_sec_hold, TRUE );
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, Partage->com_dls.temps_sched, TRUE );                 /* historique */
+          Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE );        /* historique */
         }
        if (Partage->top-last_top_2sec>=20)                                                             /* Toutes les secondes */
         { Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_2SEC", &dls_flipflop_2sec,
@@ -1950,8 +1896,8 @@ end:
         }
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
         { Dls_data_set_MONO ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
-          Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, g_slist_length(Partage->com_msrv.liste_msg), TRUE );
-          Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
+          Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
+          Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
           last_top_1min = Partage->top;
         }
 

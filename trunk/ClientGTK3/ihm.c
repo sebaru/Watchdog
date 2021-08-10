@@ -173,10 +173,6 @@ printf("searching page type %d id %d\n", type, id );
                   if ( Json_get_int ( ((struct TYPE_INFO_ATELIER *)page->infos)->syn , "id" ) != id )
                    { liste = liste->next; continue; }
                   break;
-             case TYPE_PAGE_HISTO_MSGS:
-                  if ( ((struct TYPE_INFO_HISTO_MSGS *)page->infos)->page_id != id )
-                   { liste = liste->next; continue; }
-                  break;
              case TYPE_PAGE_SUPERVISION:
                   if ( Json_get_int ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn , "id" ) != id )
                    { liste = liste->next; continue; }

@@ -49,17 +49,9 @@
  #define WATCHDOG_USER_AGENT        "Watchdog Client - libcurl"
 
  enum
-  { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
-    TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
-    TYPE_PAGE_ALL_MNEMONIQUE,                                                /* Page de visualisation de tous les mnemoniques */
-    TYPE_PAGE_MNEMONIQUE,                                                            /* Page de visualisation des mnemoniques */
-    TYPE_PAGE_ICONE,                                                    /* Ajout/retrait/modif des icones et classes d'icones */
-    TYPE_PAGE_SOURCE_DLS,                                                                       /* Edition d'une source D.L.S */
-    TYPE_PAGE_HISTO_MSGS,                                                                         /* Parcours de l'historique */
+  { TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
     TYPE_PAGE_ATELIER,                                                                   /* Il s'agit d'un atelier synoptique */
     TYPE_PAGE_SUPERVISION,                                                                /* Supervision graphique synoptique */
-    TYPE_PAGE_ADMIN,                                               /* Page de gestion des commandes/requests d'administration */
-    TYPE_PAGE_HORLOGE
   };
 
  struct PAGE_NOTEBOOK
@@ -81,37 +73,6 @@
     GtkWidget *Box_palette;                                                                   /* Widget de la boite a palette */
     GtkWidget *bouton_acq;                                                                   /* Bouton d'acquit du synoptique */
     struct TRAME *Trame;                                                                   /* La trame de fond de supervision */
-  };
-
- struct TYPE_INFO_HORLOGE
-  { guint id_mnemo;
-    GtkWidget *Liste_horloge;
-  };
-
- struct TYPE_INFO_MNEMONIQUE
-  { gint id;                                                 /* ID du module DLS dont les mnemoniques sont en cours d'edition */
-    GtkWidget *Liste_mnemonique;                                      /* GtkTreeView pour la gestion des mnemoniques Watchdog */
-  };
-
- struct TYPE_INFO_HISTO_MSGS
-  { SoupWebsocketConnection *websocket;
-    GtkListStore *Liste_histo_msgs;                                      /* GtkTreeView pour la gestion des messages Watchdog */
-    GtkWidget *F_histo_msgs;
-    GtkWidget *Check_num;
-    GtkWidget *Spin_num;
-    GtkWidget *Check_type;
-    GtkWidget *Option_type;
-    GtkWidget *Check_nom_ack;
-    GtkWidget *Entry_nom_ack;
-    GtkWidget *Check_libelle;
-    GtkWidget *Entry_libelle;
-    GtkWidget *Check_groupage;
-    GtkWidget *Entry_groupage;
-    GtkWidget *Check_debut;
-    GtkWidget *Date_debut;
-    GtkWidget *Check_fin;
-    GtkWidget *Date_fin;
-    gint page_id;
   };
 
  struct TYPE_INFO_ATELIER

@@ -52,7 +52,7 @@
     MNEMO_WATCHDOG,
     NBR_TYPE_MNEMO
   };
-  
+
  enum                                                                                  /* Code retour de la compilation D.L.S */
   { DLS_COMPIL_NEVER_COMPILED_YET,
     DLS_COMPIL_EXPORT_DB_FAILED,
@@ -65,9 +65,13 @@
     NBR_DLS_COMPIL_STATUS
   };
 
+ #define NBR_CARAC_TECHID     32
+ #define NBR_CARAC_ACRONYME   64
+ #define NBR_CARAC_UNITE      32
+
  struct DLS_PLUGIN
   { gchar nom[128];
-    gchar shortname[64];
+    gchar shortname[ NBR_CARAC_ACRONYME ];
     gchar tech_id[NBR_CARAC_TECHID];
     gchar package[130];
     gchar syn_parent_page[NBR_CARAC_TECHID];
@@ -119,12 +123,11 @@
  struct DLS_AI
   { gchar   acronyme[NBR_CARAC_ACRONYME];
     gchar   tech_id[NBR_CARAC_TECHID];
-    gfloat  min;
-    gfloat  max;
+    gdouble min;
+    gdouble max;
     guint   type;                                                                                  /* Type de gestion de l'EA */
-    gchar   unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                         /* Km, h, ° ... */
-    gfloat  val_ech;
-    gfloat  val_avant_ech;
+    gchar   unite[NBR_CARAC_UNITE];                                                                                        /* Km, h, ° ... */
+    gdouble valeur;
     guint   last_arch;                                                                         /* Date de la derniere archive */
     guint   inrange;
     guint   archivage;
@@ -133,21 +136,12 @@
  struct DLS_AO
   { gchar   acronyme[NBR_CARAC_ACRONYME];
     gchar   tech_id[NBR_CARAC_TECHID];
-    gfloat  min;
-    gfloat  max;
+    gdouble min;
+    gdouble max;
     guint   type;                                                                                  /* Type de gestion de l'EA */
-    gchar   unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                         /* Km, h, ° ... */
-    gfloat  val_ech;
-    gfloat  val_avant_ech;
+    gchar   unite[NBR_CARAC_UNITE];                                                                           /* Km, h, ° ... */
+    gdouble valeur;
     guint   last_arch;                                                                         /* Date de la derniere archive */
-  };
-
- struct ANALOG_INPUT
-  { struct CMD_TYPE_MNEMO_AI confDB;
-    gfloat  val_ech;
-    gfloat  val_avant_ech;
-    guint   last_arch;                                                                         /* Date de la derniere archive */
-    guint   inrange;
   };
 
  struct SORTIE_TOR                                                                             /* Définition d'une sortie TOR */
@@ -197,7 +191,7 @@
     guint   last_update;
     gint    imp_par_minute;
     gint    valeurs[60];                                                                              /* 60 dernieres valeurs */
-    gchar   unite[32];
+    gchar   unite[NBR_CARAC_UNITE];
     gboolean etat;
     gint    archivage;
     guint   last_arch;
@@ -241,7 +235,7 @@
   { gchar  tech_id[NBR_CARAC_TECHID];
     gchar  acronyme[NBR_CARAC_ACRONYME];
     gfloat valeur;
-    gchar  unite[32];
+    gchar  unite[NBR_CARAC_UNITE];
     gint   archivage;
     guint  last_arch;                                                    /* Date de dernier enregistrement en base de données */
     gdouble pid_somme_erreurs;                                                                                /* Calcul PID KI*/
@@ -319,7 +313,7 @@
  extern struct DLS_SYN *Dls_search_syn ( gint id );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
- extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble val_avant_ech, gboolean in_range );
+ extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble valeur, gboolean in_range );
  extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
  extern void Dls_data_set_MSG_init ( gchar *tech_id, gchar *acronyme, gboolean etat );

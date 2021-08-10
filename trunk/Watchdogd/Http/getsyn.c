@@ -437,7 +437,7 @@ end:
         { cadran->in_range = FALSE; }
        else
         { cadran->in_range = ai->inrange;
-          cadran->valeur   = ai->val_ech;
+          cadran->valeur   = ai->valeur;
           g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ai->unite );
         }
      }

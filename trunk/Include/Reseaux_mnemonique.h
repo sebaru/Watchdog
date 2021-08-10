@@ -42,14 +42,6 @@
 
 
 /**************************************************** AddOns pour les Analog Input ********************************************/
- enum
-  { ENTREEANA_NON_INTERP,
-    ENTREEANA_4_20_MA_12BITS,
-    ENTREEANA_4_20_MA_10BITS,
-    ENTREEANA_WAGO_750455,
-    ENTREEANA_WAGO_750461,
-    NBR_TYPE_ENTREEANA
-  };
 
  struct CMD_TYPE_MNEMO_AI
   { gfloat min;

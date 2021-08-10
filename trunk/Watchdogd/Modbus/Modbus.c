@@ -804,24 +804,25 @@ end:
                 { struct DLS_AI *ai = module->AI[cpt];
                   if (!ai) continue;                                                 /* Si pas mappé, bah on ne la stocke pas */
                   switch( ai->type )
-                   { case ENTREEANA_WAGO_750455:
+                   { case WAGO_750455:
                           if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
                            { int reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 5;
                              reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
-                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
+                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt],
+                                              (gdouble)(reponse*(ai->max - ai->min))/4095.0 + ai->min, TRUE );
                            }
-                          else { Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], 0.0, FALSE );
-                               }
+                          else { Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], 0.0, FALSE ); }
                           break;
-                     case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
+                     case WAGO_750461:                                                                         /* Borne PT100 */
                            { gint16 reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
-                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse, TRUE );
+                             if (reponse > -2000 && reponse < 8500)
+                              { Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], (gdouble)(reponse/10.0), TRUE ); }
+                             else { Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], 0.0, FALSE ); }
                            }
                           break;
-                     default : break;
                    }
                 }
                module->mode = MODBUS_SET_DO;

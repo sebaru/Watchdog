@@ -291,6 +291,9 @@
 
     Send_to_API ( "PUT", "/api/archive/get", json_request, function(Response)
      { var dates;
+       var ctx = document.getElementById(idChart).getContext('2d');
+       if (!ctx) return;
+
        if (period=="HOUR") dates = Response.valeurs.map( function(item) { return item.date.split(' ')[1]; } );
                       else dates = Response.valeurs.map( function(item) { return item.date; } );
        var data = { labels: dates,
@@ -316,13 +319,10 @@ console.debug(data);
                                         ]
                                }
                      };
-       var ctx = document.getElementById(idChart).getContext('2d');
-       if (ctx)
-        { if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
-          Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
-          setTimeout ( function()                                                                         /* Un ping tous les jours */
-           { Charger_plusieurs_courbes ( idChart, tableau_map, period ); }, 60000 );
-        }
+       if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
+       Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
+       setTimeout ( function()                                                                               /* Update graphe */
+        { Charger_plusieurs_courbes ( idChart, tableau_map, period ); }, 60000 );
      });
 	 }
 /******************************************************************************************************************************/

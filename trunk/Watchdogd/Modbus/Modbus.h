@@ -30,6 +30,16 @@
  #include <libsoup/soup.h>
  #include <json-glib/json-glib.h>
 
+ enum
+  { WAGO_UNUSED_1, /* a virer */
+    WAGO_UNUSED_2,
+    WAGO_UNUSED_3,
+    WAGO_750455,
+    WAGO_750461,
+    NBR_TYPE_WAGO
+  };
+
+
  #define MBUS_READ_COIL                0x01
  #define MBUS_WRITE_MULTIPLE_COIL      0x0F
  #define MBUS_READ_REGISTER            0x04
