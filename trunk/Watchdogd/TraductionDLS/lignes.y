@@ -66,7 +66,7 @@
 %token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_ANALOG_INPUT T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
 %type  <val>    alias_classe
 
-%token <val>    T_ROUGE T_VERT T_BLEU T_JAUNE T_NOIR T_BLANC T_ORANGE T_GRIS T_KAKI T_CYAN 
+%token <val>    T_ROUGE T_VERT T_BLEU T_JAUNE T_NOIR T_BLANC T_ORANGE T_GRIS T_KAKI T_CYAN
 %type  <chaine>  couleur
 
 %token <val>    T_EDGE_UP T_EDGE_DOWN T_IN_RANGE
@@ -1063,7 +1063,7 @@ couleur:          T_ROUGE  {{ $$="red";       }}
                 | T_JAUNE  {{ $$="yellow";    }}
                 | T_NOIR   {{ $$="black";     }}
                 | T_BLANC  {{ $$="white";     }}
-                | T_GRIS   {{ $$="grey";      }}
+                | T_GRIS   {{ $$="gray";      }}
                 | T_ORANGE {{ $$="orange";    }}
                 | T_KAKI   {{ $$="darkgreen"; }}
                 | T_CYAN   {{ $$="lightblue"; }}
