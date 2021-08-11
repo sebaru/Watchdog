@@ -76,7 +76,7 @@
                 { boutons = Bouton_actions_start ();
                   /*boutons += Bouton_actions_add ( "secondary", "Voir le tableau", "Redirect", "/"+item.page, "chart-line", null );*/
                   boutons += Bouton_actions_add ( "outline-primary", "Configurer", "Show_Modal_Tableau_Edit", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "outline-secondary", "Editer les courbes", "Redirect", "/tech/tableau_map?tebleau_id="+item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-secondary", "Editer les courbes", "Redirect", "/tech/tableau_map?tableau_id="+item.id, "pen", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer ce tableau", "Show_Modal_Tableau_Delete", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
