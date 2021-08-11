@@ -48,11 +48,8 @@
   { table = $('#idTableTableau').DataTable();
     selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
     $('#idModalEditTitre').text ( "Modifier le tableau " + selection.titre + "?" );
-    Send_to_API ( "GET", "/api/syn/list", null, function (Response)
-     { $('#idModalEditPage').empty();
-       $.each ( Response.synoptiques, function ( i, item )
-        { $('#idModalEditPage').append("<option value='"+item.id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
-     }, null );
+    Select_from_api ( "idModalEditPage", "/api/syn/list", null, "synoptiques", "id", function(item)
+                        { return(item.page+" - "+htmlEncode(item.libelle)); }, selection.syn_id );
 
     $('#idModalEditLibelle').val( selection.titre );
     $('#idModalEditValider').attr( "onclick", "Tableau_Set('"+selection.id+"')" );
