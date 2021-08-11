@@ -2,9 +2,8 @@
 
 /************************************ Créé un nouveau tableau *****************************************************************/
  function Tableau_Map_New ( )
-  { vars = window.location.pathname.split('/');
-    var json_request = JSON.stringify(
-       { tableau_id: vars[3],
+  { var json_request = JSON.stringify(
+       { tableau_id: Get_url_parameter("tableau_id"),
          tech_id : "New_tech_id",
          acronyme: "New_acronyme",
          color   : "#00F",
