@@ -1785,8 +1785,7 @@ end:
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
-  { gint last_top_10sec, last_top_5sec, last_top_2sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min;
-    gint Update_heure=0;
+  { gint last_top_10sec, last_top_5sec, last_top_2sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min, last_top_10min;
     gint wait;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
@@ -1811,6 +1810,7 @@ end:
     Mnemo_auto_create_AI ( FALSE, "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
     Mnemo_auto_create_AI ( FALSE, "SYS", "NBR_MSG_QUEUE", "Nombre de messages dans la file de traitement", "messages" );
     Mnemo_auto_create_AI ( FALSE, "SYS", "NBR_VISUEL_QUEUE", "Nombre de visuels dans la file de traitement", "visuels" );
+    Mnemo_auto_create_AI ( FALSE, "SYS", "NBR_LIGNE_DLS", "Nombre de lignes total de tous modules D.L.S", "lignes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
     Mnemo_auto_create_BOOL ( FALSE, MNEMO_MONOSTABLE, "SYS", "TOP_5SEC", "Impulsion toutes les 5 secondes" );
@@ -1829,13 +1829,14 @@ end:
 
     Partage->com_dls.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
-    last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = Partage->top;
+    last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = last_top_10min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { gpointer dls_top_10sec=NULL, dls_top_5sec=NULL, dls_top_1sec=NULL, dls_top_2hz=NULL, dls_top_5hz=NULL, dls_top_1min=NULL;
        gpointer dls_flipflop_1sec=NULL, dls_flipflop_2hz=NULL;
        gpointer dls_flipflop_2sec=NULL, dls_flipflop_5hz=NULL;
        gpointer dls_wait = NULL, dls_tour_per_sec = NULL, dls_bit_per_sec = NULL;
        gpointer dls_nbr_msg_queue = NULL, dls_nbr_visuel_queue = NULL;
+       gpointer dls_nbr_ligne_dls = NULL;
 
        if (Partage->com_dls.Thread_reload || Partage->com_dls.Thread_reload_with_recompil)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1898,12 +1899,18 @@ end:
         { Dls_data_set_MONO ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
           Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
           Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
+          Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           last_top_1min = Partage->top;
         }
 
-       if (Partage->top-Update_heure>=600)                          /* Gestion des changements d'horaire (toutes les minutes) */
-        { Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
-          Update_heure=Partage->top;
+       if (Partage->top-last_top_10min>=6000)                                                        /* Toutes les 10 minutes */
+        { JsonNode *result = Json_node_create();
+          if (result)
+           { SQL_Select_to_json_node ( result, NULL, "SELECT SUM(nbr_ligne) AS nbr_ligne_total FROM dls" );
+             Dls_data_set_AI ( "SYS", "NBR_LIGNE_DLS", &dls_nbr_ligne_dls, Json_get_int( result, "nbr_ligne_total" )*1.0, TRUE );
+             json_node_unref(result);
+           }
+          last_top_10min = Partage->top;
         }
 
        Set_edge();                                                                     /* Mise à zero des bit de egde up/down */
