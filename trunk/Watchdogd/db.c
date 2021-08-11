@@ -2395,6 +2395,7 @@ fin:
                     "('vmc',              'png',  'by_color'      ),"
                     "('voyant_moteur',    'png',  'by_color'      ),"
                     "('eclair',           'png',  'by_color'      ),"
+                    "('vanne',            'png',  'by_color'      ),"
                     "('check',            'png',  'by_mode'       ),"
                     "('thermometre',      'png',  'by_mode_color' ),"
                     "('haut_parleur',     'png',  'by_mode_color' ),"
