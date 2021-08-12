@@ -30,6 +30,9 @@
    <canvas id="idCourbeDlsNbVISUEL" class="courbe-dashboard border border-info"></canvas>
   </div>
 
+  <div class="row p-1">
+   <canvas id="idCourbeDlsNbLigne" class="courbe-dashboard border border-info"></canvas>
+  </div>
 
 <script src="/js/tech/dashboard_courbes.js" type="text/javascript"></script>
 <!-- Container -->
