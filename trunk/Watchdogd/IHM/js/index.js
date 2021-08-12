@@ -6,7 +6,10 @@
  function Ping ()
   { setTimeout ( function()                                                                         /* Un ping tous les jours */
      { Send_to_API ( "GET", "/api/ping", null, function ()
-        { if (WTDWebSocket && WTDWebSocket.readyState != "OPEN") Load_websocket();
+        { if (WTDWebSocket && WTDWebSocket.readyState != "OPEN")
+           { console.log("Ping : websocket status = " + WTDWebSocket.readyState );
+             Load_websocket();
+           }
           Ping();
         }, null );
      }, 60000 );

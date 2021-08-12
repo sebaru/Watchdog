@@ -292,7 +292,7 @@
     Send_to_API ( "PUT", "/api/archive/get", json_request, function(Response)
      { var dates;
        var ctx = document.getElementById(idChart).getContext('2d');
-       if (!ctx) return;
+       if (!ctx) { console.log("Erreur chargement tableau " + json_request ); return; }
 
        if (period=="HOUR") dates = Response.valeurs.map( function(item) { return item.date.split(' ')[1]; } );
                       else dates = Response.valeurs.map( function(item) { return item.date; } );
