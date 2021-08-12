@@ -40,7 +40,8 @@
     struct TYPE_INFO_SUPERVISION *infos_supervision;
     struct TYPE_INFO_ATELIER     *infos_atelier;
 
-printf("%s : %s:%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get_string ( element, "acronyme" ) );
+printf("%s : %s:%s color=%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get_string ( element, "acronyme" ),
+       Json_get_string ( element, "color") );
     if (!page) return;
 
     if (page->type == TYPE_PAGE_SUPERVISION)  { infos_supervision = page->infos; }
@@ -55,7 +56,7 @@ printf("%s : %s:%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get
         { Trame_ajout_visuel_simple   ( page, element ); }
        return;
      }
- 
+
     if (page->type == TYPE_PAGE_SUPERVISION)
      { Trame_ajout_visuel_old ( FALSE, infos_supervision->Trame, element ); }
     else if (page->type == TYPE_PAGE_ATELIER)

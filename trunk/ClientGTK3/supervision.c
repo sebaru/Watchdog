@@ -215,7 +215,7 @@
 
     if ( Json_has_member ( trame_motif->visuel, "ihm_affichage" ) &&
          !strcasecmp ( Json_get_string ( trame_motif->visuel, "ihm_affichage" ), "complexe" ) )
-     { Trame_rafraichir_visuel_complexe( trame_motif, motif );
+     { Trame_redessiner_visuel_complexe( trame_motif, motif );
        return;
      }
 

@@ -343,7 +343,7 @@ end:
                    "INNER JOIN syns ON syns.id=dls.syn_id "
                    "SET posx='%d', posy='%d', groupe='%d', angle='%d', scale='%f' "
                    "WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
-                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ), 
+                   Json_get_int( element, "posx" ), Json_get_int( element, "posy" ),
                    Json_get_int( element, "groupe" ), Json_get_int( element, "angle" ),
                    Json_get_double( element, "scale" ),
                    Json_get_int( element, "id" ), session->access_level );
@@ -712,8 +712,8 @@ end:
                                     "LEFT JOIN dls ON dls.id=v.dls_id "
                                     "LEFT JOIN icone AS i ON i.forme=m.forme "
                                     "LEFT JOIN syns AS s ON dls.syn_id=s.id "
-                                    "WHERE (s.id='%d' AND s.access_level<=%d AND m.access_level<=%d)",
-                                     syn_id, session->access_level, session->access_level) == FALSE)
+                                    "WHERE (s.id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d'",
+                                     syn_id, session->access_level, session->access_level, syn_id) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref(synoptique);
           return;
@@ -723,7 +723,7 @@ end:
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
                                     "SELECT m.*,v.*,i.*,dls.shortname AS dls_shortname FROM syns_visuels AS v "
                                     "INNER JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
-                                    "INNER JOIN dls ON dls.tech_id=v.tech_id "
+                                    "INNER JOIN dls ON dls.id=v.dls_id "
                                     "INNER JOIN icone AS i ON i.forme=m.forme "
                                     "INNER JOIN syns AS s ON dls.syn_id=s.id "
                                     "WHERE s.id='%d' AND s.access_level<=%d AND m.access_level<=%d",

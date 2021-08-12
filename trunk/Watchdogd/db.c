@@ -2342,9 +2342,9 @@ encore:
      }
 
     if (database_version < 5870)
-     { SQL_Write_new ("ALTER TABLE syns_comments ADD `color` VARCHAR(16) DEFAULT 'black' AFTER `blue`");
-       SQL_Write_new ("ALTER TABLE syns_comments DROP `rouge`, DROP `vert`, DROP `blue`, DROP `def_color`");
-       SQL_Write_new ("ALTER TABLE syns_comments CHANGE `color` `def_color` VARCHAR(16) DEFAULT 'white'");
+     { SQL_Write_new ("ALTER TABLE syns_comments ADD `color` VARCHAR(16) DEFAULT 'black' AFTER `bleu`");
+       SQL_Write_new ("ALTER TABLE syns_comments DROP `rouge`, DROP `vert`, DROP `bleu`, DROP `def_color`");
+       SQL_Write_new ("ALTER TABLE syns_comments CHANGE `def_color` `color` VARCHAR(16) DEFAULT 'white'");
      }
 
     if (database_version < 5871)
@@ -2361,19 +2361,20 @@ encore:
                       "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray'");
      }
 
-fin:
-    database_version = 5895;
-    g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
-    Lancer_requete_SQL ( db, requete );
+    if (database_version < 5908)
+     { SQL_Write_new ("ALTER TABLE syns_visuels ADD `dls_id` INT(11) NOT NULL DEFAULT '1'" ); }
 
-    g_snprintf( requete, sizeof(requete), "CREATE TABLE `icone` ("
-                                          "`id` int(11) NOT NULL AUTO_INCREMENT,"
-                                          "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
-                                          "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
-                                          "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
-                                          "PRIMARY KEY (`id`)"
-                                          ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
-    Lancer_requete_SQL ( db, requete );
+fin:
+    database_version = 5908;
+    SQL_Write_new ("DROP TABLE `icone`");
+
+    SQL_Write_new ("CREATE TABLE `icone` ("
+                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                   "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                   "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
+                   "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
+                   "PRIMARY KEY (`id`)"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
 
     SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES "
                     "('wago_750342',      'webp', 'static'        ),"
