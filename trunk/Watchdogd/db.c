@@ -2338,13 +2338,11 @@ encore:
                       "s.mnemo_id=(SELECT id FROM mnemos_VISUEL WHERE tech_id=s.tech_id AND acronyme=s.acronyme);");
        SQL_Write_new ("ALTER TABLE syns_visuels DROP forme, DROP access_level, DROP libelle");
        SQL_Write_new ("ALTER TABLE syns_visuels CHANGE `syn_id` `syn_id` INT(11) NULL DEFAULT NULL");
-       SQL_Write_new ("ALTER TABLE syns_visuels ADD UNIQUE (`dls_id`,`mnemo_id`)");
      }
 
     if (database_version < 5870)
      { SQL_Write_new ("ALTER TABLE syns_comments ADD `color` VARCHAR(16) DEFAULT 'black' AFTER `bleu`");
        SQL_Write_new ("ALTER TABLE syns_comments DROP `rouge`, DROP `vert`, DROP `bleu`, DROP `def_color`");
-       SQL_Write_new ("ALTER TABLE syns_comments CHANGE `def_color` `color` VARCHAR(16) DEFAULT 'white'");
      }
 
     if (database_version < 5871)
@@ -2353,16 +2351,16 @@ encore:
      }
 
     if (database_version < 5895)
-     { SQL_Write_new ("ALTER TABLE syns_comments CHANGE `def_color` "
-                      "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'white'");
-       SQL_Write_new ("ALTER TABLE syns_rectangles CHANGE `def_color` "
+     { SQL_Write_new ("ALTER TABLE syns_rectangles CHANGE `def_color` "
                       "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray'");
        SQL_Write_new ("ALTER TABLE mnemos_VISUEL CHANGE `def_color` "
                       "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray'");
      }
 
     if (database_version < 5908)
-     { SQL_Write_new ("ALTER TABLE syns_visuels ADD `dls_id` INT(11) NOT NULL DEFAULT '1'" ); }
+     { SQL_Write_new ("ALTER TABLE syns_visuels ADD `dls_id` INT(11) NOT NULL DEFAULT '1' AFTER `visuel_id`" );
+       SQL_Write_new ("ALTER TABLE syns_visuels ADD UNIQUE (`dls_id`,`mnemo_id`)");
+     }
 
 fin:
     database_version = 5908;
