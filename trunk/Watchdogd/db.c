@@ -2338,7 +2338,7 @@ encore:
                       "s.mnemo_id=(SELECT id FROM mnemos_VISUEL WHERE tech_id=s.tech_id AND acronyme=s.acronyme);");
        SQL_Write_new ("ALTER TABLE syns_visuels DROP forme, DROP access_level, DROP libelle");
        SQL_Write_new ("ALTER TABLE syns_visuels CHANGE `syn_id` `syn_id` INT(11) NULL DEFAULT NULL");
-       SQL_Write_new ("ALTER TABLE syns_visuels ADD UNIQUE (`tech_id`,`mnemo_id`)");
+       SQL_Write_new ("ALTER TABLE syns_visuels ADD UNIQUE (`dls_id`,`mnemo_id`)");
      }
 
     if (database_version < 5870)

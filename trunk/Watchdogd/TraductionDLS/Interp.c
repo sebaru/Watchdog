@@ -1404,11 +1404,13 @@
           close(fd);
         }
 
+/*----------------------------------------------- Prise en charge du peuplement de la database -------------------------------*/
        gchar *Liste_BOOL = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
        gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
        gchar *Liste_CI = NULL, *Liste_CH = NULL;
        gchar *Liste_CADRANS = NULL;
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
+
        while(liste)
         { alias = (struct ALIAS *)liste->data;
           if ( (!alias->used) )

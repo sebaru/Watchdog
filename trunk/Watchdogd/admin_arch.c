@@ -271,7 +271,7 @@
      }
 
     SQL_Arch_to_json_node ( RootNode, "tables",
-                            "SELECT table_name, table_rows FROM information_schema.tables WHERE table_schema='%s' "
+                            "SELECT table_name, table_rows, update_time FROM information_schema.tables WHERE table_schema='%s' "
                             "AND table_name like 'histo_bit_%%'", Partage->com_arch.archdb_database );
 
     gchar *buf = Json_node_to_string ( RootNode );
