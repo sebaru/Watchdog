@@ -331,7 +331,8 @@ console.debug(data);
        if (Charts != null && Charts[idChart] != null)
         { Charts[idChart].ctx.destroy();
           if (Charts[idChart].timeout != null) clearTimeout ( Charts[idChart].timeout );
-        }
+        } else Charts[idChart] = new Object ();
+
        Charts[idChart].ctx = new Chart(ctx, { type: 'line', data: data, options: options } );
        if (period == "HOUR")
         { Charts[idChart].timeout = setTimeout ( function()                                                  /* Update graphe */
