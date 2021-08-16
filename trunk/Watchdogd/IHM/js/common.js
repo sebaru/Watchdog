@@ -328,10 +328,15 @@ console.debug(data);
                                         ]
                                }
                      };
-       if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
-       Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
-       setTimeout ( function()                                                                               /* Update graphe */
-        { Charger_plusieurs_courbes ( idChart, tableau_map, period ); }, 60000 );
+       if (Charts != null && Charts[idChart] != null)
+        { Charts[idChart].ctx.destroy();
+          if (Charts[idChart].timeout != null) clearTimeout ( Charts[idChart].timeout );
+        }
+       Charts[idChart].ctx = new Chart(ctx, { type: 'line', data: data, options: options } );
+       if (period == "HOUR")
+        { Charts[idChart].timeout = setTimeout ( function()                                                  /* Update graphe */
+           { Charger_plusieurs_courbes ( idChart, tableau_map, period ); }, 60000 );
+        }
      });
 	 }
 /******************************************************************************************************************************/
