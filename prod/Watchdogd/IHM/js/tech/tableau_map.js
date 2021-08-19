@@ -2,9 +2,8 @@
 
 /************************************ Créé un nouveau tableau *****************************************************************/
  function Tableau_Map_New ( )
-  { vars = window.location.pathname.split('/');
-    var json_request = JSON.stringify(
-       { tableau_id: vars[3],
+  { var json_request = JSON.stringify(
+       { tableau_id: Get_url_parameter("tableau_id"),
          tech_id : "New_tech_id",
          acronyme: "New_acronyme",
          color   : "#00F",
@@ -51,16 +50,15 @@
 
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { vars = window.location.pathname.split('/');
-    Send_to_API ( "GET", "/api/tableau/list", null, function(Response)
-     { tableau = Response.tableaux.filter( function(item) { return item.id==vars[3] } )[0];
+  { Send_to_API ( "GET", "/api/tableau/list", null, function(Response)
+     { tableau = Response.tableaux.filter( function(item) { return item.id==Get_url_parameter("tableau_id") } )[0];
        $('#idTableauTitle').text(tableau.titre);
      }, null );
 
     $('#idTableTableauMap').DataTable(
        { pageLength : 25,
          fixedHeader: true,
-         ajax: {	url : "/api/tableau/map/list",	type : "GET", data: { tableau_id: vars[3] }, dataSrc: "tableau_map",
+         ajax: {	url : "/api/tableau/map/list",	type : "GET", data: { tableau_id: Get_url_parameter("tableau_id") }, dataSrc: "tableau_map",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          rowId: "id",

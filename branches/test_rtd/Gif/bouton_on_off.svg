@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg2"
+   inkscape:export-ydpi="180"
+   viewBox="0 0 76.252011 72.434007"
+   inkscape:export-xdpi="180"
+   version="1.1"
+   inkscape:version="0.92+devel unknown"
+   sodipodi:docname="Bouton_on_off.svg"
+   width="118.75282"
+   height="74.520767">
+  <sodipodi:namedview
+     id="base"
+     fit-margin-left="20"
+     inkscape:zoom="7.9616326"
+     borderopacity="1.0"
+     inkscape:current-layer="layer1"
+     inkscape:cx="71.674584"
+     inkscape:cy="50.483764"
+     inkscape:window-maximized="1"
+     showgrid="false"
+     fit-margin-right="20"
+     inkscape:guide-bbox="true"
+     showguides="true"
+     bordercolor="#666666"
+     inkscape:window-x="49"
+     inkscape:window-y="48"
+     fit-margin-bottom="20"
+     inkscape:window-width="1871"
+     inkscape:pageopacity="1"
+     inkscape:pageshadow="2"
+     pagecolor="#ffffff"
+     inkscape:document-units="px"
+     inkscape:window-height="1008"
+     fit-margin-top="20"
+     inkscape:document-rotation="0">
+    <inkscape:grid
+       spacingy="1.1705561"
+       spacingx="1.7719443"
+       empspacing="5"
+       type="xygrid"
+       snapvisiblegridlinesonly="true"
+       visible="true"
+       originx="-35.586773"
+       enabled="true"
+       originy="-1148.1891"
+       id="grid2984" />
+    <sodipodi:guide
+       inkscape:locked="false"
+       orientation="0,1"
+       position="1.6674426,-33.312664"
+       id="guide4248" />
+  </sodipodi:namedview>
+  <defs
+     id="defs3">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3760">
+      <stop
+         offset="0"
+         style="stop-color:#cccccc"
+         id="stop3762" />
+      <stop
+         offset="1"
+         style="stop-color:#cccccc;stop-opacity:0"
+         id="stop3764" />
+    </linearGradient>
+    <filter
+       inkscape:collect="always"
+       x="-0.032350998"
+       y="-1.1431"
+       color-interpolation-filters="sRGB"
+       width="1.0647"
+       height="3.2860999"
+       id="filter3892">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.0103417"
+         id="feGaussianBlur3894" />
+    </filter>
+    <linearGradient
+       inkscape:collect="always"
+       x1="50"
+       y1="42"
+       gradientTransform="matrix(0.4186,0,0,0.96154,29.945,-4.41)"
+       x2="49.5"
+       gradientUnits="userSpaceOnUse"
+       xlink:href="#linearGradient3760"
+       y2="21.5"
+       id="linearGradient3980" />
+    <filter
+       inkscape:collect="always"
+       x="-0.102"
+       y="-0.28476"
+       color-interpolation-filters="sRGB"
+       width="1.204"
+       height="1.5695"
+       id="filter4010">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.8475891"
+         id="feGaussianBlur4012" />
+    </filter>
+  </defs>
+  <metadata
+     id="metadata177">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="matrix(1.066667,0,0,1.066667,-0.22387059,19.400417)"
+     style="display:inline"
+     inkscape:label="Layer 1"
+     id="layer1"
+     inkscape:groupmode="layer">
+    <rect
+       x="0"
+       y="0.39002609"
+       width="71"
+       height="31.104"
+       ry="5.1841002"
+       rx="5"
+       style="fill:#666666;fill-rule:evenodd"
+       id="rect3960" />
+    <rect
+       x="0"
+       y="0.39002609"
+       width="71"
+       height="30"
+       ry="5"
+       rx="5"
+       style="fill:#b3b3b3;fill-rule:evenodd"
+       id="rect3962" />
+    <rect
+       x="1"
+       y="1.3900261"
+       width="35.673218"
+       height="28"
+       ry="4"
+       rx="2.0680127"
+       style="fill:#112b00;fill-rule:evenodd;stroke-width:0.71902931"
+       id="rect3964" />
+    <rect
+       x="101"
+       y="1020.4"
+       width="67"
+       height="24"
+       ry="3.4286001"
+       rx="3.8841"
+       transform="matrix(0.42030491,0,0,0.94122369,-37.324955,-956.33104)"
+       style="opacity:0.55513;fill:#008000;fill-rule:evenodd;filter:url(#filter4010)"
+       id="rect3988" />
+    <path
+       inkscape:connector-curvature="0"
+       style="opacity:0.8;fill:#00d400"
+       d="m 10.315,15.79 c -10e-7,-0.8021 0.11995,-1.4753 0.35986,-2.0195 0.17904,-0.4011 0.42342,-0.7609 0.73315,-1.0796 0.30973,-0.3187 0.649,-0.555 1.0178,-0.709 0.49056,-0.2077 1.0563,-0.3115 1.6973,-0.3115 1.1602,0 2.0885,0.3598 2.7849,1.0796 0.69644,0.7197 1.0447,1.7205 1.0447,3.0024 -8e-6,1.2712 -0.34555,2.2657 -1.0366,2.9836 -0.69109,0.718 -1.6149,1.0769 -2.7715,1.0769 -1.1709,0 -2.1019,-0.3571 -2.793,-1.0715 -0.69108,-0.7143 -1.0366,-1.6981 -1.0366,-2.9514 z m 1.6382,-0.054 c -2e-6,0.8916 0.20589,1.5675 0.61768,2.0276 0.41178,0.4601 0.93457,0.6902 1.5684,0.6902 0.63378,0 1.1539,-0.2283 1.5603,-0.6849 0.40641,-0.4565 0.60961,-1.1413 0.60962,-2.0544 -6e-6,-0.9023 -0.19784,-1.5755 -0.5935,-2.0195 -0.39568,-0.444 -0.92115,-0.666 -1.5764,-0.666 -0.65528,0 -1.1834,0.2247 -1.5845,0.674 -0.40104,0.4494 -0.60156,1.1271 -0.60156,2.033 z"
+       id="path3294" />
+    <path
+       inkscape:connector-curvature="0"
+       style="opacity:0.8;fill:#00d400"
+       d="m 19.204,19.69 v -7.8741 h 1.5469 l 3.2227,5.2583 v -5.2583 h 1.4771 V 19.69 H 23.8555 L 20.6812,14.5552 V 19.69 Z"
+       id="path3296" />
+    <g
+       id="g85"
+       transform="matrix(0.98708437,0,0,1,0.44950384,0)">
+      <rect
+         id="rect4056"
+         style="fill:#2b0000;fill-rule:evenodd;stroke-width:0.71674502"
+         rx="2.0548937"
+         ry="4"
+         height="28"
+         width="35.446918"
+         y="1.3499854"
+         x="34.803082" />
+      <rect
+         transform="matrix(0.41878484,0,0,0.81507,-4.2508937,-826.09)"
+         id="rect4058"
+         ry="3.4286001"
+         style="opacity:0.55513;fill:#ff0000;fill-rule:evenodd;filter:url(#filter4010)"
+         rx="3.8841"
+         height="24"
+         width="67"
+         y="1020.4"
+         x="101" />
+      <path
+         d="m 42.815,15.79 c -10e-7,-0.8021 0.11995,-1.4753 0.35986,-2.0195 0.17904,-0.4011 0.42342,-0.7609 0.73315,-1.0796 0.30973,-0.3187 0.649,-0.555 1.0178,-0.70901 0.49056,-0.20767 1.0563,-0.31151 1.6973,-0.31152 1.1602,10e-6 2.0885,0.35983 2.7849,1.07963 0.69644,0.7197 1.0447,1.7205 1.0447,3.0024 -8e-6,1.2712 -0.34555,2.2657 -1.0366,2.9836 -0.69109,0.718 -1.6149,1.0769 -2.7715,1.0769 -1.1709,0 -2.1019,-0.3571 -2.793,-1.0715 -0.69108,-0.7143 -1.0366,-1.6981 -1.0366,-2.9514 z m 1.6382,-0.054 c -2e-6,0.8916 0.20589,1.5675 0.61768,2.0276 0.41178,0.4601 0.93457,0.6902 1.5684,0.6902 0.63378,0 1.1539,-0.2283 1.5603,-0.6849 0.40641,-0.4565 0.60961,-1.1413 0.60962,-2.0544 -6e-6,-0.9023 -0.19784,-1.5755 -0.5935,-2.0195 -0.39568,-0.444 -0.92115,-0.666 -1.5764,-0.666 -0.65528,0 -1.1834,0.2247 -1.5845,0.674 -0.40104,0.4494 -0.60156,1.1271 -0.60156,2.033 z"
+         inkscape:connector-curvature="0"
+         id="path3287"
+         style="fill:#ff8080" />
+      <path
+         d="m 51.699,19.69 v -7.874 h 5.3979 v 1.332 h -3.8081 v 1.8637 h 3.2871 v 1.3321 H 53.2888 V 19.69 Z"
+         inkscape:connector-curvature="0"
+         id="path3289"
+         style="fill:#ff8080" />
+      <path
+         d="m 58.423,19.69 v -7.874 h 5.398 v 1.332 h -3.8081 v 1.8637 H 63.3 v 1.3321 H 60.0129 V 19.69 Z"
+         inkscape:connector-curvature="0"
+         id="path3291"
+         style="fill:#ff8080" />
+    </g>
+    <g
+       id="bouton" class="WTD-StateEvent">
+      <rect
+         id="rect3984"
+         style="fill:#b3b3b3;fill-rule:evenodd"
+         rx="5"
+         ry="5"
+         height="30"
+         width="40"
+         y="0.39002609"
+         x="30.875"/>
+      <rect
+         id="rect3986"
+         style="fill:#ffffff;fill-rule:evenodd"
+         rx="4"
+         ry="4"
+         height="28"
+         width="38"
+         y="1.3900261"
+         x="31.875" />
+      <rect
+         id="rect3966"
+         style="fill:url(#linearGradient3980);fill-rule:evenodd"
+         rx="3"
+         ry="3.8462"
+         height="25"
+         width="36"
+         y="2.3900261"
+         x="32.875" />
+      <rect
+         id="rect3976"
+         style="opacity:0.15589001;fill:#666666;fill-rule:evenodd;filter:url(#filter3892)"
+         transform="matrix(0.42057,0,0,0.34785,30.147,2.99)"
+         rx="2.5953"
+         ry="0.26357001"
+         height="2.1213"
+         width="74.953003"
+         y="68.333"
+         x="12.374" />
+      <rect
+         id="rect3978"
+         ry="0.26357001"
+         style="opacity:0.15589001;fill:#666666;fill-rule:evenodd;filter:url(#filter3892)"
+         rx="2.5953"
+         transform="matrix(0.40723,0,0,0.34785,30.312,-20.71)"
+         height="2.1213"
+         width="74.953003"
+         y="68.333"
+         x="12.374" />
+      <animateTransform attributeName="transform" attributeType="XML" type="translate" from="0 0" to="-30 0" begin="state_1" dur="0.3s" fill="freeze"/>
+      <animateTransform attributeName="transform" attributeType="XML" type="translate" from="-30 0" to="0 0" begin="state_0" dur="0.3s" fill="freeze"/>
+     </g>
+  </g>
+</svg>

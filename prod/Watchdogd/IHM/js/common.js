@@ -238,6 +238,10 @@
 /********************************* Chargement d'une courbe dans u synoptique 1 au démrrage ************************************/
  function Charger_une_courbe ( idChart, tech_id, acronyme, period )
   { if (localStorage.getItem("instance_is_master")!="true") return;
+
+    var chartElement = document.getElementById(idChart);
+    if (!chartElement) { console.log("Charger_une_courbe: Erreur chargement chartElement " + json_request ); return; }
+
     if (period===undefined) period="HOUR";
     var json_request = JSON.stringify(
      { courbes: [ { tech_id : tech_id, acronyme : acronyme, } ],
@@ -268,7 +272,9 @@
                                         ]
                                }
                      };
-       var ctx = document.getElementById(idChart).getContext('2d');
+       var ctx = chartElement.getContext('2d');
+       if (!ctx) { console.log("Charger_une_courbe: Erreur chargement context " + json_request ); return; }
+
        if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
        Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
      });
@@ -282,6 +288,9 @@
  function Charger_plusieurs_courbes ( idChart, tableau_map, period )
   { if (localStorage.getItem("instance_is_master")!="true") return;
 
+    var chartElement = document.getElementById(idChart);
+    if (!chartElement) { console.log("Charger_plusieurs_courbes: Erreur chargement chartElement " + json_request ); return; }
+
     if (period===undefined) period="HOUR";
     var json_request = JSON.stringify(
      { courbes: tableau_map.map( function (item)
@@ -291,6 +300,9 @@
 
     Send_to_API ( "PUT", "/api/archive/get", json_request, function(Response)
      { var dates;
+       var ctx = chartElement.getContext('2d');
+       if (!ctx) { console.log("Charger_plusieurs_courbes: Erreur chargement context " + json_request ); return; }
+
        if (period=="HOUR") dates = Response.valeurs.map( function(item) { return item.date.split(' ')[1]; } );
                       else dates = Response.valeurs.map( function(item) { return item.date; } );
        var data = { labels: dates,
@@ -316,13 +328,24 @@ console.debug(data);
                                         ]
                                }
                      };
-       var ctx = document.getElementById(idChart).getContext('2d');
-       if (Charts != null && Charts[idChart] != null) Charts[idChart].destroy();
-       Charts[idChart] = new Chart(ctx, { type: 'line', data: data, options: options } );
-     });
+       if (Charts != null && Charts[idChart] != null)
+        { Charts[idChart].ctx.destroy();
+          if (Charts[idChart].timeout != null) clearTimeout ( Charts[idChart].timeout );
+        } else Charts[idChart] = new Object ();
 
-    /*if (period=="HOUR") setInterval( function() { window.location.reload(); }, 60000);
-    else if (period=="DAY")  setInterval( function() { window.location.reload(); }, 300000);
-    else setInterval( function() { window.location.reload(); }, 600000);*/
+       Charts[idChart].ctx = new Chart(ctx, { type: 'line', data: data, options: options } );
+       if (period == "HOUR")
+        { Charts[idChart].timeout = setTimeout ( function()                                                  /* Update graphe */
+           { Charger_plusieurs_courbes ( idChart, tableau_map, period ); }, 60000 );
+        }
+     });
 	 }
+/******************************************************************************************************************************/
+/* Get_url_parameter : Recupere un parametre de recherche dans l'URL                                                          */
+/******************************************************************************************************************************/
+ function Get_url_parameter ( name )
+  { const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    return (urlParams.get(name));
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

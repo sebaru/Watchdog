@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Meteo/Meteo.h        Déclaration structure internes pour l'Meteo Watchdog                         */
+/* Watchdogd/Meteo/Meteo.h        Déclaration structure internes pour les données Meteo de Watchdog                           */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    12.03.2021 18:37:46 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -28,7 +28,7 @@
 #ifndef _METEO_H_
  #define _METEO_H_
 
- #define METEO_POLLING                 36000
+ #define METEO_POLLING                 36000                                             /* Polling du site toutes les heures */
 
  struct METEO_CONFIG
   { struct LIBRAIRIE *lib;

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.0"
+   id="svg8"
+   sodipodi:docname="lampe_lune.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   viewBox="0 0 1000 1000"
+   preserveAspectRatio="xMidYMid meet"
+   height="50px"
+   width="50px">
+  <style
+     id="style854"></style>
+  <metadata
+     id="metadata14">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs12" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="983"
+     id="namedview10"
+     showgrid="false"
+     units="px"
+     inkscape:zoom="0.40299562"
+     inkscape:cx="271.83857"
+     inkscape:cy="402.02353"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g6" />
+  <g
+     transform="matrix(0.1,0,0,-0.1,0,15)"
+     fill="#000000"
+     stroke="none"
+     id="g6"
+     style="fill:#e15d5d;fill-opacity:1">
+    <path class="WTD-ActiveFillColor"
+       d="M 111,104 C 99,89 90,73 90,68 90,50 134,0 150,0 c 16,0 60,50 60,68 0,19 -42,62 -60,62 -10,0 -28,-12 -39,-26 z m 69,-4 C 206,74 205,58 175,30 L 150,7 125,30 c -14,13 -25,29 -25,37 0,15 35,53 50,53 6,0 19,-9 30,-20 z"
+       id="path4"
+       style="fill:#ffff00;fill-opacity:1;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none"
+       transform="matrix(21.808892,0,0,21.808892,481.63292,-6906.3588)" />
+    <path class="WTD-ActiveFillColor"
+       style="opacity:0.5;fill:none;fill-opacity:1;stroke:#fff800;stroke-width:33.6924;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.90001243"
+       id="path856"
+       transform="matrix(-10.031372,-4.7504245,-4.7092575,10.119064,690.59767,-6350.1206)"
+       inkscape:label="path856"
+       sodipodi:type="arc"
+       sodipodi:cx="-275.57294"
+       sodipodi:cy="-61.444138"
+       sodipodi:rx="316.27399"
+       sodipodi:ry="316.27399"
+       sodipodi:start="0"
+       sodipodi:end="4.0305941"
+       sodipodi:open="true"
+       sodipodi:arc-type="chord"
+       d="M 40.70105,-61.444138 A 316.27399,316.27399 0 0 1 -204.31209,246.69727 316.27399,316.27399 0 0 1 -559.73484,77.412797 316.27399,316.27399 0 0 1 -474.8849,-307.01282 Z" />
+  </g>
+  <script id="SetMode" type="text/javascript">
+    { console.log("Appel au svg "+this.motif.libelle+" avec mode="+mode);
+    if (mode==null)  mode=0;
+     if (mode==0)
+    { /*this.getElementById("Layer-1").setAttribute("visibility", "visible" );*/
+    }
+    else if (mode==1)
+    {/* this.getElementById("Layer-1").setAttribute("visibility", "visible" );*/
+    }
+    }
+  </script>
+</svg>

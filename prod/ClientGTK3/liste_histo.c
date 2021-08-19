@@ -28,8 +28,6 @@
  #include <gtk/gtk.h>
  #include <time.h>
 
- #include "Reseaux.h"
-
  enum
   { COLONNE_TECH_ID,
     COLONNE_ACRONYME,

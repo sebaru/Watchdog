@@ -102,10 +102,10 @@
         { if (1<=num && num<=DMX_CHANNEL)
            { g_snprintf( Cfg_dmx.Canal[num-1].tech_id, sizeof(Cfg_dmx.Canal[num-1].tech_id), "%s", tech_id );
              g_snprintf( Cfg_dmx.Canal[num-1].acronyme, sizeof(Cfg_dmx.Canal[num-1].acronyme), "%s", acro );
-             Cfg_dmx.Canal[num-1].min  = atof(min);
-             Cfg_dmx.Canal[num-1].max  = atof(max);
-             Cfg_dmx.Canal[num-1].type = atoi(type);
-             Cfg_dmx.Canal[num-1].val_avant_ech = 0.0;                 /*atof(valeur); a l'init, on considère le canal à zero */
+             Cfg_dmx.Canal[num-1].min    = atof(min);
+             Cfg_dmx.Canal[num-1].max    = atof(max);
+             Cfg_dmx.Canal[num-1].type   = atoi(type);
+             Cfg_dmx.Canal[num-1].valeur = 0.0;                        /*atof(valeur); a l'init, on considère le canal à zero */
              Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO,
                        "%s: AO Canal %d : '%s:%s'=%s ('%s') loaded", __func__, num, tech_id, acro, valeur, libelle );
              cpt++;
@@ -164,7 +164,7 @@
     Cfg_dmx.Trame_dmx.length_lsb =  (sizeof(Cfg_dmx.Trame_dmx.channel)+1) & 0xFF;
     Cfg_dmx.Trame_dmx.length_msb =  ((sizeof(Cfg_dmx.Trame_dmx.channel)+1) >> 8) & 0xFF;
     Cfg_dmx.Trame_dmx.start_code = 0; /* Start Code DMX = 0 */
-    for (cpt=0; cpt<DMX_CHANNEL; cpt++) { Cfg_dmx.Trame_dmx.channel[cpt] = (guchar)Cfg_dmx.Canal[cpt].val_avant_ech; }
+    for (cpt=0; cpt<DMX_CHANNEL; cpt++) { Cfg_dmx.Trame_dmx.channel[cpt] = (guchar)Cfg_dmx.Canal[cpt].valeur; }
     Cfg_dmx.Trame_dmx.end_delimiter = 0xE7; /* End delimiter */
     if ( write( Cfg_dmx.fd, &Cfg_dmx.Trame_dmx, sizeof(struct TRAME_DMX) ) != sizeof(struct TRAME_DMX) )/* Ecriture de la trame */
      { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Write Trame Error '%s'", __func__, strerror(errno) );
@@ -227,7 +227,7 @@ reload:
                        !strcasecmp( Cfg_dmx.Canal[num].acronyme, acronyme))
                     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Setting %s:%s=%f (Canal %d)", __func__,
                                 tech_id, acronyme, valeur, num );
-                      Cfg_dmx.Canal[num].val_avant_ech = valeur;
+                      Cfg_dmx.Canal[num].valeur = valeur;
                       break;
                     }
 

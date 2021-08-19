@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include "Reseaux.h"
  #include "trame.h"
 
 /********************************* Définitions des prototypes programme ***********************************/
@@ -42,7 +41,7 @@
            event->type == GDK_BUTTON_PRESS)
        ) return(FALSE);
 
-    Demander_synoptique_supervision ( trame_pass->page->client, trame_pass->pass->syn_cible_id );
+    Demander_synoptique_supervision ( trame_pass->page->client, Json_get_int ( trame_pass->pass, "syn_cible_id" ) );
     return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

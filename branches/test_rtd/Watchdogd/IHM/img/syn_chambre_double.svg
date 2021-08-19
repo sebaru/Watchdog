@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   version="1.1"
+   id="Calque_2"
+   x="0px"
+   y="0px"
+   viewBox="0 0 128 128"
+   style="enable-background:new 0 0 128 128;"
+   xml:space="preserve"
+   sodipodi:docname="syn_chambre_double.svg"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs125" /><sodipodi:namedview
+   id="namedview123"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   showgrid="false"
+   inkscape:zoom="6.0625"
+   inkscape:cx="63.917526"
+   inkscape:cy="64"
+   inkscape:window-width="1920"
+   inkscape:window-height="979"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="g80" />
+<style
+   type="text/css"
+   id="style2">
+	.st0{fill:none;}
+	.st1{fill:#ED746F;}
+	.st2{fill:#E15A5E;}
+	.st3{fill:#4FA2B3;}
+	.st4{fill:url(#SVGID_1_);}
+	.st5{fill:#B6FFFF;}
+	.st6{fill:none;stroke:#C69C6D;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st7{fill:none;stroke:#534741;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st8{fill:#534741;}
+	.st9{fill:#D1BAA0;}
+	.st10{fill:#E0CEB8;}
+	.st11{fill:none;stroke:#736357;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st12{fill:#754C24;}
+	.st13{fill:#C7B299;}
+	.st14{fill:none;stroke:#633D36;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st15{fill:#633D36;}
+	.st16{fill:#F6B7B0;}
+	.st17{fill:#EF8275;}
+	.st18{fill:url(#SVGID_2_);}
+	.st19{opacity:0.6;fill:url(#SVGID_3_);}
+	.st20{fill:url(#SVGID_4_);}
+	.st21{opacity:0.6;fill:url(#SVGID_5_);}
+</style>
+<pattern
+   y="128"
+   width="32.2"
+   height="34.5"
+   patternUnits="userSpaceOnUse"
+   id="Nouvelle_nuance_de_motif_8"
+   viewBox="0 -34.5 32.2 34.5"
+   style="overflow:visible;">
+	<g
+   id="g8">
+		<rect
+   y="-34.5"
+   class="st0"
+   width="32.2"
+   height="34.5"
+   id="rect4" />
+		<rect
+   y="-34.5"
+   class="st1"
+   width="32.2"
+   height="34.5"
+   id="rect6" />
+	</g>
+</pattern>
+<pattern
+   y="128"
+   width="32.2"
+   height="34.5"
+   patternUnits="userSpaceOnUse"
+   id="Nouvelle_nuance_de_motif_9"
+   viewBox="0 -34.5 32.2 34.5"
+   style="overflow:visible;">
+	<g
+   id="g15">
+		<rect
+   y="-34.5"
+   class="st0"
+   width="32.2"
+   height="34.5"
+   id="rect11" />
+		<rect
+   y="-34.5"
+   class="st2"
+   width="32.2"
+   height="34.5"
+   id="rect13" />
+	</g>
+</pattern>
+<g
+   id="g120">
+	<g
+   id="g80">
+		<ellipse
+   transform="matrix(0.7071 -0.7071 0.7071 0.7071 -26.5097 64)"
+   class="st3"
+   cx="64"
+   cy="64"
+   rx="64"
+   ry="64"
+   id="ellipse18"
+   style="fill:#4ebad3;fill-opacity:1" />
+		<linearGradient
+   id="SVGID_1_"
+   gradientUnits="userSpaceOnUse"
+   x1="148.9986"
+   y1="99.6561"
+   x2="53.3746"
+   y2="58.0419">
+			<stop
+   offset="0"
+   style="stop-color:#2A717E;stop-opacity:0"
+   id="stop20" />
+			<stop
+   offset="1"
+   style="stop-color:#2A717E"
+   id="stop22" />
+		</linearGradient>
+		<path
+   class="st4"
+   d="M99.8,117.1c17-11.5,28.2-31,28.2-53.1c0-3.1-0.6-8.2-1-11.2L96.7,38.1l-55.8,4.7l-8,43.9L99.8,117.1z"
+   id="path25" />
+		<path
+   class="st5"
+   d="M79.6,71.3C79.6,71.3,79.6,71.3,79.6,71.3"
+   id="path27" />
+		<line
+   class="st6"
+   x1="33.5"
+   y1="77.9"
+   x2="96.2"
+   y2="77.9"
+   id="line29" />
+		<line
+   class="st7"
+   x1="95.2"
+   y1="53.9"
+   x2="112.5"
+   y2="53.9"
+   id="line31" />
+		<g
+   id="g45">
+			<path
+   class="st8"
+   d="M104.5,46.6v4.7c0,0.1,0.2,0.2,0.5,0.2c0.3,0,0.5-0.1,0.5-0.2v-4.7H104.5z"
+   id="path33" />
+			<g
+   id="g37">
+				<polygon
+   class="st9"
+   points="101.9,36.9 98,46.6 111.9,46.6 108,36.9     "
+   id="polygon35" />
+			</g>
+			<g
+   id="g41">
+				<polygon
+   class="st8"
+   points="103.9,50.5 102.5,54 107.4,54 106,50.5     "
+   id="polygon39" />
+			</g>
+			<polygon
+   class="st10"
+   points="100.6,46.6 103,46.6 104.4,36.9 103.5,36.9    "
+   id="polygon43" />
+		</g>
+		<line
+   class="st11"
+   x1="33.6"
+   y1="53.9"
+   x2="16.3"
+   y2="53.9"
+   id="line47" />
+		<g
+   id="g61">
+			<path
+   class="st12"
+   d="M23.4,46.6v4.7c0,0.1,0.2,0.2,0.5,0.2c0.3,0,0.5-0.1,0.5-0.2v-4.7H23.4z"
+   id="path49" />
+			<g
+   id="g53">
+				<polygon
+   class="st9"
+   points="20.8,36.9 16.9,46.6 30.8,46.6 26.9,36.9     "
+   id="polygon51" />
+			</g>
+			<g
+   id="g57">
+				<polygon
+   class="st12"
+   points="22.8,50.5 21.4,54 26.3,54 24.9,50.5     "
+   id="polygon55" />
+			</g>
+			<polygon
+   class="st10"
+   points="19.5,46.6 21.9,46.6 23.3,36.9 22.4,36.9    "
+   id="polygon59" />
+		</g>
+		<rect
+   x="95.3"
+   y="53.9"
+   class="st8"
+   width="17.6"
+   height="1.6"
+   id="rect63" />
+		<rect
+   x="15.9"
+   y="53.9"
+   class="st12"
+   width="17.6"
+   height="1.6"
+   id="rect65" />
+		<g
+   id="g74">
+			<g
+   id="XMLID_1_">
+				<g
+   id="g71">
+					<path
+   class="st12"
+   d="M105,86.7v9.2h-6.5l-2.9-9.2H32.9l-2.9,9.2h-6.5v-9.2v-2.8V69.9h2.6l5.7-15.2V38.1h64.9v16.7l5.6,15.2       h2.6v13.9V86.7z"
+   id="path67" />
+					<path
+   class="st13"
+   d="M95.6,68.6l0.3,1.4H32.6l0.4-1.4l2.7-7.3c0.5-2.8,2.7-5.3,5.9-5.3H87c3.3,0,5.1,2.1,5.9,5.3L95.6,68.6z"
+   id="path69" />
+				</g>
+			</g>
+		</g>
+		<line
+   class="st14"
+   x1="35.6"
+   y1="76.6"
+   x2="92.9"
+   y2="76.6"
+   id="line76" />
+		<line
+   class="st14"
+   x1="35.6"
+   y1="79.9"
+   x2="92.9"
+   y2="79.9"
+   id="line78" />
+	</g>
+	<g
+   id="g86">
+		<g
+   id="g84">
+			<rect
+   x="34.4"
+   y="38.2"
+   class="st15"
+   width="59.7"
+   height="4.3"
+   id="rect82" />
+		</g>
+	</g>
+	<g
+   id="g94">
+		<g
+   id="g92">
+			<rect
+   x="31.7"
+   y="38.2"
+   class="st15"
+   width="4"
+   height="17.4"
+   id="rect88" />
+			<rect
+   x="92.7"
+   y="38.2"
+   class="st15"
+   width="4"
+   height="17.4"
+   id="rect90" />
+		</g>
+	</g>
+	<g
+   id="g118">
+		<polygon
+   class="st16"
+   points="92.2,55.3 36.4,55.3 30.8,67.8 97.8,67.8   "
+   id="polygon96" />
+		<path
+   class="st17"
+   d="M98,70.2v-1.1c0-2-1.6-3.6-3.6-3.6H34.2c-2,0-3.6,1.6-3.6,3.6v1.1H98z"
+   id="path98" />
+		<g
+   id="g116">
+			<g
+   id="g106">
+				
+					<pattern
+   id="SVGID_2_"
+   xlink:href="#Nouvelle_nuance_de_motif_8"
+   patternTransform="matrix(1.3281 0 0 1.3281 2694.7896 2694.8818)">
+				</pattern>
+				<path
+   class="st18"
+   d="M61.9,58c0.2,0.8-0.3,1.4-1.2,1.5c-5.8,0.4-11.7,0.4-17.5,0c-0.8-0.1-1.4-0.7-1.2-1.5c0.5-2.7,0.5-5.3,0-8      c-0.2-0.8,0.4-1.4,1.2-1.5c5.8-0.4,11.7-0.4,17.5,0c0.8,0.1,1.3,0.7,1.2,1.5C61.3,52.7,61.3,55.4,61.9,58z"
+   id="path101" />
+				
+					<pattern
+   id="SVGID_3_"
+   xlink:href="#Nouvelle_nuance_de_motif_9"
+   patternTransform="matrix(1.3281 0 0 1.3281 2694.7896 2694.8818)">
+				</pattern>
+				<path
+   class="st19"
+   d="M61.9,50.1c0.2-0.8-0.3-1.4-1.2-1.5c-0.3,0-0.5,0-0.8,0c-0.4,5.2-4.8,9.3-10.1,9.3c-2.9,0-5.6-1.3-7.5-3.4      c0,1.2-0.1,2.4-0.4,3.5c-0.2,0.8,0.4,1.4,1.2,1.5c5.8,0.4,11.7,0.4,17.5,0c0.8-0.1,1.3-0.7,1.2-1.5      C61.3,55.4,61.3,52.7,61.9,50.1z"
+   id="path104" />
+			</g>
+			<g
+   id="g114">
+				
+					<pattern
+   id="SVGID_4_"
+   xlink:href="#Nouvelle_nuance_de_motif_8"
+   patternTransform="matrix(1.3281 0 0 1.3281 2694.7896 2694.8818)">
+				</pattern>
+				<path
+   class="st20"
+   d="M86.6,58c0.2,0.8-0.4,1.4-1.2,1.5c-5.8,0.4-11.7,0.4-17.5,0c-0.8-0.1-1.4-0.7-1.2-1.5c0.5-2.7,0.5-5.3,0-8      c-0.2-0.8,0.4-1.4,1.2-1.5c5.8-0.4,11.7-0.4,17.5,0c0.8,0.1,1.3,0.7,1.2,1.5C86.1,52.7,86.1,55.4,86.6,58z"
+   id="path109" />
+				
+					<pattern
+   id="SVGID_5_"
+   xlink:href="#Nouvelle_nuance_de_motif_9"
+   patternTransform="matrix(1.3281 0 0 1.3281 2694.7896 2694.8818)">
+				</pattern>
+				<path
+   class="st21"
+   d="M86.6,50.1c0.2-0.8-0.4-1.4-1.2-1.5c-0.3,0-0.5,0-0.8,0c-0.4,5.2-4.8,9.3-10.1,9.3c-2.9,0-5.6-1.3-7.5-3.4      c0,1.2-0.2,2.4-0.4,3.5c-0.2,0.8,0.4,1.4,1.2,1.5c5.8,0.4,11.7,0.4,17.5,0c0.8-0.1,1.3-0.7,1.2-1.5      C86.1,55.4,86.1,52.7,86.6,50.1z"
+   id="path112" />
+			</g>
+		</g>
+	</g>
+</g>
+</svg>

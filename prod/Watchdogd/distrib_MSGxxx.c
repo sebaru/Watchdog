@@ -49,7 +49,7 @@
            { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
               { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
              else*/
-              { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->val_ech, ai->unite ); }
+              { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->valeur, ai->unite ); }
            }
           else g_snprintf( chaine, sizeof(chaine), "erreur" );
           g_strlcat ( result, chaine, sizeof(result) );

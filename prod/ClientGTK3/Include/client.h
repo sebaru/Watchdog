@@ -31,8 +31,6 @@
  #include <gtk/gtk.h>
  #include <libsoup/soup.h>
 
- #include "Reseaux.h"
-
  #define REPERTOIR_CONF    ".watchdog"                             /* Repertoire ou sont stocké les fichiers de configuration */
 
 /* enum

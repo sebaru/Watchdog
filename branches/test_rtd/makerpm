@@ -1,0 +1,16 @@
+#!/bin/sh
+
+buildir=/home/sebastien/Essai/Watchdog
+svn update
+SVNVERSION=`svnversion -n`
+./autogen.sh
+./configure
+make dist-gzip
+mv Watchdog-2.8.$SVNVERSION.tar.gz $buildir/SOURCES/
+#date +%y%m%d%H%M`
+sed s/latest/$SVNVERSION/g Watchdog.rpm.spec > $buildir/Watchdog.rpm.spec
+ulimit -t 60 -v 102400
+ulimit -a
+nice -19 ionice -c 3 rpmbuild -v --clean --rmsource --buildroot $buildir/BUILDROOT -ba $buildir/Watchdog.rpm.spec
+rsync -arvx $buildir/RPMS/* /mnt/Satis-storage/Partage/Distributions/Watchdog/RPMS/
+rsync -arvx $buildir/SRPMS/* /mnt/Satis-storage/Partage/Distributions/Watchdog/SRPMS/

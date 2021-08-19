@@ -47,19 +47,33 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
 
+    gchar *syn_id_string = g_hash_table_lookup ( query, "syn_id" );
+
     JsonNode *RootNode = Json_node_create ();
     if (!RootNode)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        return;
      }
 
-    if ( SQL_Select_to_json_node ( RootNode, "tableaux",
-                                  "SELECT tableau.*,syns.page FROM tableau "
-                                  "INNER JOIN syns ON tableau.syn_id = syns.id "
-                                  "WHERE access_level<=%d", session->access_level ) == FALSE )
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(RootNode);
-       return;
+    if ( syn_id_string )
+     { if ( SQL_Select_to_json_node ( RootNode, "tableaux",
+                                     "SELECT tableau.*,syns.page FROM tableau "
+                                     "INNER JOIN syns ON tableau.syn_id = syns.id "
+                                     "WHERE syn_id=%d AND access_level<=%d", atoi(syn_id_string), session->access_level ) == FALSE )
+        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+          json_node_unref(RootNode);
+         return;
+        }
+     }
+    else
+     { if ( SQL_Select_to_json_node ( RootNode, "tableaux",
+                                     "SELECT tableau.*,syns.page FROM tableau "
+                                     "INNER JOIN syns ON tableau.syn_id = syns.id "
+                                     "WHERE access_level<=%d", session->access_level ) == FALSE )
+        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+          json_node_unref(RootNode);
+         return;
+        }
      }
 
     gchar *buf = Json_node_to_string ( RootNode );

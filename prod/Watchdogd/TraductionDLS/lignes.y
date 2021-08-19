@@ -49,7 +49,7 @@
 %token <val>    T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
 %token <val>    T_BUS T_HOST T_TECH_ID T_TAG T_TARGET
 
-%token <val>    MODE COLOR CLIGNO T_RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
+%token <val>    MODE T_COLOR CLIGNO T_RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
 %token <val>    T_PID T_KP T_KI T_KD T_INPUT
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE T_CONSIGNE T_ALIAS
 
@@ -66,8 +66,10 @@
 %token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_ANALOG_INPUT T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
 %type  <val>    alias_classe
 
-%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP T_EDGE_DOWN T_IN_RANGE
-%type  <val>    couleur
+%token <val>    T_ROUGE T_VERT T_BLEU T_JAUNE T_NOIR T_BLANC T_ORANGE T_GRIS T_KAKI T_CYAN
+%type  <chaine>  couleur
+
+%token <val>    T_EDGE_UP T_EDGE_DOWN T_IN_RANGE
 
 %token <val>    T_CADRAN T_MIN T_MAX T_SEUIL_NTB T_SEUIL_NB T_SEUIL_NH T_SEUIL_NTH T_DECIMAL
 
@@ -113,7 +115,7 @@ une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
                        { Emettre_erreur_new( "'%s:%s' is already defined", $2, $3 );
                          Liberer_options($5);
                        }
-                      else { Set_new_external_alias($2, $4, $5); }
+                      else { New_external_alias($2, $4, $5); }
                     }
                    if ($2) g_free($2);
                    if ($4) g_free($4);
@@ -377,7 +379,7 @@ calcul_expr3:   T_POUV calcul_expr T_PFERM {{ $$=$2; }}
                       else { tech_id = NULL; acro = $1; }
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
                    if (!alias)
-                    { alias = Set_new_external_alias(tech_id,acro,NULL); }           /* Si dependance externe, on va chercher */
+                    { alias = New_external_alias(tech_id,acro,NULL); }           /* Si dependance externe, on va chercher */
 
                    if (alias)
                     { switch(alias->classe)               /* On traite que ce qui peut passer en "condition" */
@@ -621,7 +623,7 @@ une_action:     T_NOP
 
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
                    if (!alias)
-                    { alias = Set_new_external_alias(tech_id,acro, NULL); }          /* Si dependance externe, on va chercher */
+                    { alias = New_external_alias(tech_id,acro, NULL); }          /* Si dependance externe, on va chercher */
 
                    if (!alias)
                     { if ($3) Emettre_erreur_new( "'%s:%s' is not defined", $2, $3 );
@@ -818,11 +820,17 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
-                | COLOR T_EGAL couleur
+                | T_COLOR T_EGAL couleur
                 {{ $$=New_option();
                    $$->token = $1;
-                   $$->token_classe = ENTIER;
-                   $$->val_as_int = $3;
+                   $$->token_classe = T_CHAINE;
+                   $$->chaine = g_strdup($3);
+                }}
+                | T_COLOR T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->token = $1;
+                   $$->token_classe = T_CHAINE;
+                   $$->chaine = $3;
                 }}
                 | T_FORME T_EGAL T_CHAINE
                 {{ $$=New_option();
@@ -1049,15 +1057,24 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                 }}
                 ;
 
-couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAKI
+couleur:          T_ROUGE  {{ $$="red";       }}
+                | T_VERT   {{ $$="green";     }}
+                | T_BLEU   {{ $$="blue";      }}
+                | T_JAUNE  {{ $$="yellow";    }}
+                | T_NOIR   {{ $$="black";     }}
+                | T_BLANC  {{ $$="white";     }}
+                | T_GRIS   {{ $$="gray";      }}
+                | T_ORANGE {{ $$="orange";    }}
+                | T_KAKI   {{ $$="darkgreen"; }}
+                | T_CYAN   {{ $$="lightblue"; }}
                 ;
-type_msg:         T_INFO    {{ $$=MSG_ETAT; }}
-                | T_ATTENTE {{ $$=MSG_ATTENTE; }}
-                | T_DEFAUT  {{ $$=MSG_DEFAUT; }}
-                | T_ALARME  {{ $$=MSG_ALARME; }}
-                | T_VEILLE  {{ $$=MSG_VEILLE; }}
-                | T_ALERTE  {{ $$=MSG_ALERTE; }}
-                | T_DANGER  {{ $$=MSG_DANGER; }}
+type_msg:         T_INFO        {{ $$=MSG_ETAT;        }}
+                | T_ATTENTE     {{ $$=MSG_ATTENTE;     }}
+                | T_DEFAUT      {{ $$=MSG_DEFAUT;      }}
+                | T_ALARME      {{ $$=MSG_ALARME;      }}
+                | T_VEILLE      {{ $$=MSG_VEILLE;      }}
+                | T_ALERTE      {{ $$=MSG_ALERTE;      }}
+                | T_DANGER      {{ $$=MSG_DANGER;      }}
                 | T_DERANGEMENT {{ $$=MSG_DERANGEMENT; }}
                 ;
 

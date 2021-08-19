@@ -80,6 +80,8 @@
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/ephemeride/0?token=%s&insee=%s",
                 Cfg_meteo.token, Cfg_meteo.code_insee );
 
+    Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_DEBUG,
+             "%s: Starting getting data for code_insee '%s'", __func__, Cfg_meteo.code_insee );
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( "GET", query );
@@ -175,6 +177,8 @@
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/forecast/daily?token=%s&insee=%s",
                 Cfg_meteo.token, Cfg_meteo.code_insee );
 
+    Info_new( Config.log, Cfg_meteo.lib->Thread_debug, LOG_DEBUG,
+             "%s: Starting getting data for code_insee '%s'", __func__, Cfg_meteo.code_insee );
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( "GET", query );

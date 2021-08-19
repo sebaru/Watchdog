@@ -29,7 +29,6 @@
  #define _MNEMONIQUE_H_
 
  #include <glib.h>
- #include "Reseaux.h"
  #include "Db.h"
 
  #define NOM_TABLE_MNEMO          "mnemos"
@@ -38,7 +37,8 @@
  #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Registre"
 
 /***************************************************** Définitions des prototypes *********************************************/
- extern gint Rechercher_DICO_type ( gchar *tech_id, gchar *acronyme );
+ extern gint Rechercher_DICO_type ( gchar *tech_id, gchar *acronyme );                                   /* Dans Mnemonique.c */
+ extern JsonNode *Rechercher_DICO ( gchar *tech_id, gchar *acronyme );
 
  extern void Charger_confDB_AI ( gchar *tech_id, gchar *acronyme );                                       /* Dans Mnemos_AI.c */
  extern void Updater_confDB_AI( void );

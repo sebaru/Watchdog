@@ -32,10 +32,10 @@
  #include <pthread.h>
  #include <string.h>
  #include <errno.h>
+ #include <openssl/ssl.h>
  #include <libsoup/soup.h>
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
- #include "Reseaux.h"
  #include "Json.h"
  #include "Db.h"
  #include "config.h"
@@ -43,7 +43,6 @@
  #include "Config.h"
  #include "Archive.h"
  #include "Message_DB.h"
- #include "Camera_DB.h"
  #include "Histo_DB.h"
  #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"

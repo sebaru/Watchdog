@@ -27,7 +27,6 @@
 
  #include <sys/time.h>
 
- #include "Reseaux.h"
  #include "trame.h"
 
 /********************************************* Définitions des prototypes programme *******************************************/
@@ -216,10 +215,10 @@
 
     if ( Json_has_member ( trame_motif->visuel, "ihm_affichage" ) &&
          !strcasecmp ( Json_get_string ( trame_motif->visuel, "ihm_affichage" ), "complexe" ) )
-     { Trame_rafraichir_visuel_complexe( trame_motif, motif );
+     { Trame_redessiner_visuel_complexe( trame_motif, motif );
        return;
      }
-     
+
     switch( Json_get_int ( trame_motif->visuel, "gestion" ) )
      { case TYPE_INERTE: break;                                              /* Si le motif est inerte, nous n'y touchons pas */
        case TYPE_STATIQUE:
@@ -401,7 +400,7 @@
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
         { case TYPE_PASSERELLE:
                 { struct TRAME_ITEM_PASS *trame_pass = objet->data;
-                  if (trame_pass->pass->syn_cible_id == Json_get_int ( element, "id" ))
+                  if ( Json_get_int ( trame_pass->pass, "syn_cible_id" ) == Json_get_int ( element, "id" ))
                    { Updater_un_syn_vars( trame_pass, element );
                    }
                 }
@@ -578,7 +577,6 @@
     json_array_foreach_element ( Json_get_array ( infos->syn, "visuels" ),      Afficher_un_motif, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ),  Afficher_une_passerelle, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),     Afficher_un_commentaire, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "cameras" ),      Afficher_une_camera, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),      Afficher_un_cadran, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "etat_visuels" ), Updater_les_visuels_by_array, page );
     Json_node_foreach_array_element ( infos->syn, "syn_vars", Updater_les_syn_vars, page );

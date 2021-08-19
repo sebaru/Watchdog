@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include "Reseaux.h"
  #include "client.h"
 
 /******************************************** Définitions des prototypes programme ********************************************/

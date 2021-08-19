@@ -167,7 +167,7 @@ printf("Afficher_propriete: debut\n");
 /* Entrée: la nouvelle position X et Y                                                                                        */
 /* Sortie: sans                                                                                                               */
 /******************************************************************************************************************************/
- static void Mettre_a_jour_position ( struct PAGE_NOTEBOOK *page, gint x, gint y, gint angle, gint scale )
+ static void Mettre_a_jour_position ( struct PAGE_NOTEBOOK *page, gint x, gint y, gint angle, gdouble scale )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
     gchar chaine[30];
 
@@ -189,7 +189,7 @@ printf("Afficher_propriete: debut\n");
 /******************************************************************************************************************************/
  static void Mettre_a_jour_description ( struct PAGE_NOTEBOOK *page, gint icone_id, gchar *description )
   { struct TYPE_INFO_ATELIER *infos = page->infos;
-    gchar chaine[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];
+    gchar chaine[256];
 
     snprintf( chaine, sizeof(chaine), "%4d - %s", icone_id, description );
     gtk_entry_set_text( GTK_ENTRY(infos->Entry_libelle), chaine );
@@ -203,7 +203,7 @@ printf("Afficher_propriete: debut\n");
   { switch (event->type)
      { case GDK_LEAVE_NOTIFY:  break;
        case GDK_ENTER_NOTIFY:
-       case GDK_MOTION_NOTIFY: Mettre_a_jour_position( page, event->motion.x, event->motion.y, 0, 0 );
+       case GDK_MOTION_NOTIFY: Mettre_a_jour_position( page, event->motion.x, event->motion.y, 0, 0.0 );
                                break;
        case GDK_BUTTON_PRESS:  if ( !(event->button.state & 0x4) )                         /* Si pas CTRL */
                                 { Tout_deselectionner( page ); }
@@ -253,12 +253,16 @@ printf("Afficher_propriete: debut\n");
                                if (!infos->Selection) { return; }
                                switch ( *((gint *)(infos->Selection->data)) )               /* Mise a jour des entrys positions */
                                 { case TYPE_PASSERELLE:
-                                       x = ((struct TRAME_ITEM_PASS *)infos->Selection->data)->pass->position_x;
-                                       y = ((struct TRAME_ITEM_PASS *)infos->Selection->data)->pass->position_y;
+                                        { struct TRAME_ITEM_PASS *trame_pass = infos->Selection->data;
+                                          x = 1.0*Json_get_int ( trame_pass->pass, "posx" );
+                                          y = 1.0*Json_get_int ( trame_pass->pass, "posy" );
+                                        }
                                        break;
                                   case TYPE_COMMENTAIRE:
-                                       x = ((struct TRAME_ITEM_COMMENT *)infos->Selection->data)->comment->position_x;
-                                       y = ((struct TRAME_ITEM_COMMENT *)infos->Selection->data)->comment->position_y;
+                                        { struct TRAME_ITEM_COMMENT *trame_comm = infos->Selection->data;
+                                          x = 1.0*Json_get_int ( trame_comm->comment, "posx" );
+                                          y = 1.0*Json_get_int ( trame_comm->comment, "posy" );
+                                        }
                                        break;
                                   case TYPE_MOTIF:
                                         { struct TRAME_ITEM_MOTIF *trame_motif = infos->Selection->data;
@@ -271,10 +275,6 @@ printf("Afficher_propriete: debut\n");
                                           x = 1.0*Json_get_int ( trame_cadran->cadran, "posx" );
                                           y = 1.0*Json_get_int ( trame_cadran->cadran, "posy" );
                                         }
-                                       break;
-                                  case TYPE_CAMERA_SUP:
-                                       x = ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection->data)->camera_sup->posx;
-                                       y = ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection->data)->camera_sup->posy;
                                        break;
                                   default: printf("Clic_general: type inconnu\n" );
                                            x=-1; y=-1;
@@ -299,18 +299,18 @@ printf("Afficher_propriete: debut\n");
 
     if ( Json_get_int ( trame_motif->visuel, "gestion" ) == TYPE_FOND)
      { Clic_sur_fond( page, event, NULL );
-       Mettre_a_jour_position( page, event->motion.x_root, event->motion.y_root, 0, 0 );
+       Mettre_a_jour_position( page, event->motion.x_root, event->motion.y_root, 0, 0.0 );
      }
     else
      { Clic_general( page, event, trame_motif, Json_get_int ( trame_motif->visuel, "groupe") );      /* Fonction de base clic */
-       Mettre_a_jour_position( page, Json_get_int ( trame_motif->visuel, "posx" ),
-                                     Json_get_int ( trame_motif->visuel, "posy" ),
-                                     Json_get_int ( trame_motif->visuel, "angle" ),
-                                     Json_get_int ( trame_motif->visuel, "scale" )
+       Mettre_a_jour_position( page, Json_get_int    ( trame_motif->visuel, "posx" ),
+                                     Json_get_int    ( trame_motif->visuel, "posy" ),
+                                     Json_get_int    ( trame_motif->visuel, "angle" ),
+                                     Json_get_double ( trame_motif->visuel, "scale" )
                              );
      }
 
-    Mettre_a_jour_description( trame_motif->page,
+    Mettre_a_jour_description( page,
                                Json_get_int ( trame_motif->visuel, "icone" ),
                                Json_get_string ( trame_motif->visuel, "libelle" ) );
 
@@ -393,56 +393,105 @@ printf("Afficher_propriete: debut\n");
     gtk_widget_show_all(Popup);
     gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
   }
-#ifdef bouh
-
-/**********************************************************************************************************/
-/* Clic_sur_motif: Appelé quand un evenement est capté sur un motif                                       */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Clic_sur_comment: Appelé quand un evenement est capté sur un commentaire                                                   */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Clic_sur_comment ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                       struct TRAME_ITEM_COMMENT *trame_comment )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    static GtkWidget *Popup = NULL;
-    static GnomeUIInfo Popup_comment[]=
-     { GNOMEUIINFO_ITEM_STOCK( N_("Properties"), NULL, Afficher_propriete, GNOME_STOCK_PIXMAP_PROPERTIES ),
-       GNOMEUIINFO_SEPARATOR,
-       /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
-       GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
-       GNOMEUIINFO_SEPARATOR,
-       GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
-       GNOMEUIINFO_END
-     };
-    if (!(trame_comment && event)) return;
+                         struct TRAME_ITEM_COMMENT *trame_comment )
+  { if (!(trame_comment && event)) return;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+    struct PAGE_NOTEBOOK *page = trame_comment->page;
 
-    infos->Selection.type = TYPE_COMMENTAIRE;
-    infos->Selection.groupe = trame_comment->groupe_dpl;
-    infos->Selection.trame_comment = trame_comment;
+    Clic_general( page, event, trame_comment, Json_get_int ( trame_comment->comment, "groupe") );    /* Fonction de base clic */
+    Mettre_a_jour_position( page, Json_get_int    ( trame_comment->comment, "posx" ),
+                                  Json_get_int    ( trame_comment->comment, "posy" ),
+                                  Json_get_int    ( trame_comment->comment, "angle" ),
+                                  Json_get_double ( trame_comment->comment, "scale" )
+                          );
 
-    Clic_general( infos, event );                                                /* Fonction de base clic */
+    Mettre_a_jour_description( page,
+                               Json_get_int ( trame_comment->comment, "id" ),
+                               Json_get_string ( trame_comment->comment, "libelle" ) );
 
-    Mettre_a_jour_description( infos, trame_comment->comment->id, trame_comment->comment->libelle );
-    if (event->type == GDK_BUTTON_PRESS)
-     { if ( event->button.button == 1)
-        { goo_canvas_item_raise( trame_comment->select_mi, NULL );
-        }
-       else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_comment );                     /* Creation menu */
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
+  //  else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
+    //          event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
 
-        }
+    if (event->type == GDK_BUTTON_PRESS && event->button.button == 1)
+     { if (trame_comment->select_mi) goo_canvas_item_raise( trame_comment->select_mi, NULL );
+       return;
      }
-/*    else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
-/*              event->type == GDK_2BUTTON_PRESS) Afficher_propriete();*/
+
+    if ( ! (event->type == GDK_BUTTON_PRESS && event->button.button == 3)) return;
+    GtkWidget *Popup = gtk_menu_new();
+    GtkWidget *item, *submenu;
+
+    item = Menu ( "Propriétés", "preferences-system" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Afficher_propriete), client );
+
+    item = Menu ( "Couleur par défaut", "applications-graphics" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    /*g_signal_connect_swapped ( item, "activate", G_CALLBACK (Changer_couleur_directe), page );*/
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
+
+    item = Menu ( "Scale", "insert-link" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    submenu = gtk_menu_new();
+    gtk_menu_item_set_submenu ( GTK_MENU_ITEM(item), submenu );
+
+      item = Menu ( "Scale to 1:1", "zoom-original" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_1_1), page );
+
+      item = Menu ( "Scale to 1:Y", "object-flip-horizontal" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_1_Y), page );
+
+      item = Menu ( "Scale to X:1", "object-flip-vertical" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Mettre_echelle_selection_X_1), page );
+
+
+    item = Menu ( "Raise/Lower", "insert-link" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    submenu = gtk_menu_new();
+    gtk_menu_item_set_submenu ( GTK_MENU_ITEM(item), submenu );
+
+      item = Menu ( "Raise to top", "go-top" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Raise_to_top), page );
+
+      item = Menu ( "Lower to bottom", "go-bottom" );
+      gtk_menu_shell_append (GTK_MENU_SHELL(submenu), item);
+      g_signal_connect_swapped ( item, "activate", G_CALLBACK (Lower_to_bottom), page );
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
+
+    item = Menu ( "Détacher la sélection", "view-restore" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Detacher_selection), page );
+
+    item = Menu ( "Fusionner la sélection", "view-fullscreen" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    g_signal_connect_swapped ( item, "activate", G_CALLBACK (Fusionner_selection), page );
+
+    item = Menu ( "Dupliquer la sélection", "edit-copy" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Dupliquer_selection), client );
+
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), gtk_separator_menu_item_new () );
+
+    item = Menu ( "Supprimer la sélection", "edit-delete" );
+    gtk_menu_shell_append (GTK_MENU_SHELL(Popup), item);
+    //g_signal_connect_swapped ( item, "activate", G_CALLBACK (Effacer_selection), client );
+
+    gtk_widget_show_all(Popup);
+    gtk_menu_popup_at_pointer ( GTK_MENU(Popup), (GdkEvent *)event );
+
   }
-#endif
 /******************************************************************************************************************************/
 /* Clic_sur_pass: Appelé quand un evenement est capté sur une passerelle                                                      */
 /* Entrée: une structure Event                                                                                                */
@@ -467,9 +516,12 @@ printf("Afficher_propriete: debut\n");
 
     struct PAGE_NOTEBOOK *page = trame_pass->page;
 
-    Clic_general( page, event, trame_pass, trame_pass->layer );                                      /* Fonction de base clic */
-    Mettre_a_jour_position( trame_pass->page, trame_pass->pass->position_x, trame_pass->pass->position_y, trame_pass->pass->angle, 1 );
-
+    Clic_general( page, event, trame_pass, Json_get_int ( trame_pass->pass, "groupe" ) );            /* Fonction de base clic */
+    Mettre_a_jour_position( page, Json_get_int    ( trame_pass->pass, "posx" ),
+                                  Json_get_int    ( trame_pass->pass, "posy" ),
+                                  Json_get_int    ( trame_pass->pass, "angle" ),
+                                  Json_get_double ( trame_pass->pass, "scale" )
+                          );
     Mettre_a_jour_description( page, 0, "Gateway" );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)
@@ -497,10 +549,10 @@ printf("Afficher_propriete: debut\n");
 printf("%s: trame_cadran = %p\n", __func__, trame_cadran );
 
     Clic_general( page, event, trame_cadran, Json_get_int ( trame_cadran->cadran, "groupe" ) );      /* Fonction de base clic */
-    Mettre_a_jour_position( page, Json_get_int ( trame_cadran->cadran, "posx" ),
-                                  Json_get_int ( trame_cadran->cadran, "posy" ),
-                                  Json_get_int ( trame_cadran->cadran, "angle" ),
-                                  Json_get_int ( trame_cadran->cadran, "scale" ) );
+    Mettre_a_jour_position( page, Json_get_int    ( trame_cadran->cadran, "posx" ),
+                                  Json_get_int    ( trame_cadran->cadran, "posy" ),
+                                  Json_get_int    ( trame_cadran->cadran, "angle" ),
+                                  Json_get_double ( trame_cadran->cadran, "scale" ) );
 
     g_snprintf( chaine, sizeof(chaine), "%s:%s - %s",
                 Json_get_string ( trame_cadran->cadran, "tech_id" ),

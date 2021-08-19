@@ -99,21 +99,22 @@ newline       [\n\r]+
 
 
  /************************************************ Couleurs ***********************************************/
-"rouge"                    { DlsScanner_lval.val = ROUGE;       return ROUGE;       }
-"vert"                     { DlsScanner_lval.val = VERT;        return VERT;        }
-"bleu"                     { DlsScanner_lval.val = BLEU;        return BLEU;        }
-"jaune"                    { DlsScanner_lval.val = JAUNE;       return JAUNE;       }
-"noir"                     { DlsScanner_lval.val = NOIR;        return NOIR;        }
-"orange"                   { DlsScanner_lval.val = ORANGE;      return ORANGE;      }
-"gris"                     { DlsScanner_lval.val = GRIS;        return GRIS;        }
-"blanc"                    { DlsScanner_lval.val = BLANC;       return BLANC;       }
-"kaki"                     { DlsScanner_lval.val = KAKI;        return KAKI;        }
+"rouge"                    { DlsScanner_lval.val = T_ROUGE;     return T_ROUGE;     }
+"vert"                     { DlsScanner_lval.val = T_VERT;      return T_VERT;      }
+"bleu"                     { DlsScanner_lval.val = T_BLEU;      return T_BLEU;      }
+"cyan"                     { DlsScanner_lval.val = T_CYAN;      return T_CYAN;      }
+"jaune"                    { DlsScanner_lval.val = T_JAUNE;     return T_JAUNE;     }
+"noir"                     { DlsScanner_lval.val = T_NOIR;      return T_NOIR;      }
+"orange"                   { DlsScanner_lval.val = T_ORANGE;    return T_ORANGE;    }
+"gris"                     { DlsScanner_lval.val = T_GRIS;      return T_GRIS;      }
+"blanc"                    { DlsScanner_lval.val = T_BLANC;     return T_BLANC;     }
+"kaki"                     { DlsScanner_lval.val = T_KAKI;      return T_KAKI;      }
  /************************************************* Options ************************************************/
 "mode"                     { DlsScanner_lval.val = MODE;        return MODE;        }
 "reset"                    { DlsScanner_lval.val = T_RESET;     return T_RESET;     }
 "multi"                    { DlsScanner_lval.val = T_MULTI;     return T_MULTI;     }
 "ratio"                    { DlsScanner_lval.val = T_RATIO;     return T_RATIO;     }
-"color"                    { DlsScanner_lval.val = COLOR;       return COLOR;       }
+"color"                    { DlsScanner_lval.val = T_COLOR;     return T_COLOR;     }
 "cligno"                   { DlsScanner_lval.val = CLIGNO;      return CLIGNO;      }
 "in_range"                 { DlsScanner_lval.val = T_IN_RANGE;  return T_IN_RANGE;  }
 "edge_up"                  { DlsScanner_lval.val = T_EDGE_UP;   return T_EDGE_UP;   }

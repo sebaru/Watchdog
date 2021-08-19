@@ -148,7 +148,7 @@
     texte = gtk_label_new( "Page" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, i, 1, 1 );
     GtkWidget *Entry_page = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_page), NBR_CARAC_PAGE_SYNOPTIQUE );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_page), 32 );
     gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_page), "Entrez le nom court" );
     gtk_widget_set_tooltip_text ( Entry_page, "Entrez le nom court" );
     /*gtk_entry_set_progress_fraction (GTK_ENTRY(Entry_page), 0.5 );*/
@@ -164,7 +164,7 @@
     texte = gtk_label_new( "Description" );
     gtk_grid_attach( GTK_GRID(table), texte, 0, i, 1, 1 );
     GtkWidget *Entry_lib = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_SYNOPTIQUE );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), 128 );
     gtk_entry_set_placeholder_text ( GTK_ENTRY(Entry_lib), "Entrez la description du synoptique" );
     gtk_widget_set_tooltip_text ( Entry_lib, "Entrez la description du synoptique" );
     gtk_grid_attach( GTK_GRID(table), Entry_lib, 1, i, 2, 1 );

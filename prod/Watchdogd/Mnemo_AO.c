@@ -147,7 +147,7 @@
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE mnemos_AO as m SET valeur='%f' "
                    "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   ao->val_avant_ech, ao->tech_id, ao->acronyme );
+                   ao->valeur, ao->tech_id, ao->acronyme );
        Lancer_requete_SQL ( db, requete );
        liste = g_slist_next(liste);
        cpt++;
@@ -164,10 +164,10 @@
  void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit )
   { Json_node_add_string ( element, "tech_id",      bit->tech_id );
     Json_node_add_string ( element, "acronyme",     bit->acronyme );
-    Json_node_add_double ( element, "valeur_brute", bit->val_avant_ech );
+    Json_node_add_double ( element, "valeur_brute", bit->valeur );
     Json_node_add_double ( element, "valeur_min",   bit->min );
     Json_node_add_double ( element, "valeur_max",   bit->max );
-    Json_node_add_double ( element, "valeur",       bit->val_ech );
+    Json_node_add_double ( element, "valeur",       bit->valeur );
     Json_node_add_int    ( element, "type",         bit->type );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -44,30 +44,11 @@
  #include "protocli.h"
  #include "client.h"
 
-/**********************************************************************************************************/
-/* Reduire_en_vignette: Met un motif aux dimensions de vignette                                           */
-/* Entrée: Le trame_motif souhaité                                                                        */
-/* Sortie: niet                                                                                           */
-/**********************************************************************************************************/
- void Reduire_en_vignette ( struct CMD_TYPE_MOTIF *motif )
-  { if ( motif && (motif->largeur>TAILLE_ICONE_X || motif->hauteur>TAILLE_ICONE_Y ) )
-     { double facteur;
-       facteur = (gdouble)motif->hauteur/motif->largeur;
-       if (facteur>=1.0)
-        { motif->largeur = (guint)((double)TAILLE_ICONE_Y/facteur);
-          motif->hauteur = TAILLE_ICONE_Y;
-        }
-       else
-        { motif->largeur = TAILLE_ICONE_X;
-          motif->hauteur = (guint)((double)TAILLE_ICONE_X*facteur);
-        }
-     }
-  }
-/**********************************************************************************************************/
-/* Trame_new_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: kedal                                                                                          */
-/* Sortie: une structure TRAME_ITEM_MOTIF                                                                 */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_new_item: Renvoi un nouveau item, completement vierge                                                                */
+/* Entrée: kedal                                                                                                              */
+/* Sortie: une structure TRAME_ITEM_MOTIF                                                                                     */
+/******************************************************************************************************************************/
  struct TRAME_ITEM_MOTIF *Trame_new_item ( void )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     trame_motif = g_try_malloc0( sizeof(struct TRAME_ITEM_MOTIF) );
@@ -90,16 +71,6 @@
     g_list_foreach( trame_motif->images, (GFunc) g_object_unref /*g_free*/, NULL );
     g_list_free( trame_motif->images );
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
-  }
-/**********************************************************************************************************/
-/* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
-/* Sortie: rieng                                                                                          */
-/**********************************************************************************************************/
- void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
-  {
-    if (trame_camera_sup->item_groupe) goo_canvas_item_remove( trame_camera_sup->item_groupe );
-    if (trame_camera_sup->select_mi) goo_canvas_item_remove( trame_camera_sup->select_mi );
   }
 /******************************************************************************************************************************/
 /* Trame_del_svg: Libere la mémoire liée à un objet de type SVG                                                               */
@@ -131,11 +102,11 @@
     Trame_del_SVG (trame_pass->item_2);                                                  /* Désactive la gestion clignotement */
     Trame_del_SVG (trame_pass->item_3);                                                  /* Désactive la gestion clignotement */
   }
-/**********************************************************************************************************/
-/* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
-/* Sortie: rieng                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_del_item: Efface un item de la trame                                                                                 */
+/* Entrée: un item                                                                                                            */
+/* Sortie: rieng                                                                                                              */
+/******************************************************************************************************************************/
  void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm )
   { if (trame_comm->item_groupe) goo_canvas_item_remove( trame_comm->item_groupe );
   }
@@ -178,8 +149,8 @@
 
        cairo_matrix_rotate ( &trame_motif->transform_hd, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_hd,
-                                ((gdouble)largeur/2),
-                                -((gdouble)hauteur/2) - 9
+                                ((gdouble)trame_motif->gif_largeur/2)*scale,
+                                -((gdouble)trame_motif->gif_hauteur/2)*scale
                               );
        goo_canvas_item_set_transform ( trame_motif->select_hd, &trame_motif->transform_hd );
 
@@ -187,8 +158,8 @@
        cairo_matrix_translate ( &trame_motif->transform_bd, (gdouble)position_x, (gdouble)position_y );
        cairo_matrix_rotate ( &trame_motif->transform_bd, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_bd,
-                                ((gdouble)largeur/2),
-                                ((gdouble)hauteur/2)
+                                ((gdouble)trame_motif->gif_largeur/2)*scale,
+                                ((gdouble)trame_motif->gif_hauteur/2)*scale
                               );
        goo_canvas_item_set_transform ( trame_motif->select_bd, &trame_motif->transform_bd );
 
@@ -197,8 +168,8 @@
 
        cairo_matrix_rotate ( &trame_motif->transform_hg, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_hg,
-                                -((gdouble)largeur/2) - 9,
-                                -((gdouble)hauteur/2) - 9
+                                -((gdouble)trame_motif->gif_largeur/2)*scale,
+                                -((gdouble)trame_motif->gif_hauteur/2)*scale
                               );
        goo_canvas_item_set_transform ( trame_motif->select_hg, &trame_motif->transform_hg );
 
@@ -207,29 +178,11 @@
 
        cairo_matrix_rotate ( &trame_motif->transform_bg, (gdouble)angle*FACTEUR_PI );
        cairo_matrix_translate ( &trame_motif->transform_bg,
-                                -((gdouble)largeur/2) - 9,
-                                ((gdouble)hauteur/2)
+                                -((gdouble)trame_motif->gif_largeur/2)*scale,
+                                ((gdouble)trame_motif->gif_hauteur/2)*scale
                               );
        goo_canvas_item_set_transform ( trame_motif->select_bg, &trame_motif->transform_bg );
      }
-  }
-/******************************************************************************************************************************/
-/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre                                  */
-/* Entrée: la structure graphique TRAME_MOTIF                                                                                 */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
-  { if (!(trame_camera_sup && trame_camera_sup->camera_sup)) return;
-    cairo_matrix_init_identity ( &trame_camera_sup->transform );
-    cairo_matrix_translate ( &trame_camera_sup->transform,
-                             (gdouble)trame_camera_sup->camera_sup->posx,
-                             (gdouble)trame_camera_sup->camera_sup->posy
-                           );
-
-    cairo_matrix_rotate ( &trame_camera_sup->transform, 0.0 );
-    cairo_matrix_scale  ( &trame_camera_sup->transform, 1.0, 1.0 );
-
-    goo_canvas_item_set_transform ( trame_camera_sup->item_groupe, &trame_camera_sup->transform );
   }
 /**********************************************************************************************************/
 /* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
@@ -241,11 +194,11 @@
 
     cairo_matrix_init_identity ( &trame_comment->transform );
     cairo_matrix_translate ( &trame_comment->transform,
-                             (gdouble)trame_comment->comment->position_x,
-                             (gdouble)trame_comment->comment->position_y
+                             (gdouble)Json_get_int ( trame_comment->comment, "posx" ),
+                             (gdouble)Json_get_int ( trame_comment->comment, "posy" )
                            );
 
-    cairo_matrix_rotate ( &trame_comment->transform, (gdouble)trame_comment->comment->angle*FACTEUR_PI );
+    cairo_matrix_rotate ( &trame_comment->transform, (gdouble)Json_get_int ( trame_comment->comment, "angle" )*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_comment->transform, 1.0, 1.0 );
 
     goo_canvas_item_set_transform ( trame_comment->item_groupe, &trame_comment->transform );
@@ -260,11 +213,11 @@
 
     cairo_matrix_init_identity ( &trame_pass->transform );
     cairo_matrix_translate ( &trame_pass->transform,
-                             (gdouble)trame_pass->pass->position_x,
-                             (gdouble)trame_pass->pass->position_y
+                             (gdouble)Json_get_int ( trame_pass->pass, "posx" ),
+                             (gdouble)Json_get_int ( trame_pass->pass, "posy" )
                            );
 
-    cairo_matrix_rotate ( &trame_pass->transform, (gdouble)trame_pass->pass->angle*FACTEUR_PI );
+    cairo_matrix_rotate ( &trame_pass->transform, (gdouble)Json_get_int ( trame_pass->pass, "angle" )*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_pass->transform, 1.0, 1.0 );
 
     goo_canvas_item_set_transform ( trame_pass->item_groupe, &trame_pass->transform );
@@ -308,17 +261,22 @@
     buffer = gdk_pixbuf_get_pixels( trame_motif->pixbuf );
 
     gint rouge = 0, vert = 0, bleu = 0;
+    if (!color) color="gray";
          if (!strcasecmp(color, "rouge"))     { rouge = 255; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "vert"))      { rouge =   0; vert = 255; bleu =   0; }
     else if (!strcasecmp(color, "bleu"))      { rouge =   0; vert =   0; bleu = 255; }
     else if (!strcasecmp(color, "jaune"))     { rouge = 255; vert = 255; bleu =   0; }
     else if (!strcasecmp(color, "orange"))    { rouge = 255; vert = 190; bleu =   0; }
     else if (!strcasecmp(color, "blanc"))     { rouge = 255; vert = 255; bleu = 255; }
+    else if (!strcasecmp(color, "white"))     { rouge = 255; vert = 255; bleu = 255; }
     else if (!strcasecmp(color, "kaki"))      { rouge =   0; vert = 100; bleu =   0; }
+    else if (!strcasecmp(color, "darkgreen")) { rouge =   0; vert = 100; bleu =   0; }
     else if (!strcasecmp(color, "gris"))      { rouge = 127; vert = 127; bleu = 127; }
     else if (!strcasecmp(color, "marron"))    { rouge = 165; vert =  42; bleu =  42; }
     else if (!strcasecmp(color, "grisfonce")) { rouge = 100; vert = 100; bleu = 100; }
     else if (!strcasecmp(color, "noir"))      { rouge =   0; vert =   0; bleu =   0; }
+    else if (!strcasecmp(color, "black"))     { rouge =   0; vert =   0; bleu =   0; }
+    else if (!strcasecmp(color, "(null)"))    { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "#000"))      { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "#4A4A4A"))   { rouge = 0x4A; vert = 0x4A; bleu = 0x4A; }
     else if (!strcasecmp(color, "#4D4D4D"))   { rouge = 0x4D; vert = 0x4D; bleu = 0x4D; }
@@ -421,177 +379,6 @@ printf("Charger_pixbuf_file: %s\n", fichier );
             }
      }
   }
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Satellite_Receive_response : Recupere la reponse du serveur (master)                                                       */
-/* Entrée : Les informations à sauvegarder                                                                                    */
-/******************************************************************************************************************************/
- static size_t CB_Receive_gif_data( char *ptr, size_t size, size_t nmemb, void *userdata )
-  { gchar *new_buffer;
-    printf("%s: %d*%d octets received", __func__, size, nmemb );
-    new_buffer = g_try_realloc ( Gif_received_buffer, Gif_received_size +  size*nmemb );
-    if (!new_buffer)                                                 /* Si erreur, on arrete le transfert */
-     { printf( "%s: Memory Error realloc", __func__ );
-       g_free(Gif_received_buffer);
-       Gif_received_buffer = NULL;
-       return(-1);
-     } else Gif_received_buffer = new_buffer;
-    memcpy( Gif_received_buffer + Gif_received_size, ptr, size*nmemb );
-    Gif_received_size += size*nmemb;
-    return(size*nmemb);
-  }
-/**********************************************************************************************************/
-/* Download_gif: Tente de récupérer un .gif depuis le serveur                                             */
-/* Entrée: l'id et le mode attendu                                                                        */
-/* Sortie: FALSE si probleme                                                                              */
-/**********************************************************************************************************/
- static gboolean Download_gif ( gint id, gint mode )
-  { gchar erreur[CURL_ERROR_SIZE+1];
-    struct curl_slist *slist = NULL;
-    long http_response;
-    gchar url[128];
-    CURLcode res;
-    CURL *curl;
-
-    Gif_received_buffer = NULL;                                     /* Init du tampon de reception à NULL */
-    Gif_received_size = 0;                                          /* Init du tampon de reception à NULL */
-    http_response = 0;
-
-    curl = curl_easy_init();                                            /* Preparation de la requete CURL */
-    if (!curl)
-     { printf( "Download_gif: cURL init failed" );
-       return(FALSE);
-     }
-
-    if (mode) g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%d.gif.%02d", id, mode );
-         else g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%d.gif", id );
-    printf( "%s: Trying to get %s", __func__, url );
-    curl_easy_setopt(curl, CURLOPT_URL, url );
-       /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
-       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
-       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buf->use);*/
-       /*slist = curl_slist_append(slist, "Content-Type: application/xml");*/
-/*       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
-       curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE );
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
-/*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
-/*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
-/*       curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
-       curl_easy_setopt(curl, CURLOPT_SSLKEY, Cfg_satellite.https_file_key );
-       g_snprintf( chaine, sizeof(chaine), "./%s", Cfg_satellite.https_file_cert );
-       curl_easy_setopt(curl, CURLOPT_SSLCERT, chaine );*/
-
-    res = curl_easy_perform(curl);
-    if (res)
-     { printf( "%s: Error : Could not connect", __func__ );
-       curl_easy_cleanup(curl);
-       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
-       return(FALSE);
-     }
-    if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK) http_response = 401;
-    curl_easy_cleanup(curl);
-    curl_slist_free_all(slist);
-
-    if (http_response != 200)                                                                /* HTTP 200 OK ? */
-     { printf(
-                "%s: Gif %s not received (HTTP_CODE = %d)!", __func__, url, http_response );
-       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
-       return(FALSE);
-     }
-    else
-     { gchar nom_fichier[80];
-       gint fd;
-       if (mode) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", id, mode );
-            else g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", id );
-       printf(
-                "%s: Saving GIF id %d, mode %d, size %d -> %s", __func__, id, mode, Gif_received_size, nom_fichier );
-       unlink(nom_fichier);
-       fd = open( nom_fichier, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
-       if (fd>0)
-        { write( fd, Gif_received_buffer, Gif_received_size );
-          close (fd);
-        }
-       else
-        { printf(
-                   "Download_gif : Unable to save file %s", nom_fichier );
-        }
-       g_free(Gif_received_buffer);
-       Gif_received_buffer = NULL;
-       if (fd<=0) return(FALSE);
-     }
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Download_icon : Tente de récupérer un fichier depuis le serveur commun abls-habitat.fr                                     */
-/* Entrée: le nom de fichier a télécharger                                                                                    */
-/* Sortie: FALSE si probleme                                                                                                  */
-/******************************************************************************************************************************/
- static gboolean Download_icon ( gchar *file )
-  { gchar erreur[CURL_ERROR_SIZE+1];
-    struct curl_slist *slist = NULL;
-    long http_response;
-    gchar url[128];
-    CURLcode res;
-    CURL *curl;
-
-    Gif_received_buffer = NULL;                                                         /* Init du tampon de reception à NULL */
-    Gif_received_size = 0;                                                              /* Init du tampon de reception à NULL */
-    http_response = 0;
-
-    curl = curl_easy_init();                                                                /* Preparation de la requete CURL */
-    if (!curl)
-     { printf( "%s: cURL init failed for %s", __func__, file );
-       return(FALSE);
-     }
-    printf( "%s: Trying to download %s", __func__, file );
-
-    g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%s", file );
-    printf( "%s: Trying to get %s", __func__, url );
-    curl_easy_setopt(curl, CURLOPT_URL, url );
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE );
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
-
-    res = curl_easy_perform(curl);
-    if (res)
-     { printf( "%s: Error : Could not connect", __func__ );
-       curl_easy_cleanup(curl);
-       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
-       return(FALSE);
-     }
-    if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK) http_response = 401;
-    curl_easy_cleanup(curl);
-    curl_slist_free_all(slist);
-
-    if (http_response != 200)                                                                                /* HTTP 200 OK ? */
-     { printf(
-                "%s: URL %s not received (HTTP_CODE = %d)!", __func__, url, http_response );
-       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
-       return(FALSE);
-     }
-    else
-     { gint fd;
-       printf( "%s: Saving FILE %s", __func__, file );
-       unlink(file);
-       fd = open( file, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
-       if (fd>0)
-        { write( fd, Gif_received_buffer, Gif_received_size );
-          close (fd);
-        }
-       else
-        { printf( "%s: Unable to save file %s", __func__, file ); }
-       g_free(Gif_received_buffer);
-       Gif_received_buffer = NULL;
-       if (fd<=0) return(FALSE);
-     }
-    printf( "%s: %s downloaded", __func__, file );
-    return(TRUE);
-  }
-#endif
 /******************************************************************************************************************************/
 /* Add_single_icone_to_item : Chargement d'un icone (ID+Mode) dans l'item en parametre                                        */
 /* Entrée: L'item, l'icone_id et le mode attendu                                                                              */
@@ -663,13 +450,386 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     return(pixbuf);
   }
 /******************************************************************************************************************************/
+/* Trame_set_handlers: Accroche les handlers au visuel en parametre                                                           */
+/* Entrée : le visuel trame_motif                                                                                             */
+/* sortie : Les handlers sont définis ainsi que les accroches                                                                 */
+/******************************************************************************************************************************/
+ static void Trame_set_handlers ( struct TRAME_ITEM_MOTIF *trame_motif )
+  { struct TRAME *trame;
+         if (trame_motif->page->type == TYPE_PAGE_SUPERVISION)
+          {  trame = ((struct TYPE_INFO_SUPERVISION *)trame_motif->page->infos)->Trame; }
+    else if (trame_motif->page->type == TYPE_PAGE_ATELIER)
+          { trame = ((struct TYPE_INFO_ATELIER *)trame_motif->page->infos)->Trame_atelier; }
+    else return;
+
+    if (trame_motif->page->type == TYPE_PAGE_ATELIER )
+     { trame_motif->select_hg = goo_canvas_rect_new (trame->canvas_root,
+                                                    -2.5, -2.5, 5.0, 5.0,
+                                                    "fill_color", "lightblue",
+                                                    "stroke_color", "black", NULL);
+
+       trame_motif->select_hd = goo_canvas_rect_new (trame->canvas_root,
+                                                    -2.5, -2.5, 5.0, 5.0,
+                                                    "fill_color", "red",
+                                                    "stroke_color", "black", NULL);
+
+       trame_motif->select_bg = goo_canvas_rect_new (trame->canvas_root,
+                                                    -2.5, -2.5, 5.0, 5.0,
+                                                    "fill_color", "green",
+                                                    "stroke_color", "black", NULL);
+
+       trame_motif->select_bd = goo_canvas_rect_new (trame->canvas_root,
+                                                    -2.5, -2.5, 5.0, 5.0,
+                                                    "fill_color", "darkblue",
+                                                    "stroke_color", "black", NULL);
+
+       g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+       g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+       g_object_set( trame_motif->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+       g_object_set( trame_motif->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+
+       if (trame_motif->item)
+        { g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
+        }
+       else
+        { g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
+        }
+
+       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-press-event",   G_CALLBACK(Agrandir_hg), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-release-event", G_CALLBACK(Agrandir_hg), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_hg), "motion-notify-event",  G_CALLBACK(Agrandir_hg), trame_motif );
+
+       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-press-event",   G_CALLBACK(Agrandir_hd), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-release-event", G_CALLBACK(Agrandir_hd), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_hd), "motion-notify-event",  G_CALLBACK(Agrandir_hd), trame_motif );
+
+       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-press-event",   G_CALLBACK(Agrandir_bg), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-release-event", G_CALLBACK(Agrandir_bg), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_bg), "motion-notify-event",  G_CALLBACK(Agrandir_bg), trame_motif );
+
+       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-press-event",   G_CALLBACK(Agrandir_bd), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-release-event", G_CALLBACK(Agrandir_bd), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_bd), "motion-notify-event",  G_CALLBACK(Agrandir_bd), trame_motif );
+
+     }
+    else
+     { g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
+                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
+                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+     }
+  }
+/******************************************************************************************************************************/
+/* Trame_render_svg_to_pixbuf : rendre un svg en un pixbuf                                                                    */
+/* Entrée: la chaine de caractere SVG                                                                                         */
+/* Sortie: le pixbuf                                                                                                          */
+/******************************************************************************************************************************/
+ static GdkPixbuf *Trame_render_svg_to_pixbuf ( gchar *svg )
+  { GError *error = NULL;
+    RsvgHandle *handle = rsvg_handle_new_from_data ( svg, strlen(svg), &error );
+    if (handle)
+     { GdkPixbuf *pixbuf = rsvg_handle_get_pixbuf ( handle );
+       g_object_unref ( handle );
+       return(pixbuf);
+     }
+    printf("%s: Load SVG failed: %s\n", __func__, error->message );
+    g_error_free(error);
+    return(NULL);
+  }
+/******************************************************************************************************************************/
+/* Make_svg_bouton: Renvoie la chaine SVG pour faire un bouton                                                                */
+/* Entrée: les parametres du bouton                                                                                           */
+/* Sortie: la chaine de caractere                                                                                             */
+/******************************************************************************************************************************/
+ static GdkPixbuf *Trame_Make_svg_bouton ( gint posx, gint posy, gchar *couleur, gchar *libelle )
+  { gchar bouton[512];
+    gint largeur=14*strlen(libelle);
+    gint hauteur=28;
+    g_snprintf( bouton, sizeof(bouton),
+                "<svg>"
+                "<rect x='%d' y='%d' rx='10' width='%d' height='%d' "
+                "      fill='%s' stroke='none' />"
+                "<text text-anchor='middle' x='%d' y='%d' "
+                "      font-size='14px' font-family='Bitstream' font-style='' fill='white' stroke='white'>%s</text> "
+                "</svg>",
+                posx, posy, largeur, hauteur, couleur, posx+largeur/2, posy+hauteur/2+5, libelle );
+printf("%s: New bouton %s\n", __func__, bouton );
+    return(Trame_render_svg_to_pixbuf (bouton));
+  }
+/******************************************************************************************************************************/
+/* Trame_load_encadre: Prépare un pixbuf pour l'encadre en parametre                                                          */
+/* Entrée: la taille de lencadre, la couleur, son libellé                                                                     */
+/* Sortie: le pixbuf                                                                                                          */
+/******************************************************************************************************************************/
+ static gchar *Trame_Make_svg_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
+  { gchar encadre[512];
+    gint largeur=64*ligne;
+    gint hauteur=64*colonne;
+    g_snprintf( encadre, sizeof(encadre),
+                "<svg viewBox='0 0 %d %d' >"
+                "<text text-anchor='middle' x='%d' y='12' "
+                "      font-size='14px' font-family='Bitstream' font-style='italic' fill='black' stroke='black'>%s</text> "
+                "<rect x='5' y='20' rx='15' width='%d' height='%d' "
+                "      fill='none' stroke='%s' stroke-width='4'  />"
+                "</svg>",
+                largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, couleur
+              );
+printf("%s: New encadre %s\n", __func__, encadre );
+    return ( g_strdup(encadre) );
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_visuel_bloc_maintenance: Prépare un pixbuf pour le bloc maintenance en parametre                               */
+/* Entrée: la page, la description du bloc maintenance                                                                        */
+/* Sortie: False si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ static void Trame_calculer_bounds ( struct TRAME_ITEM_MOTIF *trame_motif )
+  { GooCanvasBounds bounds;
+    goo_canvas_item_get_bounds ( trame_motif->item_groupe, &bounds );
+    trame_motif->gif_largeur = (gint)bounds.x2-bounds.x1;
+    trame_motif->gif_hauteur = (gint)bounds.y2-bounds.y1;
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_visuel_bloc_maintenance: Prépare un pixbuf pour le bloc maintenance en parametre                               */
+/* Entrée: la page, la description du bloc maintenance                                                                        */
+/* Sortie: False si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ static gboolean Trame_ajout_visuel_bloc_maintenance ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
+  { struct TRAME *trame;
+         if (page->type == TYPE_PAGE_SUPERVISION) trame = ((struct TYPE_INFO_SUPERVISION *)page->infos)->Trame;
+    else if (page->type == TYPE_PAGE_ATELIER)     trame = ((struct TYPE_INFO_ATELIER *)page->infos)->Trame_atelier;
+    else return(FALSE);
+
+    struct TRAME_ITEM_MOTIF *trame_motif = Trame_new_item();
+    if (!trame_motif) { printf("%s: Erreur mémoire\n", __func__); return(FALSE); }
+
+    trame_motif->visuel = visuel;
+    trame_motif->page   = page;
+    trame_motif->type   = TYPE_MOTIF;
+    trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
+
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
+
+    trame_motif->items = g_slist_append ( trame_motif->items,
+                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, -77, -34.0, NULL )
+                                        );
+
+    trame_motif->items = g_slist_append ( trame_motif->items,
+                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, -77, 6.0, NULL )
+                                        );
+
+    Trame_redessiner_visuel_complexe ( trame_motif, visuel );
+    Trame_calculer_bounds ( trame_motif );
+    Trame_set_handlers ( trame_motif );
+    Trame_rafraichir_motif ( trame_motif );
+
+printf("%s: New bloc maintenance\n", __func__ );
+    pthread_mutex_lock ( &trame->lock );
+    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    pthread_mutex_unlock ( &trame->lock );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- static gboolean Trame_ajout_visuel_simple ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
+ static gboolean Trame_ajout_visuel_encadre ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
+  { struct TRAME *trame;
+         if (page->type == TYPE_PAGE_SUPERVISION) trame = ((struct TYPE_INFO_SUPERVISION *)page->infos)->Trame;
+    else if (page->type == TYPE_PAGE_ATELIER)     trame = ((struct TYPE_INFO_ATELIER *)page->infos)->Trame_atelier;
+    else return(FALSE);
+
+    struct TRAME_ITEM_MOTIF *trame_motif = Trame_new_item();
+    if (!trame_motif) { printf("%s: Erreur mémoire\n", __func__); return(FALSE); }
+
+    trame_motif->visuel = visuel;
+    trame_motif->page   = page;
+    trame_motif->type   = TYPE_MOTIF;
+    trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
+
+    trame_motif->image  = NULL;
+    trame_motif->images = NULL;
+    trame_motif->nbr_images  = 0;
+    trame_motif->gif_largeur = 0;
+    trame_motif->gif_hauteur = 0;
+
+    gint ligne, colonne;
+    if ( Json_has_member ( visuel, "mode" ) )
+     { if ( sscanf ( Json_get_string ( visuel, "mode" ), "%dx%d", &ligne, &colonne ) != 2 )
+         { ligne = colonne = 1; }
+     }
+    else { ligne = colonne = 1; }
+    gchar *svg = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
+                                          Json_get_string ( visuel, "libelle" ) );
+    trame_motif->pixbuf = Trame_render_svg_to_pixbuf ( svg );
+    g_free(svg);
+
+    if (!trame_motif->pixbuf)
+     { printf("%s: Chargement visuel encadre\n", __func__ );
+       g_free(trame_motif);
+       return(FALSE);
+     }
+
+    trame_motif->gif_largeur = gdk_pixbuf_get_width ( trame_motif->pixbuf );
+    trame_motif->gif_hauteur = gdk_pixbuf_get_height( trame_motif->pixbuf );
+    trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );     /* Et ajout dans la liste */
+    trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
+    trame_motif->nbr_images++;
+
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
+    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
+                                               trame_motif->pixbuf,
+                                               (-(gdouble)(trame_motif->gif_largeur/2)),
+                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
+                                               NULL );
+
+    Trame_set_handlers ( trame_motif );
+    Trame_rafraichir_motif ( trame_motif );
+    pthread_mutex_lock ( &trame->lock );
+    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    pthread_mutex_unlock ( &trame->lock );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
+ static gboolean Trame_ajout_visuel_bouton ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
+  { struct TRAME *trame;
+         if (page->type == TYPE_PAGE_SUPERVISION) trame = ((struct TYPE_INFO_SUPERVISION *)page->infos)->Trame;
+    else if (page->type == TYPE_PAGE_ATELIER)     trame = ((struct TYPE_INFO_ATELIER *)page->infos)->Trame_atelier;
+    else return(FALSE);
+
+    struct TRAME_ITEM_MOTIF *trame_motif = Trame_new_item();
+    if (!trame_motif) { printf("%s: Erreur mémoire\n", __func__); return(FALSE); }
+
+    trame_motif->visuel = visuel;
+    trame_motif->page   = page;
+    trame_motif->type   = TYPE_MOTIF;
+    trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
+
+    trame_motif->image  = NULL;
+    trame_motif->images = NULL;
+    trame_motif->nbr_images  = 0;
+    trame_motif->gif_largeur = 0;
+    trame_motif->gif_hauteur = 0;
+
+    trame_motif->pixbuf = Trame_Make_svg_bouton ( 0, 0, Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) );
+
+    if (!trame_motif->pixbuf)
+     { printf("%s: Chargement visuel bouton failed\n", __func__ );
+       g_free(trame_motif);
+       return(FALSE);
+     }
+
+    trame_motif->gif_largeur = gdk_pixbuf_get_width ( trame_motif->pixbuf );
+    trame_motif->gif_hauteur = gdk_pixbuf_get_height( trame_motif->pixbuf );
+    trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );     /* Et ajout dans la liste */
+    trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
+    trame_motif->nbr_images++;
+
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
+    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
+                                               trame_motif->pixbuf,
+                                               (-(gdouble)(trame_motif->gif_largeur/2)),
+                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
+                                               NULL );
+    Trame_set_handlers ( trame_motif );
+    Trame_rafraichir_motif ( trame_motif );
+    pthread_mutex_lock ( &trame->lock );
+    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    pthread_mutex_unlock ( &trame->lock );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
+ gboolean Trame_ajout_visuel_complexe ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
+  { gchar *forme = Json_get_string ( visuel, "forme" );
+         if ( !strcasecmp ( forme, "encadre" ) )           { return ( Trame_ajout_visuel_encadre          ( page, visuel ) ); }
+    else if ( !strcasecmp ( forme, "bouton" ) )            { return ( Trame_ajout_visuel_bouton           ( page, visuel ) ); }
+    else if ( !strcasecmp ( forme, "bloc_maintenance" ) )  { return ( Trame_ajout_visuel_bloc_maintenance ( page, visuel ) ); }
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Trame_redessiner_visuel_complexe: Met a jour un visuel complexe                                                            */
+/* Entrée: le motif du synoptique et son nouveau statut                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Trame_redessiner_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
   {
-    GdkPixbuf *pixbuf = NULL;
+    gchar *forme = Json_get_string ( trame_motif->visuel, "forme" );
+    if ( !strcasecmp ( forme, "bloc_maintenance" ) )
+     { gchar *couleur_service,  *couleur_maintenance;
+       gchar *mode = Json_get_string ( visuel, "mode" );
+
+       GooCanvasItem *bouton_service     = g_slist_nth_data ( trame_motif->items, 0 );
+       GooCanvasItem *bouton_maintenance = g_slist_nth_data ( trame_motif->items, 1 );
+
+       if (!strcasecmp ( mode, "maintenance" ))
+        { couleur_maintenance = "gray"; couleur_service="blue"; }
+       else
+        { couleur_maintenance = "blue"; couleur_service="gray"; }
+
+       g_object_set( bouton_service, "pixbuf",
+                     Trame_Make_svg_bouton ( 0, 0, couleur_service, "  Service  " ), NULL );
+
+       g_object_set( bouton_maintenance, "pixbuf",
+                     Trame_Make_svg_bouton ( 0, 0, couleur_maintenance, "Maintenance" ), NULL );
+       return;
+     }
+
+    if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
+    if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre" ) )
+     { gint ligne, colonne;
+       if ( Json_has_member ( visuel, "mode" ) )
+        { if ( sscanf ( Json_get_string ( visuel, "mode" ), "%dx%d", &ligne, &colonne ) != 2 )
+            { ligne = colonne = 1; }
+        }
+       else { ligne = colonne = 1; }
+       gchar *svg = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
+                                             Json_get_string ( visuel, "libelle" ) );
+       trame_motif->pixbuf = Trame_render_svg_to_pixbuf ( svg );
+       g_free(svg);
+     }
+    if (trame_motif->pixbuf) g_object_set( trame_motif->item, "pixbuf", trame_motif->pixbuf, NULL );
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
+ gboolean Trame_ajout_visuel_simple ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
+  { GdkPixbuf *pixbuf = NULL;
+    struct TRAME *trame;
+
+         if (page->type == TYPE_PAGE_SUPERVISION) trame = ((struct TYPE_INFO_SUPERVISION *)page->infos)->Trame;
+    else if (page->type == TYPE_PAGE_ATELIER)     trame = ((struct TYPE_INFO_ATELIER *)page->infos)->Trame_atelier;
+    else return(FALSE);
+
+    struct TRAME_ITEM_MOTIF *trame_motif = Trame_new_item();
+    if (!trame_motif) { printf("%s: Erreur mémoire\n", __func__); return(FALSE); }
+
+    trame_motif->visuel = visuel;
+    trame_motif->page   = page;
+    trame_motif->type   = TYPE_MOTIF;
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
 
     gchar *forme         = Json_get_string ( visuel, "forme" );
     gchar *ihm_affichage = Json_get_string ( visuel, "ihm_affichage" );
@@ -711,159 +871,67 @@ printf("Charger_pixbuf_file: %s\n", fichier );
         return(FALSE);
       }
 
-    if (pixbuf)
-     { trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
-       trame_motif->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
-       trame_motif->images = g_list_append( trame_motif->images, pixbuf );     /* Et ajout dans la liste */
-       trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
-       trame_motif->nbr_images++;
-       printf("%s : width = %d, height=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
+    if (!pixbuf)
+     { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme );
+       g_free(trame_motif);
+       return(FALSE);
      }
-    else { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme ); return(FALSE); }
+
+    trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
+    trame_motif->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
+    trame_motif->images = g_list_append( trame_motif->images, pixbuf );     /* Et ajout dans la liste */
+    trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
+    trame_motif->nbr_images++;
+    printf("%s : width = %d, height=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
+
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
+    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
+                                               trame_motif->pixbuf,
+                                               (-(gdouble)(trame_motif->gif_largeur/2)),
+                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
+                                               NULL );
+    Trame_set_handlers ( trame_motif );
+    pthread_mutex_lock ( &trame->lock );
+    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    pthread_mutex_unlock ( &trame->lock );
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Trame_color_to_html: Convertir une couleur en francais en couleur html                                                     */
-/* Entrée: la couleur 'DLS'                                                                                                   */
-/* Sortie: un buffer static                                                                                                   */
-/******************************************************************************************************************************/
- static gchar *Trame_color_to_html ( gchar *color )
-  {
-         if (!strcasecmp(color, "rouge"))     { return("red");       }
-    else if (!strcasecmp(color, "vert"))      { return("green");     }
-    else if (!strcasecmp(color, "bleu"))      { return("blue");      }
-    else if (!strcasecmp(color, "cyan"))      { return("lightblue"); }
-    else if (!strcasecmp(color, "jaune"))     { return("yellow");    }
-    else if (!strcasecmp(color, "orange"))    { return("orange");    }
-    else if (!strcasecmp(color, "blanc"))     { return("white");     }
-    else if (!strcasecmp(color, "kaki"))      { return("darkgreen"); }
-    else if (!strcasecmp(color, "gris"))      { return("gray");      }
-    else if (!strcasecmp(color, "marron"))    { return("brown");     }
-    else if (!strcasecmp(color, "grisfonce")) { return("darkgray");  }
-    else if (!strcasecmp(color, "noir"))      { return("black");     }
-    else return("black");
-  }
-/******************************************************************************************************************************/
-/* Trame_load_encadre: Prépare un pixbuf pour l'encadre en parametre                                                          */
-/* Entrée: la taille de lencadre, la couleur, son libellé                                                                     */
-/* Sortie: le pixbuf                                                                                                          */
-/******************************************************************************************************************************/
- static GdkPixbuf *Trame_load_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
-  { RsvgHandle *handle;
-    gchar encadre[512];
-    gchar *html_couleur = Trame_color_to_html ( couleur );
-    gint largeur=64*ligne;
-    gint hauteur=64*colonne;
-    g_snprintf( encadre, sizeof(encadre),
-                "<svg viewBox='0 0 %d %d' >"
-                "<text text-anchor='middle' x='%d' y='12' "
-                "      font-size='14px' font-family='Bitstream' font-style='italic' fill='black' stroke='black'>%s</text> "
-                "<rect x='5' y='20' rx='15' width='%d' height='%d' "
-                "      fill='none' stroke='%s' stroke-width='4'  />"
-                "</svg>",
-                largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, html_couleur
-              );
-printf("%s: New encadre %s\n", __func__, encadre );
-    GError *error = NULL;
-    handle = rsvg_handle_new_from_data ( encadre, strlen(encadre), &error );
-    if (handle)
-     { GdkPixbuf *pixbuf = rsvg_handle_get_pixbuf ( handle );
-       g_object_unref ( handle );
-       return(pixbuf);
-     }
-    printf("%s: Load encadre failed: %s\n", __func__, error->message );
-    g_error_free(error);
-    return(NULL);
-  }
-/******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- static void Trame_ajout_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
-  {
-    trame_motif->image  = NULL;
-    trame_motif->images = NULL;
-    trame_motif->nbr_images  = 0;
-    trame_motif->gif_largeur = 0;
-    trame_motif->gif_hauteur = 0;
-    GdkPixbuf *pixbuf = NULL;
-
-    gchar *forme = Json_get_string ( visuel, "forme" );
-    if ( g_str_has_prefix ( forme, "encadre_" ) )
-     { gint ligne, colonne;
-       if ( sscanf ( forme, "encadre_%dx%d", &ligne, &colonne ) != 2 ) return;
-       pixbuf = Trame_load_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
-                                     Json_get_string ( visuel, "libelle" ) );
-     }
-
-    if (pixbuf)
-     { trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
-       trame_motif->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
-       trame_motif->images = g_list_append( trame_motif->images, pixbuf );     /* Et ajout dans la liste */
-       trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
-       trame_motif->nbr_images++;
-       printf("%s : width = %d, height=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
-     }
-    else { printf("%s: Chargement visuel complexe '%s' pixbuf failed\n", __func__, forme ); }
-  }
-/******************************************************************************************************************************/
-/* Trame_rafraichir_visuel_complexe: Met a jour un visuel complexe                                                            */
-/* Entrée: le motif du synoptique et son nouveau statut                                                                       */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Trame_rafraichir_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
-  {
-    if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
-    if ( g_str_has_prefix ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre_" ) )
-     { gint ligne, colonne;
-       if ( sscanf ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre_%dx%d", &ligne, &colonne ) != 2 ) return;
-       trame_motif->pixbuf = Trame_load_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
-                                                  Json_get_string ( visuel, "libelle" ) );
-      
-     }
-    if (trame_motif->pixbuf) g_object_set( trame_motif->item, "pixbuf", trame_motif->pixbuf, NULL );
-  }
-/******************************************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
-/* Sortie: reussite                                                                                                           */
-/******************************************************************************************************************************/
- struct TRAME_ITEM_MOTIF *Trame_ajout_visuel ( gint flag, struct TRAME *trame, JsonNode *visuel )
+ void Trame_ajout_visuel_old ( gint flag, struct TRAME *trame, JsonNode *visuel )
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
-    if (!(trame && visuel)) return(NULL);
+    if (!(trame && visuel)) return;
 
     trame_motif = Trame_new_item();
-    if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return(NULL); }
+    if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return; }
 
     trame_motif->visuel = visuel;
     trame_motif->page   = trame->page;
     trame_motif->type   = TYPE_MOTIF;
-    gint groupe = Json_get_int ( visuel, "groupe" );
+    trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
+
     if (flag)
      { struct TYPE_INFO_ATELIER *infos = trame->page->infos;                     /* Pointeur sur les infos de la page atelier */
+       gint groupe = Json_get_int ( visuel, "groupe" );
        if (infos->groupe_max < groupe) infos->groupe_max = groupe;
      }
 
-    if ( Json_has_member ( visuel, "ihm_affichage" ) )
-     { if (!strcasecmp( Json_get_string ( visuel, "ihm_affichage" ), "complexe" ) )
-        { Trame_ajout_visuel_complexe ( trame_motif, visuel ); }
-       else
-        { if (Trame_ajout_visuel_simple ( trame_motif, visuel )==FALSE)
-           { g_free(trame_motif); return(NULL); }
-        }
-     }
-    else
-     { Charger_pixbuf_id( trame_motif, Json_get_int ( visuel, "icone" ) );
-       if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */
-        { Trame_del_item(trame_motif);
-          g_free(trame_motif);
-          return(NULL);
-        }
+    gint icone = Json_get_int ( visuel, "icone" );
+    if (icone == -1 || icone == 0) return;
+    Charger_pixbuf_id( trame_motif, icone );
+    if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */
+     { Trame_del_item(trame_motif);
+       g_free(trame_motif);
+       return;
      }
 
-    Trame_peindre_motif( trame_motif, Json_get_string ( visuel, "def_color" ) );
+    Trame_peindre_motif( trame_motif, Json_get_string ( visuel, "color" ) );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
@@ -900,6 +968,35 @@ printf("%s: New encadre %s\n", __func__, encadre );
        g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
        g_object_set( trame_motif->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
        g_object_set( trame_motif->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+
+       g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
+
+       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-press-event",   G_CALLBACK(Agrandir_hg), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-release-event", G_CALLBACK(Agrandir_hg), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_hg), "motion-notify-event",  G_CALLBACK(Agrandir_hg), trame_motif );
+
+       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-press-event",   G_CALLBACK(Agrandir_hd), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-release-event", G_CALLBACK(Agrandir_hd), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_hd), "motion-notify-event",  G_CALLBACK(Agrandir_hd), trame_motif );
+
+       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-press-event",   G_CALLBACK(Agrandir_bg), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-release-event", G_CALLBACK(Agrandir_bg), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_bg), "motion-notify-event",  G_CALLBACK(Agrandir_bg), trame_motif );
+
+       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-press-event",   G_CALLBACK(Agrandir_bd), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-release-event", G_CALLBACK(Agrandir_bd), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->select_bd), "motion-notify-event",  G_CALLBACK(Agrandir_bd), trame_motif );
+
+     }
+    else
+     { g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
+                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
+                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
      }
 
     Trame_rafraichir_motif ( trame_motif );
@@ -912,111 +1009,34 @@ printf("%s: New encadre %s\n", __func__, encadre );
        goo_canvas_item_lower( trame->fond, NULL );
      }
     else if (!flag) g_object_set ( G_OBJECT(trame_motif->item_groupe), "tooltip", Json_get_string ( visuel, "libelle" ), NULL );
-    return(trame_motif);
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                                                 */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
-/* Sortie: la structure referencant la camera de supervision, ou NULL si erreur                                               */
+/* Trame_ajout_commentaire: Ajoute un commentaire sur le visuel                                                               */
+/* Entrée: une structure commentaire, la trame de reference                                                                   */
+/* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
-                                                        struct CMD_TYPE_CAMERASUP *camera_sup )
-  { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-    GdkPixbuf *pixbuf;
-
-    if (!(trame && camera_sup)) return(NULL);
-
-    trame_camera_sup = g_try_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
-    if (!trame_camera_sup) return(NULL);
-    trame_camera_sup->camera_sup = camera_sup;
-    trame_camera_sup->page = trame->page;
-    pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                      /* Chargement du fichier Camera */
-    if (!pixbuf)
-     { //Download_gif ( 1, 0 );
-       pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                   /* Chargement du fichier Camera */
-       if (!pixbuf) { g_free(trame_camera_sup); return(NULL); }
-     }
-
-    trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );    /* Groupe MOTIF */
-    if (!flag) g_object_set ( G_OBJECT(trame_camera_sup->item_groupe), "tooltip", camera_sup->libelle, NULL );
-
-    trame_camera_sup->item = goo_canvas_image_new ( trame_camera_sup->item_groupe,
-                                                    pixbuf,
-                                                    -gdk_pixbuf_get_width(pixbuf)/2.0, -gdk_pixbuf_get_height(pixbuf)/2.0,
-                                                    NULL );
-
-/*       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
-       goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
-                                                         -1, GOO_CANVAS_ANCHOR_CENTER,
-                                                         "fill-color", "yellow",
-                                                         "font", "arial bold 14",
-                                                         NULL);*/
-    Trame_rafraichir_camera_sup ( trame_camera_sup );
-
-    trame_camera_sup->type = TYPE_CAMERA_SUP;
-    pthread_mutex_lock ( &trame->lock );
-    trame->trame_items = g_list_append( trame->trame_items, trame_camera_sup );
-    pthread_mutex_unlock ( &trame->lock );
-    return(trame_camera_sup);
-  }
-/**********************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
- void Trame_ajout_motif_par_item ( struct TRAME *trame,
-                                   struct TRAME_ITEM_MOTIF *trame_motif )
-  { trame_motif->image = trame_motif->images;
-
-    Trame_choisir_frame( trame_motif, 0, Json_get_string ( trame_motif->visuel, "def_color" ) );
-#ifdef DEBUG_TRAME
-printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->motif->hauteur );
-#endif
-    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
-
-    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
-                                               trame_motif->pixbuf,
-                                               (-(gdouble)(trame_motif->gif_largeur/2)),
-                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
-                                               NULL );
-
-    trame_motif->type = TYPE_MOTIF;                                  /* Il s'agit d'un item de type motif */
-    Trame_rafraichir_motif ( trame_motif );                                    /* Rafraichissement visuel */
-
-    pthread_mutex_lock ( &trame->lock );
-    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
-    pthread_mutex_unlock ( &trame->lock );
-  }
-/**********************************************************************************************************/
-/* Trame_ajout_commentaire: Ajoute un commentaire sur le visuel                                           */
-/* Entrée: une structure commentaire, la trame de reference                                               */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
- struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire ( gint flag, struct TRAME *trame,
-                                                      struct CMD_TYPE_COMMENT *comm )
+ struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire ( gint flag, struct TRAME *trame, JsonNode *comment )
   { struct TRAME_ITEM_COMMENT *trame_comm;
-    guint couleur;
 
-    if (!(trame && comm)) return(NULL);
+    if (!(trame && comment)) return(NULL);
     trame_comm = g_try_malloc0( sizeof(struct TRAME_ITEM_COMMENT) );
     if (!trame_comm) return(NULL);
-    couleur = ((guint)comm->rouge<<24) + ((guint)comm->vert<<16) + ((guint)comm->bleu<<8) + 0xFF;
 
-#ifdef DEBUG_TRAME
-printf("New comment %s %s \n", comm->libelle, comm->font );
-#endif
     trame_comm->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );        /* Groupe COMMENT */
 
     trame_comm->item = goo_canvas_text_new ( trame_comm->item_groupe,
-                                             comm->libelle, 0.0, 0.0, -1, GOO_CANVAS_ANCHOR_CENTER,
-                                               "font", comm->font,
-                                               "fill_color_rgba", couleur,
-                                               NULL );
-    trame_comm->comment = comm;
+                                             Json_get_string ( comment, "libelle" ), 0.0, 0.0, -1, GOO_CANVAS_ANCHOR_CENTER,
+                                            "font", Json_get_string( comment, "font"),
+                                            "fill_color", Json_get_string ( comment, "color" ),
+                                            NULL );
+    trame_comm->comment = comment;
     trame_comm->type = TYPE_COMMENTAIRE;
-    pthread_mutex_lock ( &trame->lock );
-    trame->trame_items = g_list_append( trame->trame_items, trame_comm );
-    pthread_mutex_unlock ( &trame->lock );
+    trame_comm->page   = trame->page;
+    if (flag)
+     { struct TYPE_INFO_ATELIER *infos = trame->page->infos;                     /* Pointeur sur les infos de la page atelier */
+       gint groupe = Json_get_int ( comment, "groupe" );
+       if (infos->groupe_max < groupe) infos->groupe_max = groupe;
+     }
 
     if ( flag )
      { trame_comm->select_mi = goo_canvas_rect_new (trame_comm->item_groupe,
@@ -1027,6 +1047,9 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
      }
 
     Trame_rafraichir_comment ( trame_comm );
+    pthread_mutex_lock ( &trame->lock );
+    trame->trame_items = g_list_append( trame->trame_items, trame_comm );
+    pthread_mutex_unlock ( &trame->lock );
     return(trame_comm);
   }
 /******************************************************************************************************************************/
@@ -1073,7 +1096,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Entrée: une structure passerelle, la trame de reference                                                                    */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, struct CMD_TYPE_PASSERELLE *pass )
+ struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, JsonNode *pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     gint taillex, tailley;
 
@@ -1081,12 +1104,13 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_pass = g_try_malloc0( sizeof(struct TRAME_ITEM_PASS) );
     if (!trame_pass) return(NULL);
 
+    gchar *nom_page = Json_get_string ( pass, "page" );
     trame_pass->page   = trame->page;
     trame_pass->pass   = pass;
     trame_pass->type   = TYPE_PASSERELLE;
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
     tailley = 15;
-    taillex = strlen(pass->libelle) * 11;
+    taillex = strlen(nom_page) * 11;
     trame_pass->item_fond = goo_canvas_rect_new( trame_pass->item_groupe,
                                                  (double)-60.0,
                                                  (double)-(tailley/2+10.0),
@@ -1097,7 +1121,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                  NULL);
 
     trame_pass->item_texte = goo_canvas_text_new( trame_pass->item_groupe,
-                                                  pass->libelle, 10.0, 0.0,
+                                                  nom_page, 10.0, 0.0,
                                                   -1, GOO_CANVAS_ANCHOR_WEST,
                                                   "font", "courier bold 14",
                                                   "fill-color", "white",
@@ -1106,7 +1130,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_pass->item_1 = Trame_new_SVG ( trame, trame_pass->item_groupe, "Pignon", "vert", 0, 25, 25, -58, -15 );
     trame_pass->item_2 = Trame_new_SVG ( trame, trame_pass->item_groupe, "Bouclier2", "vert", 0, 20, 20, -32, -13 );
     trame_pass->item_3 = Trame_new_SVG ( trame, trame_pass->item_groupe, "Croix_rouge", "vert", 0, 15, 15, -10, -10 );
-    printf("Nouvelle passerelle: %d, %p, %p, %p\n", pass->syn_id, trame_pass->item_1, trame_pass->item_2, trame_pass->item_3 );
 
     if ( flag )
      { trame_pass->select_mi = goo_canvas_rect_new (trame_pass->item_groupe,
@@ -1115,7 +1138,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                     "stroke_color", "black", NULL);
        g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
      }
-    else g_object_set ( G_OBJECT(trame_pass->item_groupe), "tooltip", pass->libelle, NULL );
+    else g_object_set ( G_OBJECT(trame_pass->item_groupe), "tooltip", nom_page, NULL );
 
 
     Trame_rafraichir_passerelle ( trame_pass );
@@ -1241,7 +1264,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     struct TRAME_ITEM_COMMENT *trame_comm;
     struct TRAME_ITEM_PASS *trame_pass;
     struct TRAME_ITEM_CADRAN *trame_cadran;
-    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
 
     pthread_mutex_lock ( &trame->lock );
@@ -1265,11 +1287,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
           case TYPE_MOTIF:  trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
                             Trame_del_item( trame_motif );
                             g_free(trame_motif);
-                            break;
-          case TYPE_CAMERA_SUP:
-                            trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
-                            Trame_del_camera_sup( trame_camera_sup );
-                            g_free(trame_camera_sup);
                             break;
           default: printf("Trame_effacer_trame: type inconnu\n");
         }

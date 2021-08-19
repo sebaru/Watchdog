@@ -33,7 +33,6 @@
  #include <gdk-pixbuf/gdk-pixbuf.h>                                                              /* Gestion des images/motifs */
  #include <json-glib/json-glib.h>
  #include <librsvg/rsvg.h>
- #include "Reseaux.h"
 
  #define TAILLE_SYNOPTIQUE_X        1024                                  /* Généralités sur la taille de la Trame synoptique */
  #define TAILLE_SYNOPTIQUE_Y        768
@@ -69,7 +68,6 @@
         TYPE_COMMENTAIRE,
         TYPE_MOTIF,
         TYPE_CADRAN,
-        TYPE_CAMERA_SUP
       };
 
  struct TRAME_ITEM_SVG
@@ -98,6 +96,7 @@
     GooCanvasItem *item_acro_syn;
     GList *images;                                                         /* Toutes les images présentes dans le fichier GIF */
     GList *image;                                                                     /* Image en cours d'affichage à l'écran */
+    GSList *items;                                                                      /* Liste des GooCanvas Item du visuel */
     GdkPixbuf *pixbuf;                                                               /* Pixbuf colorié et visualisé à l'écran */
     guchar num_image;                                                             /* Numero de l'image actuellement présentée */
     guchar nbr_images;                                                                   /* Nombre total d'image dans le .gif */
@@ -128,8 +127,7 @@
     GooCanvasItem *item_fond;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
-    struct CMD_TYPE_PASSERELLE *pass;
-    gint   layer;                                                                      /* Groupe de deplacement du motif */
+    JsonNode *pass;
     gint selection;
   };
 
@@ -140,8 +138,7 @@
     GooCanvasItem *item;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
-    struct CMD_TYPE_COMMENT *comment;
-    gint   layer;                                                                      /* Groupe de deplacement du motif */
+    JsonNode *comment;
     gint   selection;
   };
 
@@ -158,25 +155,11 @@
     gint   selection;
   };
 
- struct TRAME_ITEM_CAMERA_SUP
-  { gint type;                                                                                              /* Type de l'item */
-    struct PAGE_NOTEBOOK *page;
-    GooCanvasItem *item;
-    cairo_matrix_t transform;
-    GooCanvasItem *item_groupe;
-    GooCanvasItem *select_mi;
-
-    struct CMD_TYPE_CAMERASUP *camera_sup;
-    gint   layer;                                                                      /* Groupe de deplacement du motif */
-    gint selection;
-  };
-
  struct TRAME_ITEM
   { union { struct TRAME_ITEM_MOTIF motif;
             struct TRAME_ITEM_PASS pass;
             struct TRAME_ITEM_COMMENT comment;
             struct TRAME_ITEM_CADRAN cadran;
-            struct TRAME_ITEM_CAMERA_SUP camera_sup;
           };
   };
 
@@ -199,29 +182,25 @@
  extern void Trame_rafraichir_comment ( struct TRAME_ITEM_COMMENT *trame_comment );
  extern void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
- extern void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
- extern void Trame_rafraichir_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel );
+ extern void Trame_redessiner_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel );
  extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, gchar *color );
  extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gchar *color );
  extern void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno );
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
- extern struct TRAME_ITEM_MOTIF *Trame_ajout_visuel ( gint flag, struct TRAME *trame, JsonNode *visuel );
- extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
-                                                            struct CMD_TYPE_COMMENT *comm );
- extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
-                                                         struct CMD_TYPE_PASSERELLE *pass );
+ extern gboolean Trame_ajout_visuel_complexe ( struct PAGE_NOTEBOOK *page, JsonNode *visuel );
+ extern gboolean Trame_ajout_visuel_simple ( struct PAGE_NOTEBOOK *page, JsonNode *visuel );
+ extern void Trame_ajout_visuel_old ( gint flag, struct TRAME *trame, JsonNode *visuel );
+ extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame, JsonNode *comment );
+ extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, JsonNode *pass );
  extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame, JsonNode *cadran );
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
- extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
-                                                               struct CMD_TYPE_CAMERASUP *camera_sup );
  extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
  extern void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern struct TRAME *Trame_creer_trame ( struct PAGE_NOTEBOOK *page, guint taille_x, guint taille_y, char *coul, guint grille );
  extern void Trame_effacer_trame ( struct TRAME *trame );
  extern void Trame_detruire_trame ( struct TRAME *trame );

@@ -102,7 +102,7 @@
 /* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
- static void Ajouter_arch_all( gchar *nom, gchar *tech_id, gfloat valeur )
+ static void Ajouter_arch_all( gchar *tech_id, gchar *acronyme, gdouble valeur )
   { struct timeval tv;
     struct ARCHDB *arch;
 
@@ -110,8 +110,8 @@
     if (!arch) return;
 
     gettimeofday( &tv, NULL );                                                                   /* On prend l'heure actuelle */
-    g_snprintf( arch->nom,     sizeof(arch->nom),     "%s", nom );
-    g_snprintf( arch->tech_id, sizeof(arch->tech_id), "%s", tech_id );
+    g_snprintf( arch->tech_id,  sizeof(arch->tech_id),  "%s", tech_id );
+    g_snprintf( arch->acronyme, sizeof(arch->acronyme), "%s", acronyme );
     arch->valeur    = valeur;
     arch->date_sec  = tv.tv_sec;
     arch->date_usec = tv.tv_usec;
@@ -125,14 +125,14 @@
 /* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
- void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur )
+ void Ajouter_arch( gchar *tech_id, gchar *acronyme, gdouble valeur )
   { static gint last_log = 0;
 
     if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
     else if (Partage->com_arch.taille_arch > Partage->com_arch.buffer_size)
      { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "%s: DROP arch (taille>%d) '%s:%s'", __func__, Partage->com_arch.buffer_size, tech_id, nom );
+                   "%s: DROP arch (taille>%d) '%s:%s'", __func__, Partage->com_arch.buffer_size, tech_id, acronyme );
           last_log = Partage->top;
         }
        return;
@@ -140,13 +140,13 @@
     else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
      { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "%s: Thread is down. Dropping '%s:%s'=%f", __func__, tech_id, nom, valeur );
+                   "%s: Thread is down. Dropping '%s:%s'=%f", __func__, tech_id, acronyme, valeur );
           last_log = Partage->top;
         }
        return;
      }
-    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: '%s:%s'=%f", __func__, tech_id, nom, valeur );
-    Ajouter_arch_all( nom, tech_id, valeur );
+    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: '%s:%s'=%f", __func__, tech_id, acronyme, valeur );
+    Ajouter_arch_all( tech_id, acronyme, valeur );
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread                                                                                        */

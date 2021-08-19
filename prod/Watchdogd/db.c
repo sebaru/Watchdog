@@ -364,7 +364,7 @@
              "Libere_DB_SQL: Deconnexion effective (DB%07d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
-    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, taille, TRUE );
+    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, (gdouble)taille, TRUE );
   }
 /******************************************************************************************************************************/
 /* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */
@@ -2314,19 +2314,65 @@ encore:
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version = 5838;
-fin:
-    g_snprintf( requete, sizeof(requete), "DROP TABLE `icone`" );
-    Lancer_requete_SQL ( db, requete );
+    if (database_version < 5868)
+     { SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_VISUEL` ("
+                      "`id` INT(11) NOT NULL AUTO_INCREMENT,"
+                      "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                      "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                      "`forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',"
+                      "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL,"
+                      "`access_level` INT(11) NOT NULL DEFAULT '0',"
+                      "`def_color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '#c8c8c8',"
+                      "PRIMARY KEY (`id`),"
+                      "UNIQUE (`tech_id`, `acronyme`),"
+                      "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                      ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+       SQL_Write_new ("DELETE FROM dls WHERE tech_id=''");
+       SQL_Write_new ("INSERT INTO mnemos_VISUEL (tech_id, acronyme, forme, libelle, access_level, def_color) "
+                      "SELECT DISTINCT tech_id, acronyme, forme, libelle, access_level, def_color "
+                      "FROM syns_visuels WHERE tech_id IN (SELECT tech_id FROM dls)");
 
-    g_snprintf( requete, sizeof(requete), "CREATE TABLE `icone` ("
-                                          "`id` int(11) NOT NULL AUTO_INCREMENT,"
-                                          "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
-                                          "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
-                                          "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
-                                          "PRIMARY KEY (`id`)"
-                                          ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
-    Lancer_requete_SQL ( db, requete );
+       SQL_Write_new ("ALTER TABLE syns_visuels ADD mnemo_id INT(11) NULL DEFAULT NULL AFTER `visuel_id`, "
+                      "ADD FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_VISUEL` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;");
+       SQL_Write_new ("UPDATE syns_visuels AS s SET "
+                      "s.mnemo_id=(SELECT id FROM mnemos_VISUEL WHERE tech_id=s.tech_id AND acronyme=s.acronyme);");
+       SQL_Write_new ("ALTER TABLE syns_visuels DROP forme, DROP access_level, DROP libelle");
+       SQL_Write_new ("ALTER TABLE syns_visuels CHANGE `syn_id` `syn_id` INT(11) NULL DEFAULT NULL");
+     }
+
+    if (database_version < 5870)
+     { SQL_Write_new ("ALTER TABLE syns_comments ADD `color` VARCHAR(16) DEFAULT 'black' AFTER `bleu`");
+       SQL_Write_new ("ALTER TABLE syns_comments DROP `rouge`, DROP `vert`, DROP `bleu`, DROP `def_color`");
+     }
+
+    if (database_version < 5871)
+     { SQL_Write_new ("ALTER TABLE syns_comments ADD `groupe` INT(11) NOT NULL DEFAULT '0'");
+       SQL_Write_new ("ALTER TABLE syns_pass ADD `groupe` INT(11) NOT NULL DEFAULT '0'");
+     }
+
+    if (database_version < 5895)
+     { SQL_Write_new ("ALTER TABLE syns_rectangles CHANGE `def_color` "
+                      "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray'");
+       SQL_Write_new ("ALTER TABLE mnemos_VISUEL CHANGE `def_color` "
+                      "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray'");
+     }
+
+    if (database_version < 5908)
+     { SQL_Write_new ("ALTER TABLE syns_visuels ADD `dls_id` INT(11) NOT NULL DEFAULT '1' AFTER `visuel_id`" );
+       SQL_Write_new ("ALTER TABLE syns_visuels ADD UNIQUE (`dls_id`,`mnemo_id`)");
+     }
+
+fin:
+    database_version = 5908;
+    SQL_Write_new ("DROP TABLE `icone`");
+
+    SQL_Write_new ("CREATE TABLE `icone` ("
+                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                   "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                   "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
+                   "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
+                   "PRIMARY KEY (`id`)"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
 
     SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES "
                     "('wago_750342',      'webp', 'static'        ),"
@@ -2348,18 +2394,13 @@ fin:
                     "('vmc',              'png',  'by_color'      ),"
                     "('voyant_moteur',    'png',  'by_color'      ),"
                     "('eclair',           'png',  'by_color'      ),"
+                    "('vanne',            'png',  'by_color'      ),"
                     "('check',            'png',  'by_mode'       ),"
                     "('thermometre',      'png',  'by_mode_color' ),"
                     "('haut_parleur',     'png',  'by_mode_color' ),"
-                    "('encadre_1x1',      'none', 'complexe'      ),"
-                    "('encadre_1x2',      'none', 'complexe'      ),"
-                    "('encadre_1x3',      'none', 'complexe'      ),"
-                    "('encadre_2x1',      'none', 'complexe'      ),"
-                    "('encadre_2x2',      'none', 'complexe'      ),"
-                    "('encadre_2x3',      'none', 'complexe'      ),"
-                    "('encadre_3x1',      'none', 'complexe'      ),"
-                    "('encadre_3x2',      'none', 'complexe'      ),"
-                    "('encadre_3x3',      'none', 'complexe'      );"
+                    "('bouton',           'none', 'complexe'      ),"
+                    "('bloc_maintenance', 'none', 'complexe'      ),"
+                    "('encadre',          'none', 'complexe'      );"
                   );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
@@ -2393,7 +2434,7 @@ fin:
        "SELECT id,'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_HORLOGE UNION "
        "SELECT id,'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_Tempo UNION "
        "SELECT id,'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_R UNION "
-       "SELECT visuel_id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM syns_visuels UNION "
+       "SELECT id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_VISUEL UNION "
        "SELECT id,'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
        "SELECT id,'TABLEAU' AS classe, -1 AS classe_int, '' AS tech_id, '' AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
        "SELECT id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",

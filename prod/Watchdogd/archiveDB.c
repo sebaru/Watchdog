@@ -43,7 +43,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s_%s_%s(date_time,valeur) VALUES "
                 "(FROM_UNIXTIME(%d.%d),'%f')",
-                NOM_TABLE_ARCH, arch->tech_id, arch->nom, arch->date_sec, arch->date_usec, arch->valeur );
+                NOM_TABLE_ARCH, arch->tech_id, arch->acronyme, arch->date_sec, arch->date_usec, arch->valeur );
 
     if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
      {                               /* Si erreur, c'est peut etre parce que la table n'existe pas, on tente donc de la créer */
@@ -55,17 +55,18 @@
                    "KEY `index_date` (`date_time`)"
                    ") ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
                    "  PARTITION BY LINEAR KEY (date_time) PARTITIONS 12;",
-                   NOM_TABLE_ARCH, arch->tech_id, arch->nom );
+                   NOM_TABLE_ARCH, arch->tech_id, arch->acronyme );
        if (Lancer_requete_SQL ( db, table )==FALSE)                                            /* Execution de la requete SQL */
         { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                   "%s: Creation de la table %s_%s_%s FAILED", __func__, NOM_TABLE_ARCH, arch->tech_id, arch->nom );
+                   "%s: Creation de la table %s_%s_%s FAILED", __func__, NOM_TABLE_ARCH, arch->tech_id, arch->acronyme );
           return(FALSE);
         }
        Info_new( Config.log, Config.log_arch, LOG_NOTICE,
-                "%s: Creation de la table %s_%s_%s avant Insert", __func__, NOM_TABLE_ARCH, arch->tech_id, arch->nom );
+                "%s: Creation de la table %s_%s_%s avant Insert", __func__, NOM_TABLE_ARCH, arch->tech_id, arch->acronyme );
        if (Lancer_requete_SQL ( db, requete )==FALSE)                  /* Une fois la table créé, on peut y stocker l'archive */
         { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                   "%s: Ajout (2ième essai) dans la table %s_%s_%s FAILED", __func__, NOM_TABLE_ARCH, arch->tech_id, arch->nom );
+                   "%s: Ajout (2ième essai) dans la table %s_%s_%s FAILED", __func__,
+                    NOM_TABLE_ARCH, arch->tech_id, arch->acronyme );
           return(FALSE);
         }
      }

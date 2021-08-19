@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   height="128"
+   width="128"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.0"
+   sodipodi:version="0.32"
+   viewBox="0 0 262.4 192"
+   sodipodi:modified="true"
+   sodipodi:docname="bouton_io_source.svg"
+   id="svg2633"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs2635">
+    <linearGradient
+       inkscape:collect="always"
+       x1="127.2"
+       y1="18.495001"
+       x2="127.2"
+       gradientUnits="userSpaceOnUse"
+       y2="47.547001"
+       id="linearGradient2243">
+      <stop
+         offset="0"
+         style="stop-color:#ffffff"
+         id="stop3259" />
+      <stop
+         offset="1"
+         style="stop-color:#ffffff;stop-opacity:0"
+         id="stop3261" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     inkscape:document-rotation="0"
+     inkscape:window-maximized="1"
+     showgrid="false"
+     inkscape:document-units="px"
+     inkscape:pageopacity="0.0"
+     inkscape:window-width="1920"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:cy="63.568391"
+     inkscape:cx="40.513658"
+     inkscape:current-layer="g168"
+     borderopacity="1.0"
+     height="60px"
+     objecttolerance="10"
+     inkscape:zoom="2.2338146"
+     width="82px"
+     inkscape:window-height="979"
+     gridtolerance="10000"
+     pagecolor="#ffffff"
+     guidetolerance="10"
+     inkscape:pageshadow="2"
+     bordercolor="#666666"
+     id="base"
+     inkscape:pagecheckerboard="0" />
+  <g
+     transform="translate(-19.315,-20.92)"
+     inkscape:groupmode="layer"
+     inkscape:label="Layer 1"
+     id="layer1">
+    <g
+       id="g168"
+       transform="matrix(3.2026355,0,0,3.2026355,-41.74926,-45.704698)"
+       style="stroke-width:0.312243">
+      <circle
+         r="35.10146"
+         cy="908.54846"
+         cx="655.00006"
+         transform="matrix(1.1313982,0,0,1.1313982,-680.75089,-977.01009)"
+         style="fill:#ffbe00;fill-opacity:1;fill-rule:evenodd;stroke-width:0.173451"
+         class="WTD-ActiveFillColor"
+         id="path3676" />
+      <g
+         transform="matrix(1.0484457,0,0,1.0484457,-585.35909,-773.08514)"
+         style="fill:#eeeeec;stroke-width:0.173451"
+         id="g3756">
+        <path
+           inkscape:radius="-0.66131908"
+           inkscape:href="#path22091"
+           transform="matrix(0.93548,0,0,0.93548,3.1009,-64.472)"
+           inkscape:original="M 649.75 891.0625 C 641.40779 893.35756 635.28126 900.99292 635.28125 910.0625 C 635.28127 920.94545 644.11705 929.78124 655 929.78125 C 665.88295 929.78122 674.71874 920.94545 674.71875 910.0625 C 674.71873 900.98968 668.56549 893.35456 660.21875 891.0625 L 660.21875 899.15625 C 664.28467 901.11041 667.125 905.25095 667.125 910.0625 C 667.12501 916.75034 661.68785 922.1875 655 922.1875 C 648.31215 922.18751 642.875 916.75035 642.875 910.0625 C 642.87498 905.25102 645.6842 901.11044 649.75 899.15625 L 649.75 891.0625 z "
+           xlink:href="#path22091"
+           d="m 649.08789,892.00586 c -7.61805,2.49027 -13.14452,9.59996 -13.14453,18.05664 2e-5,10.525 8.53164,19.05663 19.05664,19.05664 10.525,-3e-5 19.05663,-8.53164 19.05664,-19.05664 -2e-5,-8.45901 -5.5512,-15.56911 -13.17578,-18.05664 v 6.80273 c 4.06873,2.13526 6.90625,6.34341 6.90625,11.25391 10e-6,7.04627 -5.74083,12.78711 -12.78711,12.78711 -7.04628,10e-6 -12.78711,-5.74083 -12.78711,-12.78711 -2e-5,-4.90752 2.80743,-9.1179 6.875,-11.25391 z"
+           sodipodi:type="inkscape:offset"
+           style="fill:#eeeeec;fill-rule:evenodd;stroke-width:0.173451"
+           id="path3758" />
+        <path
+           inkscape:radius="-0.60243881"
+           inkscape:href="#path22093"
+           transform="matrix(0.93548,0,0,0.93548,3.1009,-64.472)"
+           inkscape:original="M 651.1875 887.3125 L 651.1875 911.125 L 658.8125 911.125 L 658.8125 887.3125 L 651.1875 887.3125 z "
+           xlink:href="#path22093"
+           d="m 651.78906,887.91406 v 22.60938 h 6.42188 v -22.60938 z"
+           sodipodi:type="inkscape:offset"
+           style="fill:#eeeeec;fill-rule:evenodd;stroke-width:0.173451"
+           id="path3760" />
+      </g>
+      <ellipse
+         transform="matrix(1.2629377,0,0,1.3253862,-100.32087,-9.5817304)"
+         ry="16.283796"
+         rx="22.428625"
+         cy="34.778526"
+         cx="127.19796"
+         style="display:inline;opacity:0.75;fill:url(#linearGradient2243);fill-rule:evenodd;stroke-width:0.173451"
+         id="path3678" />
+    </g>
+  </g>
+  <metadata
+     id="metadata16">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>
+          image/svg+xml
+        </dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>
+              Openclipart
+            </dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title>
+          multicolor power buttons
+        </dc:title>
+        <dc:date>
+          2006-12-08T21:31:15
+        </dc:date>
+        <dc:description>
+          Multicolor power buttons, suitable for UI/web design.
+        </dc:description>
+        <dc:source>
+          https://openclipart.org/detail/1945/multicolor-power-buttons-by-molumen-1945
+        </dc:source>
+        <dc:subject />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

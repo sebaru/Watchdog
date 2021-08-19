@@ -226,14 +226,14 @@
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
      { ai = NULL;
-       Dls_data_set_AI ( db->row[0], db->row[1], (void *)&ai, atoi(db->row[2]), FALSE );
+       Dls_data_set_AI ( db->row[0], db->row[1], (void *)&ai, atof(db->row[2]), FALSE );
        ai->min       = atof(db->row[3]);
        ai->max       = atof(db->row[4]);
        ai->type      = atoi(db->row[5]);
        g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[6] );
        ai->archivage = atoi(db->row[7]);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s'=%f %s loaded", __func__,
-                 ai->tech_id, ai->acronyme, ai->val_avant_ech, ai->unite );
+                 ai->tech_id, ai->acronyme, ai->valeur, ai->unite );
      }
     Libere_DB_SQL( &db );
   }
@@ -262,7 +262,7 @@
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE mnemos_AI as m SET valeur='%f' "
                    "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   ai->val_avant_ech, ai->tech_id, ai->acronyme );
+                   ai->valeur, ai->tech_id, ai->acronyme );
        Lancer_requete_SQL ( db, requete );
        liste = g_slist_next(liste);
        cpt++;
@@ -279,10 +279,9 @@
  void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit )
   { Json_node_add_string ( element, "tech_id",      bit->tech_id );
     Json_node_add_string ( element, "acronyme",     bit->acronyme );
-    Json_node_add_double ( element, "valeur_brute", bit->val_avant_ech );
     Json_node_add_double ( element, "valeur_min",   bit->min );
     Json_node_add_double ( element, "valeur_max",   bit->max );
-    Json_node_add_double ( element, "valeur",       bit->val_ech );
+    Json_node_add_double ( element, "valeur",       bit->valeur );
     Json_node_add_string ( element, "unite",        bit->unite );
     Json_node_add_int    ( element, "type",         bit->type );
     Json_node_add_int    ( element, "in_range",     bit->inrange );

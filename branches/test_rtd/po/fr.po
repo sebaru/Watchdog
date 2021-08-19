@@ -1,0 +1,175 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2003-06-03 13:49+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=en_EN\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: Config/Watchdog-config.c:19
+msgid "Setup Watchdog ver"
+msgstr "Configuration de Watchdog"
+
+#: Config/Watchdog-config.c:42
+msgid "_Quit"
+msgstr "_Quitter"
+
+#: Config/Watchdog-config.c:42
+msgid "Stop the application"
+msgstr "Sortie de l'application"
+
+#: Config/Watchdog-config.c:47
+msgid "About"
+msgstr "A propos"
+
+#: Config/Watchdog-config.c:47
+msgid "Authors and Thanks"
+msgstr "Auteurs et remerciements"
+
+#: Config/Watchdog-config.c:63
+msgid "Quit"
+msgstr "Quitter"
+
+#: Config/Watchdog-config.c:116
+#, c-format
+msgid "%d user%c"
+msgstr ""
+
+#: Config/Watchdog-config.c:127
+#, c-format
+msgid "%d group%c"
+msgstr ""
+
+#: Config/Watchdog-config.c:138
+#, c-format
+msgid "%d message%c"
+msgstr ""
+
+#: Config/Watchdog-config.c:154 Config/Watchdog-config.c:168
+msgid "Users"
+msgstr ""
+
+#. *********************************** Edition des groupes Watchdog ***************************************
+#: Config/Watchdog-config.c:156 Config/Watchdog-config.c:174
+msgid "Groups"
+msgstr ""
+
+#: Config/Watchdog-config.c:161
+msgid "Messages"
+msgstr ""
+
+#: Config/Watchdog-config.c:188
+msgid "Groupname"
+msgstr ""
+
+#: Config/Watchdog-config.c:190
+msgid "ID"
+msgstr ""
+
+#: Config/Watchdog-config.c:193
+msgid "Creation date"
+msgstr ""
+
+#: Config/Watchdog-config.c:196
+msgid "Comments"
+msgstr ""
+
+#: Config/Watchdog-config.c:223
+msgid "Debug level"
+msgstr ""
+
+#: Config/Watchdog-config.c:225
+msgid "Watchdog Database"
+msgstr ""
+
+#: Config/Watchdog-config.c:227
+msgid "Password Database"
+msgstr ""
+
+#: Config/Watchdog-config.c:229
+msgid "before the first launch"
+msgstr ""
+
+#: Config/Watchdog-config.c:260 Config/Watchdog-config.c:275
+msgid "Unable to open Watchdog database!"
+msgstr ""
+
+#: Config/identcfg.c:36
+msgid "Put your new password"
+msgstr ""
+
+#: Config/identcfg.c:49
+msgid "New password"
+msgstr ""
+
+#: Config/identcfg.c:56
+msgid ""
+"New password\n"
+"(again)"
+msgstr ""
+
+#: Config/identcfg.c:81
+msgid "Passwords do not match"
+msgstr ""
+
+#: Config/identcfg.c:90
+msgid ""
+"Your REALLY have to\n"
+"change your password"
+msgstr ""
+
+#: Config/identcfg.c:99 Config/identcfg.c:179
+msgid "Encryption Error"
+msgstr ""
+
+#: Config/identcfg.c:107
+msgid "Password has been changed"
+msgstr ""
+
+#: Config/identcfg.c:127
+msgid "Identification required"
+msgstr ""
+
+#: Config/identcfg.c:130
+msgid "Put your ID and password"
+msgstr ""
+
+#: Config/identcfg.c:143
+msgid "Name"
+msgstr ""
+
+#: Config/identcfg.c:149
+msgid "Password"
+msgstr ""
+
+#: Config/identcfg.c:188
+msgid "Sorry !"
+msgstr ""
+
+#: Config/identcfg.c:197
+msgid ""
+"Sorry, but your account\n"
+"is disabled"
+msgstr ""
+
+#: Config/identcfg.c:204
+msgid ""
+"Sorry, but you have to\n"
+"change your password"
+msgstr ""
+
+#: Config/identcfg.c:213
+#, c-format
+msgid ""
+"Only members of %s\n"
+"are allowed to connect"
+msgstr ""
