@@ -721,11 +721,13 @@ end:
      }
     else
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
-                                    "SELECT m.*,v.*,i.*,dls.shortname AS dls_shortname FROM syns_visuels AS v "
+                                    "SELECT m.*,v.*,i.*,dls.tech_id AS dls_tech_id, dls.shortname AS dls_shortname, dls_owner.shortname AS dls_owner_shortname "
+                                    "FROM syns_visuels AS v "
                                     "INNER JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
                                     "INNER JOIN dls ON dls.id=v.dls_id "
                                     "INNER JOIN icone AS i ON i.forme=m.forme "
                                     "INNER JOIN syns AS s ON dls.syn_id=s.id "
+                                    "INNER JOIN dls AS dls_owner ON dls_owner.tech_id=m.tech_id "
                                     "WHERE s.id='%d' AND s.access_level<=%d AND m.access_level<=%d",
                                     syn_id, session->access_level, session->access_level) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
