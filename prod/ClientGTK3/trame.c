@@ -262,19 +262,15 @@
 
     gint rouge = 0, vert = 0, bleu = 0;
     if (!color) color="gray";
-         if (!strcasecmp(color, "rouge"))     { rouge = 255; vert =   0; bleu =   0; }
-    else if (!strcasecmp(color, "vert"))      { rouge =   0; vert = 255; bleu =   0; }
-    else if (!strcasecmp(color, "bleu"))      { rouge =   0; vert =   0; bleu = 255; }
-    else if (!strcasecmp(color, "jaune"))     { rouge = 255; vert = 255; bleu =   0; }
+         if (!strcasecmp(color, "red"))       { rouge = 255; vert =   0; bleu =   0; }
+    else if (!strcasecmp(color, "green"))     { rouge =   0; vert = 255; bleu =   0; }
+    else if (!strcasecmp(color, "blue"))      { rouge =   0; vert =   0; bleu = 255; }
+    else if (!strcasecmp(color, "yellow"))    { rouge = 255; vert = 255; bleu =   0; }
     else if (!strcasecmp(color, "orange"))    { rouge = 255; vert = 190; bleu =   0; }
-    else if (!strcasecmp(color, "blanc"))     { rouge = 255; vert = 255; bleu = 255; }
     else if (!strcasecmp(color, "white"))     { rouge = 255; vert = 255; bleu = 255; }
     else if (!strcasecmp(color, "kaki"))      { rouge =   0; vert = 100; bleu =   0; }
     else if (!strcasecmp(color, "darkgreen")) { rouge =   0; vert = 100; bleu =   0; }
-    else if (!strcasecmp(color, "gris"))      { rouge = 127; vert = 127; bleu = 127; }
-    else if (!strcasecmp(color, "marron"))    { rouge = 165; vert =  42; bleu =  42; }
-    else if (!strcasecmp(color, "grisfonce")) { rouge = 100; vert = 100; bleu = 100; }
-    else if (!strcasecmp(color, "noir"))      { rouge =   0; vert =   0; bleu =   0; }
+    else if (!strcasecmp(color, "gray"))      { rouge = 127; vert = 127; bleu = 127; }
     else if (!strcasecmp(color, "black"))     { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "(null)"))    { rouge =   0; vert =   0; bleu =   0; }
     else if (!strcasecmp(color, "#000"))      { rouge =   0; vert =   0; bleu =   0; }
