@@ -8,6 +8,7 @@
      { Send_to_API ( "GET", "/api/ping", null, function ()
         { if (WTDWebSocket && WTDWebSocket.readyState != 1)
            { console.log("Ping : websocket status = " + WTDWebSocket.readyState );
+             Charger_page_synoptique (Synoptique.id);
              Load_websocket();
            }
           Ping();
@@ -60,10 +61,10 @@
 /* Load_page: Appelé au chargement de la page                                                                                 */
 /******************************************************************************************************************************/
  function Load_page ()
-  { vars = window.location.pathname.split('/');
-    console.log("Load_page " + vars[1]);
-
-    Charger_page_synoptique (1);
+  { target = Get_url_parameter ( "syn_id" );
+    console.log("Load_page " + target );
+    if (targer==null) target = 1;
+    Charger_page_synoptique ( target );
     Load_websocket();
     Ping();
   }
