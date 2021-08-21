@@ -2362,45 +2362,49 @@ encore:
        SQL_Write_new ("ALTER TABLE syns_visuels ADD UNIQUE (`dls_id`,`mnemo_id`)");
      }
 
+    if (database_version < 5927)
+     { SQL_Write_new ("ALTER TABLE mnemos_VISUEL ADD `mode` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default' AFTER `forme`"); }
+
 fin:
-    database_version = 5908;
+    database_version = 5927;
     SQL_Write_new ("DROP TABLE `icone`");
 
     SQL_Write_new ("CREATE TABLE `icone` ("
-                   "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                   "`id` INT(11) NOT NULL AUTO_INCREMENT,"
                    "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
                    "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
                    "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
+                   "`layer` INT(11) NOT NULL DEFAULT '100',"
                    "PRIMARY KEY (`id`)"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
 
-    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`) VALUES "
-                    "('wago_750342',      'webp', 'static'        ),"
-                    "('satellite',        'svg',  'static'        ),"
-                    "('sms',              'jpg',  'static'        ),"
-                    "('ampoule',          'png',  'by_mode'       ),"
-                    "('chaudiere_gaz',    'png',  'by_mode'       ),"
-                    "('radiateur',        'png',  'by_mode'       ),"
-                    "('auto_manu',        'svg',  'by_mode'       ),"
-                    "('fenetre',          'png',  'by_mode'       ),"
-                    "('porte_entree',     'png',  'by_mode'       ),"
-                    "('porte_fenetre',    'png',  'by_mode'       ),"
-                    "('soufflant',        'png',  'by_mode'       ),"
-                    "('store',            'png',  'by_mode'       ),"
-                    "('pile',             'png',  'by_mode'       ),"
-                    "('kodi',             'svg',  'static'        ),"
-                    "('film',             'svg',  'static'        ),"
-                    "('bouton_io',        'png',  'by_color'      ),"
-                    "('vmc',              'png',  'by_color'      ),"
-                    "('voyant_moteur',    'png',  'by_color'      ),"
-                    "('eclair',           'png',  'by_color'      ),"
-                    "('vanne',            'png',  'by_color'      ),"
-                    "('check',            'png',  'by_mode'       ),"
-                    "('thermometre',      'png',  'by_mode_color' ),"
-                    "('haut_parleur',     'png',  'by_mode_color' ),"
-                    "('bouton',           'none', 'complexe'      ),"
-                    "('bloc_maintenance', 'none', 'complexe'      ),"
-                    "('encadre',          'none', 'complexe'      );"
+    SQL_Write_new ( "INSERT INTO icone (`forme`, `extension`, `ihm_affichage`, `layer`) VALUES "
+                    "('wago_750342',      'webp', 'static'        , 100),"
+                    "('satellite',        'svg',  'static'        , 100),"
+                    "('sms',              'jpg',  'static'        , 100),"
+                    "('ampoule',          'png',  'by_mode'       , 100),"
+                    "('chaudiere_gaz',    'png',  'by_mode'       , 100),"
+                    "('radiateur',        'png',  'by_mode'       , 100),"
+                    "('auto_manu',        'svg',  'by_mode'       , 100),"
+                    "('fenetre',          'png',  'by_mode'       , 100),"
+                    "('porte_entree',     'png',  'by_mode'       , 100),"
+                    "('porte_fenetre',    'png',  'by_mode'       , 100),"
+                    "('soufflant',        'png',  'by_mode'       , 100),"
+                    "('store',            'png',  'by_mode'       , 100),"
+                    "('pile',             'png',  'by_mode'       , 100),"
+                    "('kodi',             'svg',  'static'        , 100),"
+                    "('film',             'svg',  'static'        , 100),"
+                    "('bouton_io',        'png',  'by_color'      , 100),"
+                    "('vmc',              'png',  'by_color'      , 100),"
+                    "('voyant_moteur',    'png',  'by_color'      , 100),"
+                    "('eclair',           'png',  'by_color'      , 100),"
+                    "('vanne',            'png',  'by_color'      , 100),"
+                    "('check',            'png',  'by_mode'       , 100),"
+                    "('thermometre',      'png',  'by_mode_color' , 100),"
+                    "('haut_parleur',     'png',  'by_mode_color' , 100),"
+                    "('bouton',           'none', 'complexe'      , 100),"
+                    "('bloc_maintenance', 'none', 'complexe'      , 100),"
+                    "('encadre',          'none', 'complexe'      , 50 );"
                   );
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "

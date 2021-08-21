@@ -554,8 +554,8 @@ printf("%s: New bouton %s\n", __func__, bouton );
 /******************************************************************************************************************************/
  static gchar *Trame_Make_svg_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
   { gchar encadre[512];
-    gint largeur=64*ligne;
-    gint hauteur=64*colonne;
+    gint hauteur=64*ligne;
+    gint largeur=64*colonne;
     g_snprintf( encadre, sizeof(encadre),
                 "<svg viewBox='0 0 %d %d' >"
                 "<text text-anchor='middle' x='%d' y='12' "
@@ -569,9 +569,9 @@ printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
     return ( g_strdup(encadre) );
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_visuel_bloc_maintenance: Prépare un pixbuf pour le bloc maintenance en parametre                               */
-/* Entrée: la page, la description du bloc maintenance                                                                        */
-/* Sortie: False si erreur                                                                                                    */
+/* Trame_calculer_bounds: Calcule les gif_hauteur et gif_largeur de l'item_groupe                                             */
+/* Entrée: le trame_motif                                                                                                     */
+/* Sortie: met a jour les champs                                                                                              */
 /******************************************************************************************************************************/
  static void Trame_calculer_bounds ( struct TRAME_ITEM_MOTIF *trame_motif )
   { GooCanvasBounds bounds;
@@ -602,11 +602,25 @@ printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
 
     trame_motif->items = g_slist_append ( trame_motif->items,
-                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, 0.0, 0.0, NULL )
+                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, 30.0, 0.0, NULL )
                                         );
 
     trame_motif->items = g_slist_append ( trame_motif->items,
-                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, 0.0, 40.0, NULL )
+                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, 30.0, 40.0, NULL )
+                                        );
+
+    trame_motif->items = g_slist_append ( trame_motif->items,
+                                          goo_canvas_rect_new ( trame_motif->item_groupe,
+                                                                0, 5.0, 15.0, 15.0,
+                                                                "fill_color", "green",
+                                                                "stroke_color", "gray", NULL )
+                                        );
+
+    trame_motif->items = g_slist_append ( trame_motif->items,
+                                          goo_canvas_rect_new ( trame_motif->item_groupe,
+                                                                0, 45.0, 15.0, 15.0,
+                                                                "fill_color", "green",
+                                                                "stroke_color", "gray", NULL )
                                         );
 
     Trame_redessiner_visuel_complexe ( trame_motif, visuel );
@@ -761,17 +775,26 @@ printf("%s: New bloc maintenance\n", __func__ );
 
        GooCanvasItem *bouton_service     = g_slist_nth_data ( trame_motif->items, 0 );
        GooCanvasItem *bouton_maintenance = g_slist_nth_data ( trame_motif->items, 1 );
+       GooCanvasItem *rect_service       = g_slist_nth_data ( trame_motif->items, 2 );
+       GooCanvasItem *rect_maintenance   = g_slist_nth_data ( trame_motif->items, 3 );
 
        if (!strcasecmp ( mode, "maintenance" ))
-        { couleur_maintenance = "gray"; couleur_service="blue"; }
+        { couleur_maintenance = "gray"; couleur_service="blue";
+          g_object_set( rect_service,     "fill_color", "gray", NULL );
+          g_object_set( rect_maintenance, "fill_color", "orange", NULL );
+        }
        else
-        { couleur_maintenance = "blue"; couleur_service="gray"; }
+        { couleur_maintenance = "blue"; couleur_service="gray";
+          g_object_set( rect_service,     "fill_color", "lime", NULL );
+          g_object_set( rect_maintenance, "fill_color", "gray", NULL );
+        }
 
        g_object_set( bouton_service, "pixbuf",
                      Trame_Make_svg_bouton ( 0, 0, couleur_service, "  Service  " ), NULL );
 
        g_object_set( bouton_maintenance, "pixbuf",
                      Trame_Make_svg_bouton ( 0, 0, couleur_maintenance, "Maintenance" ), NULL );
+
        return;
      }
 

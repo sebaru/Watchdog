@@ -42,7 +42,7 @@
 /************************************************ Définitions des prototypes **************************************************/
  extern gboolean Synoptique_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *target_tech_id_src, gchar *target_acronyme_src );
  extern gboolean Mnemo_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src,
-                                            gchar *forme_src, gchar *couleur_src );
+                                            char *forme_src, gchar *mode_src, gchar *couleur_src );
  extern void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit );
 
  extern gboolean Synoptique_auto_create_CADRAN ( struct DLS_PLUGIN *plugin, gchar *tech_id, gchar *acronyme, gchar *forme_src,

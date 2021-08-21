@@ -49,7 +49,7 @@
 %token <val>    T_TOP_ALERTE T_TOP_ALERTE_FUGITIVE
 %token <val>    T_BUS T_HOST T_TECH_ID T_TAG T_TARGET
 
-%token <val>    MODE T_COLOR CLIGNO T_RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
+%token <val>    T_MODE T_COLOR CLIGNO T_RESET T_RATIO T_MULTI T_LIBELLE T_ETIQUETTE T_UNITE T_FORME
 %token <val>    T_PID T_KP T_KI T_KD T_INPUT
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM T_UPDATE T_CONSIGNE T_ALIAS
 
@@ -808,13 +808,13 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = T_CHAINE;
                    $$->chaine = $3;
                 }}
-                | MODE T_EGAL ENTIER
+                | T_MODE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ENTIER;
                    $$->val_as_int = $3;
                 }}
-                | MODE T_EGAL T_CHAINE
+                | T_MODE T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = T_CHAINE;
