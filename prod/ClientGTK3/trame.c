@@ -140,47 +140,34 @@
                               (gdouble)hauteur/trame_motif->gif_hauteur
                            );
      }
+    cairo_matrix_translate ( &trame_motif->transform,
+                             -(gdouble)trame_motif->gif_largeur/2.0,
+                             -(gdouble)trame_motif->gif_hauteur/2.0);
     goo_canvas_item_set_transform ( trame_motif->item_groupe, &trame_motif->transform );
 
     if (trame_motif->select_hd)
-     {
-       cairo_matrix_init_identity ( &trame_motif->transform_hd );
+     { cairo_matrix_init_identity ( &trame_motif->transform_hd );
        cairo_matrix_translate ( &trame_motif->transform_hd, (gdouble)position_x, (gdouble)position_y );
-
        cairo_matrix_rotate ( &trame_motif->transform_hd, (gdouble)angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_motif->transform_hd,
-                                ((gdouble)trame_motif->gif_largeur/2)*scale,
-                                -((gdouble)trame_motif->gif_hauteur/2)*scale
-                              );
+       cairo_matrix_translate ( &trame_motif->transform_hd, (gdouble)trame_motif->gif_largeur/2.0*scale, -(gdouble)trame_motif->gif_hauteur/2.0*scale );
        goo_canvas_item_set_transform ( trame_motif->select_hd, &trame_motif->transform_hd );
 
        cairo_matrix_init_identity ( &trame_motif->transform_bd );
        cairo_matrix_translate ( &trame_motif->transform_bd, (gdouble)position_x, (gdouble)position_y );
        cairo_matrix_rotate ( &trame_motif->transform_bd, (gdouble)angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_motif->transform_bd,
-                                ((gdouble)trame_motif->gif_largeur/2)*scale,
-                                ((gdouble)trame_motif->gif_hauteur/2)*scale
-                              );
+       cairo_matrix_translate ( &trame_motif->transform_bd, (gdouble)trame_motif->gif_largeur/2.0*scale, (gdouble)trame_motif->gif_hauteur/2.0*scale );
        goo_canvas_item_set_transform ( trame_motif->select_bd, &trame_motif->transform_bd );
 
        cairo_matrix_init_identity ( &trame_motif->transform_hg );
        cairo_matrix_translate ( &trame_motif->transform_hg, (gdouble)position_x, (gdouble)position_y );
-
        cairo_matrix_rotate ( &trame_motif->transform_hg, (gdouble)angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_motif->transform_hg,
-                                -((gdouble)trame_motif->gif_largeur/2)*scale,
-                                -((gdouble)trame_motif->gif_hauteur/2)*scale
-                              );
+       cairo_matrix_translate ( &trame_motif->transform_hg, -(gdouble)trame_motif->gif_largeur/2.0*scale, -(gdouble)trame_motif->gif_hauteur/2.0*scale );
        goo_canvas_item_set_transform ( trame_motif->select_hg, &trame_motif->transform_hg );
 
        cairo_matrix_init_identity ( &trame_motif->transform_bg );
        cairo_matrix_translate ( &trame_motif->transform_bg, (gdouble)position_x, (gdouble)position_y );
-
        cairo_matrix_rotate ( &trame_motif->transform_bg, (gdouble)angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_motif->transform_bg,
-                                -((gdouble)trame_motif->gif_largeur/2)*scale,
-                                ((gdouble)trame_motif->gif_hauteur/2)*scale
-                              );
+       cairo_matrix_translate ( &trame_motif->transform_bg, -(gdouble)trame_motif->gif_largeur/2.0*scale, (gdouble)trame_motif->gif_hauteur/2.0*scale );
        goo_canvas_item_set_transform ( trame_motif->select_bg, &trame_motif->transform_bg );
      }
   }
@@ -547,7 +534,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /******************************************************************************************************************************/
  static GdkPixbuf *Trame_Make_svg_bouton ( gint posx, gint posy, gchar *couleur, gchar *libelle )
   { gchar bouton[512];
-    gint largeur=14*strlen(libelle);
+    gint largeur=10*strlen(libelle);
     gint hauteur=28;
     g_snprintf( bouton, sizeof(bouton),
                 "<svg>"
@@ -572,13 +559,13 @@ printf("%s: New bouton %s\n", __func__, bouton );
     g_snprintf( encadre, sizeof(encadre),
                 "<svg viewBox='0 0 %d %d' >"
                 "<text text-anchor='middle' x='%d' y='12' "
-                "      font-size='14px' font-family='Bitstream' font-style='italic' fill='black' stroke='black'>%s</text> "
+                "      font-size='16px' font-family='Bitstream' font-style='italic' fill='black' stroke='black'>%s</text> "
                 "<rect x='5' y='20' rx='15' width='%d' height='%d' "
                 "      fill='none' stroke='%s' stroke-width='4'  />"
                 "</svg>",
                 largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, couleur
               );
-printf("%s: New encadre %s\n", __func__, encadre );
+printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
     return ( g_strdup(encadre) );
   }
 /******************************************************************************************************************************/
@@ -615,11 +602,11 @@ printf("%s: New encadre %s\n", __func__, encadre );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
 
     trame_motif->items = g_slist_append ( trame_motif->items,
-                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, -77, -34.0, NULL )
+                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, 0.0, 0.0, NULL )
                                         );
 
     trame_motif->items = g_slist_append ( trame_motif->items,
-                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, -77, 6.0, NULL )
+                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, 0.0, 40.0, NULL )
                                         );
 
     Trame_redessiner_visuel_complexe ( trame_motif, visuel );
@@ -686,9 +673,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
-                                               (-(gdouble)(trame_motif->gif_largeur/2)),
-                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
-                                               NULL );
+                                               0.0, 0.0, NULL );
 
     Trame_set_handlers ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
@@ -741,9 +726,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
-                                               (-(gdouble)(trame_motif->gif_largeur/2)),
-                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
-                                               NULL );
+                                               0.0, 0.0, NULL );
     Trame_set_handlers ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
@@ -774,6 +757,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     if ( !strcasecmp ( forme, "bloc_maintenance" ) )
      { gchar *couleur_service,  *couleur_maintenance;
        gchar *mode = Json_get_string ( visuel, "mode" );
+       if (!mode) mode="service";
 
        GooCanvasItem *bouton_service     = g_slist_nth_data ( trame_motif->items, 0 );
        GooCanvasItem *bouton_maintenance = g_slist_nth_data ( trame_motif->items, 1 );
@@ -931,9 +915,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
-                                               (-(gdouble)(trame_motif->gif_largeur/2)),
-                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
-                                               NULL );
+                                               0.0, 0.0, NULL );
 
     if (!Json_has_member ( visuel, "larg" ) || Json_get_int ( visuel, "larg" )<=0 )
      { Json_node_add_int ( visuel, "larg", trame_motif->gif_largeur ); }
@@ -945,19 +927,19 @@ printf("%s: New bloc maintenance\n", __func__ );
      { GdkPixbuf *pixbuf;
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_hg.gif", NULL );
-       trame_motif->select_hg = goo_canvas_image_new ( trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
+       trame_motif->select_hg = goo_canvas_image_new ( trame->canvas_root, pixbuf, -2.5, -2.5, NULL );
        g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_hd.gif", NULL );
-       trame_motif->select_hd = goo_canvas_image_new ( trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
+       trame_motif->select_hd = goo_canvas_image_new ( trame->canvas_root, pixbuf, -2.5, -2.5, NULL );
        g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_bg.gif", NULL );
-       trame_motif->select_bg = goo_canvas_image_new ( trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
+       trame_motif->select_bg = goo_canvas_image_new ( trame->canvas_root, pixbuf, -2.5, -2.5, NULL );
        g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_bd.gif", NULL );
-       trame_motif->select_bd = goo_canvas_image_new ( trame->canvas_root, pixbuf, 0.0, 0.0, NULL );
+       trame_motif->select_bd = goo_canvas_image_new ( trame->canvas_root, pixbuf, -2.5, -2.5, NULL );
        g_object_unref(pixbuf);
 
        g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
