@@ -707,7 +707,7 @@ end:
 /*-------------------------------------------------- Envoi les visuels de la page --------------------------------------------*/
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
-                                    "SELECT m.*,v.*,i.*,dls.shortname AS dls_shortname FROM syns_visuels AS v "
+                                    "SELECT v.*,m.*,i.*,dls.shortname AS dls_shortname FROM syns_visuels AS v "
                                     "LEFT JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
                                     "LEFT JOIN dls ON dls.id=v.dls_id "
                                     "LEFT JOIN icone AS i ON i.forme=m.forme "
@@ -721,7 +721,7 @@ end:
      }
     else
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
-                                    "SELECT m.*,v.*,i.*,dls.tech_id AS dls_tech_id, dls.shortname AS dls_shortname, dls_owner.shortname AS dls_owner_shortname "
+                                    "SELECT v.*,m.*,i.*,dls.tech_id AS dls_tech_id, dls.shortname AS dls_shortname, dls_owner.shortname AS dls_owner_shortname "
                                     "FROM syns_visuels AS v "
                                     "INNER JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
                                     "INNER JOIN dls ON dls.id=v.dls_id "

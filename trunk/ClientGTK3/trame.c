@@ -565,7 +565,7 @@ printf("%s: New bouton %s\n", __func__, bouton );
                 "</svg>",
                 largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, couleur
               );
-printf("%s: New encadre %s\n", __func__, encadre );
+printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
     return ( g_strdup(encadre) );
   }
 /******************************************************************************************************************************/

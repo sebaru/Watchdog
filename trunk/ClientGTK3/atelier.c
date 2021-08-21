@@ -114,6 +114,7 @@
 
     page->type           = TYPE_PAGE_ATELIER;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
+
     g_object_get ( msg, "response-body-data", &response_brute, NULL );
     infos->syn = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
 
