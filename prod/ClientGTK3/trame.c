@@ -875,7 +875,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->visuel = visuel;
     trame_motif->page   = trame->page;
     trame_motif->type   = TYPE_MOTIF;
-    trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->mode   = Json_get_int(visuel, "mode");                                              /* Sauvegarde etat motif */
     trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
     g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
 
@@ -894,7 +894,6 @@ printf("%s: New bloc maintenance\n", __func__ );
        return;
      }
 
-    Trame_peindre_motif( trame_motif, Json_get_string ( visuel, "color" ) );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
@@ -960,6 +959,7 @@ printf("%s: New bloc maintenance\n", __func__ );
                          G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
      }
 
+    Trame_choisir_frame ( trame_motif, Json_get_int ( visuel, "mode" ), Json_get_string ( visuel, "color" ) );
     Trame_rafraichir_motif ( trame_motif );
 
     pthread_mutex_lock ( &trame->lock );

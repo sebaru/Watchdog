@@ -251,9 +251,10 @@
 /******************************************************************************************************************************/
  void Updater_un_visuel( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *motif )
   {
-    printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
-           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
-    trame_motif->mode   = Json_get_int(motif,"mode");                                                /* Sauvegarde etat motif */
+    printf("%s: %s:%s => %s, %s, %d. Gestion = %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
+           Json_get_string( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ),
+           Json_get_int ( trame_motif->visuel, "gestion" ) );
+    trame_motif->mode   = atoi(Json_get_string(motif,"mode"));                                       /* Sauvegarde etat motif */
     trame_motif->cligno = Json_get_bool(motif,"cligno");                                             /* Sauvegarde etat motif */
     g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string(motif,"color") );/* Sauvegarde etat motif */
 
@@ -317,17 +318,6 @@
      { /*Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,*/
 
      }
-  }
-/******************************************************************************************************************************/
-/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
-/* Entrée: une reference sur le message                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Updater_les_visuels_by_array (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct PAGE_NOTEBOOK *page = user_data;
-    if (!page) return;
-
-    Updater_les_visuels ( page, element );
   }
 /******************************************************************************************************************************/
 /* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
@@ -622,7 +612,6 @@
     json_array_foreach_element ( Json_get_array ( infos->syn, "passerelles" ),  Afficher_une_passerelle, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),     Afficher_un_commentaire, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),      Afficher_un_cadran, page );
-    json_array_foreach_element ( Json_get_array ( infos->syn, "etat_visuels" ), Updater_les_visuels_by_array, page );
     Json_node_foreach_array_element ( infos->syn, "syn_vars", Updater_les_syn_vars, page );
     gtk_widget_show_all( page->child );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(page->client->Notebook), page_num );
