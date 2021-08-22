@@ -1529,12 +1529,14 @@
                    break;
                  }
                 case MNEMO_MOTIF:
-                 { gchar *forme   = Get_option_chaine( alias->options, T_FORME, "none" );
+                 { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
                    gchar *couleur = Get_option_chaine( alias->options, T_COLOR, "black" );
                    gchar *mode    = Get_option_chaine( alias->options, T_MODE, "default" );
-                   Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
+                   if (forme)
+                    { Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
                                                                                                         /* Création du visuel */
-                   Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+                      Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+                    }
                    break;
                  }
                 case MNEMO_CPT_IMP:
