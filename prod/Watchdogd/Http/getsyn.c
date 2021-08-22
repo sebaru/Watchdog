@@ -707,12 +707,16 @@ end:
 /*-------------------------------------------------- Envoi les visuels de la page --------------------------------------------*/
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
-                                    "SELECT v.*,m.*,i.*,dls.shortname AS dls_shortname FROM syns_visuels AS v "
+                                    "SELECT v.*,m.*,i.*,dls.shortname AS dls_shortname, "
+                                    "  IF( m.tech_id IS NULL, v.tech_id, m.tech_id) AS tech_id,"
+                                    "  IF( m.acronyme IS NULL, v.acronyme, m.acronyme) AS acronyme "
+                                    "FROM syns_visuels AS v "
                                     "LEFT JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
                                     "LEFT JOIN dls ON dls.id=v.dls_id "
                                     "LEFT JOIN icone AS i ON i.forme=m.forme "
                                     "LEFT JOIN syns AS s ON dls.syn_id=s.id "
-                                    "WHERE (s.id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d'",
+                                    "WHERE (s.id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d' "
+                                    "ORDER BY layer",
                                      syn_id, session->access_level, session->access_level, syn_id) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref(synoptique);
@@ -728,7 +732,8 @@ end:
                                     "INNER JOIN icone AS i ON i.forme=m.forme "
                                     "INNER JOIN syns AS s ON dls.syn_id=s.id "
                                     "INNER JOIN dls AS dls_owner ON dls_owner.tech_id=m.tech_id "
-                                    "WHERE s.id='%d' AND s.access_level<=%d AND m.access_level<=%d",
+                                    "WHERE s.id='%d' AND s.access_level<=%d AND m.access_level<=%d "
+                                    "ORDER BY layer",
                                     syn_id, session->access_level, session->access_level) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref(synoptique);

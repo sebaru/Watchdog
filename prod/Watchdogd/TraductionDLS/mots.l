@@ -110,7 +110,7 @@ newline       [\n\r]+
 "blanc"                    { DlsScanner_lval.val = T_BLANC;     return T_BLANC;     }
 "kaki"                     { DlsScanner_lval.val = T_KAKI;      return T_KAKI;      }
  /************************************************* Options ************************************************/
-"mode"                     { DlsScanner_lval.val = MODE;        return MODE;        }
+"mode"                     { DlsScanner_lval.val = T_MODE;      return T_MODE;      }
 "reset"                    { DlsScanner_lval.val = T_RESET;     return T_RESET;     }
 "multi"                    { DlsScanner_lval.val = T_MULTI;     return T_MULTI;     }
 "ratio"                    { DlsScanner_lval.val = T_RATIO;     return T_RATIO;     }

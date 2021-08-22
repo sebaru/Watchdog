@@ -63,7 +63,7 @@
  function Load_page ()
   { target = Get_url_parameter ( "syn_id" );
     console.log("Load_page " + target );
-    if (targer==null) target = 1;
+    if (target == null) target = 1;
     Charger_page_synoptique ( target );
     Load_websocket();
     Ping();

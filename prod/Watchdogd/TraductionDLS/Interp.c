@@ -903,8 +903,8 @@
   { struct ACTION *action;
     int taille, mode;
 
-    gchar *mode_string = Get_option_chaine ( options, MODE, NULL );
-    if (mode_string == NULL) mode = Get_option_entier ( options, MODE, 0   );
+    gchar *mode_string = Get_option_chaine ( options, T_MODE, NULL );
+    if (mode_string == NULL) mode = Get_option_entier ( options, T_MODE, 0   );
     gchar *couleur = Get_option_chaine ( options, T_COLOR, "black" );
     gint   cligno  = Get_option_entier ( options, CLIGNO, 0 );
     gchar *libelle = Get_option_chaine ( options, T_LIBELLE, "pas de libellé" );
@@ -1531,7 +1531,8 @@
                 case MNEMO_MOTIF:
                  { gchar *forme   = Get_option_chaine( alias->options, T_FORME, "none" );
                    gchar *couleur = Get_option_chaine( alias->options, T_COLOR, "black" );
-                   Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, couleur );
+                   gchar *mode    = Get_option_chaine( alias->options, T_MODE, "default" );
+                   Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
                                                                                                         /* Création du visuel */
                    Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
                    break;

@@ -153,6 +153,19 @@
     Envoi_json_au_serveur ( trame_motif->page->client, "POST", builder, "/api/syn/clic", NULL );
   }
 /******************************************************************************************************************************/
+/* Envoyer_clic_au_serveur: Envoi d'une commande clic au serveur                                                              */
+/* Entrée: le tech_id, et l'acronyme                                                                                          */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Envoyer_action_au_serveur ( struct CLIENT *client, gchar *tech_id, gchar *acronyme )
+  { JsonNode *RootNode = Json_node_create ();
+    if (!RootNode) return;
+    Json_node_add_string ( RootNode, "tech_id",  tech_id );
+    Json_node_add_string ( RootNode, "acronyme", acronyme );
+    printf("%s: envoi syn_clic '%s':'%s'\n", __func__, tech_id, acronyme );
+    Envoi_json_au_serveur_new ( client, "POST", RootNode, "/api/syn/clic", NULL );
+  }
+/******************************************************************************************************************************/
 /* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                       */
 /* Entrée: une structure Event                                                                                                */
 /* Sortie :rien                                                                                                               */
@@ -199,6 +212,37 @@
            }
         }
      }
+  }
+/******************************************************************************************************************************/
+/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                       */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Clic_sur_bouton_supervision ( GooCanvasItem *item, GooCanvasItem *target,
+                                    GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
+  { static struct TRAME_ITEM_MOTIF *trame_motif_appuye = NULL;
+    gchar chaine [128];
+
+    if (!(trame_motif && event)) return;
+
+    if (event->type == GDK_BUTTON_PRESS) { trame_motif_appuye = trame_motif; return; }
+
+    if (event->type != GDK_BUTTON_RELEASE) return;
+
+    if (trame_motif_appuye == trame_motif)
+     { if ( Json_has_member ( trame_motif->visuel, "forme" ) && !strcasecmp ( Json_get_string ( trame_motif->visuel, "forme" ), "bloc_maintenance" ) )
+        { gint index = g_slist_index ( trame_motif->items, item );
+          if (index==0) /* Service */
+           { g_snprintf( chaine, sizeof(chaine), "%s_CLIC_SERVICE", Json_get_string ( trame_motif->visuel, "acronyme" ) );
+             Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
+           }
+          else if (index==1) /* Maintenance */
+           { g_snprintf( chaine, sizeof(chaine), "%s_CLIC_MAINTENANCE", Json_get_string ( trame_motif->visuel, "acronyme" ) );
+             Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
+           }
+        }
+     }
+    trame_motif_appuye = NULL;
   }
 /******************************************************************************************************************************/
 /* Changer_etat_motif: Changement d'etat d'un motif                                                                           */

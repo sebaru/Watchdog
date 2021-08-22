@@ -41,8 +41,8 @@
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_VISUEL ( struct DLS_PLUGIN *plugin, gchar *acronyme, gchar *libelle_src,
-                                     gchar *forme_src, gchar *couleur_src )
-  { gchar *acro, *libelle, *forme, *couleur;
+                                     gchar *forme_src, gchar *mode_src, gchar *couleur_src )
+  { gchar *acro, *libelle, *forme, *mode, *couleur;
     gboolean retour;
 
 /******************************************** Préparation de la base du mnemo *************************************************/
@@ -64,23 +64,30 @@
                 "%s: Normalisation forme impossible. Mnemo NOT added nor modified.", __func__ );
      }
 
+    mode       = Normaliser_chaine ( mode_src );                                             /* Formatage correct des chaines */
+    if ( !mode )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation mode impossible. Mnemo NOT added nor modified.", __func__ );
+     }
+
     couleur    = Normaliser_chaine ( couleur_src );                                          /* Formatage correct des chaines */
     if ( !couleur )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "%s: Normalisation couleur impossible. Mnemo NOT added nor modified.", __func__ );
      }
 
-    if (acro && libelle && forme && couleur)
+    if (acro && libelle && forme && mode && couleur)
      { retour = SQL_Write_new( "INSERT INTO mnemos_VISUEL SET "
-                               "tech_id='%s', acronyme='%s', forme='%s', libelle='%s', color='%s' /*access_level=0,*/ "
+                               "tech_id='%s', acronyme='%s', forme='%s', libelle='%s', mode='%s', color='%s' /*access_level=0,*/ "
                                "ON DUPLICATE KEY UPDATE forme=VALUES(forme), libelle=VALUES(libelle),"
-                               "color=VALUES(color)",
-                               plugin->tech_id, acro, forme, libelle, couleur );
+                               "mode=VALUES(mode), color=VALUES(color)",
+                               plugin->tech_id, acro, forme, libelle, mode, couleur );
      } else retour = FALSE;
     if (acro)    g_free(acro);
     if (forme)   g_free(forme);
-    if (libelle) g_free(libelle);
     if (couleur) g_free(couleur);
+    if (mode)    g_free(mode);
+    if (libelle) g_free(libelle);
 
     return (retour);
   }

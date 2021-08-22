@@ -433,82 +433,46 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     return(pixbuf);
   }
 /******************************************************************************************************************************/
-/* Trame_set_handlers: Accroche les handlers au visuel en parametre                                                           */
+/* Trame_create_poignees: Création des poignées autour de l'item groupe + raccordement event handler pour l'atelier           */
 /* Entrée : le visuel trame_motif                                                                                             */
-/* sortie : Les handlers sont définis ainsi que les accroches                                                                 */
+/* sortie : Les handlers sont définis ainsi que les poignees                                                                  */
 /******************************************************************************************************************************/
- static void Trame_set_handlers ( struct TRAME_ITEM_MOTIF *trame_motif )
+ static void Trame_create_poignees ( struct TRAME_ITEM_MOTIF *trame_motif )
   { struct TRAME *trame;
-         if (trame_motif->page->type == TYPE_PAGE_SUPERVISION)
-          {  trame = ((struct TYPE_INFO_SUPERVISION *)trame_motif->page->infos)->Trame; }
-    else if (trame_motif->page->type == TYPE_PAGE_ATELIER)
-          { trame = ((struct TYPE_INFO_ATELIER *)trame_motif->page->infos)->Trame_atelier; }
-    else return;
+    if (trame_motif->page->type != TYPE_PAGE_ATELIER) return;
 
-    if (trame_motif->page->type == TYPE_PAGE_ATELIER )
-     { trame_motif->select_hg = goo_canvas_rect_new (trame->canvas_root,
-                                                    -2.5, -2.5, 5.0, 5.0,
-                                                    "fill_color", "lightblue",
-                                                    "stroke_color", "black", NULL);
+    trame = ((struct TYPE_INFO_ATELIER *)trame_motif->page->infos)->Trame_atelier;
 
-       trame_motif->select_hd = goo_canvas_rect_new (trame->canvas_root,
-                                                    -2.5, -2.5, 5.0, 5.0,
-                                                    "fill_color", "red",
-                                                    "stroke_color", "black", NULL);
+    trame_motif->select_hg = goo_canvas_rect_new (trame->canvas_root,
+                                                 -2.5, -2.5, 5.0, 5.0,
+                                                 "fill_color", "lightblue",
+                                                 "stroke_color", "black", NULL);
 
-       trame_motif->select_bg = goo_canvas_rect_new (trame->canvas_root,
-                                                    -2.5, -2.5, 5.0, 5.0,
-                                                    "fill_color", "green",
-                                                    "stroke_color", "black", NULL);
+    trame_motif->select_hd = goo_canvas_rect_new (trame->canvas_root,
+                                                 -2.5, -2.5, 5.0, 5.0,
+                                                 "fill_color", "red",
+                                                 "stroke_color", "black", NULL);
 
-       trame_motif->select_bd = goo_canvas_rect_new (trame->canvas_root,
-                                                    -2.5, -2.5, 5.0, 5.0,
-                                                    "fill_color", "darkblue",
-                                                    "stroke_color", "black", NULL);
+    trame_motif->select_bg = goo_canvas_rect_new (trame->canvas_root,
+                                                 -2.5, -2.5, 5.0, 5.0,
+                                                 "fill_color", "green",
+                                                 "stroke_color", "black", NULL);
 
-       g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-       g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-       g_object_set( trame_motif->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-       g_object_set( trame_motif->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+    trame_motif->select_bd = goo_canvas_rect_new (trame->canvas_root,
+                                                 -2.5, -2.5, 5.0, 5.0,
+                                                 "fill_color", "darkblue",
+                                                 "stroke_color", "black", NULL);
 
-       if (trame_motif->item)
-        { g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-          g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
-          g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-          g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-          g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
-        }
-       else
-        { g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
-          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
-          g_signal_connect( G_OBJECT(trame_motif->item_groupe), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
-        }
+    g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+    g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+    g_object_set( trame_motif->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+    g_object_set( trame_motif->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
 
-       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-press-event",   G_CALLBACK(Agrandir_hg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-release-event", G_CALLBACK(Agrandir_hg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hg), "motion-notify-event",  G_CALLBACK(Agrandir_hg), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-press-event",   G_CALLBACK(Agrandir_hd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-release-event", G_CALLBACK(Agrandir_hd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hd), "motion-notify-event",  G_CALLBACK(Agrandir_hd), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-press-event",   G_CALLBACK(Agrandir_bg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-release-event", G_CALLBACK(Agrandir_bg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bg), "motion-notify-event",  G_CALLBACK(Agrandir_bg), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-press-event",   G_CALLBACK(Agrandir_bd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-release-event", G_CALLBACK(Agrandir_bd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bd), "motion-notify-event",  G_CALLBACK(Agrandir_bd), trame_motif );
-
-     }
-    else
-     { g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
-                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
-                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
-     }
+    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event", G_CALLBACK(Clic_sur_motif), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
+    g_signal_connect( G_OBJECT(trame_motif->item_groupe), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
   }
 /******************************************************************************************************************************/
 /* Trame_render_svg_to_pixbuf : rendre un svg en un pixbuf                                                                    */
@@ -532,18 +496,19 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /* Entrée: les parametres du bouton                                                                                           */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
- static GdkPixbuf *Trame_Make_svg_bouton ( gint posx, gint posy, gchar *couleur, gchar *libelle )
+ static GdkPixbuf *Trame_Make_svg_bouton ( gchar *couleur, gchar *libelle )
   { gchar bouton[512];
-    gint largeur=10*strlen(libelle);
-    gint hauteur=28;
+    gint largeur=6*strlen(libelle);
+    gint hauteur=18;
+
     g_snprintf( bouton, sizeof(bouton),
                 "<svg>"
-                "<rect x='%d' y='%d' rx='10' width='%d' height='%d' "
+                "<rect x='0' y='0' rx='10' width='%d' height='%d' "
                 "      fill='%s' stroke='none' />"
                 "<text text-anchor='middle' x='%d' y='%d' "
-                "      font-size='14px' font-family='Bitstream' font-style='' fill='white' stroke='white'>%s</text> "
+                "      font-size='9' font-family='Bitstream' font-style='' fill='white' stroke='white'>%s</text> "
                 "</svg>",
-                posx, posy, largeur, hauteur, couleur, posx+largeur/2, posy+hauteur/2+5, libelle );
+                largeur, hauteur, couleur, largeur/2, hauteur/2+4, libelle );
 printf("%s: New bouton %s\n", __func__, bouton );
     return(Trame_render_svg_to_pixbuf (bouton));
   }
@@ -554,8 +519,8 @@ printf("%s: New bouton %s\n", __func__, bouton );
 /******************************************************************************************************************************/
  static gchar *Trame_Make_svg_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
   { gchar encadre[512];
-    gint largeur=64*ligne;
-    gint hauteur=64*colonne;
+    gint hauteur=64*ligne;
+    gint largeur=64*colonne;
     g_snprintf( encadre, sizeof(encadre),
                 "<svg viewBox='0 0 %d %d' >"
                 "<text text-anchor='middle' x='%d' y='12' "
@@ -569,9 +534,9 @@ printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
     return ( g_strdup(encadre) );
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_visuel_bloc_maintenance: Prépare un pixbuf pour le bloc maintenance en parametre                               */
-/* Entrée: la page, la description du bloc maintenance                                                                        */
-/* Sortie: False si erreur                                                                                                    */
+/* Trame_calculer_bounds: Calcule les gif_hauteur et gif_largeur de l'item_groupe                                             */
+/* Entrée: le trame_motif                                                                                                     */
+/* Sortie: met a jour les champs                                                                                              */
 /******************************************************************************************************************************/
  static void Trame_calculer_bounds ( struct TRAME_ITEM_MOTIF *trame_motif )
   { GooCanvasBounds bounds;
@@ -586,6 +551,8 @@ printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
 /******************************************************************************************************************************/
  static gboolean Trame_ajout_visuel_bloc_maintenance ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
   { struct TRAME *trame;
+    GooCanvasItem *item;
+
          if (page->type == TYPE_PAGE_SUPERVISION) trame = ((struct TYPE_INFO_SUPERVISION *)page->infos)->Trame;
     else if (page->type == TYPE_PAGE_ATELIER)     trame = ((struct TYPE_INFO_ATELIER *)page->infos)->Trame_atelier;
     else return(FALSE);
@@ -601,17 +568,27 @@ printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
 
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
 
-    trame_motif->items = g_slist_append ( trame_motif->items,
-                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, 0.0, 0.0, NULL )
-                                        );
+    item = goo_canvas_image_new ( trame_motif->item_groupe, NULL, 0.0, 0.0, NULL );
+    trame_motif->items = g_slist_append ( trame_motif->items, item );
+    if (page->type == TYPE_PAGE_SUPERVISION)
+     { g_signal_connect( G_OBJECT(item), "button-press-event",   G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
+       g_signal_connect( G_OBJECT(item), "button-release-event", G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
+     }
 
-    trame_motif->items = g_slist_append ( trame_motif->items,
-                                          goo_canvas_image_new ( trame_motif->item_groupe, NULL, 0.0, 40.0, NULL )
-                                        );
+    item = goo_canvas_image_new ( trame_motif->item_groupe, NULL, 95.0, 00.0, NULL );
+    trame_motif->items = g_slist_append ( trame_motif->items, item );
+    if (page->type == TYPE_PAGE_SUPERVISION)
+     { g_signal_connect( G_OBJECT(item), "button-press-event",   G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
+       g_signal_connect( G_OBJECT(item), "button-release-event", G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
+     }
+
+    item = goo_canvas_rect_new ( trame_motif->item_groupe, 75.0, 5.0, 10.0, 10.0,
+                                 "fill_color", "lime", "stroke_color", "gray", NULL );
+    trame_motif->items = g_slist_append ( trame_motif->items, item );
 
     Trame_redessiner_visuel_complexe ( trame_motif, visuel );
     Trame_calculer_bounds ( trame_motif );
-    Trame_set_handlers ( trame_motif );
+    Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
 
 printf("%s: New bloc maintenance\n", __func__ );
@@ -675,7 +652,7 @@ printf("%s: New bloc maintenance\n", __func__ );
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
 
-    Trame_set_handlers ( trame_motif );
+    Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
@@ -709,7 +686,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->gif_largeur = 0;
     trame_motif->gif_hauteur = 0;
 
-    trame_motif->pixbuf = Trame_Make_svg_bouton ( 0, 0, Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) );
+    trame_motif->pixbuf = Trame_Make_svg_bouton ( Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) );
 
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel bouton failed\n", __func__ );
@@ -727,7 +704,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
-    Trame_set_handlers ( trame_motif );
+    Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
@@ -761,17 +738,23 @@ printf("%s: New bloc maintenance\n", __func__ );
 
        GooCanvasItem *bouton_service     = g_slist_nth_data ( trame_motif->items, 0 );
        GooCanvasItem *bouton_maintenance = g_slist_nth_data ( trame_motif->items, 1 );
+       GooCanvasItem *rect_maintenance   = g_slist_nth_data ( trame_motif->items, 2 );
 
        if (!strcasecmp ( mode, "maintenance" ))
-        { couleur_maintenance = "gray"; couleur_service="blue"; }
+        { couleur_maintenance = "gray"; couleur_service="blue";
+          g_object_set( rect_maintenance, "fill_color", "white", NULL );
+        }
        else
-        { couleur_maintenance = "blue"; couleur_service="gray"; }
+        { couleur_maintenance = "blue"; couleur_service="gray";
+          g_object_set( rect_maintenance, "fill_color", "green", NULL );
+        }
 
        g_object_set( bouton_service, "pixbuf",
-                     Trame_Make_svg_bouton ( 0, 0, couleur_service, "  Service  " ), NULL );
+                     Trame_Make_svg_bouton ( couleur_service, "  Service  " ), NULL );
 
        g_object_set( bouton_maintenance, "pixbuf",
-                     Trame_Make_svg_bouton ( 0, 0, couleur_maintenance, "Maintenance" ), NULL );
+                     Trame_Make_svg_bouton ( couleur_maintenance, "Maintenance" ), NULL );
+
        return;
      }
 
@@ -870,7 +853,7 @@ printf("%s: New bloc maintenance\n", __func__ );
                                                (-(gdouble)(trame_motif->gif_largeur/2)),
                                                (-(gdouble)(trame_motif->gif_hauteur/2)),
                                                NULL );
-    Trame_set_handlers ( trame_motif );
+    Trame_create_poignees ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
     pthread_mutex_unlock ( &trame->lock );
