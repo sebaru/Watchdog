@@ -165,7 +165,8 @@
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
-
+ extern void Clic_sur_bouton_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
                                                                                                 /* Dans supervision_comment.c */
 
                                                                                              /* Dans supervision_passerelle.c */
