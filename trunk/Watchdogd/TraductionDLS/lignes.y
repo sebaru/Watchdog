@@ -267,12 +267,17 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
 unSwitch:       T_SWITCH listeCase
                 {{ gint taille;
                    if ($2)
-                    { taille = strlen($2)+100;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "/* Ligne %d (CASE BEGIN)------------*/\n"
-                                              "%s\n"
-                                             "/* Ligne %d (CASE END)--------------*/\n",
-                                              DlsScanner_get_lineno(), $2, DlsScanner_get_lineno() );
+                    { taille = strlen($2);
+                      if (taille==0)
+                       { Emettre_erreur_new( "Switch sans action" ); }
+                      else
+                       { taille += 100;
+                         $$ = New_chaine( taille );
+                         g_snprintf( $$, taille, "/* Ligne %d (CASE BEGIN)------------*/\n"
+                                                 "%s\n"
+                                                 "/* Ligne %d (CASE END)--------------*/\n",
+                                                 DlsScanner_get_lineno(), $2, DlsScanner_get_lineno() );
+                       }
                     } else $$=NULL;
                    if ($2) g_free($2);
                 }}
