@@ -298,7 +298,13 @@
          if ( ! strcasecmp( thread, "dls" ) )     { Partage->com_dls.Thread_reload  = TRUE; }
     else if ( ! strcasecmp( thread, "archive" ) ) { Partage->com_arch.Thread_reload = TRUE; }
     else if ( ! strcasecmp( thread, "msrv" ) )    { Partage->com_msrv.Thread_run    = FALSE; }
-    else if ( ! strcasecmp( thread, "http" ) )    { Cfg_http.lib->Thread_reload     = TRUE; }
+    else if ( ! strcasecmp( thread, "http" ) )
+     { if (hard)
+        { Partage->com_msrv.Http_Hard_Reload = TRUE;
+          Cfg_http.lib->Thread_run           = FALSE;
+        }
+       else Cfg_http.lib->Thread_reload = TRUE;
+     }
     else if ( hard )
      { Decharger_librairie_par_prompt ( thread );
        Charger_librairie_par_prompt ( thread );

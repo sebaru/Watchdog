@@ -334,6 +334,11 @@
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
+          if (Partage->com_msrv.Http_Hard_Reload)                                          /* Reload du thread HTTP si besoin */
+           { Decharger_librairie_par_prompt ( "http" );                                       /* Déchargement de la librairie */
+             Charger_librairie_par_prompt ( "http" );                                         /* Rechargement de la librairie */
+             Partage->com_msrv.Http_Hard_Reload = FALSE;
+           }
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
@@ -444,6 +449,11 @@
              json_node_unref(body);
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
+          if (Partage->com_msrv.Http_Hard_Reload)                                          /* Reload du thread HTTP si besoin */
+           { Decharger_librairie_par_prompt ( "http" );                                       /* Déchargement de la librairie */
+             Charger_librairie_par_prompt ( "http" );                                         /* Rechargement de la librairie */
+             Partage->com_msrv.Http_Hard_Reload = FALSE;
+           }
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 

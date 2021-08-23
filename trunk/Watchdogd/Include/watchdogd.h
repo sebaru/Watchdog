@@ -102,6 +102,7 @@
      };
 
     GSList *Librairies;                                                        /* Liste des librairies chargées pour Watchdog */
+    gboolean Http_Hard_Reload;
   };
 
  struct PARTAGE                                                                            /* Structure des données partagées */
@@ -151,8 +152,8 @@
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Reload_librairie_par_prompt ( gchar *prompt );
- extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
- extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
+ extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *prompt );
+ extern gboolean Decharger_librairie_par_prompt ( gchar *prompt );
  extern void Thread_init ( gchar *pr_name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description );
  extern void Thread_end ( struct LIBRAIRIE *lib );
  extern JsonNode *Thread_Listen_to_master ( struct LIBRAIRIE *lib );
