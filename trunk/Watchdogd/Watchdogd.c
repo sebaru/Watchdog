@@ -205,14 +205,23 @@
      }
     else if ( !strcasecmp( zmq_tag, "SUDO") )
      { gchar chaine[80];
-       if (! (Json_has_member ( request, "commande" ) ) )
+       if (! (Json_has_member ( request, "target" ) ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
           return;
         }
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "commande" ) );
-       g_snprintf( chaine, sizeof(chaine), "sudo -n %s", Json_get_string ( request, "commande" ) );
+                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
+       g_snprintf( chaine, sizeof(chaine), "sudo -n %s", Json_get_string ( request, "target" ) );
        system(chaine);
+     }
+    else if ( !strcasecmp( zmq_tag, "EXECUTE") )
+     { if (! (Json_has_member ( request, "target" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
+          return;
+        }
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive EXECUTE from %s to %s/%s", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
+       system(Json_get_string ( request, "target" ));
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
@@ -235,14 +244,23 @@
      }
     else if ( !strcasecmp( zmq_tag, "SUDO") )
      { gchar chaine[80];
-       if (! (Json_has_member ( request, "commande" ) ) )
+       if (! (Json_has_member ( request, "target" ) ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
           return;
         }
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "commande" ) );
-       g_snprintf( chaine, sizeof(chaine), "sudo -n %s", Json_get_string ( request, "commande" ) );
+                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
+       g_snprintf( chaine, sizeof(chaine), "sudo -n %s", Json_get_string ( request, "target" ) );
        system(chaine);
+     }
+    else if ( !strcasecmp( zmq_tag, "EXECUTE") )
+     { if (! (Json_has_member ( request, "target" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
+          return;
+        }
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive EXECUTE from %s to %s/%s", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
+       system(Json_get_string ( request, "target" ));
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
