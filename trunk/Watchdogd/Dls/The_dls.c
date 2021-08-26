@@ -1238,8 +1238,7 @@ end:
 /******************************************************************************************************************************/
  void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p,
                          gchar *target_tech_id, gchar *json_parametre )
-  { /* Dls_data_set_MONO ( NULL, tech_id, acronyme, bus_p, TRUE );                                  /* Utilisation d'un boolean */
-    JsonNode *RootNode = Json_get_from_string ( json_parametre );
+  { JsonNode *RootNode = Json_get_from_string ( json_parametre );
     if (RootNode)
      { Zmq_Send_json_node ( Partage->com_dls.zmq_to_master, "DLS", target_tech_id, RootNode );
        json_node_unref(RootNode);
