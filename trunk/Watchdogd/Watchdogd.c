@@ -439,7 +439,9 @@
 
        request = Recv_zmq_with_json( zmq_from_master, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if (!strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), "msrv"))
+        { if ( !strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), g_get_host_name() ) ||
+               !strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), "msrv" )
+             )
            { Handle_zmq_for_slave( request ); }
           else
            { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
