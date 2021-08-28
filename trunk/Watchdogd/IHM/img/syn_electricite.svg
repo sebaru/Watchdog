@@ -25,15 +25,15 @@
    inkscape:pageopacity="0.0"
    inkscape:pagecheckerboard="0"
    showgrid="false"
-   inkscape:zoom="6.0625"
-   inkscape:cx="64"
-   inkscape:cy="64"
-   inkscape:window-width="1920"
-   inkscape:window-height="979"
+   inkscape:zoom="4.1986485"
+   inkscape:cx="63.94915"
+   inkscape:cy="64.068236"
+   inkscape:window-width="1366"
+   inkscape:window-height="713"
    inkscape:window-x="0"
-   inkscape:window-y="0"
+   inkscape:window-y="31"
    inkscape:window-maximized="1"
-   inkscape:current-layer="g175" />
+   inkscape:current-layer="g200" />
 <style
    type="text/css"
    id="style2">
@@ -580,10 +580,10 @@
 				<linearGradient
    id="SVGID_28_"
    gradientUnits="userSpaceOnUse"
-   x1="136.78799"
-   y1="35.434578"
-   x2="58.099998"
-   y2="70.800003"
+   x1="106.99409"
+   y1="44.774391"
+   x2="26.605335"
+   y2="81.21402"
    gradientTransform="matrix(1 0 0 -1 0 128)">
 				<stop
    offset="0"
@@ -596,10 +596,10 @@
 			</linearGradient>
 			<path
    class="st16"
-   d="m 53.9,95.5 46.97874,20.48905 C 113.72977,106.83673 118.93402,99.168686 124.9,84.3 c 2.2,-6.9 3.2,-13.9 3.1,-20.8 0,0 0,-4 -0.6,-7.4 l -48.3,-22"
+   d="m 52.9,105.1 39.060218,16.32429 C 121.98626,89.847738 122.12791,89.953267 126.41084,49.28068 L 76.546383,27.415655"
    id="path182"
    style="fill:url(#SVGID_28_)"
-   sodipodi:nodetypes="cccccc" />
+   sodipodi:nodetypes="cccc" />
 			<g
    id="g194">
 				<path
