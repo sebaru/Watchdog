@@ -572,14 +572,14 @@ end:
           exit(EXIT_ERREUR);
         }
 
-       if (setgid ( pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setGID for user '%s' (%s)\n",
+       if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREgid for user '%s' (%s)\n",
                     __func__, Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
-       if (setuid ( pwd->pw_uid )==-1)                                                              /* On drop les privilèges */
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setUID for user '%s' (%s)\n",
+       if (setreuid ( pwd->pw_uid, pwd->pw_uid )==-1)                                                              /* On drop les privilèges */
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREuid for user '%s' (%s)\n",
                     __func__, Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
