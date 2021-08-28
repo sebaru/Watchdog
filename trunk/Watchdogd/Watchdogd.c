@@ -211,7 +211,7 @@
         }
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
-       g_snprintf( chaine, sizeof(chaine), "sudo -n %s", Json_get_string ( request, "target" ) );
+       g_snprintf( chaine, sizeof(chaine), "nohup sudo -n \"%s\"", Json_get_string ( request, "target" ) );
        system(chaine);
      }
     else if ( !strcasecmp( zmq_tag, "EXECUTE") )
@@ -221,7 +221,8 @@
         }
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive EXECUTE from %s to %s/%s", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
-       system(Json_get_string ( request, "target" ));
+       g_snprintf( chaine, sizeof(chaine), "nohup \"%s\"", Json_get_string ( request, "target" ) );
+       system(chaine);
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
