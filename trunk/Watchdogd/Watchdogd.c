@@ -122,6 +122,38 @@
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
+/* Handle_zmq_common: Analyse et reagi à un message ZMQ a destination du MSRV ou du SLAVE                                     */
+/* Entrée: le message                                                                                                         */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean Handle_zmq_common ( JsonNode *request, gchar *zmq_tag, gchar *zmq_src_tech_id, gchar *zmq_dst_tech_id )
+  { if ( !strcasecmp( zmq_tag, "SUDO") )
+     { gchar chaine[128];
+       if (! (Json_has_member ( request, "target" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
+          return(FALSE);
+        }
+       gchar *target = Json_get_string ( request, "target" );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, target );
+       g_snprintf( chaine, sizeof(chaine), "%s &", target );
+       system(chaine);
+     }
+    else if ( !strcasecmp( zmq_tag, "EXECUTE") )
+     { gchar chaine[128];
+       if (! (Json_has_member ( request, "target" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
+          return(FALSE);
+        }
+       gchar *target = Json_get_string ( request, "target" );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive EXECUTE from %s to %s/%s", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, target );
+       g_snprintf( chaine, sizeof(chaine), "export DISPLAY=:0; %s &", target );
+       system(chaine);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                                     */
 /* Entrée: le message                                                                                                         */
 /* Sortie: rien                                                                                                               */
@@ -203,29 +235,7 @@
           liste = g_slist_next(liste);
         }
      }
-    else if ( !strcasecmp( zmq_tag, "SUDO") )
-     { gchar chaine[128];
-       if (! (Json_has_member ( request, "target" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
-       g_snprintf( chaine, sizeof(chaine), "nohup sudo -n \"%s\"", Json_get_string ( request, "target" ) );
-       system(chaine);
-     }
-    else if ( !strcasecmp( zmq_tag, "EXECUTE") )
-     { gchar chaine[128];
-       if (! (Json_has_member ( request, "target" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive EXECUTE from %s to %s/%s", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
-       g_snprintf( chaine, sizeof(chaine), "nohup \"%s\"", Json_get_string ( request, "target" ) );
-       system(chaine);
-     }
-    else
+    else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
                  __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
                  zmq_tag );
@@ -244,29 +254,7 @@
          if ( !strcasecmp( zmq_tag, "PING") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_tech_id );
      }
-    else if ( !strcasecmp( zmq_tag, "SUDO") )
-     { gchar chaine[128];
-       if (! (Json_has_member ( request, "target" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
-       g_snprintf( chaine, sizeof(chaine), "nohup sudo -n \"%s\"", Json_get_string ( request, "target" ) );
-       system(chaine);
-     }
-    else if ( !strcasecmp( zmq_tag, "EXECUTE") )
-     { gchar chaine[128];
-       if (! (Json_has_member ( request, "target" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive EXECUTE from %s to %s/%s", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "target" ) );
-       g_snprintf( chaine, sizeof(chaine), "nohup \"%s\"", Json_get_string ( request, "target" ) );
-       system(chaine);
-     }
-    else
+    else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
                  __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
                  zmq_tag );
