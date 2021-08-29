@@ -2,9 +2,10 @@
 
 SOCLE=`grep "^ID=" /etc/os-release | cut -f 2 -d '='`
 
-if [ "$(whoami)" != "root" ] then
-  echo "Only user root can run this script (or sudo)."
-  exit 1
+if [ "$(whoami)" != "root" ]
+ then
+   echo "Only user root can run this script (or sudo)."
+   exit 1
 fi
 
 read -p "Install for (S)ystemMode or (U)serMode (s/u) ?" -n1 USERMODE
