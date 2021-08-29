@@ -9,10 +9,13 @@ if [ "$(whoami)" != "root" ]
 fi
 
 read -p "Install for (S)ystemMode or (U)serMode (s/u) ?" -n1 USERMODE
+echo;
 
 if [ "$USERMODE" = "u" ]
- then USERMODE = "Y"; echo "Installing in user mode";
- else USERMODE = "N"; echo "Installing in system mode";
+ then
+   USERMODE="Y"; echo "Installing in user mode in 4 seconds";
+ else
+   USERMODE="N"; echo "Installing in system mode in 4 seconds";
 fi
 
 sleep 4
@@ -21,7 +24,7 @@ if [ "$SOCLE" = "fedora" ]
  then
   echo "Installing Fedora dependencies"
   dnf update -y
-  dnf install -y subversion libtool automake autoconf gcc gcc-c++ redhat-rpm-config openssl
+  dnf install -y subversion libtool automake autoconf gcc gcc-c++ redhat-rpm-config
   dnf install -y glib2-devel bison flex giflib-devel
   dnf install -y nut-devel mariadb-devel zeromq-devel libuuid-devel
   dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel
@@ -61,7 +64,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
     apt install -y gcc-8-base
   fi
 
-  apt install -y subversion libtool automake autoconf gcc git cmake openssl
+  apt install -y subversion libtool automake autoconf gcc git cmake
   apt install -y libglib2.0-dev bison flex libgif-dev
   apt install -y libupsclient-dev libssl-dev default-libmysqlclient-dev libstrophe-dev libgammu-dev
   apt install -y libpopt-dev libssl-dev libmariadbclient-dev libzmq3-dev
@@ -75,7 +78,7 @@ fi
 
   if [ "$USERMODE" = "N" ]
    then
-    if [ "$SOCLE" = "fedora" -a "$headless" = "N" ]
+    if [ "$SOCLE" = "fedora" ]
      then dnf -y install mariadb-server
     fi
     if [ "$SOCLE" = "debian" ]
@@ -97,6 +100,7 @@ make install
 cd ..
 rm -rf watchdogabls
 systemctl daemon-reload
+systemctl --user daemon-reload
 
   if [ "$USERMODE" = "N" ]
     then
