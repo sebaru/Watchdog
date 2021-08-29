@@ -1,10 +1,15 @@
 #!/bin/sh
 
 SOCLE=`grep "^ID=" /etc/os-release | cut -f 2 -d '='`
-USER=`whoami`
+
+if [ "$(whoami)" != "root" ] then
+  echo "Only user root can run this script (or sudo)."
+  exit 1
+fi
 
 read -p "Install for (S)ystemMode or (U)serMode (s/u) ?" -n1 USERMODE
-if ( [ "$USERMODE" = "u" ] )
+
+if [ "$USERMODE" = "u" ]
  then USERMODE = "Y"; echo "Installing in user mode";
  else USERMODE = "N"; echo "Installing in system mode";
 fi
@@ -16,11 +21,11 @@ if [ "$SOCLE" = "fedora" ]
   echo "Installing Fedora dependencies"
   dnf update -y
   dnf install -y subversion libtool automake autoconf gcc gcc-c++ redhat-rpm-config openssl
-  dnf install -y glib2-devel bison flex readline-devel giflib-devel
+  dnf install -y glib2-devel bison flex giflib-devel
   dnf install -y nut-devel mariadb-devel zeromq-devel libuuid-devel
   dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel
   dnf install -y json-glib-devel gammu-devel
-  dnf install -y mpg123 sox mosquitto-devel libusb-devel
+  dnf install -y mpg123 sox libusb-devel
   dnf install -y librsvg2-devel
   dnf install -y git
 
@@ -56,11 +61,11 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   fi
 
   apt install -y subversion libtool automake autoconf gcc git cmake openssl
-  apt install -y libglib2.0-dev bison flex libreadline-dev libgif-dev
+  apt install -y libglib2.0-dev bison flex libgif-dev
   apt install -y libupsclient-dev libssl-dev default-libmysqlclient-dev libstrophe-dev libgammu-dev
   apt install -y libpopt-dev libssl-dev libmariadbclient-dev libzmq3-dev
   apt install -y sox libsox-fmt-all python3-pip mpg123
-  apt install -y libjson-glib-dev libmosquitto-dev
+  apt install -y libjson-glib-dev
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
   apt install -y libsoup2.4-dev librsvg2-dev
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
