@@ -32,9 +32,10 @@ AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include \
             -DWTD_PACKAGEDATADIR=$(pkgdatadir)
 
-sysconf_DATA = watchdogd.abls.conf.sample Watchdogd.service
+sysconf_DATA = watchdogd.abls.conf.sample
 pkgdata_DATA = init_db.sql
 dist_systemdsystemunit_DATA = Watchdogd.service
+dist_systemduserunit_DATA = Watchdogd.service
 
 EXTRA_DIST = Watchdogd.service watchdogd.abls.conf init_db.sql
 MAINTAINERCLEANFILES = Makefile.in
