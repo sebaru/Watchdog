@@ -9,7 +9,7 @@ if [ "$(whoami)" != "root" ]
 fi
 
 read -p "Install for (S)ystemMode or (U)serMode (s/u) ?" -n1 USERMODE
-echo;
+echo "";
 
 if [ "$USERMODE" = "u" ]
  then
