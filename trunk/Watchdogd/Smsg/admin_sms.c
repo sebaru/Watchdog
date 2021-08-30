@@ -47,7 +47,7 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "gsms", "SELECT instance, tech_id, description FROM %s", Cfg_smsg.lib->name );
+    SQL_Select_to_json_node ( RootNode, "gsms", "SELECT instance, tech_id, description FROM smsg" );
     gchar *buf = Json_node_to_string ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);

@@ -426,6 +426,7 @@ end:
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( method, query );
+    Info_new ( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, body, strlen(body) );
     SoupMessageHeaders *headers;
     g_object_get ( G_OBJECT(soup_msg), "request_headers", &headers, NULL );
