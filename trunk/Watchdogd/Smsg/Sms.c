@@ -389,9 +389,7 @@ end:
     Json_node_add_string( RootNode, "charset", "UTF-8" );
 
     JsonArray *receivers = Json_node_add_array ( RootNode, "receivers" );
-    JsonNode *tel_node = Json_node_create();
-    json_node_set_string( tel_node, telephone );
-    Json_array_add_element ( receivers, tel_node );
+    Json_array_add_element ( receivers, json_node_init_string ( json_node_alloc(), telephone ) );
 
     gchar libelle[128];
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
