@@ -100,7 +100,6 @@ make install
 cd ..
 rm -rf watchdogabls
 systemctl daemon-reload
-systemctl --user daemon-reload
 
   if [ "$USERMODE" = "N" ]
     then

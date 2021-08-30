@@ -163,7 +163,7 @@
         </div>
       </li>
 
-      <a class="nav-link rounded" href="/tech/io_config"><i class="fas fa-cogs"></i> <span>Entrées/Sorties</span></a>
+      <a class="nav-link rounded" href="/tech/io_config"><i class="fas fa-link"></i> <span>Connecteurs</span></a>
 
     </ul>
 
