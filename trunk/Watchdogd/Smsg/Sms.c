@@ -367,7 +367,7 @@ end:
        return(TRUE);
      }
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
-             "%s: Envoi SMS Nok to %s (error '%s')", __func__, telephone, GSM_ErrorString(error) );
+             "%s: Envoi SMS Nok to %s (%s) -> error '%s'", __func__, telephone, libelle, GSM_ErrorString(error) );
     return(FALSE);
   }
 /******************************************************************************************************************************/
