@@ -247,7 +247,7 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_AI_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gfloat valeur, gboolean in_range)
+ void Zmq_Send_AI_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gdouble valeur, gboolean in_range)
   { if (!lib) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
