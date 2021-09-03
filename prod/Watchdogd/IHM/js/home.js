@@ -261,7 +261,8 @@ console.log("Changer_etat_visuel " + visuel.ihm_affichage );
          if (Response.ihm_affichage=="static")
      { contenu = $('<img>').addClass("wtd-visuel p-2")
                            .attr ( "id", id+"-img" )
-                           .attr("src", "/img/"+Response.forme+"."+Response.extension);
+                           .attr("src", "/img/"+Response.forme+"."+Response.extension)
+                           .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else if (Response.ihm_affichage=="by_mode")

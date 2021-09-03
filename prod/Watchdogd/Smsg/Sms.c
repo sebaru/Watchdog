@@ -367,7 +367,7 @@ end:
        return(TRUE);
      }
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
-             "%s: Envoi SMS Nok to %s (error '%s')", __func__, telephone, GSM_ErrorString(error) );
+             "%s: Envoi SMS Nok to %s (%s) -> error '%s'", __func__, telephone, libelle, GSM_ErrorString(error) );
     return(FALSE);
   }
 /******************************************************************************************************************************/
@@ -389,9 +389,7 @@ end:
     Json_node_add_string( RootNode, "charset", "UTF-8" );
 
     JsonArray *receivers = Json_node_add_array ( RootNode, "receivers" );
-    JsonNode *tel_node = Json_node_create();
-    json_node_set_string( tel_node, telephone );
-    Json_array_add_element ( receivers, tel_node );
+    Json_array_add_element ( receivers, json_node_init_string ( json_node_alloc(), telephone ) );
 
     gchar libelle[128];
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
@@ -426,6 +424,7 @@ end:
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( method, query );
+    Info_new ( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, body, strlen(body) );
     SoupMessageHeaders *headers;
     g_object_get ( G_OBJECT(soup_msg), "request_headers", &headers, NULL );

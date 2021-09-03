@@ -972,7 +972,7 @@
 
     JsonNode *RootNode = Json_node_create ();
     option_chaine = Get_option_chaine ( options, T_TAG, "PING" );
-    if (option_chaine) Json_node_add_string ( RootNode, "tag", option_chaine );
+    if (option_chaine) Json_node_add_string ( RootNode, "zmq_tag", option_chaine );
 
     option_chaine = Get_option_chaine ( options, T_TARGET, NULL );
     if (option_chaine) Json_node_add_string ( RootNode, "target", option_chaine );
@@ -1062,6 +1062,16 @@
     return(defaut);
   }
 /******************************************************************************************************************************/
+/* New_alias_dependance_DI: Creer un nouvel Alias de depandences                                                              */
+/* Entrées: le tech_id/acronyme de l'alias                                                                                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void New_alias_dependance_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle )
+  { GList *ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(libelle) );
+    if ( ! Get_alias_par_acronyme ( tech_id, acronyme ) )                                               /* Si pas déjà défini */
+     { New_alias ( tech_id, acronyme, MNEMO_ENTREE, ss_options ); }
+  }
+/******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
@@ -1083,18 +1093,22 @@
     if (classe != MNEMO_MOTIF) return(alias);
 
     gchar *forme_src = Get_option_chaine ( options, T_FORME, NULL );
-    gchar ss_chaine[128], ss_acronyme[64];
-    GList *ss_options;
+    gchar ss_acronyme[64];
     if (!forme_src) return(alias);
 
     gchar *forme = Normaliser_chaine ( forme_src );
     if (!forme) return(alias);
 
-    g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
-    g_snprintf( ss_chaine, sizeof(ss_chaine), "Clic sur l'icone depuis l'IHM" );
-    ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(ss_chaine) );
-    if ( ! Get_alias_par_acronyme ( tech_id, ss_acronyme ) )                                            /* Si pas déjà défini */
-     { New_alias ( tech_id, ss_acronyme, MNEMO_ENTREE, ss_options ); }
+    if (!strcasecmp(forme, "bloc_maintenance") )                                           /* Création des bits de dependance */
+     { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC_SERVICE", acronyme );
+       New_alias_dependance_DI ( tech_id, ss_acronyme, "Passage en SERVICE depuis l'IHM" );
+       g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC_MAINTENANCE", acronyme );
+       New_alias_dependance_DI ( tech_id, ss_acronyme, "Passage en MAINTENANCE depuis l'IHM" );
+     }
+    else                                                          /* Pour tous les visuels "classiques", on créé un bit _CLIC */
+     { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
+       New_alias_dependance_DI ( tech_id, ss_acronyme, "Clic sur l'icone depuis l'IHM" );
+     }
     g_free(forme);
     return(alias);
   }

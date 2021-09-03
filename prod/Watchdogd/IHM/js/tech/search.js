@@ -33,8 +33,12 @@
                   else return(item.acronyme);
                 }
             },
-            { "data": "libelle", "title":"Libelle", "className": "align-middle  text-center" },
-            { "data": "unite", "title":"Unité", "className": "align-middle  text-center" },
+            { "data": null, "title":"Libelle", "className": "align-middle  text-center",
+              "render": function (item) { return ( htmlEncode ( item.libelle ) ); }
+            },
+            { "data": null, "title":"Unité", "className": "align-middle  text-center",
+              "render": function (item) { return ( htmlEncode ( item.unite ) ); }
+            }
           ]
        }
     );

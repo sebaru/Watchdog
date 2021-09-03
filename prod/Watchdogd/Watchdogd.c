@@ -122,6 +122,38 @@
     Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
+/* Handle_zmq_common: Analyse et reagi à un message ZMQ a destination du MSRV ou du SLAVE                                     */
+/* Entrée: le message                                                                                                         */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean Handle_zmq_common ( JsonNode *request, gchar *zmq_tag, gchar *zmq_src_tech_id, gchar *zmq_dst_tech_id )
+  { if ( !strcasecmp( zmq_tag, "SUDO") )
+     { gchar chaine[128];
+       if (! (Json_has_member ( request, "target" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
+          return(FALSE);
+        }
+       gchar *target = Json_get_string ( request, "target" );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, target );
+       g_snprintf( chaine, sizeof(chaine), "%s &", target );
+       system(chaine);
+     }
+    else if ( !strcasecmp( zmq_tag, "EXECUTE") )
+     { gchar chaine[128];
+       if (! (Json_has_member ( request, "target" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
+          return(FALSE);
+        }
+       gchar *target = Json_get_string ( request, "target" );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive EXECUTE from %s to %s/%s", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, target );
+       g_snprintf( chaine, sizeof(chaine), "export DISPLAY=:0; %s &", target );
+       system(chaine);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                                     */
 /* Entrée: le message                                                                                                         */
 /* Sortie: rien                                                                                                               */
@@ -203,18 +235,7 @@
           liste = g_slist_next(liste);
         }
      }
-    else if ( !strcasecmp( zmq_tag, "SUDO") )
-     { gchar chaine[80];
-       if (! (Json_has_member ( request, "commande" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "commande" ) );
-       g_snprintf( chaine, sizeof(chaine), "sudo -n %s", Json_get_string ( request, "commande" ) );
-       system(chaine);
-     }
-    else
+    else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
                  __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
                  zmq_tag );
@@ -233,18 +254,7 @@
          if ( !strcasecmp( zmq_tag, "PING") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_tech_id );
      }
-    else if ( !strcasecmp( zmq_tag, "SUDO") )
-     { gchar chaine[80];
-       if (! (Json_has_member ( request, "commande" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, Json_get_string ( request, "commande" ) );
-       g_snprintf( chaine, sizeof(chaine), "sudo -n %s", Json_get_string ( request, "commande" ) );
-       system(chaine);
-     }
-    else
+    else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
                  __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
                  zmq_tag );
@@ -334,6 +344,11 @@
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
+          if (Partage->com_msrv.Http_Hard_Reload)                                          /* Reload du thread HTTP si besoin */
+           { Decharger_librairie_par_prompt ( "http" );                                       /* Déchargement de la librairie */
+             Charger_librairie_par_prompt ( "http" );                                         /* Rechargement de la librairie */
+             Partage->com_msrv.Http_Hard_Reload = FALSE;
+           }
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
@@ -416,7 +431,9 @@
 
        request = Recv_zmq_with_json( zmq_from_master, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if (!strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), "msrv"))
+        { if ( !strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), g_get_host_name() ) ||
+               !strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), "msrv" )
+             )
            { Handle_zmq_for_slave( request ); }
           else
            { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
@@ -444,6 +461,11 @@
              json_node_unref(body);
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
+          if (Partage->com_msrv.Http_Hard_Reload)                                          /* Reload du thread HTTP si besoin */
+           { Decharger_librairie_par_prompt ( "http" );                                       /* Déchargement de la librairie */
+             Charger_librairie_par_prompt ( "http" );                                         /* Rechargement de la librairie */
+             Partage->com_msrv.Http_Hard_Reload = FALSE;
+           }
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
@@ -550,14 +572,14 @@ end:
           exit(EXIT_ERREUR);
         }
 
-       if (setgid ( pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setGID for user '%s' (%s)\n",
+       if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREgid for user '%s' (%s)\n",
                     __func__, Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
-       if (setuid ( pwd->pw_uid )==-1)                                                              /* On drop les privilèges */
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setUID for user '%s' (%s)\n",
+       if (setreuid ( pwd->pw_uid, pwd->pw_uid )==-1)                                                              /* On drop les privilèges */
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREuid for user '%s' (%s)\n",
                     __func__, Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }

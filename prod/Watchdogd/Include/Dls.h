@@ -90,7 +90,7 @@
     time_t start_date;                                                                  /* time_t date de demarrage du plugin */
     void *handle;                                                                              /* Handle du fichier librairie */
     void (*go)(struct DLS_TO_PLUGIN *);                                                   /* Fonction de traitement du module */
-    float conso;                                                                         /* Consommation temporelle du plugin */
+    gdouble conso;                                                                       /* Consommation temporelle du plugin */
     gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
     struct DLS_TO_PLUGIN vars;
     GSList *Arbre_Comm;                         /* Liste tech_id des dependances du module pour le calcul de sa communication */
@@ -186,8 +186,8 @@
     gchar   acronyme[NBR_CARAC_ACRONYME];
     gint    valeur;
     gint    val_en_cours1;                                                    /* valeur en cours pour le calcul via les ratio */
-    gfloat  ratio;
-    gfloat  multi;
+    gdouble ratio;
+    gdouble multi;
     guint   last_update;
     gint    imp_par_minute;
     gint    valeurs[60];                                                                              /* 60 dernieres valeurs */
@@ -232,12 +232,12 @@
   };
 
  struct DLS_REGISTRE
-  { gchar  tech_id[NBR_CARAC_TECHID];
-    gchar  acronyme[NBR_CARAC_ACRONYME];
-    gfloat valeur;
-    gchar  unite[NBR_CARAC_UNITE];
-    gint   archivage;
-    guint  last_arch;                                                    /* Date de dernier enregistrement en base de données */
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
+    gdouble valeur;
+    gchar   unite[NBR_CARAC_UNITE];
+    gint    archivage;
+    guint   last_arch;                                                   /* Date de dernier enregistrement en base de données */
     gdouble pid_somme_erreurs;                                                                                /* Calcul PID KI*/
     gdouble pid_prev_erreur;                                                                                 /* Calcul PID KD */
   };

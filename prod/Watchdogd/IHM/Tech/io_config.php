@@ -1,7 +1,7 @@
 <div class="container">
 
  <div class="row m-2">
-   <h3><i class="fas fa-cogs text-primary"></i> Configuration des Entrées/Sorties</h3>
+   <h3><i class="fas fa-link text-primary"></i> Configuration des Connecteurs</h3>
  </div>
 
 <hr>

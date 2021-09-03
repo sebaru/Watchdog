@@ -32,9 +32,9 @@
 #include "watchdogd.h"
 %}
 
-%union { int val;
-         float valf;
-         char *chaine;
+%union { gint val;
+         gdouble valf;
+         gchar *chaine;
          GList *gliste;
          struct OPTION *option;
          struct ACTION *action;
