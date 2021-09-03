@@ -105,10 +105,10 @@ systemctl daemon-reload
     then
       echo "La base de données 'WatchdogDB' a été crée, ainsi que l'utilisateur 'watchdog'."
       echo "Son mot de passe est "$NEWPASSWORD
-      systemctl --user disable Watchdogd --now
+      sudo -u $(logname) systemctl --user disable Watchdogd --now
       systemctl enable Watchdogd --now
     else
-      systemctl --user enable Watchdogd --now
+      sudo -u $(logname) systemctl --user enable Watchdogd --now
       systemctl disable Watchdogd --now
   fi
 
