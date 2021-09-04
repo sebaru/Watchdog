@@ -146,36 +146,46 @@
     Send_to_API ( "GET", "/api/syn/show", "syn_id="+syn_id, function(Response)
      { console.log(Response);
        Synoptique = Response;
-       $('#idPageTitle').text(Response.libelle);
+
+       $('#idNavSynoptique').empty();
+       $('#idNavSynoptique').prepend( "<a class='nav-link rounded d-none d-sm-inline' href='#'> <span>"+Synoptique.libelle+"</span></a>" );
+       if (Synoptique.id != 1)
+        { $.each ( Response.parent_syns, function (i, syn)
+                    { $('#idNavSynoptique').prepend ( "<a class='nav-item'><img src='/img/"+syn.image+"' alt='"+syn.libelle+"' "+
+                                                      "data-toggle='tooltip' data-placement='bottom' title='"+syn.libelle+"' "+
+                                                      "onclick='Charger_page_synoptique("+syn.id+")' "+
+                                                      "class='wtd-menu'></a>" );
+                      $('#idNavSynoptique').prepend ( "<span class='text-secondary my-auto'>></span>" );
+                    }
+                 );
+        }
+
+       $('#idPageTitle').text(Synoptique.libelle);
        $.each ( Response.child_syns, function (i, syn)
                  { bodymain.append ( Creer_card ( syn ) );
-                   Set_syn_vars ( syn.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.id } )[0] );
+                   Set_syn_vars ( syn.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.id } )[0] );
                  }
               );
-       Set_syn_vars ( Response.id, Response.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
+       Set_syn_vars ( Synoptique.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
        $.each ( Response.horloges, function (i, horloge)
                  { bodymain.append ( Creer_horloge ( horloge ) ); }
               );
 
-       if (Response.image=="custom") { Changer_img_src ( 'idMenuImgAccueil', "/upload/syn_"+Response.id+".jpg", false ); }
-                                else { Changer_img_src ( 'idMenuImgAccueil', "/img/"+Response.image, false ); }
-       $('#idMenuImgAccueil').unbind('click').click ( function () { Charger_page_synoptique ( Response.id ); } );
-
-       $.each ( Response.visuels, function (i, visuel)
+       $.each ( Synoptique.visuels, function (i, visuel)
                  { var card = Creer_visuel ( visuel );
                    bodymain.append ( card );
                    Changer_etat_visuel ( visuel );
                  }
               );
 
-       $.each ( Response.cadrans, function (i, cadran)
+       $.each ( Synoptique.cadrans, function (i, cadran)
                  { bodymain.append( Creer_cadran ( cadran ) );
                  }
               );
 
-       if (Response.nbr_tableaux>0)
+       if (Synoptique.nbr_tableaux>0)
         { tableaux.prepend("<hr>");
-          $.each ( Response.tableaux, function (i, tableau)
+          $.each ( Synoptique.tableaux, function (i, tableau)
            { var id = "idTableau-"+tableau.id;
              tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe m-1") );
              maps = Response.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
