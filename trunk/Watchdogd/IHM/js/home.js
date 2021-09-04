@@ -155,7 +155,7 @@
                                                       "data-toggle='tooltip' data-placement='bottom' title='"+syn.libelle+"' "+
                                                       "onclick='Charger_page_synoptique("+syn.id+")' "+
                                                       "class='wtd-menu'></a>" );
-                      $('#idNavSynoptique').prepend ( "<span class='text-secondary my-auto'>></span>" );
+                      $('#idNavSynoptique').prepend ( "<span class='navbar-text text-secondary'>></span>" );
                     }
                  );
         }

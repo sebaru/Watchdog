@@ -210,7 +210,7 @@
            class="wtd-menu" data-toggle='tooltip' data-placement='bottom' title="Aller à l'accueil">
     </a>
   </ul>
-  <ul id="idNavSynoptique" class="navbar-nav"></ul>
+  <ul id="idNavSynoptique" class="navbar-nav d-inline mr-auto"></ul>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
