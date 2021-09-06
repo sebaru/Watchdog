@@ -127,8 +127,8 @@
               max-height: 24px;
             }
            .wtd-menu
-             { max-width: 32px;
-               max-height: 32px;
+             { max-width: 48px;
+               max-height: 48px;
              }
            .wtd-visuel
              { max-width: 96px;
