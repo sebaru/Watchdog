@@ -2365,8 +2365,12 @@ encore:
     if (database_version < 5927)
      { SQL_Write_new ("ALTER TABLE mnemos_VISUEL ADD `mode` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default' AFTER `forme`"); }
 
+
+    if (database_version < 5972)
+     { SQL_Write_new ("ALTER TABLE msgs ADD `rate_limit` INT(11) NOT NULL DEFAULT '0' AFTER `typologie`"); }
+
 fin:
-    database_version = 5927;
+    database_version = 5972;
     SQL_Write_new ("DROP TABLE `icone`");
 
     SQL_Write_new ("CREATE TABLE `icone` ("

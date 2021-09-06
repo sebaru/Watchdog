@@ -68,6 +68,7 @@
        { classe   : "MSG",
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
+         rate_limit : $('#idMSGRateLimit'+acronyme).val(),
          sms        : $('#idMSGSms'+acronyme).val(),
          audio_profil : $('#idMSGProfilAudio'+acronyme).val(),
          audio_libelle: $('#idMSGLibelleAudio'+acronyme).val(),
@@ -313,6 +314,17 @@
              { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
+             },
+             { "data": null, "title":"Rate Limit", "className": "align-middle ",
+               "render": function (item)
+                 { array = [ { valeur: 0, texte: "Pas de limite", },
+                             { valeur: 1, texte: "1 par minute", },
+                             { valeur: 5, texte: "1 pour 5 minutes", },
+                             { valeur: 30, texte: "1 pour 30 minutes", },
+                             { valeur: 60, texte: "1 pour 60 minutes", }
+                           ];
+                   return( Select ( "idMSGRateLimit"+item.acronyme, "Mnemos_MSG_set('"+item.acronyme+"')", array, item.rate_limit ) );
+                 }
              },
              { "data": null, "title":"Profil AUDIO", "className": "align-middle ",
                "render": function (item)

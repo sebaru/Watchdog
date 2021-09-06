@@ -576,7 +576,7 @@ CREATE TABLE IF NOT EXISTS `syns_rectangles` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `msgs`
+-- Structure de la table `thread_classe`
 --
 
 CREATE TABLE IF NOT EXISTS `thread_classe` (
@@ -600,6 +600,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
   `typologie` INT(11) NOT NULL DEFAULT '0',
+  `rate_limit` INT(11) NOT NULL DEFAULT '0',
   `sms_notification` INT(11) NOT NULL DEFAULT '0',
   `audio_profil` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',
   `audio_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
