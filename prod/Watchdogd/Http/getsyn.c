@@ -573,6 +573,7 @@ end:
        json_node_unref ( result );
        return;
      }
+
     if (session->access_level < Json_get_int ( result, "access_level" ))
      { Audit_log ( session, "Access to synoptique '%s' (id '%d') forbidden",
                    Json_get_string ( result, "libelle" ), syn_id );
@@ -586,6 +587,16 @@ end:
     if (!synoptique)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        return;
+     }
+
+    JsonArray *parents = Json_node_add_array ( synoptique, "parent_syns" );
+    gint cur_syn_id = syn_id;
+    while ( cur_syn_id != 1 )
+     { JsonNode *cur_syn = Json_node_create();
+       if (!cur_syn) break;
+       SQL_Select_to_json_node ( cur_syn, NULL, "SELECT id, parent_id, image, libelle FROM syns WHERE id=%d", cur_syn_id );
+       Json_array_add_element ( parents, cur_syn );
+       cur_syn_id = Json_get_int ( cur_syn, "parent_id" );
      }
 
     if (SQL_Select_to_json_node ( synoptique, NULL,

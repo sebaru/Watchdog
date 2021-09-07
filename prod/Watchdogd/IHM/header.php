@@ -127,8 +127,8 @@
               max-height: 24px;
             }
            .wtd-menu
-             { max-width: 32px;
-               max-height: 32px;
+             { max-width: 48px;
+               max-height: 48px;
              }
            .wtd-visuel
              { max-width: 96px;
@@ -200,17 +200,17 @@
 
 <header>
 	<nav class="navbar navbar-dark navbar-expand-md fixed-top shadow"> <!-- fixed-top -->
-  <a class="navbar-brand" href="#" onclick="Charger_page_synoptique('1')">
-    <img src="/img/syn_maison.png" alt="Accueil" class="wtd-menu">
-  </a>
 
   <!--<a class="nav-item"><img id="idMasterVignetteActivite" class="wtd-menu mr-1" src=""></a>
   <a class="nav-item"><img id="idMasterVignetteSecuBien" class="wtd-menu mr-1" src=""></a>
   <a class="nav-item"><img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src=""></a>-->
   <ul class="navbar-nav">
-    <a class="nav-item rounded"><img id="idMenuImgAccueil" src="" alt="Accueil" class="wtd-menu mr-1"></a>
-    <a class="nav-link rounded d-none d-sm-inline" href="#"> <span id="idPageTitle">Loading...</span></a>
+    <a class="nav-item" href="#" onclick="Charger_page_synoptique('1')">
+      <img onclick="Charger_page_synoptique('1')" src="/img/syn_maison.png" alt="Accueil"
+           class="wtd-menu" data-toggle='tooltip' data-placement='bottom' title="Aller à l'accueil">
+    </a>
   </ul>
+  <ul id="idNavSynoptique" class="navbar-nav d-inline mr-auto"></ul>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>

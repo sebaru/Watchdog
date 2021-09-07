@@ -114,6 +114,7 @@
                              "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme            /* Where */
                             );
 
+
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
     strftime( chaine, sizeof(chaine), "%F %T", temps );
@@ -129,9 +130,12 @@
     Json_node_add_bool   ( histo, "alive", TRUE );
     Ajouter_histo_msgsDB( histo );                                                                     /* Si ajout dans DB OK */
 /******************************************************* Envoi du histo aux librairies abonnées *******************************/
-    Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", histo );
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", histo );
+    if (Partage->top >= msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
+     { msg->last_on = Partage->top;
+       Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", histo );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", histo );
+     }
     json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/

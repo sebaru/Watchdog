@@ -223,6 +223,7 @@
     gboolean etat;
     gboolean etat_update;
     gint last_change;
+    gint last_on;
     gint changes;
   };
 

@@ -183,16 +183,17 @@
 	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
     else if ( ! strcasecmp ( classe, "MSG" ) )
-     { if ( Json_has_member ( request, "sms" ) &&
+     { if ( Json_has_member ( request, "rate_limit" ) && Json_has_member ( request, "sms" ) &&
             Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" )
           )
         { gchar chaine[1024];
-          gint sms    = Json_get_int ( request, "sms" );
+          gint rate_limit      = Json_get_int ( request, "rate_limit" );
+          gint sms             = Json_get_int ( request, "sms" );
           gchar *audio_libelle = Normaliser_chaine ( Json_get_string ( request, "audio_libelle" ) );
           gchar *audio_profil  = Normaliser_chaine ( Json_get_string ( request, "audio_profil" ) );
-          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET sms_notification='%d', audio_profil='%s', audio_libelle='%s' "
+          g_snprintf( chaine, sizeof(chaine), "UPDATE msgs SET rate_limit='%d', sms_notification='%d', audio_profil='%s', audio_libelle='%s' "
                                               "WHERE tech_id='%s' AND acronyme='%s'",
-                      sms, audio_profil, audio_libelle, tech_id, acronyme );
+                      rate_limit, sms, audio_profil, audio_libelle, tech_id, acronyme );
           SQL_Write ( chaine );                                                   /* Qu'il existe ou non, ou met a jour la DB */
           Audit_log ( session, "Mnemos %s:%s -> Sms_notification = '%d'", tech_id, acronyme, sms );
           Audit_log ( session, "Mnemos %s:%s -> Profil_AUDIO = '%s'", tech_id, acronyme, audio_profil );
