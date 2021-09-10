@@ -1,8 +1,10 @@
 site_name: Watchdog Docs
 site_url: https://docs.abls-habitat.fr/
 repo_url: https://svn.abls-habitat.fr/repo/Watchdog/prod/
+repo_name: Watchdog Repository
 site_description: Documentation du projet domotique Watchdog
 site_author: Sébastien et Bruno Lefèvre
+site_dir: docs_builded
 
 nav:
  - Home: index.md

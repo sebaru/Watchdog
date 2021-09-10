@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="fr" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Sébastien et Bruno Lefèvre">
+  <link rel="canonical" href="https://docs.abls-habitat.fr/users/">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Utilisateurs - Watchdog Docs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Utilisateurs";
+    var mkdocs_page_input_path = "users.md";
+    var mkdocs_page_url = "/users/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Watchdog Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Rechercher des documents" title="Tapez vos mots clés ici" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                </ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Utilisateurs</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#les-rangs-1-a-5">Les rangs 1 à 5</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#les-rangs-6-a-9">Les rangs 6 à 9</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../visuels/">Inventaire des Visuels</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="" href="../about.md">About</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Watchdog Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Documents</a> &raquo;</li>
+    
+      
+    
+    <li>Utilisateurs</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="categorie-dutilisateurs">Catégorie d'utilisateurs</h1>
+<p>Chaque utilisateur dispose d'un niveau d'habilitation, représenté par un numéro de 1 à 9.
+Un utilisateur d'un niveau <em>N</em> peut:</p>
+<ul>
+<li>Voir et modifier toutes les ressources d'un niveau inférieure ou égale à <em>N-1</em></li>
+<li>Voir les ressources d'un niveau égal à <em>N</em></li>
+<li>Voir et modifier ses propres ressources</li>
+</ul>
+<p>Il ne pourra pas accéder ou modifier les ressources de rang plus élevé.</p>
+<p>Par défaut, un utilisateur nouvellement créé sera associé au niveau <em>1</em>.</p>
+<h2 id="les-rangs-1-a-5">Les rangs <em>1</em> à <em>5</em></h2>
+<p>Les niveaux <em>1</em> à <em>5</em> sont les niveaux à destination des clients finaux.</p>
+<h2 id="les-rangs-6-a-9">Les rangs <em>6</em> à <em>9</em></h2>
+<p>Les niveaux <em>6</em> à <em>9</em> sont les niveaux reservés aux utilisateurs de profil <strong>techniciens</strong>.
+Ces utilisateurs à privilèges possèdent les droits de modifier le coeur du système:</p>
+<ul>
+<li>L'édition, l'ajout ou la suppression des <a href="dls.md">modules D.L.S</a></li>
+<li>L'édition, l'ajout ou la suppression des synoptiques</li>
+<li>La configuration des <a href="connecteurs.md">connecteurs</a></li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../visuels/" class="btn btn-neutral float-right" title="Inventaire des Visuels">Suivant <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Précédent</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Générée avec <a href="https://www.mkdocs.org/">MkDocs</a> avec un <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Précédent</a></span>
+    
+    
+      <span><a href="../visuels/" style="color: #fcfcfc">Suivant &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
