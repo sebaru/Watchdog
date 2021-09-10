@@ -10,10 +10,12 @@ Un utilisateur d'un niveau *N* peut:
 Il ne pourra pas accéder ou modifier les ressources de rang plus élevé.
 
 Par défaut, un utilisateur nouvellement créé sera associé au niveau *1*.
+Au demarrage, deux [utilisateurs par défaut](index.md#utilisateurs-par-defaut) sont créés
 
 ## Les rangs *1* à *5*
 
 Les niveaux *1* à *5* sont les niveaux à destination des clients finaux.
+L'usage des différents niveaux est laissé a l'appréciation du client.
 
 ## Les rangs *6* à *9*
 
