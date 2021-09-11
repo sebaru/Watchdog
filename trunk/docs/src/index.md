@@ -2,10 +2,10 @@
 
 Le logiciel libre **Watchdog** est un ensemble de composants distribués selon les termes de la licence GPL:
 
-* un serveur
+* un serveur permanent
 * une interface web
 * un client lourd
-* et (plus tard !) une application mobile native .
+* et (plus tard !) une application mobile native.
 
 Le composant serveur fédère un ensemble de capteurs et d'actionneurs au travers d'un [langage de programmation](dls.md) simple qui vous permettra de gérer votre habitat facilement !
 
@@ -14,7 +14,7 @@ Les [connecteurs](connecteurs.md) permettent en temps réel de connaitre l'état
 Ainsi, aux travers d'interfaces conviviales vous saurez :
 
 * Quelles sont les températures extérieures et de votre salon,
-* Que est votre consommation électrique actuelle.
+* Quelle est votre consommation électrique instantanée.
 * Piloter manuellement ou via l'intelligence embarquée vos radiateurs selon vos besoins
 * Gérer la pompe de votre puit ou de votre bac de rétention des eaux de pluie,
 * Arroser automatiquement votre jardin selon les créneaux horaires et les saisons,
