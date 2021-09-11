@@ -2400,6 +2400,7 @@ fin:
                     "('film',                'svg',  'static'        , 100),"
                     "('youtube_bebe_louis',  'png',  'static'        , 100),"
                     "('youtube_crocodile',   'png',  'static'        , 100),"
+                    "('arret_urgence',       'png',  'by_color'      , 100),"
                     "('bouton_io',           'png',  'by_color'      , 100),"
                     "('vmc',                 'png',  'by_color'      , 100),"
                     "('voyant_moteur',       'png',  'by_color'      , 100),"

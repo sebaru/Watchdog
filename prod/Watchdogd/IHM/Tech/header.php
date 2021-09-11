@@ -175,6 +175,8 @@
 
       <a class="nav-link rounded" href="/tech/search"><i class="fas fa-search"></i> <span> Dictionnaire</span></a>
 
+      <a class="nav-link rounded" href="https://docs.abls-habitat.fr"><i class="fas fa-book"></i> <span> Documentation</span></a>
+
       <li class="nav-item dropdown">
         <a class="nav-link rounded dropdown-toggle ml-2" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-user  text-warning"></i> <span id="idUsername">-</span>
