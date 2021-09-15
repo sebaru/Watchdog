@@ -41,14 +41,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Tech_ID</label>
-						     <input id="idModalPhidgetHubTechID" required type="text" class="form-control" placeholder="Tech_ID du Hub">
+						     <input id="idModalPhidgetHubTechID" required type="text" class="form-control" maxlength="32" placeholder="Tech_ID du Hub">
      					</div>
    					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Hostname</label>
-						     <input id="idModalPhidgetHubHostname" required type="text" class="form-control" placeholder="@IP ou hostname">
+						     <input id="idModalPhidgetHubHostname" required type="text" class="form-control" maxlength="32" placeholder="@IP ou hostname">
      					</div>
    					</div>
 

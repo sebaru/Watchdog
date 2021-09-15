@@ -27,7 +27,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">GSM Tech_ID</label>
-						     <input id="idGSMTechID" type="text" class="form-control" placeholder="Tech_ID du GSM">
+						     <input id="idGSMTechID" type="text" class="form-control" maxlength="32" placeholder="Tech_ID du GSM">
      					</div>
   					</div>
 
