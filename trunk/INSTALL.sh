@@ -50,6 +50,10 @@ if [ "$SOCLE" = "fedora" ]
   make install
   cd ..
   rm -rf libphidget22*
+
+  echo "/usr/local/lib" > /etc/ld.so.conf.d/local.conf
+  ldconfig
+
 fi
 
 
