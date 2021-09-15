@@ -498,7 +498,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /******************************************************************************************************************************/
  static GdkPixbuf *Trame_Make_svg_bouton ( gchar *couleur, gchar *libelle )
   { gchar bouton[512];
-    gint largeur=6*strlen(libelle);
+    gint largeur=5*strlen(libelle)+12;
     gint hauteur=18;
 
     g_snprintf( bouton, sizeof(bouton),
