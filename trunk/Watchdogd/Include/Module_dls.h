@@ -94,6 +94,7 @@
                           gchar *outputmax_tech_id, gchar *outputmax_acronyme, gpointer *r_outputmax
                         );
 
+ extern gint Dls_get_top( void );                                                                             /* donne le top */
  extern int Heure( int heure, int minute );                                                        /* Tester l'heure actuelle */
  extern int Heure_avant( int heure, int minute );
  extern int Heure_apres( int heure, int minute );
