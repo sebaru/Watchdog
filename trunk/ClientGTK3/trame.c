@@ -798,9 +798,13 @@ printf("%s: New bloc maintenance\n", __func__ );
      { g_snprintf ( fichier, sizeof(fichier), "%s.%s", forme, extension ); }
     else return;
 
-    g_snprintf ( commande, sizeof(commande), "wget --no-check-certificate https://%s:5560/img/%s -O %s", trame_motif->page->client->hostname, fichier, fichier );
+    struct stat result;
+    if (stat ( fichier, &result ) == -1)
+     { g_snprintf ( commande, sizeof(commande),
+                    "wget --no-check-certificate https://%s:5560/img/%s -O %s", trame_motif->page->client->hostname, fichier, fichier );
+       system(commande); /* Download de l'icone */
+     }
 
-    system(commande); /* Download de l'icone */
     trame_motif->pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme );
@@ -838,7 +842,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
-    
+
     trame_motif->gif_largeur = gdk_pixbuf_get_width ( trame_motif->pixbuf );
     trame_motif->gif_hauteur = gdk_pixbuf_get_height( trame_motif->pixbuf );
     trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );   /* Et ajout dans la liste */
