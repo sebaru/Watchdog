@@ -140,16 +140,20 @@
        system(chaine);
      }
     else if ( !strcasecmp( zmq_tag, "EXECUTE") )
-     { gchar chaine[128];
-       if (! (Json_has_member ( request, "target" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
+     { if (! (Json_has_member ( request, "target" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: EXECUTE : wrong parameters from %s", __func__, zmq_src_tech_id );
           return(FALSE);
         }
        gchar *target = Json_get_string ( request, "target" );
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive EXECUTE from %s to %s/%s", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id, target );
-       g_snprintf( chaine, sizeof(chaine), "export DISPLAY=:0; %s &", target );
-       system(chaine);
+       gint pid = fork();
+       if (pid<0)
+        { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s_Fils: EXECUTE: erreur Fork target '%s'", __func__, target ); }
+       else if (!pid)
+        { system(target);
+          exit(0);
+        }
      }
     return(TRUE);
   }

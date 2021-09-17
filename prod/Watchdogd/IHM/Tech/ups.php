@@ -36,14 +36,14 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">TechID</label>
-						     <input id="idModalUpsEditTechID" required type="text" class="form-control" placeholder="Tech ID de l'onduleur">
+						     <input id="idModalUpsEditTechID" required type="text" class="form-control" maxlength="32" placeholder="Tech ID de l'onduleur">
      					</div>
    					</div>
 
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">UPS Name</label>
-						     <input id="idModalUpsEditName" required type="text" class="form-control" placeholder="Nom de l'onduleur">
+						     <input id="idModalUpsEditName" required type="text" class="form-control" maxlength="32" placeholder="Nom de l'onduleur">
      					</div>
    					</div>
 

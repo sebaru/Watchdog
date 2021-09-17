@@ -1754,6 +1754,12 @@
        SQL_Write_new ( "DELETE FROM syns_cadrans WHERE dls_id='%d' AND CONCAT(tech_id,':',acronyme) NOT IN (%s)",
                        Dls_plugin.id, (Liste_CADRANS ? Liste_CADRANS: "''" ) );
        if (Liste_CADRANS) g_free(Liste_CADRANS);
+
+       /*SQL_Write_new ( "DELETE FROM mnemos_VISUEL WHERE tech_id='%s' ",
+                         " AND acronyme NOT IN ( %s )",
+                        tech_id, (Liste_WATCHDOG?Liste_WATCHDOG:"''") );
+       if (Liste_VISUELS) g_free(Liste_VISUELS);*/
+
      }
     close(Id_log);
     Liberer_memoire();

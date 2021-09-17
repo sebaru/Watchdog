@@ -309,10 +309,14 @@ printf("Afficher_propriete: debut\n");
                                      Json_get_double ( trame_motif->visuel, "scale" )
                              );
      }
+    gchar chaine[128];
+    g_snprintf( chaine, sizeof(chaine), "%s:%s - %s",
+                Json_get_string ( trame_motif->visuel, "tech_id" ),
+                Json_get_string ( trame_motif->visuel, "acronyme" ),
+                Json_get_string ( trame_motif->visuel, "libelle" )
+              );
 
-    Mettre_a_jour_description( page,
-                               Json_get_int ( trame_motif->visuel, "icone" ),
-                               Json_get_string ( trame_motif->visuel, "libelle" ) );
+    Mettre_a_jour_description( page, -1, chaine );
 
   //  else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
     //          event->type == GDK_2BUTTON_PRESS) Afficher_propriete();

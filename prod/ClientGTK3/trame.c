@@ -498,7 +498,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 /******************************************************************************************************************************/
  static GdkPixbuf *Trame_Make_svg_bouton ( gchar *couleur, gchar *libelle )
   { gchar bouton[512];
-    gint largeur=6*strlen(libelle);
+    gint largeur=5*strlen(libelle)+12;
     gint hauteur=18;
 
     g_snprintf( bouton, sizeof(bouton),
@@ -641,8 +641,6 @@ printf("%s: New bloc maintenance\n", __func__ );
        return(FALSE);
      }
 
-    trame_motif->gif_largeur = gdk_pixbuf_get_width ( trame_motif->pixbuf );
-    trame_motif->gif_hauteur = gdk_pixbuf_get_height( trame_motif->pixbuf );
     trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );     /* Et ajout dans la liste */
     trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
     trame_motif->nbr_images++;
@@ -652,6 +650,7 @@ printf("%s: New bloc maintenance\n", __func__ );
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
 
+    Trame_calculer_bounds ( trame_motif );
     Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
@@ -694,8 +693,6 @@ printf("%s: New bloc maintenance\n", __func__ );
        return(FALSE);
      }
 
-    trame_motif->gif_largeur = gdk_pixbuf_get_width ( trame_motif->pixbuf );
-    trame_motif->gif_hauteur = gdk_pixbuf_get_height( trame_motif->pixbuf );
     trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );     /* Et ajout dans la liste */
     trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
     trame_motif->nbr_images++;
@@ -704,6 +701,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
+    Trame_calculer_bounds ( trame_motif );
     Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
@@ -772,6 +770,47 @@ printf("%s: New bloc maintenance\n", __func__ );
        g_free(svg);
      }
     if (trame_motif->pixbuf) g_object_set( trame_motif->item, "pixbuf", trame_motif->pixbuf, NULL );
+    return;
+  }
+/******************************************************************************************************************************/
+/* Trame_redessiner_visuel_complexe: Met a jour un visuel complexe                                                            */
+/* Entrée: le motif du synoptique et son nouveau statut                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Trame_redessiner_visuel_simple ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
+  { if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
+    gchar *forme         = Json_get_string ( trame_motif->visuel, "forme" );
+    gchar *extension     = Json_get_string ( trame_motif->visuel, "extension" );
+    gchar *ihm_affichage = Json_get_string ( trame_motif->visuel, "ihm_affichage" );
+    gchar *mode          = Json_get_string ( visuel, "mode" );
+    gchar *color         = Json_get_string ( visuel, "color" );
+
+    gchar commande[256], fichier[128];
+    if ( !strcmp ( ihm_affichage, "by_color" ) )
+     { g_snprintf ( fichier, sizeof(fichier), "%s_%s.%s", forme, color, extension ); }
+    else if ( !strcmp ( ihm_affichage, "by_mode" ) )
+     { g_snprintf ( fichier, sizeof(fichier), "%s_%s.%s",forme, mode, extension ); }
+    else if ( !strcmp ( ihm_affichage, "by_mode_color" ) )
+     { g_snprintf ( fichier, sizeof(fichier), "%s_%s_%s.%s", forme, mode, color, extension ); }
+    else if ( !strcmp ( ihm_affichage, "static" ) )
+     { g_snprintf ( fichier, sizeof(fichier), "%s.%s", forme, extension ); }
+    else return;
+
+    struct stat result;
+    if (stat ( fichier, &result ) == -1)
+     { g_snprintf ( commande, sizeof(commande),
+                    "wget --no-check-certificate https://%s:5560/img/%s -O %s", trame_motif->page->client->hostname, fichier, fichier );
+       system(commande); /* Download de l'icone */
+     }
+
+    trame_motif->pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
+    if (!trame_motif->pixbuf)
+     { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme );
+       g_free(trame_motif);
+       return;
+     }
+
+    g_object_set( trame_motif->item, "pixbuf", trame_motif->pixbuf, NULL );
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
@@ -779,8 +818,7 @@ printf("%s: New bloc maintenance\n", __func__ );
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
  gboolean Trame_ajout_visuel_simple ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
-  { GdkPixbuf *pixbuf = NULL;
-    struct TRAME *trame;
+  { struct TRAME *trame;
 
          if (page->type == TYPE_PAGE_SUPERVISION) trame = ((struct TYPE_INFO_SUPERVISION *)page->infos)->Trame;
     else if (page->type == TYPE_PAGE_ATELIER)     trame = ((struct TYPE_INFO_ATELIER *)page->infos)->Trame_atelier;
@@ -794,66 +832,23 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->type   = TYPE_MOTIF;
     g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
 
-    gchar *forme         = Json_get_string ( visuel, "forme" );
-    gchar *ihm_affichage = Json_get_string ( visuel, "ihm_affichage" );
-    gchar *mode          = Json_get_string ( visuel, "mode" );
-    gchar *color         = Json_get_string ( visuel, "color" );
-    gchar *extension     = Json_get_string ( visuel, "extension" );
+    Trame_create_poignees ( trame_motif );
 
-    gchar commande[256], fichier[128];
-    if ( !strcmp ( ihm_affichage, "by_color" ) )
-     { g_snprintf ( fichier, sizeof(fichier), "%s_%s.%s", forme, color, extension ); }
-    else if ( !strcmp ( ihm_affichage, "by_mode" ) )
-     { g_snprintf ( fichier, sizeof(fichier), "%s_%s.%s",forme, mode, extension ); }
-    else if ( !strcmp ( ihm_affichage, "by_mode_color" ) )
-     { g_snprintf ( fichier, sizeof(fichier), "%s_%s_%s.%s", forme, mode, color, extension ); }
-    else if ( !strcmp ( ihm_affichage, "static" ) )
-     { g_snprintf ( fichier, sizeof(fichier), "%s.%s", forme, extension ); }
-    else return(FALSE);
+    Trame_redessiner_visuel_simple ( trame_motif, visuel );
 
-    g_snprintf ( commande, sizeof(commande), "wget --no-check-certificate https://%s:5560/img/%s", trame_motif->page->client->hostname, fichier);
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                /* Groupe MOTIF */
+    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
+                                               trame_motif->pixbuf,
+                                               0.0, 0.0, NULL );
 
-    system(commande); /* Download de l'icone */
-    if ( !strcmp ( extension, "svg" ) )
-     { GError *error = NULL;
-       RsvgHandle *handle = rsvg_handle_new_from_file ( fichier, &error );
-       if (handle)
-        { pixbuf = rsvg_handle_get_pixbuf ( handle );
-          g_object_unref ( handle );
-        }
-       else
-        { printf("%s: Chargement visuel simple '%s' failed: %s\n", __func__, forme, error->message );
-          g_error_free(error);
-        }
-     }
-    else if ( ! strcmp ( extension, "png" ) )
-     { pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
-     }
-    else
-      { printf("%s: extension %s non prise en charge\n", __func__, extension );
-        return(FALSE);
-      }
-
-    if (!pixbuf)
-     { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme );
-       g_free(trame_motif);
-       return(FALSE);
-     }
-
-    trame_motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
-    trame_motif->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
-    trame_motif->images = g_list_append( trame_motif->images, pixbuf );     /* Et ajout dans la liste */
-    trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
+    trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );   /* Et ajout dans la liste */
+    trame_motif->image  = trame_motif->images;                                     /* Synchro sur image numero 1 */
     trame_motif->nbr_images++;
     printf("%s : width = %d, height=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
 
-    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
-    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
-                                               trame_motif->pixbuf,
-                                               (-(gdouble)(trame_motif->gif_largeur/2)),
-                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
-                                               NULL );
+    Trame_calculer_bounds ( trame_motif );
     Trame_create_poignees ( trame_motif );
+    Trame_rafraichir_motif ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
     pthread_mutex_unlock ( &trame->lock );

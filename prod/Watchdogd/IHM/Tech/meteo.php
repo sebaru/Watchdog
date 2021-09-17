@@ -22,7 +22,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Tech_ID</label>
-						     <input id="idMeteoTechID" type="text" class="form-control" placeholder="Tech_ID du Thread Meteo">
+						     <input id="idMeteoTechID" type="text" class="form-control" maxlength="32" placeholder="Tech_ID du Thread Meteo">
      					</div>
   					</div>
 

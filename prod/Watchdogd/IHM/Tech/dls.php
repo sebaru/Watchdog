@@ -43,7 +43,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">TechID du module</label>
-						      <input id="idModalDlsEditTechID" type="text" class="form-control" placeholder="TechID du module DLS">
+						      <input id="idModalDlsEditTechID" type="text" class="form-control" maxlength="32" placeholder="TechID du module DLS">
            </div>
        </div>
 

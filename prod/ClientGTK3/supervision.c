@@ -258,9 +258,10 @@
     trame_motif->cligno = Json_get_bool(motif,"cligno");                                             /* Sauvegarde etat motif */
     g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string(motif,"color") );/* Sauvegarde etat motif */
 
-    if ( Json_has_member ( trame_motif->visuel, "ihm_affichage" ) &&
-         !strcasecmp ( Json_get_string ( trame_motif->visuel, "ihm_affichage" ), "complexe" ) )
-     { Trame_redessiner_visuel_complexe( trame_motif, motif );
+    if ( Json_has_member ( trame_motif->visuel, "ihm_affichage" ) )
+     { if ( !strcasecmp ( Json_get_string ( trame_motif->visuel, "ihm_affichage" ), "complexe" ) )
+             { Trame_redessiner_visuel_complexe( trame_motif, motif ); }
+       else  { Trame_redessiner_visuel_simple  ( trame_motif, motif ); }
        return;
      }
 
