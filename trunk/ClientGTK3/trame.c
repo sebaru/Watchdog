@@ -641,8 +641,6 @@ printf("%s: New bloc maintenance\n", __func__ );
        return(FALSE);
      }
 
-    trame_motif->gif_largeur = gdk_pixbuf_get_width ( trame_motif->pixbuf );
-    trame_motif->gif_hauteur = gdk_pixbuf_get_height( trame_motif->pixbuf );
     trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );     /* Et ajout dans la liste */
     trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
     trame_motif->nbr_images++;
@@ -652,6 +650,7 @@ printf("%s: New bloc maintenance\n", __func__ );
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
 
+    Trame_calculer_bounds ( trame_motif );
     Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
@@ -694,8 +693,6 @@ printf("%s: New bloc maintenance\n", __func__ );
        return(FALSE);
      }
 
-    trame_motif->gif_largeur = gdk_pixbuf_get_width ( trame_motif->pixbuf );
-    trame_motif->gif_hauteur = gdk_pixbuf_get_height( trame_motif->pixbuf );
     trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );     /* Et ajout dans la liste */
     trame_motif->image  = trame_motif->images;                          /* Synchro sur image numero 1 */
     trame_motif->nbr_images++;
@@ -704,6 +701,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
+    Trame_calculer_bounds ( trame_motif );
     Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
@@ -843,13 +841,13 @@ printf("%s: New bloc maintenance\n", __func__ );
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
 
-    trame_motif->gif_largeur = gdk_pixbuf_get_width ( trame_motif->pixbuf );
-    trame_motif->gif_hauteur = gdk_pixbuf_get_height( trame_motif->pixbuf );
     trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );   /* Et ajout dans la liste */
     trame_motif->image  = trame_motif->images;                                     /* Synchro sur image numero 1 */
     trame_motif->nbr_images++;
     printf("%s : width = %d, height=%d\n", __func__, trame_motif->gif_largeur, trame_motif->gif_hauteur );
 
+    Trame_calculer_bounds ( trame_motif );
+    Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
     pthread_mutex_lock ( &trame->lock );
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
