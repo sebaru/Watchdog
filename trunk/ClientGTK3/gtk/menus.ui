@@ -1,11 +1,15 @@
 <interface>
   <menu id='menubar'>
     <submenu>
-      <attribute name='label'>Fichier</attribute>
+      <attribute name='label'>Actions</attribute>
       <section>
         <item>
           <attribute name='label' translatable='yes'>Recompiler</attribute>
           <attribute name='action'>app.Recompiler</attribute>
+        </item>
+        <item>
+          <attribute name='label' translatable='yes'>Delete PNG</attribute>
+          <attribute name='action'>app.Restarter</attribute>
         </item>
         <item>
           <attribute name='label' translatable='yes'>Quitter</attribute>
