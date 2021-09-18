@@ -161,7 +161,7 @@
 
     gboolean retour;
     gchar *buf = Json_node_to_string ( RootNode );
-    retour = Zmq_Send_as_raw( zmq, buf, strlen(buf) );
+    retour = Zmq_Send_as_raw( zmq, buf, strlen(buf)+1 );
     g_free(buf);
     return(retour);
   }
