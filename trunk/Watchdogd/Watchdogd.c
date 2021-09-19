@@ -486,7 +486,7 @@
        Json_node_add_string ( RootNode, "zmq_tag", "SET_WATCHDOG" );
        Json_node_add_string ( RootNode, "tech_id",  g_get_host_name() );
        Json_node_add_string ( RootNode, "acronyme", "IO_COMM" );
-       Json_node_add_int    ( RootNode, "consigne", 900 );
+       Json_node_add_int    ( RootNode, "consigne", 0 );
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", RootNode );
        json_node_unref ( RootNode );
      }
