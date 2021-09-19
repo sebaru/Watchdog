@@ -111,7 +111,7 @@ systemctl daemon-reload
       echo "Son mot de passe est "$NEWPASSWORD
       systemctl enable Watchdogd --now
     else
-      echo "Pour lancer Watchdog, tapez 'systemctl --user enable Watchdogd --now'"
+      echo "Pour lancer Watchdog, tapez 'systemctl --user enable Watchdogd-user --now'"
   fi
 
   echo "Le point d'accès pour poursuivre l'installation est https://localhost:5560/install"

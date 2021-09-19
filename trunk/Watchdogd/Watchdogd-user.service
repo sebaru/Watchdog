@@ -1,5 +1,5 @@
 [Unit]
-Description=Watchdog System daemon
+Description=Watchdog User daemon
 After=syslog.target network.target auditd.service
 
 [Service]
@@ -10,5 +10,5 @@ RestartSec=2
 Nice=10
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 
