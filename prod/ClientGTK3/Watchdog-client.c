@@ -102,9 +102,13 @@
  static void Menu_Inspector (GSimpleAction *action, GVariant *parameter, gpointer user_data)
   { gtk_window_set_interactive_debugging (TRUE); }
 
- static void Menu_Quitter (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
-  { Fermer_client(user_data); }
+ static void Menu_Quitter (GSimpleAction *simple, GVariant *parameter, gpointer app)
+  { g_application_quit (G_APPLICATION (app)); }
 
+ static void Menu_Restarter (GSimpleAction *simple, GVariant *parameter, gpointer app)
+  { system("rm -rf ~/.watchdog/*.png*");
+    g_application_quit (G_APPLICATION (app));
+  }
 
  static void Menu_Go_to_wiki (GSimpleAction *simple, GVariant *parameter, gpointer user_data)
   { gint pid;
@@ -142,7 +146,7 @@
     gtk_widget_show (about_dialog);
   }
 /******************************************************************************************************************************/
-/* ActivateCB: Fonction d'activation de a fenetre applicative                                                                 */
+/* ActivateCB: Fonction d'activation de la fenetre applicative                                                                */
 /******************************************************************************************************************************/
  static void ActivateCB ( GtkApplication *app, gpointer data )
   { GtkToolItem *bouton, *separateur;
@@ -214,6 +218,7 @@
        { "Go_to_wiki", Menu_Go_to_wiki, NULL, NULL, NULL },
        { "Quitter", Menu_Quitter, NULL, NULL, NULL },
        { "Recompiler", Menu_Recompiler, NULL, NULL, NULL },
+       { "Restarter", Menu_Restarter, NULL, NULL, NULL },
     //  { "new", new_activated, NULL, NULL, NULL }
      };
     int status;
