@@ -1,6 +1,6 @@
-# Watchdog, ou comment gérez simplement votre habitat !
+# <img src="/img/abls.svg" width=100> Watchdog, ou comment gérer simplement votre habitat !
 
-Le logiciel libre **Watchdog** est un ensemble de composants distribués selon les termes de la licence GPL:
+ Le logiciel libre **Watchdog** est un ensemble de composants distribués selon les termes de la licence GPL:
 
 * un serveur permanent
 * une interface web
@@ -19,3 +19,4 @@ Ainsi, aux travers d'interfaces conviviales vous saurez :
 * Gérer la pompe de votre puit ou de votre bac de rétention des eaux de pluie,
 * Arroser automatiquement votre jardin selon les créneaux horaires et les saisons,
 * Et engager des économies financières !
+

@@ -1,12 +1,12 @@
-# Bienvenue sur Watchdog !
+# <img src="/img/abls.svg" width=100> Bienvenue sur Watchdog !
 
 Vous trouverez sur ce site l'ensemble de la documentation technique permettant de prendre en main ce système de gestion d'habitat.
 Cette documentation s'adresse aux personnes ayant la responsabilité de l'installation et du maintien des systèmes et sous-systèmes composant un domaine complet.
 
 Elle présente les guides d'installation, l'architecture, les concepts, les modes d'emploi, ainsi les bonnes pratiques de mise en oeuvre.
 
-
-##Pré-requis
+---
+## Pré-requis
 
 Les socles minimums sur lesquels le système a été testé puis validé:
 
@@ -23,7 +23,7 @@ La procédure d'installation recommandée est celle en ligne de commande.
 
 ###Installation en ligne de commande
 
-Depuis un terminal, lancez la commande suivante:
+Depuis un terminal, lancez la commande suivante et répondez ensuite aux questions posées:
 
      sudo bash -c "$(wget https://svn.abls-habitat.fr/repo/Watchdog/prod/INSTALL.sh -q -O -)"
 
@@ -46,34 +46,51 @@ Puis laissez-vous guider !
 Pour suivre les mises à jour automatiques de la branche de production, importez repository **prod**.
 Pour cela, tapez les commandes suivantes dans un terminal:
 
-     svn co https://svn.abls-habitat.fr/repo/Watchdog/prod Watchdog
-     cd Watchdog
-     ./autogen.sh
-     sudo make install
-     sudo systemctl start Watchdogd
+    svn co https://svn.abls-habitat.fr/repo/Watchdog/prod Watchdog
+    cd Watchdog
+    ./autogen.sh
+    sudo make install
+    sudo systemctl start Watchdogd
 
 Ensuite, laissez-vous guider depuis https://localhost:5560/install
 
 ---
-## Arret/Relance et suivi de l'instance
+## Arret/Relance et suivi de l'instance **Système**
 ###Commandes de lancement et d'arret
 
-Les commandes suivantes permettent alors de demarrer, stopper, restarter l'instance:
+Les commandes suivantes permettent alors de demarrer, stopper, restarter l'instance Système:
 
-     sudo systemctl start Watchdogd.service
-     sudo systemctl stop Watchdogd.service
-     sudo systemctl restart Watchdogd.service
+    sudo systemctl start Watchdogd.service
+    sudo systemctl stop Watchdogd.service
+    sudo systemctl restart Watchdogd.service
 
 ### Commandes d'affichage des logs
 
 Les commandes suivantes permettent d'afficher les logs de l'instance:
 
-[watchdog@Server ~]$ sudo journalctl -f -u Watchdogd.service
+    [watchdog@Server ~]$ sudo journalctl -f -u Watchdogd.service
+
+---
+## Arret/Relance et suivi de l'instance **User**
+
+###Commandes de lancement et d'arret
+
+Les commandes suivantes permettent alors de demarrer, stopper, restarter l'instance en UserMode:
+
+    systemctl --user start Watchdogd-user.service
+    systemctl --user stop Watchdogd-user.service
+    systemctl --user restart Watchdogd-user.service
+
+### Commandes d'affichage des logs
+
+Les commandes suivantes permettent d'afficher les logs de l'instance:
+
+    [moi@Server ~]$ journalctl --user -f -u Watchdogd-user.service
 
 ---
 ## Utilisateurs par défaut
 
-A l'installation, deux comptes sont pre-enregistrés: les comptes *root* et *guest*
+A l'installation, deux comptes sont pre-enregistrés: les comptes **root** et **guest**
 
 * Le compte *root* est un compte administrateur (privilège maximum : Level 9). Son mot de passe par défaut est **password**
 * Le compte *guest* est un compte utilisateur avec des privilèges minimaux (Level 1). Son mot de passe par défaut est **guest**

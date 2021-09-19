@@ -9,12 +9,19 @@ site_dir: build
 extra_css: [extra.css]
 
 nav:
- - Présentation : index.md
- - Guide de démarrage: guide_demarrage.md
- - Utilisateurs: users.md
- - Programmation D.L.S: dls.md
+
+ - Découverte:
+   - Tour d'horizon: index.md
+   - Galerie: galerie.md
+ - Prise en main:
+   - Guide de démarrage: guide_demarrage.md
+ - Guide de l'utilisateur:
+   - Typologie des Utilisateurs: users.md
+ - Programmation D.L.S:
+   - Le concept: dls.md
  - Inventaire des Visuels: visuels.md
- - Auteurs: auteurs.md
+ - Pour finir ?:
+   - Qui sommes-nous ?: auteurs.md
 
 theme:
  name: readthedocs
