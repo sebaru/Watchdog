@@ -1,6 +1,7 @@
 [Unit]
 Description=Watchdog User daemon
 After=syslog.target network.target auditd.service
+PartOf=graphical-session.target
 
 [Service]
 ExecStart=/usr/local/bin/Watchdogd
