@@ -55,14 +55,14 @@ Pour cela, tapez les commandes suivantes dans un terminal:
 Ensuite, laissez-vous guider depuis https://localhost:5560/install
 
 ---
-## Arret/Relance et suivi de l'instance **Système**
+## Arrêt/Relance et suivi de l'instance **Système**
 ###Commandes de lancement et d'arret
 
 Les commandes suivantes permettent alors de demarrer, stopper, restarter l'instance Système:
 
-    sudo systemctl start Watchdogd.service
-    sudo systemctl stop Watchdogd.service
-    sudo systemctl restart Watchdogd.service
+    [watchdog@Server ~]$ sudo systemctl start Watchdogd.service
+    [watchdog@Server ~]$ sudo systemctl stop Watchdogd.service
+    [watchdog@Server ~]$ sudo systemctl restart Watchdogd.service
 
 ### Commandes d'affichage des logs
 
@@ -71,15 +71,15 @@ Les commandes suivantes permettent d'afficher les logs de l'instance:
     [watchdog@Server ~]$ sudo journalctl -f -u Watchdogd.service
 
 ---
-## Arret/Relance et suivi de l'instance **User**
+## Arrêt/Relance et suivi de l'instance **User**
 
 ###Commandes de lancement et d'arret
 
 Les commandes suivantes permettent alors de demarrer, stopper, restarter l'instance en UserMode:
 
-    systemctl --user start Watchdogd-user.service
-    systemctl --user stop Watchdogd-user.service
-    systemctl --user restart Watchdogd-user.service
+    [moi@Server ~]$ systemctl --user start Watchdogd-user.service
+    [moi@Server ~]$ systemctl --user stop Watchdogd-user.service
+    [moi@Server ~]$ systemctl --user restart Watchdogd-user.service
 
 ### Commandes d'affichage des logs
 
@@ -92,5 +92,5 @@ Les commandes suivantes permettent d'afficher les logs de l'instance:
 
 A l'installation, deux comptes sont pre-enregistrés: les comptes **root** et **guest**
 
-* Le compte *root* est un compte administrateur (privilège maximum : Level 9). Son mot de passe par défaut est **password**
-* Le compte *guest* est un compte utilisateur avec des privilèges minimaux (Level 1). Son mot de passe par défaut est **guest**
+* Le compte **root** est un compte administrateur (privilège maximum : Level 9). Son mot de passe par défaut est **password**
+* Le compte **guest** est un compte utilisateur avec des privilèges minimaux (Level 1). Son mot de passe par défaut est **guest**
