@@ -19,7 +19,10 @@ Vous aurez également besoin des droits d'administration, via *sudo* par exemple
 ---
 ##Installation
 
-La procédure d'installation recommandée est celle en ligne de commande.
+1. Pour une primo-installation, la procédure d'installation recommandée est celle en [ligne de commande](#installation-en-ligne-de-commande)
+1. Puis complétez par [l'installation web](#installation-web).
+
+Vous pouvez également, dans le cadre d'upgrade par exemple, utiliser la méthode de mise à jour basée sur [le repository SVN](#upgrader-une-instance-existante).
 
 ###Installation en ligne de commande
 
@@ -30,29 +33,39 @@ Depuis un terminal, lancez la commande suivante et répondez ensuite aux questio
 Si vous souhaitez installer en mode **User**, précisez-le lorsque cela vous sera demandé.
 
 * Le mode **System** est préconisé pour des machines ne s'éteignant jamais, en général headless. Il est adapté aux instances *Master* ou *Slave*
-* Le mode **User** est adapté aux machines allumées de manière intermittente, comme les PC utilisés comme media center par exemple. Il est plutot utilisé avec des instances "Slave"
+* Le mode **User** est adapté aux machines allumées de manière intermittente, comme les PC utilisés comme media center par exemple.
+Il est plutot utilisé avec des instances *Slave*
 
 N'oubliez pas de noter le mot de passe associé à la base de données.
-Dans le cadre d'une instance **User**, entrez ensuite dans un navigateur l'URL suivante.
+
+Laissez-vous ensuite [guider](#installation-web) par l'installation graphique.
+
+### Installation web
+
+Dans le cadre d'une instance **User**, ouvrez dans un navigateur l'URL suivante:
 
      https://localhost:5560/install
 
-Pour une instance **Système**, remplacez *localhost* par le nom de la machine qui héberge cette instance.
+Pour une instance **System**, remplacez *localhost* par le nom de la machine qui héberge cette instance.
 
-Puis laissez-vous guider !
+Vous obtiendrez la page d'installation suivante après avoir accepté l'exception de sécurité liée au certificat SSL auto-signé:
 
-###Installation depuis le repository SVN
+![install](/img/ihm_install.png)
 
-Pour suivre les mises à jour automatiques de la branche de production, importez repository **prod**.
-Pour cela, tapez les commandes suivantes dans un terminal:
+Entrez alors les paramètres de votre nouvelle instance.
+Pour une instance **Master** en mode **System**, la configuration par défaut est adaptée.
 
-    svn co https://svn.abls-habitat.fr/repo/Watchdog/prod Watchdog
-    cd Watchdog
-    ./autogen.sh
-    sudo make install
-    sudo systemctl start Watchdogd
-
-Ensuite, laissez-vous guider depuis https://localhost:5560/install
+1. Le nom de votre habitat (exemple: *Ma maison*, *Mon appart*)
+1. Le nom du serveur de base de données associé. Pour une instance *Master*, *localhost* est le choix par défaut.
+Pour une instance **Slave** le serveur de base de données est en général celui portant l'instance **Master**
+1. Le port présentant le service de base de données, par défaut *3306*
+1. Le nom de la base de données, par défaut *WatchdogDB*
+1. Le nom de l'utilisateur de la base de données, par défaut *watchdog*
+1. Le mot de passe associé a l'utilisateur, noté lors de la première phase d'installation en ligne de commande
+1. L'utilisateur système qui fera tourner le service. Par défaut *watchdog*. Porte uniquement pour les instances en mode **System**
+1. Précisez si le *working directory* est le home (SubDirectory=*No*), ou home/.watchdog (SubDirectory=*Yes*)
+1. Précisez si l'instance est **Master** ou **Slave**
+1. Enfin, dans le cadre d'instance **Slave**, précisez le hostname de l'instance **Master**
 
 ---
 ## Arrêt/Relance et suivi de l'instance **Système**
@@ -86,6 +99,21 @@ Les commandes suivantes permettent alors de demarrer, stopper, restarter l'insta
 Les commandes suivantes permettent d'afficher les logs de l'instance:
 
     [moi@Server ~]$ journalctl --user -f -u Watchdogd-user.service
+
+---
+##Upgrader une instance existante
+
+Pour mettre à niveau votre instance, vous pouvez suivre les mises à jour automatiques de la branche de production
+du repository **[prod](https://svn.abls-habitat.fr/websvn/browse/Watchdog/prod/)**.
+
+Pour cela, tapez les commandes suivantes dans un terminal:
+
+    svn co https://svn.abls-habitat.fr/repo/Watchdog/prod Watchdog
+    cd Watchdog
+    ./autogen.sh
+    sudo make install
+    sudo systemctl restart Watchdogd
+
 
 ---
 ## Utilisateurs par défaut
