@@ -19,7 +19,11 @@ nav:
    - Typologie des Utilisateurs: users.md
  - Programmation D.L.S:
    - Le concept: dls.md
+   - Les alias: dls_alias.md
    - Les liens: dls_link.md
+   - La logique: dls_logique.md
+   - Les calculs: dls_calculs.md
+   - Les visuels: dls_visuels.md
  - Inventaire des Visuels: visuels.md
  - Pour finir ?:
    - Qui sommes-nous ?: auteurs.md
