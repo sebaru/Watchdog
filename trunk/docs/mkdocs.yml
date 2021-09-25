@@ -23,8 +23,10 @@ nav:
    - Les liens: dls_link.md
    - La logique: dls_logique.md
    - Les calculs: dls_calculs.md
-   - Les visuels: dls_visuels.md
- - Inventaire des Visuels: visuels.md
+   - Les visuels:
+     - Présentation: dls_visuels.md
+     - Les commentaires: dls_visuel_comment.md
+     - Inventaire des Visuels: visuels.md
  - Pour finir ?:
    - Qui sommes-nous ?: auteurs.md
 
