@@ -513,9 +513,9 @@ printf("%s: New bouton %s\n", __func__, bouton );
     return(Trame_render_svg_to_pixbuf (bouton));
   }
 /******************************************************************************************************************************/
-/* Trame_load_encadre: Prépare un pixbuf pour l'encadre en parametre                                                          */
+/* Trame_Make_svg_encadre: Prépare un pixbuf pour l'encadre en parametre                                                      */
 /* Entrée: la taille de lencadre, la couleur, son libellé                                                                     */
-/* Sortie: le pixbuf                                                                                                          */
+/* Sortie: la chaine SVG                                                                                                      */
 /******************************************************************************************************************************/
  static gchar *Trame_Make_svg_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
   { gchar encadre[512];
@@ -532,6 +532,45 @@ printf("%s: New bouton %s\n", __func__, bouton );
               );
 printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
     return ( g_strdup(encadre) );
+  }
+/******************************************************************************************************************************/
+/* Trame_Make_svg_comment: Prépare un pixbuf pour l'encadre en parametre                                                      */
+/* Entrée: la taille de lencadre, la couleur, son libellé                                                                     */
+/* Sortie: la chaine SVG                                                                                                      */
+/******************************************************************************************************************************/
+ static GdkPixbuf *Trame_Make_svg_comment ( gchar *libelle, gchar *mode, gchar *color )
+  { gchar comment[512], *family, *style, *weight;
+    gint size, width;
+    if (!strcasecmp ( mode, "titre" ))
+     { size = 38;
+       family = "'Bitstream Vera Serif'";
+       style  = "italic";
+       weight = "normal";
+       width  = (gint)strlen(libelle)*25;
+     }
+    else if (!strcasecmp ( mode, "soustitre" ))
+     { size = 26;
+       family = "'Bitstream Vera Serif'";
+       style  = "italic";
+       weight = "bold";
+       width  = (gint)strlen(libelle)*15;
+     }
+    else
+     { size   = 18;
+       family = "'Bitstream Vera Serif'";
+       style  = "italic";
+       weight = "normal";
+       width  = (gint)strlen(libelle)*9;
+     }
+    g_snprintf( comment, sizeof(comment),
+                "<svg viewBox='0 0 %d %d' >"
+                "<text x='0' y='%d' text-anchor='start'"
+                "      font-size='%dpx' font-family=\"%s, serif\" font-style=\"%s\" font-weight='%s' fill='%s' stroke='%s'>%s</text> "
+                "</svg>",
+                width, size+15, size+5, size, family, style, weight, color, color, libelle
+              );
+printf("%s: New comment : %s\n", __func__, comment );
+    return (Trame_render_svg_to_pixbuf (comment));
   }
 /******************************************************************************************************************************/
 /* Trame_calculer_bounds: Calcule les gif_hauteur et gif_largeur de l'item_groupe                                             */
@@ -710,6 +749,55 @@ printf("%s: New bloc maintenance\n", __func__ );
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Trame_ajout_visuel_comment: Ajoute un commentaire sur la trame                                                             */
+/* Entrée: la page et le visuel a ajouter                                                                                     */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ static gboolean Trame_ajout_visuel_comment ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
+  { struct TRAME *trame;
+         if (page->type == TYPE_PAGE_SUPERVISION) trame = ((struct TYPE_INFO_SUPERVISION *)page->infos)->Trame;
+    else if (page->type == TYPE_PAGE_ATELIER)     trame = ((struct TYPE_INFO_ATELIER *)page->infos)->Trame_atelier;
+    else return(FALSE);
+
+    struct TRAME_ITEM_MOTIF *trame_motif = Trame_new_item();
+    if (!trame_motif) { printf("%s: Erreur mémoire\n", __func__); return(FALSE); }
+
+    trame_motif->visuel = visuel;
+    trame_motif->page   = page;
+    trame_motif->type   = TYPE_MOTIF;
+    trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
+    g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
+
+    trame_motif->image  = NULL;
+    trame_motif->images = NULL;
+    trame_motif->nbr_images  = 0;
+    trame_motif->gif_largeur = 0;
+    trame_motif->gif_hauteur = 0;
+
+    trame_motif->pixbuf = Trame_Make_svg_comment ( Json_get_string ( visuel, "libelle" ),
+                                                   Json_get_string ( visuel, "mode" ),
+                                                   Json_get_string ( visuel, "color" ) );
+
+    if (!trame_motif->pixbuf)
+     { printf("%s: Chargement visuel comment failed\n", __func__ );
+       g_free(trame_motif);
+       return(FALSE);
+     }
+
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
+    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
+                                               trame_motif->pixbuf,
+                                               0.0, 0.0, NULL );
+    Trame_calculer_bounds ( trame_motif );
+    Trame_create_poignees ( trame_motif );
+    Trame_rafraichir_motif ( trame_motif );
+    pthread_mutex_lock ( &trame->lock );
+    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    pthread_mutex_unlock ( &trame->lock );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
@@ -719,6 +807,7 @@ printf("%s: New bloc maintenance\n", __func__ );
          if ( !strcasecmp ( forme, "encadre" ) )           { return ( Trame_ajout_visuel_encadre          ( page, visuel ) ); }
     else if ( !strcasecmp ( forme, "bouton" ) )            { return ( Trame_ajout_visuel_bouton           ( page, visuel ) ); }
     else if ( !strcasecmp ( forme, "bloc_maintenance" ) )  { return ( Trame_ajout_visuel_bloc_maintenance ( page, visuel ) ); }
+    else if ( !strcasecmp ( forme, "comment" ) )           { return ( Trame_ajout_visuel_comment          ( page, visuel ) ); }
     return(FALSE);
   }
 /******************************************************************************************************************************/
@@ -757,6 +846,7 @@ printf("%s: New bloc maintenance\n", __func__ );
      }
 
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
+
     if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre" ) )
      { gint ligne, colonne;
        if ( Json_has_member ( visuel, "mode" ) )
@@ -769,6 +859,18 @@ printf("%s: New bloc maintenance\n", __func__ );
        trame_motif->pixbuf = Trame_render_svg_to_pixbuf ( svg );
        g_free(svg);
      }
+
+    if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "comment" ) )
+     { gchar *mode, *color;
+       if ( Json_has_member ( visuel, "mode" ) ) mode = Json_get_string ( visuel, "mode" );
+       else mode = "annotation";
+
+       if ( Json_has_member ( visuel, "color" ) ) color = Json_get_string ( visuel, "color" );
+       else color = "white";
+
+       trame_motif->pixbuf = Trame_Make_svg_comment ( Json_get_string ( visuel, "libelle" ), mode, color );
+     }
+
     if (trame_motif->pixbuf) g_object_set( trame_motif->item, "pixbuf", trame_motif->pixbuf, NULL );
     return;
   }
