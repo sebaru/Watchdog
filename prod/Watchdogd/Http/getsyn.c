@@ -27,6 +27,7 @@
 
  #include <string.h>
  #include <unistd.h>
+ #include <locale.h>
 
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
@@ -312,6 +313,7 @@ end:
            ) )
      { return; }
 
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     SQL_Write_new( "UPDATE syns_visuels AS visu "
                    "INNER JOIN dls ON dls.id=visu.dls_id "
                    "INNER JOIN syns AS s ON dls.syn_id = s.id SET "
@@ -354,7 +356,7 @@ end:
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Http_syn_save_un_comment (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct HTTP_CLIENT_SESSION *session = user_data;
+  { /*struct HTTP_CLIENT_SESSION *session = user_data;*/
     if ( ! (Json_has_member ( element, "id" ) &&
             Json_has_member ( element, "posx" ) &&
             Json_has_member ( element, "posy" ) &&
@@ -376,7 +378,7 @@ end:
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Http_syn_save_une_passerelle (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct HTTP_CLIENT_SESSION *session = user_data;
+  { /*struct HTTP_CLIENT_SESSION *session = user_data;*/
     if ( ! (Json_has_member ( element, "id" ) &&
             Json_has_member ( element, "posx" ) &&
             Json_has_member ( element, "posy" ) &&

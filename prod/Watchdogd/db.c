@@ -2413,6 +2413,7 @@ fin:
                     "('haut_parleur',        'png',  'by_mode_color' , 100),"
                     "('bouton',              'none', 'complexe'      , 100),"
                     "('bloc_maintenance',    'none', 'complexe'      , 100),"
+                    "('comment',             'none', 'complexe'      , 150),"
                     "('encadre',             'none', 'complexe'      , 50 );"
                   );
 

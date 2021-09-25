@@ -1,6 +1,16 @@
 # Les Visuels **_I**
 
-a compléter
+Les visuels, bit de classe **_I** vous permettent de matérialiser un objet, une commande, ou encore un état.
+Chaque visuel est représenté par le **TECH_ID** de son D.L.S parent, et par son **ACRONYME**.
+Par exemple, voici la définition la plus simple d'un visuel:
+
+    /* Nous sommes dans le D.L.S "SONO" */
+    /* Déclaration d'un visuel MON_VISUEL, de forme 'haut_parleur' */
+    #define MON_VISUEL <-> _I(forme="haut_parleur");
+
+Cette déclaration vous permet ensuite d'utiliser **MON_VISUEL** a l'intérieur même du D.L.S **SONO**.
+Pour faire apparaitre ce visuel sur un autre D.L.S, il faudra utiliser un [lien](dls_link.md) précisant son identification complète
+**SONO:MON_VISUEL**.
 
 ---
 ## Comment piloter un visuel
@@ -14,18 +24,19 @@ Ces options sont représentées dans la grammaire [D.L.S](/dls.md) par les mots 
 
 Voici des exemples de déclinaisons d'une même forme selon plusieurs `mode` et `color`:
 
-    /* Déclaration d'un visuel 'haut_parleur' */
+    /* Nous sommes dans le D.L.S "SONO" */
+    /* Déclaration d'un visuel MON_VISUEL, de forme 'haut_parleur' */
     /* Par défaut, le visuel est dans le mode inactif, en blanc */
-    #define MA_PORTE <-> _I(forme="haut_parleur", mode="inactif", color="white");
+    #define MON_HAUT_PARLEUR <-> _I(forme="haut_parleur", mode="inactif", color="white");
 
     /* Si MA_CONDITION est vraie, le visuel est actif, de couleur rouge, */
     /* et clignotant */
-    - MA_CONDITION -> MA_PORTE(mode="actif", color="red", cligno);
+    - MA_CONDITION -> MON_HAUT_PARLEUR(mode="actif", color="red", cligno);
 
 ---
-## Couleurs possibles
+##Les couleurs
 
-Seules les couleurs suivantes sont reconnues:
+Les couleurs HTML sont reconnues, dans le format string, comme ci dessous:
 
 * black
 * white
@@ -39,8 +50,18 @@ Seules les couleurs suivantes sont reconnues:
 * yellow
 
 ---
-## Les catégories d'affichage
+## Les visuels complexes
 
-Certains visuels proposent plusieurs affichage selon le `mode`
+Certaines formes de visuelles sont particulières, dans le sens ou le visuel en question est construit de manière dynamique.
+Ces visuels complexes sont les suivants:
+
+| forme            |  description |
+|:----------------:|:-------------|
+| bouton           | Ce visuel affiche un bouton dont le titre est le `libelle` |
+| bloc_maintenance | Ce visuel affiche le bloc Service/Maintenance, en fonction du `mode` |
+| [comment](dls_visuel_comment.md) | Ce visuel affiche son `libelle` sous la forme de texte, avec une police et une couleur dependants du `mode` et `color` |
+| encadre          | Ce visuel affiche un cadre de couleur `color`, surmonté d'un titre selon le `libelle`. La taille du cadre est determinée selon sont `mode` |
+
+
 
 

@@ -43,55 +43,41 @@ Les différentes classes utilisées sont les suivantes:
 | [_I](dls_visuels.md)        	| Watchdog 	        | PRESENCE:CPT_A_REBOURG 	  | Les comptes a rebourg permettent de decompter le temps à partir d'un evenement<br>et de réagir si cet evenement n'est pas revenu au bout d'une consigne précise.
 
 ---
-## Définition d'un module D.L.S
+## Grammaire D.L.S
 
 Un module D.L.S présentera deux zones distinctes :
 
-* la zone de description des [**ALIAS**](dls.md#zone-de-declaration-des-alias)
-* la zone de description du fonctionnement [**logique et de calcul**](dls.md#zone-de-logique-et-de-calcul)
+* la zone de description des [**ALIAS**](dls_alias.md)
+* la zone de description des [**Liens**](dls_link.md)
+* la zone de description du fonctionnement [**logique**](dls_logique.md)
+* la zone de description des [**calculs**](dls_calcul.md)
 
-### Zone de déclaration des ALIAS
+###Les commentaires
 
-Cette zone permet d'associer un nom (ou IDentificateur) aux bits internes. Cet IDentificateur pourra être utilisé dans le code de fonctionnement pour faire référence au bit interne auquel il est rattaché.
+Dans tout le code D.L.S, il est possible d'intégrer des commentaires. Utiles pour augmenter le niveau de lisibilité du code, ils permettent
+aussi d'accélérer la compréhension du mode de fonctionnement.
 
-Il s'agit d'une zone donc la syntaxe est la suivante:
+Un commentaire commence par la chaine « /\* » et se finit par la chaine « \*/ »
+Exemple de syntaxe:
 
-     #define IDentificateur <-> _CLASSE;
+     - a . b → c;                /* Ceci est un commentaire */
 
-Elle commence directement par une chaine de caractères représentant l'IDentificateur, puis une double flèche (un inférieur « < », un tiret « - », un supérieur « > »), une Classe, et enfin un point virgule terminal.
+##Exemple de module D.L.S simple
 
-Des options peuvent être affectées à cet alias, en utilisant la syntaxe suivante :
+    /* Zone d'Alias */
+    #define POS_CAPTEUR  <-> _E(libelle="Position du capteur d'ouverture");
+    #define MON_COMPTEUR <-> _CI(libelle="Nombre d'ouvertures de la porte");
 
-     #define IDentificateur <-> _CLASSE (OPTIONS); /* OPTIONS étant une liste de champ=valeur, séparée par des virgules ',' */
+    /* Zone de liens */
+    #link EDF:VISUEL_ECLAIR; /* Lien vers le visuels de l'éclair du module D.L.S EDF. Celui-ci apparaitra sur la page syntoptique de ce module */
 
-Exemple de syntaxe complète :
+    /* Zone de logique et de calcul */
+    - POS_CAPTEUR -> MON_COMPTEUR; /* Si la porte est ouverte, on augmente de 1 la valeur de compteur */
 
-     #define VOLET_OUVERT <-> _E; /* VOLET_OUVERT devra être mappé à une Entrée Physique (par exemple, a un module MODBUS, ou à la reception d'un SMS) */
-     #define CDE_VOLET <-> _M;    /* CDE_VOLET sera utilisé en tant que monostable dans la suite du code D.L.S */
 
-### Zone de logique et de calcul
 
-C'est dans cette zone où toute l'intelligence du plugin va résider. C'est elle qui définie l'ensemble des comportements attendu en fonction de l'environnement du module.
-Zone de logique
 
-Cette zone est composée d'une suite de ligne (appelée dans la suite « ligne D.L.S ») dont le contenu d'une ligne suit la syntaxe suivante :
 
-     - EXPRESSION -> LISTE_ACTIONS;
-
-Elle commence par un tiret « - », suivi d'une « EXPRESSION », suivi par une flèche (tiret « - » puis supérieur « > »), une liste d'actions séparées par des virgules et enfin, un point virgule terminal.
-Zone de calcul
-
-Le calcul D.L.S permet, sous une condition, de calculer la valeur d'un registre en fonction d'expression booléennes ou arithmétiques. Tout comme la ligne logique, celle-ci commence par un tiret « - », suivi d'une « EXPRESSION » qui représente la condition de calcul, suivi d'un tiret, puis, entre parenthèse, d'un calcul arithmétique, suivi pour finir d'une flèche (tiret « - » puis supérieur « > »), et un registre de destination. Le point virgule terminal reste obligatoire.
-
-Si la condition est vraie, alors le Registre **RESULTAT** sera mis à jour avec la valeur du calcul entre parenthèses.
-
-     - EXPRESSION - ( CALCUL ) -> RESULTAT;
-
-Exemple:
-
-     - SYS:TOP_1SEC - ( VITESSE + 1.0 ) -> VITESSE;
-
-Toutes les secondes, le registre **VITESSE** est augmenté de 1.
 
 ---
 ## Bits locaux à chaque module

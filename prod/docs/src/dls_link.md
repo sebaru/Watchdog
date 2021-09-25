@@ -13,16 +13,17 @@ Un lien se définit de la manière suivante dans la zone d'**Alias** du module D
 **TECH_ID_SOURCE** et **ACRONYME_SOURCE** referencent le bit interne distant faisant l'objet du lien.
 La **liste_options** permet de surcharger les options associés au bit interne cible.
 
-Typiquement, prenons l'exemple du synoptique **METEO**, auquel est associé le module DLS **VENT**,
-proposant lui-même l'[entrée analogique](dls_ea.md) **VITESSE**:
+Typiquement, prenons l'exemple du synoptique **METEO**, auquel est associé le module DLS dont le tech_id est **VENT**,
+proposant lui-même l'[entrée analogique](dls_ai.md) **VITESSE**:
 
+    /* Module DLS 'VENT', associé au synoptique 'METEO' */
     #define VITESSE <-> _AI(libelle="Vitesse du vent mesurée par le capteur", unite="m/s" );
 
 Pour matérialiser un [cadran](dls_cadran.md) sur ce bit interne **VENT:VITESSE** sur un synoptique **MON_AUTRE_SYNOPTIQUE**
 hébergeant le module D.L.S **MON_AUTRE_DLS**, déclarez un lien de la manière suivante:
 
-     /* Module DLS 'MON_AUTRE_DLS', associé au synoptique 'MON_AUTRE_SYNOPTIQUE' */
-     #link VITESSE:VENT (cadran="simple");
+    /* Module DLS 'MON_AUTRE_DLS', associé au synoptique 'MON_AUTRE_SYNOPTIQUE' */
+    #link VENT:VITESSE (cadran="simple");
 
 ## Suppression d'un lien
 
