@@ -34,6 +34,7 @@
  #include <dirent.h>
  #include <string.h>
  #include <stdio.h>
+ #include <locale.h>
 
  #include <sys/wait.h>
  #include <fcntl.h>
@@ -51,6 +52,7 @@
  void Thread_init ( gchar *name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description )
   { gchar chaine[128];
 
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     g_snprintf( chaine, sizeof(chaine), "W-%s", name );
     gchar *upper_name = g_ascii_strup ( chaine, -1 );
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );

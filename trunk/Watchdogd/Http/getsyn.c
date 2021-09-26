@@ -313,7 +313,6 @@ end:
            ) )
      { return; }
 
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     SQL_Write_new( "UPDATE syns_visuels AS visu "
                    "INNER JOIN dls ON dls.id=visu.dls_id "
                    "INNER JOIN syns AS s ON dls.syn_id = s.id SET "

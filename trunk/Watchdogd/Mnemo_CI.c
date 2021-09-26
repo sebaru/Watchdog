@@ -123,32 +123,20 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_confDB_CI ( void )
-  { gchar requete[200];
-    GSList *liste;
-    struct DB *db;
+  { GSList *liste;
     gint cpt;
-
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
-       return;
-     }
 
     cpt = 0;
     liste = Partage->Dls_data_CI;
     while ( liste )
      { struct DLS_CI *cpt_imp = (struct DLS_CI *)liste->data;
-       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_CI as m SET valeur='%d', etat='%d' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   cpt_imp->valeur, cpt_imp->etat, cpt_imp->tech_id, cpt_imp->acronyme );
-       Lancer_requete_SQL ( db, requete );
+       SQL_Write_new ( "UPDATE mnemos_CI as m SET valeur='%d', etat='%d' "
+                       "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                       cpt_imp->valeur, cpt_imp->etat, cpt_imp->tech_id, cpt_imp->acronyme );
        liste = g_slist_next(liste);
        cpt++;
      }
 
-    Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d CptIMP updated", __func__, cpt );
   }
 /******************************************************************************************************************************/

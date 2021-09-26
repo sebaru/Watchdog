@@ -243,32 +243,20 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_confDB_AI( void )
-  { gchar requete[200];
-    GSList *liste;
-    struct DB *db;
+  { GSList *liste;
     gint cpt;
-
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
-       return;
-     }
 
     cpt = 0;
     liste = Partage->Dls_data_AI;
     while ( liste )
      { struct DLS_AI *ai = (struct DLS_AI *)liste->data;
-       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_AI as m SET valeur='%f' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   ai->valeur, ai->tech_id, ai->acronyme );
-       Lancer_requete_SQL ( db, requete );
+       SQL_Write_new( "UPDATE mnemos_AI as m SET valeur='%f' "
+                      "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                      ai->valeur, ai->tech_id, ai->acronyme );
        liste = g_slist_next(liste);
        cpt++;
      }
 
-    Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d AI updated", __func__, cpt );
   }
 /******************************************************************************************************************************/

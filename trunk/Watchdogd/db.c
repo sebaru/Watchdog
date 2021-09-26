@@ -27,6 +27,7 @@
 
  #include <glib.h>
  #include <string.h>
+ #include <locale.h>
 
 /**************************************************** Chargement des prototypes ***********************************************/
  #include "watchdogd.h"
@@ -265,6 +266,7 @@
   { gboolean retour = FALSE;
     va_list ap;
 
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     va_start( ap, format );
     gsize taille = g_printf_string_upper_bound (format, ap);
     va_end ( ap );

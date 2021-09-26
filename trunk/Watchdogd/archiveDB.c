@@ -39,7 +39,6 @@
  gboolean Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
   { gchar requete[512], table[512];
 
-    setlocale ( LC_NUMERIC, "C" );
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s_%s_%s(date_time,valeur) VALUES "
                 "(FROM_UNIXTIME(%d.%d),'%f')",

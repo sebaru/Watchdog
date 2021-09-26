@@ -284,7 +284,6 @@
 
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
-    setlocale(LC_ALL, "C");
     switch(comparateur->ordre)
      { case T_EGAL:      g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)==%f",
                                      alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
@@ -1295,7 +1294,6 @@
     if (!rc) retour = TRAD_DLS_ERROR_NO_FILE;
     else
      { GList *options;
-       setlocale(LC_ALL, "C");
 
 /*---------------------------------------- Création des mnemoniques permanents -----------------------------------------------*/
        options = New_option_chaine ( NULL, T_LIBELLE, g_strdup("Statut de Synthèse de la communication du module"));
