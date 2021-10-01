@@ -21,7 +21,8 @@
        { parent_id: $('#idModalSynEditPPage').val(),
          page     : $('#idModalSynEditPage').val(),
          libelle  : $('#idModalSynEditDescription').val(),
-         access_level: $('#idModalSynEditAccessLevel').val()
+         access_level: $('#idModalSynEditAccessLevel').val(),
+         mode_affichage: $('#idModalSynEditAffichage').val()
        };
     if (syn_id>0) json_request.syn_id = syn_id;                                                         /* Ajout ou édition ? */
     else json_request.image = "syn_maison.png";
@@ -57,6 +58,7 @@
     $('#idModalSynEditPage').val("");
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page(null)");
     Synoptique_set_controle_page (null)
+    $('#idModalSynEditAffichage').val("0");
     $('#idModalSynEditDescription').val("");
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") ).val(0);
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('0')" );
@@ -81,6 +83,7 @@
     $('#idModalSynEditPage').val( selection.page );
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page('"+selection.page+"')");
     Synoptique_set_controle_page (selection.page)
+    $('#idModalSynEditAffichage').val( selection.mode_affichage );
     $('#idModalSynEditDescription').val( selection.libelle );
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") )
                                    .val( selection.access_level );
@@ -159,6 +162,10 @@
             { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
               "render": function (item)
                 { return( Badge_Access_level ( item.access_level ) ); }
+            },
+            { "data": null, "title":"Affichage Full", "className": "align-middle text-center",
+              "render": function (item)
+                { if (item.mode_affichage==1) return( "Mode Full" ); else return ("Mode Simple"); }
             },
             { "data": null, "title": "Parent", "className": "align-middle text-center",
               "render": function (item)

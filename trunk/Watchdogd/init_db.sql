@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'syn_maison.png',
   `page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `access_level` INT(11) NOT NULL DEFAULT '0',
+  `mode_affichage` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
