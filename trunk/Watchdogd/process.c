@@ -67,8 +67,15 @@
     Modifier_configDB ( lib->name, "thread_version", lib->version );
     SQL_Write_new ( "INSERT INTO thread_classe SET thread=UPPER('%s'), classe=UPPER('%s') "
                     "ON DUPLICATE KEY UPDATE classe=VALUES(classe)", lib->name, classe );
+
+    Creer_configDB ( lib->name, "debug", "false" );
+    gchar *db_debug = Recuperer_configDB_by_nom ( lib->name, "debug" );
+    lib->Thread_debug = !g_ascii_strcasecmp(db_debug, "true");
+    g_free(db_debug);
+
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage du thread '%s' (v%s) de classe '%s' -> TID = %p", __func__,
               lib->name, lib->version, classe, pthread_self() );
+
     lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
   }
