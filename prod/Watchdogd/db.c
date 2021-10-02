@@ -27,6 +27,7 @@
 
  #include <glib.h>
  #include <string.h>
+ #include <locale.h>
 
 /**************************************************** Chargement des prototypes ***********************************************/
  #include "watchdogd.h"
@@ -265,6 +266,7 @@
   { gboolean retour = FALSE;
     va_list ap;
 
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     va_start( ap, format );
     gsize taille = g_printf_string_upper_bound (format, ap);
     va_end ( ap );
@@ -2369,8 +2371,11 @@ encore:
     if (database_version < 5972)
      { SQL_Write_new ("ALTER TABLE msgs ADD `rate_limit` INT(11) NOT NULL DEFAULT '0' AFTER `typologie`"); }
 
+    if (database_version < 6015)
+     { SQL_Write_new ("ALTER TABLE `syns` ADD `mode_affichage` TINYINT(1) NOT NULL DEFAULT '0' AFTER `access_level`" ); }
+
 fin:
-    database_version = 5972;
+    database_version = 6015;
     SQL_Write_new ("DROP TABLE `icone`");
 
     SQL_Write_new ("CREATE TABLE `icone` ("

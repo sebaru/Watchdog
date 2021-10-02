@@ -553,7 +553,6 @@ reload:
 
     Charger_tous_ups();                                                                         /* Chargement des upss ups */
 
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();

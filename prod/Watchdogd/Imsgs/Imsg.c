@@ -454,7 +454,8 @@ reconnect:
 
     retour = xmpp_connect_client ( Cfg_imsgs.conn, NULL, 0, Imsgs_connexion_CB, NULL );
     if ( retour != XMPP_EOK)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Connexion failed with error %d", __func__, retour );
+     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR,
+                             "%s: Connexion failed with error %d for '%s'", __func__, retour, Cfg_imsgs.username );
        Cfg_imsgs.signed_off = TRUE;
      }
     else

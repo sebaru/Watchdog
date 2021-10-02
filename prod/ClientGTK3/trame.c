@@ -52,6 +52,10 @@
  struct TRAME_ITEM_MOTIF *Trame_new_item ( void )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     trame_motif = g_try_malloc0( sizeof(struct TRAME_ITEM_MOTIF) );
+    if (!trame_motif)
+     { printf("%s: Reservation mémoire failed\n", __func__ );
+       return(NULL);
+     }
     trame_motif->num_image  = 0;
     trame_motif->cligno     = 0;                                        /* Par defaut, on ne clignote pas */
     trame_motif->images     = NULL;
@@ -524,7 +528,7 @@ printf("%s: New bouton %s\n", __func__, bouton );
     g_snprintf( encadre, sizeof(encadre),
                 "<svg viewBox='0 0 %d %d' >"
                 "<text text-anchor='middle' x='%d' y='12' "
-                "      font-size='16px' font-family='Bitstream' font-style='italic' fill='black' stroke='black'>%s</text> "
+                "      font-size='14px' font-family='Sans' font-style='italic' fill='black' stroke='black'>%s</text> "
                 "<rect x='5' y='20' rx='15' width='%d' height='%d' "
                 "      fill='none' stroke='%s' stroke-width='4'  />"
                 "</svg>",
@@ -542,22 +546,22 @@ printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
   { gchar comment[512], *family, *style, *weight;
     gint size, width;
     if (!strcasecmp ( mode, "titre" ))
-     { size = 38;
-       family = "'Bitstream Vera Serif'";
+     { size = 32;
+       family = "'Sans'";
        style  = "italic";
        weight = "normal";
-       width  = (gint)strlen(libelle)*25;
+       width  = (gint)strlen(libelle)*20;
      }
     else if (!strcasecmp ( mode, "soustitre" ))
-     { size = 26;
-       family = "'Bitstream Vera Serif'";
+     { size = 24;
+       family = "'Sans'";
        style  = "italic";
-       weight = "bold";
-       width  = (gint)strlen(libelle)*15;
+       weight = "normal";
+       width  = (gint)strlen(libelle)*14;
      }
     else
-     { size   = 18;
-       family = "'Bitstream Vera Serif'";
+     { size   = 14;
+       family = "'Sans'";
        style  = "italic";
        weight = "normal";
        width  = (gint)strlen(libelle)*9;
@@ -908,7 +912,6 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme );
-       g_free(trame_motif);
        return;
      }
 

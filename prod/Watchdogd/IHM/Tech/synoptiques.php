@@ -58,6 +58,16 @@
 
        <div class="col form-group">
 					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Mode d'Affichage</label>
+						     <select id="idModalSynEditAffichage" class="col-7 col-sm-8 custom-select border-info">
+             <option value="0">Mode Simple</option>
+             <option value="1">Mode Full</option>
+           </select>
+     					</div>
+       </div>
+
+       <div class="col form-group">
+					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Description du synoptique</label>
 						     <input id="idModalSynEditDescription" type="text" class="form-control" placeholder="Description du synoptique">
      					</div>

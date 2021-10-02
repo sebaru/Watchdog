@@ -175,32 +175,19 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_confDB_Registre( void )
-  { gchar requete[200];
-    GSList *liste;
-    struct DB *db;
-    gint cpt;
+  { GSList *liste;
 
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
-       return;
-     }
-
-    cpt = 0;
+    gint cpt = 0;
     liste = Partage->Dls_data_REGISTRE;
     while ( liste )
      { struct DLS_REGISTRE *r = (struct DLS_REGISTRE *)liste->data;
-       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_R as m SET valeur='%f' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   r->valeur, r->tech_id, r->acronyme );
-       Lancer_requete_SQL ( db, requete );
+       SQL_Write_new( "UPDATE mnemos_R as m SET valeur='%f' "
+                      "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                      r->valeur, r->tech_id, r->acronyme );
        liste = g_slist_next(liste);
        cpt++;
      }
 
-    Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d REGISTRE updated", __func__, cpt );
   }
 /******************************************************************************************************************************/

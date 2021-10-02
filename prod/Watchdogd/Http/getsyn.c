@@ -194,6 +194,11 @@
           g_free(chaine);
         }
 
+       if ( Json_has_member ( request, "mode_affichage" ) )
+        { SQL_Write_new ( "UPDATE syns SET mode_affichage='%d' WHERE id='%d' AND access_level<='%d'",
+                          Json_get_int ( request, "mode_affichage" ), Json_get_int ( request, "syn_id" ), session->access_level );
+        }
+
        if ( Json_has_member ( request, "access_level" ) )
         { SQL_Write_new ( "UPDATE syns SET access_level='%d' WHERE id='%d' AND access_level<='%d'",
                           Json_get_int ( request, "access_level" ), Json_get_int ( request, "syn_id" ), session->access_level );
@@ -313,7 +318,6 @@ end:
            ) )
      { return; }
 
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     SQL_Write_new( "UPDATE syns_visuels AS visu "
                    "INNER JOIN dls ON dls.id=visu.dls_id "
                    "INNER JOIN syns AS s ON dls.syn_id = s.id SET "
