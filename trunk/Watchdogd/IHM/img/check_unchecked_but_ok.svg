@@ -6,11 +6,12 @@
    id="Layer_1"
    x="0px"
    y="0px"
-   viewBox="0 0 297 297"
-   style="enable-background:new 0 0 297 297;"
+   viewBox="0 0 128 128"
    xml:space="preserve"
    sodipodi:docname="check_unchecked_but_ok.svg"
    inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   width="128"
+   height="128"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,24 +26,33 @@
    inkscape:pagecheckerboard="0"
    showgrid="false"
    inkscape:zoom="2.6127946"
-   inkscape:cx="148.5"
-   inkscape:cy="148.5"
+   inkscape:cx="62.576676"
+   inkscape:cy="63.916237"
    inkscape:window-width="1920"
    inkscape:window-height="979"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="1"
-   inkscape:current-layer="g14" />
+   inkscape:current-layer="g14"
+   fit-margin-top="0"
+   fit-margin-left="0"
+   fit-margin-right="0"
+   fit-margin-bottom="0" />
 <g
-   id="g14">
+   id="g14"
+   transform="translate(-84.5,-84.5)">
 	<g
-   id="g8">
+   id="g8"
+   transform="matrix(0.43097643,0,0,0.43097643,84.5,84.5)"
+   style="stroke-width:2.32031">
 		<g
-   id="g6">
+   id="g6"
+   style="stroke-width:2.32031">
 			<g
-   id="g4">
+   id="g4"
+   style="stroke-width:2.32031">
 				<circle
-   style="fill:#c0952b;fill-opacity:1"
+   style="fill:#c0952b;fill-opacity:1;stroke-width:2.32031"
    cx="148.5"
    cy="148.5"
    id="circle2"
@@ -51,57 +61,74 @@
 		</g>
 	</g>
 	<path
-   style="fill:#936315;fill-opacity:1"
-   d="M223.53,86.581L85.344,222.292l74.293,74.293c73.135-5.423,131.525-63.813,136.948-136.948   L223.53,86.581z"
-   id="path10" />
+   style="fill:#936315;fill-opacity:1;stroke-width:2.32031"
+   d="m 223.53,86.581 -138.186,135.711 74.293,74.293 c 73.135,-5.423 131.525,-63.813 136.948,-136.948 z"
+   id="path10"
+   transform="matrix(0.43097643,0,0,0.43097643,84.5,84.5)" />
 	<polygon
-   style="fill:#ECF0F1;"
-   points="231.823,94.875 202.125,65.177 148.5,118.802 94.875,65.177 65.177,94.875 118.802,148.5    65.177,202.125 94.875,231.823 148.5,178.198 202.125,231.823 231.823,202.125 178.198,148.5  "
-   id="polygon12" />
+   style="fill:#ecf0f1;stroke-width:2.32031"
+   points="118.802,148.5 65.177,202.125 94.875,231.823 148.5,178.198 202.125,231.823 231.823,202.125 178.198,148.5 231.823,94.875 202.125,65.177 148.5,118.802 94.875,65.177 65.177,94.875 "
+   id="polygon12"
+   transform="matrix(0.43097643,0,0,0.43097643,84.5,84.5)" />
 </g>
 <g
-   id="g16">
+   id="g16"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g18">
+   id="g18"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g20">
+   id="g20"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g22">
+   id="g22"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g24">
+   id="g24"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g26">
+   id="g26"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g28">
+   id="g28"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g30">
+   id="g30"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g32">
+   id="g32"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g34">
+   id="g34"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g36">
+   id="g36"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g38">
+   id="g38"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g40">
+   id="g40"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g42">
+   id="g42"
+   transform="translate(-84.5,-84.5)">
 </g>
 <g
-   id="g44">
+   id="g44"
+   transform="translate(-84.5,-84.5)">
 </g>
 </svg>
