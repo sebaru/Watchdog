@@ -52,6 +52,10 @@
  struct TRAME_ITEM_MOTIF *Trame_new_item ( void )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     trame_motif = g_try_malloc0( sizeof(struct TRAME_ITEM_MOTIF) );
+    if (!trame_motif)
+     { printf("%s: Reservation mémoire failed\n", __func__ );
+       return(NULL);
+     }
     trame_motif->num_image  = 0;
     trame_motif->cligno     = 0;                                        /* Par defaut, on ne clignote pas */
     trame_motif->images     = NULL;
@@ -908,7 +912,6 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme );
-       g_free(trame_motif);
        return;
      }
 
