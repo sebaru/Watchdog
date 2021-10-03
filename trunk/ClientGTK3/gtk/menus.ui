@@ -8,7 +8,7 @@
           <attribute name='action'>app.Recompiler</attribute>
         </item>
         <item>
-          <attribute name='label' translatable='yes'>Delete PNG</attribute>
+          <attribute name='label' translatable='yes'>Delete local PNG</attribute>
           <attribute name='action'>app.Restarter</attribute>
         </item>
         <item>
