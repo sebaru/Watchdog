@@ -239,7 +239,7 @@
     return(json_object_get_string_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
-/* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */
+/* Json_has_member: Test la présence d'un champ dans le rootnode                                                              */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
@@ -248,24 +248,14 @@
     return( json_object_has_member ( object, chaine ) && !json_object_get_null_member ( object, chaine ) );
   }
 /******************************************************************************************************************************/
-/* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */
+/* Json_get: Recupere l'entier dont le nom est en parametre                                                               */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gint Json_get_int ( JsonNode *query, gchar *chaine )
-  { GValue valeur = G_VALUE_INIT;
-    gint retour;
-    JsonObject *object = json_node_get_object (query);
+  { JsonObject *object = json_node_get_object (query);
     if (!object) printf("%s : Warning : Object unknown for '%s' unknown\n", __func__, chaine );
-    JsonNode *node = json_object_get_member ( object, chaine );
-    if (!node) { return(-1); }
-    json_node_get_value ( node, &valeur );
-         if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atoi(g_value_get_string (&valeur)); }
-    else if ( G_VALUE_HOLDS_INT    (&valeur) ) { retour = g_value_get_int (&valeur); }
-    else if ( G_VALUE_HOLDS_INT64  (&valeur) ) { retour = g_value_get_int64 (&valeur); }
-    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = -1; }
-    g_value_unset ( &valeur );
-    return(retour);
+    return(json_object_get_int_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
@@ -273,18 +263,9 @@
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gdouble Json_get_double ( JsonNode *query, gchar *chaine )
-  { GValue valeur = G_VALUE_INIT;
-    gdouble retour;
-    JsonObject *object = json_node_get_object (query);
+  { JsonObject *object = json_node_get_object (query);
     if (!object) printf("%s : Warning : Object unknown for '%s' unknown\n", __func__, chaine );
-    JsonNode *node = json_object_get_member ( object, chaine );
-    if (!node) { return(0.0); }
-    json_node_get_value ( node, &valeur );
-         if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atof(g_value_get_string (&valeur)); }
-    else if ( G_VALUE_HOLDS_DOUBLE (&valeur) ) { retour = g_value_get_double(&valeur); }
-    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = -1.0; }
-    g_value_unset ( &valeur );
-    return(retour);
+    return(json_object_get_double_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
@@ -292,18 +273,9 @@
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gboolean Json_get_bool ( JsonNode *query, gchar *chaine )
-  { GValue valeur = G_VALUE_INIT;
-    gint retour;
-    JsonObject *object = json_node_get_object (query);
+  { JsonObject *object = json_node_get_object (query);
     if (!object) printf("%s : Warning : Object unknown for '%s' unknown\n", __func__, chaine );
-    JsonNode *node = json_object_get_member ( object, chaine );
-    if (!node) { return(-1); }
-    json_node_get_value ( node, &valeur );
-         if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atoi(g_value_get_string (&valeur)); }
-    else if ( G_VALUE_HOLDS_BOOLEAN(&valeur) ) { retour = g_value_get_boolean (&valeur); }
-    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = FALSE; }
-    g_value_unset ( &valeur );
-    return(retour);
+    return(json_object_get_boolean_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */

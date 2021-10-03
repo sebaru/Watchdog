@@ -36,6 +36,7 @@
  extern void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur );
  extern void Json_node_add_int ( JsonNode *RootNode, gchar *name, gint64 valeur );
  extern void Json_node_add_double ( JsonNode *RootNode, gchar *name, gdouble valeur );
+ extern void Json_node_add_null ( JsonNode *RootNode, gchar *name );
  extern JsonArray *Json_node_add_array ( JsonNode *RootNode, gchar *name );
  extern JsonNode *Json_node_add_objet ( JsonNode *RootNode, gchar *name );
  extern void Json_array_add_element ( JsonArray *array, JsonNode *element );

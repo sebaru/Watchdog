@@ -73,7 +73,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y libupsclient-dev libssl-dev default-libmysqlclient-dev libstrophe-dev libgammu-dev
   apt install -y libpopt-dev libssl-dev libmariadbclient-dev libzmq3-dev
   apt install -y sox libsox-fmt-all python3-pip mpg123
-  apt install -y libjson-glib-dev
+  apt install -y libjson-glib-dev libgpiod-dev
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
   apt install -y libsoup2.4-dev librsvg2-dev
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -

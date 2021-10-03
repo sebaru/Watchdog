@@ -1,10 +1,14 @@
 # Liste des visuels
 
-A noter, lorsqu'un visuel propose une option *color*, une seule et unique couleur est présentée dans cette liste.
-Lorsque les visuels ne proposent pas d'option *mode* ou *color*, celles-ci sont notées **"--"**.
+
+Les visuels sont présentées selon leur catégorie:
+
+* Les [équipements électriques](visuels_electriques.md)
+
 
 | Visuels | `forme` | `mode` | `color` |
 |:-------:|:-----:|:----:|-------|
+| ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/clef_red.png)  | clef | -- | red |
 | ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/arret_urgence_red.png)  | arret_urgence | -- | red |
 | ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/panneau_stop_red.png)  | panneau_stop | -- | green |
 | ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/bouton_io_green.png)  | bouton_io | -- | green |

@@ -122,6 +122,7 @@
  void Trame_rafraichir_motif ( struct TRAME_ITEM_MOTIF *trame_motif )
   { if (!(trame_motif && trame_motif->visuel)) return;
 
+    gchar *forme    = Json_get_string ( trame_motif->visuel, "forme" );
     gint position_x = Json_get_int ( trame_motif->visuel, "posx" );
     gint position_y = Json_get_int ( trame_motif->visuel, "posy" );
     gint largeur    = Json_get_int ( trame_motif->visuel, "larg" );
@@ -129,7 +130,6 @@
     gint angle      = Json_get_int ( trame_motif->visuel, "angle" );
     gdouble scale   = Json_get_double ( trame_motif->visuel, "scale" );
     if (scale<=0.0) scale=1.0;
-    gchar *forme    = Json_get_string ( trame_motif->visuel, "forme" );
 
     cairo_matrix_init_identity ( &trame_motif->transform );
     cairo_matrix_translate ( &trame_motif->transform, (gdouble)position_x, (gdouble)position_y );

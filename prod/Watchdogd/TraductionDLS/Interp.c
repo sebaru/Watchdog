@@ -1420,7 +1420,7 @@
        gchar *Liste_BOOL = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
        gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
        gchar *Liste_CI = NULL, *Liste_CH = NULL;
-       gchar *Liste_CADRANS = NULL;
+       gchar *Liste_CADRANS = NULL, *Liste_MOTIF = NULL;
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
 
        while(liste)
@@ -1548,6 +1548,7 @@
                     { Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
                                                                                                         /* Création du visuel */
                       Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+                      Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );
                     }
                    break;
                  }
@@ -1670,6 +1671,7 @@
                 case MNEMO_MOTIF:
                  {                                                                 /* Création du LINK vers le visuel externe */
                    Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+                   Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );
                    break;
                  }
               }
@@ -1753,10 +1755,9 @@
                        Dls_plugin.id, (Liste_CADRANS ? Liste_CADRANS: "''" ) );
        if (Liste_CADRANS) g_free(Liste_CADRANS);
 
-       /*SQL_Write_new ( "DELETE FROM mnemos_VISUEL WHERE tech_id='%s' ",
-                         " AND acronyme NOT IN ( %s )",
-                        tech_id, (Liste_WATCHDOG?Liste_WATCHDOG:"''") );
-       if (Liste_VISUELS) g_free(Liste_VISUELS);*/
+       SQL_Write_new ( "DELETE FROM mnemos_VISUEL WHERE tech_id='%s' ",
+                       " AND acronyme NOT IN ( %s )", tech_id, (Liste_MOTIF?Liste_MOTIF:"''") );
+       if (Liste_MOTIF) g_free(Liste_MOTIF);
 
      }
     close(Id_log);
