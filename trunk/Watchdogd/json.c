@@ -77,6 +77,15 @@
     json_object_set_int_member ( object, name, valeur );
   }
 /******************************************************************************************************************************/
+/* Json_node_add_null: Ajoute un enregistrement NULL dans le RootNode                                                         */
+/* Entrée: le RootNode, le nom du parametre, la valeur                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_node_add_null ( JsonNode *RootNode, gchar *name )
+  { JsonObject *object = json_node_get_object (RootNode);
+    json_object_set_null_member   ( object, name );
+  }
+/******************************************************************************************************************************/
 /* Json_add_string: Ajoute un enregistrement name/string dans le RootNode                                                     */
 /* Entrée: le RootNode, le nom du parametre, la valeur                                                                        */
 /* Sortie: néant                                                                                                              */
@@ -143,17 +152,8 @@
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gdouble Json_get_double ( JsonNode *query, gchar *chaine )
-  { GValue valeur = G_VALUE_INIT;
-    gdouble retour;
-    JsonObject *object = json_node_get_object (query);
-    JsonNode *node = json_object_get_member ( object, chaine );
-    if (!node) { return(0.0); }
-    json_node_get_value ( node, &valeur );
-         if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atof(g_value_get_string (&valeur)); }
-    else if ( G_VALUE_HOLDS_DOUBLE (&valeur) ) { retour = g_value_get_double(&valeur); }
-    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = -1.0; }
-    g_value_unset ( &valeur );
-    return(retour);
+  { JsonObject *object = json_node_get_object (query);
+    return(json_object_get_double_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
@@ -170,18 +170,8 @@
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gint Json_get_int ( JsonNode *query, gchar *chaine )
-  { GValue valeur = G_VALUE_INIT;
-    gint retour;
-    JsonObject *object = json_node_get_object (query);
-    JsonNode *node = json_object_get_member ( object, chaine );
-    if (!node) { return(-1); }
-    json_node_get_value ( node, &valeur );
-         if ( G_VALUE_HOLDS_STRING (&valeur) ) { retour = atoi(g_value_get_string (&valeur)); }
-    else if ( G_VALUE_HOLDS_INT    (&valeur) ) { retour = g_value_get_int (&valeur); }
-    else if ( G_VALUE_HOLDS_INT64  (&valeur) ) { retour = g_value_get_int64 (&valeur); }
-    else { printf("%s: Erreur getting '%s'\n", __func__, chaine ); retour = -1; }
-    g_value_unset ( &valeur );
-    return(retour);
+  { JsonObject *object = json_node_get_object (query);
+    return(json_object_get_int_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
 /* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */

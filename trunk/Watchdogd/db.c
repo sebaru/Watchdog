@@ -144,6 +144,23 @@
                                Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port, FALSE ) );
   }
 /******************************************************************************************************************************/
+/* SQL_Field_to_Json : Intéègre un MYSQL_FIELD dans une structure JSON                                                        */
+/* Entrée: Le JsonNode et le MYSQL_FIELD                                                                                      */
+/* Sortie: le jsonnode est mis a jour                                                                                         */
+/******************************************************************************************************************************/
+ static void SQL_Field_to_Json ( JsonNode *node, MYSQL_FIELD *field, gchar *chaine )
+  { if ( field->type == MYSQL_TYPE_FLOAT || field->type==MYSQL_TYPE_DOUBLE )
+     { if (chaine) Json_node_add_double( node, field->name, atof(chaine) );
+              else Json_node_add_null  ( node, field->name );
+     }
+    else if ( field->type == MYSQL_TYPE_TINY || field->type==MYSQL_TYPE_LONG )
+     { if (chaine) Json_node_add_int( node, field->name, atoi(chaine) );
+              else Json_node_add_null  ( node, field->name );
+     }
+    else
+     { Json_node_add_string( node, field->name, chaine ); }
+  }
+/******************************************************************************************************************************/
 /* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
@@ -177,14 +194,18 @@
        while ( (db->row = mysql_fetch_row(db->result)) != NULL )
         { JsonNode *element = Json_node_create();
           for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
-           { Json_node_add_string( element, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
+           { MYSQL_FIELD *field = mysql_fetch_field_direct(db->result, cpt);
+             SQL_Field_to_Json ( element, field, db->row[cpt] );
+           }
           Json_array_add_element ( array, element );
         }
      }
     else
      { while ( (db->row = mysql_fetch_row(db->result)) != NULL )
         { for (gint cpt=0; cpt<mysql_num_fields(db->result); cpt++)
-           { Json_node_add_string( RootNode, mysql_fetch_field_direct(db->result, cpt)->name, db->row[cpt] ); }
+           { MYSQL_FIELD *field = mysql_fetch_field_direct(db->result, cpt);
+             SQL_Field_to_Json ( RootNode, field, db->row[cpt] );
+           }
         }
      }
     mysql_free_result( db->result );

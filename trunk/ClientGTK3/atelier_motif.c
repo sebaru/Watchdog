@@ -40,12 +40,14 @@
     struct TYPE_INFO_SUPERVISION *infos_supervision;
     struct TYPE_INFO_ATELIER     *infos_atelier;
 
+    if (!page) return;
+
     if (!Json_has_member ( element, "mode"  ) ) Json_node_add_string ( element, "mode", "no mode" );
     if (!Json_has_member ( element, "color" ) ) Json_node_add_string ( element, "color", "gray" );
 
-printf("%s : %s:%s mode=%s, color=%s, gestion=%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get_string ( element, "acronyme" ),
-       Json_get_string( element, "mode" ), Json_get_string ( element, "color"), Json_get_string ( element, "gestion" ) );
-    if (!page) return;
+printf("%s : %s:%s mode=%s, color=%s, scale=%f, gestion=%s\n", __func__, Json_get_string( element, "tech_id" ), Json_get_string ( element, "acronyme" ),
+       Json_get_string( element, "mode" ), Json_get_string ( element, "color"),
+       Json_get_double ( element, "scale" ), Json_get_string ( element, "gestion" ) );
 
     if (page->type == TYPE_PAGE_SUPERVISION)  { infos_supervision = page->infos; }
     else if (page->type == TYPE_PAGE_ATELIER) { infos_atelier     = page->infos; }
