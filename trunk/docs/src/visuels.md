@@ -1,7 +1,10 @@
 # Liste des visuels
 
-A noter, lorsqu'un visuel propose une option *color*, une seule et unique couleur est présentée dans cette liste.
-Lorsque les visuels ne proposent pas d'option *mode* ou *color*, celles-ci sont notées **"--"**.
+
+Les visuels sont présentées selon leur catégorie:
+
+* Les [équipements électriques](visuels_electriques.md)
+
 
 | Visuels | `forme` | `mode` | `color` |
 |:-------:|:-----:|:----:|-------|

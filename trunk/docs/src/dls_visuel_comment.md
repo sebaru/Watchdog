@@ -22,6 +22,7 @@ Celles-ci sont les suivantes:
 | soustitre  | Le commentaire est affiché en taille 26 |
 | annotation | Le commentaire est affiché en taille 18 |
 
+
 Si le `mode` n'est pas renseigné, celui-ci sera considéré comme **annotation**.
 
 ##Les couleurs des commentaires
@@ -30,5 +31,5 @@ Toutes les [couleurs](dls_visuels.md#les-couleurs) traditionnelles sont reconnue
 
 ##Attribut de clignotement
 
-Un commentaire, peut éventuellement etre clignotant, si l'option `cligno` est renseigné dans ses options.
+Un commentaire, peut éventuellement etre clignotant, si l'option `cligno` est renseignée dans ses options.
 Par défaut, il ne l'est pas.

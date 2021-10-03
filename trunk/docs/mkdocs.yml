@@ -23,10 +23,12 @@ nav:
    - Les liens: dls_link.md
    - La logique: dls_logique.md
    - Les calculs: dls_calculs.md
-   - Les visuels:
-     - Présentation: dls_visuels.md
-     - Les commentaires: dls_visuel_comment.md
-     - Inventaire des Visuels: visuels.md
+   - Les entrées T.O.R: dls_entre_tor.md
+   - Les Visuels: dls_visuels.md
+ - Les formes de visuels:
+   - Les commentaires: dls_visuel_comment.md
+   - Inventaire des Visuels: visuels.md
+   - Equipements Electriques: visuels_electriques.md
  - Pour finir ?:
    - Qui sommes-nous ?: auteurs.md
 
