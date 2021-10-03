@@ -2434,6 +2434,7 @@ fin:
                     "('voyant_moteur',       'png',  'by_color'      , 100),"
                     "('eclair',              'png',  'by_color'      , 100),"
                     "('vanne',               'png',  'by_color'      , 100),"
+                    "('clef',                'png',  'by_color'      , 100),"
                     "('check',               'png',  'by_mode'       , 100),"
                     "('thermometre',         'png',  'by_mode_color' , 100),"
                     "('haut_parleur',        'png',  'by_mode_color' , 100),"
