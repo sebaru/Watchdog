@@ -2422,6 +2422,7 @@ fin:
                     "('soufflant',           'png',  'by_mode'       , 100),"
                     "('store',               'png',  'by_mode'       , 100),"
                     "('pile',                'png',  'by_mode'       , 100),"
+                    "('cadena',              'png',  'by_mode'       , 100),"
                     "('kodi',                'svg',  'static'        , 100),"
                     "('film',                'svg',  'static'        , 100),"
                     "('youtube_bebe_louis',  'png',  'static'        , 100),"
