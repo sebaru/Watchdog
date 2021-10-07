@@ -4,13 +4,13 @@
   { var json_request =
      { description: $('#idInstallDescription').val(),
        db_hostname: $('#idInstallDBHostname').val(),
-       db_port:     $('#idInstallDBPort').val(),
+       db_port:     parseInt($('#idInstallDBPort').val()),
        db_username: $('#idInstallDBUsername').val(),
        db_database: $('#idInstallDBDatabase').val(),
        db_password: $('#idInstallDBPassword').val(),
-       is_master:   $('#idInstallIsMaster').val(),
+       is_master:   parseInt($('#idInstallIsMaster').val()),
        master_host: $('#idInstallMasterHost').val(),
-       use_subdir:  $('#idInstallUseSubdir').val(),
+       use_subdir:  parseInt($('#idInstallUseSubdir').val()),
        run_as:      $('#idInstallRunAs').val(),
      };
     $('#idSpinner').show();

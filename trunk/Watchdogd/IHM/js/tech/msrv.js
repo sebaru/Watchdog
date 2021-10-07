@@ -37,7 +37,7 @@
  function MSRV_Set_Log_Level ( )
   { var json_request = JSON.stringify(
      { instance : $('#idTargetInstance').val(),
-       log_level: $("#idMSRVLogLevel").val(),
+       log_level: parseInt($("#idMSRVLogLevel").val()),
        log_db   : ($("#idMSRVLogDB").val()=="true" ? true : false),
        log_zmq  : ($("#idMSRVLogZMQ").val()=="true" ? true : false),
        log_trad : ($("#idMSRVLogTrad").val()=="true" ? true : false),

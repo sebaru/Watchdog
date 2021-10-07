@@ -43,8 +43,8 @@
        { tech_id : $('#idModalModbusEditTechID').val(),
          hostname: $('#idModalModbusEditHostname').val(),
          description: $('#idModalModbusEditDescription').val(),
-         watchdog: $('#idModalModbusEditWatchdog').val(),
-         max_request_par_sec: $('#idModalModbusEditMaxRequestParSec').val(),
+         watchdog: parseInt($('#idModalModbusEditWatchdog').val()),
+         max_request_par_sec: parseInt($('#idModalModbusEditMaxRequestParSec').val()),
        }
      );
     Send_to_API ( 'POST', "/api/process/modbus/set", json_request, function ()
@@ -72,8 +72,8 @@
        { tech_id :    $('#idModalModbusEditTechID').val().toUpperCase(),
          hostname:    $('#idModalModbusEditHostname').val(),
          description: $('#idModalModbusEditDescription').val(),
-         watchdog:    $('#idModalModbusEditWatchdog').val(),
-         max_request_par_sec: $('#idModalModbusEditMaxRequestParSec').val(),
+         watchdog:    parseInt($('#idModalModbusEditWatchdog').val()) ,
+         max_request_par_sec: parseInt($('#idModalModbusEditMaxRequestParSec').val()),
        }
      );
     Send_to_API ( 'POST', "/api/process/modbus/add", json_request, function ()

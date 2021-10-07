@@ -18,13 +18,13 @@
  function Synoptique_set ( syn_id )
   {
     var json_request =
-       { parent_id: $('#idModalSynEditPPage').val(),
+       { parent_id: parseInt($('#idModalSynEditPPage').val()),
          page     : $('#idModalSynEditPage').val(),
          libelle  : $('#idModalSynEditDescription').val(),
-         access_level: $('#idModalSynEditAccessLevel').val(),
-         mode_affichage: $('#idModalSynEditAffichage').val()
+         access_level: parseInt($('#idModalSynEditAccessLevel').val()),
+         mode_affichage: parseInt($('#idModalSynEditAffichage').val())
        };
-    if (syn_id>0) json_request.syn_id = syn_id;                                                         /* Ajout ou édition ? */
+    if (syn_id>0) json_request.syn_id = parseInt(syn_id);                                               /* Ajout ou édition ? */
     else json_request.image = "syn_maison.png";
 
     Send_to_API ( "POST", "/api/syn/set", JSON.stringify(json_request), function(Response)

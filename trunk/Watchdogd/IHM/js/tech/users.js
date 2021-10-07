@@ -104,7 +104,7 @@
     selection = table.ajax.json().users.filter( function(item) { return (item.username==username) } )[0];
     var json_request = JSON.stringify(
        { username    : selection.username,
-         access_level: $('#idUserLevel_'+username).val(),
+         access_level: parseInt($('#idUserLevel_'+username).val()),
          email       : $('#idUserMail_'+username).val(),
          xmpp        : $('#idUserXmpp_'+username).val(),
          phone       : $('#idUserPhone_'+username).val(),
