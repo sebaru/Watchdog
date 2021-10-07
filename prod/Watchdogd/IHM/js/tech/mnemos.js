@@ -20,7 +20,7 @@
        { classe   : "AI",
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
-         archivage: $('#idAIArchivage'+acronyme).val()
+         archivage: parseInt($('#idAIArchivage'+acronyme).val())
        }
      );
 
@@ -36,7 +36,7 @@
        { classe   : "CI",
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
-         archivage: $('#idCIArchivage'+acronyme).val()
+         archivage: parseInt($('#idCIArchivage'+acronyme).val())
        }
      );
 
@@ -52,7 +52,7 @@
        { classe   : "R",
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
-         archivage: $('#idRArchivage'+acronyme).val()
+         archivage: parseInt($('#idRArchivage'+acronyme).val())
        }
      );
 
@@ -68,8 +68,8 @@
        { classe   : "MSG",
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
-         rate_limit : $('#idMSGRateLimit'+acronyme).val(),
-         sms        : $('#idMSGSms'+acronyme).val(),
+         rate_limit : parseInt($('#idMSGRateLimit'+acronyme).val()),
+         sms        : parseInt($('#idMSGSms'+acronyme).val()),
          audio_profil : $('#idMSGProfilAudio'+acronyme).val(),
          audio_libelle: $('#idMSGLibelleAudio'+acronyme).val(),
        }
@@ -87,7 +87,7 @@
        { classe   : "HORLOGE",
          tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
-         access_level : $('#idHORLOGELevel_'+acronyme).val(),
+         access_level : parseInt($('#idHORLOGELevel_'+acronyme).val()),
        }
      );
 

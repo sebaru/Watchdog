@@ -5,7 +5,7 @@
   { var json_request = JSON.stringify(
      { instance:    $('#idTargetInstance').val(),
        tech_id:     $('#idTINFOTechID').val(),
-       port:        $('#idTINFOPort').val(),
+       port:        parseInt($('#idTINFOPort').val()),
        description: $('#idTINFODescription').val(),
      });
     Send_to_API ( 'POST', "/api/process/teleinfoedf/set", json_request, function() { Load_page(); }, null );

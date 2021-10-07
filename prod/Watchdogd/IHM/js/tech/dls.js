@@ -75,7 +75,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Dls_Set ( dls_id )
   { var json_request =
-       { syn_id    : $('#idModalDlsEditPage').val(),
+       { syn_id    : parseInt($('#idModalDlsEditPage').val()),
          shortname : $('#idModalDlsEditShortname').val(),
          name      : $('#idModalDlsEditDescription').val(),
          tech_id   : $('#idModalDlsEditTechID').val().toUpperCase(),

@@ -16,7 +16,7 @@
     selection = table.ajax.json().tableaux.filter( function(item) { return item.id==id } )[0];
     var json_request =
        { titre:  $('#idModalEditLibelle').val(),
-         syn_id: $('#idModalEditPage').val(),
+         syn_id: parseInt($('#idModalEditPage').val()),
        }
     if (id!=null) json_request.id = id;
 

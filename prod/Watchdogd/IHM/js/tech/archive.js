@@ -45,11 +45,11 @@
  function Archive_sauver_parametre ( )
   { var json_request =
      { hostname:    $('#idArchiveDBHostname').val(),
-       port:        $('#idArchiveDBPort').val(),
+       port:        parseInt($('#idArchiveDBPort').val()),
        username:    $('#idArchiveDBUsername').val(),
        database:    $('#idArchiveDBDatabase').val(),
-       retention:   $('#idArchiveDBRetention').val(),
-       buffer_size: $('#idArchiveDBBufferSize').val(),
+       retention:   parseInt($('#idArchiveDBRetention').val()),
+       buffer_size: parseInt($('#idArchiveDBBufferSize').val()),
      };
     if ($('#idArchiveDBPassword').val().length > 0) { json_request.password = $('#idArchiveDBPassword').val(); }
     Send_to_API ( 'POST', "/api/process/archive/set", JSON.stringify(json_request), null );

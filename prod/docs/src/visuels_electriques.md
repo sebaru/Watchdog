@@ -1,6 +1,6 @@
 # Liste des visuels Electriques
 
-##Ampoule
+##`forme`="ampoule"
 
 Modes:
 
@@ -10,7 +10,8 @@ Modes:
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/ampoule_on.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/ampoule_off.png)
 
-##Eclair
+---
+##`forme`="eclair"
 
 Pas de mode.
 
@@ -25,14 +26,15 @@ Pas de mode.
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/eclair_black.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/eclair_white.png)
 
-##Haut_parleur
+---
+##`forme`="haut_parleur"
 
 Modes:
 
 * `mode`="inactif"
 * `mode`="actif"
 
-![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_inactif_white.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_inactif_gray.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_inactif_green.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_inactif_darkgreen.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_inactif_red.png)
@@ -43,7 +45,7 @@ Modes:
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_inactif_black.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_inactif_white.png)
 
-![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_actif_white.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_actif_gray.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_actif_green.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_actif_darkgreen.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_actif_red.png)
@@ -54,7 +56,8 @@ Modes:
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_actif_black.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/haut_parleur_actif_white.png)
 
-##Pile
+---
+##`forme`="pile"
 
 Modes:
 
@@ -74,7 +77,8 @@ Modes:
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/pile_100.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/pile_en_charge.png)
 
-##Soufflant
+---
+##`forme`="soufflant"
 
 Modes:
 
