@@ -1,5 +1,5 @@
 
-# Liste des visuels de la catégorie 'hydrolique'
+# Liste des visuels de la catégorie 'hydraulique'
 
 ---
 ## `forme`='vanne'

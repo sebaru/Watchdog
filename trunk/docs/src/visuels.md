@@ -6,7 +6,7 @@
 * [chauffage](visuels_chauffage.md)
 * [divers](visuels_divers.md)
 * [electrique](visuels_electrique.md)
-* [hydrolique](visuels_hydrolique.md)
+* [hydraulique](visuels_hydraulique.md)
 * [io](visuels_io.md)
 * [ouvrant](visuels_ouvrant.md)
 * [panneau](visuels_panneau.md)
