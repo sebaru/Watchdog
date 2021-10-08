@@ -4,6 +4,7 @@
 ---
 ## `forme`='arret_urgence'
 
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/arret_urgence.png)
 
 ---
 ## `forme`='auto_manu'

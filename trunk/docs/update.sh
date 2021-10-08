@@ -1,22 +1,27 @@
 #/bin/sh
 
-read  -p "password:" -r PASSWORD
-
 #echo "SELECT * from icone" | mysql -u watchdog WatchdogDB -p$PASSWORD | tail -n +2 > categorie.sql
-echo "SELECT DISTINCT categorie FROM icone" | mysql -u watchdog WatchdogDB -p$PASSWORD | tail -n +2 > categorie.sql
+echo "SELECT DISTINCT categorie FROM icone ORDER BY categorie" | mysql -u watchdog WatchdogDB -pwatchdog | tail -n +2 > categorie.sql
 
-#| while read -r line
+SOMMAIRE=src/visuels.md
+echo "" > $SOMMAIRE
+echo "# Liste des visuels par catégorie" >> $SOMMAIRE
+echo "" >> $SOMMAIRE
+
+
 for CAT in $(cat categorie.sql)
 	do
   echo;
   echo "------------- Processing Categorie $CAT"
+
+  echo "* [$CAT](visuels_$CAT.md)" >> $SOMMAIRE
 
   RESULT=src/visuels_$CAT.md
   echo "" > $RESULT
   echo "# Liste des visuels de la catégorie '"$CAT"'" >> $RESULT
   echo "" >> $RESULT
 
-  echo "SELECT forme, extension, ihm_affichage FROM icone WHERE categorie='"$CAT"'" | mysql -u watchdog WatchdogDB -p$PASSWORD | tail -n +2 > forme.sql
+  echo "SELECT forme, extension, ihm_affichage FROM icone WHERE categorie='"$CAT"' ORDER BY forme" | mysql -u watchdog WatchdogDB -pwatchdog | tail -n +2 > forme.sql
 
   cat forme.sql | while read -r line
    do
@@ -34,6 +39,11 @@ for CAT in $(cat categorie.sql)
     echo "---" >> $RESULT
     echo "## \`forme\`='$FORME'" >> $RESULT
     echo "" >> $RESULT
+
+    if [ $IHM_AFFICHAGE = "static" ]
+     then
+       echo "![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/"$FORME"."$EXTENSION")" >> $RESULT
+    fi
 
     if [ $IHM_AFFICHAGE = "by_color" ]
      then
