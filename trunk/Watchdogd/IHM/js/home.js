@@ -185,15 +185,15 @@
 
           $.each ( Synoptique.visuels, function (i, visuel)
                     { if (visuel.forme == null)
-                       { svg.append ("svg")
-                                      .attr( "x", visuel.posx )
-                                      .attr( "y", visuel.posy )
-                                      .append ( "image" ).attr( "transform", "rotate("+visuel.angle+") " )
-                                              .attr("xlink:href", "/img/"+visuel.icone+".gif" );
-
+                       { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
+                         new_svg.attr( "transform", "rotate("+visuel.angle+") translate("+visuel.posx+" "+visuel.posy+") " );
+                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.icone+".gif" );
+                         var dimensions = new_svg.node().getBoundingClientRect();
+                         console.debug(dimensions);
                        }
                       else if (visuel.extension=="png")
-                       { svg.append ( "image" ).attr("xlink:href", "/img/"+visuel.forme+".png>" );
+                       { svg.append ( "image" ).attr("href", "/img/"+visuel.forme+".png>" );
                        }
 
                     }
