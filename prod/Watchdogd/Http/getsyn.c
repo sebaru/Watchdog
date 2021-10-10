@@ -563,7 +563,6 @@ end:
     if (syn_id_src) { syn_id = atoi (syn_id_src); }
                  else syn_id=1;
 
-    gchar *full_syn = g_hash_table_lookup ( query, "full" );
 
 /*-------------------------------------------------- Test autorisation d'accès -----------------------------------------------*/
     JsonNode *result = Json_node_create();
@@ -612,6 +611,7 @@ end:
        json_node_unref(synoptique);
        return;
      }
+    gint full_syn = Json_get_int ( synoptique, "mode_affichage" );
 /*-------------------------------------------------- Envoi les data des synoptiques fils -------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "child_syns",
                                  "SELECT s.* FROM syns AS s INNER JOIN syns as s2 ON s.parent_id=s2.id "

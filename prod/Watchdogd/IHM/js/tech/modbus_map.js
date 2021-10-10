@@ -98,7 +98,7 @@
          acronyme   : $('#idModalEditAISelectAcronyme').val().toUpperCase(),
          map_tech_id: $('#idModalEditAIWagoTechID').val().toUpperCase(),
          map_tag    : "AI"+$('#idModalEditAIWagoTag').val(),
-         type       : parseInt($('#idModalEditAIType').val(),
+         type       : parseInt($('#idModalEditAIType').val()),
          min        : parseInt($('#idModalEditAIMin').val()),
          max        : parseInt($('#idModalEditAIMax').val()),
          unite      : $('#idModalEditAIUnite').val(),

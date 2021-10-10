@@ -630,7 +630,7 @@
 
     if (Chercher_page_notebook( client, TYPE_PAGE_SUPERVISION, id, TRUE )) return;
 
-    g_snprintf(chaine, sizeof(chaine), "/api/syn/show?full=true&syn_id=%d", id );
+    g_snprintf(chaine, sizeof(chaine), "/api/syn/show?syn_id=%d", id );
     Envoi_json_au_serveur( client, "GET", NULL, chaine, Creer_page_supervision_CB );
   }
 /******************************************************************************************************************************/

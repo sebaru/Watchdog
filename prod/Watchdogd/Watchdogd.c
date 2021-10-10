@@ -45,7 +45,8 @@
 
  struct CONFIG Config;                                       /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  struct PARTAGE *Partage;                                                        /* Accès aux données partagées des processes */
-
+ extern char** environ;
+ 
 /******************************************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                                             */
 /* Entrée: numero du signal à gerer                                                                                           */
@@ -148,9 +149,11 @@
                  zmq_src_tech_id, zmq_dst_tech_id, target );
        gint pid = fork();
        if (pid<0)
-        { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s_Fils: EXECUTE: erreur Fork target '%s'", __func__, target ); }
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: EXECUTE: erreur Fork target '%s'", __func__, target ); }
        else if (!pid)
-        { system(target);
+        { gchar **argv = g_strsplit ( target, " ", 0 );
+          if (argv && argv[0]) { execve ( argv[0], argv, environ ); }
+          else Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: split error target '%s'", __func__, target );
           exit(0);
         }
      }
@@ -256,6 +259,7 @@
 
          if ( !strcasecmp( zmq_tag, "PING") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_tech_id );
+       Partage->com_msrv.last_master_ping = Partage->top;
      }
     else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
@@ -379,7 +383,7 @@
 /******************************************************************************************************************************/
  static void *Boucle_pere_slave ( void )
   { struct ZMQUEUE *zmq_from_master, *zmq_from_bus;
-    gint cpt_5_minutes, cpt_1_minute;
+    gint cpt_5_minutes = 0, cpt_1_minute = 0;
     gchar chaine[128];
 
     prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
@@ -416,9 +420,6 @@
 
     if (!Config.installed) Charger_librairie_par_prompt ("http");/* Charge uniquement le module HTTP si instance pas installée*/
 /***************************************** Debut de la boucle sans fin ********************************************************/
-    cpt_5_minutes = Partage->top + 3000;
-    cpt_1_minute  = Partage->top + 600;
-
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
     JsonNode *RootNode = Json_node_create ();
@@ -472,6 +473,11 @@
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
+       if (Partage->com_msrv.last_master_ping + 1200 < Partage->top)
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Master is not responding. Restart Slave in 10s.", __func__ );
+          Partage->com_msrv.Thread_run = FALSE;
+          sleep(10);
+        }
        usleep(1000);
        sched_yield();
      }

@@ -142,6 +142,7 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Charger_un_synoptique ( syn_id )
   { var bodymain = $('#bodymain');
+    var fullsvg  = $('#fullsvg');
     var tableaux = $('#tableaux');
     Send_to_API ( "GET", "/api/syn/show", "syn_id="+syn_id, function(Response)
      { console.log(Response);
@@ -160,23 +161,51 @@
                  );
         }
 
-       $('#idPageTitle').text(Synoptique.libelle);
-       $.each ( Response.child_syns, function (i, syn)
+       $.each ( Synoptique.child_syns, function (i, syn)
                  { bodymain.append ( Creer_card ( syn ) );
-                   Set_syn_vars ( syn.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.id } )[0] );
+                   if (Synoptique.syn_vars)
+                    { Set_syn_vars ( syn.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.id } )[0] ); }
                  }
               );
-       Set_syn_vars ( Synoptique.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
-       $.each ( Response.horloges, function (i, horloge)
+       /*Set_syn_vars ( Synoptique.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );*/
+       $.each ( Synoptique.horloges, function (i, horloge)
                  { bodymain.append ( Creer_horloge ( horloge ) ); }
               );
 
-       $.each ( Synoptique.visuels, function (i, visuel)
-                 { var card = Creer_visuel ( visuel );
-                   bodymain.append ( card );
-                   Changer_etat_visuel ( visuel );
-                 }
-              );
+       if (Synoptique.mode_affichage == 0) /* Affichage simple */
+        { $.each ( Synoptique.visuels, function (i, visuel)
+                    { var card = Creer_visuel ( visuel );
+                      bodymain.append ( card );
+                      Changer_etat_visuel ( visuel );
+                    }
+                 );
+        }
+       else /* Affichage full */
+        { var svg = d3.select("#fullsvg").append("svg").attr("width", 1024).attr("height", 768);
+
+          $.each ( Synoptique.visuels, function (i, visuel)
+                    { if (visuel.forme == null)
+                       { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
+                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.icone+".gif" )
+                                .on( "load", function ()
+                                  { console.log("loaded");
+                                    var dimensions = this.getBBox();
+                                    var orig_x = (visuel.posx-dimensions.width/2);
+                                    var orig_y = (visuel.posy-dimensions.height/2);
+                                    new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                               "scale("+visuel.scale+") "+
+                                                               "translate("+orig_x+" "+orig_y+") "
+                                                );
+                                  } );
+                       }
+                      else if (visuel.extension=="png")
+                       { svg.append ( "image" ).attr("href", "/img/"+visuel.forme+".png>" );
+                       }
+
+                    }
+                 );
+        }
 
        $.each ( Synoptique.cadrans, function (i, cadran)
                  { bodymain.append( Creer_cadran ( cadran ) );
@@ -188,7 +217,7 @@
           $.each ( Synoptique.tableaux, function (i, tableau)
            { var id = "idTableau-"+tableau.id;
              tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe m-1") );
-             maps = Response.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
+             maps = Synoptique.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
              Charger_plusieurs_courbes ( id, maps, "HOUR" );
              $('#'+id).on("click", function () { Charger_page_tableau(tableau.id); } );
            });
@@ -207,6 +236,7 @@
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div>")
+                     .append("<div id='fullsvg'  class='row mx-1 justify-content-center'></div>")
                      .append("<div id='tableaux' class='row mx-1 justify-content-center'></div>")
                      .append("<hr><table id='idTableMessages' class='table table-dark table-bordered w-100'></table>");
        Synoptique = null;

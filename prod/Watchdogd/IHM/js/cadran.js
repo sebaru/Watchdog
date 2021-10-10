@@ -124,7 +124,7 @@
     cadrans = Synoptique.cadrans.filter( function (item) { return(item.tech_id==etat.tech_id && item.acronyme==etat.acronyme); });
     if (cadrans.length!=1) return;
     cadran = cadrans[0];
-    console.debug(etat);
+/*    console.debug(etat);*/
     var minimum = parseFloat(cadran.minimum);
     var maximum = parseFloat(cadran.maximum);
     var valeur  = etat.valeur;
@@ -134,7 +134,7 @@
        var position = 100*(valeur-minimum)/(maximum-minimum);
      }
 
-console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.seuil_ntb+" nb="+cadran.seuil_nb+" nh="+cadran.seuil_nh+" nth="+cadran.seuil_nth);
+/*console.log("Changer_etat_cadran valeur="+etat.valeur+" seuils = ntb="+cadran.seuil_ntb+" nb="+cadran.seuil_nb+" nh="+cadran.seuil_nh+" nth="+cadran.seuil_nth);*/
 
     if (cadran.forme=="progress")
      { var idcadranforme = "wtd-cadran-"+etat.tech_id+"-"+etat.acronyme+"-barre";
