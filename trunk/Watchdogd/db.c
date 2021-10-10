@@ -2438,6 +2438,7 @@ fin:
                     "('voyant',       'voyant_moteur',       'png',  'by_color'      , 100),"
                     "('voyant',       'eclair',              'png',  'by_color'      , 100),"
                     "('hydraulique',  'vanne',               'png',  'by_color'      , 100),"
+                    "('hydraulique',  'goutte_eau',          'png',  'by_color'      , 100),"
                     "('divers',       'clef',                'png',  'by_color'      , 100),"
                     "('divers',       'check',               'png',  'by_mode'       , 100),"
                     "('chauffage',    'thermometre',         'png',  'by_mode_color' , 100),"
