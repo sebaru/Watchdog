@@ -142,6 +142,7 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Charger_un_synoptique ( syn_id )
   { var bodymain = $('#bodymain');
+    var fullsvg  = $('#fullsvg');
     var tableaux = $('#tableaux');
     Send_to_API ( "GET", "/api/syn/show", "syn_id="+syn_id, function(Response)
      { console.log(Response);
@@ -160,23 +161,44 @@
                  );
         }
 
-       $('#idPageTitle').text(Synoptique.libelle);
-       $.each ( Response.child_syns, function (i, syn)
+       $.each ( Synoptique.child_syns, function (i, syn)
                  { bodymain.append ( Creer_card ( syn ) );
-                   Set_syn_vars ( syn.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.id } )[0] );
+                   if (Synoptique.syn_vars)
+                    { Set_syn_vars ( syn.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.id } )[0] ); }
                  }
               );
-       Set_syn_vars ( Synoptique.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );
-       $.each ( Response.horloges, function (i, horloge)
+       /*Set_syn_vars ( Synoptique.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );*/
+       $.each ( Synoptique.horloges, function (i, horloge)
                  { bodymain.append ( Creer_horloge ( horloge ) ); }
               );
 
-       $.each ( Synoptique.visuels, function (i, visuel)
-                 { var card = Creer_visuel ( visuel );
-                   bodymain.append ( card );
-                   Changer_etat_visuel ( visuel );
-                 }
-              );
+       if (Synoptique.mode_affichage == 0) /* Affichage simple */
+        { $.each ( Synoptique.visuels, function (i, visuel)
+                    { var card = Creer_visuel ( visuel );
+                      bodymain.append ( card );
+                      Changer_etat_visuel ( visuel );
+                    }
+                 );
+        }
+       else /* Affichage full */
+        { var svg = d3.select("#fullsvg").append("svg").attr("width", 1024).attr("height", 768);
+
+          $.each ( Synoptique.visuels, function (i, visuel)
+                    { if (visuel.forme == null)
+                       { svg.append ("svg")
+                                      .attr( "x", visuel.posx )
+                                      .attr( "y", visuel.posy )
+                                      .append ( "image" ).attr( "transform", "rotate("+visuel.angle+") " )
+                                              .attr("xlink:href", "/img/"+visuel.icone+".gif" );
+
+                       }
+                      else if (visuel.extension=="png")
+                       { svg.append ( "image" ).attr("xlink:href", "/img/"+visuel.forme+".png>" );
+                       }
+
+                    }
+                 );
+        }
 
        $.each ( Synoptique.cadrans, function (i, cadran)
                  { bodymain.append( Creer_cadran ( cadran ) );
@@ -188,7 +210,7 @@
           $.each ( Synoptique.tableaux, function (i, tableau)
            { var id = "idTableau-"+tableau.id;
              tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe m-1") );
-             maps = Response.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
+             maps = Synoptique.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
              Charger_plusieurs_courbes ( id, maps, "HOUR" );
              $('#'+id).on("click", function () { Charger_page_tableau(tableau.id); } );
            });
@@ -207,6 +229,7 @@
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div>")
+                     .append("<div id='fullsvg'  class='row mx-1 justify-content-center'></div>")
                      .append("<div id='tableaux' class='row mx-1 justify-content-center'></div>")
                      .append("<hr><table id='idTableMessages' class='table table-dark table-bordered w-100'></table>");
        Synoptique = null;

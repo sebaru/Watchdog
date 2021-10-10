@@ -390,7 +390,7 @@
        gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                /* Recup du id */
        gchar chaine[64];
-       g_snprintf( chaine, sizeof(chaine), "/api/syn/show?syn_id=%d&full=1", id  );
+       g_snprintf( chaine, sizeof(chaine), "/api/syn/show?syn_id=%d", id  );
        Envoi_json_au_serveur ( page->client, "GET", NULL, chaine, Creer_page_atelier_CB );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
