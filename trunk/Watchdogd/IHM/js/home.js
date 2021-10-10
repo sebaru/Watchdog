@@ -187,10 +187,17 @@
                     { if (visuel.forme == null)
                        { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
-                         new_svg.attr( "transform", "rotate("+visuel.angle+") translate("+visuel.posx+" "+visuel.posy+") " );
-                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.icone+".gif" );
-                         var dimensions = new_svg.node().getBoundingClientRect();
-                         console.debug(dimensions);
+                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.icone+".gif" )
+                                .on( "load", function ()
+                                  { console.log("loaded");
+                                    var dimensions = this.getBBox();
+                                    var orig_x = (visuel.posx-dimensions.width/2);
+                                    var orig_y = (visuel.posy-dimensions.height/2);
+                                    new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                               "scale("+visuel.scale+") "+
+                                                               "translate("+orig_x+" "+orig_y+") "
+                                                );
+                                  } );
                        }
                       else if (visuel.extension=="png")
                        { svg.append ( "image" ).attr("href", "/img/"+visuel.forme+".png>" );
