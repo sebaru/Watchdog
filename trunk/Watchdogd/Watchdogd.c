@@ -380,7 +380,7 @@
 /******************************************************************************************************************************/
  static void *Boucle_pere_slave ( void )
   { struct ZMQUEUE *zmq_from_master, *zmq_from_bus;
-    gint cpt_5_minutes, cpt_1_minute;
+    gint cpt_5_minutes = 0, cpt_1_minute = 0;
     gchar chaine[128];
 
     prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
@@ -417,9 +417,6 @@
 
     if (!Config.installed) Charger_librairie_par_prompt ("http");/* Charge uniquement le module HTTP si instance pas installée*/
 /***************************************** Debut de la boucle sans fin ********************************************************/
-    cpt_5_minutes = Partage->top + 3000;
-    cpt_1_minute  = Partage->top + 600;
-
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
     JsonNode *RootNode = Json_node_create ();
