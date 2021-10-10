@@ -103,6 +103,7 @@
 
     GSList *Librairies;                                                        /* Liste des librairies chargées pour Watchdog */
     gboolean Http_Hard_Reload;
+    gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
   };
 
  struct PARTAGE                                                                            /* Structure des données partagées */

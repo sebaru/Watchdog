@@ -256,6 +256,7 @@
 
          if ( !strcasecmp( zmq_tag, "PING") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_tech_id );
+       Partage->com_msrv.last_master_ping = Partage->top;
      }
     else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
@@ -472,6 +473,11 @@
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
+       if (Partage->com_msrv.last_master_ping + 1200 < Partage->top)
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Master is not responding. Restart Slave in 10s.", __func__ );
+          Partage->com_msrv.Thread_run = FALSE;
+          sleep(10);
+        }
        usleep(1000);
        sched_yield();
      }
