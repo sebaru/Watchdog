@@ -2413,7 +2413,7 @@ fin:
                     "('io',           'wago_750342',         'webp', 'static'        , 100),"
                     "('io',           'satellite',           'svg',  'static'        , 100),"
                     "('io',           'sms',                 'jpg',  'static'        , 100),"
-                    "('lieu',         'soisy',               'gif',  'static'        , 50),"
+                    "('lieu',         'soisy',               'gif',  'static'        , 10),"
                     "('electrique',   'ampoule',             'png',  'by_mode'       , 100),"
                     "('chauffage',    'chaudiere_gaz',       'png',  'by_mode'       , 100),"
                     "('chauffage',    'radiateur',           'png',  'by_mode'       , 100),"
