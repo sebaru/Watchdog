@@ -2430,6 +2430,7 @@ fin:
                     "('application',  'youtube_bebe_louis',  'png',  'static'        , 100),"
                     "('application',  'youtube_crocodile',   'png',  'static'        , 100),"
                     "('application',  'youtube_peppa_pig',   'png',  'static'        , 100),"
+                    "('bouton',       'bouton_raz',          'png',  'by_color'      , 100),"
                     "('bouton',       'arret_urgence',       'png',  'by_color'      , 100),"
                     "('panneau',      'panneau_stop',        'png',  'by_color'      , 100),"
                     "('panneau',      'panneau_au',          'png',  'by_color'      , 100),"
