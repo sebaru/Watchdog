@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
    id="Calque_3"
    x="0px"
@@ -17,10 +9,18 @@
    sodipodi:docname="syn_maintenance.svg"
    width="128"
    height="128"
-   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
    inkscape:export-filename="/home/sebastien/SRC/trunk/Watchdogd/IHM/img/syn_maintenance.png"
    inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96"><metadata
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><metadata
    id="metadata459"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
          rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
@@ -34,17 +34,18 @@
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
    inkscape:window-width="1920"
-   inkscape:window-height="1043"
+   inkscape:window-height="979"
    id="namedview455"
    showgrid="false"
-   inkscape:zoom="4.3862718"
-   inkscape:cx="72.538"
-   inkscape:cy="73.900211"
+   inkscape:zoom="1.5507813"
+   inkscape:cx="90.277077"
+   inkscape:cy="35.465995"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="1"
    inkscape:current-layer="g452"
-   inkscape:document-rotation="0" />
+   inkscape:document-rotation="0"
+   inkscape:pagecheckerboard="0" />
 <style
    type="text/css"
    id="style2">
@@ -136,30 +137,31 @@
    class="st2"
    d="M 128,64 C 128,99.3 99.3,128 64,128 28.7,128 0,99.3 0,64 0,28.7 28.7,0 64,0 c 35.3,0 64,28.7 64,64 z"
    id="path20"
-   style="fill:#00d0d1;fill-opacity:1" />
+   style="fill:#d1c500;fill-opacity:1" />
 		
 			<linearGradient
    id="SVGID_2_"
    gradientUnits="userSpaceOnUse"
-   x1="24.151699"
-   y1="50.205101"
-   x2="127.5517"
-   y2="50.205101"
+   x1="51.205425"
+   y1="71.957634"
+   x2="111.80655"
+   y2="22.864826"
    gradientTransform="matrix(1,0,0,-1,0,128)">
 			<stop
    offset="0"
-   style="stop-color:#42210B;stop-opacity:0"
+   style="stop-color:#000000;stop-opacity:0.34779656"
    id="stop22" />
 			<stop
    offset="1"
-   style="stop-color:#42210B"
+   style="stop-color:#000000;stop-opacity:0"
    id="stop24" />
 		</linearGradient>
 		<path
    class="st3"
-   d="m 121.2,92.9 c 2.4,-5 5.3,-10.9 6.4,-20.4 L 101.3,52.9 72.5,58.8 28.4,27.6 l -4.2,3.3 1.4,79.5 c 0,0 4.5,8.2 11.7,11.8 7.2,3.6 23.3,5.7 23.3,5.7 20.6,1.3 48.3,-9.5 60.6,-35 z"
+   d="M 125.7877,45.528418 97.417111,25.274076 68.345617,61.754386 C 31.785307,106.2337 61.752385,68.057239 23.845666,106.45569 L 60.6,127.9 c 57.28762,-1.3574 71.51355,-39.753141 65.1877,-82.371582 z"
    id="path27"
-   style="fill:url(#SVGID_2_)" />
+   style="fill:url(#SVGID_2_)"
+   sodipodi:nodetypes="cccccc" />
 	</g>
 	<g
    id="g380">
@@ -265,7 +267,7 @@
 				</linearGradient>
 				<polygon
    class="st8"
-   points="89.4,43.1 85,44.9 88.3,53.2 92.7,51.4 "
+   points="92.7,51.4 89.4,43.1 85,44.9 88.3,53.2 "
    id="polygon71"
    style="fill:url(#SVGID_4_)" />
 				<g
@@ -1030,7 +1032,8 @@
 		<path
    class="st25"
    d="m 60.7,71.8 7.5,-7.4 c -0.7,-0.6 -1.4,-1.2 -2.1,-1.8 l -7.2,7.1 c 0.5,0.6 1.2,1.3 1.8,2.1 z"
-   id="path399" />
+   id="path399"
+   style="fill:#aa0000" />
 		<path
    class="st26"
    d="m 58.9,69.7 7.2,-7.1 C 66,62.5 65.9,62.5 65.9,62.4 l -7.1,7.1 c 0,0.1 0.1,0.2 0.1,0.2 z"
@@ -1045,7 +1048,8 @@
 		<path
    class="st27"
    d="m 99.2,111.9 c 0.6,0.6 1.6,0.6 2.2,0 l 6.6,-6.6 c 0.6,-0.6 0.6,-1.6 0,-2.2 -2.2,-2.3 -7.5,-7.9 -14.5,-14.9 l -9.2,9.2 c 7,7 12.6,12.3 14.9,14.5 z"
-   id="path407" />
+   id="path407"
+   style="fill:#aa0000;fill-opacity:1" />
 		<path
    class="st28"
    d="m 84.5,97.5 9.2,-9.2 c -0.1,-0.1 -0.1,-0.1 -0.2,-0.2 l -9.2,9.2 c 0.1,0 0.1,0.1 0.2,0.2 z"
@@ -1127,10 +1131,10 @@
    sodipodi:nodetypes="cscccc" />
 		<polygon
    class="st31"
-   points="21.7,28.2 23.4,30.4 26.4,27.4 24.2,25.7 "
+   points="24.2,25.7 21.7,28.2 23.4,30.4 26.4,27.4 "
    id="polygon444" />
 		<polygon
-   points="24.2,25.8 26.3,27.4 26.4,27.4 24.2,25.7 21.7,28.2 23.4,30.4 21.8,28.3 "
+   points="24.2,25.7 21.7,28.2 23.4,30.4 21.8,28.3 24.2,25.8 26.3,27.4 26.4,27.4 "
    id="polygon446" />
 		<path
    class="st6"
