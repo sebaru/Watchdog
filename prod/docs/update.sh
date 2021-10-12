@@ -115,7 +115,7 @@ for CAT in $(cat categorie.sql)
 
     echo "" >> $RESULT
    done
-  svn add $RESULT
+  svn add $RESULT &>/dev/null
   rm forme.sql
 done
 

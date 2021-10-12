@@ -725,6 +725,7 @@ end:
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "visuels",
                                     "SELECT v.*,m.*,i.*,dls.shortname AS dls_shortname, "
+                                    "  IF(i.layer IS NULL, 200, i.layer) AS layer,"
                                     "  IF(m.tech_id IS NULL, v.tech_id, m.tech_id) AS tech_id,"
                                     "  IF(m.acronyme IS NULL, v.acronyme, m.acronyme) AS acronyme, "
                                     "  IF(m.color IS NULL, v.color, m.color) AS color "
