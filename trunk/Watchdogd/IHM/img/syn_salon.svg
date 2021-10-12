@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
    id="Calque_2_1_"
    x="0px"
@@ -18,9 +10,17 @@
    inkscape:export-filename="/home/sebastien/SRC/trunk/Watchdogd/IHM/img/syn_salon.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
-   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
    width="128"
-   height="128"><metadata
+   height="128"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><metadata
    id="metadata265"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
          rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
@@ -38,13 +38,13 @@
    id="namedview261"
    showgrid="false"
    inkscape:pagecheckerboard="true"
-   inkscape:zoom="6.203125"
-   inkscape:cx="64"
-   inkscape:cy="64"
+   inkscape:zoom="4.3862718"
+   inkscape:cx="48.788587"
+   inkscape:cy="67.255295"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="1"
-   inkscape:current-layer="Calque_2_1_"
+   inkscape:current-layer="g258"
    inkscape:document-rotation="0" />
 <style
    type="text/css"
@@ -120,29 +120,31 @@
    cx="64"
    cy="64"
    r="64"
-   id="circle11" />
+   id="circle11"
+   style="fill:#4c86e4;fill-opacity:1" />
 	</g>
 	<linearGradient
    id="SVGID_1_"
    gradientUnits="userSpaceOnUse"
-   x1="31.3981"
-   y1="81.147903"
-   x2="127.9964"
-   y2="81.147903">
+   x1="117.67464"
+   y1="88.780464"
+   x2="38.872494"
+   y2="58.029198">
 		<stop
    offset="0"
-   style="stop-color:#BC823F;stop-opacity:0"
+   style="stop-color:#000000;stop-opacity:0.15450732"
    id="stop15" />
 		<stop
    offset="1"
-   style="stop-color:#BC823F"
+   style="stop-color:#000000;stop-opacity:0.48432332"
    id="stop17" />
 	</linearGradient>
 	<path
    class="st3"
-   d="m 100.3,116.9 c 17,-11.5 27.6,-31 27.6,-53.1 0,-3.1 -0.1,-3.6 -0.3,-6.3 L 91.4,45.4 51.6,45.5 31.4,91.5 Z"
+   d="m 100.3,116.9 c 17,-11.5 27.6,-31 27.6,-53.1 0,-3.1 -0.1,-3.6 -0.3,-6.3 L 91.4,45.4 51.6,45.5 29,91.7 Z"
    id="path20"
-   style="fill:url(#SVGID_1_)" />
+   style="fill:url(#SVGID_1_)"
+   sodipodi:nodetypes="csccccc" />
 	<linearGradient
    id="SVGID_2_"
    gradientUnits="userSpaceOnUse"
@@ -152,18 +154,14 @@
    y2="81.147903">
 		<stop
    offset="0"
-   style="stop-color:#BC823F;stop-opacity:0"
+   style="stop-color:#000000;stop-opacity:0"
    id="stop22" />
 		<stop
    offset="1"
-   style="stop-color:#BC823F"
+   style="stop-color:#000000;stop-opacity:0"
    id="stop24" />
 	</linearGradient>
-	<path
-   class="st4"
-   d="m 100.3,116.9 c 17,-11.5 27.6,-31 27.6,-53.1 0,-3.1 0.1,-3.3 -0.3,-6.3 L 91.3,45.4 51.5,45.5 31.3,91.5 Z"
-   id="path27"
-   style="fill:url(#SVGID_2_)" />
+	
 	<g
    id="g99">
 		<g
@@ -349,7 +347,7 @@
 			</pattern>
 			<polygon
    class="st11"
-   points="31.4,91.7 36.8,87.6 31.4,87.6 29,91.7 "
+   points="36.8,87.6 31.4,87.6 29,91.7 31.4,91.7 "
    id="polygon104" />
 			
 				<pattern
@@ -359,7 +357,7 @@
 			</pattern>
 			<polygon
    class="st12"
-   points="64,87.6 64,84.7 28.2,84.7 31.4,87.6 "
+   points="64,84.7 28.2,84.7 31.4,87.6 64,87.6 "
    id="polygon107" />
 			
 				<pattern
@@ -369,7 +367,7 @@
 			</pattern>
 			<polygon
    class="st13"
-   points="96.6,91.7 91.2,87.6 96.6,87.6 99,91.7 "
+   points="91.2,87.6 96.6,87.6 99,91.7 96.6,91.7 "
    id="polygon110" />
 			
 				<pattern
@@ -379,7 +377,7 @@
 			</pattern>
 			<polygon
    class="st14"
-   points="64,87.6 64,84.7 99.8,84.7 96.6,87.6 "
+   points="64,84.7 99.8,84.7 96.6,87.6 64,87.6 "
    id="polygon113" />
 		</g>
 		<g
@@ -439,7 +437,8 @@
 		</g>
 	</g>
 	<g
-   id="g215">
+   id="g215"
+   transform="translate(0.09591467,-0.08875157)">
 		<g
    id="g153">
 			<rect
@@ -458,7 +457,8 @@
    id="rect151" />
 		</g>
 		<g
-   id="g165">
+   id="g165"
+   transform="translate(0.07480727,-0.11048543)">
 			<rect
    x="11.1"
    y="33.099998"
@@ -499,14 +499,17 @@
    class="st22"
    width="2.3"
    height="14.1"
-   id="rect167" />
+   id="rect167"
+   style="fill:#dad91b;fill-opacity:1"
+   transform="translate(0.03873948,-0.10163547)" />
 			<path
    class="st23"
    d="m 17.4,39 c 0,0.1 -0.1,0.1 -0.1,0.1 h -1 c -0.1,0 -0.1,0 -0.1,-0.1 v -7 c 0,-0.1 0.1,-0.1 0.1,-0.1 h 1 c 0.1,0 0.1,0 0.1,0.1 z"
    id="path169" />
 		</g>
 		<g
-   id="g183">
+   id="g183"
+   transform="translate(0.37028653,0.00273859)">
 			<rect
    x="20.6"
    y="31.5"
@@ -561,7 +564,8 @@
    id="path189" />
 		</g>
 		<g
-   id="g199">
+   id="g199"
+   transform="translate(0.23399535,-0.00445281)">
 			<rect
    x="19.299999"
    y="32.099998"
@@ -582,7 +586,8 @@
    id="path197" />
 		</g>
 		<g
-   id="g213">
+   id="g213"
+   transform="translate(0.6946389,0.00600901)">
 			<rect
    x="23.799999"
    y="31.5"
@@ -640,7 +645,7 @@
    id="rect217" />
 		<polygon
    class="st32"
-   points="123.7,58.3 122.7,58 116,58 115.7,58.3 "
+   points="122.7,58 116,58 115.7,58.3 123.7,58.3 "
    id="polygon219" />
 		<rect
    x="116.3"
