@@ -45,7 +45,6 @@
 
  struct CONFIG Config;                                       /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  struct PARTAGE *Partage;                                                        /* Accès aux données partagées des processes */
- extern char** environ;
 
 /******************************************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                                             */
@@ -153,7 +152,7 @@
        else if (!pid)
         { gchar **argv = g_strsplit ( target, " ", 0 );
           if (argv && argv[0])
-           { execve ( argv[0], argv, environ );
+           { execvp ( argv[0], argv );
              Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: execve error '%s'", __func__, strerror(errno) );
            }
           else Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: split error target '%s'", __func__, target );
