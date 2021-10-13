@@ -154,7 +154,7 @@
         { gchar **argv = g_strsplit ( target, " ", 0 );
           if (argv && argv[0])
            { execve ( argv[0], argv, environ );
-             Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: execve error '%s'", __func__, strerrno(errno) );
+             Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: execve error '%s'", __func__, strerror(errno) );
            }
           else Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: split error target '%s'", __func__, target );
           exit(0);
