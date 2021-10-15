@@ -16,6 +16,12 @@
      { Process_reload ( $('#idTargetInstance').val(), "MSRV", false );
      }, null );
   }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function MSRV_Reset ( )
+  { Process_reload ( $('#idTargetInstance').val(), "MSRV", false );
+    $('#idModalInfoDetail').html("<strong>Reboot en cours</strong><br>Attendez 10 secondes avant de vous reconnecter." );
+    $('#idModalInfo').modal("show");
+  }
 /************************ Affichage des données relatives a l'instance donnée *************************************************/
  function MSRV_Load_config ()
   { if ($('#idTargetInstance').val()==null)
