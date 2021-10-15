@@ -11,5 +11,6 @@
 * [lieu](visuels_lieu.md)
 * [ouvrant](visuels_ouvrant.md)
 * [panneau](visuels_panneau.md)
+* [schema](visuels_schema.md)
 * [sonorisation](visuels_sonorisation.md)
 * [voyant](visuels_voyant.md)
