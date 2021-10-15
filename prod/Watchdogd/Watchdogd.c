@@ -45,8 +45,7 @@
 
  struct CONFIG Config;                                       /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  struct PARTAGE *Partage;                                                        /* Accès aux données partagées des processes */
- extern char** environ;
- 
+
 /******************************************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                                             */
 /* Entrée: numero du signal à gerer                                                                                           */
@@ -152,7 +151,10 @@
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: EXECUTE: erreur Fork target '%s'", __func__, target ); }
        else if (!pid)
         { gchar **argv = g_strsplit ( target, " ", 0 );
-          if (argv && argv[0]) { execve ( argv[0], argv, environ ); }
+          if (argv && argv[0])
+           { execvp ( argv[0], argv );
+             Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: execve error '%s'", __func__, strerror(errno) );
+           }
           else Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: split error target '%s'", __func__, target );
           exit(0);
         }

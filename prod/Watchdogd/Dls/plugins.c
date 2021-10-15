@@ -377,7 +377,7 @@
     liste_bit = Partage->Dls_data_TEMPO;
     while(liste_bit)
      { struct DLS_TEMPO *tempo = liste_bit->data;
-       if (!strcmp(tempo->tech_id, plugin->tech_id))
+       if (!strcasecmp(tempo->tech_id, plugin->tech_id))
         { tempo->status = DLS_TEMPO_NOT_COUNTING;                                           /* La tempo ne compte pas du tout */
           tempo->state  = FALSE;
           tempo->init   = FALSE;
@@ -389,7 +389,7 @@
     while(liste_bit)
      { struct DLS_MESSAGES *msg = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
-       if (!strcmp(msg->tech_id, plugin->tech_id))
+       if (!strcasecmp(msg->tech_id, plugin->tech_id))
         { Dls_data_set_MSG ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
      }
 
@@ -397,7 +397,7 @@
     while(liste_bit)
      { struct DLS_BOOL *bool = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
-       if (!strcmp(bool->tech_id, plugin->tech_id))
+       if (!strcasecmp(bool->tech_id, plugin->tech_id) && strcasecmp(bool->acronyme, "IO_COMM") )
         {      if (bool->classe == MNEMO_BISTABLE)
            { Dls_data_set_BI   ( &plugin->vars, bool->tech_id, bool->acronyme, (gpointer)&bool, FALSE ); }
           else if (bool->classe == MNEMO_MONOSTABLE)
@@ -409,7 +409,7 @@
     while(liste_bit)
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
-       if (!strcmp(wtd->tech_id, plugin->tech_id))
+       if (!strcasecmp(wtd->tech_id, plugin->tech_id))
         { Dls_data_set_WATCHDOG ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
      }
 
@@ -417,7 +417,7 @@
     while(liste_bit)
      { struct DLS_VISUEL *visu = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
-       if (!strcmp(visu->tech_id, plugin->tech_id))
+       if (!strcasecmp(visu->tech_id, plugin->tech_id))
         { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE, "resetted" ); }
      }
 
@@ -425,7 +425,7 @@
     while(liste_bit)
      { struct DLS_DO *dout = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
-       if (!strcmp(dout->tech_id, plugin->tech_id))
+       if (!strcasecmp(dout->tech_id, plugin->tech_id))
         { Dls_data_set_DO ( &plugin->vars, dout->tech_id, dout->acronyme, (gpointer *)&dout, FALSE ); }
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );

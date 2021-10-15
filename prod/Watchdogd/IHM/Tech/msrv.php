@@ -85,6 +85,7 @@
    <div class="row m-2">
      <div class="ml-auto">
         <button type="button" onclick="MSRV_Sauver_parametre()" class="btn btn-outline-danger"><i class="fas fa-save"></i> Sauvegarder & Reset</button>
+        <button type="button" onclick="MSRV_Reset()" class="btn btn-outline-danger"><i class="fas fa-redo"></i> Reset</button>
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
      </div>
    </div>

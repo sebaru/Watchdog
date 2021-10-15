@@ -153,9 +153,9 @@
      { if (chaine) Json_node_add_double( node, field->name, atof(chaine) );
               else Json_node_add_null  ( node, field->name );
      }
-    else if ( field->type == MYSQL_TYPE_TINY || field->type==MYSQL_TYPE_LONG )
-     { if (chaine) Json_node_add_int( node, field->name, atoi(chaine) );
-              else Json_node_add_null  ( node, field->name );
+    else if ( IS_NUM(field->type) )
+     { if (chaine) Json_node_add_int  ( node, field->name, atoi(chaine) );
+              else Json_node_add_null ( node, field->name );
      }
     else
      { Json_node_add_string( node, field->name, chaine ); }
@@ -2413,6 +2413,7 @@ fin:
                     "('io',           'wago_750342',         'webp', 'static'        , 100),"
                     "('io',           'satellite',           'svg',  'static'        , 100),"
                     "('io',           'sms',                 'jpg',  'static'        , 100),"
+                    "('divers',       'logo',                'png',  'static'        , 100),"
                     "('lieu',         'soisy',               'gif',  'static'        , 10),"
                     "('electrique',   'ampoule',             'png',  'by_mode'       , 100),"
                     "('chauffage',    'chaudiere_gaz',       'png',  'by_mode'       , 100),"
@@ -2440,7 +2441,10 @@ fin:
                     "('voyant',       'eclair',              'png',  'by_color'      , 100),"
                     "('hydraulique',  'vanne_auto',          'png',  'by_color'      , 100),"
                     "('hydraulique',  'goutte_eau',          'png',  'by_color'      , 100),"
-                    "('divers',       'clef',                'png',  'by_color'      , 100),"
+                    "('voyant',       'clef',                'png',  'by_color'      , 100),"
+                    "('voyant',       'croix',               'png',  'by_color'      , 100),"
+                    "('schema',       'schema_ampoule',      'png',  'by_color'      , 100),"
+                    "('divers',       'fleche',              'png',  'by_color'      , 100),"
                     "('divers',       'check',               'png',  'by_mode'       , 100),"
                     "('chauffage',    'thermometre',         'png',  'by_mode_color' , 100),"
                     "('sonorisation', 'haut_parleur',        'png',  'by_mode_color' , 100),"

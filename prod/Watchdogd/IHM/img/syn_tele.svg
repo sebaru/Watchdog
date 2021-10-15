@@ -23,7 +23,7 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/"><metadata
    id="metadata129"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
    id="defs127"><linearGradient
      id="SVGID_2_"
      gradientUnits="userSpaceOnUse"
@@ -58,7 +58,7 @@
    id="namedview125"
    showgrid="false"
    inkscape:zoom="4.3862718"
-   inkscape:cx="68.16723"
+   inkscape:cx="63.949525"
    inkscape:cy="67.02731"
    inkscape:window-x="0"
    inkscape:window-y="0"
@@ -114,50 +114,61 @@
 	
 	<path
    class="st4"
-   d="M 103.57371,115.53209 C 123.35438,97.547459 131.16413,78.207503 126.29177,51.512747 L 94.966447,37.441041 C 46.78153,37.561902 31.483398,56.872485 31.28397,79.875485 Z"
+   d="M 95.036776,121.0233 C 129.18846,100.31088 130.89607,67.25002 123.90061,41.00856 L 104.11698,30.035122 C 55.932062,30.155983 24.433704,64.705874 24.234276,87.708874 Z"
    id="path27"
    style="fill:url(#linearGradient2489);fill-opacity:1;stroke:none"
    transform="translate(-0.0046629,-0.86338655)"
    sodipodi:nodetypes="ccccc" /><g
    id="g120"
-   transform="translate(0,-5.4)">
+   transform="matrix(1.2774433,0,0,1.2774433,-17.756371,-24.654565)"
+   style="stroke-width:0.782814">
 		<g
-   id="g118">
+   id="g118"
+   style="stroke-width:0.782814">
 			<g
-   id="g110">
+   id="g110"
+   style="stroke-width:0.782814">
 				<g
-   id="g104">
+   id="g104"
+   style="stroke-width:0.782814">
 					<path
    class="st5"
    d="m 96.7,45.1 c 0,-2.2 -1.6,-4 -3.5,-4 H 34.9 c -2,0 -3.5,1.8 -3.5,4 v 33.8 h 65.3 z"
-   id="path100" />
+   id="path100"
+   style="stroke-width:0.782814" />
 					<path
    class="st6"
    d="m 31.3,78.9 v 5.2 c 0,2.2 1.6,4 3.5,4 H 93 c 2,0 3.5,-1.8 3.5,-4 v -5.2 z"
-   id="path102" />
+   id="path102"
+   style="stroke-width:0.782814" />
 				</g>
 				<path
    class="st7"
    d="M 72.1,96.7 C 69.7,95.3 69.8,92.4 69.8,92.4 V 88 H 64 58.2 v 4.5 c 0,0 0.1,2.9 -2.3,4.3 h -0.7 v 0.9 h 8.8 8.8 v -0.9 h -0.7 z"
-   id="path106" />
+   id="path106"
+   style="stroke-width:0.782814" />
 				<rect
    x="55.200001"
    y="96.699997"
    class="st8"
    width="17.6"
    height="0.89999998"
-   id="rect108" />
+   id="rect108"
+   style="stroke-width:0.782814" />
 			</g>
 			<g
-   id="g116">
+   id="g116"
+   style="stroke-width:0.782814">
 				<polygon
    class="st9"
-   points="34.6,44.9 34.6,75.7 46.3,75.7 70.6,44.9 "
-   id="polygon112" />
+   points="34.6,75.7 46.3,75.7 70.6,44.9 34.6,44.9 "
+   id="polygon112"
+   style="stroke-width:0.782814" />
 				<polygon
    class="st10"
-   points="93.4,44.9 70.6,44.9 46.3,75.7 93.4,75.7 "
-   id="polygon114" />
+   points="70.6,44.9 46.3,75.7 93.4,75.7 93.4,44.9 "
+   id="polygon114"
+   style="stroke-width:0.782814" />
 			</g>
 		</g>
 	</g>

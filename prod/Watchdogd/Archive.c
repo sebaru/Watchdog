@@ -158,7 +158,6 @@
     gint top, last_delete, last_count, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
 
     Arch_Lire_config ();                                                                       /* Lecture des données en base */
