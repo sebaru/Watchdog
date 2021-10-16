@@ -409,7 +409,7 @@
     while(liste_bit)
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
-       if (!strcasecmp(wtd->tech_id, plugin->tech_id))
+       if (!strcasecmp(wtd->tech_id, plugin->tech_id) && strcasecmp(wtd->acronyme, "IO_COMM") )
         { Dls_data_set_WATCHDOG ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
      }
 
