@@ -9,6 +9,7 @@
 * [hydraulique](visuels_hydraulique.md)
 * [io](visuels_io.md)
 * [lieu](visuels_lieu.md)
+* [outils](visuels_outils.md)
 * [ouvrant](visuels_ouvrant.md)
 * [panneau](visuels_panneau.md)
 * [schema](visuels_schema.md)
