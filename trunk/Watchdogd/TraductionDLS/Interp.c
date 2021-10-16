@@ -1755,8 +1755,9 @@
                        Dls_plugin.id, (Liste_CADRANS ? Liste_CADRANS: "''" ) );
        if (Liste_CADRANS) g_free(Liste_CADRANS);
 
-       SQL_Write_new ( "DELETE FROM mnemos_VISUEL WHERE tech_id='%s' ",
-                       " AND acronyme NOT IN ( %s )", tech_id, (Liste_MOTIF?Liste_MOTIF:"''") );
+       SQL_Write_new ( "DELETE FROM mnemos_VISUEL WHERE tech_id='%s' "
+                       " AND acronyme NOT IN ( %s )",
+                       tech_id, (Liste_MOTIF?Liste_MOTIF:"''") );
        if (Liste_MOTIF) g_free(Liste_MOTIF);
 
      }
