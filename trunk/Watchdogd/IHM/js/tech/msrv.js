@@ -40,6 +40,9 @@
      }, null);
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
+ function MSRV_Reload_icons ( )
+  { Send_to_API ( 'POST', "/api/instance/reload_icons", null, null, null ); }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Set_Log_Level ( )
   { var json_request = JSON.stringify(
      { instance : $('#idTargetInstance').val(),

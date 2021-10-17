@@ -2395,70 +2395,11 @@ encore:
     if (database_version < 6015)
      { SQL_Write_new ("ALTER TABLE `syns` ADD `mode_affichage` TINYINT(1) NOT NULL DEFAULT '0' AFTER `access_level`" ); }
 
+    if (database_version < 6075)
+     { SQL_Write_new ("ALTER TABLE `icone` ADD `date_create` DATETIME NOT NULL DEFAULT NOW() AFTER `layer`" ); }
+
 fin:
-    database_version = 6015;
-    SQL_Write_new ("DROP TABLE `icone`");
-
-    SQL_Write_new ("CREATE TABLE `icone` ("
-                   "`id` INT(11) NOT NULL AUTO_INCREMENT,"
-                   "`categorie` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
-                   "`extension` VARCHAR(4) NOT NULL DEFAULT 'svg',"
-                   "`ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',"
-                   "`layer` INT(11) NOT NULL DEFAULT '100',"
-                   "PRIMARY KEY (`id`)"
-                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;");
-
-    SQL_Write_new ( "INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) VALUES "
-                    "('io',           'wago_750342',         'webp', 'static'        , 100),"
-                    "('io',           'satellite',           'svg',  'static'        , 100),"
-                    "('io',           'sms',                 'jpg',  'static'        , 100),"
-                    "('divers',       'logo',                'png',  'static'        , 100),"
-                    "('lieu',         'soisy',               'gif',  'static'        , 10),"
-                    "('electrique',   'ampoule',             'png',  'by_mode'       , 100),"
-                    "('chauffage',    'chaudiere_gaz',       'png',  'by_mode'       , 100),"
-                    "('chauffage',    'radiateur',           'png',  'by_mode'       , 100),"
-                    "('bouton',       'auto_manu',           'svg',  'by_mode'       , 100),"
-                    "('ouvrant',      'fenetre',             'png',  'by_mode'       , 100),"
-                    "('ouvrant',      'porte_entree',        'png',  'by_mode'       , 100),"
-                    "('ouvrant',      'porte_fenetre',       'png',  'by_mode'       , 100),"
-                    "('chauffage',    'soufflant',           'png',  'by_mode'       , 100),"
-                    "('ouvrant',      'store',               'png',  'by_mode'       , 100),"
-                    "('electrique',   'pile',                'png',  'by_mode'       , 100),"
-                    "('divers',       'cadena',              'png',  'by_mode'       , 100),"
-                    "('application',  'kodi',                'svg',  'static'        , 100),"
-                    "('application',  'film',                'svg',  'static'        , 100),"
-                    "('application',  'youtube_bebe_louis',  'png',  'static'        , 100),"
-                    "('application',  'youtube_crocodile',   'png',  'static'        , 100),"
-                    "('application',  'youtube_peppa_pig',   'png',  'static'        , 100),"
-                    "('bouton',       'bouton_raz',          'png',  'by_color'      , 100),"
-                    "('bouton',       'arret_urgence',       'png',  'by_color'      , 100),"
-                    "('panneau',      'panneau_stop',        'png',  'by_color'      , 100),"
-                    "('panneau',      'panneau_au',          'png',  'by_color'      , 100),"
-                    "('bouton',       'bouton_io',           'png',  'by_color'      , 100),"
-                    "('electrique',   'vmc',                 'png',  'by_color'      , 100),"
-                    "('electrique',   'moteur',              'png',  'by_color'      , 100),"
-                    "('electrique',   'moteur_2',            'png',  'by_color'      , 100),"
-                    "('outils',       'marteau_1',           'png',  'by_color'      , 100),"
-                    "('outils',       'clef_a_molette_1',    'png',  'by_color'      , 100),"
-                    "('outils',       'clef_a_molette_2',    'png',  'by_color'      , 100),"
-                    "('outils',       'clef_a_molette_3',    'png',  'by_color'      , 100),"
-                    "('voyant',       'voyant_moteur',       'png',  'by_color'      , 100),"
-                    "('voyant',       'eclair',              'png',  'by_color'      , 100),"
-                    "('hydraulique',  'vanne_auto',          'png',  'by_color'      , 100),"
-                    "('hydraulique',  'goutte_eau',          'png',  'by_color'      , 100),"
-                    "('voyant',       'clef',                'png',  'by_color'      , 100),"
-                    "('voyant',       'croix',               'png',  'by_color'      , 100),"
-                    "('schema',       'schema_ampoule',      'png',  'by_color'      , 100),"
-                    "('divers',       'fleche',              'png',  'by_color'      , 100),"
-                    "('divers',       'check',               'png',  'by_mode'       , 100),"
-                    "('chauffage',    'thermometre',         'png',  'by_mode_color' , 100),"
-                    "('sonorisation', 'haut_parleur',        'png',  'by_mode_color' , 100),"
-                    "('bouton',       'bouton',              'none', 'complexe'      , 100),"
-                    "('bouton',       'bloc_maintenance',    'none', 'complexe'      , 100),"
-                    "('divers',       'comment',             'none', 'complexe'      , 150),"
-                    "('divers',       'encadre',             'none', 'complexe'      , 50 );"
-                  );
+    database_version = 6075;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

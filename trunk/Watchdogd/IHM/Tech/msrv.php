@@ -6,6 +6,8 @@
 
 <hr>
 
+       <div class="alert alert-primary">Configuration par instance</div>
+
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Choix de l'instance</label>
@@ -63,6 +65,7 @@
      					</div>
   					</div>
 
+
        <div class="alert alert-danger">Attention, la modification des données ci dessous peuvent déconnecter l'instance !</div>
 
        <div class="col form-group">
@@ -89,6 +92,16 @@
         <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
      </div>
    </div>
+
+       <div class="alert alert-secondary">Configuration transverse</div>
+
+       <div class="col form-group">
+					     <div class="input-group">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Recharger la base d'icones</label>
+           <button type="button" onclick="MSRV_Reload_icons()" class="btn btn-primary"><i class="fas fa-image"></i> Recharger les icones</button>
+     					</div>
+  					</div>
+
 <!-- Container -->
 </div>
 
