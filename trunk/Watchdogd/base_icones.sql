@@ -23,6 +23,7 @@ INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) 
 ('application',  'youtube_peppa_pig',   'png',  'static'        , 100),
 ('bouton',       'bouton_raz',          'png',  'by_color'      , 100),
 ('bouton',       'arret_urgence',       'png',  'by_color'      , 100),
+('bouton',       'bouton_panique',      'png',  'by_color'      , 100),
 ('panneau',      'panneau_stop',        'png',  'by_color'      , 100),
 ('panneau',      'panneau_au',          'png',  'by_color'      , 100),
 ('bouton',       'bouton_io',           'png',  'by_color'      , 100),
