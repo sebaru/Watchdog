@@ -711,3 +711,15 @@ CREATE TABLE IF NOT EXISTS `audit_log` (
   KEY (`date`),
   KEY (`username`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
+
+CREATE TABLE IF NOT EXISTS `icone` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `categorie` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
+  `forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `extension` VARCHAR(4) NOT NULL DEFAULT 'svg',
+  `ihm_affichage` VARCHAR(32) NOT NULL DEFAULT 'static',
+  `layer` INT(11) NOT NULL DEFAULT '100',
+  `date_create` DATETIME NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
+

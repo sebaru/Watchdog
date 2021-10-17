@@ -128,7 +128,7 @@
      }
 /******************************************* Test accès Database **************************************************************/
     if (is_master)
-     { Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Loading DB Schema'", __func__ );
+     { Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Loading DB Schema", __func__ );
        gchar *DB_SCHEMA = "/usr/local/share/Watchdog/init_db.sql";
        if (stat ( DB_SCHEMA, &stat_buf)==-1)
         { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Stat DB Schema Error" );

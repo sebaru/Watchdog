@@ -27,6 +27,9 @@
 
  #include <string.h>
  #include <unistd.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
 
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
@@ -122,6 +125,64 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogTrad set to '%d'", __func__, Config.log_trad );
 
     json_node_unref(request);
+	   soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_instance_reload_icons: Met a jour la base d'icones selon base_icones.sql                                      */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_traiter_instance_reload_icons ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                           SoupClientContext *client, gpointer user_data)
+  { struct stat stat_buf;
+    if (msg->method != SOUP_METHOD_POST)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+
+    if ( !Config.instance_is_master )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Instance is not master. Ignoring.", __func__ );
+       return;
+     }
+
+    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Reloading Icons DB", __func__ );
+    gchar *DB_ICONS = "/usr/local/share/Watchdog/base_icones.sql";
+
+    if (stat ( DB_ICONS, &stat_buf)==-1)
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Stat DB Icones Error" );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Stat DB Icones Error", __func__ );
+       return;
+     }
+
+    gchar *db_icones = g_try_malloc0 ( stat_buf.st_size+1 );
+    if (!db_icones)
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory DB Icones Error" );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Memory DB Icones Error", __func__ );
+       return;
+     }
+
+    gint fd = open ( DB_ICONS, O_RDONLY );
+    if (!fd)
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Open DB Icones Error" );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Open DB Icones Error", __func__ );
+       g_free(db_icones);
+       return;
+     }
+    if (read ( fd, db_icones, stat_buf.st_size ) != stat_buf.st_size)
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Read DB Icones Error" );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Read DB Icones Error", __func__ );
+       g_free(db_icones);
+       return;
+     }
+    close(fd);
+
+    SQL_Write_new ( db_icones );
+    g_free(db_icones);
+    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Icons DB Loaded.", __func__ );
+
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
