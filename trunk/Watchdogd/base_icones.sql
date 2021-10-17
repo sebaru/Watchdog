@@ -4,6 +4,7 @@ INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) 
 ('io',           'sms',                 'jpg',  'static'        , 100),
 ('divers',       'logo',                'png',  'static'        , 100),
 ('lieu',         'soisy',               'gif',  'static'        , 10),
+('bouton',       'bouton_stop_klaxon',  'png',  'static'        , 100),
 ('electrique',   'ampoule',             'png',  'by_mode'       , 100),
 ('chauffage',    'chaudiere_gaz',       'png',  'by_mode'       , 100),
 ('chauffage',    'radiateur',           'png',  'by_mode'       , 100),

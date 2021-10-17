@@ -833,11 +833,11 @@ printf("%s: New bloc maintenance\n", __func__ );
 
        if (!strcasecmp ( mode, "maintenance" ))
         { couleur_maintenance = "gray"; couleur_service="blue";
-          g_object_set( rect_maintenance, "fill_color", "white", NULL );
+          g_object_set( rect_maintenance, "fill_color", "yellow", NULL );
         }
        else
         { couleur_maintenance = "blue"; couleur_service="gray";
-          g_object_set( rect_maintenance, "fill_color", "green", NULL );
+          g_object_set( rect_maintenance, "fill_color", "lime", NULL );
         }
 
        g_object_set( bouton_service, "pixbuf",
