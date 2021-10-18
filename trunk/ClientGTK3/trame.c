@@ -906,6 +906,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     if (stat ( fichier, &result ) == -1)
      { g_snprintf ( commande, sizeof(commande),
                     "wget --no-check-certificate https://%s:5560/img/%s -O %s", trame_motif->page->client->hostname, fichier, fichier );
+       printf("%s: download %s\n", __func__, fichier );
        system(commande); /* Download de l'icone */
      }
 
