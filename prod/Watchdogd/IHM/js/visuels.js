@@ -11,7 +11,7 @@
     console.log("Changer_etat_visuel_by_mode " + etat.tech_id + ":" + etat.acronyme + " -> mode = "+etat.mode +" couleur="+etat.color );
     console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-    if (etat.mode=="hors_comm")
+    if (etat.mode=="hors_comm" || etat.mode=="disabled")
      { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
      }
@@ -40,7 +40,7 @@
     console.log("Changer_etat_1_visuel_by_color " + etat.tech_id + ":" + etat.acronyme + " -> mode = "+etat.mode +" couleur="+etat.color );
     console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-    if (etat.mode=="hors_comm")
+    if (etat.mode=="hors_comm" || etat.mode=="disabled")
      { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
      }
@@ -68,7 +68,7 @@
     console.log("Changer_etat_visuel_by_mode_color " + etat.tech_id + ":" + etat.acronyme + " -> mode = "+etat.mode +" couleur="+etat.color );
     console.debug(visuel);
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-    if (etat.mode=="hors_comm")
+    if (etat.mode=="hors_comm" || etat.mode=="disabled")
      { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
      }
@@ -97,7 +97,7 @@
     console.debug(visuel);
 
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
-    if (etat.mode=="hors_comm")
+    if (etat.mode=="hors_comm" || etat.mode=="disabled")
      { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
      }

@@ -200,7 +200,7 @@
                                   } );
                        }
                       else if (visuel.extension=="png")
-                       { svg.append ( "image" ).attr("href", "/img/"+visuel.forme+".png>" );
+                       { svg.append ( "image" ).attr("href", "/img/"+visuel.forme+".png" );
                        }
 
                     }

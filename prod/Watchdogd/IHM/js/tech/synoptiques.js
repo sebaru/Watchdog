@@ -129,8 +129,8 @@
                "syn_volets.png", "syn_luminaires.png",
                "syn_spot.png", "syn_sonorisation.png",
                "syn_maintenance.png", "syn_parametres.png", "syn_horloge.png",
-               "syn_confort.png", "syn_vmc.png",
-               "syn_energie.png", "syn_electricite.png","syn_ups.png", "syn_panneau_solaire.png" ];
+               "syn_confort.png", "syn_vmc.png", "syn_energie.png", "syn_chaudiere.png", "syn_electricite.png",
+               "syn_ups.png", "syn_panneau_solaire.png" ];
 
     liste = $("#idSynEditImageListe");
     liste.empty();
