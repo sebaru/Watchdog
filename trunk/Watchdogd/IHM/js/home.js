@@ -182,6 +182,7 @@
         }
        else /* Affichage full */
         { var svg = d3.select("#fullsvg").append("svg").attr("width", 1024).attr("height", 768);
+          $("#fullsvg").css("position","relative");
 
           $.each ( Synoptique.visuels, function (i, visuel)
                     { if (visuel.forme == null)
@@ -199,8 +200,19 @@
                                                 );
                                   } );
                        }
+                      else if (visuel.ihm_affichage=="complexe" && visuel.forme=="bouton")
+                       { var button = $("<button>").css("position", "absolute").addClass("btn")
+                                                   .css("left", visuel.posx).css("top", visuel.posy)
+                                                   .append( visuel.libelle )
+                         if (visuel.color="blue")   button.addClass("btn-primary");
+                         if (visuel.color="orange") button.addClass("btn-warning");
+                         if (visuel.color="gray")   button.addClass("btn-secondary");
+                         if (visuel.color="red")    button.addClass("btn-danger");
+                         $("#fullsvg").append ( button );
+                       }
                       else if (visuel.extension=="png")
-                       { svg.append ( "image" ).attr("href", "/img/"+visuel.forme+".png" );
+                       { svg.append ( "image" ).attr("x", visuel.posx).attr("y", visuel.posy)
+                                               .attr("href", "/img/"+visuel.forme+".png" );
                        }
 
                     }
