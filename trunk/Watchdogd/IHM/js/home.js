@@ -201,15 +201,47 @@
                                   } );
                        }
                       else if (visuel.ihm_affichage=="complexe" && visuel.forme=="bouton")
-                       { var button = $("<button>").css("position", "absolute").addClass("btn btn-outline-dark")
+                       { var button = $("<button>").css("position", "absolute").addClass("btn")
                                                    .css("left", visuel.posx).css("top", visuel.posy)
                                                    .append( visuel.libelle )
                               if (visuel.color=="blue")   button.addClass("btn-primary");
                          else if (visuel.color=="orange") button.addClass("btn-warning");
                          else if (visuel.color=="gray")   button.addClass("btn-secondary");
                          else if (visuel.color=="red")    button.addClass("btn-danger");
-                         else if (visuel.color=="darkgreen") button.attr("disabled", '');
+                         else if (visuel.color=="darkgreen") button.addClass("btn-outline-dark").attr("disabled", '');
                          $("#fullsvg").append ( button );
+                       }
+                      else if (visuel.ihm_affichage=="complexe" && visuel.forme=="comment")
+                       { var new_svg = svg. append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
+                         var size, family, style, weight;
+                         if ( visuel.mode=="titre" )
+                          { size = 32;
+                            family = "Sans";
+                            style  = "italic";
+                            weight = "normal";
+                          }
+                         else if ( visuel.mode =="soustitre" )
+                          { size = 24;
+                            family = "Sans";
+                            style  = "italic";
+                            weight = "normal";
+                          }
+                         else
+                          { size   = 14;
+                            family = "Sans";
+                            style  = "italic";
+                            weight = "normal";
+                          }
+
+                         new_svg.append ( "text" ).attr("x", visuel.posx).attr("y", visuel.posy)
+                                                  .attr("font-size", size)
+                                                  .attr("font-family", family + ",serif" )
+                                                  .attr("font-style", style )
+                                                  .attr("font-weight", weight )
+                                                  .attr("fill", visuel.color )
+                                                  .attr("stroke", visuel.color )
+                                                  .text(visuel.libelle);
                        }
                       else if (visuel.ihm_affichage=="by_mode")
                        { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
