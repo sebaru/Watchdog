@@ -42,8 +42,7 @@ if [ "$SOCLE" = "fedora" ]
   cd ..
   rm -rf libstrophe
 
-  wget https://www.phidgets.com/downloads/phidget22/libraries/linux/libphidget22.tar.gz
-  tar xzf libphidget22.tar.gz
+  curl -fsSL https://www.phidgets.com/downloads/phidget22/libraries/linux/libphidget22.tar.gz | tar xvz
   cd libphidget22-*
   ./configure
   make
