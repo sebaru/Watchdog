@@ -28,6 +28,9 @@
  #include <glib.h>
  #include <string.h>
  #include <locale.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
 
 /**************************************************** Chargement des prototypes ***********************************************/
  #include "watchdogd.h"
@@ -491,6 +494,42 @@ encore:
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock ( &Partage->com_db.synchro );
+  }
+/******************************************************************************************************************************/
+/* SQL_read_from_file : Lance une requete SQL a partir d'un fichier                                                           */
+/* Entrée: le nom de fichier sans le directory                                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ gchar *SQL_Read_from_file ( gchar *file )
+  { struct stat stat_buf;
+    Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Loading DB %s", __func__, file );
+    gchar filename[256];
+    g_snprintf ( filename, sizeof(filename), "%s/%s", WTD_PKGDATADIR, file );
+
+    if (stat ( filename, &stat_buf)==-1)
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Stat DB Error for %s", __func__, filename );
+       return(FALSE);
+     }
+
+    gchar *db_content = g_try_malloc0 ( stat_buf.st_size+1 );
+    if (!db_content)
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Memory DB Error for %s", __func__, filename );
+       return(FALSE);
+     }
+
+    gint fd = open ( filename, O_RDONLY );
+    if (!fd)
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Open DB Error for %s", __func__, filename );
+       g_free(db_content);
+       return(FALSE);
+     }
+    if (read ( fd, db_content, stat_buf.st_size ) != stat_buf.st_size)
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Read DB Error for %s", __func__, filename );
+       g_free(db_content);
+       return(FALSE);
+     }
+    close(fd);
+    return(db_content);
   }
 /******************************************************************************************************************************/
 /* Update_database_schema: Vérifie la connexion et le schéma de la base de données                                            */

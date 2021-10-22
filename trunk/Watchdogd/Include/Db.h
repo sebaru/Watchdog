@@ -64,5 +64,6 @@
  extern gboolean SQL_Write_new( gchar *format, ... );
  extern gboolean SQL_Arch_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... );
  extern gboolean SQL_Arch_Write ( gchar *requete );
+ extern gchar *SQL_Read_from_file ( gchar *file );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
