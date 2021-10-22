@@ -208,9 +208,40 @@
                          else if (visuel.color=="orange") button.addClass("btn-warning");
                          else if (visuel.color=="gray")   button.addClass("btn-secondary");
                          else if (visuel.color=="red")    button.addClass("btn-danger");
-                         else if (visuel.color=="darkgreen") button.addClass("btn-outline-dark").attr("disabled", '');
+                         else if (visuel.color=="green")  button.addClass("btn-success");
+                         else button.addClass("btn-outline-dark").attr("disabled", '');
                          $("#fullsvg").append ( button );
                        }
+                      else if (visuel.ihm_affichage=="complexe" && visuel.forme=="encadre")
+                       { var new_svg = svg. append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
+
+                         const dimensions = visuel.mode.split('x');
+
+                         var hauteur=64*parseInt(dimensions[0]);
+                         var largeur=64*parseInt(dimensions[1]);
+
+                         new_svg.append ( "text" ).attr("x", (largeur+10)/2 ).attr("y", 12 )
+                                                  .attr("text-anchor", "middle")
+                                                  .attr("font-size", "14" )
+                                                  .attr("font-family", "Sans" )
+                                                  .attr("font-style", "italic" )
+                                                  .attr("font-weight", "normal" )
+                                                  .attr("fill", visuel.color )
+                                                  .attr("stroke", visuel.color )
+                                                  .text(visuel.libelle);
+
+                         new_svg.append ( "rect" ).attr("x", 5 ).attr("y", 20 ).attr("rx", 15)
+                                                  .attr("width", largeur)
+                                                  .attr("height", hauteur )
+                                                  .attr("fill", "none" )
+                                                  .attr("stroke-width", 4 )
+                                                  .attr("stroke", visuel.color );
+                         new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                    "scale("+visuel.scale+") "+
+                                                    "translate("+visuel.posx+" "+visuel.posy+") "
+                                     );
+                        }
                       else if (visuel.ihm_affichage=="complexe" && visuel.forme=="comment")
                        { var new_svg = svg. append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
@@ -234,14 +265,17 @@
                             weight = "normal";
                           }
 
-                         new_svg.append ( "text" ).attr("x", visuel.posx).attr("y", visuel.posy)
-                                                  .attr("font-size", size)
+                         new_svg.append ( "text" ).attr("font-size", size)
                                                   .attr("font-family", family + ",serif" )
                                                   .attr("font-style", style )
                                                   .attr("font-weight", weight )
                                                   .attr("fill", visuel.color )
                                                   .attr("stroke", visuel.color )
                                                   .text(visuel.libelle);
+                         new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                    "scale("+visuel.scale+") "+
+                                                    "translate("+visuel.posx+" "+visuel.posy+") "
+                                     );
                        }
                       else if (visuel.ihm_affichage=="by_mode")
                        { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
