@@ -667,15 +667,8 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->gif_largeur = 0;
     trame_motif->gif_hauteur = 0;
 
-    gint ligne, colonne;
-    if ( Json_has_member ( visuel, "mode" ) )
-     { if ( sscanf ( Json_get_string ( visuel, "mode" ), "%dx%d", &ligne, &colonne ) != 2 )
-         { ligne = colonne = 1; }
-     }
-    else { ligne = colonne = 1; }
-    trame_motif->pixbuf = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
-                                                   Json_get_string ( visuel, "libelle" ) );
-
+    Trame_redessiner_visuel_complexe ( trame_motif, visuel );
+    
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel encadre\n", __func__ );
        g_free(trame_motif);
@@ -859,7 +852,7 @@ printf("%s: New bloc maintenance\n", __func__ );
         { couleur_maintenance = "blue"; couleur_service="gray";
           g_object_set( rect_maintenance, "fill_color", "lime", NULL );
         }
-
+       Json_node_add_string ( trame_motif->visuel, "mode", mode );                /* sauvegarde du mode en cours */
        g_object_set( bouton_service, "pixbuf",
                      Trame_Make_svg_bouton ( couleur_service, "  Service  " ), NULL );
 

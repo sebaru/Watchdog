@@ -230,19 +230,21 @@
 
     if (trame_motif_appuye == trame_motif && Json_has_member ( trame_motif->visuel, "forme" ) )
      { gchar *forme = Json_get_string ( trame_motif->visuel, "forme" );
+       gchar *mode  = Json_get_string ( trame_motif->visuel, "mode" );
        if ( !strcasecmp ( forme, "bloc_maintenance" ) )
         { gint index = g_slist_index ( trame_motif->items, item );
-          if (index==0) /* Service */
+			printf("%s: %s\n", __func__, mode );
+          if ( index==0 && !strcasecmp ( mode, "maintenance" ) ) /* Service */
            { g_snprintf( chaine, sizeof(chaine), "%s_CLIC_SERVICE", Json_get_string ( trame_motif->visuel, "acronyme" ) );
              Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
            }
-          else if (index==1) /* Maintenance */
+          else if ( index==1 && strcasecmp ( mode, "maintenance" ) ) /* Maintenance */
            { g_snprintf( chaine, sizeof(chaine), "%s_CLIC_MAINTENANCE", Json_get_string ( trame_motif->visuel, "acronyme" ) );
              Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
            }
         }
        else if ( !strcasecmp ( forme, "bouton" ) )
-        { if ( strcasecmp( Json_get_string ( trame_motif->visuel, "mode" ), "disabled" ) )  /* Uniquement si mode != disabled */
+        { if ( strcasecmp( mode, "disabled" ) )                                             /* Uniquement si mode != disabled */
            { g_snprintf( chaine, sizeof(chaine), "%s_CLIC", Json_get_string ( trame_motif->visuel, "acronyme" ) );
              Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
            }
