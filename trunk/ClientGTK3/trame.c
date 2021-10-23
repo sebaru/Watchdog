@@ -72,8 +72,9 @@
     if (trame_motif->select_hg) goo_canvas_item_remove( trame_motif->select_hg );
     if (trame_motif->select_bd) goo_canvas_item_remove( trame_motif->select_bd );
     if (trame_motif->select_bg) goo_canvas_item_remove( trame_motif->select_bg );
-    g_list_foreach( trame_motif->images, (GFunc) g_object_unref /*g_free*/, NULL );
-    g_list_free( trame_motif->images );
+#warning A revoir quand tout sera migre en full dynamic
+    /*g_list_foreach( trame_motif->images, (GFunc) g_object_unref, NULL ); 
+    g_list_free( trame_motif->images );*/
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
   }
 /******************************************************************************************************************************/
@@ -833,11 +834,12 @@ printf("%s: New bloc maintenance\n", __func__ );
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Trame_redessiner_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
-  {
-    gchar *forme = Json_get_string ( trame_motif->visuel, "forme" );
+  { gchar *forme = Json_get_string ( trame_motif->visuel, "forme" );
+    gchar *mode  = Json_get_string ( visuel, "mode" );
+    gchar *color = Json_get_string ( visuel, "color" );
+
     if ( !strcasecmp ( forme, "bloc_maintenance" ) )
      { gchar *couleur_service,  *couleur_maintenance;
-       gchar *mode = Json_get_string ( visuel, "mode" );
        if (!mode) mode="service";
 
        GooCanvasItem *bouton_service     = g_slist_nth_data ( trame_motif->items, 0 );
@@ -861,6 +863,9 @@ printf("%s: New bloc maintenance\n", __func__ );
 
        return;
      }
+
+    Json_node_add_string ( trame_motif->visuel, "mode", mode );                   /* sauvegarde du mode en cours */
+    Json_node_add_string ( trame_motif->visuel, "color", color );                 /* sauvegarde du mode en cours */
 
     if (trame_motif->pixbuf)
      { g_object_unref(trame_motif->pixbuf);

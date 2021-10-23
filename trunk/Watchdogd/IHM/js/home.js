@@ -217,6 +217,8 @@
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
 
                          const dimensions = visuel.mode.split('x');
+                         if (!dimensions[0]) dimensions[0] = 1;
+                         if (!dimensions[1]) dimensions[1] = 1;
 
                          var hauteur=64*parseInt(dimensions[0]);
                          var largeur=64*parseInt(dimensions[1]);
