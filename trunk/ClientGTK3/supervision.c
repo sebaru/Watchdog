@@ -222,15 +222,15 @@
                                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static struct TRAME_ITEM_MOTIF *trame_motif_appuye = NULL;
     gchar chaine [128];
-
     if (!(trame_motif && event)) return;
 
     if (event->type == GDK_BUTTON_PRESS) { trame_motif_appuye = trame_motif; return; }
 
     if (event->type != GDK_BUTTON_RELEASE) return;
 
-    if (trame_motif_appuye == trame_motif)
-     { if ( Json_has_member ( trame_motif->visuel, "forme" ) && !strcasecmp ( Json_get_string ( trame_motif->visuel, "forme" ), "bloc_maintenance" ) )
+    if (trame_motif_appuye == trame_motif && Json_has_member ( trame_motif->visuel, "forme" ) )
+     { gchar *forme = Json_get_string ( trame_motif->visuel, "forme" );
+       if ( !strcasecmp ( forme, "bloc_maintenance" ) )
         { gint index = g_slist_index ( trame_motif->items, item );
           if (index==0) /* Service */
            { g_snprintf( chaine, sizeof(chaine), "%s_CLIC_SERVICE", Json_get_string ( trame_motif->visuel, "acronyme" ) );
@@ -240,6 +240,10 @@
            { g_snprintf( chaine, sizeof(chaine), "%s_CLIC_MAINTENANCE", Json_get_string ( trame_motif->visuel, "acronyme" ) );
              Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
            }
+        }
+       else if ( !strcasecmp ( forme, "bouton" ) )
+        { g_snprintf( chaine, sizeof(chaine), "%s_CLIC", Json_get_string ( trame_motif->visuel, "acronyme" ) );
+          Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
         }
      }
     trame_motif_appuye = NULL;

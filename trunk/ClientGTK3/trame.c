@@ -742,6 +742,11 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
+    if (page->type == TYPE_PAGE_SUPERVISION)
+     { g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
+     }
+
     Trame_calculer_bounds ( trame_motif );
     Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
