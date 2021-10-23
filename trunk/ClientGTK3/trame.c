@@ -521,7 +521,7 @@ printf("%s: New bouton %s\n", __func__, bouton );
 /* Entrée: la taille de lencadre, la couleur, son libellé                                                                     */
 /* Sortie: la chaine SVG                                                                                                      */
 /******************************************************************************************************************************/
- static gchar *Trame_Make_svg_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
+ static GdkPixbuf *Trame_Make_svg_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
   { gchar encadre[512];
     gint hauteur=64*ligne;
     gint largeur=64*colonne;
@@ -535,7 +535,7 @@ printf("%s: New bouton %s\n", __func__, bouton );
                 largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, couleur
               );
 printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
-    return ( g_strdup(encadre) );
+    return (Trame_render_svg_to_pixbuf (encadre));
   }
 /******************************************************************************************************************************/
 /* Trame_Make_svg_comment: Prépare un pixbuf pour l'encadre en parametre                                                      */
@@ -673,10 +673,8 @@ printf("%s: New bloc maintenance\n", __func__ );
          { ligne = colonne = 1; }
      }
     else { ligne = colonne = 1; }
-    gchar *svg = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
-                                          Json_get_string ( visuel, "libelle" ) );
-    trame_motif->pixbuf = Trame_render_svg_to_pixbuf ( svg );
-    g_free(svg);
+    trame_motif->pixbuf = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
+                                                   Json_get_string ( visuel, "libelle" ) );
 
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel encadre\n", __func__ );
@@ -815,6 +813,23 @@ printf("%s: New bloc maintenance\n", __func__ );
     return(FALSE);
   }
 /******************************************************************************************************************************/
+/* Trame_load_pixbuf: Charge un pixbuf distant en le mettant en cache local                                                   */
+/* Entrée: le fichier a telecharger                                                                                           */
+/* Sortie: Le pixbuf, ou NULL si erreur                                                                                       */
+/******************************************************************************************************************************/
+ static GdkPixbuf *Trame_load_pixbuf ( struct CLIENT*client, gchar *fichier )
+  { gchar commande[256];
+    struct stat result;
+    if (stat ( fichier, &result ) == -1)
+     { g_snprintf ( commande, sizeof(commande),
+                    "wget --no-check-certificate https://%s:5560/img/%s -O %s", client->hostname, fichier, fichier );
+       printf("%s: download %s\n", __func__, fichier );
+       system(commande); /* Download de l'icone */
+     }
+
+    return (gdk_pixbuf_new_from_file ( fichier, NULL ));
+  }
+/******************************************************************************************************************************/
 /* Trame_redessiner_visuel_complexe: Met a jour un visuel complexe                                                            */
 /* Entrée: le motif du synoptique et son nouveau statut                                                                       */
 /* Sortie: néant                                                                                                              */
@@ -849,19 +864,23 @@ printf("%s: New bloc maintenance\n", __func__ );
        return;
      }
 
-    if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
+    if (trame_motif->pixbuf)
+     { g_object_unref(trame_motif->pixbuf);
+       trame_motif->pixbuf = NULL;
+     }
 
     if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre" ) )
      { gint ligne, colonne;
-       if ( Json_has_member ( visuel, "mode" ) )
-        { if ( sscanf ( Json_get_string ( visuel, "mode" ), "%dx%d", &ligne, &colonne ) != 2 )
-            { ligne = colonne = 1; }
+       if ( !Json_has_member ( visuel, "mode" ) ) Json_node_add_string ( visuel, "mode", "hors_comm" );
+       gchar *mode = Json_get_string ( visuel, "mode" );
+       if ( sscanf ( mode, "%dx%d", &ligne, &colonne ) != 2 ) { ligne = colonne = 1; }
+
+       if ( !strcasecmp ( mode, "hors_comm" ) )
+        { trame_motif->pixbuf = Trame_load_pixbuf ( trame_motif->page->client, "question.png" ); }
+       else
+        { trame_motif->pixbuf = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
+                                                         Json_get_string ( visuel, "libelle" ) );
         }
-       else { ligne = colonne = 1; }
-       gchar *svg = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
-                                             Json_get_string ( visuel, "libelle" ) );
-       trame_motif->pixbuf = Trame_render_svg_to_pixbuf ( svg );
-       g_free(svg);
      }
 
     if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "comment" ) )
@@ -891,7 +910,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     gchar *mode          = Json_get_string ( visuel, "mode" );
     gchar *color         = Json_get_string ( visuel, "color" );
 
-    gchar commande[256], fichier[128];
+    gchar fichier[128];
     if ( !strcmp ( ihm_affichage, "by_color" ) )
      { g_snprintf ( fichier, sizeof(fichier), "%s_%s.%s", forme, color, extension ); }
     else if ( !strcmp ( ihm_affichage, "by_mode" ) )
@@ -902,15 +921,7 @@ printf("%s: New bloc maintenance\n", __func__ );
      { g_snprintf ( fichier, sizeof(fichier), "%s.%s", forme, extension ); }
     else return;
 
-    struct stat result;
-    if (stat ( fichier, &result ) == -1)
-     { g_snprintf ( commande, sizeof(commande),
-                    "wget --no-check-certificate https://%s:5560/img/%s -O %s", trame_motif->page->client->hostname, fichier, fichier );
-       printf("%s: download %s\n", __func__, fichier );
-       system(commande); /* Download de l'icone */
-     }
-
-    trame_motif->pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
+    trame_motif->pixbuf = Trame_load_pixbuf ( trame_motif->page->client, fichier );
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme );
        return;
