@@ -4,6 +4,7 @@ After=syslog.target network.target auditd.service
 PartOf=graphical-session.target
 
 [Service]
+Environment="DISPLAY=:0"
 ExecStart=/usr/local/bin/Watchdogd
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
