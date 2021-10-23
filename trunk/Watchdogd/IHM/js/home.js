@@ -216,7 +216,9 @@
                        { var new_svg = svg. append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
 
-                         const dimensions = visuel.mode.split('x');
+                         var dimensions = visuel.mode.split('x');
+                         console.log("Encadre : dimensions");
+                         console.debug(dimensions);
                          if (!dimensions[0]) dimensions[0] = 1;
                          if (!dimensions[1]) dimensions[1] = 1;
 
