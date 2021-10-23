@@ -641,7 +641,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Trame_ajout_visuel_encadre: Ajoute un visuel encadré sur le canvas                                                         */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
@@ -700,7 +700,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Trame_ajout_visuel_bouton: Ajoute un visuel 'bouton' sur la canvas                                                         */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
@@ -726,8 +726,8 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->gif_largeur = 0;
     trame_motif->gif_hauteur = 0;
 
-    trame_motif->pixbuf = Trame_Make_svg_bouton ( Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) );
-
+    Trame_redessiner_visuel_complexe ( trame_motif, visuel );
+    
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel bouton failed\n", __func__ );
        g_free(trame_motif);
@@ -874,7 +874,7 @@ printf("%s: New bloc maintenance\n", __func__ );
        trame_motif->pixbuf = NULL;
      }
 
-    if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre" ) )
+    if ( !strcasecmp ( forme, "encadre" ) )
      { gint ligne, colonne;
        if ( !Json_has_member ( visuel, "mode" ) ) Json_node_add_string ( visuel, "mode", "hors_comm" );
        gchar *mode = Json_get_string ( visuel, "mode" );
@@ -887,8 +887,12 @@ printf("%s: New bloc maintenance\n", __func__ );
                                                          Json_get_string ( visuel, "libelle" ) );
         }
      }
-
-    if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "comment" ) )
+    else if ( !strcasecmp ( forme, "bouton" ) )
+     { gchar *mode = Json_get_string ( visuel, "mode" );
+       if (!strcasecmp ( mode, "disabled" )) Json_node_add_string ( visuel, "color", "grey" );
+       trame_motif->pixbuf = Trame_Make_svg_bouton ( Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) );
+     }
+    else if ( !strcasecmp ( forme, "comment" ) )
      { gchar *mode, *color;
        if ( Json_has_member ( visuel, "mode" ) ) mode = Json_get_string ( visuel, "mode" );
        else mode = "annotation";
@@ -903,7 +907,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     return;
   }
 /******************************************************************************************************************************/
-/* Trame_redessiner_visuel_complexe: Met a jour un visuel complexe                                                            */
+/* Trame_redessiner_visuel_simple: Met a jour un visuel simple                                                                */
 /* Entrée: le motif du synoptique et son nouveau statut                                                                       */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -935,7 +939,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     g_object_set( trame_motif->item, "pixbuf", trame_motif->pixbuf, NULL );
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Trame_ajout_visuel_simple: Ajoute un visuel simple sur le canvas                                                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/

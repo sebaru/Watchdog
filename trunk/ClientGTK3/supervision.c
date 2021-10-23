@@ -242,8 +242,10 @@
            }
         }
        else if ( !strcasecmp ( forme, "bouton" ) )
-        { g_snprintf( chaine, sizeof(chaine), "%s_CLIC", Json_get_string ( trame_motif->visuel, "acronyme" ) );
-          Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
+        { if ( strcasecmp( Json_get_string ( trame_motif->visuel, "mode" ), "disabled" ) )  /* Uniquement si mode != disabled */
+           { g_snprintf( chaine, sizeof(chaine), "%s_CLIC", Json_get_string ( trame_motif->visuel, "acronyme" ) );
+             Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
+           }
         }
      }
     trame_motif_appuye = NULL;
