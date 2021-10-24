@@ -73,7 +73,7 @@
     if (trame_motif->select_bd) goo_canvas_item_remove( trame_motif->select_bd );
     if (trame_motif->select_bg) goo_canvas_item_remove( trame_motif->select_bg );
 #warning A revoir quand tout sera migre en full dynamic
-    /*g_list_foreach( trame_motif->images, (GFunc) g_object_unref, NULL ); 
+    /*g_list_foreach( trame_motif->images, (GFunc) g_object_unref, NULL );
     g_list_free( trame_motif->images );*/
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
   }
@@ -669,7 +669,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->gif_hauteur = 0;
 
     Trame_redessiner_visuel_complexe ( trame_motif, visuel );
-    
+
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel encadre\n", __func__ );
        g_free(trame_motif);
@@ -721,7 +721,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->gif_hauteur = 0;
 
     Trame_redessiner_visuel_complexe ( trame_motif, visuel );
-    
+
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel bouton failed\n", __func__ );
        g_free(trame_motif);
