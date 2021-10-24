@@ -12,8 +12,8 @@ INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) 
 ('ouvrant',      'fenetre',             'png',  'by_mode'       , 100),
 ('ouvrant',      'porte_entree',        'png',  'by_mode'       , 100),
 ('ouvrant',      'porte_fenetre',       'png',  'by_mode'       , 100),
+('ouvrant',      'volet_roulant',       'png',  'by_mode'       , 100),
 ('chauffage',    'soufflant',           'png',  'by_mode'       , 100),
-('ouvrant',      'store',               'png',  'by_mode'       , 100),
 ('electrique',   'pile',                'png',  'by_mode'       , 100),
 ('divers',       'cadena',              'png',  'by_mode'       , 100),
 ('application',  'kodi',                'svg',  'static'        , 100),
@@ -47,6 +47,7 @@ INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) 
 ('sonorisation', 'haut_parleur',        'png',  'by_mode_color' , 100),
 ('bouton',       'bouton',              'none', 'complexe'      , 100),
 ('bouton',       'bloc_maintenance',    'none', 'complexe'      , 100),
+('divers',       'question',            'png',  'static'        , 100),
 ('divers',       'comment',             'none', 'complexe'      , 150),
 ('divers',       'encadre',             'none', 'complexe'      , 50 )
 ON DUPLICATE KEY UPDATE categorie=VALUE(categorie), extension=VALUE(extension), ihm_affichage=VALUE(ihm_affichage), layer=VALUE(layer);

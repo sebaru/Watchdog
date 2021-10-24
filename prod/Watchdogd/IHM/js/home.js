@@ -182,6 +182,7 @@
         }
        else /* Affichage full */
         { var svg = d3.select("#fullsvg").append("svg").attr("width", 1024).attr("height", 768);
+          fullsvg.css("position","relative");
 
           $.each ( Synoptique.visuels, function (i, visuel)
                     { if (visuel.forme == null)
@@ -199,10 +200,147 @@
                                                 );
                                   } );
                        }
-                      else if (visuel.extension=="png")
-                       { svg.append ( "image" ).attr("href", "/img/"+visuel.forme+".png" );
+                      else if (visuel.ihm_affichage=="complexe" && visuel.forme=="bouton")
+                       { var button = $("<button>").css("position", "absolute").addClass("btn")
+                                                   .css("left", visuel.posx).css("top", visuel.posy)
+                                                   .append( visuel.libelle )
+                              if (visuel.color=="blue")   button.addClass("btn-primary");
+                         else if (visuel.color=="orange") button.addClass("btn-warning");
+                         else if (visuel.color=="gray")   button.addClass("btn-secondary");
+                         else if (visuel.color=="red")    button.addClass("btn-danger");
+                         else if (visuel.color=="green")  button.addClass("btn-success");
+                         else button.addClass("btn-outline-dark").attr("disabled", '');
+                         $("#fullsvg").append ( button );
                        }
+                      else if (visuel.ihm_affichage=="complexe" && visuel.forme=="encadre")
+                       { var new_svg = svg. append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
 
+                         var dimensions = visuel.mode.split('x');
+                         console.log("Encadre : dimensions");
+                         console.debug(dimensions);
+                         if (!dimensions[0]) dimensions[0] = 1;
+                         if (!dimensions[1]) dimensions[1] = 1;
+
+                         var hauteur=64*parseInt(dimensions[0]);
+                         var largeur=64*parseInt(dimensions[1]);
+
+                         new_svg.append ( "text" ).attr("x", (largeur+10)/2 ).attr("y", 12 )
+                                                  .attr("text-anchor", "middle")
+                                                  .attr("font-size", "14" )
+                                                  .attr("font-family", "Sans" )
+                                                  .attr("font-style", "italic" )
+                                                  .attr("font-weight", "normal" )
+                                                  .attr("fill", visuel.color )
+                                                  .attr("stroke", visuel.color )
+                                                  .text(visuel.libelle);
+
+                         new_svg.append ( "rect" ).attr("x", 5 ).attr("y", 20 ).attr("rx", 15)
+                                                  .attr("width", largeur)
+                                                  .attr("height", hauteur )
+                                                  .attr("fill", "none" )
+                                                  .attr("stroke-width", 4 )
+                                                  .attr("stroke", visuel.color );
+                         new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                    "scale("+visuel.scale+") "+
+                                                    "translate("+visuel.posx+" "+visuel.posy+") "
+                                     );
+                        }
+                      else if (visuel.ihm_affichage=="complexe" && visuel.forme=="comment")
+                       { var new_svg = svg. append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
+                         var size, family, style, weight;
+                         if ( visuel.mode=="titre" )
+                          { size = 32;
+                            family = "Sans";
+                            style  = "italic";
+                            weight = "normal";
+                          }
+                         else if ( visuel.mode =="soustitre" )
+                          { size = 24;
+                            family = "Sans";
+                            style  = "italic";
+                            weight = "normal";
+                          }
+                         else
+                          { size   = 14;
+                            family = "Sans";
+                            style  = "italic";
+                            weight = "normal";
+                          }
+
+                         new_svg.append ( "text" ).attr("font-size", size)
+                                                  .attr("font-family", family + ",serif" )
+                                                  .attr("font-style", style )
+                                                  .attr("font-weight", weight )
+                                                  .attr("fill", visuel.color )
+                                                  .attr("stroke", visuel.color )
+                                                  .text(visuel.libelle);
+                         new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                    "scale("+visuel.scale+") "+
+                                                    "translate("+visuel.posx+" "+visuel.posy+") "
+                                     );
+                       }
+                      else if (visuel.ihm_affichage=="by_mode")
+                       { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
+                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.forme+"_"+visuel.mode+"."+visuel.extension )
+                                .on( "load", function ()
+                                  { console.log("loaded");
+                                    var dimensions = this.getBBox();
+                                    var orig_x = (visuel.posx-dimensions.width/2);
+                                    var orig_y = (visuel.posy-dimensions.height/2);
+                                    new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                               "scale("+visuel.scale+") "+
+                                                               "translate("+orig_x+" "+orig_y+") "
+                                                );
+                                  } );
+                       }
+                      else if (visuel.ihm_affichage=="by_color")
+                       { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
+                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.forme+"_"+visuel.color+"."+visuel.extension )
+                                .on( "load", function ()
+                                  { console.log("loaded");
+                                    var dimensions = this.getBBox();
+                                    var orig_x = (visuel.posx-dimensions.width/2);
+                                    var orig_y = (visuel.posy-dimensions.height/2);
+                                    new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                               "scale("+visuel.scale+") "+
+                                                               "translate("+orig_x+" "+orig_y+") "
+                                                );
+                                  } );
+                       }
+                      else if (visuel.ihm_affichage=="by_mode_color")
+                       { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
+                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.forme+"_"+visuel.mode+"_"+visuel.color+"."+visuel.extension )
+                                .on( "load", function ()
+                                  { console.log("loaded");
+                                    var dimensions = this.getBBox();
+                                    var orig_x = (visuel.posx-dimensions.width/2);
+                                    var orig_y = (visuel.posy-dimensions.height/2);
+                                    new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                               "scale("+visuel.scale+") "+
+                                                               "translate("+orig_x+" "+orig_y+") "
+                                                );
+                                  } );
+                       }
+                      else if (visuel.ihm_affichage=="static")
+                       { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                         new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
+                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.forme+"."+visuel.extension )
+                                .on( "load", function ()
+                                  { console.log("loaded");
+                                    var dimensions = this.getBBox();
+                                    var orig_x = (visuel.posx-dimensions.width/2);
+                                    var orig_y = (visuel.posy-dimensions.height/2);
+                                    new_svg.attr( "transform", "rotate("+visuel.angle+") "+
+                                                               "scale("+visuel.scale+") "+
+                                                               "translate("+orig_x+" "+orig_y+") "
+                                                );
+                                  } );
+                       }
                     }
                  );
         }
@@ -236,7 +374,7 @@
     $('#toplevel').slideUp("normal", function ()
      { $('#toplevel').empty()
                      .append("<div id='bodymain' class='row row-cols-2 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 row-cols-xl-6 justify-content-center'></div>")
-                     .append("<div id='fullsvg'  class='row mx-1 justify-content-center'></div>")
+                     .append("<div class='row justify-content-center'><div id='fullsvg'></div></div>")
                      .append("<div id='tableaux' class='row mx-1 justify-content-center'></div>")
                      .append("<hr><table id='idTableMessages' class='table table-dark table-bordered w-100'></table>");
        Synoptique = null;

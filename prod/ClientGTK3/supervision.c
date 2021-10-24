@@ -222,22 +222,30 @@
                                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static struct TRAME_ITEM_MOTIF *trame_motif_appuye = NULL;
     gchar chaine [128];
-
     if (!(trame_motif && event)) return;
 
     if (event->type == GDK_BUTTON_PRESS) { trame_motif_appuye = trame_motif; return; }
 
     if (event->type != GDK_BUTTON_RELEASE) return;
 
-    if (trame_motif_appuye == trame_motif)
-     { if ( Json_has_member ( trame_motif->visuel, "forme" ) && !strcasecmp ( Json_get_string ( trame_motif->visuel, "forme" ), "bloc_maintenance" ) )
+    if (trame_motif_appuye == trame_motif && Json_has_member ( trame_motif->visuel, "forme" ) )
+     { gchar *forme = Json_get_string ( trame_motif->visuel, "forme" );
+       gchar *mode  = Json_get_string ( trame_motif->visuel, "mode" );
+       if ( !strcasecmp ( forme, "bloc_maintenance" ) )
         { gint index = g_slist_index ( trame_motif->items, item );
-          if (index==0) /* Service */
+			printf("%s: %s\n", __func__, mode );
+          if ( index==0 && !strcasecmp ( mode, "maintenance" ) ) /* Service */
            { g_snprintf( chaine, sizeof(chaine), "%s_CLIC_SERVICE", Json_get_string ( trame_motif->visuel, "acronyme" ) );
              Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
            }
-          else if (index==1) /* Maintenance */
+          else if ( index==1 && strcasecmp ( mode, "maintenance" ) ) /* Maintenance */
            { g_snprintf( chaine, sizeof(chaine), "%s_CLIC_MAINTENANCE", Json_get_string ( trame_motif->visuel, "acronyme" ) );
+             Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
+           }
+        }
+       else if ( !strcasecmp ( forme, "bouton" ) )
+        { if ( strcasecmp( mode, "disabled" ) )                                             /* Uniquement si mode != disabled */
+           { g_snprintf( chaine, sizeof(chaine), "%s_CLIC", Json_get_string ( trame_motif->visuel, "acronyme" ) );
              Envoyer_action_au_serveur( trame_motif->page->client, Json_get_string ( trame_motif->visuel, "tech_id" ), chaine );
            }
         }
@@ -614,6 +622,44 @@
     json_array_foreach_element ( Json_get_array ( infos->syn, "comments" ),     Afficher_un_commentaire, page );
     json_array_foreach_element ( Json_get_array ( infos->syn, "cadrans" ),      Afficher_un_cadran, page );
     Json_node_foreach_array_element ( infos->syn, "syn_vars", Updater_les_syn_vars, page );
+
+    JsonNode *visuel = Json_node_create();
+    if (visuel)
+     { Json_node_add_string ( visuel, "forme", "logo" );
+       Json_node_add_string ( visuel, "gestion", "0" );
+       Json_node_add_string ( visuel, "tech_id", "" );
+       Json_node_add_string ( visuel, "acronyme", "" );
+       Json_node_add_string ( visuel, "ihm_affichage", "static" );
+       Json_node_add_string ( visuel, "extension", "png" );
+       Json_node_add_int ( visuel, "id", -1 );
+       Json_node_add_int ( visuel, "angle", 0 );
+       Json_node_add_int ( visuel, "posx", 25 );
+       Json_node_add_int ( visuel, "posy", 25 );
+       Json_node_add_double ( visuel, "scale", 0.05 );
+       Afficher_un_motif ( NULL, 0, visuel, page );
+     }
+
+    visuel = Json_node_create();
+    if (visuel)
+     { Json_node_add_string ( visuel, "forme", "comment" );
+       Json_node_add_string ( visuel, "gestion", "0" );
+       Json_node_add_string ( visuel, "mode", "annotation" );
+       Json_node_add_string ( visuel, "color", "black" );
+       Json_node_add_string ( visuel, "tech_id", "" );
+       Json_node_add_string ( visuel, "acronyme", "" );
+       Json_node_add_string ( visuel, "ihm_affichage", "complexe" );
+       gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), "SYN_%d", infos->syn_id );
+       Json_node_add_string ( visuel, "libelle", chaine );
+       Json_node_add_int ( visuel, "id", -1 );
+       Json_node_add_int ( visuel, "angle", 0 );
+       Json_node_add_int ( visuel, "posx", 50 );
+       Json_node_add_int ( visuel, "posy", 740 );
+       Json_node_add_double ( visuel, "scale", 1.0 );
+       Afficher_un_motif ( NULL, 0, visuel, page );
+     }
+
+
     gtk_widget_show_all( page->child );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(page->client->Notebook), page_num );
     gchar chaine[256];

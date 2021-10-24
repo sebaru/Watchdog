@@ -27,7 +27,8 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 openssl libsoup-2.4
                    `mysql_config --cflags`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
-            -I$(top_srcdir)/Watchdogd/Include
+            -I$(top_srcdir)/Watchdogd/Include \
+            -DWTD_PKGDATADIR=\"$(pkgdatadir)\"
 
 sysconf_DATA = watchdogd.abls.conf.sample
 pkgdata_DATA = init_db.sql base_icones.sql

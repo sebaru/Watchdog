@@ -281,6 +281,14 @@
     prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
+    gchar *requete = SQL_Read_from_file ( "base_icones.sql" );                                    /* Load DB icons at startup */
+    if (!requete)
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB Error.", __func__ ); }
+    else  if (!SQL_Writes ( requete ))
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB SQL Error.", __func__ ); }
+    else Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB Loaded.", __func__ );
+    if (requete) g_free(requete);
+
 /************************************************* Socket ZMQ interne *********************************************************/
     Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     zmq_from_bus                 = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );

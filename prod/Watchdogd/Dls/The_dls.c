@@ -1452,10 +1452,7 @@ end:
 
        if ( visu->changes <= 10 )                                                          /* Si moins de 10 changes en 5 sec */
         { if ( visu->changes == 10 )                                                /* Est-ce le dernier change avant blocage */
-           { g_snprintf( visu->mode,  sizeof(visu->mode),  "too_many_change" );
-             g_snprintf( visu->color, sizeof(visu->color), "brown" );
-             visu->cligno = 1;                                                                                  /* Clignotant */
-           }
+           { g_snprintf( visu->mode,  sizeof(visu->mode),  "hors_comm" ); }
           else { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
                  g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
                  g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );

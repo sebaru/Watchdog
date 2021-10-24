@@ -47,11 +47,9 @@
   { gchar fichier[80], home[128], chaine[256], *welcome =
           "#Welcome, your instance is now installed !\n"
           "#Sébastien Lefèvre - Abls-Habitat.fr\n";
-    GBytes *request_brute;
     struct stat stat_buf;
     struct passwd *pwd;
     gchar *db_schema;
-    gsize taille;
 
     if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -69,12 +67,10 @@
        return;
      }
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if (!request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request !");
-       return;
-     }
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 0 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
     if ( ! (    Json_has_member ( request, "description" )
              && Json_has_member ( request, "db_username" )
@@ -129,36 +125,15 @@
 /******************************************* Test accès Database **************************************************************/
     if (is_master)
      { Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Loading DB Schema", __func__ );
-       gchar *DB_SCHEMA = "/usr/local/share/Watchdog/init_db.sql";
-       if (stat ( DB_SCHEMA, &stat_buf)==-1)
-        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Stat DB Schema Error" );
-          Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Stat DB Schema Error", __func__ );
-          return;
-        }
-
-       db_schema = g_try_malloc0 ( stat_buf.st_size+1 );
+       db_schema = SQL_Read_from_file ( "init_db.sql" );
        if (!db_schema)
-        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory DB Schema Error" );
-          Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Memory DB Schema Error", __func__ );
-          return;
-        }
-
-       gint fd = open ( DB_SCHEMA, O_RDONLY );
-       if (!fd)
-        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Open DB Schema Error" );
-          Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Open DB Schema Error", __func__ );
-          g_free(db_schema);
-          return;
-        }
-       if (read ( fd, db_schema, stat_buf.st_size ) != stat_buf.st_size)
         { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Read DB Schema Error" );
           Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Read DB Schema Error", __func__ );
-         g_free(db_schema);
           return;
         }
-       close(fd);
        Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Loaded. Connecting to DB.", __func__ );
      }
+
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Connecting to DB.", __func__ );
     struct DB *db = Init_DB_SQL_with ( Json_get_string(request, "db_hostname"), Json_get_string(request, "db_username"),
                                        Json_get_string(request, "db_password"), Json_get_string(request, "db_database"),
@@ -170,13 +145,13 @@
        g_free(db_schema);
        return;
      }
+
     if (is_master)
      { Lancer_requete_SQL ( db, db_schema );                                                            /* Création du schéma */
-       g_free(db_schema);
        Liberer_resultat_SQL ( db );
+       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Init OK (Master).", __func__ );
      }
-
-    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema OK. Starting update.", __func__ );
+    else Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Not Initialize (instance Slave).", __func__ );
 
     g_snprintf( chaine, sizeof(chaine),
                "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"

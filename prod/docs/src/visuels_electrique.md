@@ -6,9 +6,13 @@
 
 Modes:
 
+* action_off
+* action_on
 * off
 * on
 
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/ampoule_action_off.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/ampoule_action_on.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/ampoule_off.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/ampoule_on.png)
 

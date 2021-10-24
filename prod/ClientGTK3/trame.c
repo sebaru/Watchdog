@@ -72,8 +72,9 @@
     if (trame_motif->select_hg) goo_canvas_item_remove( trame_motif->select_hg );
     if (trame_motif->select_bd) goo_canvas_item_remove( trame_motif->select_bd );
     if (trame_motif->select_bg) goo_canvas_item_remove( trame_motif->select_bg );
-    g_list_foreach( trame_motif->images, (GFunc) g_object_unref /*g_free*/, NULL );
-    g_list_free( trame_motif->images );
+#warning A revoir quand tout sera migre en full dynamic
+    /*g_list_foreach( trame_motif->images, (GFunc) g_object_unref, NULL );
+    g_list_free( trame_motif->images );*/
     if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
   }
 /******************************************************************************************************************************/
@@ -521,7 +522,7 @@ printf("%s: New bouton %s\n", __func__, bouton );
 /* Entrée: la taille de lencadre, la couleur, son libellé                                                                     */
 /* Sortie: la chaine SVG                                                                                                      */
 /******************************************************************************************************************************/
- static gchar *Trame_Make_svg_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
+ static GdkPixbuf *Trame_Make_svg_encadre ( gint ligne, gint colonne, gchar *couleur, gchar *libelle )
   { gchar encadre[512];
     gint hauteur=64*ligne;
     gint largeur=64*colonne;
@@ -535,7 +536,7 @@ printf("%s: New bouton %s\n", __func__, bouton );
                 largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, couleur
               );
 printf("%s: New encadre %dx%d : %s\n", __func__, ligne, colonne, encadre );
-    return ( g_strdup(encadre) );
+    return (Trame_render_svg_to_pixbuf (encadre));
   }
 /******************************************************************************************************************************/
 /* Trame_Make_svg_comment: Prépare un pixbuf pour l'encadre en parametre                                                      */
@@ -641,7 +642,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Trame_ajout_visuel_encadre: Ajoute un visuel encadré sur le canvas                                                         */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
@@ -667,16 +668,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->gif_largeur = 0;
     trame_motif->gif_hauteur = 0;
 
-    gint ligne, colonne;
-    if ( Json_has_member ( visuel, "mode" ) )
-     { if ( sscanf ( Json_get_string ( visuel, "mode" ), "%dx%d", &ligne, &colonne ) != 2 )
-         { ligne = colonne = 1; }
-     }
-    else { ligne = colonne = 1; }
-    gchar *svg = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
-                                          Json_get_string ( visuel, "libelle" ) );
-    trame_motif->pixbuf = Trame_render_svg_to_pixbuf ( svg );
-    g_free(svg);
+    Trame_redessiner_visuel_complexe ( trame_motif, visuel );
 
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel encadre\n", __func__ );
@@ -702,7 +694,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Trame_ajout_visuel_bouton: Ajoute un visuel 'bouton' sur la canvas                                                         */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
@@ -728,7 +720,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->gif_largeur = 0;
     trame_motif->gif_hauteur = 0;
 
-    trame_motif->pixbuf = Trame_Make_svg_bouton ( Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) );
+    Trame_redessiner_visuel_complexe ( trame_motif, visuel );
 
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel bouton failed\n", __func__ );
@@ -744,6 +736,11 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
+    if (page->type == TYPE_PAGE_SUPERVISION)
+     { g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",   G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item), "button-release-event", G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
+     }
+
     Trame_calculer_bounds ( trame_motif );
     Trame_create_poignees ( trame_motif );
     Trame_rafraichir_motif ( trame_motif );
@@ -815,16 +812,34 @@ printf("%s: New bloc maintenance\n", __func__ );
     return(FALSE);
   }
 /******************************************************************************************************************************/
+/* Trame_load_pixbuf: Charge un pixbuf distant en le mettant en cache local                                                   */
+/* Entrée: le fichier a telecharger                                                                                           */
+/* Sortie: Le pixbuf, ou NULL si erreur                                                                                       */
+/******************************************************************************************************************************/
+ static GdkPixbuf *Trame_load_pixbuf ( struct CLIENT*client, gchar *fichier )
+  { gchar commande[256];
+    struct stat result;
+    if (stat ( fichier, &result ) == -1)
+     { g_snprintf ( commande, sizeof(commande),
+                    "wget --no-check-certificate https://%s:5560/img/%s -O %s", client->hostname, fichier, fichier );
+       printf("%s: download %s\n", __func__, fichier );
+       system(commande); /* Download de l'icone */
+     }
+
+    return (gdk_pixbuf_new_from_file ( fichier, NULL ));
+  }
+/******************************************************************************************************************************/
 /* Trame_redessiner_visuel_complexe: Met a jour un visuel complexe                                                            */
 /* Entrée: le motif du synoptique et son nouveau statut                                                                       */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Trame_redessiner_visuel_complexe ( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *visuel )
-  {
-    gchar *forme = Json_get_string ( trame_motif->visuel, "forme" );
+  { gchar *forme = Json_get_string ( trame_motif->visuel, "forme" );
+    gchar *mode  = Json_get_string ( visuel, "mode" );
+    gchar *color = Json_get_string ( visuel, "color" );
+
     if ( !strcasecmp ( forme, "bloc_maintenance" ) )
      { gchar *couleur_service,  *couleur_maintenance;
-       gchar *mode = Json_get_string ( visuel, "mode" );
        if (!mode) mode="service";
 
        GooCanvasItem *bouton_service     = g_slist_nth_data ( trame_motif->items, 0 );
@@ -839,7 +854,7 @@ printf("%s: New bloc maintenance\n", __func__ );
         { couleur_maintenance = "blue"; couleur_service="gray";
           g_object_set( rect_maintenance, "fill_color", "lime", NULL );
         }
-
+       Json_node_add_string ( trame_motif->visuel, "mode", mode );                /* sauvegarde du mode en cours */
        g_object_set( bouton_service, "pixbuf",
                      Trame_Make_svg_bouton ( couleur_service, "  Service  " ), NULL );
 
@@ -849,22 +864,33 @@ printf("%s: New bloc maintenance\n", __func__ );
        return;
      }
 
-    if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
+    Json_node_add_string ( trame_motif->visuel, "mode", mode );                   /* sauvegarde du mode en cours */
+    Json_node_add_string ( trame_motif->visuel, "color", color );                 /* sauvegarde du mode en cours */
 
-    if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "encadre" ) )
-     { gint ligne, colonne;
-       if ( Json_has_member ( visuel, "mode" ) )
-        { if ( sscanf ( Json_get_string ( visuel, "mode" ), "%dx%d", &ligne, &colonne ) != 2 )
-            { ligne = colonne = 1; }
-        }
-       else { ligne = colonne = 1; }
-       gchar *svg = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
-                                             Json_get_string ( visuel, "libelle" ) );
-       trame_motif->pixbuf = Trame_render_svg_to_pixbuf ( svg );
-       g_free(svg);
+    if (trame_motif->pixbuf)
+     { g_object_unref(trame_motif->pixbuf);
+       trame_motif->pixbuf = NULL;
      }
 
-    if ( !strcmp ( Json_get_string ( trame_motif->visuel, "forme" ), "comment" ) )
+    if ( !strcasecmp ( forme, "encadre" ) )
+     { gint ligne, colonne;
+       if ( !Json_has_member ( visuel, "mode" ) ) Json_node_add_string ( visuel, "mode", "hors_comm" );
+       gchar *mode = Json_get_string ( visuel, "mode" );
+       if ( sscanf ( mode, "%dx%d", &ligne, &colonne ) != 2 ) { ligne = colonne = 1; }
+
+       if ( !strcasecmp ( mode, "hors_comm" ) )
+        { trame_motif->pixbuf = Trame_load_pixbuf ( trame_motif->page->client, "question.png" ); }
+       else
+        { trame_motif->pixbuf = Trame_Make_svg_encadre ( ligne, colonne,  Json_get_string ( visuel, "color" ),
+                                                         Json_get_string ( visuel, "libelle" ) );
+        }
+     }
+    else if ( !strcasecmp ( forme, "bouton" ) )
+     { gchar *mode = Json_get_string ( visuel, "mode" );
+       if (!strcasecmp ( mode, "disabled" )) Json_node_add_string ( visuel, "color", "grey" );
+       trame_motif->pixbuf = Trame_Make_svg_bouton ( Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) );
+     }
+    else if ( !strcasecmp ( forme, "comment" ) )
      { gchar *mode, *color;
        if ( Json_has_member ( visuel, "mode" ) ) mode = Json_get_string ( visuel, "mode" );
        else mode = "annotation";
@@ -879,7 +905,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     return;
   }
 /******************************************************************************************************************************/
-/* Trame_redessiner_visuel_complexe: Met a jour un visuel complexe                                                            */
+/* Trame_redessiner_visuel_simple: Met a jour un visuel simple                                                                */
 /* Entrée: le motif du synoptique et son nouveau statut                                                                       */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -891,7 +917,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     gchar *mode          = Json_get_string ( visuel, "mode" );
     gchar *color         = Json_get_string ( visuel, "color" );
 
-    gchar commande[256], fichier[128];
+    gchar fichier[128];
     if ( !strcmp ( ihm_affichage, "by_color" ) )
      { g_snprintf ( fichier, sizeof(fichier), "%s_%s.%s", forme, color, extension ); }
     else if ( !strcmp ( ihm_affichage, "by_mode" ) )
@@ -902,15 +928,7 @@ printf("%s: New bloc maintenance\n", __func__ );
      { g_snprintf ( fichier, sizeof(fichier), "%s.%s", forme, extension ); }
     else return;
 
-    struct stat result;
-    if (stat ( fichier, &result ) == -1)
-     { g_snprintf ( commande, sizeof(commande),
-                    "wget --no-check-certificate https://%s:5560/img/%s -O %s", trame_motif->page->client->hostname, fichier, fichier );
-       printf("%s: download %s\n", __func__, fichier );
-       system(commande); /* Download de l'icone */
-     }
-
-    trame_motif->pixbuf = gdk_pixbuf_new_from_file ( fichier, NULL );
+    trame_motif->pixbuf = Trame_load_pixbuf ( trame_motif->page->client, fichier );
     if (!trame_motif->pixbuf)
      { printf("%s: Chargement visuel simple '%s' pixbuf failed\n", __func__, forme );
        return;
@@ -919,7 +937,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     g_object_set( trame_motif->item, "pixbuf", trame_motif->pixbuf, NULL );
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Trame_ajout_visuel_simple: Ajoute un visuel simple sur le canvas                                                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/

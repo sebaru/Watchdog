@@ -39,7 +39,16 @@ Modes:
 
 Modes:
 
-* ferme
 
-![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/store_ferme.png)
+
+---
+## `forme`='volet_roulant'
+
+Modes:
+
+* ferme
+* ouvert
+
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/volet_roulant_ferme.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/volet_roulant_ouvert.png)
 
