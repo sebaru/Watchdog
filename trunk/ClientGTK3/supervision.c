@@ -633,9 +633,9 @@
        Json_node_add_string ( visuel, "extension", "png" );
        Json_node_add_int ( visuel, "id", -1 );
        Json_node_add_int ( visuel, "angle", 0 );
-       Json_node_add_int ( visuel, "posx", 25 );
-       Json_node_add_int ( visuel, "posy", 25 );
-       Json_node_add_double ( visuel, "scale", 0.05 );
+       Json_node_add_int ( visuel, "posx", 40 );
+       Json_node_add_int ( visuel, "posy", 40 );
+       Json_node_add_double ( visuel, "scale", 0.08 );
        Afficher_un_motif ( NULL, 0, visuel, page );
      }
 
@@ -649,12 +649,12 @@
        Json_node_add_string ( visuel, "acronyme", "" );
        Json_node_add_string ( visuel, "ihm_affichage", "complexe" );
        gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), "SYN_%d", infos->syn_id );
+       g_snprintf( chaine, sizeof(chaine), "SYN_%05d", infos->syn_id );
        Json_node_add_string ( visuel, "libelle", chaine );
        Json_node_add_int ( visuel, "id", -1 );
        Json_node_add_int ( visuel, "angle", 0 );
-       Json_node_add_int ( visuel, "posx", 50 );
-       Json_node_add_int ( visuel, "posy", 740 );
+       Json_node_add_int ( visuel, "posx", 60 );
+       Json_node_add_int ( visuel, "posy", 750 );
        Json_node_add_double ( visuel, "scale", 1.0 );
        Afficher_un_motif ( NULL, 0, visuel, page );
      }

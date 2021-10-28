@@ -531,7 +531,7 @@ printf("%s: New bouton %s\n", __func__, bouton );
                 "<text text-anchor='middle' x='%d' y='12' "
                 "      font-size='14px' font-family='Sans' font-style='italic' fill='black' stroke='black'>%s</text> "
                 "<rect x='5' y='20' rx='15' width='%d' height='%d' "
-                "      fill='none' stroke='%s' stroke-width='4'  />"
+                "      fill='none' stroke='%s' stroke-width='2'  />"
                 "</svg>",
                 largeur+10, hauteur+25, (largeur+10)/2, libelle, largeur, hauteur, couleur
               );
