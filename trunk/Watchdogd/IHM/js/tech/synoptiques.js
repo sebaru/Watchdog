@@ -20,7 +20,7 @@
     var json_request =
        { parent_id: parseInt($('#idModalSynEditPPage').val()),
          page     : $('#idModalSynEditPage').val(),
-         libelle  : $('#idModalSynEditDescription').val(),
+         libelle  : $('#idModalSynEditLibelle').val(),
          access_level: parseInt($('#idModalSynEditAccessLevel').val()),
          mode_affichage: parseInt($('#idModalSynEditAffichage').val())
        };
@@ -59,7 +59,7 @@
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page(null)");
     Synoptique_set_controle_page (null)
     $('#idModalSynEditAffichage').val("0");
-    $('#idModalSynEditDescription').val("");
+    $('#idModalSynEditLibelle').val("");
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") ).val(0);
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('0')" );
     $('#idModalSynEdit').modal("show");
@@ -84,7 +84,7 @@
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page('"+selection.page+"')");
     Synoptique_set_controle_page (selection.page)
     $('#idModalSynEditAffichage').val( selection.mode_affichage );
-    $('#idModalSynEditDescription').val( selection.libelle );
+    $('#idModalSynEditLibelle').val( selection.libelle );
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") )
                                    .val( selection.access_level );
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.id+"')" );
