@@ -26,9 +26,10 @@ nav:
    - Les entrées T.O.R: dls_entre_tor.md
    - Les Visuels: dls_visuels.md
  - Les formes de visuels:
+   - Les boutons: dls_visuel_bouton.md
    - Les commentaires: dls_visuel_comment.md
    - Inventaire des Visuels: visuels.md
- - Pour finir ?:
+ - Pour nous aider:
    - Qui sommes-nous ?: auteurs.md
 
 theme:
