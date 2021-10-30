@@ -659,6 +659,23 @@
        Afficher_un_motif ( NULL, 0, visuel, page );
      }
 
+    visuel = Json_node_create();
+    if (visuel)
+     { Json_node_add_string ( visuel, "forme", "comment" );
+       Json_node_add_string ( visuel, "gestion", "0" );
+       Json_node_add_string ( visuel, "mode", "titre" );
+       Json_node_add_string ( visuel, "color", "black" );
+       Json_node_add_string ( visuel, "tech_id", "" );
+       Json_node_add_string ( visuel, "acronyme", "" );
+       Json_node_add_string ( visuel, "ihm_affichage", "complexe" );
+       Json_node_add_string ( visuel, "libelle", Json_get_string ( infos->syn, "libelle" ) );
+       Json_node_add_int ( visuel, "id", -1 );
+       Json_node_add_int ( visuel, "angle", 0 );
+       Json_node_add_int ( visuel, "posx", TAILLE_SYNOPTIQUE_X/2 );
+       Json_node_add_int ( visuel, "posy", 40 );
+       Json_node_add_double ( visuel, "scale", 1.0 );
+       Afficher_un_motif ( NULL, 0, visuel, page );
+     }
 
     gtk_widget_show_all( page->child );
     gtk_notebook_set_current_page ( GTK_NOTEBOOK(page->client->Notebook), page_num );
