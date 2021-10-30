@@ -68,8 +68,8 @@
 
        <div class="col form-group">
 					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Description du synoptique</label>
-						     <input id="idModalSynEditDescription" type="text" class="form-control" placeholder="Description du synoptique">
+						     <label class="col-5 col-sm-4 col-form-label text-right">Libellé du synoptique</label>
+						     <input id="idModalSynEditLibelle" type="text" class="form-control" placeholder="Libellé du synoptique">
      					</div>
        </div>
 

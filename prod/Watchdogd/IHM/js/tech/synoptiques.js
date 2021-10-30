@@ -20,7 +20,7 @@
     var json_request =
        { parent_id: parseInt($('#idModalSynEditPPage').val()),
          page     : $('#idModalSynEditPage').val(),
-         libelle  : $('#idModalSynEditDescription').val(),
+         libelle  : $('#idModalSynEditLibelle').val(),
          access_level: parseInt($('#idModalSynEditAccessLevel').val()),
          mode_affichage: parseInt($('#idModalSynEditAffichage').val())
        };
@@ -59,7 +59,7 @@
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page(null)");
     Synoptique_set_controle_page (null)
     $('#idModalSynEditAffichage').val("0");
-    $('#idModalSynEditDescription').val("");
+    $('#idModalSynEditLibelle').val("");
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") ).val(0);
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('0')" );
     $('#idModalSynEdit').modal("show");
@@ -84,7 +84,7 @@
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page('"+selection.page+"')");
     Synoptique_set_controle_page (selection.page)
     $('#idModalSynEditAffichage').val( selection.mode_affichage );
-    $('#idModalSynEditDescription').val( selection.libelle );
+    $('#idModalSynEditLibelle').val( selection.libelle );
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") )
                                    .val( selection.access_level );
     $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.id+"')" );
@@ -126,11 +126,12 @@
                "syn_buanderie.png", "syn_camera.png", "syn_chambre_double.png", "syn_chambre_simple.png",
                "syn_cuisine.png", "syn_garage.png", "syn_cour.png", "syn_jardin.png", "syn_piscine.png",
                "syn_salle_de_bain.png", "syn_salon.png", "syn_jeux.png", "syn_tele.png",
-               "syn_volets.png", "syn_luminaires.png",
-               "syn_spot.png", "syn_sonorisation.png",
+               "syn_ouvrants.png", "syn_volets.png",
+               "syn_luminaires.png", "syn_spot.png", "syn_sonorisation.png",
                "syn_maintenance.png", "syn_parametres.png", "syn_horloge.png",
                "syn_confort.png", "syn_vmc.png", "syn_energie.png", "syn_chaudiere.png", "syn_electricite.png",
-               "syn_ups.png", "syn_panneau_solaire.png" ];
+               "syn_ups.png", "syn_panneau_solaire.png"
+             ];
 
     liste = $("#idSynEditImageListe");
     liste.empty();
