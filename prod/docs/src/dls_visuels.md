@@ -55,12 +55,12 @@ Les couleurs HTML sont reconnues, dans le format string, comme ci dessous:
 Certaines formes de visuelles sont particulières, dans le sens ou le visuel en question est construit de manière dynamique.
 Ces visuels complexes sont les suivants:
 
-| forme            |  description |
-|:----------------:|:-------------|
-| bouton           | Ce visuel affiche un bouton dont le titre est le `libelle` |
+| forme                            |  description |
+|:--------------------------------:|:-------------|
+| [bouton](dls_visuel_bouton.md)   | Ce visuel affiche un bouton dont le titre est le `libelle` |
 | bloc_maintenance | Ce visuel affiche le bloc Service/Maintenance, en fonction du `mode` |
 | [comment](dls_visuel_comment.md) | Ce visuel affiche son `libelle` sous la forme de texte, avec une police et une couleur dependants du `mode` et `color` |
-| encadre          | Ce visuel affiche un cadre de couleur `color`, surmonté d'un titre selon le `libelle`. La taille du cadre est determinée selon sont `mode` |
+| encadre          | Ce visuel affiche un cadre de couleur `color`, surmonté d'un titre selon le `libelle`. La taille du cadre est determinée selon son `mode` |
 
 
 
