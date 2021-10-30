@@ -275,6 +275,8 @@
                                                   .attr("font-weight", weight )
                                                   .attr("fill", visuel.color )
                                                   .attr("stroke", visuel.color )
+                                                  .attr("dominant-baseline", "middle")
+                                                  .attr("text-anchor", "middle")
                                                   .text(visuel.libelle);
                          new_svg.attr( "transform", "rotate("+visuel.angle+") "+
                                                     "scale("+visuel.scale+") "+
