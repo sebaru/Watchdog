@@ -1068,7 +1068,9 @@
  static void New_alias_dependance_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle )
   { GList *ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(libelle) );
     if ( ! Get_alias_par_acronyme ( tech_id, acronyme ) )                                               /* Si pas déjà défini */
-     { New_alias ( tech_id, acronyme, MNEMO_ENTREE, ss_options ); }
+     { struct ALIAS *alias_dep = New_alias ( tech_id, acronyme, MNEMO_ENTREE, ss_options );
+       if (alias_dep) alias_dep->used = 1;                         /* Par défaut, on considère qu'une dependance est utilisée */
+     }
   }
 /******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
