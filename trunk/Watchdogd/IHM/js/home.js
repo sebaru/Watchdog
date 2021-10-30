@@ -186,16 +186,17 @@
 
           $.each ( Synoptique.visuels, function (i, visuel)
                     { if (visuel.forme == null)
-                       { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                       { console.debug(visuel);
+                         var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
                          new_svg.append ( "image" ).attr("href", "/img/"+visuel.icone+".gif" )
-                                .on( "load", function ()
-                                  { console.log("loaded");
+                                          .on( "load", function ()
+                                            { console.log("loaded");
                                     var dimensions = this.getBBox();
                                     var orig_x = (visuel.posx-dimensions.width/2);
                                     var orig_y = (visuel.posy-dimensions.height/2);
                                     new_svg.attr( "transform", "rotate("+visuel.angle+") "+
-                                                               "scale("+visuel.scale+") "+
+                                                               "scale("+(visuel.larg/dimensions.width)+" "+(visuel.haut/dimensions.height)+") "+
                                                                "translate("+orig_x+" "+orig_y+") "
                                                 );
                                   } );
@@ -203,6 +204,7 @@
                       else if (visuel.ihm_affichage=="complexe" && visuel.forme=="bouton")
                        { var button = $("<button>").css("position", "absolute").addClass("btn")
                                                    .css("left", visuel.posx).css("top", visuel.posy)
+                                                   .css("translate", "-50% -50%")
                                                    .append( visuel.libelle )
                               if (visuel.color=="blue")   button.addClass("btn-primary");
                          else if (visuel.color=="orange") button.addClass("btn-warning");
