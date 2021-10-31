@@ -182,25 +182,10 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
-  { gchar requete[2048];
-    gboolean retour;
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_configDB: DB connexion failed" );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-               "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
-               "('%s','%s','%s','%s') ON DUPLICATE KEY UPDATE valeur='%s';",
-               NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom, valeur, valeur
-              );
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return(retour);
+  { return ( SQL_Write_new( "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
+                            "('%s','%s','%s','%s') ON DUPLICATE KEY UPDATE valeur='%s';",
+                            NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom, valeur, valeur
+                          ) );
   }
 /******************************************************************************************************************************/
 /* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
@@ -208,25 +193,10 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Modifier_configDB_int ( gchar *nom_thread, gchar *nom, gint valeur )
-  { gchar requete[2048];
-    gboolean retour;
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-               "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
-               "('%s','%s','%s','%d') ON DUPLICATE KEY UPDATE valeur='%d';",
-               NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom, valeur, valeur
-              );
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return(retour);
+  { return ( SQL_Write_new( "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
+                            "('%s','%s','%s','%d') ON DUPLICATE KEY UPDATE valeur='%d';",
+                            NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom, valeur, valeur
+                          ) );
   }
 /******************************************************************************************************************************/
 /* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée                                   */
