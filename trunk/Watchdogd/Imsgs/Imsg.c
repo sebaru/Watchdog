@@ -30,47 +30,67 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Imsg.h"
 
- struct IMSGS_CONFIG Cfg_imsgs;
+ struct IMSGS_CONFIG Cfg;
 /******************************************************************************************************************************/
 /* Imsgs_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Imsgs_Lire_config ( void )
-  { gchar *nom, *valeur;
-    struct DB *db;
-
-    Cfg_imsgs.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Creer_configDB ( Cfg_imsgs.lib->name, "debug", "false" );
-
-    g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id ), Cfg_imsgs.lib->name );
-    Creer_configDB ( Cfg_imsgs.lib->name, "tech_id", Cfg_imsgs.tech_id );
-
-    g_snprintf( Cfg_imsgs.username, sizeof(Cfg_imsgs.username), IMSGS_DEFAUT_USERNAME );
-    Creer_configDB ( Cfg_imsgs.lib->name, "username", Cfg_imsgs.username );
-
-    g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), IMSGS_DEFAUT_PASSWORD );
-    Creer_configDB ( Cfg_imsgs.lib->name, "password", Cfg_imsgs.password );
-
-    if ( ! Recuperer_configDB( &db, Cfg_imsgs.lib->name ) )                                          /* Connexion a la base de données */
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING,
-                "%s: Database connexion failed. Using Default Parameters", __func__ );
+ static gboolean Imsgs_Lire_config ( void )
+  { JsonNode *config = Json_node_create();
+    if (!config)
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Memory Error. Could not load config", __func__ );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO,                                           /* Print Config */
-                "%s: '%s' = %s", __func__, nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "username" ) )
-        { g_snprintf( Cfg_imsgs.username, sizeof(Cfg_imsgs.username), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
-        { g_snprintf( Cfg_imsgs.password, sizeof(Cfg_imsgs.password), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
-        { g_snprintf( Cfg_imsgs.tech_id,  sizeof(Cfg_imsgs.tech_id),  "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsgs.lib->Thread_debug = TRUE;  }
-     }
+    g_snprintf( Cfg.tech_id,  sizeof(Cfg.tech_id), "IMSG01" );                                           /* Valeur par défaut */
+    SQL_Select_to_json_node ( config, NULL, "SELECT * FROM %s WHERE instance='%s'", Cfg.lib->name, g_get_host_name() );
+
+    if (Json_has_member ( config, "tech_id" ))
+     { g_snprintf( Cfg.tech_id, sizeof(Cfg.tech_id), "%s", Json_get_string ( config, "tech_id" ) ); }
+
+    if (Json_has_member ( config, "jabberid" ))
+     { g_snprintf( Cfg.jabberid, sizeof(Cfg.jabberid), "%s", Json_get_string ( config, "jabberid" ) ); }
+
+    if (Json_has_member ( config, "password" ))
+     { g_snprintf( Cfg.password, sizeof(Cfg.password), "%s", Json_get_string ( config, "password" ) ); }
+
+    json_node_unref ( config );
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Imsgs_Creer_DB ( void )
+  { gint database_version;
+
+    gchar *database_version_string = Recuperer_configDB_by_nom( Cfg.lib->name, "database_version" );
+    if (database_version_string)
+     { database_version = atoi( database_version_string );
+       g_free(database_version_string);
+     } else database_version=0;
+
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE,
+             "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
+
+    if (database_version==0)
+     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                       "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                       "`instance` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'localhost',"
+                       "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                       "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                       "`jabberid` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "`password` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "PRIMARY KEY (`id`)"
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", Cfg.lib->name );
+       goto end;
+     }
+
+end:
+    database_version = 1;
+    Modifier_configDB_int ( Cfg.lib->name, "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Recuperer_imsgsDB: Recupération de la liste des users users IM                                                             */
@@ -113,7 +133,7 @@
      }
 
     imsg = (struct IMSGSDB *)g_try_malloc0( sizeof(struct IMSGSDB) );
-    if (!imsg) Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    if (!imsg) Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
      { g_snprintf( imsg->user_jabberid, sizeof(imsg->user_jabberid), "%s", db->row[5] );
        g_snprintf( imsg->user_name,     sizeof(imsg->user_name),     "%s", db->row[1] );
@@ -132,9 +152,9 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgs_Envoi_message_to ( const gchar *dest, gchar *message )
-  { xmpp_stanza_t *stanza = xmpp_message_new ( Cfg_imsgs.ctx, "normal", dest, NULL );
+  { xmpp_stanza_t *stanza = xmpp_message_new ( Cfg.ctx, "normal", dest, NULL );
     xmpp_message_set_body ( stanza, message );
-    xmpp_send ( Cfg_imsgs.conn , stanza ) ;
+    xmpp_send ( Cfg.conn , stanza ) ;
     xmpp_stanza_release ( stanza );
   }
 /******************************************************************************************************************************/
@@ -165,12 +185,12 @@
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(NULL);
      }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )                     /* Execution de la requete SQL */
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Requete failed", __func__ );
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_WARNING, "%s: Requete failed", __func__ );
        Libere_DB_SQL( &db );
        return(NULL);
      }
@@ -190,14 +210,14 @@
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return;
      }
 
 /*********************************************** Chargement des informations en bases ******************************************/
     if ( ! Recuperer_all_available_imsgDB( db ) )
      { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_imsg Failed", __func__ );
+       Info_new( Config.log, Cfg.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_imsg Failed", __func__ );
        return;
      }
 
@@ -217,7 +237,7 @@
     gchar *acro    = Json_get_string ( element, "acronyme" );
     gchar *libelle = Json_get_string ( element, "libelle" );
     gchar *map_tag = Json_get_string ( element, "map_tag" );
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
               map_tag, tech_id, acro, libelle );
     Imsgs_Envoi_message_to( from, map_tag );
   }
@@ -232,7 +252,7 @@
     gchar *acro    = Json_get_string ( element, "acronyme" );
     gchar *libelle = Json_get_string ( element, "libelle" );
     gchar *map_tag = Json_get_string ( element, "map_tag" );
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Match found from '%s' -> '%s' '%s:%s' - %s", __func__,
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: Match found from '%s' -> '%s' '%s:%s' - %s", __func__,
               from, map_tag, tech_id, acro, libelle );
     Envoyer_commande_dls_data ( tech_id, acro );
   }
@@ -249,15 +269,15 @@
     from = xmpp_stanza_get_attribute    ( stanza, "from" );
     message = xmpp_message_get_body     ( stanza );
     if (!from || !message)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Error : from or message = NULL", __func__ );
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_WARNING, "%s: Error : from or message = NULL", __func__ );
        return(1);
      }
 
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: From '%s' -> '%s'", __func__, from, message );
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: From '%s' -> '%s'", __func__, from, message );
 
     imsg = Imsgs_recipient_allow_command ( from );
     if ( imsg == NULL )
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_WARNING,
                 "%s : unknown sender '%s' or not allow to send command. Dropping message...", __func__, from );
        goto end;
      }
@@ -271,14 +291,14 @@
 
     JsonNode *RootNode = Json_node_create();
     if ( RootNode == NULL )
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s : Memory Error for '%s'", __func__, from );
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s : Memory Error for '%s'", __func__, from );
        goto end;
      }
     SQL_Select_to_json_node ( RootNode, "results",
                               "SELECT * FROM mnemos_DI WHERE map_thread='COMMAND_TEXT' AND map_tag LIKE '%%%s%%'", message );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
        Imsgs_Envoi_message_to( from, "Error searching Database .. Sorry .." );
        goto end;
      }
@@ -294,7 +314,7 @@
      { Json_node_foreach_array_element ( RootNode, "results", Imsgs_Envoyer_commande_dls_data, from ); }
 end:
     json_node_unref( RootNode );
-    xmpp_free(Cfg_imsgs.ctx, message);
+    xmpp_free(Cfg.ctx, message);
     return(1);
   }
 /******************************************************************************************************************************/
@@ -322,14 +342,14 @@ end:
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return;
      }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )                                         /* Execution de la requete SQL */
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_WARNING, "%s: Requete failed", __func__ );
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_WARNING, "%s: Requete failed", __func__ );
      }
-    else { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG,
+    else { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG,
                     "%s : jabber_id %s -> Availability updated to %d.", __func__, jabber_id, available );
          }
     Libere_DB_SQL( &db );
@@ -339,28 +359,28 @@ end:
 /* Entrée : le statut au format chaine de caratères                                                                           */
 /******************************************************************************************************************************/
   static void Imsgs_set_presence ( const char *status_to_send )
-  { xmpp_stanza_t *pres = xmpp_presence_new(Cfg_imsgs.ctx);
+  { xmpp_stanza_t *pres = xmpp_presence_new(Cfg.ctx);
 
-    xmpp_stanza_t *show = xmpp_stanza_new(Cfg_imsgs.ctx);
+    xmpp_stanza_t *show = xmpp_stanza_new(Cfg.ctx);
     xmpp_stanza_set_name  ( show,"show" ) ;
-    xmpp_stanza_t *show_text = xmpp_stanza_new(Cfg_imsgs.ctx);
+    xmpp_stanza_t *show_text = xmpp_stanza_new(Cfg.ctx);
     xmpp_stanza_set_text  ( show_text, "chat" );
     xmpp_stanza_add_child ( show, show_text ) ;
     xmpp_stanza_add_child ( pres, show ) ;
 
-    xmpp_stanza_t *status = xmpp_stanza_new(Cfg_imsgs.ctx);
+    xmpp_stanza_t *status = xmpp_stanza_new(Cfg.ctx);
     xmpp_stanza_set_name  ( status,"status" ) ;
-    xmpp_stanza_t *status_text = xmpp_stanza_new(Cfg_imsgs.ctx);
+    xmpp_stanza_t *status_text = xmpp_stanza_new(Cfg.ctx);
     xmpp_stanza_set_text  ( status_text, status_to_send );
     xmpp_stanza_add_child ( status, status_text ) ;
     xmpp_stanza_add_child ( pres, status ) ;
 
     gchar *buf; size_t buflen;
     xmpp_stanza_to_text ( pres, &buf, &buflen );
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
-    xmpp_free(Cfg_imsgs.ctx, buf);
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
+    xmpp_free(Cfg.ctx, buf);
 
-    xmpp_send(Cfg_imsgs.conn, pres);
+    xmpp_send(Cfg.conn, pres);
     xmpp_stanza_release(pres);
   }
 /******************************************************************************************************************************/
@@ -376,21 +396,21 @@ end:
 
     if (type && !strcmp(type,"subscribe"))                            /* Demande de souscription de la part d'un utilisateur */
      { xmpp_stanza_t *pres;
-       pres = xmpp_presence_new(Cfg_imsgs.ctx);
+       pres = xmpp_presence_new(Cfg.ctx);
        xmpp_stanza_set_to  ( pres, from );
        xmpp_stanza_set_type( pres, "subscribed" );
-       xmpp_send(Cfg_imsgs.conn, pres);
+       xmpp_send(Cfg.conn, pres);
        xmpp_stanza_release(pres);
-       pres = xmpp_presence_new(Cfg_imsgs.ctx);
-       xmpp_stanza_set_to  ( pres, Cfg_imsgs.username );
+       pres = xmpp_presence_new(Cfg.ctx);
+       xmpp_stanza_set_to  ( pres, Cfg.jabberid );
        xmpp_stanza_set_type( pres, "subscribe" );
-       xmpp_send(Cfg_imsgs.conn, pres);
+       xmpp_send(Cfg.conn, pres);
        xmpp_stanza_release(pres);
      }
     gchar *buf; size_t buflen;
     xmpp_stanza_to_text ( stanza, &buf, &buflen );
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
-    xmpp_free(Cfg_imsgs.ctx, buf);
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
+    xmpp_free(Cfg.ctx, buf);
 
     return(1);
   }
@@ -402,70 +422,70 @@ end:
                                   xmpp_stream_error_t *const stream_error, void *const userdata )
   { if (status == XMPP_CONN_CONNECT)
      {
-       Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Account '%s' connected and %s secure",
-                 __func__, Cfg_imsgs.username, (xmpp_conn_is_secured (conn) ? "IS" : "IS NOT") );
-       xmpp_handler_add ( Cfg_imsgs.conn, Imsgs_handle_message_CB,  NULL, "message",  NULL, NULL );
-       xmpp_handler_add ( Cfg_imsgs.conn, Imsgs_handle_presence_CB, NULL, "presence", NULL, NULL );
-       /*xmpp_handler_add   ( Cfg_imsgs.conn, Imsgs_test, NULL, NULL, NULL, NULL );*/
+       Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: '%s': Account connected and %s secure",
+                 __func__, Cfg.jabberid, (xmpp_conn_is_secured (conn) ? "IS" : "IS NOT") );
+       xmpp_handler_add ( Cfg.conn, Imsgs_handle_message_CB,  NULL, "message",  NULL, NULL );
+       xmpp_handler_add ( Cfg.conn, Imsgs_handle_presence_CB, NULL, "presence", NULL, NULL );
+       /*xmpp_handler_add   ( Cfg.conn, Imsgs_test, NULL, NULL, NULL, NULL );*/
 
        Imsgs_set_presence( "A votre écoute !" );
        Imsgs_Envoi_message_to_all_available ( "Instance démarrée. A l'écoute !" );
      }
     else
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s: Account '%s' disconnected",
-                 __func__, Cfg_imsgs.username );
-       Cfg_imsgs.signed_off = TRUE;
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: '%s': Account disconnected",
+                 __func__, Cfg.jabberid );
+       Cfg.signed_off = TRUE;
      }
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Imsg                                                                                   */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct ZMQUEUE *zmq_from_bus;
-    gint retour;
+  { gint retour;
 
 reload:
-    memset( &Cfg_imsgs, 0, sizeof(Cfg_imsgs) );                                     /* Mise a zero de la structure de travail */
-    Cfg_imsgs.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
+    memset( &Cfg, 0, sizeof(Cfg) );                                                 /* Mise a zero de la structure de travail */
+    Cfg.lib = lib;                                                 /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "imsgs", "USER", lib, WTD_VERSION, "Manage Instant Messaging system (libstrophe)" );
+    Imsgs_Creer_DB ();                                                                             /* Création de la Database */
     Imsgs_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
-    if (Config.instance_is_master==FALSE)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE,
-                "%s: Instance is not Master. Shutting Down %p", __func__, pthread_self() );
-       goto end;
-     }
 
-    Cfg_imsgs.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
-    zmq_from_bus           = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    if (Dls_auto_create_plugin( Cfg.tech_id, "Gestion messagerie instantanée" ) == FALSE)
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, Cfg.tech_id ); }
+
+    Mnemo_auto_create_DI ( FALSE, Cfg.tech_id, "IO_COMM", "Statut de la communication avec la messagerie instantanée" );
+
+    Cfg.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
+
 reconnect:
-    Cfg_imsgs.signed_off = FALSE;
+    Cfg.signed_off = FALSE;
     xmpp_initialize();
-    Cfg_imsgs.ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_INFO));
-    if (!Cfg_imsgs.ctx)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Ctx Init failed", __func__ ); }
+    Cfg.ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_INFO));
+    if (!Cfg.ctx)
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Ctx Init failed", __func__ ); }
 
-    Cfg_imsgs.conn = xmpp_conn_new(Cfg_imsgs.ctx);
-    if (!Cfg_imsgs.conn)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Connection New failed", __func__ ); }
+    Cfg.conn = xmpp_conn_new(Cfg.ctx);
+    if (!Cfg.conn)
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Connection New failed", __func__ ); }
 
-    xmpp_conn_set_keepalive(Cfg_imsgs.conn, 60, 1);
-    xmpp_conn_set_jid (Cfg_imsgs.conn, Cfg_imsgs.username);
-    xmpp_conn_set_pass(Cfg_imsgs.conn, Cfg_imsgs.password);
+    xmpp_conn_set_keepalive(Cfg.conn, 60, 1);
+    xmpp_conn_set_jid (Cfg.conn, Cfg.jabberid);
+    xmpp_conn_set_pass(Cfg.conn, Cfg.password);
 
-    retour = xmpp_connect_client ( Cfg_imsgs.conn, NULL, 0, Imsgs_connexion_CB, NULL );
+    retour = xmpp_connect_client ( Cfg.conn, NULL, 0, Imsgs_connexion_CB, NULL );
     if ( retour != XMPP_EOK)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR,
-                             "%s: Connexion failed with error %d for '%s'", __func__, retour, Cfg_imsgs.username );
-       Cfg_imsgs.signed_off = TRUE;
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR,
+                             "%s: '%s': Connexion failed with error %d", __func__, Cfg.jabberid, retour );
+       Cfg.signed_off = TRUE;
      }
     else
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_INFO, "%s: Connexion to '%s' in progress.", __func__, Cfg_imsgs.username ); }
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: '%s': Connexion in progress.", __func__, Cfg.jabberid ); }
 
-    while(lib->Thread_run == TRUE && Cfg_imsgs.signed_off == FALSE && lib->Thread_reload == FALSE)/* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE && Cfg.signed_off == FALSE && lib->Thread_reload == FALSE)/* On tourne tant que necessaire */
      { /*g_usleep(200000);*/
        sched_yield();
 
-       xmpp_run_once ( Cfg_imsgs.ctx, 500 ); /* En milliseconde */
+       xmpp_run_once ( Cfg.ctx, 500 ); /* En milliseconde */
 
 /********************************************************* Envoi de SMS *******************************************************/
        JsonNode *request;
@@ -473,7 +493,7 @@ reconnect:
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE )
-           { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_NOTICE, "%s : Sending msg '%s:%s' (%s)", __func__,
+           { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: '%s': Sending msg '%s:%s' (%s)", __func__, Cfg.jabberid,
                        Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                        Json_get_string ( request, "libelle" ) );
              gchar chaine[256];
@@ -481,34 +501,32 @@ reconnect:
              Imsgs_Envoi_message_to_all_available ( chaine );
            }
           else
-           { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s : zmq_tag '%s' not for this thread", __func__, zmq_tag ); }
+           { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': zmq_tag '%s' not for this thread", __func__, Cfg.jabberid, zmq_tag ); }
           json_node_unref(request);
         }
      }                                                                                         /* Fin du while partage->arret */
-    xmpp_disconnect(Cfg_imsgs.conn);
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s: Disconnect OK", __func__ );
-    xmpp_conn_release(Cfg_imsgs.conn);
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s: Connection Release OK", __func__ );
-    xmpp_ctx_free(Cfg_imsgs.ctx);
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s: Ctx Free OK", __func__ );
+    xmpp_disconnect(Cfg.conn);
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Disconnect OK", __func__, Cfg.jabberid );
+    xmpp_conn_release(Cfg.conn);
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Connection Release OK", __func__, Cfg.jabberid );
+    xmpp_ctx_free(Cfg.ctx);
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Ctx Free OK", __func__, Cfg.jabberid );
     xmpp_shutdown();
-    Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_DEBUG, "%s: XMPPshutdown OK", __func__ );
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': XMPPshutdown OK", __func__, Cfg.jabberid );
 
-    if (Cfg_imsgs.lib->Thread_run == TRUE && Cfg_imsgs.signed_off == TRUE)
-     { Info_new( Config.log, Cfg_imsgs.lib->Thread_debug, LOG_ERR, "%s: Account signed off. Why ?? Reconnect in 5s!", __func__ );
-       Cfg_imsgs.signed_off = FALSE;
-       sleep(5);
-       goto reconnect;
-     }
-
-    Zmq_Close ( zmq_from_bus );
-
-end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: '%s': Reloading", __func__, Cfg.jabberid );
        lib->Thread_reload = FALSE;
        goto reload;
      }
+
+    if (Cfg.lib->Thread_run == TRUE && Cfg.signed_off == TRUE)
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: '%s': Account signed off. Why ?? Reconnect in 2s!", __func__, Cfg.jabberid );
+       Cfg.signed_off = FALSE;
+       sleep(2);
+       goto reconnect;
+     }
+
     Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

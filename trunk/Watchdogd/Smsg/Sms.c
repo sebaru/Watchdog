@@ -42,17 +42,8 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Smsg_Lire_config ( void )
-  { gchar *result, requete[256];
+  { gchar requete[256];
     struct DB *db;
-
-    Creer_configDB ( Cfg_smsg.lib->name, "debug", "false" );
-    result = Recuperer_configDB_by_nom ( Cfg_smsg.lib->name, "debug" );
-    Cfg_smsg.lib->Thread_debug = !g_ascii_strcasecmp(result, "true");
-    g_free(result);
-
-    SQL_Write_new ( "INSERT IGNORE %s SET tech_id='GSM01', description='DEFAULT', ovh_service_name='DEFAULT', "
-                    "ovh_application_key='DEFAULT',ovh_application_secret='DEFAULT', ovh_consumer_key='DEFAULT', "
-                    "instance='%s'", Cfg_smsg.lib->name, g_get_host_name() );
 
     db = Init_DB_SQL();
     if (!db)

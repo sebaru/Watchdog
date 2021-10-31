@@ -50,12 +50,11 @@
     gchar tech_id[32];
     xmpp_ctx_t *ctx;
     xmpp_conn_t *conn;
-    gchar username[80];
+    gchar jabberid[80];
     gchar password[80];
     gboolean signed_off;
   };
 /*********************************************** Déclarations des prototypes **************************************************/
- extern gboolean Imsgs_Lire_config ( void );
  void Imsgs_Envoi_message_to_all_available ( gchar *message );
  extern gboolean Recuperer_imsgsDB ( struct DB *db );
  extern struct IMSGSDB *Recuperer_imsgsDB_suite( struct DB *db );

@@ -21,19 +21,21 @@
 
  <div class="col p-1">
   <div class="card h-100 text-center bg-light">
-   <a href="/tech/smsg"><img src="/img/sms.jpg" class="card-img-top" alt="Commandes SMS"></a>
+   <a href="/tech/smsg"><img src="/img/sms.jpg" class="card-img-top" alt="GSM"></a>
    <div class="card-header">Les GSM</div>
    <div class="card-body">
         <button type="button" onclick="Redirect('/tech/smsg')" class="btn btn-block m-1 btn-primary btn-sm"><i class="fas fa-list"></i> Configurer</button>
+        <button type="button" onclick="Redirect('/tech/command_text')" class="btn btn-block m-1 btn-primary btn-sm"><i class="fas fa-directions"></i> Mapper</button>
    </div>
   </div>
  </div>
 
  <div class="col p-1">
   <div class="card h-100 text-center bg-light">
-   <a href="/tech/command_text"><img src="/img/commande_texte.png" class="card-img-top" alt="Commandes Textuelles"></a>
-   <div class="card-header">Les Entrées Textuelles</div>
+   <a href="/tech/imsgs"><img src="/img/imsgs.png" class="card-img-top" alt="Messagerie XMPP"></a>
+   <div class="card-header">Messagerie XMPP</div>
    <div class="card-body">
+        <button type="button" onclick="Redirect('/tech/imsgs')" class="btn btn-block m-1 btn-primary btn-sm"><i class="fas fa-list"></i> Configurer</button>
         <button type="button" onclick="Redirect('/tech/command_text')" class="btn btn-block m-1 btn-primary btn-sm"><i class="fas fa-directions"></i> Mapper</button>
    </div>
   </div>

@@ -29,30 +29,7 @@
  #include "watchdogd.h"
  #include "Sms.h"
  extern struct SMS_CONFIG Cfg_smsg;
-/******************************************************************************************************************************/
-/* Admin_json_smsg_list: Liste les parametres de bases de données associés au thread SMSG                                     */
-/* Entrée : Le message libsoup                                                                                                */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- static void Admin_json_smsg_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
 
-    SQL_Select_to_json_node ( RootNode, "gsms", "SELECT instance, tech_id, description FROM smsg" );
-    gchar *buf = Json_node_to_string ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
 /******************************************************************************************************************************/
 /* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
 /* Entrée : un JSon Builder                                                                                                   */
@@ -118,12 +95,15 @@
     gchar *ovh_application_key    = Normaliser_chaine ( Json_get_string( request, "ovh_application_key" ) );
     gchar *ovh_application_secret = Normaliser_chaine ( Json_get_string( request, "ovh_application_secret" ) );
     gchar *ovh_consumer_key       = Normaliser_chaine ( Json_get_string( request, "ovh_consumer_key" ) );
-
-    SQL_Write_new ( "UPDATE %s SET tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
-                    "ovh_application_secret='%s', ovh_consumer_key='%s' "
-                    "WHERE instance='%s'", Cfg_smsg.lib->name,
-                    tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key, g_get_host_name() );
     json_node_unref(request);
+
+    SQL_Write_new ( "INSERT INTO %s SET instance='%s', tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
+                    "ovh_application_secret='%s', ovh_consumer_key='%s' "
+                    "ON DUPLICATE KEY UPDATE tech_id=VALUES(tech_id), description=VALUES(description), "
+                    "ovh_service_name=VALUES(ovh_service_name), ovh_application_key=VALUES(ovh_application_key), "
+                    "ovh_application_secret=VALUES(ovh_application_secret), ovh_consumer_key=VALUES(ovh_consumer_key)",
+                    Cfg_smsg.lib->name, g_get_host_name(),
+                    tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key );
     g_free(tech_id);
     g_free(description);
     g_free(ovh_service_name);
@@ -145,7 +125,6 @@
        return;
      }
          if (!strcasecmp(path, "/status"))   { Admin_json_smsg_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/list"))     { Admin_json_smsg_list   ( lib, msg ); }
     else if (!strcasecmp(path, "/set"))      { Admin_json_smsg_set ( lib, msg ); }
     else if (!strcasecmp(path, "/send") && lib->Thread_run)
      { if ( msg->method != SOUP_METHOD_PUT )

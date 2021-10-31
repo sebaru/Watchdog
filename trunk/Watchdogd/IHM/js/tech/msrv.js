@@ -57,13 +57,8 @@
  function Load_page ()
   { $('#idTargetInstance').empty();
     if (localStorage.getItem("instance_is_master")=="true")
-     { Send_to_API ( "GET", "/api/instance/list", null, function (Response)
-        { $('#idTargetInstance').append("<option value='MASTER'>MASTER</option>");
-
-          $.each ( Response.instances, function ( i, instance )
-           { $('#idTargetInstance').append("<option value='"+instance.instance_id+"'>"+instance.instance_id+"</option>"); } );
-          $('#idTargetInstance').val("MASTER");
-        }, null);
+     { Select_from_api ( "idTargetInstance", "/api/instance/list", null, "instances", "instance_id", function (Response)
+                          { return ( instance.instance_id ); }, "MASTER" );
      }
     else
      { $('#idTargetInstance').append("<option value='LOCAL'>LOCAL</option>"); }

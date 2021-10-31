@@ -39,10 +39,9 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTargetInstance').empty();
-    Send_to_API ( "GET", "/api/process/smsg/list", null, function(Response)
-     { $.each ( Response.gsms, function ( i, gsm )
-        { $('#idTargetInstance').append("<option value='"+gsm.instance+"'>"+
-                                          gsm.tech_id+ " sur " +gsm.instance+"</option>"); } );
+    Send_to_API ( "GET", "/api/instance/list", null, function(Response)
+     { $.each ( Response.instances, function ( i, instance )
+        { $('#idTargetInstance').append("<option value='"+instance.instance_id+"'>"+instance.instance_id+"</option>"); } );
        SMS_Load_config ();
      }, null );
   }
