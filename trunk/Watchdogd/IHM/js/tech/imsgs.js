@@ -31,6 +31,6 @@
  function Load_page ()
   { $('#idTargetInstance').empty();
     Select_from_api ( "idTargetInstance", "/api/instance/list", null, "instances", "instance_id", function (Response)
-                       { return ( instance.instance_id ); }, "MASTER" );
+                       { return ( Response.instance_id ); }, "MASTER" );
     IMSGS_Load_config ();
   }
