@@ -24,8 +24,8 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function SMS_Load_config ()
   { Send_to_API ( "GET", "/api/process/smsg/status?instance="+$('#idTargetInstance').val(), null, function(Response)
-     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
-                                  else { $('#idAlertThreadNotRunning').show(); }
+     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').slideUp(); }
+                                  else { $('#idAlertThreadNotRunning').slideDown(); }
        $('#idGSMTechID').val( Response.tech_id );
        $('#idGSMDescription').val( Response.description );
        $('#idGSMOVHServiceName').val( Response.ovh_service_name );

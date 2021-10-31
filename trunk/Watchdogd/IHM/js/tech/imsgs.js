@@ -20,8 +20,8 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function IMSGS_Load_config ()
   { Send_to_API ( "GET", "/api/process/imsgs/status?instance="+$('#idTargetInstance').val(), null, function(Response)
-     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
-                                  else { $('#idAlertThreadNotRunning').show(); }
+     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').slideUp(); }
+                                  else { $('#idAlertThreadNotRunning').slideDown(); }
        $('#idIMSGSTechID').val( Response.tech_id );
        $('#idIMSGSJabberID').val( Response.jabberid );
        $('#idIMSGSPassword').val( Response.password );

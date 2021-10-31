@@ -114,7 +114,9 @@
      { if ( msg->method != SOUP_METHOD_PUT )
         {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED); }
        else
-				    { Imsgs_Envoi_message_to_all_available ( "Ceci est un test IMSG" ); }
+				    { Imsgs_Envoi_message_to_all_available ( "Ceci est un test IMSG" );
+          soup_message_set_status (msg, SOUP_STATUS_OK);
+        }
      }
     else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
