@@ -39,9 +39,7 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTargetInstance').empty();
-    Send_to_API ( "GET", "/api/instance/list", null, function(Response)
-     { $.each ( Response.instances, function ( i, instance )
-        { $('#idTargetInstance').append("<option value='"+instance.instance_id+"'>"+instance.instance_id+"</option>"); } );
-       SMS_Load_config ();
-     }, null );
+    Select_from_api ( "idTargetInstance", "/api/instance/list", null, "instances", "instance_id", function (Response)
+                      { return ( instance.instance_id ); }, "MASTER" );
+    SMS_Load_config ();
   }

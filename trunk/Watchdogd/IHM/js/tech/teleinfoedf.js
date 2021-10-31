@@ -27,10 +27,7 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTargetInstance').empty();
-    Send_to_API ( "GET", "/api/process/teleinfoedf/list", null, function(Response)
-     { $.each ( Response.tinfos, function ( i, tinfo )
-        { $('#idTargetInstance').append("<option value='"+tinfo.instance+"'>"+
-                                          tinfo.tech_id+ " sur " +tinfo.instance+"</option>"); } );
-       TINFO_Load_config ();
-     }, null );
+    Select_from_api ( "idTargetInstance", "/api/instance/list", null, "instances", "instance_id", function (Response)
+                          { return ( instance.instance_id ); }, "MASTER" );
+    TINFO_Load_config ();
   }
