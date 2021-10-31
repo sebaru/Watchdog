@@ -69,7 +69,6 @@
 /******************************************* Prototypes de fonctions **************************************/
  extern gboolean Lire_config ( void );
  extern void Print_config ( void );
- extern gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom );
  extern gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
  extern gboolean Modifier_configDB_int ( gchar *nom_thread, gchar *nom, gint valeur );
  extern gboolean Creer_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );

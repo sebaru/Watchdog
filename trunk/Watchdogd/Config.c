@@ -127,30 +127,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
   }
 /******************************************************************************************************************************/
-/* Retirer_configDB: Elimination d'un parametre de configuration                                                              */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom )
-  { gchar requete[512];
-    gboolean retour;
-    struct DB *db;
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "DELETE FROM %s WHERE instance_id = '%s' AND nom_thread='%s' AND nom = '%s'",
-                 NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom );
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_configDB: DB connexion failed" );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return(retour);
-  }
-/******************************************************************************************************************************/
 /* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
 /* Entrée: le thread, le nom du parametre, sa valeur                                                                          */
 /* Sortie: false si probleme                                                                                                  */
