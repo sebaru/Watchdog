@@ -105,7 +105,7 @@ int gpiod_line_set_value(struct gpiod_line *line,
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
-    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM '%s' WHERE instance='%s'",
+    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM %s WHERE instance='%s'",
                                   Cfg.lib->name, g_get_host_name() ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
@@ -191,8 +191,8 @@ reload:
           json_node_unref (request);
         }
      }
-    for ( gint cpt=0; cpt < sizeof(Cfg.lines); cpt ++ )
-     { if (Cfg.lines[cpt]) gpiod_line_release( Cfg.lines[cpt] ); }
+    if (Cfg.lines)                                                                                   /* Libération des lignes */
+     { for ( gint cpt=0; cpt < sizeof(Cfg.lines); cpt ++ ) { if (Cfg.lines[cpt]) gpiod_line_release( Cfg.lines[cpt] ); } }
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
