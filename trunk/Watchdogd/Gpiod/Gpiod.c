@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/RaspberryPI/RaspberryPI.c  Gestion des I/O RaspberryPI  Watchdog 3.0                                             */
+/* Watchdogd/Gpiod/Gpiod.c  Gestion des I/O Gpiod  Watchdog 3.0                                                               */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    03.09.2021 17:51:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * RaspberryPI.c
+ * Gpiod.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -29,16 +29,15 @@
  #include <sys/prctl.h>
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
- #include "RaspberryPI.h"
+ #include "Gpiod.h"
 
- struct RASPBERRYPI_CONFIG Cfg;
-
+ static struct GPIOD_CONFIG Cfg;
 /******************************************************************************************************************************/
-/* RaspberryPI_Creer_DB: Creer la base de données du thread                                                                   */
+/* Gpiod_Creer_DB: Creer la base de données du thread                                                                         */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void RaspberryPI_Creer_DB ( void )
+ static void Gpiod_Creer_DB ( void )
   { gint database_version;
 
     gchar *database_version_string = Recuperer_configDB_by_nom( Cfg.lib->name, "database_version" );
@@ -65,6 +64,10 @@
      }
 
 end:
+    for (gint cpt=0; cpt<27; cpt++)                                                                     /* Valeurs par défaut */
+     { SQL_Write_new ( "INSERT IGNORE INTO %s SET instance='%s', gpio='%d', mode_inout='0', mode_activelow='0'",
+                       Cfg.lib->name, g_get_host_name(), cpt );
+     }
     database_version = 1;
     Modifier_configDB_int ( Cfg.lib->name, "database_version", database_version );
   }
@@ -85,7 +88,7 @@ end:
      { gpiod_line_request_output( Cfg.lines [gpio], "Watchdog RPI Thread", 0 ); }
     else
      { gpiod_line_request_input( Cfg.lines [gpio], "Watchdog RPI Thread" ); }
-      
+
 
 /*
  * int gpiod_line_get_value(struct gpiod_line *line);
@@ -112,22 +115,22 @@ int gpiod_line_set_value(struct gpiod_line *line,
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Main: Fonction principale du thread RaspberryPI                                                                               */
+/* Main: Fonction principale du thread Gpiod                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { 
+  {
 reload:
     memset( &Cfg, 0, sizeof(Cfg) );                                                 /* Mise a zero de la structure de travail */
     Cfg.lib = lib;                                                 /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "raspi", "I/O", lib, WTD_VERSION, "Manage RaspberryPI I/O" );
-    RaspberryPI_Creer_DB ();                                                                /* Création de la base de données */
+    Thread_init ( "gpiod", "I/O", lib, WTD_VERSION, "Manage Gpiod I/O" );
+    Gpiod_Creer_DB ();                                                                /* Création de la base de données */
 
     Cfg.chip = gpiod_chip_open_lookup("gpiochip0");
     if (!Cfg.chip)
      { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading chip 'gpiochip0'", __func__ );
        Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
        goto end;
-     }    
+     }
 
     Cfg.num_lines = gpiod_chip_num_lines(Cfg.chip);
 
@@ -188,7 +191,7 @@ reload:
      }
     for ( gint cpt=0; cpt < sizeof(Cfg.lines); cpt ++ )
      { if (Cfg.lines[cpt]) gpiod_line_release( Cfg.lines[cpt] ); }
-     
+
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

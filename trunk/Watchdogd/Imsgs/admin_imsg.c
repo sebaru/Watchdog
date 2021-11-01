@@ -27,7 +27,7 @@
 
  #include "watchdogd.h"
  #include "Imsg.h"
- extern struct IMSGS_CONFIG Cfg;
+
 /******************************************************************************************************************************/
 /* Admin_json_imsgs_status : fonction appelée pour vérifier le status de la librairie                                         */
 /* Entrée : un JSon Builder                                                                                                   */
@@ -48,11 +48,10 @@
      }
 
     Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM %s WHERE instance='%s'", Lib->name, g_get_host_name() );
 
     if (Lib->Thread_run)                                      /* Warning : Cfg_meteo does not exist if thread is not running ! */
-     { Json_node_add_string ( RootNode, "tech_id", Cfg.tech_id );
-       Json_node_add_string ( RootNode, "jabberid", Cfg.jabberid );
-       Json_node_add_string ( RootNode, "password", Cfg.password );
+     { /*Json_node_add_string ( RootNode, "tech_id", Cfg.tech_id );*/
      }
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref(RootNode);

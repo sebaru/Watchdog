@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/RaspberryPI/admin_raspberryPI.c        Gestion des connexions RaspberryPI pour watchdog                          */
+/* Watchdogd/Gpiod/admin_raspberryPI.c        Gestion des connexions Gpiod pour watchdog                                      */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    01.10.2021 21:52:58 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -27,41 +27,16 @@
 
  #include <glib.h>
  #include "watchdogd.h"
- #include "RaspberryPI.h"
- extern struct RASPBERRYPI_CONFIG Cfg;
-#ifdef bouh
-/******************************************************************************************************************************/
-/* Admin_json_smsg_list: Liste les parametres de bases de données associés au thread SMSG                                     */
-/* Entrée : Le message libsoup                                                                                                */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- static void Admin_json_tinfo_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
+ #include "Gpiod.h"
 
-    SQL_Select_to_json_node ( RootNode, "tinfos", "SELECT instance, tech_id, description FROM %s", Cfg.lib->name );
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
 /******************************************************************************************************************************/
-/* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
+/* Admin_json_gpiod_status : fonction appelée pour vérifier le status de la librairie                                         */
 /* Entrée : un JSon Builder                                                                                                   */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_tinfo_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
+ static void Admin_json_gpiod_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+  {
+    if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
@@ -74,20 +49,10 @@
      }
 
     Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
+    SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM %s WHERE instance='%s' ORDER BY gpio", Lib->name, g_get_host_name() );
 
-    if (Lib->Thread_run)                                     /* Warning : Cfg_tinfo does not exist if thread is not running ! */
-     { Json_node_add_string ( RootNode, "tech_id", Cfg.tech_id );
-				   Json_node_add_string ( RootNode, "port", Cfg.port );
-				   Json_node_add_string ( RootNode, "description", Cfg.description );
-				   Json_node_add_bool   ( RootNode, "comm_status", Cfg.comm_status );
-				   switch ( Cfg.mode )
-        { case TINFO_WAIT_BEFORE_RETRY: Json_node_add_string ( RootNode, "mode", "TINFO_WAIT_BEFORE_RETRY" ); break;
-          case TINFO_RETRING          : Json_node_add_string ( RootNode, "mode", "TINFO_RETRYING" ); break;
-          case TINFO_CONNECTED        : Json_node_add_string ( RootNode, "mode", "TINFO_CONNECTED" ); break;
-          default: Json_node_add_string ( RootNode, "mode", "UNKNOWN" ); break;
-        }
-				   Json_node_add_int ( RootNode, "retry_in", (Cfg.date_next_retry - Partage->top)/10.0 );
-				   Json_node_add_int ( RootNode, "last_view", (Partage->top - Cfg.last_view)/10.0 );
+    if (Lib->Thread_run)                                      /* Warning : Cfg_meteo does not exist if thread is not running ! */
+     { /*Json_node_add_string ( RootNode, "tech_id", Cfg.tech_id );*/
      }
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref(RootNode);
@@ -96,11 +61,11 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
-/* Admin_json_tinfo_set: Configure le thread TINFO                                                                            */
+/* Admin_json_gpiod_set: Configure le thread GPIOD                                                                            */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_tinfo_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_gpiod_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -109,29 +74,27 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "tech_id" ) &&
-            Json_has_member ( request, "port" ) && Json_has_member ( request, "description" ) ) )
+    if ( ! (Json_has_member ( request, "gpio" ) &&
+            Json_has_member ( request, "mode_inout" ) && Json_has_member ( request, "active_low" )
+           ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
      }
 
-    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
-    gchar *port        = Normaliser_chaine ( Json_get_string( request, "port" ) );
-
-    SQL_Write_new ( "UPDATE %s SET tech_id='%s', description='%s', port='%s' "
-                    "WHERE instance='%s'", Cfg.lib->name, tech_id, description, port, g_get_host_name() );
+    gint gpio       = Json_get_int( request, "gpio" );
+    gint mode_inout = Json_get_int( request, "mode_inout" );
+    gint active_low = Json_get_int( request, "active_low" );
     json_node_unref(request);
-    g_free(tech_id);
-    g_free(description);
-    g_free(port);
+
+    SQL_Write_new ( "INSERT INTO %s SET instance='%s', gpio='%d', mode_inou='%d', active_low='%d' "
+                    "ON DUPLICATE KEY UPDATE mode_inou=VALUES(mode_inou), active_low=VALUES(active_low)",
+                    Lib->name, g_get_host_name(), gpio, mode_inout, active_low );
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
     Lib->Thread_reload = TRUE;
     while ( Lib->Thread_run == TRUE && Lib->Thread_reload == TRUE);                              /* Attente reboot du process */
   }
-  #endif
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
@@ -142,10 +105,8 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-/*
-         if (!strcasecmp(path, "/status"))   { Admin_json_tinfo_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/list"))     { Admin_json_tinfo_list   ( lib, msg ); }
-    else if (!strcasecmp(path, "/set"))      { Admin_json_tinfo_set    ( lib, msg ); }
-*/
+         if (!strcasecmp(path, "/status")) { Admin_json_gpiod_status ( lib, msg ); }
+    else if (!strcasecmp(path, "/set"))    { Admin_json_gpiod_set ( lib, msg ); }
+    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

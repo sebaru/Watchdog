@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/RaspberryPI/RaspberryPI.h        Déclaration structure internes des communication RASPBERRYPI                    */
+/* Watchdogd/Gpiod/Gpiod.h        Déclaration structure internes des communication RASPBERRYPI                                */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    03.09.2021 18:52:35 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * RaspberryPI.h
+ * Gpiod.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -30,7 +30,7 @@
 
  #include <gpiod.h>
 
- struct RASPBERRYPI_CONFIG
+ struct GPIOD_CONFIG
   { struct LIBRAIRIE *lib;
     gint   delai;                                                     /* Temps d'attente pour avoir les 50 tours par secondes */
     struct gpiod_chip *chip;

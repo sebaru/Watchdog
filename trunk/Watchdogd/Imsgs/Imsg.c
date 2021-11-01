@@ -30,7 +30,7 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Imsg.h"
 
- struct IMSGS_CONFIG Cfg;
+ static struct IMSGS_CONFIG Cfg;
 /******************************************************************************************************************************/
 /* Imsgs_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
@@ -160,7 +160,7 @@ end:
 /******************************************************************************************************************************/
 /* Imsgs_recipient_allow_command : Renvoie un contact IMSGDB si delui-ci dispose du flag allow_cde                            */
 /* Entrée: le jabber_id                                                                                                       */
-/* Sortie: struct IMSGSDB *imsg                                                                                                */
+/* Sortie: struct IMSGSDB *imsg                                                                                               */
 /******************************************************************************************************************************/
  static struct IMSGSDB *Imsgs_recipient_allow_command ( gchar *jabber_id )
   { gchar *jabberid, requete[512], hostonly[80], *ptr;
@@ -462,11 +462,11 @@ reconnect:
     xmpp_initialize();
     Cfg.ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_INFO));
     if (!Cfg.ctx)
-     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Ctx Init failed", __func__ ); }
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Ctx Init failed", __func__ ); goto end; }
 
     Cfg.conn = xmpp_conn_new(Cfg.ctx);
     if (!Cfg.conn)
-     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Connection New failed", __func__ ); }
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Connection New failed", __func__ ); goto end; }
 
     xmpp_conn_set_keepalive(Cfg.conn, 60, 1);
     xmpp_conn_set_jid (Cfg.conn, Cfg.jabberid);
@@ -505,12 +505,18 @@ reconnect:
           json_node_unref(request);
         }
      }                                                                                         /* Fin du while partage->arret */
-    xmpp_disconnect(Cfg.conn);
-    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Disconnect OK", __func__, Cfg.jabberid );
-    xmpp_conn_release(Cfg.conn);
-    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Connection Release OK", __func__, Cfg.jabberid );
-    xmpp_ctx_free(Cfg.ctx);
-    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Ctx Free OK", __func__, Cfg.jabberid );
+
+end:
+    if (Cfg.conn)
+     { xmpp_disconnect(Cfg.conn);
+       Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Disconnect OK", __func__, Cfg.jabberid );
+       xmpp_conn_release(Cfg.conn);
+       Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Connection Release OK", __func__, Cfg.jabberid );
+     }
+    if (Cfg.ctx)
+     { xmpp_ctx_free(Cfg.ctx);
+       Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': Ctx Free OK", __func__, Cfg.jabberid );
+     }
     xmpp_shutdown();
     Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: '%s': XMPPshutdown OK", __func__, Cfg.jabberid );
 
