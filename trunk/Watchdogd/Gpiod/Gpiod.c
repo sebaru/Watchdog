@@ -81,13 +81,13 @@ end:
     gint mode_inout     = Json_get_int ( element, "mode_inout" );
     gint mode_activelow = Json_get_int ( element, "mode_activelow" );
     Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO,
-              "%s: Chargement du GPIO%d en mode_inout %d, mode_activelow=%d", __func__, gpio, mode_inout, mode_activelow );
+              "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__, gpio, mode_inout, mode_activelow );
 
     Cfg.lines[gpio] = gpiod_chip_get_line( Cfg.chip, gpio );
     if (mode_inout)
      { gpiod_line_request_output( Cfg.lines [gpio], "Watchdog RPI Thread", 0 ); }
     else
-     { gpiod_line_request_input( Cfg.lines [gpio], "Watchdog RPI Thread" ); }
+     { gpiod_line_request_input ( Cfg.lines [gpio], "Watchdog RPI Thread" ); }
 
 
 /*
@@ -193,7 +193,7 @@ reload:
         }
      }
     if (Cfg.lines)                                                                                   /* Libération des lignes */
-     { for ( gint cpt=0; cpt < sizeof(Cfg.lines); cpt ++ ) { if (Cfg.lines[cpt]) gpiod_line_release( Cfg.lines[cpt] ); } }
+     { for ( gint cpt=0; cpt < sizeof(Cfg.num_lines); cpt ++ ) { if (Cfg.lines[cpt]) gpiod_line_release( Cfg.lines[cpt] ); } }
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
