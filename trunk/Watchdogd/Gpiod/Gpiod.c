@@ -81,7 +81,7 @@ end:
     gint mode_inout     = Json_get_int ( element, "mode_inout" );
     gint mode_activelow = Json_get_int ( element, "mode_activelow" );
     Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO,
-              "%s: Chargement du GPIO%d en mode_intout %d, mode_activelow=%d", gpio, mode_inout, mode_activelow );
+              "%s: Chargement du GPIO%d en mode_inout %d, mode_activelow=%d", gpio, mode_inout, mode_activelow );
 
     Cfg.lines[gpio] = gpiod_chip_get_line( Cfg.chip, gpio );
     if (mode_inout)
@@ -101,7 +101,7 @@ int gpiod_line_set_value(struct gpiod_line *line,
 /* Entrée: rien                                                                                                               */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gboolean Charger_tous_IO ( void  )
+ static gboolean Charger_tous_gpio ( void  )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
@@ -110,7 +110,7 @@ int gpiod_line_set_value(struct gpiod_line *line,
      { json_node_unref(RootNode);
        return(FALSE);
      }
-    Json_node_foreach_array_element ( RootNode, "hubs", Charger_un_gpio, NULL );
+    Json_node_foreach_array_element ( RootNode, "gpios", Charger_un_gpio, NULL );
     json_node_unref(RootNode);
     return(TRUE);
   }
@@ -136,10 +136,11 @@ reload:
     Cfg.num_lines = gpiod_chip_num_lines(Cfg.chip);
     Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: found %d lines", __func__, Cfg.num_lines );
 
-    if ( Charger_tous_IO() == FALSE )                                                                   /* Chargement des I/O */
+    if ( Charger_tous_gpio() == FALSE )                                                                 /* Chargement des I/O */
      { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", __func__ );
        Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
      }
+    else Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: GPIO Lines loaded", __func__ );
 
     gint last_top = 0, nbr_tour_par_sec = 0, nbr_tour = 0;                        /* Limitation du nombre de tour par seconde */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
