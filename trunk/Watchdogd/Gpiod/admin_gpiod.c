@@ -74,22 +74,21 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "gpio" ) &&
-            Json_has_member ( request, "mode_inout" ) && Json_has_member ( request, "active_low" )
+    if ( ! (Json_has_member ( request, "id" ) &&
+            Json_has_member ( request, "mode_inout" ) && Json_has_member ( request, "mode_activelow" )
            ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
      }
 
-    gint gpio       = Json_get_int( request, "gpio" );
-    gint mode_inout = Json_get_int( request, "mode_inout" );
-    gint active_low = Json_get_int( request, "active_low" );
+    gint id           = Json_get_int( request, "id" );
+    gint mode_inout     = Json_get_int( request, "mode_inout" );
+    gint mode_activelow = Json_get_int( request, "mode_activelow" );
     json_node_unref(request);
 
-    SQL_Write_new ( "INSERT INTO %s SET instance='%s', gpio='%d', mode_inou='%d', active_low='%d' "
-                    "ON DUPLICATE KEY UPDATE mode_inou=VALUES(mode_inou), active_low=VALUES(active_low)",
-                    Lib->name, g_get_host_name(), gpio, mode_inout, active_low );
+    SQL_Write_new ( "UPDATE %s SET mode_inout='%d', mode_activelow='%d' WHERE id=%d",
+                    Lib->name, mode_inout, mode_activelow, id );
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
     Lib->Thread_reload = TRUE;

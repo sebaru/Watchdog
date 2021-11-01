@@ -53,7 +53,7 @@
      { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
                        "`id` int(11) NOT NULL AUTO_INCREMENT,"
                        "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                       "`instance` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'localhost',"
+                       "`instance` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'localhost',"
                        "`gpio` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_inout` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_activelow` TINYINT(1) NOT NULL DEFAULT '0',"

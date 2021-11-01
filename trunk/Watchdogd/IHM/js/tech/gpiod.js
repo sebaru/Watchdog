@@ -1,11 +1,13 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function GPIOD_Sauver_parametre ( )
+ function GPIOD_Sauver_parametre ( id )
   { var json_request = JSON.stringify(
-     { instance: $('#idTargetInstance').val(),
+     { id            : id,
+       mode_inout    : parseInt ($('#idGPIODInOut'+id).val()),
+       mode_activelow: parseInt($('#idGPIODActiveLow'+id).val()),
      });
-    Send_to_API ( 'POST', "/api/process/gpiod/set", json_request, function() { Load_page(); }, null );
+    Send_to_API ( 'POST', "/api/process/gpiod/set", json_request, null/*function() { Load_page(); }*/, null );
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function GPIOD_Load_config ()
@@ -31,11 +33,17 @@
          [ { "data": "gpio",   "title":"#Gpio",   "className": "align-middle text-center" },
            { "data": null, "title":"Mode I/O",    "className": "align-middle ",
              "render": function (item)
-               { return("test"); }
+               { return( Select ( "idGPIODInOut"+item.id, "GPIOD_Sauver_parametre("+item.id+")",
+                                  [ { valeur: 0, texte: "IN" }, { valeur: 1, texte: "OUT" } ], item.mode_inout )
+                       );
+               }
            },
            { "data": null, "title":"Active Low",    "className": "align-middle ",
              "render": function (item)
-               { return("test2"); }
+               { return( Select ( "idGPIODActiveLow"+item.id, "GPIOD_Sauver_parametre("+item.id+")",
+                                  [ { valeur: 0, texte: "NO" }, { valeur: 1, texte: "YES" } ], item.mode_activelow )
+                       );
+               }
            },
          ],
        /*order: [ [0, "desc"] ],*/
