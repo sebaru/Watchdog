@@ -131,11 +131,13 @@ reload:
        Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
        goto end;
      }
+    else Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: chip 'gpiochip0' loaded", __func__ );
 
     Cfg.num_lines = gpiod_chip_num_lines(Cfg.chip);
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: found %d lines", __func__, Cfg.num_lines );
 
     if ( Charger_tous_IO() == FALSE )                                                                   /* Chargement des I/O */
-     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading IO PHIDGET -> stop", __func__ );
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", __func__ );
        Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
      }
 

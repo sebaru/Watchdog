@@ -94,7 +94,7 @@
 /******************************************* Creation du user *****************************************************************/
     g_snprintf( chaine, sizeof(chaine), "useradd -m -c 'WatchdogServer' %s", Json_get_string(request, "run_as") );
     system(chaine);
-    g_snprintf( chaine, sizeof(chaine), "usermod -a -G audio,dialout %s", Json_get_string(request, "run_as") );
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G audio,dialout,gpio %s", Json_get_string(request, "run_as") );
     system(chaine);
 
 /******************************************* Creation du home *****************************************************************/

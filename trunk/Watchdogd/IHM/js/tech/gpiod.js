@@ -2,12 +2,14 @@
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function GPIOD_Sauver_parametre ( id )
-  { var json_request = JSON.stringify(
-     { id            : id,
+  { var json_request =
+     { instance      : $('#idTargetInstance').val(),
+       id            : id,
        mode_inout    : parseInt ($('#idGPIODInOut'+id).val()),
        mode_activelow: parseInt($('#idGPIODActiveLow'+id).val()),
      });
-    Send_to_API ( 'POST', "/api/process/gpiod/set", json_request, null/*function() { Load_page(); }*/, null );
+    Send_to_API ( 'POST', "/api/process/gpiod/set", JSON.stringify(json_request),
+                  function() { Process_reload ( json_request.instance, "GPIOD", false ); }, null );
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function GPIOD_Load_config ()
@@ -16,7 +18,6 @@
                                   else { $('#idAlertThreadNotRunning').slideDown(); }
        $('#idGPIODTable').DataTable().clear();
        $('#idGPIODTable').DataTable().rows.add( Response.gpios ).draw();
-
      }, null);
   }
 /********************************************* Appelé au chargement de la page ************************************************/
