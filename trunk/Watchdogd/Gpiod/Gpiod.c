@@ -81,7 +81,7 @@ end:
     gint mode_inout     = Json_get_int ( element, "mode_inout" );
     gint mode_activelow = Json_get_int ( element, "mode_activelow" );
     Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO,
-              "%s: Chargement du GPIO%d en mode_inout %d, mode_activelow=%d", gpio, mode_inout, mode_activelow );
+              "%s: Chargement du GPIO%d en mode_inout %d, mode_activelow=%d", __func__, gpio, mode_inout, mode_activelow );
 
     Cfg.lines[gpio] = gpiod_chip_get_line( Cfg.chip, gpio );
     if (mode_inout)
