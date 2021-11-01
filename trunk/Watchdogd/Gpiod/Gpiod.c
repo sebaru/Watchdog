@@ -64,7 +64,7 @@
      }
 
 end:
-    for (gint cpt=0; cpt<54; cpt++)                                                                     /* Valeurs par défaut */
+    for (gint cpt=0; cpt<27; cpt++)                                                                     /* Valeurs par défaut */
      { SQL_Write_new ( "INSERT IGNORE INTO %s SET instance='%s', gpio='%d', mode_inout='0', mode_activelow='0'",
                        Cfg.lib->name, g_get_host_name(), cpt );
      }
