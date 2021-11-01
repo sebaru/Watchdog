@@ -35,7 +35,11 @@
     gint   delai;                                                     /* Temps d'attente pour avoir les 50 tours par secondes */
     struct gpiod_chip *chip;
     gint   num_lines;
-    struct gpiod_line *lines[64];
+    struct
+     { gboolean mode_inout;
+       gboolean mode_activelow;
+       struct gpiod_line *gpio_ligne;
+     } lignes[64];
  };
 
 /************************************************ Définitions des prototypes **************************************************/

@@ -83,11 +83,14 @@ end:
     Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO,
               "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__, gpio, mode_inout, mode_activelow );
 
-    Cfg.lines[gpio] = gpiod_chip_get_line( Cfg.chip, gpio );
+    Cfg.lignes[gpio].gpio_ligne     = gpiod_chip_get_line( Cfg.chip, gpio );
+    Cfg.lignes[gpio].mode_inout     = mode_inout;
+    Cfg.lignes[gpio].mode_activelow = mode_activelow;
+
     if (mode_inout)
-     { gpiod_line_request_output( Cfg.lines [gpio], "Watchdog RPI Thread", 0 ); }
+     { gpiod_line_request_output( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread", mode_activelow ); }
     else
-     { gpiod_line_request_input ( Cfg.lines [gpio], "Watchdog RPI Thread" ); }
+     { gpiod_line_request_input ( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread" ); }
 
 
 /*
@@ -168,7 +171,7 @@ reload:
              else
               { gchar *tech_id  = Json_get_string ( request, "tech_id" );
                 gchar *acronyme = Json_get_string ( request, "acronyme" );
-                gboolean etat   = Json_get_bool   ( request, "etat" );
+                /*gboolean etat   = Json_get_bool   ( request, "etat" );*/
 
                 Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s",
                           __func__, tech_id, acronyme );
@@ -192,8 +195,9 @@ reload:
           json_node_unref (request);
         }
      }
-    if (Cfg.lines)                                                                                   /* Libération des lignes */
-     { for ( gint cpt=0; cpt < sizeof(Cfg.num_lines); cpt ++ ) { if (Cfg.lines[cpt]) gpiod_line_release( Cfg.lines[cpt] ); } }
+
+    for ( gint cpt=0; cpt < sizeof(Cfg.num_lines); cpt++ )
+     { if (Cfg.lignes[cpt].gpio_ligne) gpiod_line_release( Cfg.lignes[cpt].gpio_ligne ); }
 
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
