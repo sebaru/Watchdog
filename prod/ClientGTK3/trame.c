@@ -659,7 +659,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->page   = page;
     trame_motif->type   = TYPE_MOTIF;
     trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
-    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->cligno = Json_get_bool ( visuel, "cligno" );                                     /* Sauvegarde etat motif */
     g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
 
     trame_motif->image  = NULL;
@@ -711,7 +711,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->page   = page;
     trame_motif->type   = TYPE_MOTIF;
     trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
-    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->cligno = Json_get_bool ( visuel, "cligno" );                                     /* Sauvegarde etat motif */
     g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
 
     trame_motif->image  = NULL;
@@ -767,7 +767,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->page   = page;
     trame_motif->type   = TYPE_MOTIF;
     trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
-    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
+    trame_motif->cligno = Json_get_bool ( visuel, "cligno" );                                     /* Sauvegarde etat motif */
     g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
 
     trame_motif->image  = NULL;
@@ -955,6 +955,7 @@ printf("%s: New bloc maintenance\n", __func__ );
     trame_motif->page   = page;
     trame_motif->type   = TYPE_MOTIF;
     g_snprintf( trame_motif->color, sizeof(trame_motif->color), "%s", Json_get_string ( visuel, "color" ) );
+    trame_motif->cligno = Json_get_bool ( visuel, "cligno" );                                     /* Sauvegarde etat motif */
 
     Trame_create_poignees ( trame_motif );
 

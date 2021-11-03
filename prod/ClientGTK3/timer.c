@@ -46,14 +46,18 @@
 /* Entree: trame_motif                                                                                    */
 /* Sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
- static void Timer_motif( struct TRAME_ITEM_MOTIF *trame_motif, gint cligno )
+ static void Timer_motif( struct TRAME_ITEM_MOTIF *trame_motif, gint hidden )
   {
 
     if ( Json_has_member ( trame_motif->visuel, "ihm_affichage" ) )
-     {
+     { if (trame_motif->cligno == 1 && hidden)
+        { g_object_set ( trame_motif->item_groupe, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL ); }
+       else
+        { g_object_set ( trame_motif->item_groupe, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL ); }
+
        return;
      }
-         
+
 
     switch( Json_get_int ( trame_motif->visuel, "gestion" ) )
      { case TYPE_INERTE    : return;
@@ -111,10 +115,10 @@
             break;
      }
 
-    if (trame_motif->cligno == 1 && !cligno)
+    if (trame_motif->cligno == 1 && hidden)
      { Trame_peindre_motif ( trame_motif, "black" ); }
 
-    if ( cligno && (strcmp(trame_motif->color, trame_motif->en_cours_color) ) )
+    if ( !hidden && (strcmp(trame_motif->color, trame_motif->en_cours_color) ) )
      { Trame_peindre_motif ( trame_motif, trame_motif->color );
      }
   }
