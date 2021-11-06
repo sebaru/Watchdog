@@ -13,6 +13,7 @@ INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) 
 ('ouvrant',      'porte_entree',        'png',  'by_mode'       , 100),
 ('ouvrant',      'porte_fenetre',       'png',  'by_mode'       , 100),
 ('ouvrant',      'volet_roulant',       'png',  'by_mode'       , 100),
+('ouvrant',      '2d_porte',            'png',  'by_mode_color' , 100),
 ('chauffage',    'soufflant',           'png',  'by_mode'       , 100),
 ('electrique',   'pile',                'png',  'by_mode'       , 100),
 ('divers',       'cadena',              'png',  'by_mode'       , 100),
