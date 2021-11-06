@@ -30,31 +30,6 @@
  #include "Teleinfo.h"
  extern struct TELEINFO_CONFIG Cfg_teleinfo;
 /******************************************************************************************************************************/
-/* Admin_json_smsg_list: Liste les parametres de bases de données associés au thread SMSG                                     */
-/* Entrée : Le message libsoup                                                                                                */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- static void Admin_json_tinfo_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    SQL_Select_to_json_node ( RootNode, "tinfos", "SELECT instance, tech_id, description FROM %s", Cfg_teleinfo.lib->name );
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
 /* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
 /* Entrée : un JSon Builder                                                                                                   */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
@@ -142,7 +117,6 @@
      }
 
          if (!strcasecmp(path, "/status"))   { Admin_json_tinfo_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/list"))     { Admin_json_tinfo_list   ( lib, msg ); }
     else if (!strcasecmp(path, "/set"))      { Admin_json_tinfo_set    ( lib, msg ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

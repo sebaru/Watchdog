@@ -38,9 +38,9 @@ Les différentes classes utilisées sont les suivantes:
 | [_T](dls_tempo.md) 	         | Temporisation 	   | GARAGE:TEMPO_OUV_PORTE 	  | Les temporisations permettent de décaler, maintenir ou limiter dans le temps<br> un evenement particulier
 | [_R](dls_registres.md) 	     | Registre 	        | EDF:EQUIV_KWH 	           | Les registres permettent de manipuler des points de consignes, de seuil,<br>et permettent de réaliser des calculs
 | [_HORLOGE](dls_horloge.md) 	 | Horloge 	         | SALON:DMD_FERMETURE_VOLET |	Les horloges sont des valeurs binaires positionnées a une heure bien précise de la journée
-| [_WATCHDOG](dls_watchdog.md)	| Watchdog 	        | PRESENCE:CPT_A_REBOURG 	  | Les comptes a rebourg permettent de decompter le temps à partir d'un evenement<br>et de réagir si cet evenement n'est pas revenu au bout d'une consigne précise.
-| [_MSG](dls_messages.md)     	| Watchdog 	        | PRESENCE:CPT_A_REBOURG 	  | Les comptes a rebourg permettent de decompter le temps à partir d'un evenement<br>et de réagir si cet evenement n'est pas revenu au bout d'une consigne précise.
-| [_I](dls_visuels.md)        	| Watchdog 	        | PRESENCE:CPT_A_REBOURG 	  | Les comptes a rebourg permettent de decompter le temps à partir d'un evenement<br>et de réagir si cet evenement n'est pas revenu au bout d'une consigne précise.
+| [_WATCHDOG](dls_watchdog.md)	| Watchdog 	        | PRESENCE:CPT_A_REBOURS 	  | Les comptes a rebours permettent de decompter le temps à partir d'un evenement<br>et de réagir si cet evenement n'est pas revenu au bout d'une consigne précise.
+| [_MSG](dls_messages.md)     	| Messages 	        | EDF:PRESENCE_TENSION   	  | Les messages peremttent de notifier les utilisateurs. Ils sont diffusés dans l'interface,<br>par SMS ou par messagerie instantanée ou par mail.
+| [_I](dls_visuels.md)        	| Visuels  	        | ENTREE:PORTE           	  | Les visuels représentent des images associés aux objets, sous différentes formes et couleurs.
 
 ---
 ## Grammaire D.L.S

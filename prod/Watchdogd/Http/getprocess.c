@@ -341,7 +341,9 @@
      { GSList *liste;
        if (msg->method == SOUP_METHOD_GET)                                               /* Test si Slave redirect necessaire */
         { gpointer instance = g_hash_table_lookup ( query, "instance" );
-          if ( Config.instance_is_master && instance && strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
+          if (!instance) instance="MASTER";
+          if (!strcasecmp(instance, "null")) instance="MASTER";
+          if ( Config.instance_is_master && strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
            { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s : Redirecting %s vers %s", __func__, path, instance );
              Http_redirect_to_slave ( msg, instance );
              return;

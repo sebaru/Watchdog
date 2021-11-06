@@ -57,7 +57,8 @@
      }
 
     SQL_Select_to_json_node ( RootNode, "instances",
-                             "SELECT DISTINCT(instance_id),valeur AS instance_is_master FROM config WHERE nom='instance_is_master'" );
+                             "SELECT 'MASTER' AS instance_id, 'true' AS instance_is_master UNION "
+                             "SELECT DISTINCT(instance_id),valeur FROM config WHERE nom='instance_is_master'" );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );

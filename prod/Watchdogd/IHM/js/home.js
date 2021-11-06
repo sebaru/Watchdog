@@ -186,8 +186,7 @@
 
           $.each ( Synoptique.visuels, function (i, visuel)
                     { if (visuel.forme == null)
-                       { console.debug(visuel);
-                         var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
+                       { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
                          new_svg.append ( "image" ).attr("href", "/img/"+visuel.icone+".gif" )
                                           .on( "load", function ()

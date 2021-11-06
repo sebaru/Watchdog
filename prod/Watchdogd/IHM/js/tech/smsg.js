@@ -24,8 +24,8 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function SMS_Load_config ()
   { Send_to_API ( "GET", "/api/process/smsg/status?instance="+$('#idTargetInstance').val(), null, function(Response)
-     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
-                                  else { $('#idAlertThreadNotRunning').show(); }
+     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').slideUp(); }
+                                  else { $('#idAlertThreadNotRunning').slideDown(); }
        $('#idGSMTechID').val( Response.tech_id );
        $('#idGSMDescription').val( Response.description );
        $('#idGSMOVHServiceName').val( Response.ovh_service_name );
@@ -39,10 +39,7 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTargetInstance').empty();
-    Send_to_API ( "GET", "/api/process/smsg/list", null, function(Response)
-     { $.each ( Response.gsms, function ( i, gsm )
-        { $('#idTargetInstance').append("<option value='"+gsm.instance+"'>"+
-                                          gsm.tech_id+ " sur " +gsm.instance+"</option>"); } );
-       SMS_Load_config ();
-     }, null );
+    Select_from_api ( "idTargetInstance", "/api/instance/list", null, "instances", "instance_id", function (Response)
+                      { return ( Response.instance_id ); }, "MASTER" );
+    SMS_Load_config ();
   }

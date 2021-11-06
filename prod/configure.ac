@@ -119,5 +119,5 @@ Watchdogd/Radio/Makefile \
 Watchdogd/Dmx/Makefile \
 Watchdogd/Meteo/Makefile \
 Watchdogd/Phidget/Makefile \
-Watchdogd/RaspberryPI/Makefile \
+Watchdogd/Gpiod/Makefile \
 )

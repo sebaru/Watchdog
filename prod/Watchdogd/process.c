@@ -73,8 +73,9 @@
     lib->Thread_debug = !g_ascii_strcasecmp(db_debug, "true");
     g_free(db_debug);
 
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Démarrage du thread '%s' (v%s) de classe '%s' -> TID = %p", __func__,
-              lib->name, lib->version, classe, pthread_self() );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+              "%s: Démarrage du thread '%s' (v%s) de classe '%s' (debug = %d) -> TID = %p", __func__,
+              lib->name, lib->version, classe, lib->Thread_debug, pthread_self() );
 
     lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );

@@ -19,7 +19,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Choix du compteur</label>
-           <select id="idTargetInstance" class="custom-select border-info" onchanged="TINFO_Load_config()"></select>
+           <select id="idTargetInstance" class="custom-select border-info" onchange="TINFO_Load_config()"></select>
      					</div>
   					</div>
 

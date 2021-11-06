@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/RaspberryPI/RaspberryPI.c  Gestion des I/O RaspberryPI  Watchdog 3.0                                             */
+/* Watchdogd/Gpiod/Gpiod.c  Gestion des I/O Gpiod  Watchdog 3.0                                                               */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    03.09.2021 17:51:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * RaspberryPI.c
+ * Gpiod.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -29,16 +29,15 @@
  #include <sys/prctl.h>
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
- #include "RaspberryPI.h"
+ #include "Gpiod.h"
 
- struct RASPBERRYPI_CONFIG Cfg;
-
+ static struct GPIOD_CONFIG Cfg;
 /******************************************************************************************************************************/
-/* RaspberryPI_Creer_DB: Creer la base de données du thread                                                                   */
+/* Gpiod_Creer_DB: Creer la base de données du thread                                                                         */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void RaspberryPI_Creer_DB ( void )
+ static void Gpiod_Creer_DB ( void )
   { gint database_version;
 
     gchar *database_version_string = Recuperer_configDB_by_nom( Cfg.lib->name, "database_version" );
@@ -54,10 +53,12 @@
      { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
                        "`id` int(11) NOT NULL AUTO_INCREMENT,"
                        "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                       "`instance` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'localhost',"
+                       "`instance` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'localhost',"
                        "`gpio` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_inout` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_activelow` TINYINT(1) NOT NULL DEFAULT '0',"
+                       "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
+                       "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
                        "PRIMARY KEY (`id`),"
                        "UNIQUE (`instance`,`gpio`)"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", Cfg.lib->name );
@@ -65,6 +66,10 @@
      }
 
 end:
+    for (gint cpt=0; cpt<GPIOD_MAX_LINE; cpt++)                                                         /* Valeurs par défaut */
+     { SQL_Write_new ( "INSERT IGNORE INTO %s SET instance='%s', gpio='%d', mode_inout='0', mode_activelow='0'",
+                       Cfg.lib->name, g_get_host_name(), cpt );
+     }
     database_version = 1;
     Modifier_configDB_int ( Cfg.lib->name, "database_version", database_version );
   }
@@ -74,19 +79,34 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_gpio (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { gint gpio           = Json_get_int ( element, "gpio" );
+  { struct LIBRAIRIE *lib = user_data;
+    gint gpio           = Json_get_int ( element, "gpio" );
     gint mode_inout     = Json_get_int ( element, "mode_inout" );
     gint mode_activelow = Json_get_int ( element, "mode_activelow" );
-    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO,
-              "%s: Chargement du GPIO%d en mode_intout %d, mode_activelow=%d", gpio, mode_inout, mode_activelow );
+    Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+              "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__, gpio, mode_inout, mode_activelow );
 
-    Cfg.lines[gpio] = gpiod_chip_get_line( Cfg.chip, gpio );
-    if (mode_inout)
-     { gpiod_line_request_output( Cfg.lines [gpio], "Watchdog RPI Thread", 0 ); }
+    Cfg.lignes[gpio].gpio_ligne     = gpiod_chip_get_line( Cfg.chip, gpio );
+    Cfg.lignes[gpio].mode_inout     = mode_inout;
+    Cfg.lignes[gpio].mode_activelow = mode_activelow;
+
+    if (mode_inout==0)
+     { gpiod_line_request_input ( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread" );
+       Cfg.lignes[gpio].etat = gpiod_line_get_value( Cfg.lignes[gpio].gpio_ligne );
+     }
     else
-     { gpiod_line_request_input( Cfg.lines [gpio], "Watchdog RPI Thread" ); }
-      
+     { gpiod_line_request_output( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread", mode_activelow );
+       Cfg.lignes[gpio].etat = mode_activelow;
+     }
 
+    if (Json_has_member ( element, "tech_id" ) && Json_has_member ( element, "acronyme" ))
+     { g_snprintf ( Cfg.lignes[gpio].tech_id,  sizeof(Cfg.lignes[gpio].tech_id),  Json_get_string ( element, "tech_id" ) );
+       g_snprintf ( Cfg.lignes[gpio].acronyme, sizeof(Cfg.lignes[gpio].acronyme), Json_get_string ( element, "acronyme" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+                 "%s: GPIO%02d mappé sur '%s:%s'", __func__, gpio, Cfg.lignes[gpio].tech_id, Cfg.lignes[gpio].acronyme );
+     }
+    else Info_new( Config.log, lib->Thread_debug, LOG_DEBUG,
+                   "%s: GPIO%02d not mapped", __func__, gpio );
 /*
  * int gpiod_line_get_value(struct gpiod_line *line);
 int gpiod_line_set_value(struct gpiod_line *line,
@@ -98,43 +118,46 @@ int gpiod_line_set_value(struct gpiod_line *line,
 /* Entrée: rien                                                                                                               */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gboolean Charger_tous_IO ( void  )
+ static gboolean Charger_tous_gpio ( struct LIBRAIRIE *lib )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
-    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM '%s' WHERE instance='%s'",
+    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM %s WHERE instance='%s'",
                                   Cfg.lib->name, g_get_host_name() ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
      }
-    Json_node_foreach_array_element ( RootNode, "hubs", Charger_un_gpio, NULL );
+    Json_node_foreach_array_element ( RootNode, "gpios", Charger_un_gpio, lib );
     json_node_unref(RootNode);
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Main: Fonction principale du thread RaspberryPI                                                                               */
+/* Main: Fonction principale du thread Gpiod                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { 
+  {
 reload:
     memset( &Cfg, 0, sizeof(Cfg) );                                                 /* Mise a zero de la structure de travail */
     Cfg.lib = lib;                                                 /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "raspi", "I/O", lib, WTD_VERSION, "Manage RaspberryPI I/O" );
-    RaspberryPI_Creer_DB ();                                                                /* Création de la base de données */
+    Thread_init ( "gpiod", "I/O", lib, WTD_VERSION, "Manage Gpiod I/O" );
+    Gpiod_Creer_DB ();                                                                /* Création de la base de données */
 
     Cfg.chip = gpiod_chip_open_lookup("gpiochip0");
     if (!Cfg.chip)
      { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading chip 'gpiochip0'", __func__ );
        Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
        goto end;
-     }    
+     }
+    else Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: chip 'gpiochip0' loaded", __func__ );
 
     Cfg.num_lines = gpiod_chip_num_lines(Cfg.chip);
+    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: found %d lines", __func__, Cfg.num_lines );
 
-    if ( Charger_tous_IO() == FALSE )                                                                   /* Chargement des I/O */
-     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading IO PHIDGET -> stop", __func__ );
+    if ( Charger_tous_gpio( lib ) == FALSE )                                                            /* Chargement des I/O */
+     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", __func__ );
        Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
      }
+    else Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: GPIO Lines loaded", __func__ );
 
     gint last_top = 0, nbr_tour_par_sec = 0, nbr_tour = 0;                        /* Limitation du nombre de tour par seconde */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
@@ -147,6 +170,16 @@ reload:
           if(nbr_tour_par_sec > 50) Cfg.delai += 50;
           else if(Cfg.delai>0) Cfg.delai -= 50;
           last_top = Partage->top;
+        }
+
+       for ( gint cpt = 0; cpt < GPIOD_MAX_LINE; cpt++ )
+        { if (Cfg.lignes[cpt].mode_inout == 0) /* Ligne d'entrée ? */
+           { gint etat = gpiod_line_get_value( Cfg.lignes[cpt].gpio_ligne );
+             if (etat != Cfg.lignes[cpt].etat) /* Détection de changement */
+              { Cfg.lignes[cpt].etat = etat;
+                Zmq_Send_DI_to_master ( lib, Cfg.lignes[cpt].tech_id, Cfg.lignes[cpt].acronyme, etat );
+              }
+           }
         }
 
        JsonNode *request;                                                                          /* Ecoute du Master Server */
@@ -162,7 +195,7 @@ reload:
              else
               { gchar *tech_id  = Json_get_string ( request, "tech_id" );
                 gchar *acronyme = Json_get_string ( request, "acronyme" );
-                gboolean etat   = Json_get_bool   ( request, "etat" );
+                /*gboolean etat   = Json_get_bool   ( request, "etat" );*/
 
                 Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s",
                           __func__, tech_id, acronyme );
@@ -186,9 +219,10 @@ reload:
           json_node_unref (request);
         }
      }
-    for ( gint cpt=0; cpt < sizeof(Cfg.lines); cpt ++ )
-     { if (Cfg.lines[cpt]) gpiod_line_release( Cfg.lines[cpt] ); }
-     
+
+    for ( gint cpt=0; cpt < sizeof(Cfg.num_lines); cpt++ )
+     { if (Cfg.lignes[cpt].gpio_ligne) gpiod_line_release( Cfg.lignes[cpt].gpio_ligne ); }
+
 end:
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

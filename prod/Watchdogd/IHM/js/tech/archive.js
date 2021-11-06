@@ -57,8 +57,8 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { Send_to_API ( "GET", "/api/process/archive/status", null, function ( Response )
-     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
-                                  else { $('#idAlertThreadNotRunning').show(); }
+     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').slideUp(); }
+                                  else { $('#idAlertThreadNotRunning').slideDown(); }
        $('#idArchiveDBHostname').val(Response.hostname);
        $('#idArchiveDBPort').val(Response.port);
        $('#idArchiveDBUsername').val(Response.username);

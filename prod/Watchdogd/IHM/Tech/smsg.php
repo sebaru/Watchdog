@@ -6,7 +6,7 @@
    </div>
 
  <div class="row m-2">
-   <h3><img src="/img/sms.jpg" style="width:80px" alt="Commandes SMS">Configuration des GSM</h3>
+   <h3><img src="/img/sms.jpg" style="width:80px" alt="Configuration SMS">Configuration des GSM</h3>
 
    <div class ="ml-auto btn-group align-items-center">
         <button type="button" onclick="Redirect('/tech/command_text')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
@@ -20,7 +20,7 @@
        <div class="col form-group">
 					     <div class="input-group">
 						     <label class="col-5 col-sm-4 col-form-label text-right">Choix du GSM</label>
-           <select id="idTargetInstance" class="custom-select border-info" onchanged="SMS_Load_config()"></select>
+           <select id="idTargetInstance" class="custom-select border-info" onchange="SMS_Load_config()"></select>
      					</div>
   					</div>
 

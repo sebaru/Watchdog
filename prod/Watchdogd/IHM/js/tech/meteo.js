@@ -18,8 +18,8 @@
 /********************************************* Appelé au chargement de la page ************************************************/
  function Meteo_Load_config ()
   { Send_to_API ( "GET", "/api/process/meteo/status", null, function(Response)
-     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').hide(); }
-                                  else { $('#idAlertThreadNotRunning').show(); }
+     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').slideUp(); }
+                                  else { $('#idAlertThreadNotRunning').slideDown(); }
        $('#idMeteoTechID').val( Response.tech_id );
        $('#idMeteoDescription').val( Response.description );
        $('#idMeteoToken').val( Response.token );
