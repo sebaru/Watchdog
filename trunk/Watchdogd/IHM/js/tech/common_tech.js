@@ -57,6 +57,8 @@
     if (def_tech_id != null) { $('#'+ids+'RechercherTechID').val( '' ); }
     json_request.tech_id = $('#'+ids+'RechercherTechID').val();
 
+    $('#'+ids+'SelectTechID').off("change").on("change", function () { Common_Updater_Choix_Acronyme ( ids, classe, def_acronyme ); } );
+
     Send_to_API ( "PUT", "/api/mnemos/validate", JSON.stringify(json_request), function (Response)
      { $('#'+ids+'SelectTechID').empty();
        $.each ( Response.tech_ids_found, function ( i, item )

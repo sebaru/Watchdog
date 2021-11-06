@@ -57,6 +57,8 @@
                        "`gpio` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_inout` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_activelow` TINYINT(1) NOT NULL DEFAULT '0',"
+                       "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
+                       "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
                        "PRIMARY KEY (`id`),"
                        "UNIQUE (`instance`,`gpio`)"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", Cfg.lib->name );
@@ -64,7 +66,7 @@
      }
 
 end:
-    for (gint cpt=0; cpt<27; cpt++)                                                                     /* Valeurs par défaut */
+    for (gint cpt=0; cpt<GPIOD_MAX_LINE; cpt++)                                                         /* Valeurs par défaut */
      { SQL_Write_new ( "INSERT IGNORE INTO %s SET instance='%s', gpio='%d', mode_inout='0', mode_activelow='0'",
                        Cfg.lib->name, g_get_host_name(), cpt );
      }
@@ -77,22 +79,34 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_gpio (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { gint gpio           = Json_get_int ( element, "gpio" );
+  { struct LIBRAIRIE *lib = user_data;
+    gint gpio           = Json_get_int ( element, "gpio" );
     gint mode_inout     = Json_get_int ( element, "mode_inout" );
     gint mode_activelow = Json_get_int ( element, "mode_activelow" );
-    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO,
+    Info_new( Config.log, lib->Thread_debug, LOG_INFO,
               "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__, gpio, mode_inout, mode_activelow );
 
     Cfg.lignes[gpio].gpio_ligne     = gpiod_chip_get_line( Cfg.chip, gpio );
     Cfg.lignes[gpio].mode_inout     = mode_inout;
     Cfg.lignes[gpio].mode_activelow = mode_activelow;
 
-    if (mode_inout)
-     { gpiod_line_request_output( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread", mode_activelow ); }
+    if (mode_inout==0)
+     { gpiod_line_request_input ( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread" );
+       Cfg.lignes[gpio].etat = gpiod_line_get_value( Cfg.lignes[gpio].gpio_ligne );
+     }
     else
-     { gpiod_line_request_input ( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread" ); }
+     { gpiod_line_request_output( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread", mode_activelow );
+       Cfg.lignes[gpio].etat = mode_activelow;
+     }
 
-
+    if (Json_has_member ( element, "tech_id" ) && Json_has_member ( element, "acronyme" ))
+     { g_snprintf ( Cfg.lignes[gpio].tech_id,  sizeof(Cfg.lignes[gpio].tech_id),  Json_get_string ( element, "tech_id" ) );
+       g_snprintf ( Cfg.lignes[gpio].acronyme, sizeof(Cfg.lignes[gpio].acronyme), Json_get_string ( element, "acronyme" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+                 "%s: GPIO%02d mappé sur '%s:%s'", __func__, gpio, Cfg.lignes[gpio].tech_id, Cfg.lignes[gpio].acronyme );
+     }
+    else Info_new( Config.log, lib->Thread_debug, LOG_DEBUG,
+                   "%s: GPIO%02d not mapped", __func__, gpio );
 /*
  * int gpiod_line_get_value(struct gpiod_line *line);
 int gpiod_line_set_value(struct gpiod_line *line,
@@ -104,7 +118,7 @@ int gpiod_line_set_value(struct gpiod_line *line,
 /* Entrée: rien                                                                                                               */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gboolean Charger_tous_gpio ( void  )
+ static gboolean Charger_tous_gpio ( struct LIBRAIRIE *lib )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
@@ -113,7 +127,7 @@ int gpiod_line_set_value(struct gpiod_line *line,
      { json_node_unref(RootNode);
        return(FALSE);
      }
-    Json_node_foreach_array_element ( RootNode, "gpios", Charger_un_gpio, NULL );
+    Json_node_foreach_array_element ( RootNode, "gpios", Charger_un_gpio, lib );
     json_node_unref(RootNode);
     return(TRUE);
   }
@@ -139,7 +153,7 @@ reload:
     Cfg.num_lines = gpiod_chip_num_lines(Cfg.chip);
     Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: found %d lines", __func__, Cfg.num_lines );
 
-    if ( Charger_tous_gpio() == FALSE )                                                                 /* Chargement des I/O */
+    if ( Charger_tous_gpio( lib ) == FALSE )                                                            /* Chargement des I/O */
      { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", __func__ );
        Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
      }
@@ -156,6 +170,16 @@ reload:
           if(nbr_tour_par_sec > 50) Cfg.delai += 50;
           else if(Cfg.delai>0) Cfg.delai -= 50;
           last_top = Partage->top;
+        }
+
+       for ( gint cpt = 0; cpt < GPIOD_MAX_LINE; cpt++ )
+        { if (Cfg.lignes[cpt].mode_inout == 0) /* Ligne d'entrée ? */
+           { gint etat = gpiod_line_get_value( Cfg.lignes[cpt].gpio_ligne );
+             if (etat != Cfg.lignes[cpt].etat) /* Détection de changement */
+              { Cfg.lignes[cpt].etat = etat;
+                Zmq_Send_DI_to_master ( lib, Cfg.lignes[cpt].tech_id, Cfg.lignes[cpt].acronyme, etat );
+              }
+           }
         }
 
        JsonNode *request;                                                                          /* Ecoute du Master Server */
