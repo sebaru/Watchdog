@@ -9,6 +9,7 @@ INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) 
 ('electrique',   'ampoule',             'png',  'by_mode'       , 100),
 ('chauffage',    'chaudiere_gaz',       'png',  'by_mode'       , 100),
 ('chauffage',    'radiateur',           'png',  'by_mode'       , 100),
+('capteur',      'detection_mouvement', 'png',  'by_mode_color' , 100),
 ('bouton',       'auto_manu',           'svg',  'by_mode'       , 100),
 ('ouvrant',      'fenetre',             'png',  'by_mode'       , 100),
 ('ouvrant',      'porte_entree',        'png',  'by_mode'       , 100),

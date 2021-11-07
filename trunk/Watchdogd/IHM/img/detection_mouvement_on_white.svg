@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 64 64"
+   style="enable-background:new 0 0 64 64"
+   version="1.1"
+   id="svg18"
+   sodipodi:docname="detection_mouvement_on_source.svg"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs22" />
+  <sodipodi:namedview
+     id="namedview20"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="3.03125"
+     inkscape:cx="73.072165"
+     inkscape:cy="83.134021"
+     inkscape:window-width="1920"
+     inkscape:window-height="979"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g10" />
+  <g
+     style="fill:none;stroke-miterlimit:10;stroke:#ffffff;stroke-width:3;stroke-opacity:1"
+     id="g10">
+    <path
+       d="m49.2 41.2c1.5-2.8 2.3-5.9 2.3-9.2 0-3.3-.8-6.5-2.3-9.2"
+       id="path2"
+       style="stroke:#ffffff;stroke-opacity:1" />
+    <path
+       d="m14.8 22.8c-1.5 2.8-2.3 5.9-2.3 9.2 0 3.3.8 6.5 2.3 9.2"
+       id="path4"
+       style="stroke:#ffffff;stroke-opacity:1" />
+    <path
+       d="m55.2 44.8c2.1-3.8 3.3-8.2 3.3-12.8 0-4.7-1.2-9-3.3-12.8"
+       id="path6"
+       style="stroke:#ffffff;stroke-opacity:1" />
+    <path
+       d="M8.8,19.2C6.7,23,5.5,27.3,5.5,32  c0,4.7,1.2,9,3.3,12.8"
+       id="path8"
+       style="stroke:#ffffff;stroke-opacity:1" />
+  </g>
+  <g
+     style="fill:#c8c8cf;fill-opacity:1"
+     id="g16">
+    <path
+       d="m33.2 17.9c1.9.2 3.6-1.3 3.7-3.2.1-1.9-1.3-3.6-3.2-3.7-1.9-.1-3.6 1.3-3.7 3.2-.1 1.9 1.3 3.6 3.2 3.7"
+       id="path12"
+       style="fill:#c8c8cf;fill-opacity:1" />
+    <path
+       d="m30.3 19.4c.7-.5 1.5-.8 2.4-.7 1.2.1 2.2.8 2.8 1.7l3.5 7 4.8 3.3c.4.3.7.8.6 1.4-.1.9-.8 1.5-1.7 1.4-.3 0-.5-.1-.7-.2l-5.2-3.6c-.2-.1-.3-.3-.4-.5l-1.3-2.6-1.6 6.9 6.2 7.3c.1.2.2.5.3.8l1.7 8.8c0 .2 0 .3 0 .5-.1 1.3-1.2 2.3-2.5 2.2-1.1-.1-1.9-.9-2.1-1.9l-1.6-8.2-5-5.5-1.2 5.3c0 .3-.4.8-.5 1l-4.8 8.1c-.5.7-1.3 1.2-2.2 1.1-1.3-.1-2.3-1.2-2.2-2.5 0-.4.2-.8.3-1l4.5-7.5 3.7-16.5-2.4 2-1.3 5.9c-.2.8-.9 1.4-1.7 1.3-.9-.1-1.5-.8-1.4-1.7 0-.1 0-.1 0-.2l1.5-6.9c.1-.3.3-.6.5-.8l7-5.7"
+       id="path14"
+       style="fill:#c8c8cf;fill-opacity:1" />
+  </g>
+</svg>
