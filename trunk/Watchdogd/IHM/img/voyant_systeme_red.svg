@@ -2,13 +2,13 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="86"
-   height="17.232454"
-   viewBox="0 0 15.927917 3.191594"
+   width="128"
+   height="25.648304"
+   viewBox="0 0 23.706667 4.7502794"
    version="1.1"
    id="svg8"
    inkscape:version="1.1 (c68e22c387, 2021-05-23)"
-   sodipodi:docname="16.svg"
+   sodipodi:docname="voyant_systeme_source.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -26,8 +26,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="5.4415094"
-     inkscape:cx="23.430999"
-     inkscape:cy="14.701803"
+     inkscape:cx="44.381068"
+     inkscape:cy="18.928572"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -49,8 +49,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid10"
-       originx="-3.1485411"
-       originy="-1.1823179" />
+       originx="0.74083406"
+       originy="-0.40296313" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -67,26 +67,26 @@
      inkscape:label="Calque 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-3.148541,-203.52606)">
+     transform="translate(0.74083415,-202.74671)">
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:2.46944px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.247943"
+       style="font-style:normal;font-weight:normal;font-size:2.46944px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.161434"
        x="5.8401179"
        y="205.98605"
        id="text18"
-       transform="matrix(0.75825741,0,0,0.73586616,2.6863644,54.179623)"><tspan
+       transform="matrix(1.1405617,0,0,1.15401,-1.561992,-31.590827)"><tspan
          sodipodi:role="line"
          id="tspan16"
          x="5.8401179"
          y="205.98605"
-         style="font-size:2.46944px;stroke-width:0.247943;fill:#ff0000;fill-opacity:1">Système</tspan></text>
+         style="font-size:2.46944px;fill:#ff0000;fill-opacity:1;stroke-width:0.161434">Système</tspan></text>
     <rect
-       style="fill:none;stroke:#ff0000;stroke-width:0.633034;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#ff0000;stroke-width:0.412165;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect20"
        width="20.372915"
        height="3.7041595"
        x="0.92604166"
        y="203.26978"
-       transform="matrix(0.75825741,0,0,0.73586616,2.6863644,54.179623)" />
+       transform="matrix(1.1405617,0,0,1.15401,-1.561992,-31.590827)" />
   </g>
 </svg>
