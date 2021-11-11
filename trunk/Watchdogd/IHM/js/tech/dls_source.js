@@ -46,7 +46,7 @@
      });
     Send_to_API ( "GET", "/api/dls/source", "tech_id="+vars[3], function(Response)
      { $("#idSourceTitle").text(Response.tech_id + " (#"+Response.id+") -" + Response.shortname);
-       $("#idSourceSynoptique").text(Response+page);
+       $("#idSourceSynoptique").text(Response.page);
        SourceCode.getDoc().setValue(Response.sourcecode);
        $("#idErrorLog").html(Response.errorlog.replace(/(?:\r\n|\r|\n)/g, '<br>'));
             if (Response.compil_status==6) { $("#idErrorLog").addClass("alert-success"); }                              /* OK */
