@@ -1,7 +1,7 @@
 #! /bin/sh
 
 svn update
-osFedora=`grep "NAME=Fedora" /etc/os-release`
+osFedora=`grep -e "^NAME.*Fedora.*" /etc/os-release`
 osRaspbian=`grep "ID=raspbian" /etc/os-release`
 osDebian=`grep "ID=debian" /etc/os-release`
 

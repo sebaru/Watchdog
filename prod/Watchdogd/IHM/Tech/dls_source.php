@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <h3><i class="fas fa-code text-primary"></i> Edition du module D.L.S - '<strong id="idSourceTitle"></strong>'</h3>
+   <h3><i class="fas fa-code text-primary"></i> Edition D.L.S <strong id="idSourceTitle"></strong></h3>
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Compiler()" class="btn btn-outline-success"><i class="fas fa-coffee"></i> Compiler</button>
@@ -10,6 +10,10 @@
         <button type="button" onclick="window.location='/tech/dls'" class="btn btn-secondary"><i class="fas fa-list"></i> Liste DLS</button>
          <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
    </div>
+ </div>
+
+ <div class="row m-2">
+   <h5>Du synoptique <strong id="idSourceSynoptique"></strong></h5>
  </div>
 
 <hr>

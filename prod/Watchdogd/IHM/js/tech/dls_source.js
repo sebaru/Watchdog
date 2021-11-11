@@ -40,13 +40,14 @@
     SourceCode = CodeMirror.fromTextArea( document.getElementById("idSourceCode"), { lineNumbers: true } );
     SourceCode.setSize( null, "100%");
 
-    $("#idSourceTitle").text(vars[3]);
 
     var json_request = JSON.stringify(
      { tech_id : vars[3],
      });
-    Send_to_API ( "PUT", "/api/dls/source", json_request, function(Response)
-     { SourceCode.getDoc().setValue(Response.sourcecode);
+    Send_to_API ( "GET", "/api/dls/source", "tech_id="+vars[3], function(Response)
+     { $("#idSourceTitle").text( "(#"+Response.id+") - " + Response.tech_id + " - " + Response.shortname);
+       $("#idSourceSynoptique").text(Response.page);
+       SourceCode.getDoc().setValue(Response.sourcecode);
        $("#idErrorLog").html(Response.errorlog.replace(/(?:\r\n|\r|\n)/g, '<br>'));
             if (Response.compil_status==6) { $("#idErrorLog").addClass("alert-success"); }                              /* OK */
        else if (Response.compil_status==7) { $("#idErrorLog").addClass("alert-warning"); }                         /* Warning */

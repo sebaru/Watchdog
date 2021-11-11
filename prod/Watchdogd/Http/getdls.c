@@ -339,24 +339,21 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_source ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_PUT)
+  { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
 
-    if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+    gchar *tech_id_src = g_hash_table_lookup ( query, "tech_id" );
+    if (!tech_id_src)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gchar *tech_id = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    json_node_unref(request);
+    gchar *tech_id = Normaliser_chaine ( tech_id_src );
     if (!tech_id)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Bad Argument");
        return;
@@ -372,7 +369,7 @@
      }
 
     if (SQL_Select_to_json_node ( RootNode, NULL,
-                                 "SELECT d.* FROM dls as d INNER JOIN syns as s ON d.syn_id=s.id "
+                                 "SELECT d.*, s.page FROM dls AS d INNER JOIN syns AS s ON d.syn_id=s.id "
                                  "WHERE tech_id='%s' AND s.access_level<='%d'", tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
