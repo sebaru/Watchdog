@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <h3><i class="fas fa-code text-primary"></i> Edition D.L.S '<strong id="idSourceTitle"></strong>'</h3>
+   <h3><i class="fas fa-code text-primary"></i> Edition D.L.S <strong id="idSourceTitle"></strong></h3>
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Compiler()" class="btn btn-outline-success"><i class="fas fa-coffee"></i> Compiler</button>
