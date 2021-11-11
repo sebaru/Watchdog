@@ -45,7 +45,7 @@
      { tech_id : vars[3],
      });
     Send_to_API ( "GET", "/api/dls/source", "tech_id="+vars[3], function(Response)
-     { $("#idSourceTitle").text(Response.tech_id + " (#"+Response.id+") -" + Response.shortname);
+     { $("#idSourceTitle").text( "(#"+Response.id+") - " + Response.tech_id + " - " + Response.shortname);
        $("#idSourceSynoptique").text(Response.page);
        SourceCode.getDoc().setValue(Response.sourcecode);
        $("#idErrorLog").html(Response.errorlog.replace(/(?:\r\n|\r|\n)/g, '<br>'));
