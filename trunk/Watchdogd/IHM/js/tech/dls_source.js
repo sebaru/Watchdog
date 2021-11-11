@@ -44,7 +44,7 @@
     var json_request = JSON.stringify(
      { tech_id : vars[3],
      });
-    Send_to_API ( "sGET", "/api/dls/source", "tech_id="+vars[3], function(Response)
+    Send_to_API ( "GET", "/api/dls/source", "tech_id="+vars[3], function(Response)
      { $("#idSourceTitle").text(Response+tech_id + " (#"+Response.id+") -" + Response.shortname);
        $("#idSourceSynoptique").text(Response+page);
        SourceCode.getDoc().setValue(Response.sourcecode);
