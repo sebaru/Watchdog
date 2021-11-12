@@ -98,7 +98,7 @@
  void Thread_end ( struct LIBRAIRIE *lib )
   { Zmq_Close ( lib->zmq_from_bus );
     Zmq_Close ( lib->zmq_to_master );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: v%s Down . . . TID = %p",
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: '%s' v%s Down . . . TID = %p", __func__,
               lib->uuid, lib->name, lib->version, pthread_self() );
     lib->Thread_run = FALSE;                                                                    /* Le thread ne tourne plus ! */
     lib->TID = 0;                                                             /* On indique au master que le thread est mort. */

@@ -58,7 +58,7 @@
        SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_io` ("
                        "`id` INT(11) NOT NULL AUTO_INCREMENT,"
                        "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                       "`uuid` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
+                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
                        "`gpio` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_inout` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_activelow` TINYINT(1) NOT NULL DEFAULT '0',"
@@ -84,35 +84,35 @@ end:
 /******************************************************************************************************************************/
  static void Charger_un_gpio (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct LIBRAIRIE *lib = user_data;
-    gint gpio           = Json_get_int ( element, "gpio" );
+    gint num            = Json_get_int ( element, "num" );
     gint mode_inout     = Json_get_int ( element, "mode_inout" );
     gint mode_activelow = Json_get_int ( element, "mode_activelow" );
     Info_new( Config.log, lib->Thread_debug, LOG_INFO,
-              "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__, gpio, mode_inout, mode_activelow );
+              "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__, num, mode_inout, mode_activelow );
 
-    Cfg.lignes[gpio].gpio_ligne     = gpiod_chip_get_line( Cfg.chip, gpio );
-    Cfg.lignes[gpio].mode_inout     = mode_inout;
-    Cfg.lignes[gpio].mode_activelow = mode_activelow;
+    Cfg.lignes[num].gpio_ligne     = gpiod_chip_get_line( Cfg.chip, num );
+    Cfg.lignes[num].mode_inout     = mode_inout;
+    Cfg.lignes[num].mode_activelow = mode_activelow;
 
     if (mode_inout==0)
-     { gpiod_line_request_input ( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread" );
-       Cfg.lignes[gpio].etat = gpiod_line_get_value( Cfg.lignes[gpio].gpio_ligne );
+     { gpiod_line_request_input ( Cfg.lignes[num].gpio_ligne, "Watchdog RPI Thread" );
+       Cfg.lignes[num].etat = gpiod_line_get_value( Cfg.lignes[num].gpio_ligne );
      }
     else
-     { gpiod_line_request_output( Cfg.lignes[gpio].gpio_ligne, "Watchdog RPI Thread", mode_activelow );
-       Cfg.lignes[gpio].etat = mode_activelow;
+     { gpiod_line_request_output( Cfg.lignes[num].gpio_ligne, "Watchdog RPI Thread", mode_activelow );
+       Cfg.lignes[num].etat = mode_activelow;
      }
 
     if (Json_has_member ( element, "tech_id" ) && Json_has_member ( element, "acronyme" ))
-     { g_snprintf ( Cfg.lignes[gpio].tech_id,  sizeof(Cfg.lignes[gpio].tech_id),  Json_get_string ( element, "tech_id" ) );
-       g_snprintf ( Cfg.lignes[gpio].acronyme, sizeof(Cfg.lignes[gpio].acronyme), Json_get_string ( element, "acronyme" ) );
+     { g_snprintf ( Cfg.lignes[num].tech_id,  sizeof(Cfg.lignes[num].tech_id),  Json_get_string ( element, "tech_id" ) );
+       g_snprintf ( Cfg.lignes[num].acronyme, sizeof(Cfg.lignes[num].acronyme), Json_get_string ( element, "acronyme" ) );
        Info_new( Config.log, lib->Thread_debug, LOG_INFO,
-                 "%s: GPIO%02d mappé sur '%s:%s'", __func__, gpio, Cfg.lignes[gpio].tech_id, Cfg.lignes[gpio].acronyme );
-       Cfg.lignes[gpio].mapped = TRUE;
+                 "%s: GPIO%02d mappé sur '%s:%s'", __func__, num, Cfg.lignes[num].tech_id, Cfg.lignes[num].acronyme );
+       Cfg.lignes[num].mapped = TRUE;
      }
     else
-     { Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: GPIO%02d not mapped", __func__, gpio );
-       Cfg.lignes[gpio].mapped = FALSE;
+     { Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: GPIO%02d not mapped", __func__, num );
+       Cfg.lignes[num].mapped = FALSE;
      }
 /*
  * int gpiod_line_get_value(struct gpiod_line *line);
@@ -129,8 +129,7 @@ int gpiod_line_set_value(struct gpiod_line *line,
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
-    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM %s WHERE instance='%s'",
-                                  Cfg.lib->name, g_get_host_name() ) == FALSE)
+    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM %s_io WHERE uuid='%s'", Cfg.lib->name, lib->uuid ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
      }
