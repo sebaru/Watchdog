@@ -59,7 +59,7 @@
                        "`id` INT(11) NOT NULL AUTO_INCREMENT,"
                        "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                        "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                       "`gpio` INT(11) NOT NULL DEFAULT '0',"
+                       "`num` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_inout` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_activelow` TINYINT(1) NOT NULL DEFAULT '0',"
                        "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
@@ -169,7 +169,7 @@ reload:
      { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", __func__ );
        Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
      }
-    else Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: GPIO Lines loaded", __func__ );
+    else Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: %d GPIO Lines loaded", __func__, max );
 
     gint last_top = 0, nbr_tour_par_sec = 0, nbr_tour = 0;                        /* Limitation du nombre de tour par seconde */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
