@@ -197,7 +197,7 @@
   }
 /******************************************************************************************************************************/
 /* Http_rechercher_session: Recherche une session dans la liste des session                                                   */
-/* Entrée: l'uuid associé a la session                                                                                        */
+/* Entrée: le message libsoup                                                                                                 */
 /* Sortie: la session, ou NULL si pas trouvé                                                                                  */
 /******************************************************************************************************************************/
  struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupMessage *msg )
@@ -453,9 +453,7 @@
     Libere_DB_SQL( &db );
 
     time(&session->last_request);
-    uuid_t uuid_hex;
-    uuid_generate(uuid_hex);
-    uuid_unparse_lower(uuid_hex, session->wtd_session);
+    New_uuid ( session->wtd_session );
     if (strlen(session->wtd_session) != 36)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
        g_free(session);

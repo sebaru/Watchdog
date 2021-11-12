@@ -51,6 +51,7 @@
 /******************************************************************************************************************************/
  void Thread_init ( gchar *name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description )
   { gchar chaine[128];
+    gint fd;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     g_snprintf( chaine, sizeof(chaine), "W-%s", name );
@@ -73,12 +74,21 @@
     lib->Thread_debug = !g_ascii_strcasecmp(db_debug, "true");
     g_free(db_debug);
 
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-              "%s: Démarrage du thread '%s' (v%s) de classe '%s' (debug = %d) -> TID = %p", __func__,
-              lib->name, lib->version, classe, lib->Thread_debug, pthread_self() );
-
     lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+
+    g_snprintf( chaine, sizeof(chaine), "%s.uuid", name );                                    /* Passer en base de données ?? */
+    fd = open ( chaine, O_RDONLY );
+    if (fd>0) { read ( fd, lib->uuid, 36 ); }
+    else { New_uuid ( lib->uuid );
+           fd = creat ( chaine, S_IRUSR | S_IWUSR );
+           write ( fd, lib->uuid, 36 );
+         }
+    close(fd);
+
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+              "%s: UUID %s: Démarrage du thread '%s' (v%s) de classe '%s' (debug = %d) -> TID = %p", __func__,
+              lib->uuid, lib->name, lib->version, classe, lib->Thread_debug, pthread_self() );
   }
 /******************************************************************************************************************************/
 /* Thread_end: appelé par chaque thread, lors de son arret                                                                    */
@@ -88,7 +98,8 @@
  void Thread_end ( struct LIBRAIRIE *lib )
   { Zmq_Close ( lib->zmq_from_bus );
     Zmq_Close ( lib->zmq_to_master );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: v%s Down . . . TID = %p", lib->name, lib->version, pthread_self() );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: v%s Down . . . TID = %p",
+              lib->uuid, lib->name, lib->version, pthread_self() );
     lib->Thread_run = FALSE;                                                                    /* Le thread ne tourne plus ! */
     lib->TID = 0;                                                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

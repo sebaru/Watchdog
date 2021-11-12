@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Gpiod/Gpiod.h        Déclaration structure internes des communication RASPBERRYPI                                */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    03.09.2021 18:52:35 */
+/* Watchdogd/uiud.c        Fonctions communes autour des UUID                                                                 */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                    12.11.2021 22:14:10 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Gpiod.h
+ * uuid.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -25,29 +25,15 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef _RASPBERRYPI_H_
- #define _RASPBERRYPI_H_
-
- #include <gpiod.h>
-
- #define GPIOD_MAX_LINE    27                                                         /* 27 Lignes maximums d'entrées/sorties */
-
- struct GPIOD_CONFIG
-  { struct LIBRAIRIE *lib;
-    gint   delai;                                                     /* Temps d'attente pour avoir les 50 tours par secondes */
-    struct gpiod_chip *chip;
-    gint   num_lines;
-    struct
-     { gchar tech_id[32];
-       gchar acronyme[64];
-       gboolean mapped;
-       gboolean etat;
-       gboolean mode_inout;
-       gboolean mode_activelow;
-       struct gpiod_line *gpio_ligne;
-     } lignes[64];
- };
-
-/************************************************ Définitions des prototypes **************************************************/
-#endif
+ #include "watchdogd.h"
+/******************************************************************************************************************************/
+/* New_uuid: Génère un nouveau UUID dans le buffer en paramètre                                                               */
+/* Entrée: le buffer a remplir                                                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void New_uuid ( gchar *target )
+  { uuid_t uuid_hex;
+    uuid_generate(uuid_hex);
+    uuid_unparse_lower(uuid_hex, target );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

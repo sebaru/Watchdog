@@ -37,7 +37,7 @@
 /* Entrée: rien                                                                                                               */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Gpiod_Creer_DB ( void )
+ static void Gpiod_Creer_DB ( struct LIBRAIRIE *lib )
   { gint database_version;
 
     gchar *database_version_string = Recuperer_configDB_by_nom( Cfg.lib->name, "database_version" );
@@ -51,27 +51,31 @@
 
     if (database_version==0)
      { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                       "`id` int(11) NOT NULL AUTO_INCREMENT,"
-                       "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                       "`instance` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'localhost',"
+                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci PRIMARY KEY,"
+                       "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                       "`tech_id` VARCHAR(32) NULL"
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
+       SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_io` ("
+                       "`id` INT(11) NOT NULL AUTO_INCREMENT,"
+                       "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                       "`uuid` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
                        "`gpio` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_inout` INT(11) NOT NULL DEFAULT '0',"
                        "`mode_activelow` TINYINT(1) NOT NULL DEFAULT '0',"
                        "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
                        "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
                        "PRIMARY KEY (`id`),"
-                       "UNIQUE (`instance`,`gpio`)"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", Cfg.lib->name );
+                       "FOREIGN KEY (`uuid`) REFERENCES `%s` (uuid) ON DELETE CASCADE ON UPDATE CASCADE,"
+                       "UNIQUE (`uuid`,`gpio`)"
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;",
+                       lib->name, lib->name );
        goto end;
      }
 
 end:
-    for (gint cpt=0; cpt<GPIOD_MAX_LINE; cpt++)                                                         /* Valeurs par défaut */
-     { SQL_Write_new ( "INSERT IGNORE INTO %s SET instance='%s', gpio='%d', mode_inout='0', mode_activelow='0'",
-                       Cfg.lib->name, g_get_host_name(), cpt );
-     }
+    SQL_Write_new ("INSERT IGNORE INTO `%s` SET uuid='%s'", lib->name, lib->uuid );
     database_version = 1;
-    Modifier_configDB_int ( Cfg.lib->name, "database_version", database_version );
+    Modifier_configDB_int ( lib->name, "database_version", database_version );
   }
 /******************************************************************************************************************************/
 /* Charger_un_gpio: Charge une configuration de GPIO                                                                          */
@@ -104,9 +108,12 @@ end:
        g_snprintf ( Cfg.lignes[gpio].acronyme, sizeof(Cfg.lignes[gpio].acronyme), Json_get_string ( element, "acronyme" ) );
        Info_new( Config.log, lib->Thread_debug, LOG_INFO,
                  "%s: GPIO%02d mappé sur '%s:%s'", __func__, gpio, Cfg.lignes[gpio].tech_id, Cfg.lignes[gpio].acronyme );
+       Cfg.lignes[gpio].mapped = TRUE;
      }
-    else Info_new( Config.log, lib->Thread_debug, LOG_DEBUG,
-                   "%s: GPIO%02d not mapped", __func__, gpio );
+    else
+     { Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: GPIO%02d not mapped", __func__, gpio );
+       Cfg.lignes[gpio].mapped = FALSE;
+     }
 /*
  * int gpiod_line_get_value(struct gpiod_line *line);
 int gpiod_line_set_value(struct gpiod_line *line,
@@ -132,7 +139,7 @@ int gpiod_line_set_value(struct gpiod_line *line,
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Main: Fonction principale du thread Gpiod                                                                               */
+/* Main: Fonction principale du thread Gpiod                                                                                  */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   {
@@ -140,7 +147,7 @@ reload:
     memset( &Cfg, 0, sizeof(Cfg) );                                                 /* Mise a zero de la structure de travail */
     Cfg.lib = lib;                                                 /* Sauvegarde de la structure pointant sur cette librairie */
     Thread_init ( "gpiod", "I/O", lib, WTD_VERSION, "Manage Gpiod I/O" );
-    Gpiod_Creer_DB ();                                                                /* Création de la base de données */
+    Gpiod_Creer_DB ( lib );                                                                 /* Création de la base de données */
 
     Cfg.chip = gpiod_chip_open_lookup("gpiochip0");
     if (!Cfg.chip)
@@ -152,6 +159,12 @@ reload:
 
     Cfg.num_lines = gpiod_chip_num_lines(Cfg.chip);
     Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: found %d lines", __func__, Cfg.num_lines );
+
+    gint max = (Cfg.num_lines > GPIOD_MAX_LINE ? GPIOD_MAX_LINE : Cfg.num_lines );
+    for (gint cpt=0; cpt<max; cpt++)                                                                    /* Valeurs par défaut */
+     { SQL_Write_new ( "INSERT IGNORE INTO `%s_io` SET uuid='%s', gpio='%d', mode_inout='0', mode_activelow='0'",
+                       lib->name, lib->uuid, cpt );
+     }
 
     if ( Charger_tous_gpio( lib ) == FALSE )                                                            /* Chargement des I/O */
      { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", __func__ );

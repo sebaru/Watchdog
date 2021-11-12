@@ -29,7 +29,6 @@
  #define _HTTP_H_
  #include <libsoup/soup.h>
  #include <json-glib/json-glib.h>
- #include <uuid/uuid.h>
 
  #define HTTP_DEFAUT_FILE_CERT         "https_api_cert.pem"
  #define HTTP_DEFAUT_FILE_KEY          "https_api_key.pem"

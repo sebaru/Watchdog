@@ -10,12 +10,12 @@ libwatchdog_server_http_la_SOURCES    = Http.c Http.h install.c admin_http.c get
                                         websocket.c gethisto_msgs.c getprocess.c getdls.c getsyn.c gettableau.c \
                                         getarchive.c getusers.c getmnemos.c getinstance.c getfile.c getmap.c gethorloge.c
 
-libwatchdog_server_http_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4 uuid` \
+libwatchdog_server_http_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
                                        `mysql_config --libs` -lcrypt \
                                        -rdynamic \
                                        -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-libwatchdog_server_http_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4 uuid` \
+libwatchdog_server_http_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
                                           `mysql_config --cflags`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \

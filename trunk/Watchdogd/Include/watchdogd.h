@@ -34,6 +34,7 @@
  #include <errno.h>
  #include <openssl/ssl.h>
  #include <libsoup/soup.h>
+ #include <uuid/uuid.h>
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
  #include "Json.h"
@@ -60,6 +61,7 @@
  struct LIBRAIRIE
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
+    gchar uuid[37];                                                                            /* Unique Identifier du thread */
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     time_t start_time;
     gchar name[32];                                                                    /* Prompt auquel va répondre le thread */
@@ -173,6 +175,7 @@
  extern gint Http_Msg_status_code ( SoupMessage *msg );
  extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
 
+ extern void New_uuid ( gchar *target );                                                                       /* Dans uuid.c */
 /*-------------------------------------------------- autres dépendances ------------------------------------------------------*/
  #include "Zmq.h"
 

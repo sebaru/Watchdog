@@ -50,18 +50,6 @@ CREATE TABLE IF NOT EXISTS `cameras` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
---
--- Structure de la table `icone`
---
-
-CREATE TABLE IF NOT EXISTS `icone` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
-  `extension` VARCHAR(4) NOT NULL DEFAULT 'svg',
-  `mode_affichage` VARCHAR(32) NOT NULL DEFAULT 'cadre',
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
-
 -- --------------------------------------------------------
 
 --
@@ -722,4 +710,3 @@ CREATE TABLE IF NOT EXISTS `icone` (
   `date_create` DATETIME NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
-

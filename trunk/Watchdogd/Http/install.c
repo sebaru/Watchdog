@@ -67,8 +67,6 @@
        return;
      }
 
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 0 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
