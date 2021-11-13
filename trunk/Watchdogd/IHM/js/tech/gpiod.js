@@ -7,6 +7,8 @@
        id            : id,
        mode_inout    : parseInt ($('#idModalGPIODInOut').val()),
        mode_activelow: parseInt($('#idModalGPIODActiveLow').val()),
+       tech_id       : $('#idModalGPIODSelectTechID').val(),
+       acronyme      : $('#idModalGPIODSelectAcronyme').val(),
      };
     Send_to_API ( 'POST', "/api/process/gpiod/set", JSON.stringify(json_request),
                   function() { Process_reload ( json_request.instance, "GPIOD", false ); }, null );
@@ -20,6 +22,9 @@
        $('#idGPIODTable').DataTable().rows.add( Response.gpios ).draw();
      }, null);
   }
+/********************************************* Appelé au chargement de la page ************************************************/
+ function GPIOD_Updater_Choix_TechID ( classe, tech_id, acronyme )
+  { Common_Updater_Choix_TechID ( "idModalGPIOD", classe, selection.tech_id, selection.acronyme ); }
 
 /********************************************* Appelé au chargement de la page ************************************************/
  function GPIOD_Show_modal_map ( id )
@@ -28,9 +33,11 @@
     $("#idModalGPIODTitre").text("Mapper la GPIO "+selection.gpio+ " sur " + $('#idTargetInstance').val() );
     if (selection.mode_inout==0) { classe="DI"; $("#idModalGPIODInOut").val("0"); }
                             else { classe="DO"; $("#idModalGPIODInOut").val("1"); }
+    $("#idModalGPIODInOut").off("change").on("change", function ()
+     { GPIOD_Updater_Choix_TechID ( "idModalGPIOD", classe, selection.tech_id, selection.acronyme ); } );
     if (selection.mode_activelow==0) { $("#idModalGPIODActiveLow").val("0"); }
                                 else { $("#idModalGPIODActiveLow").val("1"); }
-    Common_Updater_Choix_TechID ( "idModalGPIOD", classe, selection.tech_id, selection.acronyme );
+    GPIOD_Updater_Choix_TechID ( "idModalGPIOD", classe, selection.tech_id, selection.acronyme );
     $("#idModalGPIODValider").attr( "onclick", "GPIOD_Sauver_parametre("+id+")" );
     $("#idModalGPIOD").modal("show");
   }

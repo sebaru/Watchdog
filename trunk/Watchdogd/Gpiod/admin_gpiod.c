@@ -75,20 +75,25 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "id" ) &&
-            Json_has_member ( request, "mode_inout" ) && Json_has_member ( request, "mode_activelow" )
+            Json_has_member ( request, "mode_inout" ) && Json_has_member ( request, "mode_activelow" ) &&
+            Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" )
            ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
      }
 
-    gint id           = Json_get_int( request, "id" );
+    gint id             = Json_get_int( request, "id" );
     gint mode_inout     = Json_get_int( request, "mode_inout" );
     gint mode_activelow = Json_get_int( request, "mode_activelow" );
+    gchar *tech_id      = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
+    gchar *acronyme     = Normaliser_chaine ( Json_get_string ( request, "acronyme" ) );
     json_node_unref(request);
 
-    SQL_Write_new ( "UPDATE %s SET mode_inout='%d', mode_activelow='%d' WHERE id=%d",
-                    Lib->name, mode_inout, mode_activelow, id );
+    SQL_Write_new ( "UPDATE gpiod_io SET mode_inout='%d', mode_activelow='%d', tech_id='%s', acronyme='%s' "
+                    "WHERE id=%d", mode_inout, mode_activelow, tech_id, acronyme, id );
+    g_free(tech_id);
+    g_free(acronyme);
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
     Lib->Thread_reload = TRUE;
