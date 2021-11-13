@@ -50,12 +50,12 @@
              "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
 
     if (database_version==0)
-     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `gpio` ("
                        "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci PRIMARY KEY,"
                        "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                        "`tech_id` VARCHAR(32) NULL"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-       SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_io` ("
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+       SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `gpiod` ("
                        "`id` INT(11) NOT NULL AUTO_INCREMENT,"
                        "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                        "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
@@ -65,15 +65,14 @@
                        "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
                        "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
                        "PRIMARY KEY (`id`),"
-                       "FOREIGN KEY (`uuid`) REFERENCES `%s` (uuid) ON DELETE CASCADE ON UPDATE CASCADE,"
+                       "FOREIGN KEY (`uuid`) REFERENCES `gpio` (uuid) ON DELETE CASCADE ON UPDATE CASCADE,"
                        "UNIQUE (`uuid`,`num`)"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;",
-                       lib->name, lib->name );
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
        goto end;
      }
 
 end:
-    SQL_Write_new ("INSERT IGNORE INTO `%s` SET uuid='%s'", lib->name, lib->uuid );
+    SQL_Write_new ("INSERT IGNORE INTO `gpio` SET uuid='%s'", lib->uuid );
     database_version = 1;
     Modifier_configDB_int ( lib->name, "database_version", database_version );
   }

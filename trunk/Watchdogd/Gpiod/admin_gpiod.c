@@ -49,7 +49,7 @@
      }
 
     Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
-    SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM %s WHERE uuid='%s' ORDER BY num", Lib->name, Lib->uuid );
+    SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM gpiod_io WHERE uuid='%s' ORDER BY num", Lib->uuid );
 
     if (Lib->Thread_run)                                      /* Warning : Cfg_meteo does not exist if thread is not running ! */
      { /*Json_node_add_string ( RootNode, "tech_id", Cfg.tech_id );*/
