@@ -1,9 +1,10 @@
-Watchdog
-========
+Watchdog by Abls-Habitat
+========================
 
-Powerful Home Automation & Domotic !
+Many years ago, we wanted to deal with our houses. Now there we are, with a great project.
 
- See :
- - https://github.com/sebaru/Watchdog
- - http://seblef.hd.free.fr/wiki
- - http://seblef.hd.free.fr/bugzilla
+Please see installation instructions here:
+
+* https://docs.abls-habitat.fr/
+* https://wiki.abls-habitat.fr
+
