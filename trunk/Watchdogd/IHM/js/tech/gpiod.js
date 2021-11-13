@@ -23,21 +23,22 @@
      }, null);
   }
 /********************************************* Appelé au chargement de la page ************************************************/
- function GPIOD_Updater_Choix_TechID ( classe, tech_id, acronyme )
-  { Common_Updater_Choix_TechID ( "idModalGPIOD", classe, selection.tech_id, selection.acronyme ); }
-
+ function GPIOD_Updater_Choix_TechID ( tech_id, acronyme )
+  { if ($("#idModalGPIODInOut").val()=="0") classe="DI"; else classe="DO";
+    Common_Updater_Choix_TechID ( "idModalGPIOD", classe, selection.tech_id, selection.acronyme );
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function GPIOD_Show_modal_map ( id )
   { table = $('#idGPIODTable').DataTable();
     selection = table.rows().data().filter( function(item) { return (item.id==id) } )[0];
     $("#idModalGPIODTitre").text("Mapper la GPIO "+selection.gpio+ " sur " + $('#idTargetInstance').val() );
-    if (selection.mode_inout==0) { classe="DI"; $("#idModalGPIODInOut").val("0"); }
-                            else { classe="DO"; $("#idModalGPIODInOut").val("1"); }
+    if (selection.mode_inout==0) { $("#idModalGPIODInOut").val("0"); }
+                            else { $("#idModalGPIODInOut").val("1"); }
     $("#idModalGPIODInOut").off("change").on("change", function ()
-     { GPIOD_Updater_Choix_TechID ( classe, selection.tech_id, selection.acronyme ); } );
+     { GPIOD_Updater_Choix_TechID ( selection.tech_id, selection.acronyme ); } );
     if (selection.mode_activelow==0) { $("#idModalGPIODActiveLow").val("0"); }
                                 else { $("#idModalGPIODActiveLow").val("1"); }
-    GPIOD_Updater_Choix_TechID ( classe, selection.tech_id, selection.acronyme );
+    GPIOD_Updater_Choix_TechID ( selection.tech_id, selection.acronyme );
     $("#idModalGPIODValider").attr( "onclick", "GPIOD_Sauver_parametre("+id+")" );
     $("#idModalGPIOD").modal("show");
   }
