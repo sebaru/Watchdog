@@ -66,7 +66,7 @@
                        "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
                        "PRIMARY KEY (`id`),"
                        "FOREIGN KEY (`uuid`) REFERENCES `%s` (uuid) ON DELETE CASCADE ON UPDATE CASCADE,"
-                       "UNIQUE (`uuid`,`gpio`)"
+                       "UNIQUE (`uuid`,`num`)"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;",
                        lib->name, lib->name );
        goto end;
@@ -161,7 +161,7 @@ reload:
 
     gint max = (Cfg.num_lines > GPIOD_MAX_LINE ? GPIOD_MAX_LINE : Cfg.num_lines );
     for (gint cpt=0; cpt<max; cpt++)                                                                    /* Valeurs par défaut */
-     { SQL_Write_new ( "INSERT IGNORE INTO `%s_io` SET uuid='%s', gpio='%d', mode_inout='0', mode_activelow='0'",
+     { SQL_Write_new ( "INSERT IGNORE INTO `%s_io` SET uuid='%s', num='%d', mode_inout='0', mode_activelow='0'",
                        lib->name, lib->uuid, cpt );
      }
 
