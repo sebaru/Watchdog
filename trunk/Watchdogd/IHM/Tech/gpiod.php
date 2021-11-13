@@ -34,11 +34,11 @@
 <!-- Container -->
 </div>
 
-<div id="idModalGPIODMap" class="modal fade" tabindex="-1" role="dialog">
+<div id="idModalGPIOD" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalGPIODMapTitre"></span></h5>
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalGPIODTitre"></span></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -57,7 +57,7 @@
 
        <div class="col form-group">
           <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <label class="col-5 col-sm-4 col-form-label text-right">Mode Active Low</label>
            <select id="idModalGPIODActiveLow" class="col-7 custom-select border-info">
              <option value="0">Active High</option>
              <option value="1">Active Low</option>
@@ -68,21 +68,21 @@
        <div class="col form-group">
           <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-           <input id="idModalGPIODMapRechercherTechID" type="text" class="col-7 form-control" placeholder="Rechercher un Tech_id">
+           <input id="idModalGPIODRechercherTechID" type="text" class="col-7 form-control" placeholder="Rechercher un Tech_id">
           </div>
        </div>
 
        <div class="col form-group">
           <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-           <select id="idModalGPIODMapSelectTechID" class="col-7 custom-select border-info"></select>
+           <select id="idModalGPIODSelectTechID" class="col-7 custom-select border-info"></select>
           </div>
        </div>
 
        <div class="col form-group">
           <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-           <select id="idModalGPIODMapSelectAcronyme" class="col-7 custom-select border-info"></select>
+           <select id="idModalGPIODSelectAcronyme" class="col-7 custom-select border-info"></select>
           </div>
        </div>
 
@@ -90,7 +90,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-        <button id="idModalGPIODMapValider" type="button" class="btn btn-primary" data-dismiss="modal"><i class="fas fa-save"></i> Valider</button>
+        <button id="idModalGPIODValider" type="button" class="btn btn-primary" data-dismiss="modal"><i class="fas fa-save"></i> Valider</button>
       </div>
     </div>
   </div>
