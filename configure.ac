@@ -1,16 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
 
-define([MAJOR_VERSION], [3])
-define([MINOR_VERSION], [7])
-define([SVN_VERSION],   esyscmd([sh -c "svnversion -n | sed s/M//g"]))
+define([VERSION_MAJOR], [3])
+define([VERSION_MINOR], [7])
 
 AC_INIT([Watchdog], [MAJOR_VERSION.MINOR_VERSION.SVN_VERSION],
         [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
 
-AC_DEFINE([WTD_MAJOR_VERSION], [MAJOR_VERSION], [Numéro de version majeure])
-AC_DEFINE([WTD_MINOR_VERSION], [MINOR_VERSION], [Numéro de version mineure])
-AC_DEFINE([WTD_SVN_VERSION],   [SVN_VERSION],   [Numéro de revision SVN])
-full_version=MAJOR_VERSION.MINOR_VERSION.SVN_VERSION
+full_version=VERSION_MAJOR.VERSION_MINOR
 AC_DEFINE_UNQUOTED([WTD_VERSION], "$full_version", [Numero de version])
 
 AC_CANONICAL_TARGET

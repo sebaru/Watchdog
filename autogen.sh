@@ -1,6 +1,6 @@
 #! /bin/sh
 
-svn update
+git pull
 osFedora=`grep -e "^NAME.*Fedora.*" /etc/os-release`
 osRaspbian=`grep "ID=raspbian" /etc/os-release`
 osDebian=`grep "ID=debian" /etc/os-release`
@@ -30,4 +30,4 @@ aclocal --force
 automake --add-missing
 autoconf --force
 ./configure
-make -j 8
+make -j 16
