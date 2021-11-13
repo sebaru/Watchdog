@@ -11,7 +11,7 @@
        acronyme      : $('#idModalGPIODSelectAcronyme').val(),
      };
     Send_to_API ( 'POST', "/api/process/gpiod/set", JSON.stringify(json_request),
-                  function() { Process_reload ( json_request.instance, "GPIOD", false ); }, null );
+                  function() { Process_reload ( json_request.instance, "GPIOD", false ); GPIOD_Load_config (); }, null );
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function GPIOD_Load_config ()

@@ -113,11 +113,6 @@ end:
      { Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: GPIO%02d not mapped", __func__, num );
        Cfg.lignes[num].mapped = FALSE;
      }
-/*
- * int gpiod_line_get_value(struct gpiod_line *line);
-int gpiod_line_set_value(struct gpiod_line *line,
-                         int value);
-*/
   }
 /******************************************************************************************************************************/
 /* Charger_tous_IO: Charge toutes les I/O                                                                                     */
@@ -156,19 +151,19 @@ reload:
     else Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: chip 'gpiochip0' loaded", __func__ );
 
     Cfg.num_lines = gpiod_chip_num_lines(Cfg.chip);
+    if (Cfg.num_lines > GPIOD_MAX_LINE) Cfg.num_lines = GPIOD_MAX_LINE;
     Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: found %d lines", __func__, Cfg.num_lines );
 
-    gint max = (Cfg.num_lines > GPIOD_MAX_LINE ? GPIOD_MAX_LINE : Cfg.num_lines );
-    for (gint cpt=0; cpt<max; cpt++)                                                                    /* Valeurs par défaut */
+    for (gint cpt=0; cpt<Cfg.num_lines; cpt++)                                                                    /* Valeurs par défaut */
      { SQL_Write_new ( "INSERT IGNORE INTO `%s_io` SET uuid='%s', num='%d', mode_inout='0', mode_activelow='0'",
                        lib->name, lib->uuid, cpt );
      }
 
     if ( Charger_tous_gpio( lib ) == FALSE )                                                            /* Chargement des I/O */
-     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", __func__ );
+     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", __func__ );
        Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
      }
-    else Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: %d GPIO Lines loaded", __func__, max );
+    else Info_new( Config.log, lib->Thread_debug, LOG_INFO, "%s: %d GPIO Lines loaded", __func__, Cfg.num_lines );
 
     gint last_top = 0, nbr_tour_par_sec = 0, nbr_tour = 0;                        /* Limitation du nombre de tour par seconde */
     while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
@@ -183,12 +178,14 @@ reload:
           last_top = Partage->top;
         }
 
-       for ( gint cpt = 0; cpt < GPIOD_MAX_LINE; cpt++ )
+       for ( gint cpt = 0; cpt < Cfg.num_lines; cpt++ )
         { if (Cfg.lignes[cpt].mode_inout == 0) /* Ligne d'entrée ? */
-           { gint etat = gpiod_line_get_value( Cfg.lignes[cpt].gpio_ligne );
+           { gboolean etat = gpiod_line_get_value( Cfg.lignes[cpt].gpio_ligne );
              if (etat != Cfg.lignes[cpt].etat) /* Détection de changement */
               { Cfg.lignes[cpt].etat = etat;
-                Zmq_Send_DI_to_master ( lib, Cfg.lignes[cpt].tech_id, Cfg.lignes[cpt].acronyme, etat );
+                if (Cfg.lignes[cpt].mapped) Zmq_Send_DI_to_master ( lib, Cfg.lignes[cpt].tech_id, Cfg.lignes[cpt].acronyme, etat );
+                Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: INPUT: GPIO%02d = %d", __func__, cpt, etat );
+                break;
               }
            }
         }
@@ -198,7 +195,7 @@ reload:
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_DO" ) )
            { if (!Json_has_member ( request, "tech_id"))
-              { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
+              { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
              else if (!Json_has_member ( request, "acronyme" ))
               { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
              else if (!Json_has_member ( request, "etat" ))
@@ -206,10 +203,21 @@ reload:
              else
               { gchar *tech_id  = Json_get_string ( request, "tech_id" );
                 gchar *acronyme = Json_get_string ( request, "acronyme" );
-                /*gboolean etat   = Json_get_bool   ( request, "etat" );*/
+                gboolean etat   = Json_get_bool   ( request, "etat" );
 
                 Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s",
                           __func__, tech_id, acronyme );
+
+                for ( gint cpt = 0; cpt < Cfg.num_lines; cpt++ )
+                 { if (Cfg.lignes[cpt].mode_inout == 1 &&  /* Ligne de sortie ? */
+                       !strcasecmp ( Cfg.lignes[cpt].tech_id, tech_id ) &&
+                       !strcasecmp ( Cfg.lignes[cpt].acronyme, acronyme )
+                      )
+                    { gpiod_line_set_value ( Cfg.lignes[cpt].gpio_ligne, etat );
+                      Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: OUTPUT: GPIO%02d = %d", __func__, cpt, etat );
+                      break;
+                    }
+                 }
 
                 /*GSList *liste = Cfg_phidget.Liste_sensors;
                 while (liste)
