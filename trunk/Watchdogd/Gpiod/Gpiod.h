@@ -30,7 +30,7 @@
 
  #include <gpiod.h>
 
- #define GPIOD_MAX_LINE    27                                                         /* 27 Lignes maximums d'entrées/sorties */
+ #define GPIOD_MAX_LINE    28                                                         /* 28 Lignes maximums d'entrées/sorties */
 
  struct GPIOD_CONFIG
   { struct LIBRAIRIE *lib;

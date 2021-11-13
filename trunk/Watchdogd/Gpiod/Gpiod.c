@@ -66,7 +66,8 @@
                        "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
                        "PRIMARY KEY (`id`),"
                        "FOREIGN KEY (`uuid`) REFERENCES `gpiod` (uuid) ON DELETE CASCADE ON UPDATE CASCADE,"
-                       "UNIQUE (`uuid`,`num`)"
+                       "UNIQUE (`uuid`,`num`),"
+                       "UNIQUE (`tech_id`,`acronyme`)"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
        goto end;
      }
@@ -218,21 +219,6 @@ reload:
                       break;
                     }
                  }
-
-                /*GSList *liste = Cfg_phidget.Liste_sensors;
-                while (liste)
-                 { struct PHIDGET_ELEMENT *canal = liste->data;
-                   if ( !strcasecmp ( canal->classe, "DigitalOutput" ) &&
-                        !strcasecmp ( canal->dls_do->tech_id, tech_id ) &&
-                        !strcasecmp ( canal->dls_do->acronyme, acronyme ) )
-                    { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_NOTICE, "%s: SET_DO %s:%s=%d", __func__,
-                                canal->dls_do->tech_id, canal->dls_do->acronyme, etat );
-                      if ( PhidgetDigitalOutput_setState( (PhidgetDigitalOutputHandle)canal->handle, etat ) != EPHIDGET_OK )
-                       { Phidget_print_error ( canal ); }
-                      break;
-                    }
-                   liste = g_slist_next(liste);
-                 }*/
               }
            }
           json_node_unref (request);

@@ -90,6 +90,9 @@
     gchar *acronyme     = Normaliser_chaine ( Json_get_string ( request, "acronyme" ) );
     json_node_unref(request);
 
+    SQL_Write_new ( "UPDATE gpiod_io SET tech_id=NULL, acronyme=NULL "
+                    "WHERE tech_id='%s', acronyme='%s'", tech_id, acronyme );
+
     SQL_Write_new ( "UPDATE gpiod_io SET mode_inout='%d', mode_activelow='%d', tech_id='%s', acronyme='%s' "
                     "WHERE id=%d", mode_inout, mode_activelow, tech_id, acronyme, id );
     g_free(tech_id);
