@@ -18,16 +18,16 @@
 <hr>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Choix de l'instance</label>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Choix de l'instance</label>
            <select id="idTargetInstance" class="custom-select border-info" onchange="GPIOD_Load_config()"></select>
-     					</div>
-  					</div>
+          </div>
+       </div>
 
     <table id="idGPIODTable" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
-				  </thead>
-			   <tbody>
+      </thead>
+      <tbody>
       </tbody>
     </table>
 
@@ -46,25 +46,45 @@
       <div class="modal-body">
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalGPIODMapRechercherTechID" type="text" class="col-7 form-control" placeholder="Rechercher un Tech_id">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Mode Input/Output</label>
+           <select id="idModalGPIODInOut" class="col-7 custom-select border-info">
+             <option value="0">Input</option>
+             <option value="1">Output</option>
+           </select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalGPIODMapSelectTechID" class="col-7 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idModalGPIODActiveLow" class="col-7 custom-select border-info">
+             <option value="0">Active High</option>
+             <option value="1">Active Low</option>
+           </select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalGPIODMapSelectAcronyme" class="col-7 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idModalGPIODMapRechercherTechID" type="text" class="col-7 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
+
+       <div class="col form-group">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idModalGPIODMapSelectTechID" class="col-7 custom-select border-info"></select>
+          </div>
+       </div>
+
+       <div class="col form-group">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idModalGPIODMapSelectAcronyme" class="col-7 custom-select border-info"></select>
+          </div>
+       </div>
 
 
       </div>

@@ -5,8 +5,8 @@
   { var json_request =
      { instance      : $('#idTargetInstance').val(),
        id            : id,
-       mode_inout    : parseInt ($('#idGPIODInOut'+id).val()),
-       mode_activelow: parseInt($('#idGPIODActiveLow'+id).val()),
+       mode_inout    : parseInt ($('#idGPIODInOut').val()),
+       mode_activelow: parseInt($('#idGPIODActiveLow').val()),
      };
     Send_to_API ( 'POST', "/api/process/gpiod/set", JSON.stringify(json_request),
                   function() { Process_reload ( json_request.instance, "GPIOD", false ); }, null );
@@ -26,7 +26,10 @@
   { table = $('#idGPIODTable').DataTable();
     selection = table.rows().data().filter( function(item) { return (item.id==id) } )[0];
     $("#idModalGPIODMapTitre").text("Mapper la GPIO "+selection.gpio+ " sur " + $('#idTargetInstance').val() );
-    if (selection.mode_inout==0) classe="DI"; else classe="DO";
+    if (selection.mode_inout==0) { classe="DI"; $("#idModalGPIODInOut").val("0"); }
+                            else { classe="DO"; $("#idModalGPIODInOut").val("1"); }
+    if (selection.mode_activelow==0) { $("#idModalGPIODActiveLow").val("0"); }
+                                else { $("#idModalGPIODActiveLow").val("1"); }
     Common_Updater_Choix_TechID ( "idModalGPIODMap", classe, selection.tech_id, selection.acronyme );
     $("#idModalGPIODMap").modal("show");
   }
@@ -44,16 +47,14 @@
          [ { "data": "gpio",   "title":"#Gpio",   "className": "align-middle text-center" },
            { "data": null, "title":"Mode I/O",    "className": "align-middle ",
              "render": function (item)
-               { return( Select ( "idGPIODInOut"+item.id, "GPIOD_Sauver_parametre("+item.id+")",
-                                  [ { valeur: 0, texte: "IN" }, { valeur: 1, texte: "OUT" } ], item.mode_inout )
-                       );
+               { if (item.mode_inout) return( "INPUT" );
+                                 else return( "OUTPUT" );
                }
            },
            { "data": null, "title":"Active Low",    "className": "align-middle ",
              "render": function (item)
-               { return( Select ( "idGPIODActiveLow"+item.id, "GPIOD_Sauver_parametre("+item.id+")",
-                                  [ { valeur: 0, texte: "NO" }, { valeur: 1, texte: "YES" } ], item.mode_activelow )
-                       );
+               { if (item.mode_activelow) return( "ActiveLow" );
+                                     else return( "ActiveHigh" );
                }
            },
            { "data": "tech_id",  "title":"Map Tech_ID",  "className": "align-middle text-center" },
