@@ -48,14 +48,14 @@
          [ { "data": "num", "title":"#Gpio", "className": "align-middle text-center" },
            { "data": null,  "title":"Mode I/O", "className": "align-middle text-center",
              "render": function (item)
-               { if (item.mode_inout) return( "INPUT" );
-                                 else return( "OUTPUT" );
+               { if (item.mode_inout) return( "OUTPUT" );
+                                 else return( "INPUT" );
                }
            },
            { "data": null, "title":"Active Low",    "className": "align-middle text-center",
              "render": function (item)
-               { if (item.mode_activelow) return( "Active High" );
-                                     else return( "Active Low" );
+               { if (item.mode_activelow) return( "Active Low" );
+                                     else return( "Active High" );
                }
            },
            { "data": "tech_id",  "title":"Map Tech_ID",  "className": "align-middle text-center" },
