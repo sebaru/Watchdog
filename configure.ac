@@ -1,13 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 
-define([VERSION_MAJOR], [3])
-define([VERSION_MINOR], [7])
+define ([GITTAG], m4_esyscmd_s([sh -c "git describe --tags | tr -d '\n'"]) )
 
-AC_INIT([Watchdog], [MAJOR_VERSION.MINOR_VERSION.SVN_VERSION],
+AC_INIT([Watchdog], [GITTAG],
         [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
 
-full_version=VERSION_MAJOR.VERSION_MINOR
-AC_DEFINE_UNQUOTED([WTD_VERSION], "$full_version", [Numero de version])
+AC_DEFINE_UNQUOTED([WTD_VERSION], "[m4_esyscmd_s([sh -c "git describe --tags | tr -d '\n'"])]", [Numero de version])
 
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])

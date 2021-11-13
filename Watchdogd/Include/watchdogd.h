@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/watchdogd.h      Déclarations générales watchdog                                                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 11 avr 2009 12:23:32 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 11 avr 2009 12:23:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
