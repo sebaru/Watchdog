@@ -95,11 +95,11 @@ end:
     Cfg.lignes[num].mode_activelow = mode_activelow;
 
     if (mode_inout==0)
-     { gpiod_line_request_input ( Cfg.lignes[num].gpio_ligne, "Watchdog RPI Thread" );
+     { gpiod_line_request_input ( Cfg.lignes[num].gpio_ligne, "Watchdog GPIO INPUT Thread" );
        Cfg.lignes[num].etat = gpiod_line_get_value( Cfg.lignes[num].gpio_ligne );
      }
     else
-     { gpiod_line_request_output( Cfg.lignes[num].gpio_ligne, "Watchdog RPI Thread", mode_activelow );
+     { gpiod_line_request_output( Cfg.lignes[num].gpio_ligne, "Watchdog GPIO OUTPUT Thread", mode_activelow );
        Cfg.lignes[num].etat = mode_activelow;
      }
 
@@ -124,7 +124,7 @@ end:
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
-    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM %s_io WHERE uuid='%s'", Cfg.lib->name, lib->uuid ) == FALSE)
+    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM gpiod_io WHERE uuid='%s'", lib->uuid ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
      }
