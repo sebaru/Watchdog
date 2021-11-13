@@ -124,7 +124,7 @@ end:
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
-    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM gpiod_io WHERE uuid='%s'", lib->uuid ) == FALSE)
+    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM gpiod_io WHERE uuid='%s' ORDER BY num", lib->uuid ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
      }
@@ -225,7 +225,7 @@ reload:
         }
      }
 
-    for ( gint cpt=0; cpt < sizeof(Cfg.num_lines); cpt++ )
+    for ( gint cpt=0; cpt < Cfg.num_lines; cpt++ )
      { if (Cfg.lignes[cpt].gpio_ligne) gpiod_line_release( Cfg.lignes[cpt].gpio_ligne ); }
 
 end:
