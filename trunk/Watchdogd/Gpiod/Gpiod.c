@@ -84,23 +84,22 @@ end:
 /******************************************************************************************************************************/
  static void Charger_un_gpio (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct LIBRAIRIE *lib = user_data;
-    gint num            = Json_get_int ( element, "num" );
-    gint mode_inout     = Json_get_int ( element, "mode_inout" );
-    gint mode_activelow = Json_get_int ( element, "mode_activelow" );
-    Info_new( Config.log, lib->Thread_debug, LOG_INFO,
-              "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__, num, mode_inout, mode_activelow );
-
+    gint num                       = Json_get_int ( element, "num" );
+    Cfg.lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
+    Cfg.lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );
     Cfg.lignes[num].gpio_ligne     = gpiod_chip_get_line( Cfg.chip, num );
-    Cfg.lignes[num].mode_inout     = mode_inout;
-    Cfg.lignes[num].mode_activelow = mode_activelow;
+    Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+              "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__,
+              num, Cfg.lignes[num].mode_inout, Cfg.lignes[num].mode_activelow );
 
-    if (mode_inout==0)
+
+    if (Cfg.lignes[num].mode_inout==0)
      { gpiod_line_request_input ( Cfg.lignes[num].gpio_ligne, "Watchdog GPIO INPUT Thread" );
        Cfg.lignes[num].etat = gpiod_line_get_value( Cfg.lignes[num].gpio_ligne );
      }
     else
-     { gpiod_line_request_output( Cfg.lignes[num].gpio_ligne, "Watchdog GPIO OUTPUT Thread", mode_activelow );
-       Cfg.lignes[num].etat = mode_activelow;
+     { gpiod_line_request_output( Cfg.lignes[num].gpio_ligne, "Watchdog GPIO OUTPUT Thread", Cfg.lignes[num].mode_activelow );
+       Cfg.lignes[num].etat = !Cfg.lignes[num].mode_activelow;
      }
 
     if (Json_has_member ( element, "tech_id" ) && Json_has_member ( element, "acronyme" ))
@@ -214,8 +213,8 @@ reload:
                        !strcasecmp ( Cfg.lignes[cpt].tech_id, tech_id ) &&
                        !strcasecmp ( Cfg.lignes[cpt].acronyme, acronyme )
                       )
-                    { gpiod_line_set_value ( Cfg.lignes[cpt].gpio_ligne, etat );
-                      Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: OUTPUT: GPIO%02d = %d", __func__, cpt, etat );
+                    { Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: OUTPUT: GPIO%02d = %d", __func__, cpt, etat );
+                      gpiod_line_set_value ( Cfg.lignes[cpt].gpio_ligne, (Cfg.lignes[cpt].mode_activelow ? !etat : etat) );
                       break;
                     }
                  }
