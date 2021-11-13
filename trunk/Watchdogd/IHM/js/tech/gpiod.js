@@ -34,7 +34,7 @@
     if (selection.mode_inout==0) { classe="DI"; $("#idModalGPIODInOut").val("0"); }
                             else { classe="DO"; $("#idModalGPIODInOut").val("1"); }
     $("#idModalGPIODInOut").off("change").on("change", function ()
-     { GPIOD_Updater_Choix_TechID ( "idModalGPIOD", classe, selection.tech_id, selection.acronyme ); } );
+     { GPIOD_Updater_Choix_TechID ( classe, selection.tech_id, selection.acronyme ); } );
     if (selection.mode_activelow==0) { $("#idModalGPIODActiveLow").val("0"); }
                                 else { $("#idModalGPIODActiveLow").val("1"); }
     GPIOD_Updater_Choix_TechID ( "idModalGPIOD", classe, selection.tech_id, selection.acronyme );
