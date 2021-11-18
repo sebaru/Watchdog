@@ -4,10 +4,10 @@ for SRC in $( ls *.svg );
             FILENAME=$(basename $SRC ".svg")
             echo Parsing ${SRC} into ${FILENAME}.png
             nice -10 ionice -c 3 sh -c 'inkscape '${SRC}' -o '${FILENAME}'.png;' &
-	       done
+       done
 
 for job in `jobs -p`
         do
            wait $job
         done
-svn add *.png &>/dev/null
+git add *.png
