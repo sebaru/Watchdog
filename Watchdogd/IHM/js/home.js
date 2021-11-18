@@ -201,7 +201,7 @@
                                   } );
                        }
                       else if (visuel.ihm_affichage=="complexe" && visuel.forme=="bouton")
-                       { var button = $("<button>").css("position", "absolute").addClass("btn")
+                       { var button = $("<button>").css("position", "absolute").addClass("btn btn-sm")
                                                    .css("left", visuel.posx).css("top", visuel.posy)
                                                    .css("translate", "-50% -50%")
                                                    .append( visuel.libelle )
