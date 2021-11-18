@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun',
-  `archivage` INT(11) NOT NULL DEFAULT '3',
+  `archivage` INT(11) NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   UNIQUE (`map_tech_id`,`map_tag`),

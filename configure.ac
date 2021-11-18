@@ -9,7 +9,7 @@ AC_DEFINE_UNQUOTED([WTD_VERSION], "[m4_esyscmd_s([sh -c "git describe --tags | t
 
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 
 AC_CONFIG_HEADER(config.h)
 
