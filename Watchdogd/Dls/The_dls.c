@@ -464,7 +464,7 @@ end:
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_INFO,
-                    "%s: adding DLS_BOOL MONO '%s:%s'", __func__, tech_id, acronyme );
+                    "%s: adding DLS_BOOL MONO '%s:%s'=%d", __func__, tech_id, acronyme, valeur );
         }
        if (bool_p) *bool_p = (gpointer)bool;                                        /* Sauvegarde pour acceleration si besoin */
       }
