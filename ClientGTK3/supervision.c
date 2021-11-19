@@ -663,6 +663,26 @@
     if (visuel)
      { Json_node_add_string ( visuel, "forme", "comment" );
        Json_node_add_string ( visuel, "gestion", "0" );
+       Json_node_add_string ( visuel, "mode", "annotation" );
+       Json_node_add_string ( visuel, "color", "black" );
+       Json_node_add_string ( visuel, "tech_id", "" );
+       Json_node_add_string ( visuel, "acronyme", "" );
+       Json_node_add_string ( visuel, "ihm_affichage", "complexe" );
+       gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), "%s", Json_get_string ( infos->syn, "date_create" ) );
+       Json_node_add_string ( visuel, "libelle", chaine );
+       Json_node_add_int ( visuel, "id", -1 );
+       Json_node_add_int ( visuel, "angle", 0 );
+       Json_node_add_int ( visuel, "posx", 950 );
+       Json_node_add_int ( visuel, "posy", 750 );
+       Json_node_add_double ( visuel, "scale", 1.0 );
+       Afficher_un_motif ( NULL, 0, visuel, page );
+     }
+
+    visuel = Json_node_create();
+    if (visuel)
+     { Json_node_add_string ( visuel, "forme", "comment" );
+       Json_node_add_string ( visuel, "gestion", "0" );
        Json_node_add_string ( visuel, "mode", "titre" );
        Json_node_add_string ( visuel, "color", "black" );
        Json_node_add_string ( visuel, "tech_id", "" );

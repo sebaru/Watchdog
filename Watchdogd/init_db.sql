@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `cameras` (
 
 CREATE TABLE IF NOT EXISTS `syns` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `date_create` DATETIME NOT NULL DEFAULT NOW(),
   `parent_id` INT(11) NOT NULL,
   `libelle` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'syn_maison.png',
