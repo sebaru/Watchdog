@@ -40,12 +40,9 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gint Mnemo_auto_create_MSG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gint typologie )
+ gint Mnemo_auto_create_MSG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gint typologie, gint groupe )
   { gchar *libelle;
-    gchar requete[2048];
     gboolean retour;
-    struct DB *db;
-    gint id;
 
     libelle = Normaliser_chaine ( libelle_src );                                             /* Formatage correct des chaines */
     if (!libelle)
@@ -53,28 +50,13 @@
        return(-1);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',"
-                "typologie='%d',sms_notification='0' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), typologie=VALUES(typologie)", NOM_TABLE_MSG,
-                deletable, tech_id, acronyme, libelle, libelle, typologie
-              );
+    retour = SQL_Write_new ( "INSERT INTO %s SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',"
+                             "typologie='%d',sms_notification='0', groupe='%d' "
+                             " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), typologie=VALUES(typologie), groupe=VALUES(groupe)", NOM_TABLE_MSG,
+                             deletable, tech_id, acronyme, libelle, libelle, typologie, groupe
+                           );
     g_free(libelle);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(-1);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if ( retour == FALSE )
-     { Libere_DB_SQL(&db);
-       return(-1);
-     }
-    id = Recuperer_last_ID_SQL ( db );
-    Libere_DB_SQL(&db);
-    return(id);
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* Charger_confDB_MSG: Recupération de la conf des messages                                                                   */
@@ -92,7 +74,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.tech_id, m.acronyme, m.etat FROM msgs as m"
+                "SELECT m.tech_id, m.acronyme, m.etat, m.groupe FROM msgs as m"
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -101,7 +83,7 @@
      }
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Dls_data_set_MSG_init ( db->row[0], db->row[1], atoi(db->row[2]) );
+     { Dls_data_set_MSG_init ( db->row[0], db->row[1], atoi(db->row[2]), atoi(db->row[3]) );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: MSG '%s:%s'=%d loaded", __func__,
                  db->row[0], db->row[1], atoi(db->row[2]) );
      }
@@ -145,6 +127,7 @@
  void Dls_MESSAGE_to_json ( JsonNode *element, struct DLS_MESSAGES *bit )
   { Json_node_add_string ( element, "tech_id",  bit->tech_id );
     Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool ( element, "etat", bit->etat );
+    Json_node_add_bool   ( element, "etat",     bit->etat );
+    Json_node_add_int    ( element, "groupe",   bit->groupe );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

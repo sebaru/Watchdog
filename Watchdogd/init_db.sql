@@ -595,6 +595,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `audio_profil` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',
   `audio_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
+  `groupe` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE(`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE

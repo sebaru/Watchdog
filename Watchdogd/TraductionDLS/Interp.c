@@ -739,11 +739,18 @@
     action->sinon = New_chaine( taille );
 
     gint update = Get_option_entier ( options, T_UPDATE, 0 );
+    gint groupe = Get_option_entier ( options, T_GROUPE, 0 );
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, FALSE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+    if (groupe>0)
+     { g_snprintf( action->alors, taille, "   Dls_data_set_MSG_groupe ( vars, \"%s\", \"%s\", &_%s_%s, %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, groupe );
+     }
+    else
+     { g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+       g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, FALSE );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+     }
     return(action);
   }
 /******************************************************************************************************************************/
@@ -1595,9 +1602,9 @@
                    break;
                  }
                 case MNEMO_MSG:
-                 { gint param;
-                   param = Get_option_entier ( alias->options, T_TYPE, MSG_ETAT );
-                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, param );
+                 { gint type   = Get_option_entier ( alias->options, T_TYPE, MSG_ETAT );
+                   gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
+                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, type, groupe );
                    Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme );
                    break;
                  }

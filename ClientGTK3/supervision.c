@@ -635,7 +635,7 @@
        Json_node_add_int ( visuel, "angle", 0 );
        Json_node_add_int ( visuel, "posx", 40 );
        Json_node_add_int ( visuel, "posy", 40 );
-       Json_node_add_double ( visuel, "scale", 0.08 );
+       Json_node_add_double ( visuel, "scale", 0.06 );
        Afficher_un_motif ( NULL, 0, visuel, page );
      }
 

@@ -2440,8 +2440,11 @@ encore:
     if (database_version < 6076)
      { SQL_Write_new ("ALTER TABLE `syns` ADD `date_create` DATETIME NOT NULL DEFAULT NOW() AFTER `id`" ); }
 
+    if (database_version < 6078)
+     { SQL_Write_new ("ALTER TABLE `msgs` ADD `groupe` INT(11) NOT NULL DEFAULT '0'" ); }
+
 fin:
-    database_version = 6076;
+    database_version = 6078;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

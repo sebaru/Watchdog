@@ -1248,64 +1248,49 @@ end:
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MSG_init ( gchar *tech_id, gchar *acronyme, gboolean etat )
+ static struct DLS_MESSAGES *Dls_data_MSG_lookup ( gchar *tech_id, gchar *acronyme )
   { struct DLS_MESSAGES *msg;
-
-    GSList *liste;
-    if ( !(acronyme && tech_id) ) return;
-    liste = Partage->Dls_data_MSG;
+    GSList *liste = Partage->Dls_data_MSG;
     while (liste)
      { msg = (struct DLS_MESSAGES *)liste->data;
-       if ( !strcasecmp ( msg->acronyme, acronyme ) && !strcasecmp( msg->tech_id, tech_id ) ) break;
+       if ( !strcasecmp( msg->tech_id, tech_id ) && !strcasecmp( msg->acronyme, acronyme ) ) return(msg);
        liste = g_slist_next(liste);
      }
 
-    if (!liste)
-     { msg = g_try_malloc0 ( sizeof(struct DLS_MESSAGES) );
-       if (!msg)
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
-          return;
-        }
-       g_snprintf( msg->acronyme, sizeof(msg->acronyme), "%s", acronyme );
-       g_snprintf( msg->tech_id,  sizeof(msg->tech_id),  "%s", tech_id );
-       pthread_mutex_lock( &Partage->com_dls.synchro_data );
-       Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
-       pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_MSG '%s:%s'", __func__, tech_id, acronyme );
+    msg = g_try_malloc0 ( sizeof(struct DLS_MESSAGES) );
+    if (!msg)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+       return(NULL);
      }
-    msg->etat = etat;
+    g_snprintf( msg->acronyme, sizeof(msg->acronyme), "%s", acronyme );
+    g_snprintf( msg->tech_id,  sizeof(msg->tech_id),  "%s", tech_id );
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );
+    Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_MSG '%s:%s'", __func__, tech_id, acronyme );
+    return(msg);
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MSG_reel ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p,
-                              gboolean update, gboolean etat )
+ void Dls_data_set_MSG_init ( gchar *tech_id, gchar *acronyme, gint groupe, gboolean etat )
+  { struct DLS_MESSAGES *msg = Dls_data_MSG_lookup ( tech_id, acronyme );
+    if (!msg) return;
+    msg->etat   = etat;
+    msg->groupe = groupe;
+  }
+/******************************************************************************************************************************/
+/* Met à jour le message en parametre                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Dls_data_set_MSG_reel ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p,
+                                     gboolean update, gboolean etat )
   { struct DLS_MESSAGES *msg;
 
     if (!msg_p || !*msg_p)
-     { GSList *liste;
-       if ( !(acronyme && tech_id) ) return;
-       liste = Partage->Dls_data_MSG;
-       while (liste)
-        { msg = (struct DLS_MESSAGES *)liste->data;
-          if ( !strcasecmp ( msg->acronyme, acronyme ) && !strcasecmp( msg->tech_id, tech_id ) ) break;
-          liste = g_slist_next(liste);
-        }
-
-       if (!liste)
-        { msg = g_try_malloc0 ( sizeof(struct DLS_MESSAGES) );
-          if (!msg)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
-             return;
-           }
-          g_snprintf( msg->acronyme, sizeof(msg->acronyme), "%s", acronyme );
-          g_snprintf( msg->tech_id,  sizeof(msg->tech_id),  "%s", tech_id );
-          pthread_mutex_lock( &Partage->com_dls.synchro_data );
-          Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
-          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_MSG '%s:%s'", __func__, tech_id, acronyme );
-        }
+     { if ( !(acronyme && tech_id) ) return;
+       msg = Dls_data_MSG_lookup ( tech_id, acronyme );
        if (msg_p) *msg_p = (gpointer)msg;                                           /* Sauvegarde pour acceleration si besoin */
       }
     else msg = (struct DLS_MESSAGES *)*msg_p;
@@ -1382,6 +1367,29 @@ end:
  void Dls_data_set_MSG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat )
   { if (vars && Dls_data_get_MONO(NULL, NULL, &vars->bit_comm)==FALSE) etat = FALSE;
     Dls_data_set_MSG_reel( vars, tech_id, acronyme, msg_p, update, etat );
+  }
+/******************************************************************************************************************************/
+/* Met à jour le groupe de messages en parametre                                                                              */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_MSG_groupe ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gint groupe )
+  { struct DLS_MESSAGES *msg;
+    if (!msg_p || !*msg_p)
+     { if ( !(acronyme && tech_id) ) return;
+       msg = Dls_data_MSG_lookup ( tech_id, acronyme );
+       if (msg_p) *msg_p = (gpointer)msg;                                           /* Sauvegarde pour acceleration si besoin */
+     }
+    else msg = (struct DLS_MESSAGES *)*msg_p;
+
+    GSList *liste = Partage->Dls_data_MSG;
+    while (liste)
+     { struct DLS_MESSAGES *current_msg = liste->data;
+       if ( current_msg != msg && !strcasecmp ( current_msg->tech_id, msg->tech_id ) && current_msg->groupe == msg->groupe )
+        { Dls_data_set_MSG_reel ( vars, current_msg->tech_id, current_msg->acronyme, (gpointer)&current_msg, FALSE, FALSE ); }
+       liste = g_slist_next(liste);
+     }
+    if (vars && Dls_data_get_MONO(NULL, NULL, &vars->bit_comm)==FALSE) Dls_data_set_MSG_reel ( vars, tech_id, acronyme, msg_p, FALSE, FALSE );
+    else Dls_data_set_MSG_reel ( vars, tech_id, acronyme, msg_p, FALSE, TRUE );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
