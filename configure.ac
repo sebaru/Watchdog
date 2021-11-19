@@ -1,8 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-define ([GITTAG], m4_esyscmd_s([sh -c "git describe --tags | tr -d '\n'"]) )
-
-AC_INIT([Watchdog], [GITTAG],
+AC_INIT([Watchdog], [3.x],
         [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
 
 AC_DEFINE_UNQUOTED([WTD_VERSION], "[m4_esyscmd_s([sh -c "git describe --tags | tr -d '\n'"])]", [Numero de version])

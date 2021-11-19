@@ -709,7 +709,7 @@
        Json_node_add_string ( visuel, "libelle", "©ABLS-Habitat.fr" );
        Json_node_add_int ( visuel, "id", -1 );
        Json_node_add_int ( visuel, "angle", 0 );
-       Json_node_add_int ( visuel, "posx", 180 );
+       Json_node_add_int ( visuel, "posx", 160 );
        Json_node_add_int ( visuel, "posy", 40 );
        Json_node_add_double ( visuel, "scale", 1.0 );
        Afficher_un_motif ( NULL, 0, visuel, page );
