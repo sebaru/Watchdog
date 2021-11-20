@@ -431,6 +431,7 @@ end:
 /******************************************************************************************************************************/
  struct DLS_BI *Dls_data_BI_lookup ( gchar *tech_id, gchar *acronyme )
   { struct DLS_BI *bi;
+    if (!tech_id || !acronyme) return(FALSE);
     GSList *liste = Partage->Dls_data_BI;
     while (liste)                                                                               /* A la recherche du message. */
      { bi = (struct DLS_BI *)liste->data;
@@ -457,6 +458,7 @@ end:
 /******************************************************************************************************************************/
  struct DLS_MONO *Dls_data_MONO_lookup ( gchar *tech_id, gchar *acronyme )
   { struct DLS_MONO *mono;
+    if (!tech_id || !acronyme) return(FALSE);
     GSList *liste = Partage->Dls_data_MONO;
     while (liste)                                                                               /* A la recherche du message. */
      { mono = (struct DLS_MONO *)liste->data;
@@ -534,7 +536,6 @@ end:
      { bi = (struct DLS_BI *)*bi_p;
        return( bi->etat );
      }
-    if (!tech_id || !acronyme) return(FALSE);
 
     bi = Dls_data_BI_lookup ( tech_id, acronyme );
     if (!bi) return(FALSE);
@@ -551,7 +552,6 @@ end:
      { bi = (struct DLS_BI *)*bi_p;
        return( bi->edge_up );
      }
-    if (!tech_id || !acronyme) return(FALSE);
 
     bi = Dls_data_BI_lookup ( tech_id, acronyme );
     if (!bi) return(FALSE);
@@ -568,12 +568,34 @@ end:
      { bi = (struct DLS_BI *)*bi_p;
        return( bi->edge_down );
      }
-    if (!tech_id || !acronyme) return(FALSE);
 
     bi = Dls_data_BI_lookup ( tech_id, acronyme );
     if (!bi) return(FALSE);
     if (bi_p) *bi_p = (gpointer)bi;                                                 /* Sauvegarde pour acceleration si besoin */
     return( bi->edge_down );
+  }
+/******************************************************************************************************************************/
+/* Met à jour le groupe de messages en parametre                                                                              */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_BI_groupe ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bi_p, gint groupe )
+  { struct DLS_BI *bi;
+
+    if (!bi_p || !*bi_p)
+     { if ( !(acronyme && tech_id) ) return;
+       bi = Dls_data_BI_lookup ( tech_id, acronyme );
+       if (bi_p) *bi_p = (gpointer)bi;                                           /* Sauvegarde pour acceleration si besoin */
+     }
+    else bi = (struct DLS_BI *)*bi_p;
+
+    GSList *liste = Partage->Dls_data_BI;
+    while (liste)
+     { struct DLS_BI *current_bi = liste->data;
+       if ( current_bi != bi && current_bi->groupe == bi->groupe && !strcasecmp ( current_bi->tech_id, bi->tech_id ) )
+        { Dls_data_set_BI ( vars, current_bi->tech_id, current_bi->acronyme, (gpointer)&current_bi, FALSE ); }
+       liste = g_slist_next(liste);
+     }
+    Dls_data_set_BI ( vars, tech_id, acronyme, bi_p, TRUE );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_MONO: Remonte l'etat d'un monostable                                                                          */
@@ -585,7 +607,6 @@ end:
      { mono = (struct DLS_MONO *)*mono_p;
        return( mono->etat );
      }
-    if (!tech_id || !acronyme) return(FALSE);
 
     mono = Dls_data_MONO_lookup ( tech_id, acronyme );
     if (!mono) return(FALSE);
@@ -602,7 +623,6 @@ end:
      { mono = (struct DLS_MONO *)*mono_p;
        return( mono->edge_up );
      }
-    if (!tech_id || !acronyme) return(FALSE);
 
     mono = Dls_data_MONO_lookup ( tech_id, acronyme );
     if (!mono) return(FALSE);
@@ -619,7 +639,6 @@ end:
      { mono = (struct DLS_MONO *)*mono_p;
        return( mono->edge_down );
      }
-    if (!tech_id || !acronyme) return(FALSE);
 
     mono = Dls_data_MONO_lookup ( tech_id, acronyme );
     if (!mono) return(FALSE);
@@ -1415,7 +1434,7 @@ end:
     GSList *liste = Partage->Dls_data_MSG;
     while (liste)
      { struct DLS_MESSAGES *current_msg = liste->data;
-       if ( current_msg != msg && !strcasecmp ( current_msg->tech_id, msg->tech_id ) && current_msg->groupe == msg->groupe )
+       if ( current_msg != msg && current_msg->groupe == msg->groupe && !strcasecmp ( current_msg->tech_id, msg->tech_id ) )
         { Dls_data_set_MSG_reel ( vars, current_msg->tech_id, current_msg->acronyme, (gpointer)&current_msg, FALSE, FALSE ); }
        liste = g_slist_next(liste);
      }

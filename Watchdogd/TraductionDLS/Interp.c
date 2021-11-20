@@ -1036,18 +1036,25 @@
   { struct ACTION *action;
     int taille;
 
+    gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
+
     action = New_action();
     taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
-    if (barre)
+    if (groupe == 0)
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, %s );\n",
+                                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (barre ? "FALSE" : "TRUE") );
+     }
+    else if(barre)
      { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
-                                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI_groupe ( vars, \"%s\", \"%s\", &_%s_%s, %d );\n",
+                                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, groupe );
      }
+
     return(action);
   }
 /******************************************************************************************************************************/
