@@ -50,12 +50,16 @@
        return(-1);
      }
 
-    retour = SQL_Write_new ( "INSERT INTO %s SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',"
+    retour = SQL_Write_new ( "INSERT INTO msgs SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s',audio_libelle='%s',"
                              "typologie='%d',sms_notification='0', groupe='%d' "
-                             " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), typologie=VALUES(typologie), groupe=VALUES(groupe)", NOM_TABLE_MSG,
+                             " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), typologie=VALUES(typologie), groupe=VALUES(groupe)",
                              deletable, tech_id, acronyme, libelle, libelle, typologie, groupe
                            );
     g_free(libelle);
+
+    struct DLS_MESSAGES *msg = Dls_data_MSG_lookup ( tech_id, acronyme );          /* Recherche ou Création du message en RAM */
+    if (msg) { msg->groupe = groupe; }                           /* Pas de modification de l'etat, on vient de la compilation */
+
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -63,31 +67,36 @@
 /* Entrée: néant                                                                                                              */
 /* Sortie: le message est chargé en mémoire                                                                                   */
 /******************************************************************************************************************************/
+ static void Charger_confDB_un_MSG (JsonArray *array, guint index, JsonNode *element, gpointer user_data )
+  { gint  *cpt_p    = user_data;
+    gchar *tech_id  = Json_get_string ( element, "tech_id" );
+    gchar *acronyme = Json_get_string ( element, "acronyme" );
+    gint   groupe   = Json_get_int    ( element, "groupe" );
+    gboolean etat   = Json_get_int    ( element, "etat" );
+    (*cpt_p)++;
+    struct DLS_MESSAGES *msg = Dls_data_MSG_lookup ( tech_id, acronyme );          /* Recherche ou Création du message en RAM */
+    if (msg) /* A l'init, on recopie tous les champs */
+     { msg->groupe = groupe;
+       msg->etat   = etat;
+     }
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: MSG '%s:%s'=%d loaded", __func__, tech_id, acronyme, etat );
+  }
+/******************************************************************************************************************************/
+/* Charger_confDB_MSG: Recupération de la conf des messages                                                                   */
+/* Entrée: néant                                                                                                              */
+/* Sortie: le message est chargé en mémoire                                                                                   */
+/******************************************************************************************************************************/
  void Charger_confDB_MSG ( void )
-  { gchar requete[512];
-    struct DB *db;
+  { gint cpt = 0;
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return;
-     }
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode)
+     { SQL_Select_to_json_node ( RootNode, "msgs", "SELECT m.tech_id, m.acronyme, m.etat, m.groupe FROM msgs as m" );
+       Json_node_foreach_array_element ( RootNode, "msgs", Charger_confDB_un_MSG, &cpt );
+       json_node_unref ( RootNode );
+     } else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Memory Error", __func__ );
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.tech_id, m.acronyme, m.etat, m.groupe FROM msgs as m"
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return;
-     }
-
-    while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Dls_data_set_MSG_init ( db->row[0], db->row[1], atoi(db->row[2]), atoi(db->row[3]) );
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: MSG '%s:%s'=%d loaded", __func__,
-                 db->row[0], db->row[1], atoi(db->row[2]) );
-     }
-    Libere_DB_SQL( &db );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MSG loaded", __func__, cpt );
   }
 /******************************************************************************************************************************/
 /* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */

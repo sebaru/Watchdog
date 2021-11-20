@@ -330,8 +330,8 @@
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble valeur, gboolean in_range );
  extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur );
+ extern struct DLS_MESSAGES *Dls_data_MSG_lookup ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
- extern void Dls_data_set_MSG_init ( gchar *tech_id, gchar *acronyme, gint groupe, gboolean etat );
  extern gboolean Dls_data_get_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p );
  extern gboolean Dls_data_get_DO_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_DO_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );

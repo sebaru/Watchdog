@@ -1331,10 +1331,10 @@ end:
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static struct DLS_MESSAGES *Dls_data_MSG_lookup ( gchar *tech_id, gchar *acronyme )
+ struct DLS_MESSAGES *Dls_data_MSG_lookup ( gchar *tech_id, gchar *acronyme )
   { struct DLS_MESSAGES *msg;
     GSList *liste = Partage->Dls_data_MSG;
-    while (liste)
+    while (liste)                                                                               /* A la recherche du message. */
      { msg = (struct DLS_MESSAGES *)liste->data;
        if ( !strcasecmp( msg->tech_id, tech_id ) && !strcasecmp( msg->acronyme, acronyme ) ) return(msg);
        liste = g_slist_next(liste);
@@ -1352,16 +1352,6 @@ end:
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_MSG '%s:%s'", __func__, tech_id, acronyme );
     return(msg);
-  }
-/******************************************************************************************************************************/
-/* Met à jour le message en parametre                                                                                         */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_data_set_MSG_init ( gchar *tech_id, gchar *acronyme, gint groupe, gboolean etat )
-  { struct DLS_MESSAGES *msg = Dls_data_MSG_lookup ( tech_id, acronyme );
-    if (!msg) return;
-    msg->etat   = etat;
-    msg->groupe = groupe;
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
