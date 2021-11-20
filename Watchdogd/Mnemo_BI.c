@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Mnemo_BOOL.c        Déclaration des fonctions pour la gestion des booleans                                       */
+/* Watchdogd/Mnemo_BI.c        Déclaration des fonctions pour la gestion des booleans                                         */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    24.06.2019 22:07:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Mnemo_BOOL.c
+ * Mnemo_BI.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -36,11 +36,11 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Mnemo_auto_create_BOOL: Ajoute un mnemonique dans la base via le tech_id                                                   */
+/* Mnemo_auto_create_BI: Ajoute un mnemonique dans la base via le tech_id                                                   */
 /* Entrée: le tech_id, l'acronyme, le libelle                                                                                 */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_BOOL ( gboolean deletable, gint type, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_BI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -63,9 +63,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_BOOL SET deletable='%d', type='%d',tech_id='%s',acronyme='%s',libelle='%s' "
-                "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), type=VALUES(type)",
-                deletable, type, tech_id, acro, libelle );
+                "INSERT INTO mnemos_BI SET deletable='%d',tech_id='%s',acronyme='%s',libelle='%s' "
+                "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                deletable, tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 
@@ -83,7 +83,7 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_confDB_BOOL ( void )
+ void Charger_confDB_BI ( void )
   { gchar requete[512];
     struct DB *db;
 
@@ -94,7 +94,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.tech_id, m.acronyme, m.etat, m.type FROM mnemos_BOOL as m"
+                "SELECT m.tech_id, m.acronyme, m.etat, m.groupe FROM mnemos_BI as m"
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -103,10 +103,8 @@
      }
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { gint type = atoi(db->row[3]);
-            if (type == MNEMO_BISTABLE )   Dls_data_set_BI   ( NULL, db->row[0], db->row[1], NULL, atoi(db->row[2]) );
-       else if (type == MNEMO_MONOSTABLE ) Dls_data_set_MONO ( NULL, db->row[0], db->row[1], NULL, atoi(db->row[2]) );
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: BOOL '%s:%s'=%d loaded", __func__,
+     { Dls_data_set_BI   ( NULL, db->row[0], db->row[1], NULL, atoi(db->row[2]) );
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: BI '%s:%s'=%d loaded", __func__,
                  db->row[0], db->row[1], atoi(db->row[2]) );
      }
     Libere_DB_SQL( &db );
@@ -116,7 +114,7 @@
 /* Entrée: néant                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Updater_confDB_BOOL ( void )
+ void Updater_confDB_BI ( void )
   { gchar requete[200];
     GSList *liste;
     struct DB *db;
@@ -128,11 +126,11 @@
        return;
      }
 
-    liste = Partage->Dls_data_BOOL;
+    liste = Partage->Dls_data_BI;
     while ( liste )
-     { struct DLS_BOOL *bool = (struct DLS_BOOL *)liste->data;
+     { struct DLS_BI *bool = (struct DLS_BI *)liste->data;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_BOOL as m SET etat='%d' "
+                   "UPDATE mnemos_BI as m SET etat='%d' "
                    "WHERE m.tech_id='%s' AND m.acronyme='%s';",
                    bool->etat, bool->tech_id, bool->acronyme );
        Lancer_requete_SQL ( db, requete );
@@ -141,17 +139,17 @@
      }
 
     Libere_DB_SQL( &db );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d BOOL updated", __func__, cpt );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d BI updated", __func__, cpt );
   }
 /******************************************************************************************************************************/
-/* Dls_BOOL_to_json : Formate un bit au format JSON                                                                           */
+/* Dls_BI_to_json : Formate un bit au format JSON                                                                           */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_BOOL_to_json ( JsonNode *element, struct DLS_BOOL *bit )
+ void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit )
   { Json_node_add_string ( element, "tech_id",  bit->tech_id );
     Json_node_add_string ( element, "acronyme", bit->acronyme );
     Json_node_add_bool   ( element, "etat",     bit->etat );
-    Json_node_add_int    ( element, "classe",   bit->classe );
+    Json_node_add_int    ( element, "groupe",   bit->groupe );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

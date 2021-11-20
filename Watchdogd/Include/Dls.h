@@ -155,10 +155,19 @@
     gint    top;
   };
 
- struct DLS_BOOL
+ struct DLS_MONO
   { gchar   tech_id[NBR_CARAC_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME];
-    gint    classe; /* Monostable/bistable */
+    gboolean etat;                                                                                      /* Etat actuel du bit */
+    gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
+    gboolean edge_up;
+    gboolean edge_down;
+  };
+
+ struct DLS_BI
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
+    gint    groupe; /* Groupe 'radio' */
     gboolean etat;                                                                                      /* Etat actuel du bit */
     gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
     gboolean edge_up;
@@ -274,13 +283,17 @@
     struct ZMQUEUE *zmq_to_master;
     GSList *Set_Dls_DI_Edge_up;                                                 /* liste des Mxxx a activer au debut tour prg */
     GSList *Set_Dls_DI_Edge_down;                                               /* liste des Mxxx a activer au debut tour prg */
-    GSList *Set_Dls_Bool_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
-    GSList *Set_Dls_Bool_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_MONO_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_MONO_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_BI_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_BI_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_DI_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_DI_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_Dls_Bool_Edge_up;                                             /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_Dls_Bool_Edge_down;                                           /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_MONO_Edge_up;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_MONO_Edge_down;                                           /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_BI_Edge_up;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_BI_Edge_down;                                           /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */

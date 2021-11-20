@@ -1426,7 +1426,7 @@
         }
 
 /*----------------------------------------------- Prise en charge du peuplement de la database -------------------------------*/
-       gchar *Liste_BOOL = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
+       gchar *Liste_BI = NULL, *Liste_MONO = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
        gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
        gchar *Liste_CI = NULL, *Liste_CH = NULL;
        gchar *Liste_CADRANS = NULL, *Liste_MOTIF = NULL;
@@ -1445,9 +1445,13 @@
               { case MNEMO_BUS:
                    break;
                 case MNEMO_BISTABLE:
+                 { Mnemo_auto_create_BI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   Liste_BI = Add_csv ( Liste_BI, alias->acronyme );
+                   break;
+                 }
                 case MNEMO_MONOSTABLE:
-                 { Mnemo_auto_create_BOOL ( TRUE, alias->classe, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_BOOL = Add_csv ( Liste_BOOL, alias->acronyme );
+                 { Mnemo_auto_create_MONO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   Liste_MONO = Add_csv ( Liste_MONO, alias->acronyme );
                    break;
                  }
                 case MNEMO_ENTREE:
@@ -1718,9 +1722,15 @@
        SQL_Write ( requete );
        g_free(requete);
 
-       requete = g_strconcat ( "DELETE FROM mnemos_BOOL WHERE deletable=1 AND tech_id='", tech_id, "' ",
-                               " AND acronyme NOT IN (", (Liste_BOOL?Liste_BOOL:"''") , ")", NULL );
-       if (Liste_BOOL) g_free(Liste_BOOL);
+       requete = g_strconcat ( "DELETE FROM mnemos_BI WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_BI?Liste_BI:"''") , ")", NULL );
+       if (Liste_BI) g_free(Liste_BI);
+       SQL_Write ( requete );
+       g_free(requete);
+
+       requete = g_strconcat ( "DELETE FROM mnemos_MONO WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_MONO?Liste_MONO:"''") , ")", NULL );
+       if (Liste_MONO) g_free(Liste_MONO);
        SQL_Write ( requete );
        g_free(requete);
 

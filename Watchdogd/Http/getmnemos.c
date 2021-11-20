@@ -88,8 +88,10 @@
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_HORLOGE AS m WHERE m.tech_id='%s'", tech_id ); }
     else if (!strcasecmp ( classe, "TEMPO" ) )
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_Tempo AS m WHERE m.tech_id='%s'", tech_id ); }
-    else if (!strcasecmp ( classe, "BOOL" ) )
-     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_BOOL AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "MONO" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_MONO AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "BI" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_BI AS m WHERE m.tech_id='%s'", tech_id ); }
     else if (!strcasecmp ( classe, "WATCHDOG" ) )
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_WATCHDOG AS m WHERE m.tech_id='%s'", tech_id ); }
     else if (!strcasecmp ( classe, "MSG" ) )

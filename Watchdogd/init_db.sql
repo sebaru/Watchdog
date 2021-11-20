@@ -134,17 +134,35 @@ CREATE TABLE IF NOT EXISTS `tableau_map` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `mnemos_BI`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_BI` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `deletable` TINYINT(1) NOT NULL DEFAULT '1',
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` VARCHAR(256] COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `etat` TINYINT(1) NOT NULL DEFAULT 0,
+  `groupe` INT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `mnemos`
 --
 
-CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
+CREATE TABLE IF NOT EXISTS `mnemos_MONO` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `deletable` tinyint(1) NOT NULL DEFAULT '1',
-  `type` INT(11) NOT NULL DEFAULT 0,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `deletable` TINYINT(1) NOT NULL DEFAULT '1',
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `etat` tinyint(1) NOT NULL DEFAULT 0,
+  `libelle` VARCHAR(256] COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `etat` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE

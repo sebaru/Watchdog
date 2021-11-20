@@ -102,7 +102,8 @@
     /*Charger_confDB_AO(NULL, NULL);*/
     Charger_confDB_AI(NULL, NULL);
     Charger_confDB_MSG();
-    Charger_confDB_BOOL();
+    Charger_confDB_MONO();
+    Charger_confDB_BI();
   }
 /******************************************************************************************************************************/
 /* Save_dls_data_to_DB : Envoie les infos DLS_DATA à la base de données pour sauvegarde !                                     */
@@ -118,7 +119,8 @@
     Updater_confDB_AI();                                                              /* Sauvegarde des compteurs d'impulsion */
     Updater_confDB_Registre();                                                                    /* Sauvegarde des registres */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
-    Updater_confDB_BOOL();                                             /* Sauvegarde des valeurs des bistables et monostables */
+    Updater_confDB_MONO();                                             /* Sauvegarde des valeurs des bistables et monostables */
+    Updater_confDB_BI();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
 /* Handle_zmq_common: Analyse et reagi à un message ZMQ a destination du MSRV ou du SLAVE                                     */
@@ -742,7 +744,8 @@ end:
        Partage->Dls_data_DO       = NULL;
        Partage->Dls_data_AI       = NULL;
        Partage->Dls_data_AO       = NULL;
-       Partage->Dls_data_BOOL     = NULL;
+       Partage->Dls_data_MONO     = NULL;
+       Partage->Dls_data_BI       = NULL;
        Partage->Dls_data_REGISTRE = NULL;
        Partage->Dls_data_MSG      = NULL;
        Partage->Dls_data_CH       = NULL;
@@ -804,9 +807,12 @@ end:
        zmq_ctx_term( Partage->zmq_ctx );
        zmq_ctx_destroy( Partage->zmq_ctx );
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique BOOL", __func__ );
-       g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_BOOL);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MONO", __func__ );
+       g_slist_foreach (Partage->Dls_data_MONO, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_MONO);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique BI", __func__ );
+       g_slist_foreach (Partage->Dls_data_BI, (GFunc) g_free, NULL );
+       g_slist_free (Partage->Dls_data_BI);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DI", __func__ );
        g_slist_foreach (Partage->Dls_data_DI, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_DI);

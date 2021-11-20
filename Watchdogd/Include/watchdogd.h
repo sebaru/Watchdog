@@ -126,7 +126,8 @@
     struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
 
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
-    GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */
+    GSList *Dls_data_MONO;                                                                           /* Liste des monostables */
+    GSList *Dls_data_BI;                                                                               /* Liste des bistables */
     GSList *Dls_data_DI;                                                                  /* Liste des entrees dynamiques TOR */
     GSList *Dls_data_DO;                                                                  /* Liste des sorties dynamiques TOR */
     GSList *Dls_data_AI;                                                                  /* Liste des entrees dynamiques ANA */

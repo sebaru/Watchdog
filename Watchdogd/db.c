@@ -2443,8 +2443,38 @@ encore:
     if (database_version < 6078)
      { SQL_Write_new ("ALTER TABLE `msgs` ADD `groupe` INT(11) NOT NULL DEFAULT '0'" ); }
 
+
+    if (database_version < 6080)
+     { SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_BI` ("
+                      "`id` INT(11) NOT NULL AUTO_INCREMENT,"
+                      "`deletable` TINYINT(1) NOT NULL DEFAULT '1',"
+                      "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
+                      "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                      "`libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                      "`etat` TINYINT(1) NOT NULL DEFAULT 0,"
+                      "`groupe` INT(11) NOT NULL DEFAULT 0,"
+                      "PRIMARY KEY (`id`),"
+                      "UNIQUE (`tech_id`,`acronyme`),"
+                      "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                      ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+
+       SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_MONO` ("
+                      "`id` INT(11) NOT NULL AUTO_INCREMENT,"
+                      "`deletable` TINYINT(1) NOT NULL DEFAULT '1',"
+                      "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
+                      "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                      "`libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                      "`etat` TINYINT(1) NOT NULL DEFAULT 0,"
+                      "PRIMARY KEY (`id`),"
+                      "UNIQUE (`tech_id`,`acronyme`),"
+                      "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                      ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+     }
+
+    /* A prévoir SQL_Write_new ("DROP TABLE mnemos_BOOL"); */
+
 fin:
-    database_version = 6078;
+    database_version = 6080;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
@@ -2455,7 +2485,8 @@ fin:
                                           "(SELECT COUNT(*) FROM mnemos_DO) AS nbr_dls_do, "
                                           "(SELECT COUNT(*) FROM mnemos_AI) AS nbr_dls_ai, "
                                           "(SELECT COUNT(*) FROM mnemos_AO) AS nbr_dls_ao, "
-                                          "(SELECT COUNT(*) FROM mnemos_BOOL) AS nbr_dls_bool, "
+                                          "(SELECT COUNT(*) FROM mnemos_BI) AS nbr_dls_bi, "
+                                          "(SELECT COUNT(*) FROM mnemos_MONO) AS nbr_dls_mono, "
                                           "(SELECT SUM(dls.nbr_ligne) FROM dls) AS nbr_dls_lignes, "
                                           "(SELECT COUNT(*) FROM users) AS nbr_users, "
                                           "(SELECT COUNT(*) FROM msgs) AS nbr_msgs, "
@@ -2471,7 +2502,8 @@ fin:
        "SELECT id,'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DI UNION "
        "SELECT id,'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DO UNION "
        "SELECT id,'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_AO UNION "
-       "SELECT id,'BOOL' AS classe, type AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_BOOL UNION "
+       "SELECT id,'BI' AS classe, 0 AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_BI UNION "
+       "SELECT id,'MONO' AS classe, 1 AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_MONO UNION "
        "SELECT id,'CH' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_CH UNION "
        "SELECT id,'CI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_CI UNION "
        "SELECT id,'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_HORLOGE UNION "
