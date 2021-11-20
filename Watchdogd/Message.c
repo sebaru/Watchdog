@@ -104,29 +104,18 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_confDB_MSG ( void )
-  { gchar requete[200];
-    GSList *liste;
-    struct DB *db;
-    gint cpt = 0;
+  { gint cpt = 0;
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
-       return;
-     }
-
-    liste = Partage->Dls_data_MSG;
+    GSList *liste = Partage->Dls_data_MSG;
     while ( liste )
      { struct DLS_MESSAGES *msg = (struct DLS_MESSAGES *)liste->data;
-       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE msgs as m SET m.etat='%d' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   msg->etat, msg->tech_id, msg->acronyme );
-       Lancer_requete_SQL ( db, requete );
+       SQL_Write_new ( "UPDATE msgs as m SET m.etat='%d' "
+                       "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                       msg->etat, msg->tech_id, msg->acronyme );
        liste = g_slist_next(liste);
        cpt++;
      }
-    Libere_DB_SQL( &db );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MSG updated", __func__, cpt );
   }
 /******************************************************************************************************************************/
 /* Dls_MESSAGE_to_json : Formate un bit au format JSON                                                                        */

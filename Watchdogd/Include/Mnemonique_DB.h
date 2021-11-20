@@ -83,15 +83,13 @@
  extern gboolean Recuperer_mnemos_DO_suite( struct DB **db_orig );
  extern void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit );
 
- extern struct DB *Rechercher_MONO ( gchar *tech_id, gchar *acronyme );                                 /* Dans mnemos_MONO.c */
+ extern void Charger_confDB_MONO ( void );                                                              /* Dans mnemos_MONO.c */
  extern gboolean Mnemo_auto_create_MONO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
- extern void Charger_confDB_MONO ( void );
  extern void Updater_confDB_MONO ( void );
  extern void Dls_MONO_to_json ( JsonNode *element, struct DLS_MONO *bit );
 
- extern struct DB *Rechercher_BI ( gchar *tech_id, gchar *acronyme );                                     /* Dans mnemos_BI.c */
- extern gboolean Mnemo_auto_create_BI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
- extern void Charger_confDB_BI ( void );
+ extern void Charger_confDB_BI ( void );                                                                  /* Dans mnemos_BI.c */
+ extern gboolean Mnemo_auto_create_BI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gint groupe );
  extern void Updater_confDB_BI ( void );
  extern void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit );
 

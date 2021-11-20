@@ -42,9 +42,7 @@
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_MONO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
-    gchar requete[1024];
     gboolean retour;
-    struct DB *db;
 
 /******************************************** Préparation de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
@@ -62,21 +60,31 @@
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_MONO SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s' "
-                "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                deletable, tech_id, acro, libelle );
+    retour = SQL_Write_new ( "INSERT INTO mnemos_MONO SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s' "
+                             "ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                             deletable, tech_id, acro, libelle );
     g_free(libelle);
     g_free(acro);
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
+    Dls_data_MONO_lookup ( tech_id, acronyme );                                    /* Recherche ou Création du message en RAM */
+
     return (retour);
+  }
+/******************************************************************************************************************************/
+/* Charger_confDB_un_MONO: Recupération de la conf d'un monostable                                                            */
+/* Entrée: néant                                                                                                              */
+/* Sortie: le message est chargé en mémoire                                                                                   */
+/******************************************************************************************************************************/
+ static void Charger_confDB_un_MONO (JsonArray *array, guint index, JsonNode *element, gpointer user_data )
+  { gint  *cpt_p    = user_data;
+    gchar *tech_id  = Json_get_string ( element, "tech_id" );
+    gchar *acronyme = Json_get_string ( element, "acronyme" );
+    gboolean etat   = Json_get_int    ( element, "etat" );
+    (*cpt_p)++;
+    struct DLS_MONO *mono = Dls_data_MONO_lookup ( tech_id, acronyme );          /* Recherche ou Création du message en RAM */
+    if (mono) /* A l'init, on recopie tous les champs */
+     { mono->etat   = etat; }
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: MONO '%s:%s'=%d loaded", __func__, tech_id, acronyme, etat );
   }
 /******************************************************************************************************************************/
 /* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
@@ -84,30 +92,16 @@
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
  void Charger_confDB_MONO ( void )
-  { gchar requete[512];
-    struct DB *db;
+  { gint cpt = 0;
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return;
-     }
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode)
+     { SQL_Select_to_json_node ( RootNode, "monos", "SELECT m.tech_id, m.acronyme, m.etat FROM mnemos_MONO as m" );
+       Json_node_foreach_array_element ( RootNode, "monos", Charger_confDB_un_MONO, &cpt );
+       json_node_unref ( RootNode );
+     } else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Memory Error", __func__ );
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.tech_id, m.acronyme, m.etat FROM mnemos_MONO as m"
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return;
-     }
-
-    while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Dls_data_set_MONO ( NULL, db->row[0], db->row[1], NULL, atoi(db->row[2]) );
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: MONO '%s:%s'=%d loaded", __func__,
-                 db->row[0], db->row[1], atoi(db->row[2]) );
-     }
-    Libere_DB_SQL( &db );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MONO loaded", __func__, cpt );
   }
 /******************************************************************************************************************************/
 /* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
@@ -115,30 +109,17 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_confDB_MONO ( void )
-  { gchar requete[200];
-    GSList *liste;
-    struct DB *db;
-    gint cpt = 0;
+  { gint cpt = 0;
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
-       return;
-     }
-
-    liste = Partage->Dls_data_MONO;
+    GSList *liste = Partage->Dls_data_MONO;
     while ( liste )
      { struct DLS_MONO *mono = (struct DLS_MONO *)liste->data;
-       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_MONO as m SET etat='%d' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   mono->etat, mono->tech_id, mono->acronyme );
-       Lancer_requete_SQL ( db, requete );
+       SQL_Write_new ( "UPDATE mnemos_MONO as m SET etat='%d' "
+                       "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                       mono->etat, mono->tech_id, mono->acronyme );
        liste = g_slist_next(liste);
        cpt++;
      }
-
-    Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MONO updated", __func__, cpt );
   }
 /******************************************************************************************************************************/

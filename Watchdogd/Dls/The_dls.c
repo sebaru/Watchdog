@@ -426,6 +426,58 @@ end:
     return( Partage->top < wtd->top );
   }
 /******************************************************************************************************************************/
+/* Met à jour le message en parametre                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ struct DLS_BI *Dls_data_BI_lookup ( gchar *tech_id, gchar *acronyme )
+  { struct DLS_BI *bi;
+    GSList *liste = Partage->Dls_data_BI;
+    while (liste)                                                                               /* A la recherche du message. */
+     { bi = (struct DLS_BI *)liste->data;
+       if ( !strcasecmp( bi->tech_id, tech_id ) && !strcasecmp( bi->acronyme, acronyme ) ) return(bi);
+       liste = g_slist_next(liste);
+     }
+
+    bi = g_try_malloc0 ( sizeof(struct DLS_BI) );
+    if (!bi)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+       return(NULL);
+     }
+    g_snprintf( bi->acronyme, sizeof(bi->acronyme), "%s", acronyme );
+    g_snprintf( bi->tech_id,  sizeof(bi->tech_id),  "%s", tech_id );
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );
+    Partage->Dls_data_BI = g_slist_prepend ( Partage->Dls_data_BI, bi );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_BI '%s:%s'", __func__, tech_id, acronyme );
+    return(bi);
+  }
+/******************************************************************************************************************************/
+/* Met à jour le message en parametre                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ struct DLS_MONO *Dls_data_MONO_lookup ( gchar *tech_id, gchar *acronyme )
+  { struct DLS_MONO *mono;
+    GSList *liste = Partage->Dls_data_MONO;
+    while (liste)                                                                               /* A la recherche du message. */
+     { mono = (struct DLS_MONO *)liste->data;
+       if ( !strcasecmp( mono->tech_id, tech_id ) && !strcasecmp( mono->acronyme, acronyme ) ) return(mono);
+       liste = g_slist_next(liste);
+     }
+
+    mono = g_try_malloc0 ( sizeof(struct DLS_MONO) );
+    if (!mono)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+       return(NULL);
+     }
+    g_snprintf( mono->acronyme, sizeof(mono->acronyme), "%s", acronyme );
+    g_snprintf( mono->tech_id,  sizeof(mono->tech_id),  "%s", tech_id );
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );
+    Partage->Dls_data_MONO = g_slist_prepend ( Partage->Dls_data_MONO, mono );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding DLS_MONO '%s:%s'", __func__, tech_id, acronyme );
+    return(mono);
+  }
+/******************************************************************************************************************************/
 /* Dls_data_set_BI: Positionne un bistable                                                                                    */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
@@ -433,31 +485,9 @@ end:
   { struct DLS_BI *bi;
 
     if (!bi_p || !*bi_p)
-     { GSList *liste;
-       if ( !(acronyme && tech_id) ) return;
-       liste = Partage->Dls_data_BI;
-       while (liste)
-        { bi = (struct DLS_BI *)liste->data;
-          if ( !strcasecmp ( bi->acronyme, acronyme ) && !strcasecmp( bi->tech_id, tech_id ) ) break;
-          liste = g_slist_next(liste);
-        }
-
-       if (!liste)
-        { bi = g_try_malloc0 ( sizeof(struct DLS_BI) );
-          if (!bi)
-           { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_ERR,
-                       "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
-             return;
-           }
-          g_snprintf( bi->acronyme, sizeof(bi->acronyme), "%s", acronyme );
-          g_snprintf( bi->tech_id,  sizeof(bi->tech_id),  "%s", tech_id );
-          pthread_mutex_lock( &Partage->com_dls.synchro_data );
-          Partage->Dls_data_BI = g_slist_prepend ( Partage->Dls_data_BI, bi );
-          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_INFO,
-                    "%s: adding DLS_BI BI '%s:%s'", __func__, tech_id, acronyme );
-        }
-       if (bi_p) *bi_p = (gpointer)bi;                                        /* Sauvegarde pour acceleration si besoin */
+     { if ( !(acronyme && tech_id) ) return;
+       bi = Dls_data_BI_lookup ( tech_id, acronyme );
+       if (bi_p) *bi_p = (gpointer)bi;                                              /* Sauvegarde pour acceleration si besoin */
       }
     else bi = (struct DLS_BI *)*bi_p;
 
@@ -477,30 +507,8 @@ end:
   { struct DLS_MONO *mono;
 
     if (!mono_p || !*mono_p)
-     { GSList *liste;
-       if ( !(acronyme && tech_id) ) return;
-       liste = Partage->Dls_data_MONO;
-       while (liste)
-        { mono = (struct DLS_MONO *)liste->data;
-          if ( !strcasecmp ( mono->acronyme, acronyme ) && !strcasecmp( mono->tech_id, tech_id ) ) break;
-          liste = g_slist_next(liste);
-        }
-
-       if (!liste)
-        { mono = g_try_malloc0 ( sizeof(struct DLS_MONO) );
-          if (!mono)
-           { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_ERR,
-                       "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
-             return;
-           }
-          g_snprintf( mono->acronyme, sizeof(mono->acronyme), "%s", acronyme );
-          g_snprintf( mono->tech_id,  sizeof(mono->tech_id),  "%s", tech_id );
-          pthread_mutex_lock( &Partage->com_dls.synchro_data );
-          Partage->Dls_data_MONO = g_slist_prepend ( Partage->Dls_data_MONO, mono );
-          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_INFO,
-                    "%s: adding DLS_MONO MONO '%s:%s'=%d", __func__, tech_id, acronyme, valeur );
-        }
+     { if ( !(acronyme && tech_id) ) return;
+       mono = Dls_data_MONO_lookup ( tech_id, acronyme );
        if (mono_p) *mono_p = (gpointer)mono;                                        /* Sauvegarde pour acceleration si besoin */
       }
     else mono = (struct DLS_MONO *)*mono_p;
@@ -522,27 +530,50 @@ end:
 /******************************************************************************************************************************/
  gboolean Dls_data_get_BI ( gchar *tech_id, gchar *acronyme, gpointer *bi_p )
   { struct DLS_BI *bi;
-    GSList *liste;
     if (bi_p && *bi_p)                                                           /* Si pointeur d'acceleration disponible */
      { bi = (struct DLS_BI *)*bi_p;
        return( bi->etat );
      }
     if (!tech_id || !acronyme) return(FALSE);
 
-    liste = Partage->Dls_data_BI;
-    while (liste)
-     { bi = (struct DLS_BI *)liste->data;
-       if ( !strcasecmp ( bi->acronyme, acronyme ) && !strcasecmp( bi->tech_id, tech_id ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste)                                                                  /* si n'existe pas, on le créé dans la liste */
-     { Dls_data_set_BI ( NULL, tech_id, acronyme, bi_p, FALSE );
-       return(FALSE);
-     }
-
-    if (bi_p) *bi_p = (gpointer)bi;                                           /* Sauvegarde pour acceleration si besoin */
+    bi = Dls_data_BI_lookup ( tech_id, acronyme );
+    if (!bi) return(FALSE);
+    if (bi_p) *bi_p = (gpointer)bi;                                              /* Sauvegarde pour acceleration si besoin */
     return( bi->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bi_up: Remonte le front montant d'un biean                                                                    */
+/* Sortie : TRUE sur le biean vient de passer à UP                                                                            */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_BI_up ( gchar *tech_id, gchar *acronyme, gpointer *bi_p )
+  { struct DLS_BI *bi;
+    if (bi_p && *bi_p)                                                               /* Si pointeur d'acceleration disponible */
+     { bi = (struct DLS_BI *)*bi_p;
+       return( bi->edge_up );
+     }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    bi = Dls_data_BI_lookup ( tech_id, acronyme );
+    if (!bi) return(FALSE);
+    if (bi_p) *bi_p = (gpointer)bi;                                                 /* Sauvegarde pour acceleration si besoin */
+    return( bi->edge_up );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bi_down: Remonte le front descendant d'un biean                                                               */
+/* Sortie : TRUE sur le biean vient de passer à DOWN                                                                          */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_BI_down ( gchar *tech_id, gchar *acronyme, gpointer *bi_p )
+  { struct DLS_BI *bi;
+    if (bi_p && *bi_p)                                                           /* Si pointeur d'acceleration disponible */
+     { bi = (struct DLS_BI *)*bi_p;
+       return( bi->edge_down );
+     }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    bi = Dls_data_BI_lookup ( tech_id, acronyme );
+    if (!bi) return(FALSE);
+    if (bi_p) *bi_p = (gpointer)bi;                                                 /* Sauvegarde pour acceleration si besoin */
+    return( bi->edge_down );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_MONO: Remonte l'etat d'un monostable                                                                          */
@@ -550,25 +581,14 @@ end:
 /******************************************************************************************************************************/
  gboolean Dls_data_get_MONO ( gchar *tech_id, gchar *acronyme, gpointer *mono_p )
   { struct DLS_MONO *mono;
-    GSList *liste;
     if (mono_p && *mono_p)                                                           /* Si pointeur d'acceleration disponible */
      { mono = (struct DLS_MONO *)*mono_p;
        return( mono->etat );
      }
     if (!tech_id || !acronyme) return(FALSE);
 
-    liste = Partage->Dls_data_MONO;
-    while (liste)
-     { mono = (struct DLS_MONO *)liste->data;
-       if ( !strcasecmp ( mono->acronyme, acronyme ) && !strcasecmp( mono->tech_id, tech_id ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste)                                                                  /* si n'existe pas, on le créé dans la liste */
-     { Dls_data_set_MONO ( NULL, tech_id, acronyme, mono_p, FALSE );
-       return(FALSE);
-     }
-
+    mono = Dls_data_MONO_lookup ( tech_id, acronyme );
+    if (!mono) return(FALSE);
     if (mono_p) *mono_p = (gpointer)mono;                                           /* Sauvegarde pour acceleration si besoin */
     return( mono->etat );
   }
@@ -578,21 +598,14 @@ end:
 /******************************************************************************************************************************/
  gboolean Dls_data_get_MONO_up ( gchar *tech_id, gchar *acronyme, gpointer *mono_p )
   { struct DLS_MONO *mono;
-    GSList *liste;
     if (mono_p && *mono_p)                                                           /* Si pointeur d'acceleration disponible */
      { mono = (struct DLS_MONO *)*mono_p;
        return( mono->edge_up );
      }
     if (!tech_id || !acronyme) return(FALSE);
 
-    liste = Partage->Dls_data_MONO;
-    while (liste)
-     { mono = (struct DLS_MONO *)liste->data;
-       if ( !strcasecmp ( mono->acronyme, acronyme ) && !strcasecmp( mono->tech_id, tech_id ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste) return(FALSE);
+    mono = Dls_data_MONO_lookup ( tech_id, acronyme );
+    if (!mono) return(FALSE);
     if (mono_p) *mono_p = (gpointer)mono;                                           /* Sauvegarde pour acceleration si besoin */
     return( mono->edge_up );
   }
@@ -602,71 +615,16 @@ end:
 /******************************************************************************************************************************/
  gboolean Dls_data_get_MONO_down ( gchar *tech_id, gchar *acronyme, gpointer *mono_p )
   { struct DLS_MONO *mono;
-    GSList *liste;
     if (mono_p && *mono_p)                                                           /* Si pointeur d'acceleration disponible */
      { mono = (struct DLS_MONO *)*mono_p;
        return( mono->edge_down );
      }
     if (!tech_id || !acronyme) return(FALSE);
 
-    liste = Partage->Dls_data_MONO;
-    while (liste)
-     { mono = (struct DLS_MONO *)liste->data;
-       if ( !strcasecmp ( mono->acronyme, acronyme ) && !strcasecmp( mono->tech_id, tech_id ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste) return(FALSE);
+    mono = Dls_data_MONO_lookup ( tech_id, acronyme );
+    if (!mono) return(FALSE);
     if (mono_p) *mono_p = (gpointer)mono;                                           /* Sauvegarde pour acceleration si besoin */
     return( mono->edge_down );
-  }
-/******************************************************************************************************************************/
-/* Dls_data_get_bi_up: Remonte le front montant d'un biean                                                                */
-/* Sortie : TRUE sur le biean vient de passer à UP                                                                          */
-/******************************************************************************************************************************/
- gboolean Dls_data_get_BI_up ( gchar *tech_id, gchar *acronyme, gpointer *bi_p )
-  { struct DLS_BI *bi;
-    GSList *liste;
-    if (bi_p && *bi_p)                                                           /* Si pointeur d'acceleration disponible */
-     { bi = (struct DLS_BI *)*bi_p;
-       return( bi->edge_up );
-     }
-    if (!tech_id || !acronyme) return(FALSE);
-
-    liste = Partage->Dls_data_BI;
-    while (liste)
-     { bi = (struct DLS_BI *)liste->data;
-       if ( !strcasecmp ( bi->acronyme, acronyme ) && !strcasecmp( bi->tech_id, tech_id ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste) return(FALSE);
-    if (bi_p) *bi_p = (gpointer)bi;                                           /* Sauvegarde pour acceleration si besoin */
-    return( bi->edge_up );
-  }
-/******************************************************************************************************************************/
-/* Dls_data_get_bi_down: Remonte le front descendant d'un biean                                                           */
-/* Sortie : TRUE sur le biean vient de passer à DOWN                                                                        */
-/******************************************************************************************************************************/
- gboolean Dls_data_get_BI_down ( gchar *tech_id, gchar *acronyme, gpointer *bi_p )
-  { struct DLS_BI *bi;
-    GSList *liste;
-    if (bi_p && *bi_p)                                                           /* Si pointeur d'acceleration disponible */
-     { bi = (struct DLS_BI *)*bi_p;
-       return( bi->edge_down );
-     }
-    if (!tech_id || !acronyme) return(FALSE);
-
-    liste = Partage->Dls_data_BI;
-    while (liste)
-     { bi = (struct DLS_BI *)liste->data;
-       if ( !strcasecmp ( bi->acronyme, acronyme ) && !strcasecmp( bi->tech_id, tech_id ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste) return(FALSE);
-    if (bi_p) *bi_p = (gpointer)bi;                                           /* Sauvegarde pour acceleration si besoin */
-    return( bi->edge_down );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_DI: Positionne une DigitalInput                                                                               */
@@ -1900,10 +1858,10 @@ end:
     Mnemo_auto_create_MONO ( FALSE, "SYS", "TOP_10SEC", "Impulsion toutes les 10 secondes" );
     Mnemo_auto_create_MONO ( FALSE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
     Mnemo_auto_create_MONO ( FALSE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
-    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_2SEC", "Creneaux d'une durée de deux secondes" );
-    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde" );
-    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde" );
-    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_5HZ",  "Creneaux d'une durée d'un 5ième de seconde" );
+    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_2SEC", "Creneaux d'une durée de deux secondes", 0 );
+    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde", 0 );
+    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde", 0 );
+    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_5HZ",  "Creneaux d'une durée d'un 5ième de seconde", 0 );
 
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Wait 20sec to let threads get I/Os", __func__ );
     wait=20;

@@ -1445,7 +1445,8 @@
               { case MNEMO_BUS:
                    break;
                 case MNEMO_BISTABLE:
-                 { Mnemo_auto_create_BI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                 { gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
+                   Mnemo_auto_create_BI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, groupe );
                    Liste_BI = Add_csv ( Liste_BI, alias->acronyme );
                    break;
                  }
