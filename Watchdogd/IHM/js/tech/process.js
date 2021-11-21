@@ -34,7 +34,7 @@
        }
      );
     Send_to_API ( "POST", "/api/process/start", json_request, function(Response)
-     { $('#idTableProcess').DataTable().ajax.reload();
+     { setTimeout ( function () { $('#idTableProcess').DataTable().ajax.reload(); }, 2000 );
      }, null);
   }
 /********************************************* Reload Process *****************************************************************/
@@ -45,7 +45,7 @@
        }
      );
     Send_to_API ( "POST", "/api/process/start", json_request, function(Response)
-     { $('#idTableProcess').DataTable().ajax.reload();
+     { setTimeout ( function () { $('#idTableProcess').DataTable().ajax.reload(); }, 2000 );
      }, null);
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/

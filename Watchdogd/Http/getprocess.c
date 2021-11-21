@@ -165,9 +165,10 @@
 
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: Stopping", __func__, uuid );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: %s", __func__, uuid, (status ? "Enabling" : "Disabling") );
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS" );
        Json_node_add_string ( RootNode, "action", "RELOAD" );
+       Json_node_add_string ( RootNode, "uuid", uuid );
        Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "MSRV", RootNode );
        json_node_unref(RootNode);
      }

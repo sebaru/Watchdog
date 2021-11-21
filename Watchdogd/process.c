@@ -74,7 +74,8 @@
     g_snprintf( lib->description, sizeof(lib->description), description );
     g_snprintf( lib->version,     sizeof(lib->version),     version );
 
-    SQL_Write_new ( "UPDATE processes SET start_time=%d, classe='%s', version='%s', database_version='%d', description='%s' WHERE uuid='%s'",
+    SQL_Write_new ( "UPDATE processes SET started=1, start_time=%d, classe='%s', version='%s', database_version='%d', "
+                    "description='%s' WHERE uuid='%s'",
                     time(NULL), classe, lib->version, lib->database_version, lib->description, lib->uuid );
 
     lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
@@ -92,7 +93,7 @@
  void Thread_end ( struct LIBRAIRIE *lib )
   { Zmq_Close ( lib->zmq_from_bus );
     Zmq_Close ( lib->zmq_to_master );
-    SQL_Write_new ( "UPDATE processes SET start_time = NULL, version = NULL WHERE uuid='%s'", lib->uuid );
+    SQL_Write_new ( "UPDATE processes SET started = NULL, start_time = NULL, version = NULL WHERE uuid='%s'", lib->uuid );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: Process is DOWN '%s' %s", __func__,
               lib->uuid, lib->name, lib->version );
     if (lib->config) json_node_unref (lib->config);
@@ -348,18 +349,11 @@
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
        if ( ! strcasecmp( uuid, lib->uuid ) )
-        { if (lib->Thread_run == FALSE)
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                      "%s: UUID %s: Reloading '%s' -> Library found but not started. Please Start '%s' before reload",
-                      __func__, lib->uuid, lib->name, lib->name );
-           }
-          else
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                      "%s: UUID %s: Reloading '%s' -> Library found. Reloading.", __func__, lib->uuid, lib->name );
-             Stop_librairie(lib);
-             dlclose( lib->dl_handle );
-             Process_dlopen ( lib );
-           }
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                   "%s: UUID %s: Reloading '%s' -> Library found. Reloading.", __func__, lib->uuid, lib->name );
+          Stop_librairie(lib);
+          dlclose( lib->dl_handle );
+          Process_dlopen ( lib );
           found = TRUE;
         }
        liste = g_slist_next(liste);
