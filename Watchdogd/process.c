@@ -49,42 +49,36 @@
 /* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
+ void Process_set_database_version ( struct LIBRAIRIE *lib, gint version )
+  { lib->database_version = version;
+    SQL_Write_new ( "UPDATE processes SET database_version='%d' WHERE uuid='%s'", lib->database_version, lib->uuid );
+  }
+/******************************************************************************************************************************/
+/* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
+/* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Thread_init ( gchar *name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description )
   { gchar chaine[128];
-    gint fd;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    g_snprintf( chaine, sizeof(chaine), "W-%s", name );
+
+    g_snprintf( chaine, sizeof(chaine), "W-%s", name );                           /* Positionne le nom du thread niveau noyau */
     gchar *upper_name = g_ascii_strup ( chaine, -1 );
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
     g_free(upper_name);
 
     lib->TID = pthread_self();                                                              /* Sauvegarde du TID pour le pere */
     lib->Thread_run = TRUE;                                                                             /* Le thread tourne ! */
-    time ( &lib->start_time );
-    g_snprintf( lib->name,        sizeof(lib->name),        name );
+    time ( &lib->start_time );                                                                           /* Date de demarrage */
     g_snprintf( lib->description, sizeof(lib->description), description );
     g_snprintf( lib->version,     sizeof(lib->version),     version );
-    Modifier_configDB ( lib->name, "thread_version", lib->version );
-    SQL_Write_new ( "INSERT INTO thread_classe SET thread=UPPER('%s'), classe=UPPER('%s') "
-                    "ON DUPLICATE KEY UPDATE classe=VALUES(classe)", lib->name, classe );
 
-    Creer_configDB ( lib->name, "debug", "false" );
-    gchar *db_debug = Recuperer_configDB_by_nom ( lib->name, "debug" );
-    lib->Thread_debug = !g_ascii_strcasecmp(db_debug, "true");
-    g_free(db_debug);
+    SQL_Write_new ( "UPDATE processes SET classe='%s', version='%s', database_version='%d', description='%s' WHERE uuid='%s'",
+                    classe, lib->version, lib->database_version, lib->description, lib->uuid );
 
-    lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
-
-    g_snprintf( chaine, sizeof(chaine), "%s.uuid", name );                                    /* Passer en base de données ?? */
-    fd = open ( chaine, O_RDONLY );
-    if (fd>0) { read ( fd, lib->uuid, 36 ); }
-    else { New_uuid ( lib->uuid );
-           fd = creat ( chaine, S_IRUSR | S_IWUSR );
-           write ( fd, lib->uuid, 36 );
-         }
-    close(fd);
+    lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
               "%s: UUID %s: Démarrage du thread '%s' (v%s) de classe '%s' (debug = %d) -> TID = %p", __func__,
@@ -98,8 +92,9 @@
  void Thread_end ( struct LIBRAIRIE *lib )
   { Zmq_Close ( lib->zmq_from_bus );
     Zmq_Close ( lib->zmq_to_master );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: '%s' v%s Down . . . TID = %p", __func__,
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: thread '%s' v%s Down . . . TID = %p", __func__,
               lib->uuid, lib->name, lib->version, pthread_self() );
+    if (lib->config) json_node_unref (lib->config);
     lib->Thread_run = FALSE;                                                                    /* Le thread ne tourne plus ! */
     lib->TID = 0;                                                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
@@ -111,6 +106,132 @@
 /******************************************************************************************************************************/
  JsonNode *Thread_Listen_to_master ( struct LIBRAIRIE *lib )
   { return ( Recv_zmq_with_json( lib->zmq_from_bus, lib->name, (gchar *)&lib->zmq_buffer, sizeof(lib->zmq_buffer) ) ); }
+/******************************************************************************************************************************/
+/* Thread_Listen_to_master: appelé par chaque thread pour écouter les messages ZMQ du master                                  */
+/* Entrée: La structure afférente                                                                                             */
+/* Sortie: JSonNode * sir il y a un message, sinon NULL                                                                       */
+/******************************************************************************************************************************/
+ JsonNode *SubProcess_Listen_to_master_new ( struct SUBPROCESS *module )
+  { return ( Recv_zmq_with_json( module->zmq_from_bus, Json_get_string ( module->config, "tech_id" ), (gchar *)&module->zmq_buffer, sizeof(module->zmq_buffer) ) ); }
+/******************************************************************************************************************************/
+/* Thread_send_comm_to_master: appelé par chaque thread pour envoyer le statut de la comm au master                           */
+/* Entrée: La structure afférente                                                                                             */
+/* Sortie: aucune                                                                                                             */
+/******************************************************************************************************************************/
+ void Thread_send_comm_to_master ( struct LIBRAIRIE *lib, gboolean etat )
+  { if (lib->comm_status != etat || lib->comm_next_update <= Partage->top)
+     { Zmq_Send_WATCHDOG_to_master ( lib, lib->name, "IO_COMM", 900 );
+       lib->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
+       lib->comm_status = etat;
+     }
+  }
+/******************************************************************************************************************************/
+/* Thread_send_comm_to_master: appelé par chaque thread pour envoyer le statut de la comm au master                           */
+/* Entrée: La structure afférente                                                                                             */
+/* Sortie: aucune                                                                                                             */
+/******************************************************************************************************************************/
+ void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat )
+  { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
+     { Zmq_Send_WATCHDOG_to_master_new ( module, Json_get_string ( module->config, "tech_id" ), "IO_COMM", 900 );
+       module->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
+       module->comm_status = etat;
+       SQL_Write_new ( "UPDATE %s SET comm=%d WHERE id=%d", module->lib->name, etat, Json_get_int ( module->config, "id" ) );
+     }
+  }
+/******************************************************************************************************************************/
+/* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
+/* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars )
+  { gchar chaine[128];
+
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
+    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    g_snprintf( chaine, sizeof(chaine), "W-%s", tech_id );   /* Positionne le nom noyau */
+    gchar *upper_name = g_ascii_strup ( chaine, -1 );
+    prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
+    g_free(upper_name);
+
+    if (sizeof_vars)
+     { module->vars = g_try_malloc0 ( sizeof_vars );
+       if (!module->vars)
+        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: Memory error.", __func__,
+                    module->lib->uuid, tech_id );
+          SubProcess_end ( module );
+        }
+     }
+
+    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s: Initialisation OK", __func__,
+              module->lib->uuid, tech_id );
+  }
+/******************************************************************************************************************************/
+/* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
+/* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void SubProcess_end ( struct SUBPROCESS *module )
+  { SubProcess_send_comm_to_master_new ( module, FALSE );
+    if (module->vars) g_free(module->vars);
+    pthread_exit(0);
+  }
+/******************************************************************************************************************************/
+/* Thread_Run_one_module: Demarre u nmodule du thread en parametre                                                            */
+/* Entrée: la structure librairie du thread et la configuration du module, dans 'element' au format json                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Process_Load_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+  { struct LIBRAIRIE *lib = user_data;
+    pthread_attr_t attr;
+
+    struct SUBPROCESS *module = g_try_malloc0( sizeof(struct SUBPROCESS) );
+    if (!module)
+     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enought Memory",
+                 __func__, Json_get_string ( element, "tech_id" ) );
+       return;
+     }
+    module->lib    = lib;
+    module->config = element;
+    module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    module->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+
+    if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
+     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: '%s': pthread_attr_init failed",
+                 __func__, Json_get_string ( element, "tech_id" ) );
+       return;
+     }
+
+    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) )                       /* On le laisse joinable au boot */
+     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: '%s': pthread_setdetachstate failed",
+                 __func__, Json_get_string ( element, "tech_id" ) );
+       return;
+     }
+
+    if ( pthread_create( &module->TID, &attr, (void *)lib->Run_module, module ) )
+     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: '%s': pthread_create failed (%s)",
+                 __func__, Json_get_string ( element, "tech_id" ) );
+       return;
+     }
+    pthread_attr_destroy(&attr);                                                                        /* Libération mémoire */
+    lib->modules = g_slist_append ( lib->modules, module );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: '%s': loaded", __func__, Json_get_string ( element, "tech_id" ) );
+  }
+/******************************************************************************************************************************/
+/* Thread_Run_one_module: Demarre u nmodule du thread en parametre                                                            */
+/* Entrée: la structure librairie du thread et la configuration du module, dans 'element' au format json                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Process_Unload_one_subprocess ( struct SUBPROCESS *module, struct LIBRAIRIE *lib )
+  { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s' Wait for sub-process end",
+                 __func__, Json_get_string ( module->config, "tech_id" ) );
+    pthread_join( module->TID, NULL );                                                                 /* Attente fin du fils */
+    Zmq_Close ( module->zmq_from_bus );
+    Zmq_Close ( module->zmq_to_master );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': sub-process ended",
+                 __func__, Json_get_string ( module->config, "tech_id" ) );
+    lib->modules = g_slist_remove ( lib->modules, module );
+    g_free(module);
+  }
 /******************************************************************************************************************************/
 /* Start_librairie: Demarre le thread en paremetre                                                                            */
 /* Entrée: La structure associée au thread                                                                                    */
@@ -160,17 +281,17 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Reload_librairie_par_prompt: Restart le thread en paremetre                                                               */
+/* Reload_librairie_par_nom: Restart le thread en paremetre                                                               */
 /* Entrée: Le nom du thread                                                                                                   */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Reload_librairie_par_prompt ( gchar *prompt )
+ gboolean Reload_librairie_par_nom ( gchar *name )
   { gboolean found = FALSE;
     GSList *liste;
     liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
-       if ( ! strcasecmp( prompt, lib->name ) )
+       if ( ! strcasecmp( name, lib->name ) )
         { if (lib->Thread_run == FALSE)
            { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                       "%s: reloading '%s' -> Library found but not started. Please Start '%s' before reload",
@@ -193,62 +314,75 @@
 /* EntrÃée: Le nom de fichier correspondant                                                                                    */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *prompt )
+ struct LIBRAIRIE *Charger_librairie_par_nom ( gchar *name )
   { pthread_mutexattr_t attr;                                                          /* Initialisation des mutex de synchro */
-    struct LIBRAIRIE *lib;
-    gchar nom_absolu[128];
-    GSList *liste;
+    gchar chaine[128];
 
-    liste = Partage->com_msrv.Librairies;
+    GSList *liste = Partage->com_msrv.Librairies;
     while (liste)
-     { struct LIBRAIRIE *lib;
-       lib = (struct LIBRAIRIE *)liste->data;
-       if ( ! strcmp( lib->name, prompt ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Librairie %s already loaded", __func__, prompt );
+     { struct LIBRAIRIE *lib = liste->data;
+       if ( ! strcmp( lib->name, name ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Librairie %s already loaded", __func__, name );
           return(NULL);
         }
-       liste=liste->next;
+       liste = g_slist_next ( liste );
      }
 
-    lib = (struct LIBRAIRIE *) g_try_malloc0( sizeof ( struct LIBRAIRIE ) );
-    if (!lib) { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: MemoryAlloc failed", __func__ );
+    struct LIBRAIRIE *lib = g_try_malloc0( sizeof ( struct LIBRAIRIE ) );
+    if (!lib) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: MemoryAlloc failed", __func__ );
                 return(NULL);
               }
 
-    g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/libwatchdog-server-%s.so", Config.librairie_dir, prompt );
+    g_snprintf( chaine, sizeof(chaine), "%s.uuid", name );                                 /* Récupère l'UUID sur le FS local */
+    gint fd = open ( chaine, O_RDONLY );
+    if (fd>0) { read ( fd, lib->uuid, 36 ); }
+    else { New_uuid ( lib->uuid );
+           fd = creat ( chaine, S_IRUSR | S_IWUSR );
+           write ( fd, lib->uuid, 36 );
+         }
+    close(fd);
 
-    lib->dl_handle = dlopen( nom_absolu, RTLD_GLOBAL | RTLD_NOW );
+    g_snprintf( lib->name, sizeof(lib->name), "%s", name );
+    g_snprintf( lib->nom_fichier,  sizeof(lib->nom_fichier), "%s/libwatchdog-server-%s.so", Config.librairie_dir, name );
+
+    SQL_Write_new ( "INSERT INTO processes SET instance='%s', uuid='%s', name='%s', database_version=0, enable=0, debug=0 "
+                    "ON DUPLICATE KEY UPDATE instance=VALUES(instance)", g_get_host_name(), lib->uuid, lib->name );
+
+    lib->dl_handle = dlopen( lib->nom_fichier, RTLD_GLOBAL | RTLD_NOW );
     if (!lib->dl_handle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Candidat %s failed (%s)", __func__, nom_absolu, dlerror() );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Candidat %s failed (%s)", __func__, lib->nom_fichier, dlerror() );
        g_free(lib);
        return(NULL);
      }
 
     lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                                      /* Recherche de la fonction */
     if (!lib->Run_thread)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Candidat %s rejected (Run_thread not found)", __func__, nom_absolu );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Candidat %s rejected (Run_thread not found)", __func__, lib->nom_fichier );
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
      }
 
+    lib->Run_module = dlsym( lib->dl_handle, "Run_module" );                                      /* Recherche de la fonction */
     lib->Admin_json = dlsym( lib->dl_handle, "Admin_json" );                                      /* Recherche de la fonction */
-    g_snprintf( lib->name, sizeof(lib->name), "%s", prompt );
-    g_snprintf( lib->nom_fichier,  sizeof(lib->nom_fichier),  "%s", nom_absolu );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %s loaded", __func__, nom_absolu );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %s loaded", __func__, lib->nom_fichier );
 
     pthread_mutexattr_init( &attr );                                                          /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
     pthread_mutex_init( &lib->synchro, &attr );
 
-    if ( !strcasecmp( prompt, "http" ) ) Start_librairie( lib );
-    else
-     { gchar *enable = Recuperer_configDB_by_nom ( prompt, "enable" );
-       if ( enable && !strcasecmp ( enable, "true" ) ) { Start_librairie( lib ); g_free(enable); }
+    JsonNode *RootNode = Json_node_create();
+    if(RootNode)
+     { SQL_Select_to_json_node ( RootNode, NULL, "SELECT debug, enable, database_version FROM processes WHERE uuid='%s'", lib->uuid );
+       lib->Thread_debug     = Json_get_bool ( RootNode, "debug" );
+       lib->database_version = Json_get_int  ( RootNode, "database_version" );
+       if ( !strcasecmp( name, "http" ) || Json_get_bool ( RootNode, "enable" ) == TRUE ) { Start_librairie( lib ); }
        else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                        "%s: Librairie '%s' is not enabled : Loaded but not started", __func__, prompt );
+                       "%s: Librairie '%s' is not enabled : Loaded but not started", __func__, name );
             }
+       json_node_unref(RootNode);
      }
+    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Librairie '%s': Memory Error", __func__, name ); }
 
     Partage->com_msrv.Librairies = g_slist_prepend( Partage->com_msrv.Librairies, lib );
     return(lib);
@@ -258,15 +392,12 @@
 /* Entrée: Le nom de la librairie                                                                                             */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- gboolean Decharger_librairie_par_prompt ( gchar *prompt )
-  { struct LIBRAIRIE *lib;
-    GSList *liste;
+ gboolean Decharger_librairie_par_nom ( gchar *name )
+  { GSList *liste = Partage->com_msrv.Librairies;
+    while(liste)                                                                           /* Liberation mÃémoire des modules */
+     { struct LIBRAIRIE *lib = liste->data;                                        /* RÃécupÃération des donnÃées de la liste */
 
-    liste = Partage->com_msrv.Librairies;
-    while(liste)                                                                            /* Liberation mÃémoire des modules */
-     { lib = (struct LIBRAIRIE *)liste->data;                                         /* RÃécupÃération des donnÃées de la liste */
-
-       if ( ! strcmp ( lib->name, prompt ) )
+       if ( ! strcmp ( lib->name, name ) )
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: trying to unload %s", __func__, lib->nom_fichier );
 
           Stop_librairie(lib);
@@ -280,7 +411,7 @@
         }
        liste = liste->next;
      }
-   Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: library %s not found", __func__, prompt );
+   Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: library %s not found", __func__, name );
    return(FALSE);
   }
 /******************************************************************************************************************************/
@@ -301,7 +432,7 @@
 
     while(Partage->com_msrv.Librairies)                                                     /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
-       Decharger_librairie_par_prompt (lib->name);
+       Decharger_librairie_par_nom (lib->name);
      }
   }
 /******************************************************************************************************************************/
@@ -318,16 +449,14 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Directory %s Unknown", __func__, Config.librairie_dir );
        return;
      }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Loading Directory %s in progress", __func__, Config.librairie_dir );
-     }
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Loading Directory %s in progress", __func__, Config.librairie_dir );
 
     while( (fichier = readdir( repertoire )) )                                      /* Pour chacun des fichiers du répertoire */
-     { gchar prompt[64];
+     { gchar name[64];
        if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 ))                     /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
-           { g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
-             Charger_librairie_par_prompt( prompt );
+           { g_snprintf( name, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
+             Charger_librairie_par_nom( name );
            }
         }
      }

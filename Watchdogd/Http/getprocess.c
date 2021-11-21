@@ -306,12 +306,12 @@
        else Cfg_http.lib->Thread_reload = TRUE;
      }
     else if ( hard )
-     { Decharger_librairie_par_prompt ( thread );
-       Charger_librairie_par_prompt ( thread );
+     { Decharger_librairie_par_nom ( thread );
+       Charger_librairie_par_nom ( thread );
        sleep(1);                                                                           /* lui laisse le temps de demarrer */
      }
     else
-     { Reload_librairie_par_prompt ( thread ); }
+     { Reload_librairie_par_nom ( thread ); }
 /*************************************************** Envoi au client **********************************************************/
     Audit_log ( session, "Processus '%s' %s Reloaded", thread, (hard ? "Hard" : "Soft") );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);

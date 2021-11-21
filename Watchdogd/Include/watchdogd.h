@@ -58,6 +58,18 @@
  #define VERROU_SERVEUR              "watchdogd.lock"
  #define FICHIER_EXPORT              "export.wdg"
 
+ struct SUBPROCESS
+  { pthread_t TID;                                                                                   /* Identifiant du thread */
+    struct LIBRAIRIE *lib;
+    JsonNode *config;
+    gboolean comm_status;                                                       /* Report local du status de la communication */
+    gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
+    void *zmq_from_bus;                                                                       /* handle d"ecoute du BUS local */
+    void *zmq_to_master;                                                                           /* handle d"envoiau master */
+    gchar zmq_buffer[1024];                                                     /* Buffer de reception des messages du master */
+    void *vars;                                                               /* Pointeur vers les variables de run du module */
+  };
+
  struct LIBRAIRIE
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
@@ -68,17 +80,21 @@
     gchar description[64];                                                             /* Designation de l'activité du thread */
     gchar version[32];
     gchar nom_fichier[128];                                                                 /* Nom de fichier de la librairie */
+    gint  database_version;                                            /* Version du schema de base de données pour ce thread */
+    JsonNode *config;
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
     gboolean Thread_reload;                                                           /* TRUE si le thread doit gerer le USR1 */
-    gboolean comm_status;                                                       /* Report local du status de la communication */
-    gint     comm_next_update;  /* a virer */                         /* Date du prochain update Watchdog COMM vers le master */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
+    void (*Run_module)( struct SUBPROCESS *module );                        /* Fonction principale de gestion du module */
                                                                                  /* Fonction de gestion des commandes d'admin */
     void *(*Admin_json)( struct LIBRAIRIE *lib, gpointer msg, const char *path, GHashTable *query, gint access_level );
 
+    GSList *modules;                                                                           /* Liste des modules du thread */
+    gboolean comm_status;                                                       /* Report local du status de la communication */
+    gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     void *zmq_from_bus;                                                                       /* handle d"ecoute du BUS local */
     void *zmq_to_master;                                                                           /* handle d"envoiau master */
     gchar zmq_buffer[1024];                                                     /* Buffer de reception des messages du master */
@@ -155,12 +171,20 @@
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
- extern gboolean Reload_librairie_par_prompt ( gchar *prompt );
- extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *prompt );
- extern gboolean Decharger_librairie_par_prompt ( gchar *prompt );
+ extern gboolean Reload_librairie_par_nom ( gchar *nom );
+ extern struct LIBRAIRIE *Charger_librairie_par_nom ( gchar *nom );
+ extern gboolean Decharger_librairie_par_nom ( gchar *nom );
+ extern void Process_set_database_version ( struct LIBRAIRIE *lib, gint version );
  extern void Thread_init ( gchar *pr_name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description );
  extern void Thread_end ( struct LIBRAIRIE *lib );
  extern JsonNode *Thread_Listen_to_master ( struct LIBRAIRIE *lib );
+ extern void Thread_send_comm_to_master ( struct LIBRAIRIE *lib, gboolean etat );
+ extern JsonNode *SubProcess_Listen_to_master_new ( struct SUBPROCESS *module );
+ extern void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat );
+ extern void Process_Load_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
+ extern void Process_Unload_one_subprocess ( struct SUBPROCESS *module, struct LIBRAIRIE *lib );
+ extern void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars );
+ extern void SubProcess_end ( struct SUBPROCESS *module );
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 

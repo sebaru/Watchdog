@@ -35,7 +35,7 @@
 /* Entrée : un JSon Builder                                                                                                   */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_smsg_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_meteo_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   {
     if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -52,10 +52,10 @@
     Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
 
     if (Lib->Thread_run)                                      /* Warning : Cfg_meteo does not exist if thread is not running ! */
-     { Json_node_add_string ( RootNode, "tech_id", Cfg_meteo.tech_id );
+     { /* Parcours Lib->module Json_node_add_string ( RootNode, "tech_id", Lib->tech_id );
        Json_node_add_string ( RootNode, "description", Cfg_meteo.description );
        Json_node_add_string ( RootNode, "token", Cfg_meteo.token );
-       Json_node_add_string ( RootNode, "code_insee", Cfg_meteo.code_insee );
+       Json_node_add_string ( RootNode, "code_insee", Cfg_meteo.code_insee );*/
      }
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref(RootNode);
@@ -64,11 +64,11 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
-/* Admin_json_smsg_set: Configure le thread SMSG                                                                              */
+/* Admin_json_meteo_set: Configure le thread SMSG                                                                              */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_smsg_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_meteo_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
   { if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -86,19 +86,19 @@
      }
 
     gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    Modifier_configDB ( Cfg_meteo.lib->name, "tech_id", tech_id );
+    Modifier_configDB ( Lib->name, "tech_id", tech_id );
     g_free(tech_id);
 
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
-    Modifier_configDB ( Cfg_meteo.lib->name, "description", description );
+    Modifier_configDB ( Lib->name, "description", description );
     g_free(description);
 
     gchar *token       = Normaliser_chaine ( Json_get_string( request, "token" ) );
-    Modifier_configDB ( Cfg_meteo.lib->name, "token", token );
+    Modifier_configDB ( Lib->name, "token", token );
     g_free(token);
 
     gchar *code_insee  = Normaliser_chaine ( Json_get_string( request, "code_insee" ) );
-    Modifier_configDB ( Cfg_meteo.lib->name, "code_insee", code_insee );
+    Modifier_configDB ( Lib->name, "code_insee", code_insee );
     g_free(code_insee);
 
     json_node_unref(request);
@@ -116,8 +116,10 @@
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-         if (!strcasecmp(path, "/status"))   { Admin_json_smsg_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/set"))      { Admin_json_smsg_set ( lib, msg ); }
+return;
+/*
+         if (!strcasecmp(path, "/status"))   { Admin_json_meteo_status ( lib, msg ); }
+    else if (!strcasecmp(path, "/set"))      { Admin_json_meteo_set ( lib, msg ); }
     else if (!strcasecmp(path, "/test") && lib->Thread_run)
      { if ( msg->method != SOUP_METHOD_PUT )
         {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED); }
@@ -126,6 +128,6 @@
           Cfg_meteo.test_api = TRUE;
         }
      }
-    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+    else*/ soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

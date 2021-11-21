@@ -16,8 +16,14 @@
 
 <hr>
 
-<div class="row m-2">
- </div>
+   <div class="table-responsive">
+     <table id="idTableMeteo" class="table table-striped table-bordered table-hover">
+       <thead class="thead-dark">
+				   </thead>
+			    <tbody>
+       </tbody>
+     </table>
+   </div>
 
        <div class="col form-group">
 					     <div class="input-group">
