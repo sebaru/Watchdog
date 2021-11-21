@@ -9,12 +9,8 @@
   }
 
 /********************************************* Reload Process *****************************************************************/
- function Process_reload ( instance, thread, hard )
-  { var json_request =
-       { thread  : thread,
-         hard    : hard,
-       };
-    if(instance!=null) json_request.instance=instance;
+ function Process_reload ( uuid )
+  { var json_request = { uuid : uuid };
     Send_to_API ( "POST", "/api/process/reload", JSON.stringify(json_request), null, null);
   }
 

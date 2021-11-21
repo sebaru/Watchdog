@@ -120,7 +120,6 @@
      };
 
     GSList *Librairies;                                                        /* Liste des librairies chargées pour Watchdog */
-    gboolean Http_Hard_Reload;
     gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
   };
 
@@ -171,9 +170,7 @@
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
- extern gboolean Reload_librairie_par_nom ( gchar *nom );
- extern struct LIBRAIRIE *Charger_librairie_par_nom ( gchar *nom );
- extern gboolean Decharger_librairie_par_nom ( gchar *nom );
+ extern gboolean Process_reload_by_uuid ( gchar *uuid );
  extern void Process_set_database_version ( struct LIBRAIRIE *lib, gint version );
  extern void Thread_init ( gchar *pr_name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description );
  extern void Thread_end ( struct LIBRAIRIE *lib );

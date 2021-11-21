@@ -161,6 +161,11 @@
           exit(0);
         }
      }
+    else if ( !strcasecmp( zmq_tag, "PROCESS") &&
+              Json_has_member ( request, "action" ) && !strcasecmp ( Json_get_string ( request, "action" ), "RELOAD" ) &&
+              Json_has_member ( request, "uuid" )
+            )
+     { Process_reload_by_uuid ( Json_get_string ( request, "uuid" ) ); }
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -315,8 +320,6 @@
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
      }
 
-    if (!Config.installed) Charger_librairie_par_nom ("http");/* Charge uniquement le module HTTP si instance pas installée*/
-
 /***************************************** Debut de la boucle sans fin ********************************************************/
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
@@ -363,11 +366,6 @@
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
-          if (Partage->com_msrv.Http_Hard_Reload)                                          /* Reload du thread HTTP si besoin */
-           { Decharger_librairie_par_nom ( "http" );                                       /* Déchargement de la librairie */
-             Charger_librairie_par_nom ( "http" );                                         /* Rechargement de la librairie */
-             Partage->com_msrv.Http_Hard_Reload = FALSE;
-           }
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
@@ -430,7 +428,6 @@
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
      }
 
-    if (!Config.installed) Charger_librairie_par_nom ("http");/* Charge uniquement le module HTTP si instance pas installée*/
 /***************************************** Debut de la boucle sans fin ********************************************************/
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
@@ -477,11 +474,6 @@
              json_node_unref(body);
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
-          if (Partage->com_msrv.Http_Hard_Reload)                                          /* Reload du thread HTTP si besoin */
-           { Decharger_librairie_par_nom ( "http" );                                       /* Déchargement de la librairie */
-             Charger_librairie_par_nom ( "http" );                                         /* Rechargement de la librairie */
-             Partage->com_msrv.Http_Hard_Reload = FALSE;
-           }
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
