@@ -105,7 +105,10 @@
      { result = "<button "+
                 "class='btn btn-"+color+" btn-block btn-sm' "+
                 "data-toggle='tooltip' title='"+tooltip+"' "+
-                "onclick="+clic_func+"('"+key+"')>"+texte+
+                "onclick="+clic_func+"('"+key+"')>"+
+                "<span id='idButtonSpinner_"+key+"' class='spinner-border spinner-border-sm' style='display:none' "+
+                "role='status' aria-hidden='true'></span> "+
+                texte+
                 "</button>";
      }
    else

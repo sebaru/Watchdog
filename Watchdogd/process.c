@@ -361,6 +361,27 @@
     return(found);
   }
 /******************************************************************************************************************************/
+/* Process_reload_by_uuid: Restart le process en paremetre                                                                    */
+/* Entrée: Le nom du thread                                                                                                   */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Process_set_debug ( gchar *uuid, gboolean debug )
+  { gboolean found = FALSE;
+    GSList *liste;
+    liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
+    while(liste)
+     { struct LIBRAIRIE *lib = liste->data;
+       if ( ! strcasecmp( uuid, lib->uuid ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                   "%s: UUID %s: Setting '%s' debug %s.", __func__, lib->uuid, lib->name, (debug ? "ON" : "OFF") );
+          lib->Thread_debug = debug;
+          found = TRUE;
+        }
+       liste = g_slist_next(liste);
+     }
+    return(found);
+  }
+/******************************************************************************************************************************/
 /* Decharger_librairies: Decharge toutes les librairies                                                                       */
 /* EntrÃée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */

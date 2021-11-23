@@ -171,6 +171,7 @@
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Process_reload_by_uuid ( gchar *uuid );
+ extern gboolean Process_set_debug ( gchar *uuid, gboolean debug );
  extern void Process_set_database_version ( struct LIBRAIRIE *lib, gint version );
  extern void Thread_init ( gchar *pr_name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description );
  extern void Thread_end ( struct LIBRAIRIE *lib );

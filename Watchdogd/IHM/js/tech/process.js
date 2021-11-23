@@ -4,9 +4,8 @@
  function Process_clic_debug ( thread )
   { instance = $('#idTargetInstance').val();
     var json_request = JSON.stringify(
-       { instance: $('#idTargetInstance').val(),
-         thread  : thread,
-         status  : true,
+       { uuid  : uuid,
+         status: true,
        }
      );
     Send_to_API ( "POST", "/api/process/debug", json_request, function(Response)
@@ -17,9 +16,8 @@
  function Process_clic_undebug ( thread )
   { instance = $('#idTargetInstance').val();
     var json_request = JSON.stringify(
-       { instance: $('#idTargetInstance').val(),
-         thread  : thread,
-         status  : false,
+       { uuid  : uuid,
+         status: false,
        }
      );
     Send_to_API ( "POST", "/api/process/debug", json_request, function(Response)
@@ -33,6 +31,7 @@
          status: true,
        }
      );
+    $("#idButtonSpinner_"+uuid).show();
     Send_to_API ( "POST", "/api/process/start", json_request, function(Response)
      { setTimeout ( function () { $('#idTableProcess').DataTable().ajax.reload(); }, 2000 );
      }, null);
@@ -44,6 +43,7 @@
          status: false,
        }
      );
+    $("#idButtonSpinner_"+uuid).show();
     Send_to_API ( "POST", "/api/process/start", json_request, function(Response)
      { setTimeout ( function () { $('#idTableProcess').DataTable().ajax.reload(); }, 2000 );
      }, null);
@@ -117,7 +117,8 @@
             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-right",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-danger", "Decharger/Recharger le process", "Process_reload", item.uuid, "redo", "Reload" );
+                  boutons += Bouton_actions_add ( "outline-danger", "Decharger/Recharger le process",
+                                                  "Process_reload", item.uuid, "redo", "Reload" );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

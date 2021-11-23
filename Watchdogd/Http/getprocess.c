@@ -70,61 +70,46 @@
 /******************************************************************************************************************************/
  void Http_traiter_process_debug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                    SoupClientContext *client, gpointer user_data )
-  { GBytes *request_brute;
-    gsize taille;
-
-    if (msg->method != SOUP_METHOD_POST)
+  { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
 
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-
-    if ( !request)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-       return;
-     }
-
-    if ( !(Json_has_member ( request, "thread" ) && Json_has_member ( request, "status" ) ) )
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "debug" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    if ( Config.instance_is_master && Json_has_member ( request, "instance" ) &&
-         strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
-         strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
-     { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
-       //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-       json_node_unref(request);
+    gchar   *uuid_src = Json_get_string ( request,"uuid" );
+    gboolean debug    = Json_get_bool ( request, "debug" );
+
+    gchar *uuid = Normaliser_chaine ( uuid_src );
+    if (!uuid)
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
-    gchar   *thread = Json_get_string ( request,"thread" );
-    gboolean status = Json_get_bool ( request, "status" );
-    Modifier_configDB ( thread, "debug", (status ? "TRUE" : "FALSE") );
+    SQL_Write_new ( "UPDATE processes SET debug=%d WHERE uuid='%s'", debug, uuid );
 
-         if ( ! strcasecmp ( thread, "archive" ) ) { Config.log_arch = status; }
-    else if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
-    else if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
-    else
-     { GSList *liste;
-       liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
-       while(liste)
-        { struct LIBRAIRIE *lib;
-          lib = (struct LIBRAIRIE *)liste->data;
-          if ( ! strcasecmp( lib->name, thread ) ) { lib->Thread_debug = status; }
-          liste = liste->next;
-        }
+    JsonNode *RootNode = Json_node_create();
+    if (RootNode)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: %s", __func__, uuid, (debug ? "Setting debug ON" : "Setting debug OFF") );
+       Json_node_add_string ( RootNode, "zmq_tag", "PROCESS" );
+       Json_node_add_string ( RootNode, "action", "DEBUG" );
+       Json_node_add_string ( RootNode, "uuid", uuid );
+       Json_node_add_bool   ( RootNode, "debug", debug );
+       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "MSRV", RootNode );
+       json_node_unref(RootNode);
      }
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting '%s' debug to '%s'", __func__,
-              thread, (status ? "TRUE" : "FALSE" ) );
+    g_free(uuid);
 /*************************************************** Envoi au client **********************************************************/
-    Audit_log ( session, "Processus '%s' debug set to %s", thread, (status ? "TRUE" : "FALSE" ) );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
   }

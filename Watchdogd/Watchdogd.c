@@ -166,6 +166,11 @@
               Json_has_member ( request, "uuid" )
             )
      { Process_reload_by_uuid ( Json_get_string ( request, "uuid" ) ); }
+    else if ( !strcasecmp( zmq_tag, "PROCESS") &&
+              Json_has_member ( request, "action" ) && !strcasecmp ( Json_get_string ( request, "action" ), "DEBUG" ) &&
+              Json_has_member ( request, "uuid" ) && Json_has_member ( request, "debug" )
+            )
+     { Process_set_debug ( Json_get_string ( request, "uuid" ), Json_get_bool ( request, "debug" ) ); }
     return(TRUE);
   }
 /******************************************************************************************************************************/
