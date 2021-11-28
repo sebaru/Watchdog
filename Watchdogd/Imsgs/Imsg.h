@@ -46,7 +46,7 @@
   };
 
  struct IMSGS_CONFIG
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     gchar tech_id[32];
     xmpp_ctx_t *ctx;
     xmpp_conn_t *conn;

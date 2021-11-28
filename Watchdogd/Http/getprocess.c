@@ -171,9 +171,9 @@
     g_free(uuid);
 
     GSList *liste = Partage->com_msrv.Librairies;                                        /* Parcours de toutes les librairies */
-    struct LIBRAIRIE *lib = NULL;
+    struct PROCESS *lib = NULL;
     while(liste)
-     { lib = (struct LIBRAIRIE *)liste->data;
+     { lib = (struct PROCESS *)liste->data;
        if ( ! strcasecmp( Json_get_string ( RootNode, "name" ), lib->name ) ) break;
        liste = g_slist_next(liste);
      }

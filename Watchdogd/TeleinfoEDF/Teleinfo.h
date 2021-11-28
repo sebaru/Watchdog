@@ -38,7 +38,7 @@
   };
 
  struct TELEINFO_CONFIG
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     gboolean comm_status;
     gpointer bit_comm;                                                            /* Pointer de raccourci pour le bit de comm */
     gint  mode;                                                                    /* Statut de connexion au port TeleInfoEDF */

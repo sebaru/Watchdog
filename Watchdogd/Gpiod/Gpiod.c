@@ -37,7 +37,7 @@
 /* Entrée: rien                                                                                                               */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Gpiod_Creer_DB ( struct LIBRAIRIE *lib )
+ static void Gpiod_Creer_DB ( struct PROCESS *lib )
   { gint database_version;
 
     gchar *database_version_string = Recuperer_configDB_by_nom( Cfg.lib->name, "database_version" );
@@ -83,7 +83,7 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_gpio (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct LIBRAIRIE *lib = user_data;
+  { struct PROCESS *lib = user_data;
     gint num                       = Json_get_int ( element, "num" );
     Cfg.lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
     Cfg.lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );
@@ -119,7 +119,7 @@ end:
 /* Entrée: rien                                                                                                               */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gboolean Charger_tous_gpio ( struct LIBRAIRIE *lib )
+ static gboolean Charger_tous_gpio ( struct PROCESS *lib )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
@@ -134,7 +134,7 @@ end:
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Gpiod                                                                                  */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   {
 reload:
     memset( &Cfg, 0, sizeof(Cfg) );                                                 /* Mise a zero de la structure de travail */

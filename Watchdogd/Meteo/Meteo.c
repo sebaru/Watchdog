@@ -36,10 +36,10 @@
 
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Meteo_Creer_DB ( struct LIBRAIRIE *lib )
+ static void Meteo_Creer_DB ( struct PROCESS *lib )
   {
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
@@ -269,7 +269,7 @@ end:
 /* Entrée: un client et un utilisateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   {
 reload:
     Meteo_Creer_DB ( lib );                                                                    /* Création de la DB du thread */

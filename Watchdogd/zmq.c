@@ -231,7 +231,7 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_DI_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gboolean etat )
+ void Zmq_Send_DI_to_master ( struct PROCESS *lib, gchar *tech_id, gchar *acronyme, gboolean etat )
   { if (!lib) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
@@ -247,7 +247,7 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_AI_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gdouble valeur, gboolean in_range)
+ void Zmq_Send_AI_to_master ( struct PROCESS *lib, gchar *tech_id, gchar *acronyme, gdouble valeur, gboolean in_range)
   { if (!lib) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
@@ -264,7 +264,7 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_CDE_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme )
+ void Zmq_Send_CDE_to_master ( struct PROCESS *lib, gchar *tech_id, gchar *acronyme )
   { if (!lib) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
@@ -279,7 +279,7 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_WATCHDOG_to_master ( struct LIBRAIRIE *lib, gchar *tech_id, gchar *acronyme, gint consigne )
+ void Zmq_Send_WATCHDOG_to_master ( struct PROCESS *lib, gchar *tech_id, gchar *acronyme, gint consigne )
   { if (!lib) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;

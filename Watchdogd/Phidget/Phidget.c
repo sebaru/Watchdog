@@ -48,7 +48,7 @@
  struct PHIDGET_CONFIG Cfg_phidget;
 /******************************************************************************************************************************/
 /* Phidget_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static gboolean Phidget_Lire_config ( void )
@@ -61,7 +61,7 @@
   }
 /******************************************************************************************************************************/
 /* Phidget_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Phidget_Creer_DB ( void )
@@ -739,7 +739,7 @@ error:
 /******************************************************************************************************************************/
 /* Main: Fonction principale du PHIDGET                                                                                        */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   {
 reload:
     memset( &Cfg_phidget, 0, sizeof(Cfg_phidget) );                                 /* Mise a zero de la structure de travail */

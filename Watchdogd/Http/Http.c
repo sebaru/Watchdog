@@ -39,7 +39,7 @@
  struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Http_Lire_config ( void )
@@ -573,11 +573,11 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
-/* Run_thread: Thread principal                                                                                               */
-/* Entrée: une structure LIBRAIRIE                                                                                            */
+/* Run_process: Thread principal                                                                                               */
+/* Entrée: une structure PROCESS                                                                                            */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   { gint last_pulse = 0;
     GError *error;
 

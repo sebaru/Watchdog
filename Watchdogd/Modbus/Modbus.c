@@ -46,7 +46,7 @@
  struct MODBUS_CONFIG Cfg_modbus;
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static gboolean Modbus_Lire_config ( void )
@@ -59,7 +59,7 @@
   }
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Modbus_Creer_DB ( void )
@@ -1146,7 +1146,7 @@ end:
 /******************************************************************************************************************************/
 /* Main: Fonction principale du MODBUS                                                                                        */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   {
 
 reload:

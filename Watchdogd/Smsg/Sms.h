@@ -31,7 +31,7 @@
  #include <gammu.h>
 
  struct SMS_CONFIG
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     gboolean sending_is_disabled;                                  /* Variable permettant d'interdire l'envoi de sms si panic */
     GSM_Error gammu_send_status;
     GSM_StateMachine *gammu_machine;

@@ -34,7 +34,7 @@
  #define AUDIO_DEFAUT_LANGUAGE       "fr"                                                  /* Language par défaut pour le TTS */
 
  struct AUDIO_CONFIG
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     gint last_audio;                                                                   /* Date de la derniere emission sonore */
     gchar language[80];                                             /* Language de restitution vocal, au format google_speech */
     gchar device[32];

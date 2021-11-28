@@ -55,7 +55,7 @@
   };
 
  struct HTTP_CONFIG
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
 
     gint tcp_port;                                           /* Port d'écoute TCP (HTTP ou HTTPS, selon le paramètre suivant) */
     gboolean ssl_enable;                                                                             /* TRUE si connexion SSL */

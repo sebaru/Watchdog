@@ -33,7 +33,7 @@
  static struct IMSGS_CONFIG Cfg;
 /******************************************************************************************************************************/
 /* Imsgs_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static gboolean Imsgs_Lire_config ( void )
@@ -60,7 +60,7 @@
   }
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgs_Creer_DB ( void )
@@ -440,7 +440,7 @@ end:
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Imsg                                                                                   */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   { gint retour;
 
 reload:

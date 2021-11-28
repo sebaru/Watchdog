@@ -34,7 +34,7 @@
 /* Entrée : la librairie, et le Json recu                                                                                     */
 /* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
- void Admin_config ( struct LIBRAIRIE *lib, gpointer msg, JsonNode *request )
+ void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
   {
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "token" ) && Json_has_member ( request, "code_insee" )

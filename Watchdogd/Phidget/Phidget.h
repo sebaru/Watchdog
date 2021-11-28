@@ -32,7 +32,7 @@
  #include <phidget22.h>
 
  struct PHIDGET_CONFIG                                                                 /* Communication entre DLS et la Phidget */
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     GSList *Liste_sensors;
   };
 

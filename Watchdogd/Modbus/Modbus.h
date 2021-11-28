@@ -72,7 +72,7 @@
  #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
 
  struct MODBUS_CONFIG                                                                 /* Communication entre DLS et la MODBUS */
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     GSList *Modules_MODBUS;
   };
 

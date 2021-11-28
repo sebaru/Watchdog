@@ -34,7 +34,7 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_phidget_status ( struct PROCESS *Lib, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -62,7 +62,7 @@
 /* Entrées: la connexion Websocket destinataire                                                                               */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_hub_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_phidget_hub_list ( struct PROCESS *Lib, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -93,7 +93,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_hub_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_phidget_hub_del ( struct PROCESS *Lib, SoupMessage *msg )
   {
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -118,7 +118,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_hub_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_phidget_hub_set ( struct PROCESS *Lib, SoupMessage *msg )
   { gboolean retour;
 
     if ( msg->method != SOUP_METHOD_POST )
@@ -171,7 +171,7 @@
 /* Entrées: la connexion Websocket, le champ start/stop                                                                       */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_hub_start_stop ( struct LIBRAIRIE *Lib, SoupMessage *msg, gboolean start )
+ static void Admin_json_phidget_hub_start_stop ( struct PROCESS *Lib, SoupMessage *msg, gboolean start )
   { if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -201,7 +201,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_map_list ( struct LIBRAIRIE *Lib, GHashTable *query, SoupMessage *msg )
+ static void Admin_json_phidget_map_list ( struct PROCESS *Lib, GHashTable *query, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -274,7 +274,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_map_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_phidget_map_set ( struct PROCESS *Lib, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -407,7 +407,7 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_map_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_phidget_map_del ( struct PROCESS *Lib, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -453,7 +453,7 @@ end:
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
+ void Admin_json ( struct PROCESS *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
   { if (access_level < 6)
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;

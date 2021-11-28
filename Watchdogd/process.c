@@ -49,7 +49,7 @@
 /* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Process_set_database_version ( struct LIBRAIRIE *lib, gint version )
+ void Process_set_database_version ( struct PROCESS *lib, gint version )
   { lib->database_version = version;
     SQL_Write_new ( "UPDATE processes SET database_version='%d' WHERE uuid='%s'", lib->database_version, lib->uuid );
   }
@@ -58,7 +58,7 @@
 /* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Thread_init ( gchar *name, gchar *classe, struct LIBRAIRIE *lib, gchar *version, gchar *description )
+ void Thread_init ( gchar *name, gchar *classe, struct PROCESS *lib, gchar *version, gchar *description )
   { gchar chaine[128];
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
@@ -90,7 +90,7 @@
 /* Entrée: Le nom du thread                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Thread_end ( struct LIBRAIRIE *lib )
+ void Thread_end ( struct PROCESS *lib )
   { Zmq_Close ( lib->zmq_from_bus );
     Zmq_Close ( lib->zmq_to_master );
     SQL_Write_new ( "UPDATE processes SET started = NULL, start_time = NULL, version = NULL WHERE uuid='%s'", lib->uuid );
@@ -106,7 +106,7 @@
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: JSonNode * sir il y a un message, sinon NULL                                                                       */
 /******************************************************************************************************************************/
- JsonNode *Thread_Listen_to_master ( struct LIBRAIRIE *lib )
+ JsonNode *Thread_Listen_to_master ( struct PROCESS *lib )
   { return ( Recv_zmq_with_json( lib->zmq_from_bus, lib->name, (gchar *)&lib->zmq_buffer, sizeof(lib->zmq_buffer) ) ); }
 /******************************************************************************************************************************/
 /* Thread_Listen_to_master: appelé par chaque thread pour écouter les messages ZMQ du master                                  */
@@ -120,7 +120,7 @@
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
- void Thread_send_comm_to_master ( struct LIBRAIRIE *lib, gboolean etat )
+ void Thread_send_comm_to_master ( struct PROCESS *lib, gboolean etat )
   { if (lib->comm_status != etat || lib->comm_next_update <= Partage->top)
      { Zmq_Send_WATCHDOG_to_master ( lib, lib->name, "IO_COMM", 900 );
        lib->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
@@ -180,12 +180,12 @@
     pthread_exit(0);
   }
 /******************************************************************************************************************************/
-/* Thread_Run_one_module: Demarre u nmodule du thread en parametre                                                            */
+/* Process_Load_one_subprocess: Demarre u nmodule du thread en parametre                                                      */
 /* Entrée: la structure librairie du thread et la configuration du module, dans 'element' au format json                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Process_Load_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct LIBRAIRIE *lib = user_data;
+  { struct PROCESS *lib = user_data;
     pthread_attr_t attr;
 
     struct SUBPROCESS *module = g_try_malloc0( sizeof(struct SUBPROCESS) );
@@ -222,11 +222,11 @@
               __func__, module->lib->uuid, Json_get_string ( element, "tech_id" ) );
   }
 /******************************************************************************************************************************/
-/* Thread_Run_one_module: Demarre u nmodule du thread en parametre                                                            */
+/* Process_Unload_one_subprocess: Demarre u nmodule du thread en parametre                                                    */
 /* Entrée: la structure librairie du thread et la configuration du module, dans 'element' au format json                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Process_Unload_one_subprocess ( struct SUBPROCESS *module, struct LIBRAIRIE *lib )
+ void Process_Unload_one_subprocess ( struct SUBPROCESS *module, struct PROCESS *lib )
   { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: UUID %s/%s: Wait for sub-process end",
               __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id" ) );
     pthread_join( module->TID, NULL );                                                                 /* Attente fin du fils */
@@ -238,11 +238,11 @@
     g_free(module);
   }
 /******************************************************************************************************************************/
-/* Start_librairie: Demarre le thread en paremetre                                                                            */
+/* Process_start: Demarre le thread en paremetre                                                                              */
 /* Entrée: La structure associée au thread                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Start_librairie ( struct LIBRAIRIE *lib )
+ gboolean Process_start ( struct PROCESS *lib )
   { pthread_attr_t attr;
     pthread_t tid;
     if (!lib) return(FALSE);
@@ -264,7 +264,7 @@
        return(FALSE);
      }
 
-    if ( pthread_create( &tid, &attr, (void *)lib->Run_thread, lib ) )
+    if ( pthread_create( &tid, &attr, (void *)lib->Run_process, lib ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: UUID %s: pthread_create failed (%s)",
                  __func__, lib->uuid, lib->nom_fichier );
        return(FALSE);
@@ -275,11 +275,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Stop_librairie: Arrete le thread en paremetre                                                                              */
+/* Process_stop: Arrete le thread en paremetre                                                                                */
 /* Entrée: La structure associée au thread                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Stop_librairie ( struct LIBRAIRIE *lib )
+ gboolean Process_stop ( struct PROCESS *lib )
   { if (!lib) return(FALSE);
     if ( lib->TID != 0 )
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: Process %s, stopping in progress",
@@ -297,7 +297,7 @@
 /* Entrée: La structure PROCESS associée                                                                                      */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gboolean Process_dlopen ( struct LIBRAIRIE *lib )
+ static gboolean Process_dlopen ( struct PROCESS *lib )
   { pthread_mutexattr_t attr;                                                          /* Initialisation des mutex de synchro */
     lib->dl_handle = dlopen( lib->nom_fichier, RTLD_GLOBAL | RTLD_NOW );
     if (!lib->dl_handle)
@@ -306,9 +306,9 @@
        return(FALSE);
      }
 
-    lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                                      /* Recherche de la fonction */
-    if (!lib->Run_thread)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: UUID %s: Process %s rejected (Run_thread not found)",
+    lib->Run_process = dlsym( lib->dl_handle, "Run_process" );                                      /* Recherche de la fonction */
+    if (!lib->Run_process)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: UUID %s: Process %s rejected (Run_process not found)",
                  __func__, lib->uuid, lib->nom_fichier );
        dlclose( lib->dl_handle );
        return(FALSE);
@@ -329,7 +329,7 @@
      { SQL_Select_to_json_node ( RootNode, NULL, "SELECT debug, enable, database_version FROM processes WHERE uuid='%s'", lib->uuid );
        lib->Thread_debug     = Json_get_bool ( RootNode, "debug" );
        lib->database_version = Json_get_int  ( RootNode, "database_version" );
-       if ( !strcasecmp( lib->name, "http" ) || Json_get_bool ( RootNode, "enable" ) == TRUE ) { Start_librairie( lib ); }
+       if ( !strcasecmp( lib->name, "http" ) || Json_get_bool ( RootNode, "enable" ) == TRUE ) { Process_start( lib ); }
        else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                        "%s: UUID %s: Process '%s' is not enabled : Loaded but not started", __func__, lib->uuid, lib->name );
             }
@@ -348,11 +348,11 @@
     GSList *liste;
     liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
     while(liste)
-     { struct LIBRAIRIE *lib = liste->data;
+     { struct PROCESS *lib = liste->data;
        if ( ! strcasecmp( uuid, lib->uuid ) )
         { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                    "%s: UUID %s: Reloading '%s' -> Library found. Reloading.", __func__, lib->uuid, lib->name );
-          Stop_librairie(lib);
+          Process_stop(lib);
           dlclose( lib->dl_handle );
           Process_dlopen ( lib );
           found = TRUE;
@@ -371,7 +371,7 @@
     GSList *liste;
     liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
     while(liste)
-     { struct LIBRAIRIE *lib = liste->data;
+     { struct PROCESS *lib = liste->data;
        if ( ! strcasecmp( uuid, lib->uuid ) )
         { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                    "%s: UUID %s: Setting '%s' debug %s.", __func__, lib->uuid, lib->name, (debug ? "ON" : "OFF") );
@@ -388,25 +388,25 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Decharger_librairies ( void )
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     GSList *liste;
 
     liste = Partage->com_msrv.Librairies;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
-     { lib = (struct LIBRAIRIE *)liste->data;
+     { lib = (struct PROCESS *)liste->data;
        lib->Thread_run = FALSE;                                                          /* On demande au thread de s'arreter */
        liste = liste->next;
      }
 
     liste = Partage->com_msrv.Librairies;
     while(liste)
-     { lib = (struct LIBRAIRIE *)liste->data;
+     { lib = (struct PROCESS *)liste->data;
        while ( lib->TID != 0 ) sleep(1);                                                                    /* Attend l'arret */
        liste = liste->next;
      }
 
     while(Partage->com_msrv.Librairies)                                                     /* Liberation mémoire des modules */
-     { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
+     { lib = (struct PROCESS *)Partage->com_msrv.Librairies->data;
        pthread_mutex_destroy( &lib->synchro );
        dlclose( lib->dl_handle );
        Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
@@ -435,7 +435,7 @@
      { if (    ! strncmp( fichier->d_name, "libwatchdog-server-", 19 )                      /* Chargement unitaire d'une librairie */
            &&  ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
         { gchar chaine[64];
-          struct LIBRAIRIE *lib = g_try_malloc0( sizeof ( struct LIBRAIRIE ) );
+          struct PROCESS *lib = g_try_malloc0( sizeof ( struct PROCESS ) );
           if (!lib) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: MemoryAlloc failed", __func__ );
                       continue;
                     }

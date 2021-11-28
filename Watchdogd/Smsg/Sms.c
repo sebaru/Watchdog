@@ -38,7 +38,7 @@
  struct SMS_CONFIG Cfg_smsg;
 /******************************************************************************************************************************/
 /* Smsg_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Smsg_Lire_config ( void )
@@ -75,7 +75,7 @@
   }
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Smsg_Creer_DB ( void )
@@ -643,7 +643,7 @@ end:
 /* Entrée: un client et un utilisateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   {
 
 reload:

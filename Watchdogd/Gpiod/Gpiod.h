@@ -33,7 +33,7 @@
  #define GPIOD_MAX_LINE    28                                                         /* 28 Lignes maximums d'entrées/sorties */
 
  struct GPIOD_CONFIG
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     gint   delai;                                                     /* Temps d'attente pour avoir les 50 tours par secondes */
     struct gpiod_chip *chip;
     gint   num_lines;

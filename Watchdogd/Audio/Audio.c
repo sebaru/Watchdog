@@ -38,7 +38,7 @@
  struct AUDIO_CONFIG Cfg_audio;
 /******************************************************************************************************************************/
 /* Audio_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Audio_Lire_config ( void )
@@ -158,7 +158,7 @@
 /******************************************************************************************************************************/
 /* Main: Fonction principale du Thread Audio                                                                                  */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   {
 reload:
     memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                                     /* Mise a zero de la structure de travail */

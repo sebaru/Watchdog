@@ -41,7 +41,7 @@
  struct UPS_CONFIG Cfg_ups;
 /******************************************************************************************************************************/
 /* Ups_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                    */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static gboolean Ups_Lire_config ( void )
@@ -54,7 +54,7 @@
   }
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Ups_Creer_DB ( void )
@@ -533,7 +533,7 @@ end:
 /******************************************************************************************************************************/
 /* Main: Fonction principale du UPS                                                                                           */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   { struct MODULE_UPS *ups;
     GSList *liste;
 

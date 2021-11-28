@@ -40,7 +40,7 @@
  struct TELEINFO_CONFIG Cfg_teleinfo;
 /******************************************************************************************************************************/
 /* Teleinfo_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                               */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Teleinfo_Lire_config ( void )
@@ -81,7 +81,7 @@
   }
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Teleinfo_Creer_DB ( void )
@@ -188,7 +188,7 @@ end:
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Teleinfo                                                                               */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   { gint retval, nbr_octet_lu;
     struct timeval tv;
     fd_set fdselect;
@@ -262,7 +262,7 @@ reload:
               }
              else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)                        /* Encore en dessous de la limite ? */
               { /* Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
-                         "Run_thread: Get one char : %d, %c (pos %d)",
+                         "Run_process: Get one char : %d, %c (pos %d)",
                           Cfg_teleinfo.buffer[nbr_octet_lu], Cfg_teleinfo.buffer[nbr_octet_lu], nbr_octet_lu );*/
                 nbr_octet_lu += cpt;                                                     /* Preparation du prochain caractere */
               }

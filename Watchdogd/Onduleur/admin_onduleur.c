@@ -34,7 +34,7 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_ups_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_ups_status ( struct PROCESS *Lib, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -62,7 +62,7 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_ups_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_ups_list ( struct PROCESS *Lib, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -113,7 +113,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static void Admin_json_ups_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_ups_del ( struct PROCESS *Lib, SoupMessage *msg )
   { gchar chaine[256];
     if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -149,7 +149,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_ups_set_add ( gboolean ajout, struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_ups_set_add ( gboolean ajout, struct PROCESS *Lib, SoupMessage *msg )
   { gchar requete[256];
 
     if ( msg->method != SOUP_METHOD_POST )
@@ -203,7 +203,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_ups_start ( struct LIBRAIRIE *Lib, SoupMessage *msg, gboolean start )
+ static void Admin_json_ups_start ( struct PROCESS *Lib, SoupMessage *msg, gboolean start )
   { gchar requete[256];
 
     if ( msg->method != SOUP_METHOD_POST )
@@ -236,7 +236,7 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
+ void Admin_json ( struct PROCESS *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
   { if (access_level < 6)
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
