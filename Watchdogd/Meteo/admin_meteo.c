@@ -47,10 +47,11 @@
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *token       = Normaliser_chaine ( Json_get_string( request, "token" ) );
     gchar *code_insee  = Normaliser_chaine ( Json_get_string( request, "code_insee" ) );
+    gchar *uuid        = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
 
     if (Json_has_member ( request, "id" ))
-     { SQL_Write_new ( "UPDATE meteo SET tech_id='%s', description='%s', token='%s', code_insee='%s' WHERE id='%d'",
-                       tech_id, description, token, code_insee, Json_get_int ( request, "id" ) );
+     { SQL_Write_new ( "UPDATE meteo SET uuid='%s', tech_id='%s', description='%s', token='%s', code_insee='%s' WHERE id='%d'",
+                       uuid, tech_id, description, token, code_insee, Json_get_int ( request, "id" ) );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, lib->uuid, tech_id );
      }
     else
@@ -65,6 +66,7 @@
     g_free(description);
     g_free(token);
     g_free(code_insee);
+    g_free(uuid);
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }

@@ -29,7 +29,7 @@
                      function () { Meteo_Del_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Meteo_Set ( id )
+ function Meteo_Set ( selection )
   { var json_request =
        { uuid       : $('#idTargetInstance').val(),
          tech_id    : $('#idMeteoTechID').val().toUpperCase(),
@@ -37,10 +37,11 @@
          description: $('#idMeteoDescription').val(),
          code_insee : $('#idMeteoCodeInsee').val(),
        };
-    if (id) json_request.id = parseInt(id);                                                             /* Ajout ou édition ? */
+    if (selection) json_request.id = parseInt(selection.id);                                            /* Ajout ou édition ? */
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
-     { Process_reload ( json_request.uuid );
+     { if (selection.uuid != json_request.uuid) Process_reload ( selection.uuid ); /* Restart de l'ancien subprocess si uuid différent */
+       Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
        $('#idTableMeteo').DataTable().ajax.reload(null, false);
      }, null );
   }
@@ -55,7 +56,7 @@
     $('#idMeteoDescription').val( selection.description );
     $('#idMeteoToken').val( selection.token );
     $('#idMeteoCodeInsee').val( selection.code_insee );
-    $('#idMeteoValider').off("click").on( "click", function () { Meteo_Set(selection.id); } );
+    $('#idMeteoValider').off("click").on( "click", function () { Meteo_Set(selection); } );
     $('#idMeteoEdit').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
