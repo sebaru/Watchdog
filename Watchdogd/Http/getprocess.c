@@ -204,10 +204,7 @@
   {      if (msg->method == SOUP_METHOD_GET)    Http_traiter_process_config_get    ( server, msg, path, query, client, user_data );
     else if (msg->method == SOUP_METHOD_DELETE) Http_traiter_process_config_delete ( server, msg, path, query, client, user_data );
     else if (msg->method == SOUP_METHOD_POST)   Http_traiter_process_config_post   ( server, msg, path, query, client, user_data );
-    else
-     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-       return;
-     }
+    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_debug: Active ou non le debug d'un process                                                 */
@@ -251,7 +248,7 @@
        Json_node_add_string ( RootNode, "action", "DEBUG" );
        Json_node_add_string ( RootNode, "uuid", uuid );
        Json_node_add_bool   ( RootNode, "debug", debug );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "MSRV", RootNode );
+       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Config.master_host, RootNode );
        json_node_unref(RootNode);
      }
     g_free(uuid);
@@ -300,7 +297,7 @@
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS" );
        Json_node_add_string ( RootNode, "action", "RELOAD" );
        Json_node_add_string ( RootNode, "uuid", uuid );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "MSRV", RootNode );
+       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Config.master_host, RootNode );
        json_node_unref(RootNode);
      }
     g_free(uuid);
@@ -331,8 +328,8 @@
        return;
      }
 
-    gchar   *uuid_src = Json_get_string ( request,"uuid" );
-    gchar *uuid = Normaliser_chaine ( uuid_src );
+    gchar *uuid_src = Json_get_string ( request,"uuid" );
+    gchar *uuid     = Normaliser_chaine ( uuid_src );
     if (!uuid)
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
@@ -346,7 +343,7 @@
                  uuid, Json_get_string ( RootNode, "host" ), Json_get_string ( RootNode, "name" ) );
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS" );
        Json_node_add_string ( RootNode, "action", "RELOAD" );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "MSRV", RootNode );
+       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Config.master_host, RootNode );
        json_node_unref(RootNode);
      }
     g_free(uuid);

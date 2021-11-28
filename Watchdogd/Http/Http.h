@@ -120,8 +120,8 @@
                                            SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_instance_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                           SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_instance_loglevel ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                              SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_instance_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                         SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_instance_reload_icons ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                                   SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_bus     ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

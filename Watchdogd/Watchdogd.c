@@ -171,6 +171,17 @@
               Json_has_member ( request, "uuid" ) && Json_has_member ( request, "debug" )
             )
      { Process_set_debug ( Json_get_string ( request, "uuid" ), Json_get_bool ( request, "debug" ) ); }
+    else if ( !strcasecmp( zmq_tag, "SET_LOG") &&
+              Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
+              Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" )
+            )
+     { Config.log_db   = Json_get_bool ( request, "log_db" );
+       Config.log_zmq  = Json_get_bool ( request, "log_zmq" );
+       Config.log_trad = Json_get_bool ( request, "log_trad" );
+       Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: db=%d, zmq=%d, trad=%d, log_level=%d", __func__,
+                 Config.log_db, Config.log_zmq, Config.log_trad, Json_get_int ( request, "log_level" ) );
+     }
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -249,7 +260,7 @@
           if (RootNode)
            { Dls_AO_to_json( RootNode, ao );
              Json_node_add_string ( RootNode, "zmq_tag", "SET_AO" );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", RootNode );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", RootNode );
              json_node_unref(RootNode);
            }
           liste = g_slist_next(liste);
@@ -339,7 +350,7 @@
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
 
-       request = Recv_zmq_with_json( zmq_from_slave, "msrv", (gchar *)&buffer, sizeof(buffer) );
+       request = Recv_zmq_with_json( zmq_from_slave, g_get_host_name(), (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { Handle_zmq_for_master( request );
           json_node_unref ( request );
@@ -347,7 +358,7 @@
 
        request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if (!strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), "msrv"))
+        { if (!strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), g_get_host_name()))
            { Handle_zmq_for_master( request ); }
           else
            { gint taille = strlen(buffer);
@@ -366,7 +377,7 @@
         { JsonNode *RootNode = Json_node_create();
           if (RootNode)
            { Json_node_add_string ( RootNode, "zmq_tag", "PING" );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "msrv", RootNode );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), Config.master_host, RootNode );
              json_node_unref(RootNode);
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
@@ -402,8 +413,6 @@
     gchar chaine[128];
 
     prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
-    Modifier_configDB ( "msrv", "thread_version", WTD_VERSION );
-
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
     g_snprintf(chaine, sizeof(chaine), "Gestion de l'instance slave %s", g_get_host_name());
@@ -439,7 +448,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_START" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_host, RootNode );
        json_node_unref ( RootNode );
      }
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
@@ -449,9 +458,7 @@
 
        request = Recv_zmq_with_json( zmq_from_master, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if ( !strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), g_get_host_name() ) ||
-               !strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), "msrv" )
-             )
+        { if ( !strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), g_get_host_name() ) )
            { Handle_zmq_for_slave( request ); }
           else
            { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
@@ -475,7 +482,7 @@
              Json_node_add_string ( body, "tech_id",  g_get_host_name() );
              Json_node_add_string ( body, "acronyme", "IO_COMM" );
              Json_node_add_int    ( body, "consigne", 900 );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", body );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_host, body );
              json_node_unref(body);
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
@@ -492,16 +499,15 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    /*Zmq_Send_WATCHDOG_to_master ( Partage->com_msrv.zmq_to_master, "msrv", g_get_host_name(), "IO_COMM", 0 );*/
     RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_STOP" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_host, RootNode );
        Json_node_add_string ( RootNode, "zmq_tag", "SET_WATCHDOG" );
        Json_node_add_string ( RootNode, "tech_id",  g_get_host_name() );
        Json_node_add_string ( RootNode, "acronyme", "IO_COMM" );
        Json_node_add_int    ( RootNode, "consigne", 0 );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, "msrv", "msrv", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_host, RootNode );
        json_node_unref ( RootNode );
      }
 end:
@@ -683,57 +689,23 @@ end:
            }
         }
 
-       gchar *log_db = Recuperer_configDB_by_nom( "msrv", "log_db" );         /* Récupération d'une config dans la DB */
-       if (log_db)
-        { Config.log_db = !strcasecmp(log_db,"true");
-          g_free(log_db);
-        } else Config.log_db = TRUE;
+       SQL_Write_new ( "UPDATE instances SET version='%s', start_time=NOW() WHERE host='%s'", WTD_VERSION, g_get_host_name());
 
-       gchar *log_zmq = Recuperer_configDB_by_nom( "msrv", "log_zmq" );             /* Récupération d'une config dans la DB */
-       if (log_zmq)
-        { Config.log_zmq = !strcasecmp(log_zmq,"true");
-          g_free(log_zmq);
-        } else Config.log_zmq = TRUE;
-
-       gchar *log_trad = Recuperer_configDB_by_nom( "msrv", "log_trad" );           /* Récupération d'une config dans la DB */
-       if (log_trad)
-        { Config.log_trad = !strcasecmp(log_trad,"true");
-          g_free(log_trad);
-        } else Config.log_trad = TRUE;
-
-       gchar *debug = Recuperer_configDB_by_nom( "msrv", "debug" );              /* Récupération d'une config dans la DB */
-       if (debug)
-        { Config.log_msrv = !strcasecmp(debug,"true");
-          g_free(debug);
-        } else Config.log_msrv = TRUE;
-
-       gchar *use_subdir = Recuperer_configDB_by_nom ( "msrv", "use_subdir" );
-       if (use_subdir)
-        { if (!strcasecmp(use_subdir,"true"))
-           { g_strlcat (Config.home, "/.watchdog", sizeof(Config.home));
-             chdir(Config.home);
-           }
-          g_free(use_subdir);
+       JsonNode *RootNode = Json_node_create ();
+       SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM instances WHERE host='%s'", g_get_host_name() );
+       Config.log_db             = Json_get_bool ( RootNode, "log_db" );
+       Config.log_zmq            = Json_get_bool ( RootNode, "log_zmq" );
+       Config.log_trad           = Json_get_bool ( RootNode, "log_trad" );
+       Config.log_msrv           = Json_get_bool ( RootNode, "debug" );
+       Config.instance_is_master = Json_get_bool ( RootNode, "is_master" );
+       g_snprintf( Config.master_host, sizeof(Config.master_host), "%s", Json_get_string ( RootNode, "master_host" ) );
+       Info_change_log_level ( Config.log, Json_get_int ( RootNode, "log_level" ) );
+       if ( Json_get_bool ( RootNode, "use_subdir" ) )
+        { g_strlcat (Config.home, "/.watchdog", sizeof(Config.home));
+          chdir(Config.home);
         }
+       json_node_unref ( RootNode );
 
-       gchar *is_master = Recuperer_configDB_by_nom ( "msrv", "instance_is_master" );
-       if (is_master)
-        { if (!strcasecmp(is_master,"true")) { Config.instance_is_master = TRUE; }
-                                       else  { Config.instance_is_master = FALSE; }
-          g_free(is_master);
-        }
-
-       gchar *master_host = Recuperer_configDB_by_nom ( "msrv", "master_host" );
-       if (master_host)
-        { g_snprintf( Config.master_host, sizeof(Config.master_host), "%s", master_host );
-          g_free(master_host);
-        }
-
-       gchar *log_level = Recuperer_configDB_by_nom( "msrv", "log_level" );           /* Récupération d'une config dans la DB */
-       if (log_level)
-        { Info_change_log_level ( Config.log, atoi(log_level) );
-          g_free(log_level);
-        }
 
        Print_config();
 /************************************* Création des zones de bits internes dynamiques *****************************************/
@@ -756,7 +728,6 @@ end:
 
        Update_database_schema();                                                    /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
-       Modifier_configDB ( "msrv", "thread_version", WTD_VERSION );                      /* Update du champs instance_version */
 
        Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */
        if (!Partage->zmq_ctx)

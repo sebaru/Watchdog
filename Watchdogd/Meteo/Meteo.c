@@ -197,7 +197,7 @@ end:
     soup_session_abort ( connexion );
   }
 /******************************************************************************************************************************/
-/* Run_module: Prend en charge un des modules du thread                                                                       */
+/* Run_subprocess: Prend en charge un des modules du thread                                                                   */
 /* Entrée: la structure librairie module                                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
@@ -244,24 +244,21 @@ end:
      { usleep(10000);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );             /* Périodiquement envoie la comm au master */
-/****************************************************** Test connexion ! ******************************************************/
-       if (Partage->top - vars->last_request >= METEO_POLLING || vars->test_api)
+       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+/****************************************************** Connexion ! ***********************************************************/
+       if (Partage->top - vars->last_request >= METEO_POLLING)
         { Meteo_get_ephemeride( module );
           Meteo_get_forecast( module );
           vars->last_request = Partage->top;
-          vars->test_api = FALSE;
         }
-
-/********************************************************* Envoi de SMS *******************************************************/
+/********************************************************* Ecoute du master ***************************************************/
        JsonNode *request;
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if ( !strcasecmp ( zmq_tag, "test" ) ) vars->test_api = TRUE;
+          /*if ( !strcasecmp ( zmq_tag, "test" ) ) vars->test_api = TRUE;*/
           json_node_unref(request);
         }
      }
-
     SubProcess_end(module);
   }
 /******************************************************************************************************************************/

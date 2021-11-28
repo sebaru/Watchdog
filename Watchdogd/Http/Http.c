@@ -666,12 +666,9 @@ reload:
     soup_server_add_handler ( socket, "/api/process/debug",  Http_traiter_process_debug, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/list",   Http_traiter_process_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/config", Http_traiter_process_config, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/config/get",     Http_traiter_config_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/config/set",     Http_traiter_config_set, NULL, NULL );
-/*    soup_server_add_handler ( socket, "/api/config/del",     Http_traiter_config_del, NULL, NULL );*/
     soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/instance/loglevel",
-                                                             Http_traiter_instance_loglevel, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/instance/set",
+                                                             Http_traiter_instance_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/instance/reload_icons",
                                                              Http_traiter_instance_reload_icons, NULL, NULL );
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );

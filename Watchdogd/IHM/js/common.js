@@ -217,7 +217,8 @@
   }
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
-  { if (string===null) return("null");
+  { if (string===undefined) return("null");
+    if (string===null) return("null");
     return ( string.replace(/'/g,'&apos;').replace(/"/g,'&quote;') ).replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 /****************************************** Are you sure **********************************************************************/

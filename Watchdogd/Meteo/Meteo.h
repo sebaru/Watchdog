@@ -32,7 +32,6 @@
 
  struct METEO_VARS
   { gint  last_request;
-    gboolean test_api;                                                      /* True pour tester l'accès a l'API meteo concept */
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/

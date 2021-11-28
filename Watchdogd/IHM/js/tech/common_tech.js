@@ -7,13 +7,11 @@
     else
      { $('#idAlertNotMaster').show(); }
   }
-
 /********************************************* Reload Process *****************************************************************/
  function Process_reload ( uuid )
   { var json_request = { uuid : uuid };
     Send_to_API ( "POST", "/api/process/reload", JSON.stringify(json_request), null, null);
   }
-
 /********************************************* Renvoi un Select d'archivage ***************************************************/
  function Bouton_Archivage ( id, fonction, selected )
   { return("<select id='"+id+"' class='custom-select'"+

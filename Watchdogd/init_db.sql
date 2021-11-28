@@ -23,21 +23,38 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 -- --------------------------------------------------------
 
---
--- Structure de la table `config`
---
-
-CREATE TABLE IF NOT EXISTS `config` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `instance_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `nom_thread` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE (`instance_id`,`nom_thread`,`nom`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
+CREATE TABLE IF NOT EXISTS `processes` (
+  `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
+  `uuid` VARCHAR(37) UNIQUE NOT NULL,
+  `host` VARCHAR(64) NOT NULL,
+  `name` VARCHAR(64) NOT NULL,
+  `classe` VARCHAR(16) DEFAULT NULL,
+  `version` VARCHAR(32) DEFAULT NULL,
+  `database_version` INT(11) NOT NULL,
+  `enable` TINYINT(1) NOT NULL,
+  `started` TINYINT(1) DEFAULT 0,
+  `start_time` DATETIME DEFAULT NOW(),
+  `debug` TINYINT(1) NOT NULL,
+  `description` VARCHAR(128) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `instances` (
+  `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
+  `host` VARCHAR(64) UNIQUE NOT NULL,
+  `is_master` TINYINT(1) NOT NULL,
+  `log_db` TINYINT(1) NOT NULL,
+  `log_zmq` TINYINT(1) NOT NULL,
+  `log_trad` TINYINT(1) NOT NULL,
+  `use_subdir` TINYINT(1) NOT NULL,
+  `master_host` VARCHAR(64) NOT NULL,
+  `log_level` INT(11) NOT NULL,
+  `start_time` DATETIME DEFAULT NOW(),
+  `database_version` INT(11) NOT NULL DEFAULT 0,
+  `description` VARCHAR(128) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
+
 
 --
 -- Structure de la table `cameras`
@@ -45,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `config` (
 
 CREATE TABLE IF NOT EXISTS `cameras` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `location` varchar(600) NOT NULL,
+  `location` VARCHAR(600) NOT NULL,
   `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;

@@ -1,12 +1,5 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
-/************************************ Demande l'envoi d'un Meteo de test ********************************************************/
- function Meteo_test ( id )
-  { table = $('#idTableMeteo').DataTable();
-    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    var json_request = { uuid : selection.uuid, tech_id : selection.tech_id, zmq_tag: "TEST" };
-    Send_to_API ( 'POST', "/api/process", JSON.stringify( json_request ), null );
-  }
 /************************************ Demande l'envoi d'un Meteo de test ******************************************************/
  function Meteo_Refresh ( )
   { $('#idTableMeteo').DataTable().ajax.reload(null, false);
@@ -82,10 +75,10 @@
        rowId: "id",
        columns:
          [ { "data": "host",   "title":"Host",   "className": "align-middle text-center" },
-            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
-              "render": function (item)
-                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
-            },
+           { "data": null, "title":"Tech_id", "className": "align-middle text-center",
+             "render": function (item)
+               { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+           },
            { "data": "token", "title":"token", "className": "align-middle " },
            { "data": "code_insee", "title":"Code Insee", "className": "align-middle " },
            { "data": "description", "title":"Description", "className": "align-middle " },
@@ -99,7 +92,6 @@
              "render": function (item)
                { boutons = Bouton_actions_start ();
                  boutons += Bouton_actions_add ( "primary", "Editer la connexion", "Meteo_Edit", item.id, "pen", null );
-                 boutons += Bouton_actions_add ( "outline-info", "Tester la connexion", "Meteo_Test", item.id, "question", null );
                  boutons += Bouton_actions_add ( "danger", "Supprimer la connexion", "Meteo_Del", item.id, "trash", null );
                  boutons += Bouton_actions_end ();
                  return(boutons);

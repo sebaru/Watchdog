@@ -239,7 +239,7 @@
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_bool   ( body, "etat", etat );
-    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, "msrv", body );
+    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, Config.master_host, body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -256,7 +256,7 @@
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_double ( body, "valeur", valeur );
     Json_node_add_bool   ( body, "in_range", in_range );
-    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, "msrv", body );
+    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, Config.master_host, body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -271,7 +271,7 @@
     Json_node_add_string ( body, "zmq_tag", "SET_CDE" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
-    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, "msrv", body );
+    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, Config.master_host, body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -287,7 +287,7 @@
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_int    ( body, "consigne", consigne );
-    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, "msrv", body );
+    Zmq_Send_json_node ( lib->zmq_to_master, lib->name, Config.master_host, body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -303,7 +303,7 @@
     Json_node_add_string ( body, "tech_id",  tech_id ); /* target */
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_int    ( body, "consigne", consigne );
-    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "tech_id" ), "msrv", body );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "tech_id" ), Config.master_host, body );
     json_node_unref(body);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
