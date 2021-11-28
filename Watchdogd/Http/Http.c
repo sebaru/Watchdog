@@ -636,6 +636,7 @@ reload:
     soup_server_add_handler ( socket, "/api/dls/compil" ,    Http_traiter_dls_compil, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/set" ,       Http_traiter_dls_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/mnemos/validate",Http_traiter_mnemos_validate, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/mnemos/tech_id", Http_traiter_mnemos_tech_id, NULL, NULL );
     soup_server_add_handler ( socket, "/api/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/map/list",       Http_traiter_map_list, NULL, NULL );
@@ -664,7 +665,7 @@ reload:
     soup_server_add_handler ( socket, "/api/process/start",  Http_traiter_process_start, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/debug",  Http_traiter_process_debug, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/list",   Http_traiter_process_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process",        Http_traiter_process, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/process/config", Http_traiter_process_config, NULL, NULL );
     soup_server_add_handler ( socket, "/api/config/get",     Http_traiter_config_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/config/set",     Http_traiter_config_set, NULL, NULL );
 /*    soup_server_add_handler ( socket, "/api/config/del",     Http_traiter_config_del, NULL, NULL );*/

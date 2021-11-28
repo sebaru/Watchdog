@@ -88,9 +88,10 @@
     gboolean Thread_reload;                                                           /* TRUE si le thread doit gerer le USR1 */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
-    void (*Run_module)( struct SUBPROCESS *module );                        /* Fonction principale de gestion du module */
+    void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
                                                                                  /* Fonction de gestion des commandes d'admin */
     void *(*Admin_json)( struct LIBRAIRIE *lib, gpointer msg, const char *path, GHashTable *query, gint access_level );
+    void *(*Admin_config)( struct LIBRAIRIE *lib, gpointer msg, JsonNode *RootNode );
 
     GSList *modules;                                                                           /* Liste des modules du thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */

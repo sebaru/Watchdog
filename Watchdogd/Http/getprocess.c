@@ -40,12 +40,49 @@
  void Http_traiter_process_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                   SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
+
+    gchar *name = g_hash_table_lookup ( query, "name" );
+    if (name) { Normaliser_as_ascii ( name ); }
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    if (name)
+     { SQL_Select_to_json_node ( RootNode, "Process", "SELECT * FROM processes WHERE name='%s' ORDER BY host", name ); }
+    else SQL_Select_to_json_node ( RootNode, "Process", "SELECT * FROM processes ORDER BY host, name" ); /* Contenu du Status */
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_process_status: Donne la config d'un process                                                                  */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Http_traiter_process_config_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                               SoupClientContext *client, gpointer user_data )
+  { struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+
+    gchar *name = g_hash_table_lookup ( query, "name" );
+    if (!name)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres tech_id");
+       return;
+     }
+    Normaliser_as_ascii ( name );
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
@@ -55,13 +92,122 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "Process", "SELECT * FROM processes" );                          /* Contenu du Status */
+    SQL_Select_to_json_node ( RootNode, "config",
+                              "SELECT p.*,config.* FROM %s AS config "
+                              "INNER JOIN processes AS p ON p.uuid = config.uuid ", name ); /* Contenu du Status */
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_process_config_delete: Delete une config d'un process                                                         */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Http_traiter_process_config_delete ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                                  SoupClientContext *client, gpointer user_data )
+  { struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    gchar *uuid    = Normaliser_chaine ( Json_get_string ( request, "uuid" ) );
+    JsonNode *RootNode = Json_node_create();
+    if (RootNode)
+     { SQL_Select_to_json_node ( RootNode, NULL, "SELECT name FROM processes WHERE uuid = '%s'", uuid );
+       gchar *tech_id = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
+       SQL_Write_new ( "DELETE FROM %s WHERE tech_id='%s'", Json_get_string( RootNode, "name" ), tech_id );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' deleted.", __func__, uuid, tech_id );
+
+       g_free(tech_id);
+       json_node_unref(RootNode);
+     }
+    g_free(uuid);
+/*************************************************** Envoi au client **********************************************************/
+    json_node_unref(request);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_process_config_post: Ajoute ou modifie une config d'un process                                                */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Http_traiter_process_config_post ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                                SoupClientContext *client, gpointer user_data )
+  { struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) ) )
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    JsonNode *RootNode = Json_node_create();
+    if (!RootNode)
+     { json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Memory Error");
+       return;
+     }
+    gchar *uuid = Normaliser_chaine ( Json_get_string ( request, "uuid" ) );
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT name FROM processes WHERE uuid = '%s'", uuid );
+    g_free(uuid);
+
+    GSList *liste = Partage->com_msrv.Librairies;                                        /* Parcours de toutes les librairies */
+    struct LIBRAIRIE *lib = NULL;
+    while(liste)
+     { lib = (struct LIBRAIRIE *)liste->data;
+       if ( ! strcasecmp( Json_get_string ( RootNode, "name" ), lib->name ) ) break;
+       liste = g_slist_next(liste);
+     }
+    json_node_unref(RootNode);
+
+    if (liste && !lib->Admin_config)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                 "%s: library %s do not have Admin_config.", __func__, lib->name );
+       soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Missing function admin_config" );
+     }
+    else if (liste && lib->Admin_config)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_config called by '%s' for %s.",
+                 __func__, session->username, path );
+       lib->Admin_config ( lib, msg, request );
+     }
+    else soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Process not found" );
+
+/*************************************************** Envoi au client **********************************************************/
+    json_node_unref(request);
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_process_status: Donne la config d'un process                                                                  */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_process_config ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data )
+  {      if (msg->method == SOUP_METHOD_GET)    Http_traiter_process_config_get    ( server, msg, path, query, client, user_data );
+    else if (msg->method == SOUP_METHOD_DELETE) Http_traiter_process_config_delete ( server, msg, path, query, client, user_data );
+    else if (msg->method == SOUP_METHOD_POST)   Http_traiter_process_config_post   ( server, msg, path, query, client, user_data );
+    else
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       return;
+     }
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_debug: Active ou non le debug d'un process                                                 */
@@ -71,8 +217,8 @@
  void Http_traiter_process_debug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                    SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
@@ -110,8 +256,8 @@
      }
     g_free(uuid);
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_start_stop: Traite une requete sur l'URI process/stop|start                                */
@@ -121,8 +267,8 @@
  void Http_traiter_process_start ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                    SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
@@ -159,8 +305,8 @@
      }
     g_free(uuid);
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_reload: Traite une requete sur l'URI process/reload                                                   */
@@ -170,8 +316,8 @@
  void Http_traiter_process_reload ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
@@ -205,84 +351,7 @@
      }
     g_free(uuid);
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
     json_node_unref(request);
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                      */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- void Http_traiter_process ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                             SoupClientContext *client, gpointer user_data )
-  {
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-
-
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Searching for CLI commande %s", __func__, path );
-    path = path + strlen("/api/process/");
-
-/****************************************** WS get Running config library *****************************************************/
-    if (!strncasecmp ( path, "archive/", strlen("archive/")))
-     { Admin_arch_json ( msg, path+strlen("archive/"), query, session->access_level );
-       Audit_log ( session, "Processus 'Archive': %s", path );
-     }
-    else
-     { GSList *liste;
-       if (msg->method == SOUP_METHOD_GET)                                               /* Test si Slave redirect necessaire */
-        { gpointer instance = g_hash_table_lookup ( query, "instance" );
-          if (!instance) instance="MASTER";
-          if (!strcasecmp(instance, "null")) instance="MASTER";
-          if ( Config.instance_is_master && strcasecmp ( instance, "MASTER" ) && strcasecmp ( instance, g_get_host_name() ) )
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s : Redirecting %s vers %s", __func__, path, instance );
-             Http_redirect_to_slave ( msg, instance );
-             return;
-           }
-        }
-       else if (msg->method == SOUP_METHOD_PUT || msg->method == SOUP_METHOD_POST || msg->method == SOUP_METHOD_DELETE)
-        { GBytes *request_brute;
-          gsize taille;
-          g_object_get ( msg, "request-body-data", &request_brute, NULL );
-          JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-          if ( !request)
-           { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No request");
-             return;
-           }
-
-          if ( Config.instance_is_master && Json_has_member ( request, "instance" ) &&
-               strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
-               strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
-           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                       "%s : Redirecting %s vers %s", __func__, path, Json_get_string(request,"instance") );
-             Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
-             //soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, taille_buf );
-             json_node_unref(request);
-             return;
-           }
-        }
-       liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
-       while(liste)
-        { struct LIBRAIRIE *lib = liste->data;
-          if ( ! strncasecmp( path, lib->name, strlen(lib->name) ) )
-           { if (!lib->Admin_json)
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                          "%s: library %s do not have Admin_json.", __func__, lib->name );
-                soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Missing function admin_json" );
-                return;
-              }
-             else
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_json called by '%s' for %s.",
-                          __func__, session->username, path );
-                lib->Admin_json ( lib, msg, path+strlen(lib->name), query, session->access_level );
-                Audit_log ( session, "Processus '%s': %s", lib->name, path );
-                return;
-              }
-            }
-           liste = g_slist_next(liste);
-        }
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Unknown Thread" );
-       return;
-     }
+    soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

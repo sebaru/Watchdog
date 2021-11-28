@@ -82,7 +82,7 @@
     lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-              "%s: UUID %s: Process is  UP  '%s' (%s) de classe '%s' (debug = %d)", __func__,
+              "%s: UUID %s: Process is UP '%s' (%s) de classe '%s' (debug = %d)", __func__,
               lib->uuid, lib->name, lib->version, classe, lib->Thread_debug );
   }
 /******************************************************************************************************************************/
@@ -211,7 +211,7 @@
        return;
      }
 
-    if ( pthread_create( &module->TID, &attr, (void *)lib->Run_module, module ) )
+    if ( pthread_create( &module->TID, &attr, (void *)lib->Run_subprocess, module ) )
      { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: pthread_create failed (%s)",
                  __func__, module->lib->uuid, Json_get_string ( element, "tech_id" ) );
        return;
@@ -314,8 +314,9 @@
        return(FALSE);
      }
 
-    lib->Run_module = dlsym( lib->dl_handle, "Run_module" );                                      /* Recherche de la fonction */
-    lib->Admin_json = dlsym( lib->dl_handle, "Admin_json" );                                      /* Recherche de la fonction */
+    lib->Run_subprocess = dlsym( lib->dl_handle, "Run_subprocess" );                              /* Recherche de la fonction */
+    lib->Admin_json     = dlsym( lib->dl_handle, "Admin_json" );                                  /* Recherche de la fonction */
+    lib->Admin_config   = dlsym( lib->dl_handle, "Admin_config" );                                /* Recherche de la fonction */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: %s loaded",
               __func__, lib->uuid, lib->nom_fichier );
 

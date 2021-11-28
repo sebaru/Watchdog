@@ -225,7 +225,7 @@
   { $('#idModalDelTitre').text ( htmlEncode(titre) );
     $('#idModalDelMessage').html( htmlEncode(message) );
     $('#idModalDelDetails').html( htmlEncode(details) );
-    $('#idModalDelValider').attr( "onclick", fonction );
+    $('#idModalDelValider').on( "click", fonction );
     $('#idModalDel').modal("show");
   }
 /********************************************* Renvoi un input ****************************************************************/

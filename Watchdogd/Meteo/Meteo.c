@@ -34,7 +34,6 @@
  #include "watchdogd.h"
  #include "Meteo.h"
 
-
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
@@ -202,7 +201,7 @@ end:
 /* Entrée: la structure librairie module                                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_module ( struct SUBPROCESS *module )
+ void Run_subprocess ( struct SUBPROCESS *module )
   { SubProcess_init ( module, sizeof(struct METEO_VARS) );
     struct METEO_VARS *vars = module->vars;
 
@@ -277,10 +276,10 @@ reload:
     Thread_init ( "meteo", "EXTAPI", lib, WTD_VERSION, "Manage Meteo system (meteo concept)" );
 
     lib->config = Json_node_create();
-    if(lib->config) SQL_Select_to_json_node ( lib->config, "modules", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
+    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d modules to load", __func__, Json_get_int ( lib->config, "nbr_modules" ) );
 
-    Json_node_foreach_array_element ( lib->config, "modules", Process_Load_one_subprocess, lib );   /* Chargement des modules */
+    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
     while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
     g_slist_foreach ( lib->modules, (GFunc)Process_Unload_one_subprocess, lib );
 
