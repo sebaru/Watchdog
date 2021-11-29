@@ -100,9 +100,9 @@
 
     gchar *description = Normaliser_chaine ( Json_get_string ( request, "description" ) );
     gchar *host        = Normaliser_chaine ( Json_get_string ( request, "host" ) );
-    SQL_Write_new ( "UPDATE instances SET log_level=%d, log_db=%d, log_zmq=%d, log_trad=%d, description='%s' "
+    SQL_Write_new ( "UPDATE instances SET debug=%d, log_level=%d, log_db=%d, log_zmq=%d, log_trad=%d, description='%s' "
                     "WHERE host='%s'",
-                    Json_get_int ( request, "log_level" ), Json_get_bool ( request, "log_db" ),
+                    Json_get_int ( request, "debug" ), Json_get_int ( request, "log_level" ), Json_get_bool ( request, "log_db" ),
                     Json_get_bool ( request, "log_zmq" ), Json_get_bool ( request, "log_trad" ), description, host );
 
     Json_node_add_string ( request, "zmq_tag", "SET_LOG" );

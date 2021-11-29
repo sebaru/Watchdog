@@ -11,6 +11,7 @@
      { host       : selection.host,
        description: $("#idMSRVDescription_"+id).val(),
        log_level  : parseInt($("#idMSRVLogLevel_"+id).val()),
+       debug      : ($("#idMSRVDebug_"+id).val()=="true" ? true : false),
        log_db     : ($("#idMSRVLogDB_"+id).val()=="true" ? true : false),
        log_zmq    : ($("#idMSRVLogZMQ_"+id).val()=="true" ? true : false),
        log_trad   : ($("#idMSRVLogTRAD_"+id).val()=="true" ? true : false),
@@ -58,10 +59,17 @@
               }
            },
            { "data": "version", "title":"Version",   "className": "align-middle text-center" },
+           { "data": "database_version", "title":"Database",   "className": "align-middle text-center" },
            { "data": null, "title":"Description", "className": "align-middle ",
              "render": function (item)
               { return( Input ( "text", "idMSRVDescription_"+item.id, "MSRV_Sauver_parametre("+item.id+")",
                                 "Description de l'instance", item.description, null ) );
+              }
+           },
+           { "data": null, "title":"Debug", "className": "align-middle text-center",
+             "render": function (item)
+              { var choix = [ { valeur: false, texte: "No" }, { valeur: true, texte: "Yes" } ];
+                return( Select ( "idMSRVDebug_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.debug ) );
               }
            },
            { "data": null, "title":"Log_DB", "className": "align-middle text-center",

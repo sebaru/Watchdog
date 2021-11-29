@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `instances` (
   `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
   `host` VARCHAR(64) UNIQUE NOT NULL,
   `is_master` TINYINT(1) NOT NULL,
+  `debug` TINYINT(1) NOT NULL,
   `log_db` TINYINT(1) NOT NULL,
   `log_zmq` TINYINT(1) NOT NULL,
   `log_trad` TINYINT(1) NOT NULL,

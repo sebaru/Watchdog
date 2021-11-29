@@ -173,14 +173,16 @@
      { Process_set_debug ( Json_get_string ( request, "uuid" ), Json_get_bool ( request, "debug" ) ); }
     else if ( !strcasecmp( zmq_tag, "SET_LOG") &&
               Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
-              Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" )
+              Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" ) &&
+              Json_has_member ( request, "debug" )
             )
      { Config.log_db   = Json_get_bool ( request, "log_db" );
        Config.log_zmq  = Json_get_bool ( request, "log_zmq" );
        Config.log_trad = Json_get_bool ( request, "log_trad" );
+       Config.log_msrv = Json_get_bool ( request, "debug" );
        Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: db=%d, zmq=%d, trad=%d, log_level=%d", __func__,
-                 Config.log_db, Config.log_zmq, Config.log_trad, Json_get_int ( request, "log_level" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: debug=%d, db=%d, zmq=%d, trad=%d, log_level=%d", __func__,
+                 Config.log_msrv, Config.log_db, Config.log_zmq, Config.log_trad, Json_get_int ( request, "log_level" ) );
      }
     return(TRUE);
   }
