@@ -160,12 +160,13 @@
        if (!module->vars)
         { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: Memory error.", __func__,
                     module->lib->uuid, tech_id );
-          SubProcess_end ( module );
+          SubProcess_end ( module );                            /* Pas besoin de return : SubProcess_end fait un pthread_exit */
         }
      }
 
+    Mnemo_auto_create_WATCHDOG ( FALSE, tech_id, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is UP",
-              __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id") );
+              __func__, module->lib->uuid, tech_id );
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */

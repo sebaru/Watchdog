@@ -248,7 +248,7 @@
        Json_node_add_string ( RootNode, "action", "DEBUG" );
        Json_node_add_string ( RootNode, "uuid", uuid );
        Json_node_add_bool   ( RootNode, "debug", debug );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Config.master_host, RootNode );
+       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );
        json_node_unref(RootNode);
      }
     g_free(uuid);
@@ -297,7 +297,7 @@
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS" );
        Json_node_add_string ( RootNode, "action", "RELOAD" );
        Json_node_add_string ( RootNode, "uuid", uuid );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Config.master_host, RootNode );
+       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );
        json_node_unref(RootNode);
      }
     g_free(uuid);
@@ -343,7 +343,7 @@
                  uuid, Json_get_string ( RootNode, "host" ), Json_get_string ( RootNode, "name" ) );
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS" );
        Json_node_add_string ( RootNode, "action", "RELOAD" );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Config.master_host, RootNode );
+       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );
        json_node_unref(RootNode);
      }
     g_free(uuid);

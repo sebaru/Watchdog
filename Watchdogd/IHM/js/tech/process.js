@@ -1,11 +1,11 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_debug ( thread )
+ function Process_clic_debug ( uuid )
   { instance = $('#idTargetInstance').val();
     var json_request = JSON.stringify(
-       { uuid  : uuid,
-         status: true,
+       { uuid : uuid,
+         debug: true,
        }
      );
     Send_to_API ( "POST", "/api/process/debug", json_request, function(Response)
@@ -13,11 +13,11 @@
      }, null);
   }
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_undebug ( thread )
+ function Process_clic_undebug ( uuid )
   { instance = $('#idTargetInstance').val();
     var json_request = JSON.stringify(
-       { uuid  : uuid,
-         status: false,
+       { uuid : uuid,
+         debug: false,
        }
      );
     Send_to_API ( "POST", "/api/process/debug", json_request, function(Response)
