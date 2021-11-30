@@ -28,59 +28,14 @@
  #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
  #include "Sms.h"
- extern struct SMS_CONFIG Cfg_smsg;
 
 /******************************************************************************************************************************/
-/* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
-/* Entrée : un JSon Builder                                                                                                   */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_config : fonction appelé par le thread http lors d'une requete POST sur config PROCESS                               */
+/* Entrée : la librairie, et le Json recu                                                                                     */
+/* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
- static void Admin_json_smsg_status ( struct PROCESS *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
-
-    if (Lib->Thread_run)                                      /* Warning : Cfg_smsg does not exist if thread is not running ! */
-     { Json_node_add_string ( RootNode, "tech_id", Cfg_smsg.tech_id );
-       Json_node_add_string ( RootNode, "ovh_service_name", Cfg_smsg.ovh_service_name );
-       Json_node_add_string ( RootNode, "ovh_application_key", Cfg_smsg.ovh_application_key );
-       Json_node_add_string ( RootNode, "ovh_application_secret", Cfg_smsg.ovh_application_secret );
-       Json_node_add_string ( RootNode, "ovh_consumer_key", Cfg_smsg.ovh_consumer_key );
-       Json_node_add_string ( RootNode, "description", Cfg_smsg.description );
-       Json_node_add_bool   ( RootNode, "comm_status", Cfg_smsg.lib->comm_status );
-       Json_node_add_int    ( RootNode, "nbr_sms", Cfg_smsg.nbr_sms );
-     }
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Admin_json_smsg_set: Configure le thread SMSG                                                                              */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_smsg_set ( struct PROCESS *Lib, SoupMessage *msg )
-  { if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "description" ) &&
+ void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
+  { if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "ovh_service_name" ) && Json_has_member ( request, "ovh_application_key" ) &&
             Json_has_member ( request, "ovh_consumer_key" ) && Json_has_member ( request, "ovh_application_secret" )
            ) )
@@ -97,54 +52,29 @@
     gchar *ovh_consumer_key       = Normaliser_chaine ( Json_get_string( request, "ovh_consumer_key" ) );
     json_node_unref(request);
 
-    SQL_Write_new ( "INSERT INTO %s SET instance='%s', tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
-                    "ovh_application_secret='%s', ovh_consumer_key='%s' "
-                    "ON DUPLICATE KEY UPDATE tech_id=VALUES(tech_id), description=VALUES(description), "
-                    "ovh_service_name=VALUES(ovh_service_name), ovh_application_key=VALUES(ovh_application_key), "
-                    "ovh_application_secret=VALUES(ovh_application_secret), ovh_consumer_key=VALUES(ovh_consumer_key)",
-                    Cfg_smsg.lib->name, g_get_host_name(),
-                    tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key );
+    if (Json_has_member ( request, "id" ))
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
+                       "ovh_application_secret='%s', ovh_consumer_key='%s' WHERE id='%d'",
+                       lib->name, lib->uuid, tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key,
+                       Json_get_int ( request, "id" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, lib->uuid, tech_id );
+     }
+    else
+     { gchar *uuid     = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
+       SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
+                       "ovh_application_secret='%s', ovh_consumer_key='%s' ",
+                       lib->name, lib->uuid, tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, lib->uuid, tech_id );
+       g_free(uuid);
+     }
+
     g_free(tech_id);
     g_free(description);
     g_free(ovh_service_name);
     g_free(ovh_application_key);
     g_free(ovh_application_secret);
     g_free(ovh_consumer_key);
+
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    Lib->Thread_reload = TRUE;
-    while ( Lib->Thread_run == TRUE && Lib->Thread_reload == TRUE);                              /* Attente reboot du process */
-  }
-/******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- void Admin_json ( struct PROCESS *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
-  { if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
-         if (!strcasecmp(path, "/status"))   { Admin_json_smsg_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/set"))      { Admin_json_smsg_set ( lib, msg ); }
-    else if (!strcasecmp(path, "/send") && lib->Thread_run)
-     { if ( msg->method != SOUP_METHOD_PUT )
-        {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED); }
-       else
-        { JsonNode *request = Http_Msg_to_Json ( msg );
-          if (!request) return;
-          if ( !Json_has_member ( request, "mode" ) )
-           { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres"); }
-          else if (!strcasecmp ( Json_get_string ( request, "mode" ), "OVH" ))
-           { Cfg_smsg.send_test_OVH = TRUE;
-             soup_message_set_status (msg, SOUP_STATUS_OK);
-           }
-          else if (!strcasecmp ( Json_get_string ( request, "mode" ), "GSM" ))
-           { Cfg_smsg.send_test_GSM = TRUE;
-             soup_message_set_status (msg, SOUP_STATUS_OK);
-           }
-          json_node_unref(request);
-        }
-     }
-    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

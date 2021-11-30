@@ -50,14 +50,14 @@
     gchar *uuid        = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
 
     if (Json_has_member ( request, "id" ))
-     { SQL_Write_new ( "UPDATE meteo SET uuid='%s', tech_id='%s', description='%s', token='%s', code_insee='%s' WHERE id='%d'",
-                       uuid, tech_id, description, token, code_insee, Json_get_int ( request, "id" ) );
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', description='%s', token='%s', code_insee='%s' WHERE id='%d'",
+                       lib->name, uuid, tech_id, description, token, code_insee, Json_get_int ( request, "id" ) );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, lib->uuid, tech_id );
      }
     else
      { gchar *uuid     = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
-       SQL_Write_new ( "INSERT INTO meteo SET uuid='%s', tech_id='%s', description='%s', token='%s', code_insee='%s'",
-                       uuid, tech_id, description, token, code_insee );
+       SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', description='%s', token='%s', code_insee='%s'",
+                       lib->name, uuid, tech_id, description, token, code_insee );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, lib->uuid, tech_id );
        g_free(uuid);
      }

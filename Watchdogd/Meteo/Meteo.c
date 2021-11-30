@@ -117,7 +117,7 @@ end:
     soup_session_abort ( connexion );
   }
 /******************************************************************************************************************************/
-/* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */
+/* Meteo_update_forecast: Met a jour le forecast auprès de meteoconcept                                                       */
 /* Entrée: Nier                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
@@ -197,8 +197,8 @@ end:
     soup_session_abort ( connexion );
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des modules du thread                                                                   */
-/* Entrée: la structure librairie module                                                                                      */
+/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
+/* Entrée: la structure SUBPROCESS associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_subprocess ( struct SUBPROCESS *module )
@@ -262,8 +262,8 @@ end:
     SubProcess_end(module);
   }
 /******************************************************************************************************************************/
-/* Envoyer_sms: Envoi un sms                                                                                                  */
-/* Entrée: un client et un utilisateur                                                                                        */
+/* Run_process: Run du Process                                                                                                */
+/* Entrée: la structure PROCESS associée                                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_process ( struct PROCESS *lib )
@@ -274,7 +274,7 @@ reload:
 
     lib->config = Json_node_create();
     if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d modules to load", __func__, Json_get_int ( lib->config, "nbr_modules" ) );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
 
     Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
     while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */

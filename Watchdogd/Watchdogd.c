@@ -360,13 +360,10 @@
 
        request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if (!strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), g_get_host_name()))
-           { Handle_zmq_for_master( request ); }
-          else
-           { gint taille = strlen(buffer);
-             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                  /* Sinon on envoi aux threads */
-             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                  /* Sinon on envoi aux slave */
-           }
+        { Handle_zmq_for_master( request );                          /* Gère d'abord le message avant de l'envoyer aux autres */
+          gint taille = strlen(buffer);
+          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                     /* Sinon on envoi aux threads */
+          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                     /* Sinon on envoi aux slave */
           json_node_unref ( request );
         }
 
@@ -460,11 +457,8 @@
 
        request = Recv_zmq_with_json( zmq_from_master, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if ( !strcasecmp( Json_get_string ( request, "zmq_dst_tech_id" ), g_get_host_name() ) )
-           { Handle_zmq_for_slave( request ); }
-          else
-           { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );          /* Sinon on envoi aux threads */
-           }
+        { Handle_zmq_for_slave( request );
+          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );             /* Sinon on envoi aux threads */
           json_node_unref ( request );
         }
                                                 /* Si reception depuis un thread, report vers le master et les autres threads */
