@@ -55,7 +55,8 @@
                        "`ovh_application_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`ovh_application_secret` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`ovh_consumer_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`nbr_sms` int(11) NOT NULL DEFAULT 0"
+                       "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
+                       "`comm` TINYINT(1) NOT NULL DEFAULT '0'"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
        goto end;
      }
@@ -204,6 +205,11 @@ end:
 
     if (module->comm_status == FALSE)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: COMM is FALSE", __func__ );
+       return(FALSE);
+     }
+
+    if (!telephone)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: telephone is NULL", __func__ );
        return(FALSE);
      }
 
@@ -358,12 +364,12 @@ end:
                               "SELECT id,username,enable,comment,notification,phone,allow_cde "
                               "FROM users AS user WHERE enable=1 AND notification=1 ORDER BY username" );
 
-    gint sms_notification = Json_get_int ( msg, "sms_notification" );
+    gint notification = Json_get_int ( msg, "notification" );
     GList *recipients = json_array_get_elements ( Json_get_array ( RootNode, "recipient" ) );
     while(recipients)
      { JsonNode *element = recipients->data;
-       gchar *user_phone = Json_get_string ( element, "user_phone" );
-       switch (sms_notification)
+       gchar *user_phone = Json_get_string ( element, "phone" );
+       switch (notification)
         { case MESSAGE_SMS_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
                 { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,

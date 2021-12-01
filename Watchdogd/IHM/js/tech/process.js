@@ -100,13 +100,14 @@
                   return(item.version);
                 },
             },
-            { "data": null, "title":"Start Time", "className": "align-middle text-center",
+            { "data": "start_time", "title":"Start Time", "className": "align-middle text-center",
+/*            { "data": null, "title":"Start Time", "className": "align-middle text-center",
               "render": function (item)
                 { if(item.start_time == null) return("--");
                   var myDate = new Date( item.start_time *1000 );
                   return(myDate.toLocaleString());
                 },
-            },
+            },*/
             { "data": null, "title":"Description", "className": "align-middle",
               "render": function (item)
                 { return("<a href='https://wiki.abls-habitat.fr/index.php?title=WatchdogServer_"+item.name.toUpperCase()+"_Thread'>"+
