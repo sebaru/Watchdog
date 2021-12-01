@@ -100,7 +100,7 @@
                   return(item.version);
                 },
             },
-            { "data": "start_time", "title":"Start Time", "className": "align-middle text-center",
+            { "data": "start_time", "title":"Start Time", "className": "align-middle text-center" },
 /*            { "data": null, "title":"Start Time", "className": "align-middle text-center",
               "render": function (item)
                 { if(item.start_time == null) return("--");
