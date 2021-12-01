@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `processes` (
   `started` TINYINT(1) DEFAULT 0,
   `start_time` DATETIME DEFAULT NOW(),
   `debug` TINYINT(1) NOT NULL,
-  `description` VARCHAR(128) NOT NULL
+  `description` VARCHAR(128) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
@@ -53,7 +53,8 @@ CREATE TABLE IF NOT EXISTS `instances` (
   `log_level` INT(11) NOT NULL,
   `start_time` DATETIME DEFAULT NOW(),
   `database_version` INT(11) NOT NULL DEFAULT 0,
-  `description` VARCHAR(128) NOT NULL
+  `description` VARCHAR(128) NOT NULL DEFAULT '',
+  `version` VARCHAR(128) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
 
 

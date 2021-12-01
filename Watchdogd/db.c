@@ -2488,7 +2488,8 @@ encore:
                       "`enable` TINYINT(1) NOT NULL,"
                       "`started` TINYINT(1) DEFAULT 0,"
                       "`start_time` INT(11) DEFAULT NOW(),"
-                      "`description` VARCHAR(128) NOT NULL"
+                      "`debug` TINYINT(1) NOT NULL,"
+                      "`description` VARCHAR(128) NOT NULL DEFAULT ''"
                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;" );
        SQL_Write_new ("CREATE TABLE IF NOT EXISTS `instances` ("
                       "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
@@ -2502,7 +2503,7 @@ encore:
                       "`master_host` VARCHAR(64) NOT NULL,"
                       "`log_level` INT(11) NOT NULL,"
                       "`start_time` INT(11) DEFAULT NOW(),"
-                      "`description` VARCHAR(128) NOT NULL"
+                      "`description` VARCHAR(128) NOT NULL DEFAULT '',"
                       "`database_version` INT(11) NOT NULL DEFAULT 0,"
                       "`version` VARCHAR(128) NOT NULL"
                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");

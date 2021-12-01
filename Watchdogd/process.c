@@ -74,9 +74,9 @@
     g_snprintf( lib->description, sizeof(lib->description), description );
     g_snprintf( lib->version,     sizeof(lib->version),     version );
 
-    SQL_Write_new ( "UPDATE processes SET started=1, start_time=%d, classe='%s', version='%s', database_version='%d', "
+    SQL_Write_new ( "UPDATE processes SET started=1, start_time=NOW(), classe='%s', version='%s', database_version='%d', "
                     "description='%s' WHERE uuid='%s'",
-                    time(NULL), classe, lib->version, lib->database_version, lib->description, lib->uuid );
+                    classe, lib->version, lib->database_version, lib->description, lib->uuid );
 
     lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
