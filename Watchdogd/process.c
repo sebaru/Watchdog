@@ -164,6 +164,9 @@
         }
      }
 
+    module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    module->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+
     Mnemo_auto_create_WATCHDOG ( FALSE, tech_id, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is UP",
               __func__, module->lib->uuid, tech_id );
@@ -176,6 +179,8 @@
  void SubProcess_end ( struct SUBPROCESS *module )
   { SubProcess_send_comm_to_master_new ( module, FALSE );
     if (module->vars) g_free(module->vars);
+    Zmq_Close ( module->zmq_from_bus );
+    Zmq_Close ( module->zmq_to_master );
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is DOWN",
               __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id") );
     pthread_exit(0);
