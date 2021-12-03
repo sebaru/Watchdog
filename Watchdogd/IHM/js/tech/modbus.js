@@ -35,7 +35,7 @@
     Show_modal_del ( "Détruire le module "+tech_id+" ?",
                      "Etes-vous sur de vouloir supprimer ce module ?",
                       selection.tech_id + " - " + selection.hostname + " - " + selection.description,
-                     "Valider_Modbus_Del('"+tech_id+"')" );
+                      function () { Valider_Modbus_Del(tech_id); } );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Edit ( tech_id )

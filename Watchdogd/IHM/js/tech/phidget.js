@@ -31,7 +31,7 @@
     Show_modal_del ( "Détruire le hub "+selection.hostname+" ?",
                      "Etes-vous sur de vouloir supprimer ce hub ?",
                       selection.hostname + " - " + selection.description,
-                     "Valider_Phidget_Hub_Del("+id+")" );
+                      function () { Valider_Phidget_Hub_Del(id); } );
   }
 /************************************ Envoi les infos de modifications phidget ************************************************/
  function Valider_Phidget_Hub_Set ( id )
