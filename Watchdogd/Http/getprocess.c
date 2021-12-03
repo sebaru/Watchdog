@@ -320,21 +320,15 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "action" ) ) )
+    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "zmq_tag" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    JsonNode *RootNode = Json_node_create();
-    if (RootNode)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: %s -> %s", __func__,
-                 Json_get_string ( request, "tech_id" ), Json_get_string ( request, "action" ) );
-       Json_node_add_string ( RootNode, "zmq_tag", "SUBPROCESS_ACTIONIHM" );
-       Json_node_add_string ( RootNode, "action", Json_get_string ( request, "action" ) );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Json_get_string ( request, "tech_id" ), RootNode );
-       json_node_unref(RootNode);
-     }
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: %s -> %s", __func__,
+              Json_get_string ( request, "tech_id" ), Json_get_string ( request, "zmq_tag" ) );
+    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Json_get_string ( request, "tech_id" ), request );
 /*************************************************** Envoi au client **********************************************************/
     json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);

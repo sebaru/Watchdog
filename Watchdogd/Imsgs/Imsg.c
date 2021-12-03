@@ -392,6 +392,7 @@ reconnect:
              g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( request, "dls_shortname" ), Json_get_string ( request, "libelle" ) );
              Imsgs_Envoi_message_to_all_available ( module, chaine );
            }
+          else if ( !strcasecmp( zmq_tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
           else
            { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': zmq_tag '%s' not for this thread", __func__,
                        jabber_id, zmq_tag ); }

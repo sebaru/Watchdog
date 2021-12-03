@@ -29,7 +29,7 @@
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     var json_request =
      { tech_id: selection.tech_id,
-       action : "test_gsm"
+       zmq_tag: "test_gsm"
      };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
   }
@@ -39,7 +39,7 @@
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     var json_request =
      { tech_id: selection.tech_id,
-       action : "test_ovh"
+       zmq_tag : "test_ovh"
      };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
   }

@@ -4,6 +4,16 @@
  function METEO_Refresh ( )
   { $('#idTableMETEO').DataTable().ajax.reload(null, false);
   }
+/************************************ Demande l'envoi d'un SMS de test ********************************************************/
+ function METEO_Test ( id )
+  { table = $('#idTableMETEO').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    var json_request =
+     { tech_id: selection.tech_id,
+       zmq_tag : "test"
+     };
+    Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
+  }
 /**************************************** Supprime une connexion meteo ********************************************************/
  function METEO_Del_Valider ( selection )
   { var json_request = JSON.stringify({ uuid : selection.uuid, tech_id: selection.tech_id });
@@ -92,6 +102,7 @@
              "render": function (item)
                { boutons = Bouton_actions_start ();
                  boutons += Bouton_actions_add ( "primary", "Editer la connexion", "METEO_Edit", item.id, "pen", null );
+                 boutons += Bouton_actions_add ( "outline-primary", "Tester la connexion", "METEO_Test", item.id, "question", null );
                  boutons += Bouton_actions_add ( "danger", "Supprimer la connexion", "METEO_Del", item.id, "trash", null );
                  boutons += Bouton_actions_end ();
                  return(boutons);

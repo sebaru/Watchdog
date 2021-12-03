@@ -256,7 +256,7 @@ end:
        JsonNode *request;
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          /*if ( !strcasecmp ( zmq_tag, "test" ) ) vars->test_api = TRUE;*/
+          if ( !strcasecmp( zmq_tag, "test" ) ) vars->last_request = Partage->top - METEO_POLLING;
           json_node_unref(request);
         }
      }
