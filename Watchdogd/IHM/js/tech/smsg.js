@@ -24,14 +24,25 @@
      }, null );
   }
 /************************************ Demande l'envoi d'un SMS de test ********************************************************/
- function SMSG_test ( target )
-  { var json_request = JSON.stringify(
-     { instance: $('#idTargetInstance').val(),
-       mode: target
-     });
-    Send_to_API ( 'PUT', "/api/process/smsg/send", json_request, null );
+ function SMSG_Test_GSM ( id )
+  { table = $('#idTableSMSG').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    var json_request =
+     { tech_id: selection.tech_id,
+       action : "test_gsm"
+     };
+    Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
   }
-
+/************************************ Demande l'envoi d'un SMS de test ********************************************************/
+ function SMSG_Test_OVH ( id )
+  { table = $('#idTableSMSG').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    var json_request =
+     { tech_id: selection.tech_id,
+       action : "test_ovh"
+     };
+    Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
+  }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function SMSG_Edit ( id )
   { table = $('#idTableSMSG').DataTable();
@@ -93,6 +104,8 @@
              "render": function (item)
                { boutons = Bouton_actions_start ();
                  boutons += Bouton_actions_add ( "primary", "Editer la connexion", "SMSG_Edit", item.id, "pen", null );
+                 boutons += Bouton_actions_add ( "outline-primary", "Test GSM", "SMSG_Test_GSM", item.id, "question", null );
+                 boutons += Bouton_actions_add ( "outline-secondary", "Test OVG", "SMSG_Test_OVH", item.id, "question", null );
                  boutons += Bouton_actions_add ( "danger", "Supprimer la connexion", "SMSG_Del", item.id, "trash", null );
                  boutons += Bouton_actions_end ();
                  return(boutons);

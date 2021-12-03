@@ -125,7 +125,7 @@
 /******************************************************************************************************************************/
 /* Handle_zmq_common: Analyse et reagi à un message ZMQ a destination du MSRV ou du SLAVE                                     */
 /* Entrée: le message                                                                                                         */
-/* Sortie: rien                                                                                                               */
+/* Sortie: FALSE si n'a pas été pris en charge                                                                                */
 /******************************************************************************************************************************/
  static gboolean Handle_zmq_common ( JsonNode *request, gchar *zmq_tag, gchar *zmq_src_tech_id, gchar *zmq_dst_tech_id )
   { if ( !strcasecmp( zmq_tag, "SUDO") )
@@ -161,13 +161,11 @@
           exit(0);
         }
      }
-    else if ( !strcasecmp( zmq_tag, "PROCESS") &&
-              Json_has_member ( request, "action" ) && !strcasecmp ( Json_get_string ( request, "action" ), "RELOAD" ) &&
+    else if ( !strcasecmp( zmq_tag, "PROCESS_RELOAD") &&
               Json_has_member ( request, "uuid" )
             )
      { Process_reload_by_uuid ( Json_get_string ( request, "uuid" ) ); }
-    else if ( !strcasecmp( zmq_tag, "PROCESS") &&
-              Json_has_member ( request, "action" ) && !strcasecmp ( Json_get_string ( request, "action" ), "DEBUG" ) &&
+    else if ( !strcasecmp( zmq_tag, "PROCESS_DEBUG") &&
               Json_has_member ( request, "uuid" ) && Json_has_member ( request, "debug" )
             )
      { Process_set_debug ( Json_get_string ( request, "uuid" ), Json_get_bool ( request, "debug" ) ); }

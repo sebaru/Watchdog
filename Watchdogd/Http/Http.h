@@ -110,6 +110,8 @@
                                           SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_process_config ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                            SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_process_send ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                         SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_process_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                          SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_process_start ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

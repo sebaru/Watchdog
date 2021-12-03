@@ -666,6 +666,7 @@ reload:
     soup_server_add_handler ( socket, "/api/process/debug",  Http_traiter_process_debug, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/list",   Http_traiter_process_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/config", Http_traiter_process_config, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/process/send",   Http_traiter_process_send, NULL, NULL );
     soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/instance/set",
                                                              Http_traiter_instance_set, NULL, NULL );

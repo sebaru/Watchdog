@@ -596,6 +596,11 @@ end:
 /*************************************************** Envoi en mode GSM ********************************************************/
              Smsg_send_to_all_authorized_recipients( module, request );
            }
+          else if ( !strcasecmp( zmq_tag, "SUBPROCESS_ACTIONIHM" ) && Json_has_member ( request, "action" ) )
+           { gchar *action = Json_get_string ( request, "action" );
+                  if ( !strcasecmp ( action, "test_gsm" ) ) vars->send_test_GSM = TRUE;
+             else if ( !strcasecmp ( action, "test_ovh" ) ) vars->send_test_OVH = TRUE;
+           }
           else
            { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s : zmq_tag '%s' not for this thread", __func__, zmq_tag ); }
           json_node_unref(request);
