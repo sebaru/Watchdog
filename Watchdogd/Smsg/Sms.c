@@ -47,8 +47,8 @@
     if (lib->database_version==0)
      { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
                        "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                       "`uuid` varchar(37) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
                        "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                       "`uuid` varchar(37) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
                        "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                        "`description` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`ovh_service_name` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
@@ -56,7 +56,8 @@
                        "`ovh_application_secret` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`ovh_consumer_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
-                       "`comm` TINYINT(1) NOT NULL DEFAULT '0'"
+                       "`comm` TINYINT(1) NOT NULL DEFAULT '0' "
+                       "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
        goto end;
      }
@@ -364,12 +365,12 @@ end:
                               "SELECT id,username,enable,comment,notification,phone,allow_cde "
                               "FROM users AS user WHERE enable=1 AND notification=1 ORDER BY username" );
 
-    gint notification = Json_get_int ( msg, "notification" );
+    gint sms_notification = Json_get_int ( msg, "sms_notification" );
     GList *recipients = json_array_get_elements ( Json_get_array ( RootNode, "recipient" ) );
     while(recipients)
      { JsonNode *element = recipients->data;
        gchar *user_phone = Json_get_string ( element, "phone" );
-       switch (notification)
+       switch (sms_notification)
         { case MESSAGE_SMS_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
                 { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
