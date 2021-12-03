@@ -71,8 +71,7 @@ end:
 /* Sortie : booléen, TRUE/FALSE                                                                                               */
 /******************************************************************************************************************************/
  static gboolean Smsg_is_allow_cde ( struct SUBPROCESS *module, gchar *tel )
-  { struct SMS_VARS *vars = module->vars;
-    gchar *phone;
+  { gchar *phone;
     gboolean retour;
 
     phone = Normaliser_chaine ( tel );
@@ -268,7 +267,6 @@ end:
 /******************************************************************************************************************************/
  static void Envoi_sms_ovh ( struct SUBPROCESS *module, JsonNode *msg, gchar *telephone )
   { gchar clair[512], hash_string[48], signature[48], query[128];
-    struct SMS_VARS *vars = module->vars;
     unsigned char hash_bin[EVP_MAX_MD_SIZE];
     EVP_MD_CTX *mdctx;
     int md_len;
@@ -290,12 +288,14 @@ end:
     json_node_unref(RootNode);
 
     gchar *method = "POST";
-    g_snprintf( query, sizeof(query), "https://eu.api.ovh.com/1.0/sms/%s/jobs", vars->ovh_service_name );
+    g_snprintf( query, sizeof(query), "https://eu.api.ovh.com/1.0/sms/%s/jobs", Json_get_string ( module->config, "ovh_service_name" ) );
     gchar timestamp[20];
     g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
 
 /******************************************************* Calcul signature *****************************************************/
-    g_snprintf( clair, sizeof(clair), "%s+%s+%s+%s+%s+%s", vars->ovh_application_secret, vars->ovh_consumer_key,
+    g_snprintf( clair, sizeof(clair), "%s+%s+%s+%s+%s+%s",
+                Json_get_string ( module->config, "ovh_application_secret" ),
+                Json_get_string ( module->config, "ovh_consumer_key" ),
                 method, query, body, timestamp );
 
     mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
@@ -320,8 +320,8 @@ end:
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, body, strlen(body) );
     SoupMessageHeaders *headers;
     g_object_get ( G_OBJECT(soup_msg), "request_headers", &headers, NULL );
-    soup_message_headers_append ( headers, "X-Ovh-Application", vars->ovh_application_key );
-    soup_message_headers_append ( headers, "X-Ovh-Consumer",    vars->ovh_consumer_key );
+    soup_message_headers_append ( headers, "X-Ovh-Application", Json_get_string ( module->config, "ovh_application_key" ) );
+    soup_message_headers_append ( headers, "X-Ovh-Consumer",    Json_get_string ( module->config, "ovh_consumer_key" ) );
     soup_message_headers_append ( headers, "X-Ovh-Signature",   signature );
     soup_message_headers_append ( headers, "X-Ovh-Timestamp",   timestamp );
     soup_session_send_message (connexion, soup_msg);
@@ -397,10 +397,9 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_ovh_text ( struct SUBPROCESS *module, gchar *texte )
-  { struct SMS_VARS *vars = module->vars;
-    JsonNode *RootNode = Json_node_create();
+  { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
-    Json_node_add_string ( RootNode, "dls_shortname", vars->tech_id );
+    Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "tech_id" ) );
     Json_node_add_int    ( RootNode, "sms_notification", MESSAGE_SMS_OVH_ONLY );
     Smsg_send_to_all_authorized_recipients( module, RootNode );
     json_node_unref(RootNode);
@@ -411,10 +410,9 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_gsm_text ( struct SUBPROCESS *module, gchar *texte )
-  { struct SMS_VARS *vars = module->vars;
-    JsonNode *RootNode = Json_node_create();
+  { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
-    Json_node_add_string ( RootNode, "dls_shortname", vars->tech_id );
+    Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "tech_id" ) );
     Json_node_add_int    ( RootNode, "sms_notification", MESSAGE_SMS_GSM_ONLY );
     Smsg_send_to_all_authorized_recipients( module, RootNode );
     json_node_unref(RootNode);
@@ -426,7 +424,6 @@ end:
 /******************************************************************************************************************************/
  static void Sms_Envoyer_commande_dls_data ( JsonArray *array, guint index, JsonNode *element, void *user_data )
   { struct SUBPROCESS *module = user_data;
-    struct SMS_VARS *vars = module->vars;
     gchar *tech_id = Json_get_string ( element, "tech_id" );
     gchar *acro    = Json_get_string ( element, "acronyme" );
     gchar *libelle = Json_get_string ( element, "libelle" );
