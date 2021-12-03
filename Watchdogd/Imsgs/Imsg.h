@@ -34,29 +34,11 @@
  #define IMSGS_DEFAUT_PASSWORD      "defaultpassword"
  #define IMSGS_TIME_RECONNECT      600                                              /* 1 minute avant reconnexion si probleme */
 
- struct IMSGSDB
-  { gint     user_id;
-    gchar    user_jabberid[80];
-    gchar    user_name[80];
-    gchar    user_comment[80];
-    gboolean user_enable;
-    gboolean user_notification;
-    gboolean user_allow_cde;
-    gboolean user_available;
-  };
-
- struct IMSGS_CONFIG
-  { struct PROCESS *lib;
-    gchar tech_id[32];
-    xmpp_ctx_t *ctx;
+ struct IMSGS_VARS
+  { xmpp_ctx_t *ctx;
     xmpp_conn_t *conn;
-    gchar jabberid[80];
-    gchar password[80];
     gboolean signed_off;
   };
 /*********************************************** Déclarations des prototypes **************************************************/
- void Imsgs_Envoi_message_to_all_available ( gchar *message );
- extern gboolean Recuperer_imsgsDB ( struct DB *db );
- extern struct IMSGSDB *Recuperer_imsgsDB_suite( struct DB *db );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -202,8 +202,6 @@
      }
     module->lib    = lib;
     module->config = element;
-    module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    module->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
      { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: pthread_attr_init failed",
@@ -237,8 +235,6 @@
               __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id" ) );
     pthread_join( module->TID, NULL );                                                                 /* Attente fin du fils */
     lib->modules = g_slist_remove ( lib->modules, module );
-    Zmq_Close ( module->zmq_from_bus );
-    Zmq_Close ( module->zmq_to_master );
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s: unloaded",
               __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id" ) );
     g_free(module);

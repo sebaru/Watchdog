@@ -279,6 +279,21 @@
 /* Entrée: le status du GSM                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
+ void Zmq_Send_CDE_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme )
+  { if (!module) return;
+    JsonNode *body = Json_node_create ();
+    if(!body) return;
+    Json_node_add_string ( body, "zmq_tag", "SET_CDE" );
+    Json_node_add_string ( body, "tech_id",  tech_id );
+    Json_node_add_string ( body, "acronyme", acronyme );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "tech_id" ), Config.master_host, body );
+    json_node_unref(body);
+  }
+/******************************************************************************************************************************/
+/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
+/* Entrée: le status du GSM                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Zmq_Send_WATCHDOG_to_master ( struct PROCESS *lib, gchar *tech_id, gchar *acronyme, gint consigne )
   { if (!lib) return;
     JsonNode *body = Json_node_create ();

@@ -48,7 +48,7 @@
      { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
                        "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                        "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                       "`uuid` varchar(37) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                       "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
                        "`tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                        "`description` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`ovh_service_name` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
@@ -56,7 +56,7 @@
                        "`ovh_application_secret` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`ovh_consumer_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
-                       "`comm` TINYINT(1) NOT NULL DEFAULT '0' "
+                       "`comm` TINYINT(1) NOT NULL DEFAULT '0',"
                        "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
        goto end;
@@ -66,11 +66,11 @@ end:
     Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
-/* Smsg_is_recipient_authorized : Renvoi TRUE si le telephone en parametre peut set ou reset un bit interne                   */
+/* Smsg_is_allow_cde : Renvoi TRUE si le telephone en parametre peut set ou reset un bit interne                              */
 /* Entrée: le nom du destinataire                                                                                             */
 /* Sortie : booléen, TRUE/FALSE                                                                                               */
 /******************************************************************************************************************************/
- static gboolean Smsg_is_allow_cde_authorized ( struct SUBPROCESS *module, gchar *tel )
+ static gboolean Smsg_is_allow_cde ( struct SUBPROCESS *module, gchar *tel )
   { struct SMS_VARS *vars = module->vars;
     gchar *phone;
     gboolean retour;
@@ -220,10 +220,11 @@ end:
     sms.UDH.Type = UDH_NoUDH;                                                                 /* No UDH, just a plain message */
     sms.Coding = SMS_Coding_Unicode_No_Compression;                                        /* We used default coding for text */
     sms.Class = 1;                                                                                /* Class 1 message (normal) */
-    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
+    gchar *dls_shortname = Json_get_string ( msg, "dls_shortname" );
+    if (dls_shortname) g_snprintf( libelle, sizeof(libelle), "%s: %s", dls_shortname, Json_get_string( msg, "libelle") );
+                  else g_snprintf( libelle, sizeof(libelle), "%s", Json_get_string( msg, "libelle") );
     EncodeUnicode( sms.Text, libelle, strlen(libelle));                                                /* Encode message text */
     EncodeUnicode( sms.Number, telephone, strlen(telephone));
-
 
  /*debug_info = GSM_GetDebug(s);
  GSM_SetDebugGlobal(FALSE, debug_info);
@@ -361,12 +362,12 @@ end:
      }
 
 /********************************************* Chargement des informations en bases *******************************************/
-    SQL_Select_to_json_node ( RootNode, "recipient",
+    SQL_Select_to_json_node ( RootNode, "recipients",
                               "SELECT id,username,enable,comment,notification,phone,allow_cde "
                               "FROM users AS user WHERE enable=1 AND notification=1 ORDER BY username" );
 
     gint sms_notification = Json_get_int ( msg, "sms_notification" );
-    GList *recipients = json_array_get_elements ( Json_get_array ( RootNode, "recipient" ) );
+    GList *recipients = json_array_get_elements ( Json_get_array ( RootNode, "recipients" ) );
     while(recipients)
      { JsonNode *element = recipients->data;
        gchar *user_phone = Json_get_string ( element, "phone" );
@@ -443,7 +444,7 @@ end:
   { struct SMS_VARS *vars = module->vars;
     gchar chaine[160];
 
-    if ( Smsg_is_allow_cde_authorized ( module, from ) == FALSE )
+    if ( Smsg_is_allow_cde ( module, from ) == FALSE )
      { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE,
                 "%s : unknown sender %s. Dropping message %s...", __func__, from, texte );
        return;
@@ -559,7 +560,7 @@ end:
     gint next_try = 0;
 
     while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
-     { usleep(10000);
+     { usleep(100000);
        sched_yield();
 
        SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */

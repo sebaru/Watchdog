@@ -685,7 +685,9 @@ end:
            }
         }
 
-       SQL_Write_new ( "UPDATE instances SET version='%s', start_time=NOW() WHERE host='%s'", WTD_VERSION, g_get_host_name());
+       SQL_Write_new ( "INSERT INTO instances SET host='%s', version='%s', start_time=NOW() "
+                       "ON DUPLICATE KEY UPDATE host=VALUES(host), version=VALUES(version), start_time=VALUES(start_time)",
+                       g_get_host_name(), WTD_VERSION);
 
        JsonNode *RootNode = Json_node_create ();
        SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM instances WHERE host='%s'", g_get_host_name() );

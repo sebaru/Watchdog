@@ -60,6 +60,7 @@
            },
            { "data": "version", "title":"Version",   "className": "align-middle text-center" },
            { "data": "database_version", "title":"Database",   "className": "align-middle text-center" },
+           { "data": "start_time", "title":"Start time",   "className": "align-middle text-center" },
            { "data": null, "title":"Description", "className": "align-middle ",
              "render": function (item)
               { return( Input ( "text", "idMSRVDescription_"+item.id, "MSRV_Sauver_parametre("+item.id+")",
