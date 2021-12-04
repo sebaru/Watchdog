@@ -169,6 +169,12 @@
               Json_has_member ( request, "uuid" ) && Json_has_member ( request, "debug" )
             )
      { Process_set_debug ( Json_get_string ( request, "uuid" ), Json_get_bool ( request, "debug" ) ); }
+    else if ( !strcasecmp( zmq_tag, "INSTANCE_RESET") &&
+              Json_has_member ( request, "tech_id" ) && !strcasecmp ( Json_get_string ( request, "tech_id" ), g_get_host_name() )
+            )
+     { Partage->com_msrv.Thread_run = FALSE;
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: INSTANCE_RESET: Stopping in progress", __func__ );
+     }
     else if ( !strcasecmp( zmq_tag, "SET_LOG") &&
               Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
               Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" ) &&

@@ -626,7 +626,7 @@ reload:
 
     Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
     while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
-    g_slist_foreach ( lib->modules, (GFunc)Process_Unload_one_subprocess, lib );
+    Process_Unload_all_subprocess ( lib );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );

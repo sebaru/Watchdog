@@ -209,7 +209,7 @@
        return;
      }
 
-    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) )                       /* On le laisse joinable au boot */
+    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )                       /* On le laisse joinable au boot */
      { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: pthread_setdetachstate failed",
                  __func__, module->lib->uuid, Json_get_string ( element, "tech_id" ) );
        return;
@@ -230,14 +230,17 @@
 /* Entrée: la structure librairie du thread et la configuration du module, dans 'element' au format json                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Process_Unload_one_subprocess ( struct SUBPROCESS *module, struct PROCESS *lib )
-  { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: UUID %s/%s: Wait for sub-process end",
-              __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id" ) );
-    pthread_join( module->TID, NULL );                                                                 /* Attente fin du fils */
-    lib->modules = g_slist_remove ( lib->modules, module );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s: unloaded",
-              __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id" ) );
-    g_free(module);
+ void Process_Unload_all_subprocess ( struct PROCESS *lib )
+  { while(lib->modules)
+     { struct SUBPROCESS *module = lib->modules->data;
+       lib->modules = g_slist_remove ( lib->modules, module );
+       Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: UUID %s/%s: Wait for sub-process end",
+                 __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id" ) );
+       pthread_join( module->TID, NULL );                                                              /* Attente fin du fils */
+       Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s: unloaded",
+                 __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id" ) );
+       g_free(module);
+     }
   }
 /******************************************************************************************************************************/
 /* Process_start: Demarre le thread en paremetre                                                                              */

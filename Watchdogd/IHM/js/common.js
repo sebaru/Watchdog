@@ -27,7 +27,7 @@
           if (method=="DELETE" || method=="POST") $('#idToastStatus').toast('show');
           if (fonction_ok != null) fonction_ok(Response);
         }
-       else { Show_Error( xhr.statusText );
+       else { if (xhr.status != 503) Show_Error( xhr.statusText );
               try { var Response = JSON.parse(xhr.responseText); }
               catch (error) { Response=undefined; }
               if (fonction_nok != null) fonction_nok(Response);
@@ -77,12 +77,24 @@
        $('#idModalError').modal("show");
      }
   }
-
+/********************************************* Chargement du synoptique 1 au démrrage *****************************************/
+ function Show_Info ( message )
+  { $('#idModalInfoDetail').html( htmlEncode(message) );
+    $('#idModalInfo').modal("show");
+  }
 /********************************************* Redirige la page ***************************************************************/
  function Redirect ( url )
   { /*$('body').fadeOut("high", function () { */ window.location = url; /* } );*/
   }
 
+ function Reload_when_ready ( )
+  { Send_to_API ( "GET", "/api/ping", null,
+                  function (Response) { if(Response.Thread_run == false) setTimeout ( function () { Reload_when_ready() }, 1000 );
+                                        else window.location.reload(false);
+                                      },
+                  function () { setTimeout ( function () { Reload_when_ready() }, 1000 ); }
+                );
+  }
 /********************************************* Barre de boutons ***************************************************************/
  function Bouton_actions_start ( )
   { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"); }

@@ -61,7 +61,7 @@
  struct SUBPROCESS
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     struct PROCESS *lib;
-    JsonNode *config;
+    JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     void *zmq_from_bus;                                                                       /* handle d"ecoute du BUS local */
@@ -181,7 +181,7 @@
  extern JsonNode *SubProcess_Listen_to_master_new ( struct SUBPROCESS *module );
  extern void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat );
  extern void Process_Load_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
- extern void Process_Unload_one_subprocess ( struct SUBPROCESS *module, struct PROCESS *lib );
+ extern void Process_Unload_all_subprocess ( struct PROCESS *lib );
  extern void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars );
  extern void SubProcess_end ( struct SUBPROCESS *module );
 

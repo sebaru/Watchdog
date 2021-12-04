@@ -22,16 +22,17 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Reset_Valider ( selection )
-  { var json_request = { host: selection.host };
-    Send_to_API ( 'POST', "/api/instance/reset", JSON.stringify(json_request), function ()
-     { $('#idTableMsrv').DataTable().ajax.reload(null, false);
+  { var json_request = { zmq_tag: "INSTANCE_RESET", tech_id: selection.host };
+    Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), function ()
+     { Show_Info ( "Attendez le redémarrage" );
+       Reload_when_ready();
      }, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Reset ( id  )
   { table = $('#idTableMsrv').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Restarter l'instance "+selection.host,
+    Show_modal_del ( "Restarter cette instance "+selection.host,
                      "Etes-vous sûr de vouloir relancer cette instance ?",
                      selection.host + " - "+selection.description,
                      function () { MSRV_Reset_Valider( selection ) } ) ;

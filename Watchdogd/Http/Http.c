@@ -300,6 +300,7 @@
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_node_add_string ( RootNode, "response", "pong" );
+    Json_node_add_bool   ( RootNode, "Thread_run", Partage->com_msrv.Thread_run );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
