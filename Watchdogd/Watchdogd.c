@@ -132,7 +132,7 @@
      { gchar chaine[128];
        if (! (Json_has_member ( request, "target" ) ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return(FALSE);
+          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
        gchar *target = Json_get_string ( request, "target" );
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s to %s/%s", __func__,
@@ -143,7 +143,7 @@
     else if ( !strcasecmp( zmq_tag, "EXECUTE") )
      { if (! (Json_has_member ( request, "target" ) ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: EXECUTE : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return(FALSE);
+          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
        gchar *target = Json_get_string ( request, "target" );
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive EXECUTE from %s to %s/%s", __func__,
@@ -181,7 +181,7 @@
        Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
        Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: debug=%d, db=%d, zmq=%d, trad=%d, log_level=%d", __func__,
                  Config.log_msrv, Config.log_db, Config.log_zmq, Config.log_trad, Json_get_int ( request, "log_level" ) );
-     }
+     } else return(FALSE); /* Si pas trouvé */
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -189,7 +189,7 @@
 /* Entrée: le message                                                                                                         */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Handle_zmq_for_master ( JsonNode *request )
+ static gboolean Handle_zmq_for_master ( JsonNode *request )
   { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
     gchar *zmq_src_tech_id = Json_get_string ( request, "zmq_src_tech_id" );
     gchar *zmq_dst_tech_id = Json_get_string ( request, "zmq_dst_tech_id" );
@@ -198,7 +198,7 @@
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
               Json_has_member ( request, "consigne" ) ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_WATCHDOG : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
+          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
 
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
@@ -213,7 +213,7 @@
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
               Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" )) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_AI : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
+          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
 
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
@@ -227,7 +227,7 @@
     else if ( !strcasecmp( zmq_tag, "SET_CDE") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
+          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                  "%s: SET_CDE=1 from %s to %s : bit techid %s acronyme %s", __func__,
@@ -238,7 +238,7 @@
     else if ( !strcasecmp( zmq_tag, "SET_DI") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_DI : wrong parameters from %s", __func__, zmq_src_tech_id );
-          return;
+          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                  "%s: SET_DI from %s to %s : '%s:%s'=%d", __func__,
@@ -268,16 +268,17 @@
      }
     else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
-                 __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
-                 zmq_tag );
+                 __func__, zmq_src_tech_id, zmq_dst_tech_id, zmq_tag );
+       return(FALSE);                                                                                           /* Pas trouvé */
      }
+    return(TRUE);                                                                                                   /* Traité */
   }
 /******************************************************************************************************************************/
 /* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                                     */
 /* Entrée: le message                                                                                                         */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Handle_zmq_for_slave ( JsonNode *request )
+ static gboolean Handle_zmq_for_slave ( JsonNode *request )
   { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
     gchar *zmq_src_tech_id   = Json_get_string ( request, "zmq_src_tech_id" );
     gchar *zmq_dst_tech_id   = Json_get_string ( request, "zmq_dst_tech_id" );
@@ -288,9 +289,10 @@
      }
     else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
-                 __func__, Json_get_string ( request, "zmq_src_tech_id" ), Json_get_string ( request, "zmq_dst_tech_id" ),
-                 zmq_tag );
+                 __func__, zmq_src_tech_id, zmq_dst_tech_id, zmq_tag );
+       return(FALSE);                                                                                           /* Pas trouvé */
      }
+    return(TRUE);                                                                                                   /* Traité */
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
@@ -358,10 +360,11 @@
 
        request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { Handle_zmq_for_master( request );                          /* Gère d'abord le message avant de l'envoyer aux autres */
-          gint taille = strlen(buffer);
-          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                     /* Sinon on envoi aux threads */
-          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                     /* Sinon on envoi aux slave */
+        { if (!Handle_zmq_for_master( request ))                     /* Gère d'abord le message avant de l'envoyer aux autres */
+           { gint taille = strlen(buffer);
+             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                     /* Sinon on envoi aux threads */
+             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                     /* Sinon on envoi aux slave */
+           }
           json_node_unref ( request );
         }
 
@@ -455,8 +458,8 @@
 
        request = Recv_zmq_with_json( zmq_from_master, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { Handle_zmq_for_slave( request );
-          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) );             /* Sinon on envoi aux threads */
+        { if (!Handle_zmq_for_slave( request ))
+           { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) ); }        /* Sinon on envoi aux threads */
           json_node_unref ( request );
         }
                                                 /* Si reception depuis un thread, report vers le master et les autres threads */

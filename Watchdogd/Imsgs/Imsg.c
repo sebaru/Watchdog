@@ -347,7 +347,6 @@ end:
 
 reconnect:
     vars->signed_off = FALSE;
-    xmpp_initialize();
     vars->ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_INFO));
     if (!vars->ctx)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Ctx Init failed", __func__ ); goto end; }
@@ -411,7 +410,6 @@ end:
      { xmpp_ctx_free(vars->ctx);
        Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Ctx Free OK", __func__, jabber_id );
      }
-    xmpp_shutdown();
     Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': XMPPshutdown OK", __func__, jabber_id );
     SubProcess_send_comm_to_master_new ( module, FALSE );
 
@@ -439,9 +437,11 @@ reload:
     if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
 
+    xmpp_initialize();
     Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
     while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
     g_slist_foreach ( lib->modules, (GFunc)Process_Unload_one_subprocess, lib );
+    xmpp_shutdown();
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
