@@ -347,7 +347,7 @@ end:
 /* Entrée: le message                                                                                                         */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Smsg_send_to_all_authorized_recipients ( struct SUBPROCESS *module, JsonNode *msg )
+ static void Smsg_send_to_all_authorized_recipients ( struct SUBPROCESS *module, JsonNode *msg )
   { struct SMS_VARS *vars = module->vars;
 
     if (vars->sending_is_disabled == TRUE)                                   /* Si envoi désactivé, on sort de suite de la fonction */

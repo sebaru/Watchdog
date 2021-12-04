@@ -360,11 +360,10 @@
 
        request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if (!Handle_zmq_for_master( request ))                     /* Gère d'abord le message avant de l'envoyer aux autres */
-           { gint taille = strlen(buffer);
-             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                     /* Sinon on envoi aux threads */
-             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                     /* Sinon on envoi aux slave */
-           }
+        { gint taille = strlen(buffer);
+          if (!Handle_zmq_for_master( request ))                   /* Gère d'abord le message avant de l'envoyer au bus local */
+           { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille ); }                /* Sinon on envoi aux threads */
+          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );        /* dans tous les cas on envoi aux slaves */
           json_node_unref ( request );
         }
 
@@ -458,7 +457,7 @@
 
        request = Recv_zmq_with_json( zmq_from_master, NULL, (gchar *)&buffer, sizeof(buffer) );
        if (request)
-        { if (!Handle_zmq_for_slave( request ))
+        { if (!Handle_zmq_for_slave( request ))                    /* Gère d'abord le message avant de l'envoyer au bus local */
            { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) ); }        /* Sinon on envoi aux threads */
           json_node_unref ( request );
         }
