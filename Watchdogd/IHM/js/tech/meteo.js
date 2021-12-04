@@ -92,7 +92,7 @@
            { "data": "description", "title":"Description", "className": "align-middle " },
            { "data": "token", "title":"token", "className": "align-middle " },
            { "data": "code_insee", "title":"Code Insee", "className": "align-middle " },
-           { "data": null, "title":"comm", "className": "align-middle ",
+           { "data": null, "title":"comm", "className": "align-middle text-center",
              "render": function (item)
                { if (item.comm==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
                                  else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }

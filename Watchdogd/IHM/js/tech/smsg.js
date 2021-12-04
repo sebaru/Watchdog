@@ -94,7 +94,7 @@
            { "data": "ovh_application_key", "title":"OVH App Key", "className": "align-middle " },
            { "data": "ovh_application_secret", "title":"OVH App Secret", "className": "align-middle " },
            { "data": "nbr_sms", "title":"#SMS", "className": "align-middle " },
-           { "data": null, "title":"comm", "className": "align-middle ",
+           { "data": null, "title":"comm", "className": "align-middle text-center",
              "render": function (item)
                { if (item.comm==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
                                  else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }

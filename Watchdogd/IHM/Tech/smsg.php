@@ -1,12 +1,7 @@
 <div class="container-fluid">
 
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Thread <a href="/tech/process">SMSG</a> is not running !
-   </div>
-
  <div class="row m-2">
-   <h3><img src="/img/sms.jpg" style="width:80px" alt="Configuration SMS">Configuration des SMSG</h3>
+   <div class="col-auto"><h3><img src="/img/sms.jpg" style="width:80px" alt="Configuration SMS">Configuration des SMSG</h3></div>
 
    <div class ="ml-auto btn-group align-items-center">
         <button type="button" onclick="SMSG_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un GSM</button>
