@@ -35,8 +35,8 @@
  #include "Meteo.h"
 
 /******************************************************************************************************************************/
-/* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la PROCESS                                                                                       */
+/* Creer_DB: Creer la table associée au Process                                                                               */
+/* Entrée: le pointeur sur le PROCESS                                                                                         */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Meteo_Creer_DB ( struct PROCESS *lib )
@@ -50,10 +50,10 @@
                        "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                        "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                        "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                       "`comm` TINYINT(1) NOT NULL DEFAULT '0',"
                        "`description` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`token` VARCHAR(65) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`code_insee` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`comm` TINYINT(1) NOT NULL DEFAULT '0',"
                        "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
                        "PRIMARY KEY (`id`) "
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );

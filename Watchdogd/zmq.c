@@ -227,8 +227,8 @@
     return(request);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
+/* Zmq_Send_DI_to_master: Envoie le bit DI au master selon le status                                                          */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Zmq_Send_DI_to_master ( struct PROCESS *lib, gchar *tech_id, gchar *acronyme, gboolean etat )
@@ -243,8 +243,24 @@
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
+/* Zmq_Send_DI_to_master: Envoie le bit DI au master selon le status                                                          */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Zmq_Send_DI_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gboolean etat )
+  { if (!module) return;
+    JsonNode *body = Json_node_create ();
+    if(!body) return;
+    Json_node_add_string ( body, "zmq_tag", "SET_DI" );
+    Json_node_add_string ( body, "tech_id",  tech_id );
+    Json_node_add_string ( body, "acronyme", acronyme );
+    Json_node_add_bool   ( body, "etat", etat );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "tech_id" ), Config.master_host, body );
+    json_node_unref(body);
+  }
+/******************************************************************************************************************************/
+/* Zmq_Send_AI_to_master: Envoie le bit AI au master selon le status                                                          */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Zmq_Send_AI_to_master ( struct PROCESS *lib, gchar *tech_id, gchar *acronyme, gdouble valeur, gboolean in_range)
@@ -260,8 +276,25 @@
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
+/* Zmq_Send_AI_to_master: Envoie le bit AI au master selon le status                                                          */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Zmq_Send_AI_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gdouble valeur, gboolean in_range)
+  { if (!module) return;
+    JsonNode *body = Json_node_create ();
+    if(!body) return;
+    Json_node_add_string ( body, "zmq_tag", "SET_AI" );
+    Json_node_add_string ( body, "tech_id",  tech_id );
+    Json_node_add_string ( body, "acronyme", acronyme );
+    Json_node_add_double ( body, "valeur", valeur );
+    Json_node_add_bool   ( body, "in_range", in_range );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "tech_id" ), Config.master_host, body );
+    json_node_unref(body);
+  }
+/******************************************************************************************************************************/
+/* Zmq_Send_CDE_to_master: Envoie le bit CDE au master selon le status                                                        */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Zmq_Send_CDE_to_master ( struct PROCESS *lib, gchar *tech_id, gchar *acronyme )
@@ -275,8 +308,8 @@
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
+/* Zmq_Send_CDE_to_master_new: Envoie le bit CDE au master selon le status                                                    */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Zmq_Send_CDE_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme )
@@ -290,8 +323,8 @@
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
+/* Zmq_Send_WATCHDOG_to_master: Envoie le bit WATCHDOG au master selon le status                                              */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Zmq_Send_WATCHDOG_to_master ( struct PROCESS *lib, gchar *tech_id, gchar *acronyme, gint consigne )
@@ -306,8 +339,8 @@
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
-/* Entrée: le status du GSM                                                                                                   */
+/* Zmq_Send_WATCHDOG_to_master_new: Envoie le bit WATCHDOG au master selon le status                                          */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Zmq_Send_WATCHDOG_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gint consigne )
