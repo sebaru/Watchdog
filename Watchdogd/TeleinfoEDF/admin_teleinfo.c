@@ -28,95 +28,43 @@
  #include <glib.h>
  #include "watchdogd.h"
  #include "Teleinfo.h"
- extern struct TELEINFO_CONFIG Cfg_teleinfo;
-/******************************************************************************************************************************/
-/* Admin_json_status : fonction appelée pour vérifier le status de la librairie                                               */
-/* Entrée : un JSon Builder                                                                                                   */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- static void Admin_json_tinfo_status ( struct PROCESS *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
 
-    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
-
-    if (Lib->Thread_run)                                     /* Warning : Cfg_tinfo does not exist if thread is not running ! */
-     { Json_node_add_string ( RootNode, "tech_id", Cfg_teleinfo.tech_id );
-				   Json_node_add_string ( RootNode, "port", Cfg_teleinfo.port );
-				   Json_node_add_string ( RootNode, "description", Cfg_teleinfo.description );
-				   Json_node_add_bool   ( RootNode, "comm_status", Cfg_teleinfo.comm_status );
-				   switch ( Cfg_teleinfo.mode )
-        { case TINFO_WAIT_BEFORE_RETRY: Json_node_add_string ( RootNode, "mode", "TINFO_WAIT_BEFORE_RETRY" ); break;
-          case TINFO_RETRING          : Json_node_add_string ( RootNode, "mode", "TINFO_RETRYING" ); break;
-          case TINFO_CONNECTED        : Json_node_add_string ( RootNode, "mode", "TINFO_CONNECTED" ); break;
-          default: Json_node_add_string ( RootNode, "mode", "UNKNOWN" ); break;
-        }
-				   Json_node_add_int ( RootNode, "retry_in", (Cfg_teleinfo.date_next_retry - Partage->top)/10.0 );
-				   Json_node_add_int ( RootNode, "last_view", (Partage->top - Cfg_teleinfo.last_view)/10.0 );
-     }
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
 /******************************************************************************************************************************/
-/* Admin_json_tinfo_set: Configure le thread TINFO                                                                            */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
+/* Admin_config : fonction appelé par le thread http lors d'une requete POST sur config PROCESS                               */
+/* Entrée : la librairie, et le Json recu                                                                                     */
+/* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
- static void Admin_json_tinfo_set ( struct PROCESS *Lib, SoupMessage *msg )
-  { if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "tech_id" ) &&
-            Json_has_member ( request, "port" ) && Json_has_member ( request, "description" ) ) )
+ void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
+  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "description" ) &&
+            Json_has_member ( request, "port" )
+           ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
        return;
      }
 
+    gchar *uuid        = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
     gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *port        = Normaliser_chaine ( Json_get_string( request, "port" ) );
 
-    SQL_Write_new ( "UPDATE %s SET tech_id='%s', description='%s', port='%s' "
-                    "WHERE instance='%s'", Cfg_teleinfo.lib->name, tech_id, description, port, g_get_host_name() );
-    json_node_unref(request);
+    if (Json_has_member ( request, "id" ))
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', description='%s', port='%s' "
+                       "WHERE id='%d'",
+                       lib->name, uuid, tech_id, description, port,
+                       Json_get_int ( request, "id" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
+     }
+    else
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', description='%s', port='%s'",
+                       lib->name, uuid, tech_id, description, port );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
+     }
+
+    g_free(uuid);
     g_free(tech_id);
     g_free(description);
     g_free(port);
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    Lib->Thread_reload = TRUE;
-    while ( Lib->Thread_run == TRUE && Lib->Thread_reload == TRUE);                              /* Attente reboot du process */
-  }
-/******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- void Admin_json ( struct PROCESS *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
-  { if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
-
-         if (!strcasecmp(path, "/status"))   { Admin_json_tinfo_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/set"))      { Admin_json_tinfo_set    ( lib, msg ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

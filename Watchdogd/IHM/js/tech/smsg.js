@@ -18,7 +18,7 @@
     if (selection) json_request.id = parseInt(selection.id);                                            /* Ajout ou édition ? */
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
-     { if (selection.uuid != json_request.uuid) Process_reload ( selection.uuid ); /* Restart de l'ancien subprocess si uuid différent */
+     { if (selection && selection.uuid != json_request.uuid) Process_reload ( selection.uuid );/* Restart de l'ancien subprocess si uuid différent */
        Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
        $('#idTableSMSG').DataTable().ajax.reload(null, false);
      }, null );
@@ -70,8 +70,25 @@
     $('#idSMSGOVHApplicationKey').val("");
     $('#idSMSGOVHApplicationSecret').val("");
     $('#idSMSGOVHConsumerKey').val("");
-    $('#idSMSGValider').off("click").on( "click", function () { SMSG_Set(selection); } );
+    $('#idSMSGValider').off("click").on( "click", function () { SMSG_Set(null); } );
     $('#idSMSGEdit').modal("show");
+  }
+/**************************************** Supprime une connexion meteo ********************************************************/
+ function SMSG_Del_Valider ( selection )
+  { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
+    Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
+     { Process_reload ( json_request.uuid );
+       $('#idTableSMSG').DataTable().ajax.reload(null, false);
+     }, null );
+  }
+/**************************************** Supprime une connexion meteo ********************************************************/
+ function SMSG_Del ( id )
+  { table = $('#idTableSMSG').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    Show_modal_del ( "Supprimer la connexion "+selection.tech_id,
+                     "Etes-vous sûr de vouloir supprimer cette connexion ?",
+                     selection.tech_id + " - "+selection.description,
+                     function () { SMSG_Del_Valider( selection ) } ) ;
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()

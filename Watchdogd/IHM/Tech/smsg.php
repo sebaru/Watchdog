@@ -21,13 +21,6 @@
      </table>
    </div>
 
-   <div class="row m-2">
-     <div class ="ml-auto">
-        <button type="button" onclick="SMS_test('ovh')" class="btn btn-outline-info"><i class="fas fa-question"></i> Test envoi OVH</button>
-        <button type="button" onclick="SMS_Sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
-     </div>
-   </div>
-
 <!-- Container -->
 </div>
 

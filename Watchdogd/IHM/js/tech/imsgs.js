@@ -16,8 +16,8 @@
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
  function IMSGS_Del_Valider ( selection )
-  { var json_request = JSON.stringify({ uuid : selection.uuid, tech_id: selection.tech_id });
-    Send_to_API ( 'DELETE', "/api/process/config", json_request, function(Response)
+  { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
+    Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
        $('#idTableIMSGS').DataTable().ajax.reload(null, false);
      }, null );
@@ -42,7 +42,7 @@
     if (selection) json_request.id = parseInt(selection.id);                                            /* Ajout ou édition ? */
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
-     { if (selection.uuid != json_request.uuid) Process_reload ( selection.uuid ); /* Restart de l'ancien subprocess si uuid différent */
+     { if (selection && selection.uuid != json_request.uuid) Process_reload ( selection.uuid );/* Restart de l'ancien subprocess si uuid différent */
        Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
        $('#idTableIMSGS').DataTable().ajax.reload(null, false);
      }, null );

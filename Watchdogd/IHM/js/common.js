@@ -238,7 +238,7 @@
   { $('#idModalDelTitre').text ( htmlEncode(titre) );
     $('#idModalDelMessage').html( htmlEncode(message) );
     $('#idModalDelDetails').html( htmlEncode(details) );
-    $('#idModalDelValider').on( "click", fonction );
+    $('#idModalDelValider').off("click").on( "click", fonction );
     $('#idModalDel').modal("show");
   }
 /********************************************* Renvoi un input ****************************************************************/

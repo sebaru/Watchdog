@@ -37,28 +37,14 @@
    	TINFO_CONNECTED
   };
 
- struct TELEINFO_CONFIG
+ struct TELEINFO_VARS
   { struct PROCESS *lib;
-    gboolean comm_status;
-    gpointer bit_comm;                                                            /* Pointer de raccourci pour le bit de comm */
     gint  mode;                                                                    /* Statut de connexion au port TeleInfoEDF */
     gint  date_next_retry;                                                 /* Date de la prochaine connexion au port teleinfo */
-    gchar tech_id[32];
-    gchar port[80];
-    gchar description[80];                                        /* Une description du téléphone ou sa position par exemple */
     gint  fd;                                                               /* File Descriptor d'acces au module Teleinfo USB */
-    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
     gchar buffer[TAILLE_BUFFER_TELEINFO];
     gint  last_view;                                                                            /* Date du dernier echange OK */
     gint  nbr_connexion;                                                                        /* Date du dernier echange OK */
-    gpointer adco;
-    gpointer isous;
-    gpointer base;
-    gpointer hchc;
-    gpointer hchp;
-    gpointer iinst;
-    gpointer imax;
-    gpointer papp;
  };
 
 /************************************************ Définitions des prototypes **************************************************/
