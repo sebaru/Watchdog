@@ -57,19 +57,6 @@ end:
     Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
-/* Recuperer_imsgsDB: Recupération de la liste des users users IM                                                             */
-/* Entrée: Un pointeur vers une database                                                                                      */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gboolean Recuperer_imsgsDB ( struct DB *db )
-  { gchar requete[512];
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,username,enable,comment,notification,xmpp,allow_cde,imsg_available "
-                " FROM users as user ORDER BY username" );
-
-    return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
-  }
-/******************************************************************************************************************************/
 /* Imsgs_Envoi_message_to : Envoi un message a un contact xmpp                                                                */
 /* Entrée: le nom du destinataire et le message                                                                               */
 /* Sortie: Néant                                                                                                              */
@@ -108,9 +95,12 @@ end:
 
     SQL_Select_to_json_node ( RootNode, NULL,
                              "SELECT allow_cde "
-                             "FROM users as user WHERE enable=1 AND allow_cde=1 AND xmpp LIKE '%s' LIMIT 1", jabberid );
+                             "FROM users AS user WHERE enable=1 AND allow_cde=1 AND xmpp LIKE '%s' LIMIT 1", jabberid );
     g_free(jabberid);
-    return( Json_has_member ( RootNode, "allow_cde" ) && Json_get_bool ( RootNode, "allow_cde" ) == TRUE );
+    gboolean retour = FALSE;
+    if (Json_has_member ( RootNode, "allow_cde" ) && Json_get_bool ( RootNode, "allow_cde" ) == TRUE) retour = TRUE;
+    json_node_unref ( RootNode );
+    return( retour );
   }
 /******************************************************************************************************************************/
 /* Imsgs_Envoi_message_to_all_available : Envoi un message aux contacts disponibles                                           */

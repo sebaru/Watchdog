@@ -318,6 +318,8 @@
  static gboolean Dls_Charger_un_plugin ( struct DLS_PLUGIN *dls, gboolean compil )
   { gchar nom_fichier_absolu[60];
 
+    if (Partage->com_dls.Thread_run == FALSE) return(FALSE);          /* si l'instance est en cours d'arret, on sort de suite */
+
     if (compil)
      { dls->compil_status = Compiler_source_dls( dls->tech_id );
        if (dls->compil_status<DLS_COMPIL_OK)

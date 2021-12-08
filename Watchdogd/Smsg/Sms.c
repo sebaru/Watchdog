@@ -589,7 +589,7 @@ end:
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
                Json_get_int  ( request, "sms_notification" ) != MESSAGE_SMS_NONE )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s : Sending msg '%s:%s' (%s)", __func__,
+           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", __func__,
                        Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                        Json_get_string ( request, "libelle" ) );
 
@@ -599,7 +599,7 @@ end:
           else if ( !strcasecmp ( zmq_tag, "test_gsm" ) ) vars->send_test_GSM = TRUE;
           else if ( !strcasecmp ( zmq_tag, "test_ovh" ) ) vars->send_test_OVH = TRUE;
           else
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s : zmq_tag '%s' not for this thread", __func__, zmq_tag ); }
+           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: zmq_tag '%s' not for this thread", __func__, zmq_tag ); }
           json_node_unref(request);
         }
      }

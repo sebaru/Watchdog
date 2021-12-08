@@ -68,7 +68,6 @@
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
     g_free(upper_name);
 
-    lib->TID = pthread_self();                                                              /* Sauvegarde du TID pour le pere */
     lib->Thread_run = TRUE;                                                                             /* Le thread tourne ! */
     time ( &lib->start_time );                                                                           /* Date de demarrage */
     g_snprintf( lib->description, sizeof(lib->description), description );
@@ -98,7 +97,6 @@
               lib->uuid, lib->name, lib->version );
     if (lib->config) json_node_unref (lib->config);
     lib->Thread_run = FALSE;                                                                    /* Le thread ne tourne plus ! */
-    lib->TID = 0;                                                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /******************************************************************************************************************************/
@@ -249,7 +247,6 @@
 /******************************************************************************************************************************/
  gboolean Process_start ( struct PROCESS *lib )
   { pthread_attr_t attr;
-    pthread_t tid;
     if (!lib) return(FALSE);
     if (lib->Thread_run == TRUE)
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: Process %s already seems to be running",
@@ -263,13 +260,13 @@
        return(FALSE);
      }
 
-    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) )                       /* On le laisse joinable au boot */
+    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )                       /* On le laisse joinable au boot */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: UUID %s: pthread_setdetachstate failed (%s)",
                  __func__, lib->uuid, lib->nom_fichier );
        return(FALSE);
      }
 
-    if ( pthread_create( &tid, &attr, (void *)lib->Run_process, lib ) )
+    if ( pthread_create( &lib->TID, &attr, (void *)lib->Run_process, lib ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: UUID %s: pthread_create failed (%s)",
                  __func__, lib->uuid, lib->nom_fichier );
        return(FALSE);
@@ -286,13 +283,10 @@
 /******************************************************************************************************************************/
  gboolean Process_stop ( struct PROCESS *lib )
   { if (!lib) return(FALSE);
-    if ( lib->TID != 0 )
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: Process %s, stopping in progress",
-                 __func__, lib->uuid, lib->nom_fichier );
-       lib->Thread_run = FALSE;                                                          /* On demande au thread de s'arreter */
-       while( lib->TID != 0 ) sched_yield();                                                            /* Attente fin thread */
-       sleep(1);
-     }
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: Process %s, stopping in progress",
+              __func__, lib->uuid, lib->nom_fichier );
+    lib->Thread_run = FALSE;                                                             /* On demande au thread de s'arreter */
+    pthread_join( lib->TID, NULL );                                                                    /* Attente fin du fils */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UUID %s: Process %s stopped",
               __func__, lib->uuid, lib->nom_fichier );
     return(TRUE);
@@ -406,7 +400,7 @@
     liste = Partage->com_msrv.Librairies;
     while(liste)
      { lib = (struct PROCESS *)liste->data;
-       while ( lib->TID != 0 ) sleep(1);                                                                    /* Attend l'arret */
+       if (lib->TID) pthread_join( lib->TID, NULL );                                                   /* Attente fin du fils */
        liste = liste->next;
      }
 
