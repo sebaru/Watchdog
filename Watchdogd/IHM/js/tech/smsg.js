@@ -48,8 +48,8 @@
   { table = $('#idTableSMSG').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=smsg", "Process", "uuid", function (Response)
-                        { return ( Response.host ); }, selection.host );
-    $('#idSMSGTitre').text("Editer la source Météo " + selection.tech_id);
+                        { return ( Response.host ); }, selection.uuid );
+    $('#idSMSGTitre').text("Editer la connexion GSM " + selection.tech_id);
     $('#idSMSGTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idSMSG", null ); } );
     $('#idSMSGDescription').val( selection.description );
     $('#idSMSGOVHServiceName').val( selection.ovh_service_name );

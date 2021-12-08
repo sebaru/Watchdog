@@ -53,7 +53,7 @@
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     $('#idIMSGSTitre').text("Editer la conexion " + selection.tech_id);
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=imsgs", "Process", "uuid", function (Response)
-                        { return ( Response.host ); }, null );
+                        { return ( Response.host ); }, selection.uuid );
     $('#idIMSGSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idIMSGS", null ); } );
     $('#idIMSGSJabberID').val( selection.jabberid );
     $('#idIMSGSPassword').val( selection.password );
