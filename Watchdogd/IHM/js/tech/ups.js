@@ -99,8 +99,8 @@
            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
              "render": function (item)
                { boutons = Bouton_actions_start ();
-                 boutons += Bouton_actions_add ( "primary", "Editer la connexion", "TELEINFO_Edit", item.id, "pen", null );
-                 boutons += Bouton_actions_add ( "danger", "Supprimer la connexion", "TELEINFO_Del", item.id, "trash", null );
+                 boutons += Bouton_actions_add ( "primary", "Editer la connexion", "UPS_Edit", item.id, "pen", null );
+                 boutons += Bouton_actions_add ( "danger", "Supprimer la connexion", "UPS_Del", item.id, "trash", null );
                  boutons += Bouton_actions_end ();
                  return(boutons);
                },
