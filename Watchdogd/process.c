@@ -352,7 +352,7 @@
         { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                    "%s: UUID %s: Reloading '%s' -> Library found. Reloading.", __func__, lib->uuid, lib->name );
           Process_stop(lib);
-          dlclose( lib->dl_handle );
+          if (lib->dl_handle) dlclose( lib->dl_handle );
           Process_dlopen ( lib );
           found = TRUE;
         }
@@ -407,7 +407,7 @@
     while(Partage->com_msrv.Librairies)                                                     /* Liberation mémoire des modules */
      { lib = (struct PROCESS *)Partage->com_msrv.Librairies->data;
        pthread_mutex_destroy( &lib->synchro );
-       dlclose( lib->dl_handle );
+       if (lib->dl_handle) dlclose( lib->dl_handle );
        Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UUID %s: process %s unloaded", __func__, lib->uuid, lib->nom_fichier );
