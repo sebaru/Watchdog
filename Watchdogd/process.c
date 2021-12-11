@@ -286,6 +286,11 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: Process %s, stopping in progress",
               __func__, lib->uuid, lib->nom_fichier );
     lib->Thread_run = FALSE;                                                             /* On demande au thread de s'arreter */
+    if (!lib->TID)
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: Process %s not started, stopping aborted",
+              __func__, lib->uuid, lib->nom_fichier );
+       return(FALSE);
+     }
     pthread_join( lib->TID, NULL );                                                                    /* Attente fin du fils */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UUID %s: Process %s stopped",
               __func__, lib->uuid, lib->nom_fichier );
