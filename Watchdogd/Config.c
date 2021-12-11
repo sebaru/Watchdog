@@ -114,6 +114,10 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config run_as               %s", Config.run_as );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_zmq              %d", Config.log_zmq );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_trad             %d", Config.log_trad );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config debug                %d", Config.log_msrv );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );

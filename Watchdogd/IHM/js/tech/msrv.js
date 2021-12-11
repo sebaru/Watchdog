@@ -56,7 +56,7 @@
               { if (item.is_master==true)
                  { return( Bouton ( "success", "Instance is Master", null, null, "Yes" ) ); }
                 else
-                 { return( Bouton ( "secondary", "Instance is Slave", null, null, "No" ) ); }
+                 { return( Bouton ( "secondary", "Master is "+item.master_host, null, null, item.master_host ) ); }
               }
            },
            { "data": "version", "title":"Version",   "className": "align-middle text-center" },
