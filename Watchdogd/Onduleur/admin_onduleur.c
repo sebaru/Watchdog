@@ -49,8 +49,6 @@
     gchar *name           = Normaliser_chaine ( Json_get_string( request, "name" ) );
     gchar *admin_username = Normaliser_chaine ( Json_get_string( request, "admin_username" ) );
     gchar *admin_password = Normaliser_chaine ( Json_get_string( request, "admin_password" ) );
-    json_node_unref(request);
-
 
     if (Json_has_member ( request, "id" ))
      { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', host='%s', name='%s', admin_username='%s', admin_password='%s' ",
