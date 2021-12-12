@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container-fluid">
 
  <div class="row m-2">
    <div class="col-auto"><h3><img src="/img/linky.jpg" style="width:80px" alt="Teleinfo E.D.F"> Configuration des modules Téléinfo EDF</h3></div>

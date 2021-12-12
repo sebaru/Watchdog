@@ -75,7 +75,7 @@ end:
     int fd;
 
     gchar *port    = Json_get_string ( module->config, "port" );
-    gchar *tech_id = Json_get_string ( module->config, "port" );
+    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
     fd = open( port, O_RDONLY | O_NOCTTY | O_NONBLOCK | O_CLOEXEC );
     if (fd<0)
