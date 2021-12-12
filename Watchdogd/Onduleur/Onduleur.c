@@ -230,8 +230,8 @@ end:
     vars->date_next_connexion = 0;
     vars->started = TRUE;
     vars->nbr_connexion++;
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE,
-              "%s: %s up and running (host='%s')", __func__, tech_id, host );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s up and running (host='%s')", __func__, tech_id, host );
+    SubProcess_send_comm_to_master_new ( module, TRUE );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -389,9 +389,10 @@ end:
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, tech_id ); }
 
     while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
-     { usleep(10000);
+     { usleep(100000);
        sched_yield();
 
+       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /********************************************* Début de l'interrogation du ups ************************************************/
        if ( Partage->top >= vars->date_next_connexion )                               /* Si attente retente, on change de ups */
         { if ( ! vars->started )                                                                 /* Communication OK ou non ? */
