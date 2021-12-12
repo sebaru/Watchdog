@@ -29,7 +29,7 @@
     $('#idTELEINFOTitre').text("Editer la connexion GSM " + selection.tech_id);
     $('#idTELEINFOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idTELEINFO", null ); } );
     $('#idTELEINFODescription').val( selection.description );
-    $('#idTELEINFOPort').val( selection.ovh_service_name );
+    $('#idTELEINFOPort').val( selection.port );
     $('#idTELEINFOValider').off("click").on( "click", function () { TELEINFO_Set(selection); } );
     $('#idTELEINFOEdit').modal("show");
   }

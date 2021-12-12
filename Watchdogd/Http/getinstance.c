@@ -56,7 +56,7 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "instances", "SELECT * FROM instances ORDER BY is_master DESC, host ASC" );
+    SQL_Select_to_json_node ( RootNode, "instances", "SELECT * FROM instances ORDER BY is_master DESC, instance ASC" );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
