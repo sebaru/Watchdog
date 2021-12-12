@@ -52,7 +52,7 @@
      { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `ups` ("
                        "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                        "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                       "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
+                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
                        "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                        "`comm` TINYINT(1) NOT NULL DEFAULT '0',"
                        "`host` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
