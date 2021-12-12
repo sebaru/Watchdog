@@ -58,8 +58,8 @@
      }
 
     if (name)
-     { SQL_Select_to_json_node ( RootNode, "Process", "SELECT * FROM processes WHERE name='%s' ORDER BY host", name ); }
-    else SQL_Select_to_json_node ( RootNode, "Process", "SELECT * FROM processes ORDER BY host, name" ); /* Contenu du Status */
+     { SQL_Select_to_json_node ( RootNode, "Process", "SELECT * FROM processes WHERE name='%s' ORDER BY instance", name ); }
+    else SQL_Select_to_json_node ( RootNode, "Process", "SELECT * FROM processes ORDER BY instance, name" ); /* Contenu du Status */
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
@@ -366,9 +366,9 @@
 /*************************************************** WS Reload library ********************************************************/
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
-     { SQL_Select_to_json_node ( RootNode, NULL, "SELECT uuid, host, name FROM processes WHERE uuid='%s'", uuid );
+     { SQL_Select_to_json_node ( RootNode, NULL, "SELECT uuid, instance, name FROM processes WHERE uuid='%s'", uuid );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for UUID %s: %s:%s", __func__,
-                 uuid, Json_get_string ( RootNode, "host" ), Json_get_string ( RootNode, "name" ) );
+                 uuid, Json_get_string ( RootNode, "instance" ), Json_get_string ( RootNode, "name" ) );
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS_RELOAD" );
        Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );
        json_node_unref(RootNode);

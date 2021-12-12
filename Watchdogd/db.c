@@ -551,7 +551,7 @@ encore:
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Memory error. Don't update schema.", __func__ );
        return;
      }
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT database_version FROM instances WHERE host='%s'", g_get_host_name() );
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT database_version FROM instances WHERE instance='%s'", g_get_host_name() );
     gint database_version;
     if (Json_has_member ( RootNode, "database_version" ) )
          { database_version = Json_get_int ( RootNode, "database_version" ); }
@@ -2479,7 +2479,7 @@ encore:
      { SQL_Write_new ("CREATE TABLE IF NOT EXISTS `processes` ("
                       "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                       "`uuid` VARCHAR(37) UNIQUE NOT NULL,"
-                      "`host` VARCHAR(64) NOT NULL,"
+                      "`instance` VARCHAR(64) NOT NULL,"
                       "`name` VARCHAR(64) NOT NULL,"
                       "`debug` TINYINT(1) NOT NULL,"
                       "`classe` VARCHAR(16) DEFAULT NULL,"
@@ -2493,7 +2493,7 @@ encore:
                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;" );
        SQL_Write_new ("CREATE TABLE IF NOT EXISTS `instances` ("
                       "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                      "`host` VARCHAR(64) UNIQUE NOT NULL,"
+                      "`instance` VARCHAR(64) UNIQUE NOT NULL,"
                       "`is_master` TINYINT(1) NOT NULL,"
                       "`debug` TINYINT(1) NOT NULL DEFAULT 0,"
                       "`log_db` TINYINT(1) NOT NULL DEFAULT 0,"
@@ -2558,7 +2558,7 @@ fin:
     Lancer_requete_SQL ( db, requete );
     Libere_DB_SQL(&db);
 
-    if (SQL_Write_new ( "UPDATE instances SET database_version='%d' WHERE host='%s'", database_version, g_get_host_name() ))
+    if (SQL_Write_new ( "UPDATE instances SET database_version='%d' WHERE instance='%s'", database_version, g_get_host_name() ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %d OK", __func__, database_version ); }
     else
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %d FAILED", __func__, database_version ); }

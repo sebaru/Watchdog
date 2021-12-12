@@ -65,7 +65,7 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "host", "title":"Host", "className": "align-middle text-center" },
+          [ { "data": "instance", "title":"Instance", "className": "align-middle text-center" },
             { "data": null, "title":"Name", "className": "align-middle text-center",
               "render": function (item)
                 { return( Lien ( "/tech/"+item.name, "Voir la conf du process "+item.name, item.name ) ); }

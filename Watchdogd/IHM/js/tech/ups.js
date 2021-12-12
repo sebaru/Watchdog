@@ -28,7 +28,7 @@
   { table = $('#idTableUPS').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
-                        { return ( Response.host ); }, selection.uuid );
+                        { return ( Response.instance ); }, selection.uuid );
     $('#idUPSTitre').text("Editer la connexion UPS " + selection.tech_id);
     $('#idUPSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idUPS", null ); } );
     $('#idUPSHost').val( selection.host );
@@ -42,7 +42,7 @@
  function UPS_Add ( )
   { $('#idUPSTitre').text("Ajouter un UPS");
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
-                        { return ( Response.host ); }, null );
+                        { return ( Response.instance ); }, null );
     $('#idUPSTechID').val("").off("input").on("input", function () { Controle_tech_id( "idUPS", null ); } );
     $('#idUPSHost').val( "" );
     $('#idUPSName').val( "" );
@@ -80,14 +80,13 @@
                error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
              },
        columns:
-        [ { "data": "host",   "title":"Host",   "className": "align-middle text-center" },
+        [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
              "render": function (item)
                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
            },
            { "data": "name", "title":"Name", "className": "align-middle text-center" },
            { "data": "host", "title":"Host", "className": "align-middle text-center" },
-           { "data": "description", "title":"Description", "className": "align-middle text-center" },
            { "data": "admin_username", "title":"Username", "className": "align-middle text-center" },
            { "data": "admin_password", "title":"Password", "className": "align-middle text-center" },
            { "data": null, "title":"comm", "className": "align-middle text-center",

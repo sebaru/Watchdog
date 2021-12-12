@@ -456,8 +456,8 @@
                }
           close(fd);
 
-          SQL_Write_new ( "INSERT INTO processes SET host='%s', uuid='%s', name='%s', database_version=0, enable=0, debug=0 "
-                          "ON DUPLICATE KEY UPDATE host=VALUES(host)", g_get_host_name(), lib->uuid, lib->name );
+          SQL_Write_new ( "INSERT INTO processes SET instance='%s', uuid='%s', name='%s', database_version=0, enable=0, debug=0 "
+                          "ON DUPLICATE KEY UPDATE instance=VALUES(instance)", g_get_host_name(), lib->uuid, lib->name );
 
           Process_dlopen( lib );
           Partage->com_msrv.Librairies = g_slist_prepend( Partage->com_msrv.Librairies, lib );

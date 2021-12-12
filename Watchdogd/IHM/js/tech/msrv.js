@@ -50,7 +50,7 @@
              },
        rowId: "id",
        columns:
-         [ { "data": "host",   "title":"Host",   "className": "align-middle text-center" },
+         [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": null, "title":"Master", "className": "align-middle text-center",
              "render": function (item)
               { if (item.is_master==true)

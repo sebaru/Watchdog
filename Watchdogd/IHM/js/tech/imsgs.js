@@ -53,7 +53,7 @@
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     $('#idIMSGSTitre').text("Editer la conexion " + selection.tech_id);
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=imsgs", "Process", "uuid", function (Response)
-                        { return ( Response.host ); }, selection.uuid );
+                        { return ( Response.instance ); }, selection.uuid );
     $('#idIMSGSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idIMSGS", null ); } );
     $('#idIMSGSJabberID').val( selection.jabberid );
     $('#idIMSGSPassword').val( selection.password );
@@ -64,7 +64,7 @@
  function IMSGS_Add ( )
   { $('#idIMSGSTitre').text("Ajouter une connexion XMPP");
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=imsgs", "Process", "uuid", function (Response)
-                        { return ( Response.host ); }, null );
+                        { return ( Response.instance ); }, null );
     $('#idIMSGSTechID').val("").off("input").on("input", function () { Controle_tech_id( "idIMSGS", null ); } );
     $('#idIMSGSJabberID').val( "" );
     $('#idIMSGSPassword').val( "" );
@@ -81,7 +81,7 @@
              },
        rowId: "id",
        columns:
-         [ { "data": "host",   "title":"Host",   "className": "align-middle text-center" },
+         [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
              "render": function (item)
                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
