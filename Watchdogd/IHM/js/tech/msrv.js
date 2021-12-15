@@ -8,7 +8,7 @@
   { table = $('#idTableMsrv').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { host       : selection.host,
+     { instance   : selection.instance,
        description: $("#idMSRVDescription_"+id).val(),
        log_level  : parseInt($("#idMSRVLogLevel_"+id).val()),
        debug      : ($("#idMSRVDebug_"+id).val()=="true" ? true : false),
@@ -22,7 +22,7 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Reset_Valider ( selection )
-  { var json_request = { zmq_tag: "INSTANCE_RESET", tech_id: selection.host };
+  { var json_request = { zmq_tag: "INSTANCE_RESET", tech_id: selection.instance };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), function ()
      { Show_Info ( "Attendez le redémarrage" );
        Reload_when_ready();
@@ -32,9 +32,9 @@
  function MSRV_Reset ( id  )
   { table = $('#idTableMsrv').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Restarter cette instance "+selection.host,
+    Show_modal_del ( "Restarter cette instance "+selection.instance,
                      "Etes-vous sûr de vouloir relancer cette instance ?",
-                     selection.host + " - "+selection.description,
+                     selection.instance + " - "+selection.description,
                      function () { MSRV_Reset_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
