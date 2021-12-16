@@ -54,6 +54,7 @@
                        "`comm` TINYINT(1) NOT NULL DEFAULT '0', "
                        "`language` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "`device` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                       "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                        "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
        goto end;
@@ -160,7 +161,7 @@ end:
     Mnemo_auto_create_DI ( FALSE, tech_id, "P_ALL", "Profil Audio: All Hps Enabled" );
     Mnemo_auto_create_DI ( FALSE, tech_id, "P_NONE", "Profil audio: All Hps disabled" );
 
-    gboolean retour = Jouer_google_speech( module, "Instance demarrée" );
+    gboolean retour = Jouer_google_speech( module, "Instance démarrée !" );
     SubProcess_send_comm_to_master_new ( module, retour );
 
     while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */

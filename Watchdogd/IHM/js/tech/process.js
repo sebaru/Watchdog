@@ -70,6 +70,10 @@
               "render": function (item)
                 { return( Lien ( "/tech/"+item.name, "Voir la conf du process "+item.name, item.name ) ); }
             },
+            { "data": null, "title":"UUID", "className": "align-middle text-center",
+              "render": function (item)
+                { return( item.uuid.slice(0, 8) ); }
+            },
             { "data": null, "title":"Started", "className": "align-middle text-center",
               "render": function (item)
                 { if (item.started==true)
