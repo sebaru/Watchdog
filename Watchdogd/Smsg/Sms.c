@@ -561,15 +561,7 @@ end:
        sched_yield();
 
        SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
-/****************************************************** SMS de test ! *********************************************************/
-       if (vars->send_test_OVH)
-        { Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
-          vars->send_test_OVH = FALSE;
-        }
-       if (vars->send_test_GSM)
-        { Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
-          vars->send_test_GSM = FALSE;
-        }
+
 /****************************************************** Tentative de connexion ************************************************/
        if (module->comm_status == FALSE && Partage->top >= next_try )
         { if (Smsg_connect(module)==FALSE)
@@ -596,8 +588,8 @@ end:
 /*************************************************** Envoi en mode GSM ********************************************************/
              Smsg_send_to_all_authorized_recipients( module, request );
            }
-          else if ( !strcasecmp ( zmq_tag, "test_gsm" ) ) vars->send_test_GSM = TRUE;
-          else if ( !strcasecmp ( zmq_tag, "test_ovh" ) ) vars->send_test_OVH = TRUE;
+          else if ( !strcasecmp ( zmq_tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
+          else if ( !strcasecmp ( zmq_tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
           else
            { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: zmq_tag '%s' not for this thread", __func__, zmq_tag ); }
           json_node_unref(request);

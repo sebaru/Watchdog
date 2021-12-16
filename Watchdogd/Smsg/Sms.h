@@ -35,8 +35,6 @@
     GSM_Error gammu_send_status;
     GSM_StateMachine *gammu_machine;
     INI_Section *gammu_cfg;
-    gboolean send_test_GSM;                                              /* TRUE si une demande de test a été faite par l'IHM */
-    gboolean send_test_OVH;                                              /* TRUE si une demande de test a été faite par l'IHM */
     guint nbr_sms;
   };
 
