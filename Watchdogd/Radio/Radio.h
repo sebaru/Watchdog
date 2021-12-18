@@ -30,10 +30,8 @@
 
  #include <json-glib/json-glib.h>
 
- struct RADIO_CONFIG
-  { struct PROCESS *lib;
-    guint nbr_diffusion;
-    gchar radio_en_cours;
+ struct RADIO_VARS
+  { gchar radio_en_cours;
     gint  radio_pid;
   };
 

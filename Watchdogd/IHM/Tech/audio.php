@@ -44,7 +44,7 @@
 
        <div class="col form-group">
           <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">AUDIO Tech_ID</label>
+           <label class="col-5 col-sm-4 col-form-label text-right">Tech_ID</label>
            <input id="idAUDIOTechID" type="text" class="form-control" maxlength="32" placeholder="Tech_ID du SMS">
           </div>
        </div>
@@ -52,20 +52,20 @@
        <div class="col form-group">
           <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">Language</label>
-           <input id="idAUDIOLanguage" type="text" class="form-control" placeholder="Langue d'émission">
+           <input id="idAUDIOLanguage" type="text" class="form-control" placeholder="frn">
           </div>
        </div>
 
        <div class="col form-group">
           <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">Device</label>
-           <input id="idAUDIODevice" type="text" class="form-control" placeholder="device /dev/">
+           <input id="idAUDIODevice" type="text" class="form-control" placeholder="default">
           </div>
        </div>
 
        <div class="col form-group">
           <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">AUDIO Description</label>
+           <label class="col-5 col-sm-4 col-form-label text-right">Description</label>
            <input id="idAUDIODescription" type="text" class="form-control" placeholder="Description de la zone de diffusion">
           </div>
        </div>
