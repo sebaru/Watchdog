@@ -54,7 +54,7 @@
                        "`date_create` datetime NOT NULL DEFAULT NOW(),"
                        "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
                        "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`comm` TINYINT(1) NOT NULL DEFAULT '0',"
+                       "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
                        "`host` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
                        "`name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
                        "`admin_username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
@@ -388,6 +388,11 @@ end:
 
     if (Dls_auto_create_plugin( tech_id, "Gestion de l'onduleur" ) == FALSE)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, tech_id ); }
+
+    if (Json_get_bool ( module->config, "enable" ) == FALSE)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, tech_id );
+       SubProcess_end ( module );
+     }
 
     while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
      { usleep(100000);

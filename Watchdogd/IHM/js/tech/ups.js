@@ -5,6 +5,38 @@
  function UPS_Refresh ( )
   { $('#idTableUPS').DataTable().ajax.reload(null, false);
   }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function UPS_Disable ( id )
+  { table = $('#idTableUPS').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    var json_request =
+     { enable : false,
+       uuid   : selection.uuid,
+       tech_id: selection.tech_id,
+       id     : selection.id
+     };
+
+    Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
+     { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
+       $('#idTableUPS').DataTable().ajax.reload(null, false);
+     }, null );
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function UPS_Enable ( id )
+  { table = $('#idTableUPS').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    var json_request =
+     { enable : true,
+       uuid   : selection.uuid,
+       tech_id: selection.tech_id,
+       id     : selection.id
+     };
+
+    Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
+     { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
+       $('#idTableUPS').DataTable().ajax.reload(null, false);
+     }, null );
+  }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function UPS_Set ( selection )
   { var json_request =
@@ -68,8 +100,6 @@
                      selection.tech_id + " - "+selection.name +"@"+ selction.host,
                      function () { UPS_Del_Valider( selection ) } ) ;
   }
-
-
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTableUPS').DataTable(
@@ -81,6 +111,18 @@
              },
        columns:
         [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
+           { "data": null, "title":"Enabled", "className": "align-middle text-center",
+              "render": function (item)
+               { if (item.enable==true)
+                  { return( Bouton ( "success", "Désactiver l'UPS",
+                                     "UPS_Disable", item.id, "Actif" ) );
+                  }
+                 else
+                  { return( Bouton ( "outline-secondary", "Activer l'UPS",
+                                     "UPS_Enable", item.id, "Désactivé" ) );
+                  }
+               },
+           },
            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
              "render": function (item)
                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }

@@ -34,9 +34,21 @@
 /* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
  void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
-  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+  {
+    if ( Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+         Json_has_member ( request, "id" ) && Json_has_member ( request, "enable" ) )
+     { SQL_Write_new ( "UPDATE %s SET enable='%d' WHERE id='%d'", lib->name, Json_get_bool(request, "enable"),
+                       Json_get_int ( request, "id" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__,
+                 Json_get_string ( request, "uuid" ), Json_get_string ( request, "tech_id" ) );
+       soup_message_set_status (msg, SOUP_STATUS_OK);
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
             Json_has_member ( request, "host" ) && Json_has_member ( request, "name" ) &&
-            Json_has_member ( request, "admin_username" ) && Json_has_member ( request, "admin_password" )
+            Json_has_member ( request, "admin_username" ) && Json_has_member ( request, "admin_password" ) &&
+            Json_has_member ( request, "enable" )
            )
         )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -49,17 +61,20 @@
     gchar *name           = Normaliser_chaine ( Json_get_string( request, "name" ) );
     gchar *admin_username = Normaliser_chaine ( Json_get_string( request, "admin_username" ) );
     gchar *admin_password = Normaliser_chaine ( Json_get_string( request, "admin_password" ) );
+    gboolean enable       = Json_get_bool ( request, "enable" );
 
     if (Json_has_member ( request, "id" ))
-     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', host='%s', name='%s', admin_username='%s', admin_password='%s' "
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', host='%s', name='%s', admin_username='%s', admin_password='%s', "
+                       "enable='%d' "
                        "WHERE id='%d'",
-                       lib->name, uuid, tech_id, host, name, admin_username, admin_password,
+                       lib->name, uuid, tech_id, host, name, admin_username, admin_password, enable,
                        Json_get_int ( request, "id" ) );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
      }
     else
-     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', host='%s', name='%s', admin_username='%s', admin_password='%s' ",
-                       lib->name, uuid, tech_id, host, name, admin_username, admin_password );
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', host='%s', name='%s', admin_username='%s', admin_password='%s' "
+                       "enable='%d' ",
+                       lib->name, uuid, tech_id, host, name, admin_username, admin_password, enable );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
      }
 
