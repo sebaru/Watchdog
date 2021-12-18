@@ -93,7 +93,7 @@
      }
 
     SQL_Select_to_json_node ( RootNode, "config",
-                              "SELECT p.*,config.* FROM %s AS config "
+                              "SELECT p.uuid, p.instance, config.* FROM %s AS config "
                               "INNER JOIN processes AS p ON p.uuid = config.uuid ", name ); /* Contenu du Status */
 
     gchar *buf = Json_node_to_string ( RootNode );
