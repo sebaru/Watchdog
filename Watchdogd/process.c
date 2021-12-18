@@ -135,7 +135,6 @@
      { Zmq_Send_WATCHDOG_to_master_new ( module, Json_get_string ( module->config, "tech_id" ), "IO_COMM", 900 );
        module->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
        module->comm_status = etat;
-       SQL_Write_new ( "UPDATE %s SET comm=%d WHERE id=%d", module->lib->name, etat, Json_get_int ( module->config, "id" ) );
      }
   }
 /******************************************************************************************************************************/
@@ -148,7 +147,7 @@
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
-    g_snprintf( chaine, sizeof(chaine), "W-%s", tech_id );   /* Positionne le nom noyau */
+    g_snprintf( chaine, sizeof(chaine), "W-%s-%s", module->lib->name, tech_id );                   /* Positionne le nom noyau */
     gchar *upper_name = g_ascii_strup ( chaine, -1 );
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
     g_free(upper_name);
