@@ -51,7 +51,8 @@
     gchar *admin_password = Normaliser_chaine ( Json_get_string( request, "admin_password" ) );
 
     if (Json_has_member ( request, "id" ))
-     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', host='%s', name='%s', admin_username='%s', admin_password='%s' ",
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', host='%s', name='%s', admin_username='%s', admin_password='%s' "
+                       "WHERE id='%d'",
                        lib->name, uuid, tech_id, host, name, admin_username, admin_password,
                        Json_get_int ( request, "id" ) );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );

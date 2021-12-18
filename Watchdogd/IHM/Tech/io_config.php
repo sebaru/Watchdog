@@ -6,7 +6,7 @@
 
 <hr>
 
-<h4><i class="fas fa-link"></i> Connecteurs</h4>
+<h4><i class="fas fa-link text-primary"></i> Connecteurs</h4>
 <div class="row justify-content-center row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xl-4">
 
  <div class="col p-1">
@@ -115,13 +115,16 @@
 </div>
 
 <hr>
-<h4><i class="fas fa-directions"></i> Mappings</h4>
+<h4><i class="fas fa-directions text-primary"></i> Mappings</h4>
 <div class="row justify-content-center row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xl-4">
 
  <div class="col p-1">
   <div class="card h-100 text-center bg-light">
+   <div class="card-header">Mappings TEXTE</div>
    <a href="/tech/command_text"><img src="/img/commande_texte.png" class="card-img-top wtd-img-connecteur" alt="Commandes Text"></a>
-   <div class="card-body">Mappings TEXTE</div>
+   <div class="card-body">
+        <button type="button" onclick="Redirect('/tech/command_text')" class="btn btn-block m-1 btn-primary btn-sm"><i class="fas fa-directions"></i> Mapper</button>
+   </div>
   </div>
  </div>
 
