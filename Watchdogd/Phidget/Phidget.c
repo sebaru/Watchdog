@@ -58,10 +58,10 @@
     if (lib->database_version==0)
      { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
                        "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                       "`date_create` datetime NOT NULL DEFAULT NOW(),"
                        "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
                        "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                       "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
                        "`hostname` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                        "`password` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                        "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
@@ -662,6 +662,11 @@ error:
     gchar *tech_id     = Json_get_string ( module->config, "tech_id" );
     gchar *hostname    = Json_get_string ( module->config, "hostname" );
     gchar *description = Json_get_string ( module->config, "description" );
+
+    if (Json_get_bool ( module->config, "enable" ) == FALSE)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, tech_id );
+       SubProcess_end ( module );
+     }
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: Chargement du HUB '%s'('%s')", __func__, hostname, description );
 
