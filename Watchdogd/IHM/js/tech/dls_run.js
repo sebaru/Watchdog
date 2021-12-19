@@ -348,7 +348,7 @@
            { "data": null, "title":"Etat", "className": "align-middle ",
              "render": function (item)
                { if (item.etat==true) { return( Bouton ( "success", "Le compteur décompte", null, null, "En décompte" ) );  }
-                                 else { return( Bouton ( "outline-warning", "Le compteur est échu", null, null, "échu" ) ); }
+                                 else { return( Bouton ( "warning", "Le compteur est échu", null, null, "échu" ) ); }
                },
            },
            { "data": null, "title":"Reste en décompte", "className": "align-middle text-center",
