@@ -1,7 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
-
-/************************************ Demande l'envoi d'un UPS de test ******************************************************/
+/************************************ Demande de refresh **********************************************************************/
  function UPS_Refresh ( )
   { $('#idTableUPS').DataTable().ajax.reload(null, false);
   }
@@ -62,7 +61,7 @@
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idUPSTitre').text("Editer la connexion UPS " + selection.tech_id);
-    $('#idUPSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idUPS", null ); } );
+    $('#idUPSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idUPS", selection.tech_id ); } );
     $('#idUPSHost').val( selection.host );
     $('#idUPSName').val( selection.name );
     $('#idUPSAdminUsername').val( selection.admin_username );
@@ -97,7 +96,7 @@
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     Show_modal_del ( "Supprimer la connexion "+selection.tech_id,
                      "Etes-vous sûr de vouloir supprimer cette connexion ?",
-                     selection.tech_id + " - "+selection.name +"@"+ selction.host,
+                     selection.tech_id + " - "+selection.name +"@"+ selection.host,
                      function () { UPS_Del_Valider( selection ) } ) ;
   }
 /********************************************* Appelé au chargement de la page ************************************************/
@@ -131,10 +130,10 @@
            { "data": "host", "title":"Host", "className": "align-middle text-center" },
            { "data": "admin_username", "title":"Username", "className": "align-middle text-center" },
            { "data": "admin_password", "title":"Password", "className": "align-middle text-center" },
-           { "data": null, "title":"comm", "className": "align-middle text-center",
+           { "data": null, "title":"IO_COMM", "className": "align-middle text-center",
              "render": function (item)
-               { if (item.comm==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
-                                 else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }
+               { if (item.comm==true) { return( Bouton ( "success", "Comm OK", null, null, "1" ) );        }
+                                 else { return( Bouton ( "outline-secondary", "Comm Failed", null, null, "0" ) ); }
                },
            },
            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",

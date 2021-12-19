@@ -1,6 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
-/************************************ Demande l'envoi d'un TELEINFO de test ******************************************************/
+/************************************ Demande de refresh **********************************************************************/
  function TELEINFO_Refresh ( )
   { $('#idTableTELEINFO').DataTable().ajax.reload(null, false);
   }
@@ -27,7 +27,7 @@
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=teleinfoedf", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idTELEINFOTitre').text("Editer la connexion GSM " + selection.tech_id);
-    $('#idTELEINFOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idTELEINFO", null ); } );
+    $('#idTELEINFOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idTELEINFO", selection.tech_id ); } );
     $('#idTELEINFODescription').val( selection.description );
     $('#idTELEINFOPort').val( selection.port );
     $('#idTELEINFOValider').off("click").on( "click", function () { TELEINFO_Set(selection); } );
@@ -78,10 +78,10 @@
            },
            { "data": "description", "title":"Description", "className": "align-middle " },
            { "data": "port", "title":"Device Port", "className": "align-middle " },
-           { "data": null, "title":"comm", "className": "align-middle text-center",
+           { "data": null, "title":"IO_COMM", "className": "align-middle text-center",
              "render": function (item)
-               { if (item.comm==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
-                                 else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }
+               { if (item.comm==true) { return( Bouton ( "success", "Comm OK", null, null, "1" ) );        }
+                                 else { return( Bouton ( "outline-secondary", "Comm Failed", null, null, "0" ) ); }
                },
            },
            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",

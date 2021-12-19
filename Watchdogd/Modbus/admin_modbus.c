@@ -28,336 +28,46 @@
  #include "watchdogd.h"
  #include "Modbus.h"
 
- extern struct MODBUS_CONFIG Cfg_modbus;
-
 /******************************************************************************************************************************/
-/* Modbus_mode_to_string: Convertit le mode modbus (int) en sa version chaine de caractere                                    */
-/* Entrée : le module_modbus                                                                                                  */
-/* Sortie : char *mode_char                                                                                                   */
+/* Admin_config : fonction appelé par le thread http lors d'une requete POST sur config PROCESS                               */
+/* Entrée : la librairie, et le Json recu                                                                                     */
+/* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
- static gchar *Modbus_mode_to_string ( struct MODULE_MODBUS *module )
-  { static gchar chaine[32];
-    if (!module)                     return("Wrong Module   ");
-    if (module->date_retente > Partage->top)
-     { g_snprintf( chaine, sizeof(chaine),  "Next Try : %03ds", (module->date_retente - Partage->top)/10 );
-       return(chaine);
-     }
-    if (!module->started)            return("Disconnected   ");
-
-    switch ( module->mode )
-     {
-       case MODBUS_GET_DESCRIPTION : return("Get_Description");
-       case MODBUS_GET_FIRMWARE    : return("Get_firmware   ");
-       case MODBUS_INIT_WATCHDOG1  : return("Init_Watchdog_1");
-       case MODBUS_INIT_WATCHDOG2  : return("Init_Watchdog_2");
-       case MODBUS_INIT_WATCHDOG3  : return("Init_Watchdog_3");
-       case MODBUS_INIT_WATCHDOG4  : return("Init_Watchdog_4");
-       case MODBUS_GET_NBR_AI      : return("Init_Get_Nbr_AI");
-       case MODBUS_GET_NBR_AO      : return("Init_Get_Nbr_AO");
-       case MODBUS_GET_NBR_DI      : return("Init_Get_Nbr_DI");
-       case MODBUS_GET_NBR_DO      : return("Init_Get_Nbr_DO");
-       case MODBUS_GET_DI          : return("Get DI State   ");
-       case MODBUS_GET_AI          : return("Get AI State   ");
-       case MODBUS_SET_DO          : return("Set DO State   ");
-       case MODBUS_SET_AO          : return("Set AO State   ");
-       default :                     return("Unknown mode   ");
-     }
-  }
-/******************************************************************************************************************************/
-/* Admin_json_modbus_list : fonction appelée pour lister les modules modbus                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- static void Admin_json_modbus_status ( struct PROCESS *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+ void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
+  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+            Json_has_member ( request, "hostname" ) && Json_has_member ( request, "description" ) &&
+            Json_has_member ( request, "watchdog" ) && Json_has_member ( request, "max_request_par_sec" )
+           )
+        )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
-/*    if (Lib->Thread_run)                                    /* Warning : Cfg_modbus does not exist if thread is not running ! */
-/*     { Json_add_int ( builder, "nbr_request_par_sec", Cfg_modbus.nbr_request_par_sec ); }*/
+    gchar *uuid                = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
+    gchar *tech_id             = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *hostname            = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
+    gchar *description         = Normaliser_chaine ( Json_get_string( request, "description" ) );
+    gint   watchdog            = Json_get_int( request, "watchdog" );
+    gint   max_request_par_sec = Json_get_int( request, "max_request_par_sec" );
 
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Admin_json_modbus_list : fonction appelée pour lister les modules modbus                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- static void Admin_json_modbus_modules_status ( struct PROCESS *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+    if (Json_has_member ( request, "id" ))
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', hostname='%s', description='%s', watchdog='%d', max_request_par_sec='%d' "
+                       "WHERE id='%d'",
+                       lib->name, uuid, tech_id, hostname, description, watchdog, max_request_par_sec,
+                       Json_get_int ( request, "id" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
      }
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
+    else
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', hostname='%s', description='%s', watchdog='%d', max_request_par_sec='%d' ",
+                       lib->name, uuid, tech_id, hostname, description, watchdog, max_request_par_sec );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
      }
 
-    JsonArray *array = Json_node_add_array ( RootNode, "modules" );
-    if (Lib->Thread_run)                                    /* Warning : Cfg_modbus does not exist if thread is not running ! */
-     { pthread_mutex_lock( &Lib->synchro );
-       GSList *liste_modules = Cfg_modbus.Modules_MODBUS;
-       while ( liste_modules )
-        { struct MODULE_MODBUS *module = liste_modules->data;
-
-          JsonNode *modbus_node = Json_node_create();
-          if (modbus_node)
-           { Json_node_add_string ( modbus_node, "tech_id", module->modbus.tech_id );
-             Json_node_add_string ( modbus_node, "mode", Modbus_mode_to_string(module) );
-             Json_node_add_bool   ( modbus_node, "started", module->started );
-             Json_node_add_int    ( modbus_node, "nbr_entree_tor", module->nbr_entree_tor );
-             Json_node_add_int    ( modbus_node, "nbr_sortie_tor", module->nbr_sortie_tor );
-             Json_node_add_int    ( modbus_node, "nbr_entree_ana", module->nbr_entree_ana );
-             Json_node_add_int    ( modbus_node, "nbr_sortie_ana", module->nbr_sortie_ana );
-             Json_node_add_bool   ( modbus_node, "comm", Dls_data_get_MONO( NULL, NULL, &module->bit_comm) );
-             Json_node_add_int    ( modbus_node, "transaction_id", module->transaction_id );
-             Json_node_add_int    ( modbus_node, "nbr_request_par_sec", module->nbr_request_par_sec );
-             Json_node_add_int    ( modbus_node, "delai", module->delai );
-             Json_node_add_int    ( modbus_node, "nbr_deconnect", module->nbr_deconnect );
-             Json_node_add_int    ( modbus_node, "last_reponse", (Partage->top - module->date_last_reponse)/10 );
-             Json_node_add_int    ( modbus_node, "date_next_eana", (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1) );
-             Json_node_add_int    ( modbus_node, "date_retente", (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
-             Json_array_add_element ( array, modbus_node );                                               /* End Module Array */
-           }
-          liste_modules = liste_modules->next;                                                   /* Passage au module suivant */
-        }
-       pthread_mutex_unlock( &Lib->synchro );
-     }
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- static void Admin_json_modbus_list ( struct PROCESS *Lib, SoupMessage *msg )
-  { gchar chaine[512];
-    if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
-    g_snprintf(chaine, sizeof(chaine), "SELECT * FROM modbus_modules" );
-    if (SQL_Select_to_json_node ( RootNode, "modules", chaine ) == FALSE)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
-       json_node_unref(RootNode);
-       return;
-     }
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- static void Admin_json_modbus_del ( struct PROCESS *Lib, SoupMessage *msg )
-  { gchar chaine[256];
-    if (msg->method != SOUP_METHOD_DELETE)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    gchar *tech_id = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    if (!tech_id)
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Normalized failed");
-       return;
-     }
-    json_node_unref(request);
-
-    g_snprintf( chaine, sizeof(chaine), "DELETE FROM modbus_modules WHERE tech_id='%s'", tech_id );
+    g_free(uuid);
     g_free(tech_id);
-    SQL_Write ( chaine );
+    g_free(hostname);
+    g_free(description);
+
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    Lib->Thread_reload = TRUE;
-  }
-/******************************************************************************************************************************/
-/* Admin_json_modbus_set: Met à jour une entrée WAGO                                                                          */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_modbus_set ( struct PROCESS *Lib, SoupMessage *msg )
-  { GBytes *request_brute;
-    gchar requete[256];
-    gsize taille;
-
-    if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "No Request");
-       return;
-     }
-
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
-            Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) &&
-            Json_has_member ( request, "max_request_par_sec" ) ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
-       return;
-     }
-
-    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
-    gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
-    gint  watchdog     = Json_get_int ( request, "watchdog" );
-    gint  max_request_par_sec = Json_get_int ( request, "max_request_par_sec" );
-    json_node_unref(request);
-
-    g_snprintf( requete, sizeof(requete),
-               "UPDATE modbus_modules SET description='%s', hostname='%s', watchdog='%d', max_request_par_sec='%d' WHERE tech_id='%s'",
-                description, hostname, watchdog, max_request_par_sec, tech_id );
-    g_free(tech_id);
-    g_free(description);
-    g_free(hostname);
-    if (SQL_Write (requete))
-     { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Lib->Thread_reload = TRUE;
-     }
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-  }
-/******************************************************************************************************************************/
-/* Admin_json_modbus_set: Met à jour une entrée WAGO                                                                          */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_modbus_start ( struct PROCESS *Lib, SoupMessage *msg, gboolean start )
-  { gchar requete[256];
-
-    if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
-       return;
-     }
-
-    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    json_node_unref(request);
-
-    g_snprintf( requete, sizeof(requete), "UPDATE modbus_modules SET enable='%d' WHERE tech_id='%s'", (start ? 1 : 0), tech_id );
-    if (SQL_Write (requete))
-     { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Lib->Thread_reload = TRUE;
-     }
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-  }
-/******************************************************************************************************************************/
-/* Admin_json_modbus_set: Ajoute un composant WAGO dans système                                                               */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_modbus_add ( struct PROCESS *Lib, SoupMessage *msg )
-  { gchar requete[256];
-    if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "hostname" ) &&
-            Json_has_member ( request, "description" ) && Json_has_member ( request, "watchdog" ) &&
-            Json_has_member ( request, "max_request_par_sec" ) ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
-       return;
-     }
-
-    gchar *tech_id     = Normaliser_as_ascii ( Json_get_string( request, "tech_id" ) );
-    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
-    gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
-    gint  watchdog     = Json_get_int ( request, "watchdog" );
-    gint  max_request_par_sec = Json_get_int ( request, "max_request_par_sec" );
-
-    g_snprintf( requete, sizeof(requete),
-               "INSERT INTO modbus_modules SET tech_id='%s', description='%s', hostname='%s', watchdog='%d', "
-               "max_request_par_sec='%d', enable=0, date_create=NOW()",
-                tech_id, description, hostname, watchdog, max_request_par_sec );
-    g_free(description);
-    g_free(hostname);
-    json_node_unref(request);
-
-    if (SQL_Write (requete))
-     { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Lib->Thread_reload = TRUE;
-     }
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-  }
-/******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- void Admin_json ( struct PROCESS *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
-  { if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
-         if (!strcasecmp(path, "/list"))     { Admin_json_modbus_list ( lib, msg ); }
-    else if (!strcasecmp(path, "/modules_status")) { Admin_json_modbus_modules_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/status"))   { Admin_json_modbus_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/del"))      { Admin_json_modbus_del ( lib, msg ); }
-    else if (!strcasecmp(path, "/set"))      { Admin_json_modbus_set ( lib, msg ); }
-    else if (!strcasecmp(path, "/add"))      { Admin_json_modbus_add ( lib, msg ); }
-    else if (!strcasecmp(path, "/start"))    { Admin_json_modbus_start ( lib, msg, TRUE ); }
-    else if (!strcasecmp(path, "/stop"))     { Admin_json_modbus_start ( lib, msg, FALSE ); }
-    else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-    return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

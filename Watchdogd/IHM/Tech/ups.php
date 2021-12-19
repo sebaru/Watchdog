@@ -1,3 +1,5 @@
+<div class="container-fluid">
+
  <div class="row m-2">
    <div class="col-auto"><h3><img src="/img/onduleur.jpg" style="width:80px" alt="Onduleur 5PX">Liste des Onduleurs</h3></div>
 

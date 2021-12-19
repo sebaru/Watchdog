@@ -1,6 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
-/************************************ Demande l'envoi d'un SMSG de test ******************************************************/
+/************************************ Demande de refresh **********************************************************************/
  function SMSG_Refresh ( )
   { $('#idTableSMSG').DataTable().ajax.reload(null, false);
   }
@@ -50,7 +50,7 @@
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=smsg", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idSMSGTitre').text("Editer la connexion GSM " + selection.tech_id);
-    $('#idSMSGTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idSMSG", null ); } );
+    $('#idSMSGTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idSMSG", selection.tech_id ); } );
     $('#idSMSGDescription').val( selection.description );
     $('#idSMSGOVHServiceName').val( selection.ovh_service_name );
     $('#idSMSGOVHApplicationKey').val( selection.ovh_application_key );
@@ -111,10 +111,10 @@
            { "data": "ovh_application_key", "title":"OVH App Key", "className": "align-middle " },
            { "data": "ovh_application_secret", "title":"OVH App Secret", "className": "align-middle " },
            { "data": "nbr_sms", "title":"#SMS", "className": "align-middle " },
-           { "data": null, "title":"comm", "className": "align-middle text-center",
+           { "data": null, "title":"IO_COMM", "className": "align-middle text-center",
              "render": function (item)
-               { if (item.comm==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
-                                 else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }
+               { if (item.comm==true) { return( Bouton ( "success", "Comm OK", null, null, "1" ) );        }
+                                 else { return( Bouton ( "outline-secondary", "Comm Failed", null, null, "0" ) ); }
                },
            },
            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",

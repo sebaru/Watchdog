@@ -1,6 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
-/************************************ Demande l'envoi d'un METEO de test ******************************************************/
+/************************************ Demande de refresh **********************************************************************/
  function METEO_Refresh ( )
   { $('#idTableMETEO').DataTable().ajax.reload(null, false);
   }
@@ -55,7 +55,7 @@
     $('#idMETEOTitre').text("Editer la source Météo " + selection.tech_id);
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=meteo", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
-    $('#idMETEOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idMETEO", null ); } );
+    $('#idMETEOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idMETEO", selection.tech_id ); } );
     $('#idMETEODescription').val( selection.description );
     $('#idMETEOToken').val( selection.token );
     $('#idMETEOCodeInsee').val( selection.code_insee );
@@ -92,10 +92,10 @@
            { "data": "description", "title":"Description", "className": "align-middle " },
            { "data": "token", "title":"token", "className": "align-middle " },
            { "data": "code_insee", "title":"Code Insee", "className": "align-middle " },
-           { "data": null, "title":"comm", "className": "align-middle text-center",
+           { "data": null, "title":"IO_COMM", "className": "align-middle text-center",
              "render": function (item)
-               { if (item.comm==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
-                                 else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }
+               { if (item.comm==true) { return( Bouton ( "success", "Comm OK", null, null, "1" ) );        }
+                                 else { return( Bouton ( "outline-secondary", "Comm Failed", null, null, "0" ) ); }
                },
            },
            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",

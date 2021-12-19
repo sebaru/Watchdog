@@ -1,6 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
-/************************************ Demande l'envoi d'un IMSGS de test ******************************************************/
+/************************************ Demande de refresh **********************************************************************/
  function IMSGS_Refresh ( )
   { $('#idTableIMSGS').DataTable().ajax.reload(null, false);
   }
@@ -34,7 +34,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function IMSGS_Set ( selection )
   { var json_request =
-       { uuid       : $('#idTargetInstance').val(),
+       { uuid    : $('#idTargetInstance').val(),
          tech_id : $('#idIMSGSTechID').val(),
          jabberid: $('#idIMSGSJabberID').val(),
          password: $('#idIMSGSPassword').val(),
@@ -54,7 +54,7 @@
     $('#idIMSGSTitre').text("Editer la conexion " + selection.tech_id);
     Select_from_api ( "idTargetInstance", "/api/process/list", "name=imsgs", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
-    $('#idIMSGSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idIMSGS", null ); } );
+    $('#idIMSGSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idIMSGS", selection.tech_id ); } );
     $('#idIMSGSJabberID').val( selection.jabberid );
     $('#idIMSGSPassword').val( selection.password );
     $('#idIMSGSValider').off("click").on( "click", function () { IMSGS_Set(selection); } );
@@ -87,10 +87,10 @@
                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
            },
            { "data": "jabberid", "title":"JabberID", "className": "align-middle " },
-           { "data": null, "title":"comm", "className": "align-middle text-center",
+           { "data": null, "title":"IO_COMM", "className": "align-middle text-center",
              "render": function (item)
-               { if (item.comm==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
-                                 else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }
+               { if (item.comm==true) { return( Bouton ( "success", "Comm OK", null, null, "1" ) );        }
+                                 else { return( Bouton ( "outline-secondary", "Comm Failed", null, null, "0" ) ); }
                },
            },
            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",

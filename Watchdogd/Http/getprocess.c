@@ -68,6 +68,16 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
+/* Http_process_add_comm: Ajoute le bit de comm à l'élément Config en parametre                                               */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Http_process_add_comm (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+  { if (!Json_has_member( element, "tech_id" )) return;
+    gchar *tech_id = Json_get_string ( element, "tech_id" );
+    Json_node_add_bool ( element, "comm", Dls_data_get_WATCHDOG ( tech_id, "IO_COMM", NULL ) );
+  }
+/******************************************************************************************************************************/
 /* Http_traiter_process_status: Donne la config d'un process                                                                  */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
@@ -96,6 +106,7 @@
                               "SELECT p.uuid, p.instance, config.* FROM %s AS config "
                               "INNER JOIN processes AS p ON p.uuid = config.uuid ", name ); /* Contenu du Status */
 
+    Json_node_foreach_array_element ( RootNode, "config", Http_process_add_comm, NULL );
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
