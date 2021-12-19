@@ -156,6 +156,10 @@
      { if (chaine) Json_node_add_double( node, field->name, atof(chaine) );
               else Json_node_add_null  ( node, field->name );
      }
+    else if ( field->type == MYSQL_TYPE_TINY )
+     { if (chaine) Json_node_add_bool ( node, field->name, atoi(chaine) );
+              else Json_node_add_null ( node, field->name );
+     }
     else if ( IS_NUM(field->type) )
      { if (chaine) Json_node_add_int  ( node, field->name, atoi(chaine) );
               else Json_node_add_null ( node, field->name );

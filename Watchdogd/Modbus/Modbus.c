@@ -1013,7 +1013,7 @@ end:
 
 /********************************************* Début de l'interrogation du module *********************************************/
        if ( vars->started == FALSE )                                               /* Si attente retente, on change de module */
-        { if ( Partage->top < vars->date_retente && Connecter_module(module)==FALSE )
+        { if ( vars->date_retente <= Partage->top && Connecter_module(module)==FALSE )
            { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Module DOWN. retrying in %ds",
                        __func__, tech_id, MODBUS_RETRY/10 );
              vars->date_retente = Partage->top + MODBUS_RETRY;
