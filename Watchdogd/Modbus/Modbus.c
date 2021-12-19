@@ -523,10 +523,7 @@ end:
                  "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
-    else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
-       vars->request = TRUE;                                                                  /* Une requete a élé lancée */
-     }
+    else { vars->request = TRUE; }                                                                /* Une requete a élé lancée */
   }
 /******************************************************************************************************************************/
 /* Interroger_entree_ana: Interrogation des entrees analogique d'un module wago                                               */
@@ -555,10 +552,7 @@ end:
                  "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
-    else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
-       vars->request = TRUE;                                                                  /* Une requete a élé lancée */
-     }                                                              /* Une requete a élé lancée */
+    else { vars->request = TRUE; }                                                                /* Une requete a élé lancée */
   }
 /******************************************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                                      */
@@ -601,10 +595,7 @@ end:
                  "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
-    else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
-       vars->request = TRUE;                                                                  /* Une requete a élé lancée */
-     }                                                                /* Une requete a élé lancée */
+    else { vars->request = TRUE; }                                                                /* Une requete a élé lancée */
   }
 /******************************************************************************************************************************/
 /* Interroger_sortie_ana: Envoie les informations liées aux sorties ANA du module                                             */
@@ -643,10 +634,7 @@ end:
                  "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
-    else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
-       vars->request = TRUE;                                                                  /* Une requete a élé lancée */
-     }
+    else { vars->request = TRUE; }                                                                /* Une requete a élé lancée */
   }
 /******************************************************************************************************************************/
 /* Modbus_do_mapping : mappe les entrees/sorties Wago avec la zone de mémoire interne dynamique                               */
