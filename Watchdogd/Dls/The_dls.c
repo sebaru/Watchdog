@@ -1807,9 +1807,9 @@ end:
           bit_comm_module &= Dls_data_get_MONO( NULL, NULL, &comm );
           liste = g_slist_next ( liste );
         }
-       Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
      }
-    else bit_comm_module = Dls_data_get_MONO ( plugin->tech_id, "COMM", &plugin->vars.bit_comm );
+    else bit_comm_module = Dls_data_get_WATCHDOG ( plugin->tech_id, "IO_COMM", &plugin->vars.bit_io_comm );
+    Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
 
     Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "MEMSA_OK", &plugin->vars.bit_activite_ok,
                         bit_comm_module &&

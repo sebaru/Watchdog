@@ -34,6 +34,7 @@
     gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
     gint     num_ligne;                                                         /* N° de ligne du plugin en cours d'execution */
     gpointer bit_comm;
+    gpointer bit_io_comm;
     gpointer bit_msg_comm_ok;
     gpointer bit_msg_comm_hs;
     gpointer bit_defaut;
