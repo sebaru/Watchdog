@@ -756,7 +756,7 @@ end:
  static void Modbus_Processer_trame( struct SUBPROCESS *module )
   { struct MODBUS_VARS *vars = module->vars;
     vars->nbr_oct_lu = 0;
-    module->vars = FALSE;                                                                     /* Une requete a été traitée */
+    vars->request = FALSE;                                                                       /* Une requete a été traitée */
 
     gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
 
@@ -769,12 +769,12 @@ end:
        vars->date_last_reponse = Partage->top;                                                     /* Estampillage de la date */
        SubProcess_send_comm_to_master_new ( module, TRUE );
        if (ntohs(vars->response.transaction_id) != vars->transaction_id)                                  /* Mauvaise reponse */
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
                    "%s: '%s': wrong transaction_id: attendu %d, recu %d", __func__, tech_id,
                     vars->transaction_id, ntohs(vars->response.transaction_id) );
         }
        if ( vars->response.fct >=0x80 )
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
                    "%s: '%s': Erreur Reponse, Error %d, Exception code %d", __func__, tech_id,
                     vars->response.fct, (int)vars->response.data[0] );
           Deconnecter_module( module );
@@ -966,9 +966,7 @@ end:
        if (cpt>=0)
         { vars->nbr_oct_lu += cpt;
           if (vars->nbr_oct_lu >= TAILLE_ENTETE_MODBUS + ntohs(vars->response.taille))
-           { Modbus_Processer_trame( module );                                      /* Si l'on a trouvé une trame complète !! */
-             vars->nbr_oct_lu = 0;
-           }
+           { Modbus_Processer_trame( module ); }                                    /* Si l'on a trouvé une trame complète !! */
         }
        else
         { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
