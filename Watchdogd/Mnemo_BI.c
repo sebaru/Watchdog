@@ -81,9 +81,9 @@
     gchar *tech_id  = Json_get_string ( element, "tech_id" );
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     gint   groupe   = Json_get_int    ( element, "groupe" );
-    gboolean etat   = Json_get_int    ( element, "etat" );
+    gboolean etat   = Json_get_bool   ( element, "etat" );
     (*cpt_p)++;
-    struct DLS_BI *bi = Dls_data_BI_lookup ( tech_id, acronyme );          /* Recherche ou Création du message en RAM */
+    struct DLS_BI *bi = Dls_data_BI_lookup ( tech_id, acronyme );                  /* Recherche ou Création du message en RAM */
     if (bi) /* A l'init, on recopie tous les champs */
      { bi->groupe = groupe;
        bi->etat   = etat;

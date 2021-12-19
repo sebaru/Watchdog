@@ -50,8 +50,7 @@
              },
        rowId: "id",
        columns:
-         [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
-           { "data": null, "title":"Master", "className": "align-middle text-center",
+         [ { "data": null, "title":"Master", "className": "align-middle text-center",
              "render": function (item)
               { if (item.is_master==true)
                  { return( Bouton ( "success", "Instance is Master", null, null, "Yes" ) ); }
@@ -59,6 +58,7 @@
                  { return( Bouton ( "secondary", "Master is "+item.master_host, null, null, item.master_host ) ); }
               }
            },
+           { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": "version", "title":"Version",   "className": "align-middle text-center" },
            { "data": "database_version", "title":"Database",   "className": "align-middle text-center" },
            { "data": "start_time", "title":"Start time",   "className": "align-middle text-center" },

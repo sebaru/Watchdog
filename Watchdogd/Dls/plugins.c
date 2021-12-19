@@ -348,7 +348,7 @@
        dls->handle = NULL;
        return(FALSE);
      }
-    dls->version = dlsym( dls->handle, "version" );                                            /* Recherche de la fonction */
+    dls->version = dlsym( dls->handle, "version" );                                               /* Recherche de la fonction */
     if (!dls->version)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                 "%s: Candidat '%s' does not provide version function", __func__, dls->tech_id );

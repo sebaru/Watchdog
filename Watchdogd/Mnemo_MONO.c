@@ -79,9 +79,9 @@
   { gint  *cpt_p    = user_data;
     gchar *tech_id  = Json_get_string ( element, "tech_id" );
     gchar *acronyme = Json_get_string ( element, "acronyme" );
-    gboolean etat   = Json_get_int    ( element, "etat" );
+    gboolean etat   = Json_get_bool   ( element, "etat" );
     (*cpt_p)++;
-    struct DLS_MONO *mono = Dls_data_MONO_lookup ( tech_id, acronyme );          /* Recherche ou Création du message en RAM */
+    struct DLS_MONO *mono = Dls_data_MONO_lookup ( tech_id, acronyme );            /* Recherche ou Création du message en RAM */
     if (mono) /* A l'init, on recopie tous les champs */
      { mono->etat   = etat; }
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: MONO '%s:%s'=%d loaded", __func__, tech_id, acronyme, etat );
