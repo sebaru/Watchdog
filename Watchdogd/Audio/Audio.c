@@ -162,7 +162,7 @@ end:
 
     gboolean retour = Jouer_google_speech( module, "Instance démarrée !" );
     SubProcess_send_comm_to_master_new ( module, retour );
-
+    vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
     while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
      { usleep(100000);
        sched_yield();
@@ -191,10 +191,10 @@ end:
                   ! (typologie == MSG_ALERTE || typologie == MSG_DANGER)
                 )                                                               /* Bit positionné quand arret diffusion audio */
               { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                          "%s : Envoi audio inhibé. Dropping '%s:%s'", __func__, tech_id, acronyme );
+                          "%s: Envoi audio inhibé. Dropping '%s:%s'", __func__, tech_id, acronyme );
               }
              else
-              { /* { Envoyer_commande_dls_data( "AUDIO", audio_profil ); }                /* Pos. du profil audio via interne */
+              { Envoyer_commande_dls_data( "AUDIO", audio_profil );                   /* Pos. du profil audio via interne */
 
                 if (vars->last_audio + AUDIO_JINGLE < Partage->top)                            /* Si Pas de message depuis xx */
                  { Jouer_wav_by_file( module, "jingle"); }                                          /* On balance le jingle ! */
@@ -208,7 +208,7 @@ end:
                  { gboolean retour = Jouer_google_speech( module, libelle );
                    SubProcess_send_comm_to_master_new ( module, retour );
                  }
-                /* { Envoyer_commande_dls_data( "AUDIO", "P_NONE" ); }                       /* Bit de fin d'emission message */
+                Envoyer_commande_dls_data( "AUDIO", "P_NONE" );                              /* Bit de fin d'emission message */
               }
            }
           else if ( !strcasecmp( zmq_tag, "DISABLE" ) )
