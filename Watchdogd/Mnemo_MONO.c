@@ -83,7 +83,7 @@
     (*cpt_p)++;
     struct DLS_MONO *mono = Dls_data_MONO_lookup ( tech_id, acronyme );            /* Recherche ou Création du message en RAM */
     if (mono) /* A l'init, on recopie tous les champs */
-     { mono->etat   = etat; }
+     { mono->etat   = mono->next_etat = etat; }
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: MONO '%s:%s'=%d loaded", __func__, tech_id, acronyme, etat );
   }
 /******************************************************************************************************************************/
