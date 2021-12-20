@@ -61,7 +61,7 @@
     gchar *acronyme = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
     json_node_unref( request );
     Envoyer_commande_dls_data ( tech_id, acronyme );
-    Audit_log ( session, "Clic Synoptique : %s:%s", tech_id, acronyme );
+    Audit_log ( session, "Clic utilisateur sur %s:%s", tech_id, acronyme );
     g_free(tech_id);
     g_free(acronyme);
 /*************************************************** Envoi au client **********************************************************/

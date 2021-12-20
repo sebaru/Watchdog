@@ -15,6 +15,12 @@
      { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
      }
+/*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
+    else if (etat.mode=="default")                                                                         /* si mode inconnu */
+     { etat.cligno = false;
+       target = "/img/question.png";
+       Changer_img_src ( idimage, target );
+     }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
      { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension;
@@ -71,6 +77,12 @@
     if (etat.mode=="hors_comm" || etat.mode=="disabled")
      { etat.cligno = false;
        $("#"+idimage).addClass("wtd-img-grayscale");
+     }
+/*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
+    else if (etat.mode=="default")                                                                         /* si mode inconnu */
+     { etat.cligno = false;
+       target = "/img/question.png";
+       Changer_img_src ( idimage, target );
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else

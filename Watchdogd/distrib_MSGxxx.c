@@ -133,8 +133,8 @@
     if (Partage->top >= msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
      { msg->last_on = Partage->top;
        Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", histo );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", histo );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", histo );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", histo );
      }
     json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
@@ -168,8 +168,8 @@
     Retirer_histo_msgsDB( histo );
 /******************************************************* Envoi du histo aux librairies abonnées *******************************/
     Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", histo );
-    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", histo );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", histo );
+    Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", histo );
     json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/

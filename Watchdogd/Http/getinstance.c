@@ -56,9 +56,7 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "instances",
-                             "SELECT 'MASTER' AS instance_id, 'true' AS instance_is_master UNION "
-                             "SELECT DISTINCT(instance_id),valeur FROM config WHERE nom='instance_is_master'" );
+    SQL_Select_to_json_node ( RootNode, "instances", "SELECT * FROM instances ORDER BY is_master DESC, instance ASC" );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
@@ -71,7 +69,7 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_traiter_instance_loglevel ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_instance_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                        SoupClientContext *client, gpointer user_data)
   { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
@@ -83,16 +81,10 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( Config.instance_is_master && Json_has_member ( request, "instance" ) &&
-         strcasecmp ( Json_get_string(request,"instance"), "MASTER" ) &&
-         strcasecmp ( Json_get_string(request,"instance"), g_get_host_name() ) )
-     { Http_redirect_to_slave ( msg, Json_get_string(request,"instance") );
-       json_node_unref(request);
-       return;
-     }
-
     if ( ! (Json_has_member ( request, "log_level" ) && Json_has_member ( request, "log_db" ) &&
-            Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_trad" ) )
+            Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_trad" ) &&
+            Json_has_member ( request, "description" ) && Json_has_member ( request, "instance" )
+           )
        )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -106,22 +98,18 @@
        return;
      }
 
-    Info_change_log_level ( Config.log, log_target );
-    Modifier_configDB_int ( "msrv", "log_level", log_target );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogLevel set to '%d'", __func__, log_target );
+    gchar *description = Normaliser_chaine ( Json_get_string ( request, "description" ) );
+    gchar *instance    = Normaliser_chaine ( Json_get_string ( request, "instance" ) );
+    SQL_Write_new ( "UPDATE instances SET debug=%d, log_level=%d, log_db=%d, log_zmq=%d, log_trad=%d, description='%s' "
+                    "WHERE instance='%s'",
+                    Json_get_int ( request, "debug" ), Json_get_int ( request, "log_level" ), Json_get_bool ( request, "log_db" ),
+                    Json_get_bool ( request, "log_zmq" ), Json_get_bool ( request, "log_trad" ), description, instance );
 
-    Config.log_db = Json_get_bool ( request, "log_db" );
-    Modifier_configDB ( "msrv", "log_db", (Config.log_db ? "true" : "false") );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogDB set to '%d'", __func__, Config.log_db );
+    Json_node_add_string ( request, "zmq_tag", "SET_LOG" );
+    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", instance, request );
 
-    Config.log_zmq = Json_get_bool ( request, "log_zmq" );
-    Modifier_configDB ( "msrv", "log_zmq", (Config.log_zmq ? "true" : "false") );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogZMQ set to '%d'", __func__, Config.log_zmq );
-
-    Config.log_trad = Json_get_bool ( request, "log_trad" );
-    Modifier_configDB ( "msrv", "log_trad", (Config.log_trad ? "true" : "false") );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: LogTrad set to '%d'", __func__, Config.log_trad );
-
+    g_free(description);
+    g_free(instance);
     json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }

@@ -30,32 +30,12 @@
 
  #include <gammu.h>
 
- struct SMS_CONFIG
-  { struct LIBRAIRIE *lib;
-    gboolean sending_is_disabled;                                  /* Variable permettant d'interdire l'envoi de sms si panic */
+ struct SMS_VARS
+  { gboolean sending_is_disabled;                                  /* Variable permettant d'interdire l'envoi de sms si panic */
     GSM_Error gammu_send_status;
     GSM_StateMachine *gammu_machine;
     INI_Section *gammu_cfg;
-    gchar tech_id[NBR_CARAC_TECHID];                                                                  /* Tech_id du téléphone */
-    gchar description[80];                                         /* Une description du téléphone ou sa position par exemple */
-    gchar ovh_service_name[16];                                                                     /* Login de connexion OVH */
-    gchar ovh_application_key[33];                                                                            /* Clef API OVH */
-    gchar ovh_application_secret[33];                                                                         /* Clef API OVH */
-    gchar ovh_consumer_key[33];                                                                               /* Clef API OVH */
-    gboolean send_test_GSM;                                              /* TRUE si une demande de test a été faite par l'IHM */
-    gboolean send_test_OVH;                                              /* TRUE si une demande de test a été faite par l'IHM */
-    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
     guint nbr_sms;
-  };
-
- struct SMSDB
-  { gint     user_id;                                                                                     /* From users table */
-    gchar    user_name[80];
-    gboolean user_enable;
-    gchar    user_comment[80];
-    gboolean user_notification;
-    gchar    user_phone[80];
-    gboolean user_allow_cde;
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/

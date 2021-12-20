@@ -75,7 +75,7 @@
 
 /**********************************************************************************************************/
 /* Enocean_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Entrée: le pointeur sur la PROCESS                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  gboolean Enocean_Lire_config ( void )
@@ -332,7 +332,7 @@
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Enocean                                                            */
 /**********************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   { struct TRAME_ENOCEAN Trame;
 
     prctl(PR_SET_NAME, "W-ENOCEAN", 0, 0, 0 );
@@ -342,7 +342,7 @@
     Enocean_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+              "Run_process: Demarrage . . . TID = %p", pthread_self() );
     Cfg_enocean.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "enocean" );
@@ -350,7 +350,7 @@
 
     if (!Cfg_enocean.enable)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread is not enabled in config. Shutting Down %p",
+                "Run_process: Thread is not enabled in config. Shutting Down %p",
                  pthread_self() );
        goto end;
      }
@@ -363,12 +363,12 @@
        sched_yield();
 
        if (lib->Thread_reload == TRUE)
-        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
+        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_process: recu signal SIGUSR1" );
           lib->Thread_reload = FALSE;
         }
 
        if (Cfg_enocean.reload == TRUE)
-        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading in progress" );
+        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_process: Reloading in progress" );
           Cfg_enocean.reload = FALSE;
         }
 
@@ -378,7 +378,7 @@
              if (Cfg_enocean.fd<0)                                         /* On valide l'acces aux ports */
               { Cfg_enocean.comm_status = ENOCEAN_DISCONNECT; }
              else { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                             "Run_thread: ENOCEAN FileDescriptor = %d opened", Cfg_enocean.fd );
+                             "Run_process: ENOCEAN FileDescriptor = %d opened", Cfg_enocean.fd );
                     Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                   }
              break;
@@ -391,7 +391,7 @@
              if (cpt>0)
               { if (sync==0x55) Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_HEADER;
                 else Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                              "Run_thread: Wrong SYNC Byte (%02X). Dropping Frame", sync );
+                              "Run_process: Wrong SYNC Byte (%02X). Dropping Frame", sync );
                 Cfg_enocean.nbr_oct_lu = 0;
               }
              else Cfg_enocean.comm_status = ENOCEAN_DISCONNECT;                              /* Si erreur */
@@ -402,7 +402,7 @@
              if (Cfg_enocean.date_last_view + ENOCEAN_TRAME_TIMEOUT <= Partage->top)
               { Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                 Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                         "Run_thread: Timeout wating for HEADER. Dropping Frame" );
+                         "Run_process: Timeout wating for HEADER. Dropping Frame" );
                 break;
               }
              if (Enocean_select()<=0) break;
@@ -414,7 +414,7 @@
                 if (Cfg_enocean.nbr_oct_lu == ENOCEAN_HEADER_LENGTH)
                  { if (Trame.crc_header != Enocean_crc_header( &Trame ))    /* Vérification du CRC Header */
                     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                               "Run_thread: Wrong CRC HEADER. Dropping Frame" );
+                               "Run_process: Wrong CRC HEADER. Dropping Frame" );
                       Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                     }
                    else
@@ -423,7 +423,7 @@
                                              + Trame.optional_data_length+1; /* On compte le CRC de fin ! */
                       if (Cfg_enocean.index_bute > sizeof(Trame))
                        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                                  "Run_thread: Trame too long (%d / %d max), can't handle, dropping",
+                                  "Run_process: Trame too long (%d / %d max), can't handle, dropping",
                                    Cfg_enocean.index_bute, sizeof(Trame) );
                          Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                        }
@@ -439,7 +439,7 @@
              if (Cfg_enocean.date_last_view + ENOCEAN_TRAME_TIMEOUT <= Partage->top)
               { Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                 Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                         "Run_thread: Timeout wating for DATA. Dropping Frame" );
+                         "Run_process: Timeout wating for DATA. Dropping Frame" );
                 break;
               }
              if (Enocean_select()<=0) break;
@@ -451,7 +451,7 @@
                 if (Cfg_enocean.nbr_oct_lu == Cfg_enocean.index_bute)         /* Vérification du CRC Data */
                  { if ( ((unsigned char *)&Trame)[Cfg_enocean.index_bute-1] != Enocean_crc_data( &Trame ) )
                     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                               "Run_thread: Wrong CRC DATA. Dropping Frame" );
+                               "Run_process: Wrong CRC DATA. Dropping Frame" );
                       Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                     }
                    else
@@ -469,7 +469,7 @@
                 Cfg_enocean.fd = 0;
               }
              Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                      "Run_thread: ENOCEAN Disconnected. Re-Trying in %d sec...",
+                      "Run_process: ENOCEAN Disconnected. Re-Trying in %d sec...",
                        ENOCEAN_RECONNECT_DELAY/10 );
              Cfg_enocean.date_retry_connect = Partage->top + ENOCEAN_RECONNECT_DELAY;
              Cfg_enocean.comm_status = ENOCEAN_WAIT_BEFORE_RECONNECT;
@@ -506,7 +506,7 @@
     close(Cfg_enocean.fd);                                                 /* Fermeture de la connexion FD */
 end:
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Down . . . TID = %p", pthread_self() );
+              "Run_process: Down . . . TID = %p", pthread_self() );
     Cfg_enocean.lib->Thread_run = FALSE;                                     /* Le thread ne tourne plus ! */
     Cfg_enocean.lib->TID = 0;                              /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

@@ -45,7 +45,7 @@
   };
 
  struct ENOCEAN_CONFIG
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     gchar port[80];
     gint fd;                                               /* File descripteur de la connexion au ENOCEAN */
     gboolean enable;                                                           /* Thread enable at boot ? */

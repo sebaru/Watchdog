@@ -28,150 +28,56 @@
  #include "watchdogd.h"
  #include "Phidget.h"
 
- extern struct PHIDGET_CONFIG Cfg_phidget;
 /******************************************************************************************************************************/
-/* Admin_json_phidget_list : fonction appelée pour lister les modules phidget                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_config : fonction appelé par le thread http lors d'une requete POST sur config PROCESS                               */
+/* Entrée : la librairie, et le Json recu                                                                                     */
+/* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
-    if (Lib->Thread_run)                                    /* Warning : Cfg_phidget does not exist if thread is not running ! */
-     { Json_node_add_int ( RootNode, "nbr_sensors", g_slist_length(Cfg_phidget.Liste_sensors) ); }
-
-    gchar *buf = Json_node_to_string(RootNode);
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Admin_json_phidget_hub_list: Renvoie la liste des hub Phidget configurés                                                   */
-/* Entrées: la connexion Websocket destinataire                                                                               */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_hub_list ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    if (SQL_Select_to_json_node ( RootNode, "hubs", "SELECT * FROM phidget_hub" ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(RootNode);
-       return;
-     }
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_request_getdlslist: Traite une requete sur l'URI dlslist                                                      */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_hub_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  {
-    if (msg->method != SOUP_METHOD_DELETE)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "id" ) ) )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    SQL_Write_new( "DELETE FROM phidget_hub WHERE id='%d'", Json_get_int ( request, "id" ) );
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    Lib->Thread_reload = TRUE;
-  }
-/******************************************************************************************************************************/
-/* Admin_json_phidget_set: Met à jour une entrée WAGO                                                                          */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_hub_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { gboolean retour;
-
-    if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "hostname" ) && Json_has_member ( request, "description" ) &&
-            Json_has_member ( request, "password" ) && Json_has_member ( request, "enable" ) &&
-            Json_has_member ( request, "serial" ) && Json_has_member ( request, "tech_id" )
+ void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
+  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+            Json_has_member ( request, "hostname" ) && Json_has_member ( request, "description" ) &&
+            Json_has_member ( request, "password" ) && Json_has_member ( request, "serial" )
            )
-       )
+        )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
        return;
      }
 
+    gchar *uuid        = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
     gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
+    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *password    = Normaliser_chaine ( Json_get_string( request, "password" ) );
+    gchar *serial      = Normaliser_chaine ( Json_get_string( request, "serial" ) );
 
     if (Json_has_member ( request, "id" ))
-     { retour = SQL_Write_new ( "UPDATE phidget_hub SET tech_id='%s', description='%s', hostname='%s', password='%s', serial='%d' "
-                                "WHERE id='%d'",
-                                tech_id, description, hostname, password, Json_get_int ( request, "serial" ), Json_get_int ( request, "id" ) );
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', description='%s', hostname='%s', password='%s', serial='%s' ",
+                       "WHERE id='%d'",
+                       lib->name, uuid, tech_id, description, hostname, password, serial,
+                       Json_get_int ( request, "id" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
      }
     else
-     { retour = SQL_Write_new ( "INSERT INTO phidget_hub SET tech_id='%s', description='%s', hostname='%s', password='%s', serial='%d'",
-                                tech_id, description, hostname, password, Json_get_int ( request, "serial" ) );
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', description='%s', hostname='%s', password='%s', serial='%s' ",
+                       lib->name, uuid, tech_id, description, hostname, password, serial );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
      }
-    json_node_unref(request);
 
-    if (retour)
-     { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Lib->Thread_reload = TRUE;
-     }
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-
+    g_free(uuid);
     g_free(tech_id);
-    g_free(description);
     g_free(hostname);
+    g_free(description);
     g_free(password);
+    g_free(serial);
+
+    soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Admin_json_phidget_hub_start_stop: Start ou Stop un Hub Phidget                                                            */
 /* Entrées: la connexion Websocket, le champ start/stop                                                                       */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_hub_start_stop ( struct LIBRAIRIE *Lib, SoupMessage *msg, gboolean start )
+ static void Admin_json_phidget_hub_start_stop ( struct PROCESS *Lib, SoupMessage *msg, gboolean start )
   { if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -201,7 +107,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_map_list ( struct LIBRAIRIE *Lib, GHashTable *query, SoupMessage *msg )
+ static void Admin_json_phidget_map_list ( struct PROCESS *lib, GHashTable *query, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -216,7 +122,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_phidget.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -274,7 +180,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_map_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_phidget_map_set ( struct PROCESS *Lib, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -407,7 +313,7 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_map_del ( struct LIBRAIRIE *Lib, SoupMessage *msg )
+ static void Admin_json_phidget_map_del ( struct PROCESS *Lib, SoupMessage *msg )
   { if (msg->method != SOUP_METHOD_DELETE)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -453,16 +359,12 @@ end:
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
+ void Admin_json ( struct PROCESS *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
   { if (access_level < 6)
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-         if (!strcasecmp(path, "/status"))    { Admin_json_phidget_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/hub/list"))  { Admin_json_phidget_hub_list ( lib, msg ); }
-    else if (!strcasecmp(path, "/hub/del"))   { Admin_json_phidget_hub_del ( lib, msg ); }
-    else if (!strcasecmp(path, "/hub/set"))   { Admin_json_phidget_hub_set ( lib, msg ); }
-    else if (!strcasecmp(path, "/hub/start")) { Admin_json_phidget_hub_start_stop ( lib, msg, TRUE ); }
+         if (!strcasecmp(path, "/hub/start")) { Admin_json_phidget_hub_start_stop ( lib, msg, TRUE ); }
     else if (!strcasecmp(path, "/hub/stop"))  { Admin_json_phidget_hub_start_stop ( lib, msg, FALSE ); }
     else if (!strcasecmp(path, "/map/list"))  { Admin_json_phidget_map_list ( lib, query, msg ); }
     else if (!strcasecmp(path, "/map/set"))   { Admin_json_phidget_map_set ( lib, msg ); }

@@ -45,7 +45,7 @@
     Show_modal_del ( "Supprimer la courbe du tableau ?",
                      "Etes-vous sur de vouloir supprimer la courbe suivante ?",
                      selection.tech_id+":"+selection.acronyme,
-                     "Tableau_Map_Valide_delete("+map_id+")" );
+                     function () { Tableau_Map_Valide_delete(map_id); } );
   }
 
 /********************************************* Appelé au chargement de la page ************************************************/

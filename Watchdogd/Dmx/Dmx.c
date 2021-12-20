@@ -43,7 +43,7 @@
  struct DMX_CONFIG Cfg_dmx;
 /******************************************************************************************************************************/
 /* Dmx_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                    */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static gboolean Dmx_Lire_config ( void )
@@ -177,7 +177,7 @@
 /******************************************************************************************************************************/
 /* Main: Fonction principale du MODBUS                                                                                        */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   {
 reload:
     memset( &Cfg_dmx, 0, sizeof(Cfg_dmx) );                                         /* Mise a zero de la structure de travail */

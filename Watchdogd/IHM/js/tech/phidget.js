@@ -1,5 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
+/************************************ Demande de refresh **********************************************************************/
  function Phidget_Hub_refresh ( )
   { $('#idTablePhidgetHub').DataTable().ajax.reload(null, false);
   }
@@ -31,7 +32,7 @@
     Show_modal_del ( "Détruire le hub "+selection.hostname+" ?",
                      "Etes-vous sur de vouloir supprimer ce hub ?",
                       selection.hostname + " - " + selection.description,
-                     "Valider_Phidget_Hub_Del("+id+")" );
+                      function () { Valider_Phidget_Hub_Del(id); } );
   }
 /************************************ Envoi les infos de modifications phidget ************************************************/
  function Valider_Phidget_Hub_Set ( id )
@@ -106,7 +107,12 @@
             { "data": "description", "title":"Description", "className": "align-middle text-center " },
             { "data": "password", "title":"Password", "className": "align-middle text-center " },
             { "data": "serial", "title":"Serial Number", "className": "align-middle text-center " },
-            { "data": "date_create", "title":"Date Création", "className": "align-middle text-center " },
+                       { "data": null, "title":"IO_COMM", "className": "align-middle text-center",
+             "render": function (item)
+               { if (item.comm==true) { return( Bouton ( "success", "Comm OK", null, null, "1" ) );        }
+                                 else { return( Bouton ( "outline-secondary", "Comm Failed", null, null, "0" ) ); }
+               },
+            },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "outline-primary", "Editer le hub", "Show_Phidget_Hub_Edit", item.id, "pen", null );

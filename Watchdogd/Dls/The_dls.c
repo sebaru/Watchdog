@@ -42,7 +42,7 @@
 
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static gboolean Dls_Lire_config ( void )
@@ -1807,9 +1807,9 @@ end:
           bit_comm_module &= Dls_data_get_MONO( NULL, NULL, &comm );
           liste = g_slist_next ( liste );
         }
-       Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
      }
-    else bit_comm_module = Dls_data_get_MONO ( plugin->tech_id, "COMM", &plugin->vars.bit_comm );
+    else bit_comm_module = Dls_data_get_WATCHDOG ( plugin->tech_id, "IO_COMM", &plugin->vars.bit_io_comm );
+    Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
 
     Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "MEMSA_OK", &plugin->vars.bit_activite_ok,
                         bit_comm_module &&
@@ -1887,6 +1887,7 @@ end:
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
      { sleep(1); wait--; }        /* attente 20 secondes pour initialisation des bit internes et collection des infos modules */
 
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Starting", __func__ );
     Partage->com_dls.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = last_top_10min = Partage->top;

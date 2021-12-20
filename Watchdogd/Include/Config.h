@@ -64,7 +64,7 @@
  #define DEFAUT_DB_USERNAME             "watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
  #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */
  #define DEFAUT_DB_PORT                 3306
- #define DEFAUT_LIBRAIRIE_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
+ #define DEFAUT_PROCESS_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
 
 /******************************************* Prototypes de fonctions **************************************/
  extern gboolean Lire_config ( void );

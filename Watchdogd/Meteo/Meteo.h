@@ -30,15 +30,8 @@
 
  #define METEO_POLLING                 36000                                             /* Polling du site toutes les heures */
 
- struct METEO_CONFIG
-  { struct LIBRAIRIE *lib;
-    gchar tech_id[32];                                                                                /* Tech_id du téléphone */
-    gchar description[80];                                         /* Une description du téléphone ou sa position par exemple */
-    gchar token[65];                                                                                 /* Clef API MeteoConcept */
-    gchar code_insee[32];                                                                         /* Code Insee de la commune */
-    gint  last_request;
-    gboolean test_api;                                                      /* True pour tester l'accès a l'API meteo concept */
-    void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
+ struct METEO_VARS
+  { gint  last_request;
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/

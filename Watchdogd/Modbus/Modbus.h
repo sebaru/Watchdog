@@ -68,14 +68,6 @@
  #define MODBUS_PORT_TCP    502                                               /* Port de connexion TCP pour accès aux modules */
  #define MODBUS_RETRY       100                                          /* 10 secondes entre chaque retry si pb de connexion */
 
- #define NOM_THREAD                "modbus"
- #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
-
- struct MODBUS_CONFIG                                                                 /* Communication entre DLS et la MODBUS */
-  { struct LIBRAIRIE *lib;
-    GSList *Modules_MODBUS;
-  };
-
  struct TRAME_MODBUS_REQUETE                                                                 /* Definition d'une trame MODBUS */
   { guint16 transaction_id;
     guint16 proto_id; /* -> 0 = MOBUS */
@@ -100,21 +92,8 @@
   };
 
 /************************************************** Gestion des modbus ********************************************************/
- struct MODBUSDB
-  { guint id;                                                                     /* Numéro du module dans la base de données */
-    gchar date_create[20];
-    gboolean enable;                                                                           /* Le module doit-il tourner ? */
-    guint watchdog;                                           /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
-    gchar hostname[32];                                                                       /* Adresses IP du module MODBUS */
-    gchar tech_id[32];                                                                            /* Tech_id du module MODBUS */
-    gchar description[128];                                                                              /* Libelle du modbus */
-    gint max_request_par_sec;                                                        /* Nombre de requete maximum par seconde */
-  };
-
- struct MODULE_MODBUS
-  { struct MODBUSDB modbus;
-    pthread_t TID;                                                                 /* Tid du thread gérant le module unitaire */
-    gboolean started;                                                                                      /* Est-il actif ?? */
+ struct MODBUS_VARS
+  { gboolean started;                                                                                      /* Est-il actif ?? */
     gint connexion;                                                                                     /* FD de connexion IP */
     gint mode;                                                                    /* Mode dans le processus de connexion WAGO */
     gint nbr_oct_lu;                                                                                /* Nombre d'octet deja lu */

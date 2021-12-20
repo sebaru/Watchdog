@@ -29,94 +29,40 @@
  #include "Imsg.h"
 
 /******************************************************************************************************************************/
-/* Admin_json_imsgs_status : fonction appelée pour vérifier le status de la librairie                                         */
-/* Entrée : un JSon Builder                                                                                                   */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_config : fonction appelé par le thread http lors d'une requete POST sur config PROCESS                               */
+/* Entrée : la librairie, et le Json recu                                                                                     */
+/* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
- static void Admin_json_imsgs_status ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  {
-    if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    Json_node_add_bool ( RootNode, "thread_is_running", Lib->Thread_run );
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM %s WHERE instance='%s'", Lib->name, g_get_host_name() );
-
-    if (Lib->Thread_run)                                      /* Warning : Cfg_meteo does not exist if thread is not running ! */
-     { /*Json_node_add_string ( RootNode, "tech_id", Cfg.tech_id );*/
-     }
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Admin_json_imsgs_set: Configure le thread IMSGS                                                                              */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_imsgs_set ( struct LIBRAIRIE *Lib, SoupMessage *msg )
-  { if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "tech_id" ) &&
+ void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
+  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
             Json_has_member ( request, "jabberid" ) && Json_has_member ( request, "password" )
            ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
        return;
      }
 
+    gchar *uuid     = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
     gchar *tech_id  = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
     gchar *jabberid = Normaliser_chaine ( Json_get_string( request, "jabberid" ) );
     gchar *password = Normaliser_chaine ( Json_get_string( request, "password" ) );
-    json_node_unref(request);
 
-    SQL_Write_new ( "INSERT INTO %s SET instance='%s', tech_id='%s', jabberid='%s', password='%s' "
-                    "ON DUPLICATE KEY UPDATE tech_id=VALUES(tech_id), jabberid=VALUES(jabberid), password=VALUES(password)",
-                    Lib->name, g_get_host_name(), tech_id, jabberid, password );
+    if (Json_has_member ( request, "id" ))
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', jabberid='%s', password='%s' WHERE id='%d'",
+                       lib->name, uuid, tech_id, jabberid, password,
+                       Json_get_int ( request, "id" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
+     }
+    else
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', jabberid='%s', password='%s' ",
+                       lib->name, uuid, tech_id, jabberid, password );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
+     }
+
+    g_free(uuid);
     g_free(tech_id);
     g_free(jabberid);
     g_free(password);
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    Lib->Thread_reload = TRUE;
-    while ( Lib->Thread_run == TRUE && Lib->Thread_reload == TRUE);                              /* Attente reboot du process */
-  }
-/******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- void Admin_json ( struct LIBRAIRIE *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
-  { if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
-         if (!strcasecmp(path, "/status")) { Admin_json_imsgs_status ( lib, msg ); }
-    else if (!strcasecmp(path, "/set"))    { Admin_json_imsgs_set ( lib, msg ); }
-    else if (!strcasecmp(path, "/send") && lib->Thread_run)
-     { if ( msg->method != SOUP_METHOD_PUT )
-        {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED); }
-       else
-				    { Imsgs_Envoi_message_to_all_available ( "Ceci est un test IMSG" );
-          soup_message_set_status (msg, SOUP_STATUS_OK);
-        }
-     }
-    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

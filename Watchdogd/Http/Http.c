@@ -39,7 +39,7 @@
  struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Http_Lire_config ( void )
@@ -300,6 +300,7 @@
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_node_add_string ( RootNode, "response", "pong" );
+    Json_node_add_bool   ( RootNode, "Thread_run", Partage->com_msrv.Thread_run );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
@@ -573,11 +574,11 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
-/* Run_thread: Thread principal                                                                                               */
-/* Entrée: une structure LIBRAIRIE                                                                                            */
+/* Run_process: Thread principal                                                                                               */
+/* Entrée: une structure PROCESS                                                                                            */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
+ void Run_process ( struct PROCESS *lib )
   { gint last_pulse = 0;
     GError *error;
 
@@ -636,6 +637,7 @@ reload:
     soup_server_add_handler ( socket, "/api/dls/compil" ,    Http_traiter_dls_compil, NULL, NULL );
     soup_server_add_handler ( socket, "/api/dls/set" ,       Http_traiter_dls_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/mnemos/validate",Http_traiter_mnemos_validate, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/mnemos/tech_id", Http_traiter_mnemos_tech_id, NULL, NULL );
     soup_server_add_handler ( socket, "/api/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/map/list",       Http_traiter_map_list, NULL, NULL );
@@ -664,13 +666,11 @@ reload:
     soup_server_add_handler ( socket, "/api/process/start",  Http_traiter_process_start, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/debug",  Http_traiter_process_debug, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/list",   Http_traiter_process_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process",        Http_traiter_process, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/config/get",     Http_traiter_config_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/config/set",     Http_traiter_config_set, NULL, NULL );
-/*    soup_server_add_handler ( socket, "/api/config/del",     Http_traiter_config_del, NULL, NULL );*/
+    soup_server_add_handler ( socket, "/api/process/config", Http_traiter_process_config, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/process/send",   Http_traiter_process_send, NULL, NULL );
     soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/instance/loglevel",
-                                                             Http_traiter_instance_loglevel, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/instance/set",
+                                                             Http_traiter_instance_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/instance/reload_icons",
                                                              Http_traiter_instance_reload_icons, NULL, NULL );
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
