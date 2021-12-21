@@ -176,6 +176,7 @@
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: INSTANCE_RESET: Stopping in progress", __func__ );
      }
     else if ( !strcasecmp( zmq_tag, "SET_LOG") &&
+              Json_has_member ( request, "tech_id" ) && !strcasecmp ( Json_get_string ( request, "tech_id" ), g_get_host_name() ) &&
               Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
               Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" ) &&
               Json_has_member ( request, "debug" )
@@ -368,8 +369,9 @@
        if (request)
         { gint taille = strlen(buffer);
           if (!Handle_zmq_for_master( request ))                   /* Gère d'abord le message avant de l'envoyer au bus local */
-           { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille ); }                /* Sinon on envoi aux threads */
-          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );        /* dans tous les cas on envoi aux slaves */
+           { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                        /* on envoi aux threads */
+             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                       /* on envoi aux slaves */
+           }
           json_node_unref ( request );
         }
 
