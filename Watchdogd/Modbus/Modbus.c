@@ -973,7 +973,7 @@ end:
     struct MODBUS_VARS *vars = module->vars;
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
-    gint   max_request_per_sec = Json_get_int ( module->config, "max_request_per_sec" );
+    gint   max_request_par_sec = Json_get_int ( module->config, "max_request_par_sec" );
 
     gchar description[128];
     g_snprintf( description, sizeof(description), "Gestion du module Wago %s", tech_id );
@@ -989,10 +989,10 @@ end:
      { usleep(vars->delai);
        sched_yield();
 
-       if (Partage->top>=vars->last_top+10)                                                        /* Toutes les 1 secondes */
+       if (Partage->top>=vars->last_top+10)                                                          /* Toutes les 1 secondes */
         { vars->nbr_request_par_sec = vars->nbr_request;
           vars->nbr_request = 0;
-          if(vars->nbr_request_par_sec > max_request_per_sec) vars->delai += 50;
+          if(vars->nbr_request_par_sec > max_request_par_sec) vars->delai += 50;
           else if(vars->delai>0) vars->delai -= 50;
           vars->last_top = Partage->top;
         }
