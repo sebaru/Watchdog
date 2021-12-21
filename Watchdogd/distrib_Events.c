@@ -60,7 +60,6 @@
        json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
-    g_free(dout);
 
 suite_AO:
     if (!Partage->com_msrv.Liste_AO) return;                                                      /* Si pas de a, on se barre */
@@ -82,6 +81,5 @@ suite_AO:
        json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
-    g_free(ao);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
