@@ -11,7 +11,7 @@
 <hr>
 
    <div class="table-responsive">
-     <table id="idTableMsrv" class="table table-striped table-bordered table-hover">
+     <table id="idTableMSRV" class="table table-striped table-bordered table-hover">
        <thead class="thead-dark">
        </thead>
        <tbody>

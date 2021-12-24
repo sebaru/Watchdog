@@ -2,10 +2,10 @@
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Refresh ( )
-  { $('#idTableMsrv').DataTable().ajax.reload(null, false); }
+  { $('#idTableMSRV').DataTable().ajax.reload(null, false); }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Sauver_parametre ( id )
-  { table = $('#idTableMsrv').DataTable();
+  { table = $('#idTableMSRV').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
     var json_request =
      { instance   : selection.instance,
@@ -17,7 +17,7 @@
        log_trad   : ($("#idMSRVLogTRAD_"+id).val()=="true" ? true : false),
      };
     Send_to_API ( 'POST', "/api/instance/set", JSON.stringify(json_request), function ()
-     { $('#idTableMsrv').DataTable().ajax.reload(null, false);
+     { MSRV_Refresh ();
      }, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -30,7 +30,7 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Reset ( id  )
-  { table = $('#idTableMsrv').DataTable();
+  { table = $('#idTableMSRV').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
     Show_modal_del ( "Restarter cette instance "+selection.instance,
                      "Etes-vous sûr de vouloir relancer cette instance ?",
@@ -38,11 +38,27 @@
                      function () { MSRV_Reset_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
+ function MSRV_Upgrade_Valider ( selection )
+  { var json_request = { zmq_tag: "INSTANCE_UPGRADE", tech_id: selection.instance };
+    Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), function ()
+     { Show_Info ( "Attendez le download et le redémarrage" );
+     }, null );
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
+ function MSRV_Upgrade ( id  )
+  { table = $('#idTableMSRV').DataTable();
+    selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
+    Show_modal_del ( "Upgrader cette instance "+selection.instance,
+                     "Etes-vous sûr de vouloir upgrader cette instance ?",
+                     selection.instance + " - "+selection.description,
+                     function () { MSRV_Upgrade_Valider( selection ) } ) ;
+  }
+/************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Reload_icons ( )
   { Send_to_API ( 'POST', "/api/instance/reload_icons", null, null, null ); }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { $('#idTableMsrv').DataTable(
+  { $('#idTableMSRV').DataTable(
      { pageLength : 50,
        fixedHeader: true, paging: false, ordering: true, searching: true,
        ajax: { url : "/api/instance/list", type : "GET", dataSrc: "instances",
@@ -104,6 +120,7 @@
            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
              "render": function (item)
                { boutons = Bouton_actions_start ();
+                 boutons += Bouton_actions_add ( "warning", "Upgrade l'instance", "MSRV_Upgrade", item.id, "download", null );
                  boutons += Bouton_actions_add ( "danger", "Restart l'instance", "MSRV_Reset", item.id, "redo", null );
                  boutons += Bouton_actions_end ();
                  return(boutons);

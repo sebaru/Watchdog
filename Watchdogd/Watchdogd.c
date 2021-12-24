@@ -173,6 +173,18 @@
      { Partage->com_msrv.Thread_run = FALSE;
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: INSTANCE_RESET: Stopping in progress", __func__ );
      }
+    else if ( !strcasecmp( zmq_tag, "INSTANCE_UPGRADE") && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: INSTANCE_UPGRADE: Upgrading in progress", __func__ );
+       gint pid = fork();
+       if (pid<0)
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: INSTANCE_UPGRADE: erreur Fork target '%s'", __func__ ); }
+       else if (!pid)
+        { system("cd; cd SRC; ./autogen.sh; sudo make install;" );
+          Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: INSTANCE_UPGRADE: done. Restarting.", __func__ );
+          system("sudo systemctl restart Watchdogd" );
+          exit(0);
+        }
+     }
     else if ( !strcasecmp( zmq_tag, "SET_LOG") && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) &&
               Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
               Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" ) &&
