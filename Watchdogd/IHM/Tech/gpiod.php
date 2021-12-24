@@ -20,7 +20,7 @@
        <div class="col form-group">
           <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">Choix de l'instance</label>
-           <select id="idTargetInstance" class="custom-select border-info" onchange="GPIOD_Load_config()"></select>
+           <select id="idTargetProcess" class="custom-select border-info" onchange="GPIOD_Load_config()"></select>
           </div>
        </div>
 

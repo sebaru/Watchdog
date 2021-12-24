@@ -7,7 +7,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function TELEINFO_Set ( selection )
   { var json_request =
-     { uuid:        $('#idTargetInstance').val(),
+     { uuid:        $('#idTargetProcess').val(),
        tech_id:     $('#idTELEINFOTechID').val(),
        description: $('#idTELEINFODescription').val(),
        port:        $('#idTELEINFOPort').val(),
@@ -24,7 +24,7 @@
  function TELEINFO_Edit ( id )
   { table = $('#idTableTELEINFO').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=teleinfoedf", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=teleinfoedf", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idTELEINFOTitre').text("Editer la connexion GSM " + selection.tech_id);
     $('#idTELEINFOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idTELEINFO", selection.tech_id ); } );
@@ -36,7 +36,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function TELEINFO_Add ( )
   { $('#idTELEINFOTitre').text("Ajouter un équipement GSM");
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=teleinfoedf", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=teleinfoedf", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idTELEINFOTechID').val("").off("input").on("input", function () { Controle_tech_id( "idTELEINFO", null ); } );
     $('#idTELEINFODescription').val("");

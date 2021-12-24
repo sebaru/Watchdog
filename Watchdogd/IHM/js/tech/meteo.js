@@ -34,7 +34,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function METEO_Set ( selection )
   { var json_request =
-       { uuid       : $('#idTargetInstance').val(),
+       { uuid       : $('#idTargetProcess').val(),
          tech_id    : $('#idMETEOTechID').val().toUpperCase(),
          token      : $('#idMETEOToken').val(),
          description: $('#idMETEODescription').val(),
@@ -53,7 +53,7 @@
   { table = $('#idTableMETEO').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     $('#idMETEOTitre').text("Editer la source Météo " + selection.tech_id);
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=meteo", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=meteo", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idMETEOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idMETEO", selection.tech_id ); } );
     $('#idMETEODescription').val( selection.description );
@@ -65,7 +65,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function METEO_Add ( )
   { $('#idMETEOTitre').text("Ajouter une source Météo");
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=meteo", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=meteo", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idMETEOTechID').val("").off("input").on("input", function () { Controle_tech_id( "idMETEO", null ); } );
     $('#idMETEODescription').val("");

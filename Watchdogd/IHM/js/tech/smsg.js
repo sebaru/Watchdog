@@ -7,7 +7,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function SMSG_Set ( selection )
   { var json_request =
-     { uuid:        $('#idTargetInstance').val(),
+     { uuid:        $('#idTargetProcess').val(),
        tech_id:     $('#idSMSGTechID').val(),
        description: $('#idSMSGDescription').val(),
        ovh_service_name:       $('#idSMSGOVHServiceName').val(),
@@ -47,7 +47,7 @@
  function SMSG_Edit ( id )
   { table = $('#idTableSMSG').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=smsg", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=smsg", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idSMSGTitre').text("Editer la connexion GSM " + selection.tech_id);
     $('#idSMSGTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idSMSG", selection.tech_id ); } );
@@ -62,7 +62,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function SMSG_Add ( )
   { $('#idSMSGTitre').text("Ajouter un équipement GSM");
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=smsg", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=smsg", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idSMSGTechID').val("").off("input").on("input", function () { Controle_tech_id( "idSMSG", null ); } );
     $('#idSMSGDescription').val("");

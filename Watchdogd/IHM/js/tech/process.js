@@ -2,8 +2,7 @@
 
 /********************************************* Reload Process *****************************************************************/
  function Process_clic_debug ( uuid )
-  { instance = $('#idTargetInstance').val();
-    var json_request = JSON.stringify(
+  { var json_request = JSON.stringify(
        { uuid : uuid,
          debug: true,
        }
@@ -14,8 +13,7 @@
   }
 /********************************************* Reload Process *****************************************************************/
  function Process_clic_undebug ( uuid )
-  { instance = $('#idTargetInstance').val();
-    var json_request = JSON.stringify(
+  { var json_request = JSON.stringify(
        { uuid : uuid,
          debug: false,
        }
@@ -50,15 +48,7 @@
   }
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  function Load_page ()
-  { $('#idTargetInstance').empty();
-    if (localStorage.getItem("instance_is_master")=="true")
-     { Select_from_api ( "idTargetInstance", "/api/instance/list", null, "instances", "instance_id", function (Response)
-                          { return ( Response.instance_id ); }, "MASTER" );
-     }
-    else
-     { $('#idTargetInstance').append("<option value='LOCAL'>LOCAL</option>"); }
-
-    $('#idTableProcess').DataTable(
+  { $('#idTableProcess').DataTable(
        { pageLength : 25,
          fixedHeader: true,
          ajax: {	url : "/api/process/list",	type : "GET", dataSrc: "Process",

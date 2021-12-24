@@ -8,7 +8,7 @@
   { table = $('#idTableMsrv').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { tech_id    : selection.tech_id,
+     { instance   : selection.instance,
        description: $("#idMSRVDescription_"+id).val(),
        log_level  : parseInt($("#idMSRVLogLevel_"+id).val()),
        log_msrv   : ($("#idMSRVLogMSRV_"+id).val()=="true" ? true : false),
@@ -22,7 +22,7 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Reset_Valider ( selection )
-  { var json_request = { zmq_tag: "INSTANCE_RESET", tech_id: selection.tech_id };
+  { var json_request = { zmq_tag: "INSTANCE_RESET", tech_id: selection.instance };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), function ()
      { Show_Info ( "Attendez le redémarrage" );
        Reload_when_ready();
@@ -32,9 +32,9 @@
  function MSRV_Reset ( id  )
   { table = $('#idTableMsrv').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Restarter cette instance "+selection.tech_id,
+    Show_modal_del ( "Restarter cette instance "+selection.instance,
                      "Etes-vous sûr de vouloir relancer cette instance ?",
-                     selection.tech_id + " - "+selection.description,
+                     selection.instance + " - "+selection.description,
                      function () { MSRV_Reset_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -58,7 +58,7 @@
                  { return( Bouton ( "secondary", "Master is "+item.master_host, null, null, item.master_host ) ); }
               }
            },
-           { "data": "tech_id",   "title":"Instance",   "className": "align-middle text-center" },
+           { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": "version", "title":"Version",   "className": "align-middle text-center" },
            { "data": "database_version", "title":"Database",   "className": "align-middle text-center" },
            { "data": "start_time", "title":"Start time",   "className": "align-middle text-center" },

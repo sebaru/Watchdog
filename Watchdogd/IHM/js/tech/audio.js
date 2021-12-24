@@ -7,7 +7,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function AUDIO_Set ( selection )
   { var json_request =
-     { uuid:     $('#idTargetInstance').val(),
+     { uuid:     $('#idTargetProcess').val(),
        tech_id : $('#idAUDIOTechID').val(),
        language: $('#idAUDIOLanguage').val(),
        device  : $('#idAUDIODevice').val(),
@@ -35,7 +35,7 @@
  function AUDIO_Edit ( id )
   { table = $('#idTableAUDIO').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=audio", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=audio", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idAUDIOTitre').text("Editer la connexion GSM " + selection.tech_id);
     $('#idAUDIOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idAUDIO", selection.tech_id ); } );
@@ -48,7 +48,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function AUDIO_Add ( )
   { $('#idAUDIOTitre').text("Ajouter un équipement GSM");
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=audio", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=audio", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idAUDIOTechID').val("").off("input").on("input", function () { Controle_tech_id( "idAUDIO", null ); } );
     $('#idAUDIOLanguage').val( "" );

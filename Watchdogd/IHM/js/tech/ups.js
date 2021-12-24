@@ -39,7 +39,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function UPS_Set ( selection )
   { var json_request =
-     { uuid:           $('#idTargetInstance').val(),
+     { uuid:           $('#idTargetProcess').val(),
        tech_id:        $('#idUPSTechID').val(),
        host:           $('#idUPSHost').val(),
        name:           $('#idUPSName').val(),
@@ -58,7 +58,7 @@
  function UPS_Edit ( id )
   { table = $('#idTableUPS').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idUPSTitre').text("Editer la connexion UPS " + selection.tech_id);
     $('#idUPSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idUPS", selection.tech_id ); } );
@@ -72,7 +72,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function UPS_Add ( )
   { $('#idUPSTitre').text("Ajouter un UPS");
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idUPSTechID').val("").off("input").on("input", function () { Controle_tech_id( "idUPS", null ); } );
     $('#idUPSHost').val( "" );

@@ -55,7 +55,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MODBUS_Set ( selection )
   { var json_request =
-     { uuid:           $('#idTargetInstance').val(),
+     { uuid:           $('#idTargetProcess').val(),
        tech_id:        $('#idMODBUSTechID').val(),
        hostname: $('#idMODBUSHostname').val(),
        description: $('#idMODBUSDescription').val(),
@@ -74,7 +74,7 @@
  function MODBUS_Edit ( id )
   { table = $('#idTableMODBUS').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=modbus", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=modbus", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idMODBUSTitre').text("Editer la connexion MODBUS " + selection.tech_id);
     $('#idMODBUSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idMODBUS", selection.tech_id ); } );
@@ -88,7 +88,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function MODBUS_Add ( )
   { $('#idMODBUSTitre').text("Ajouter un MODBUS");
-    Select_from_api ( "idTargetInstance", "/api/process/list", "name=modbus", "Process", "uuid", function (Response)
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=modbus", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idMODBUSTechID').val("").off("input").on("input", function () { Controle_tech_id( "idMODBUS", null ); } );
     $('#idMODBUSHostname').val ( "" );
