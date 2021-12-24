@@ -77,7 +77,7 @@
                        "`capteur` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                        "`intervalle` int(11) NOT NULL,"
                        "UNIQUE (hub_id, port, classe),"
-                       "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                       "FOREIGN KEY (`hub_id`) REFERENCES `phidget` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;", lib->name );
        SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_DI` ("
                        "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
@@ -87,7 +87,7 @@
                        "`classe` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                        "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                        "UNIQUE (hub_id, port, classe),"
-                       "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                       "FOREIGN KEY (`hub_id`) REFERENCES `phidget` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;", lib->name );
        SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_DO` ("
                        "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
@@ -97,7 +97,7 @@
                        "`classe` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                        "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                        "UNIQUE (hub_id, port, classe),"
-                       "FOREIGN KEY (`hub_id`) REFERENCES `phidget_hub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                       "FOREIGN KEY (`hub_id`) REFERENCES `phidget` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
                        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;", lib->name );
        goto end;
      }
@@ -675,7 +675,7 @@ error:
     if (SQL_Select_to_json_node ( module->config, "AI",
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, "
                                   "ai.*,m.tech_id,m.acronyme FROM phidget_AI AS ai "
-                                  "INNER JOIN phidget_hub AS hub ON hub.id=ai.hub_id "
+                                  "INNER JOIN phidget AS hub ON hub.id=ai.hub_id "
                                   "INNER JOIN mnemos_AI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', ai.port ) "
                                   "WHERE hub.enable=1" ) == TRUE)
      { Json_node_foreach_array_element ( module->config, "AI", Charger_un_AI, module ); }
@@ -687,7 +687,7 @@ error:
     if (SQL_Select_to_json_node ( module->config, "DI",
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, "
                                   "di.*,m.tech_id,m.acronyme FROM phidget_DI AS di "
-                                  "INNER JOIN phidget_hub AS hub ON hub.id=di.hub_id "
+                                  "INNER JOIN phidget AS hub ON hub.id=di.hub_id "
                                   "INNER JOIN mnemos_DI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', di.port ) "
                                   "WHERE hub.enable=1" ) == TRUE)
      { Json_node_foreach_array_element ( module->config, "DI", Charger_un_DI, module ); }
@@ -699,7 +699,7 @@ error:
     if (SQL_Select_to_json_node ( module->config, "DO",
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, "
                                   "do.*,m.tech_id,m.acronyme FROM phidget_DO AS do "
-                                  "INNER JOIN phidget_hub AS hub ON hub.id=do.hub_id "
+                                  "INNER JOIN phidget AS hub ON hub.id=do.hub_id "
                                   "INNER JOIN mnemos_DO AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', do.port ) "
                                   "WHERE hub.enable=1" ) == TRUE)
      { Json_node_foreach_array_element ( module->config, "DO", Charger_un_DO, module ); }
@@ -769,7 +769,7 @@ reload:
     Thread_init ( "phidget", "I/O", lib, WTD_VERSION, "Manage Phidget System" );
 
     lib->config = Json_node_create();
-    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM phidget_hub WHERE uuid='%s'", lib->uuid );
+    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM phidget WHERE uuid='%s'", lib->uuid );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
 
     if (lib->Thread_debug) PhidgetLog_enable(PHIDGET_LOG_INFO, "phidgetlog.log");

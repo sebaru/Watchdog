@@ -73,11 +73,11 @@
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
-/* Admin_json_phidget_hub_start_stop: Start ou Stop un Hub Phidget                                                            */
+/* Admin_json_phidget_start_stop: Start ou Stop un Hub Phidget                                                            */
 /* Entrées: la connexion Websocket, le champ start/stop                                                                       */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_hub_start_stop ( struct PROCESS *Lib, SoupMessage *msg, gboolean start )
+ static void Admin_json_phidget_start_stop ( struct PROCESS *Lib, SoupMessage *msg, gboolean start )
   { if ( msg->method != SOUP_METHOD_POST )
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -96,7 +96,7 @@
     json_node_unref(request);
 
 
-    if (SQL_Write_new ( "UPDATE phidget_hub SET enable='%d' WHERE id='%d'", start, id ) )
+    if (SQL_Write_new ( "UPDATE phidget SET enable='%d' WHERE id='%d'", start, id ) )
      { soup_message_set_status (msg, SOUP_STATUS_OK);
        Lib->Thread_reload = TRUE;
      }
@@ -132,7 +132,7 @@
                                     "SELECT m.tech_id, m.acronyme, m.libelle, "
                                     "hub.hostname AS hub_hostname, hub.description AS hub_description, "
                                     "di.* FROM phidget_DI AS di "
-                                    "INNER JOIN phidget_hub AS hub ON di.hub_id = hub.id "
+                                    "INNER JOIN phidget AS hub ON di.hub_id = hub.id "
                                     "INNER JOIN mnemos_DI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', di.port ) " ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref ( RootNode );
@@ -144,7 +144,7 @@
                                     "SELECT m.tech_id, m.acronyme, m.libelle, "
                                     "hub.hostname AS hub_hostname, hub.description AS hub_description, "
                                     "do.* FROM phidget_DO AS do "
-                                    "INNER JOIN phidget_hub AS hub ON do.hub_id = hub.id "
+                                    "INNER JOIN phidget AS hub ON do.hub_id = hub.id "
                                     "INNER JOIN mnemos_DO AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', do.port ) " ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref ( RootNode );
@@ -156,7 +156,7 @@
                                     "SELECT m.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale, m.min, m.max, m.unite, "
                                     "hub.hostname AS hub_hostname, hub.description AS hub_description, "
                                     "ai.* FROM phidget_AI AS ai "
-                                    "INNER JOIN phidget_hub AS hub ON ai.hub_id = hub.id "
+                                    "INNER JOIN phidget AS hub ON ai.hub_id = hub.id "
                                     "INNER JOIN mnemos_AI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', ai.port ) " ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref ( RootNode );
@@ -222,12 +222,12 @@
 
     if (! strcasecmp( classe, "DI" ) )
      { SQL_Write_new ( "UPDATE mnemos_DI SET map_thread='PHIDGET', map_tech_id=NULL "
-                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') ",
+                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') ",
                        hub_id, port
                      );
 
        SQL_Write_new ( "UPDATE mnemos_DI SET map_thread='PHIDGET', "
-                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') "
+                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') "
                        "WHERE tech_id='%s' AND acronyme='%s'",
                        hub_id, port, tech_id, acronyme
                      );
@@ -242,12 +242,12 @@
      }
     else if (! strcasecmp( classe, "DO" ) )
      { SQL_Write_new ( "UPDATE mnemos_DO SET map_thread='PHIDGET', map_tech_id=NULL "
-                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') ",
+                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') ",
                        hub_id, port
                      );
 
        SQL_Write_new ( "UPDATE mnemos_DO SET map_thread='PHIDGET', "
-                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') "
+                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') "
                        "WHERE tech_id='%s' AND acronyme='%s'",
                        hub_id, port, tech_id, acronyme
                      );
@@ -270,7 +270,7 @@
         }
 
        SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', map_tech_id=NULL "
-                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d') ",
+                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') ",
                        hub_id, port
                      );
 
@@ -279,7 +279,7 @@
        gchar *map_reponse_vocale  = Normaliser_chaine( Json_get_string ( request, "map_reponse_vocale" ) );
 
        SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', "
-                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget_hub WHERE id=%d), '_P%d'), "
+                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d'), "
                        "min='%d', max='%d', unite='%s', map_question_vocale='%s', map_reponse_vocale='%s' "
                        "WHERE tech_id='%s' AND acronyme='%s'",
                        hub_id, port,
@@ -364,8 +364,8 @@ end:
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
-         if (!strcasecmp(path, "/hub/start")) { Admin_json_phidget_hub_start_stop ( lib, msg, TRUE ); }
-    else if (!strcasecmp(path, "/hub/stop"))  { Admin_json_phidget_hub_start_stop ( lib, msg, FALSE ); }
+         if (!strcasecmp(path, "/hub/start")) { Admin_json_phidget_start_stop ( lib, msg, TRUE ); }
+    else if (!strcasecmp(path, "/hub/stop"))  { Admin_json_phidget_start_stop ( lib, msg, FALSE ); }
     else if (!strcasecmp(path, "/map/list"))  { Admin_json_phidget_map_list ( lib, query, msg ); }
     else if (!strcasecmp(path, "/map/set"))   { Admin_json_phidget_map_set ( lib, msg ); }
     else if (!strcasecmp(path, "/map/del"))   { Admin_json_phidget_map_del ( lib, msg ); }
