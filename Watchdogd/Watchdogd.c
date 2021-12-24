@@ -128,10 +128,10 @@
 /* Sortie: FALSE si n'a pas été pris en charge                                                                                */
 /******************************************************************************************************************************/
  static gboolean Handle_zmq_common ( JsonNode *request, gchar *zmq_tag, gchar *zmq_src_tech_id, gchar *zmq_dst_tech_id )
-  { if ( !strcasecmp( zmq_tag, "SUDO") )
+  { if ( !strcasecmp( zmq_tag, "SUDO")  && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) )
      { gchar chaine[128];
-       if (! (Json_has_member ( request, "target" ) && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
+       if (!Json_has_member ( request, "target" ))
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO: wrong parameters from %s", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
        gchar *target = Json_get_string ( request, "target" );
@@ -140,9 +140,9 @@
        g_snprintf( chaine, sizeof(chaine), "%s &", target );
        system(chaine);
      }
-    else if ( !strcasecmp( zmq_tag, "EXECUTE") )
-     { if (! (Json_has_member ( request, "target" ) && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: EXECUTE : wrong parameters from %s", __func__, zmq_src_tech_id );
+    else if ( !strcasecmp( zmq_tag, "EXECUTE")  && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) )
+     { if (!Json_has_member ( request, "target" ))
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: EXECUTE: wrong parameters from %s", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
        gchar *target = Json_get_string ( request, "target" );
@@ -185,12 +185,16 @@
           exit(0);
         }
      }
-    else if ( !strcasecmp( zmq_tag, "SET_LOG") && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) &&
-              Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
-              Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" ) &&
-              Json_has_member ( request, "log_msrv" )
-            )
-     { Config.log_db   = Json_get_bool ( request, "log_db" );
+    else if ( !strcasecmp( zmq_tag, "SET_LOG") && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) )
+     { if ( !( Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
+               Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" ) &&
+               Json_has_member ( request, "log_msrv" )
+             )
+          )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_LOG: wrong parameters from %s", __func__, zmq_src_tech_id );
+          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
+        }
+       Config.log_db   = Json_get_bool ( request, "log_db" );
        Config.log_zmq  = Json_get_bool ( request, "log_zmq" );
        Config.log_trad = Json_get_bool ( request, "log_trad" );
        Config.log_msrv = Json_get_bool ( request, "log_msrv" );
