@@ -4,7 +4,7 @@
    <div class="col-auto"><h3><img src="/img/audio.png" style="width:80px" alt="Configuration Audio">Connecteurs AUDIO</h3></div>
 
    <div class ="ml-auto btn-group align-items-center">
-        <button type="button" onclick="AUDIO_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un connecteur</button>
+        <button type="button" onclick="AUDIO_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une connexion</button>
         <button type="button" onclick="AUDIO_Refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
    </div>
  </div>

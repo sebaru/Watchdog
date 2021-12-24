@@ -42,6 +42,16 @@
 
  <div class="col p-1">
   <div class="card h-100 text-center bg-light">
+   <div class="card-header">Diffusion Audio</div>
+   <a href="/tech/audio"><img src="/img/audio.png" class="card-img-top wtd-img-connecteur" alt="Diffusion Audio"></a>
+   <div class="card-body">
+        <button type="button" onclick="Redirect('/tech/audio')" class="btn btn-block m-1 btn-primary btn-sm"><i class="fas fa-list"></i> Configurer</button>
+   </div>
+  </div>
+ </div>
+
+ <div class="col p-1">
+  <div class="card h-100 text-center bg-light">
    <div class="card-header">Les I/O Vocales</div>
    <a href="/tech/"><img src="/img/commande_vocale.jpg" class="card-img-top wtd-img-connecteur" alt="Commandes Vocales"></a>
    <div class="card-body">

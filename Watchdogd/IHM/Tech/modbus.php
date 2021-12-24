@@ -3,7 +3,7 @@
  <div class="row m-2">
    <div class="col-auto"><h3><img src="/img/wago_750342.webp" style="width:80px" alt="Wago 750-342">Liste des Modules WAGO sur Modbus</h3></div>
    <div class ="ml-auto btn-group align-items-center">
-        <button type="button" onclick="MODBUS_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un WAGO</button>
+        <button type="button" onclick="MODBUS_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une connexion</button>
         <button type="button" onclick="MODBUS_Refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
    </div>
  </div>

@@ -4,7 +4,7 @@
    <div class="col-auto"><h3><img src="/img/linky.jpg" style="width:80px" alt="Teleinfo E.D.F"> Configuration des modules Téléinfo EDF</h3></div>
 
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="TELEINFO_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un Compteur</button>
+        <button type="button" onclick="TELEINFO_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une connexion</button>
         <button type="button" onclick="TELEINFO_Refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
    </div>
  </div>

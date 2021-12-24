@@ -30,7 +30,7 @@
 
         .wtd-synoptique-preview { height: 80px; }
         .wtd-img-bit-interne { width: 40px; }
-        .wtd-img-connecteur  { width: auto; height: 196px; padding: 20px; }
+        .wtd-img-connecteur  { width: auto; max-width: 196px; height: 196px; padding: 20px; }
       </style>
 
     </head>

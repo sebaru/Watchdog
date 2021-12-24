@@ -47,7 +47,7 @@
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function AUDIO_Add ( )
-  { $('#idAUDIOTitre').text("Ajouter un équipement GSM");
+  { $('#idAUDIOTitre').text("Ajouter une zone AUDIO");
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=audio", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idAUDIOTechID').val("").off("input").on("input", function () { Controle_tech_id( "idAUDIO", null ); } );
