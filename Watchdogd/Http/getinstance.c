@@ -56,7 +56,7 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "instances", "SELECT * FROM instances ORDER BY is_master DESC, instance ASC" );
+    SQL_Select_to_json_node ( RootNode, "instances", "SELECT * FROM instances ORDER BY is_master DESC, tech_id ASC" );
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
@@ -101,9 +101,9 @@
 
     gchar *description = Normaliser_chaine ( Json_get_string ( request, "description" ) );
     gchar *tech_id     = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    SQL_Write_new ( "UPDATE instances SET debug=%d, log_level=%d, log_db=%d, log_zmq=%d, log_trad=%d, description='%s' "
+    SQL_Write_new ( "UPDATE instances SET log_msrv=%d, log_level=%d, log_db=%d, log_zmq=%d, log_trad=%d, description='%s' "
                     "WHERE tech_id='%s'",
-                    Json_get_int ( request, "debug" ), Json_get_int ( request, "log_level" ), Json_get_bool ( request, "log_db" ),
+                    Json_get_bool ( request, "log_msrv" ), Json_get_int ( request, "log_level" ), Json_get_bool ( request, "log_db" ),
                     Json_get_bool ( request, "log_zmq" ), Json_get_bool ( request, "log_trad" ), description, tech_id );
 
     Json_node_add_string ( request, "zmq_tag", "SET_LOG" );

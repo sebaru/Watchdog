@@ -192,7 +192,7 @@
        Config.log_trad = Json_get_bool ( request, "log_trad" );
        Config.log_msrv = Json_get_bool ( request, "log_msrv" );
        Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: debug=%d, db=%d, zmq=%d, trad=%d, log_level=%d", __func__,
+       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: log_msrv=%d, db=%d, zmq=%d, trad=%d, log_level=%d", __func__,
                  Config.log_msrv, Config.log_db, Config.log_zmq, Config.log_trad, Json_get_int ( request, "log_level" ) );
      } else return(FALSE); /* Si pas trouvé */
     return(TRUE);
