@@ -8,10 +8,10 @@
   { table = $('#idTableMsrv').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { instance   : selection.instance,
+     { tech_id    : selection.tech_id,
        description: $("#idMSRVDescription_"+id).val(),
        log_level  : parseInt($("#idMSRVLogLevel_"+id).val()),
-       debug      : ($("#idMSRVDebug_"+id).val()=="true" ? true : false),
+       log_msrv   : ($("#idMSRVLogMSRV_"+id).val()=="true" ? true : false),
        log_db     : ($("#idMSRVLogDB_"+id).val()=="true" ? true : false),
        log_zmq    : ($("#idMSRVLogZMQ_"+id).val()=="true" ? true : false),
        log_trad   : ($("#idMSRVLogTRAD_"+id).val()=="true" ? true : false),
@@ -22,7 +22,7 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MSRV_Reset_Valider ( selection )
-  { var json_request = { zmq_tag: "INSTANCE_RESET", tech_id: selection.instance };
+  { var json_request = { zmq_tag: "INSTANCE_RESET", tech_id: selection.tech_id };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), function ()
      { Show_Info ( "Attendez le redémarrage" );
        Reload_when_ready();
@@ -32,9 +32,9 @@
  function MSRV_Reset ( id  )
   { table = $('#idTableMsrv').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Restarter cette instance "+selection.instance,
+    Show_modal_del ( "Restarter cette instance "+selection.tech_id,
                      "Etes-vous sûr de vouloir relancer cette instance ?",
-                     selection.instance + " - "+selection.description,
+                     selection.tech_id + " - "+selection.description,
                      function () { MSRV_Reset_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -58,7 +58,7 @@
                  { return( Bouton ( "secondary", "Master is "+item.master_host, null, null, item.master_host ) ); }
               }
            },
-           { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
+           { "data": "tech_id",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": "version", "title":"Version",   "className": "align-middle text-center" },
            { "data": "database_version", "title":"Database",   "className": "align-middle text-center" },
            { "data": "start_time", "title":"Start time",   "className": "align-middle text-center" },
@@ -68,10 +68,10 @@
                                 "Description de l'instance", item.description, null ) );
               }
            },
-           { "data": null, "title":"Debug", "className": "align-middle text-center",
+           { "data": null, "title":"Log_MSRV", "className": "align-middle text-center",
              "render": function (item)
               { var choix = [ { valeur: false, texte: "No" }, { valeur: true, texte: "Yes" } ];
-                return( Select ( "idMSRVDebug_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.debug ) );
+                return( Select ( "idMSRVLogMSRV_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.debug ) );
               }
            },
            { "data": null, "title":"Log_DB", "className": "align-middle text-center",

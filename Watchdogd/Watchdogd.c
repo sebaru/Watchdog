@@ -130,7 +130,10 @@
  static gboolean Handle_zmq_common ( JsonNode *request, gchar *zmq_tag, gchar *zmq_src_tech_id, gchar *zmq_dst_tech_id )
   { if ( !strcasecmp( zmq_tag, "SUDO") )
      { gchar chaine[128];
-       if (! (Json_has_member ( request, "target" ) ) )
+       if (! (Json_has_member ( request, "target" ) &&
+              Json_has_member ( request, "tech_id" ) && !strcasecmp ( Json_get_string ( request, "tech_id" ), g_get_host_name() )
+             )
+          )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO : wrong parameters from %s", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
@@ -141,7 +144,10 @@
        system(chaine);
      }
     else if ( !strcasecmp( zmq_tag, "EXECUTE") )
-     { if (! (Json_has_member ( request, "target" ) ) )
+     { if (! (Json_has_member ( request, "target" ) &&
+              Json_has_member ( request, "tech_id" ) && !strcasecmp ( Json_get_string ( request, "tech_id" ), g_get_host_name() )
+             )
+          )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: EXECUTE : wrong parameters from %s", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
@@ -179,12 +185,12 @@
               Json_has_member ( request, "tech_id" ) && !strcasecmp ( Json_get_string ( request, "tech_id" ), g_get_host_name() ) &&
               Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
               Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" ) &&
-              Json_has_member ( request, "debug" )
+              Json_has_member ( request, "log_msrv" )
             )
      { Config.log_db   = Json_get_bool ( request, "log_db" );
        Config.log_zmq  = Json_get_bool ( request, "log_zmq" );
        Config.log_trad = Json_get_bool ( request, "log_trad" );
-       Config.log_msrv = Json_get_bool ( request, "debug" );
+       Config.log_msrv = Json_get_bool ( request, "log_msrv" );
        Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
        Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: debug=%d, db=%d, zmq=%d, trad=%d, log_level=%d", __func__,
                  Config.log_msrv, Config.log_db, Config.log_zmq, Config.log_trad, Json_get_int ( request, "log_level" ) );
@@ -693,16 +699,16 @@ end:
            }
         }
 
-       SQL_Write_new ( "INSERT INTO instances SET instance='%s', version='%s', start_time=NOW() "
-                       "ON DUPLICATE KEY UPDATE instance=VALUES(instance), version=VALUES(version), start_time=VALUES(start_time)",
+       SQL_Write_new ( "INSERT INTO instances SET tech_id='%s', version='%s', start_time=NOW() "
+                       "ON DUPLICATE KEY UPDATE tech_id=VALUES(tech_id), version=VALUES(version), start_time=VALUES(start_time)",
                        g_get_host_name(), WTD_VERSION);
 
        JsonNode *RootNode = Json_node_create ();
-       SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM instances WHERE instance='%s'", g_get_host_name() );
+       SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM instances WHERE tech_id='%s'", g_get_host_name() );
        Config.log_db             = Json_get_bool ( RootNode, "log_db" );
        Config.log_zmq            = Json_get_bool ( RootNode, "log_zmq" );
        Config.log_trad           = Json_get_bool ( RootNode, "log_trad" );
-       Config.log_msrv           = Json_get_bool ( RootNode, "debug" );
+       Config.log_msrv           = Json_get_bool ( RootNode, "log_msrv" );
        Config.instance_is_master = Json_get_bool ( RootNode, "is_master" );
        g_snprintf( Config.master_host, sizeof(Config.master_host), "%s", Json_get_string ( RootNode, "master_host" ) );
        Info_change_log_level ( Config.log, Json_get_int ( RootNode, "log_level" ) );

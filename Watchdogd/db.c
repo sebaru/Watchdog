@@ -555,7 +555,7 @@ encore:
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Memory error. Don't update schema.", __func__ );
        return;
      }
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT database_version FROM instances WHERE instance='%s'", g_get_host_name() );
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT database_version FROM instances WHERE tech_id='%s'", g_get_host_name() );
     gint database_version;
     if (Json_has_member ( RootNode, "database_version" ) )
          { database_version = Json_get_int ( RootNode, "database_version" ); }
@@ -2514,10 +2514,15 @@ encore:
 
       }
 
+    if (database_version < 6082)
+     { SQL_Write_new ("ALTER TABLE instances CHANGE `instance` `tech_id` VARCHAR(64) UNIQUE NOT NULL");
+       SQL_Write_new ("ALTER TABLE instances CHANGE `debug` `log_msrv` TINYINT(1) NOT NULL DEFAULT 0");
+     }
     /* A prévoir SQL_Write_new ("DROP TABLE mnemos_BOOL"); */
+    /* A prévoir SQL_Write_new ("DROP TABLE modbus_module"); */
 
 fin:
-    database_version = 6081;
+    database_version = 6082;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
@@ -2562,7 +2567,7 @@ fin:
     Lancer_requete_SQL ( db, requete );
     Libere_DB_SQL(&db);
 
-    if (SQL_Write_new ( "UPDATE instances SET database_version='%d' WHERE instance='%s'", database_version, g_get_host_name() ))
+    if (SQL_Write_new ( "UPDATE instances SET database_version='%d' WHERE tech_id='%s'", database_version, g_get_host_name() ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %d OK", __func__, database_version ); }
     else
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %d FAILED", __func__, database_version ); }

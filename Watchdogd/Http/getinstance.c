@@ -83,7 +83,8 @@
 
     if ( ! (Json_has_member ( request, "log_level" ) && Json_has_member ( request, "log_db" ) &&
             Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_trad" ) &&
-            Json_has_member ( request, "description" ) && Json_has_member ( request, "instance" )
+            Json_has_member ( request, "description" ) && Json_has_member ( request, "tech_id" ) &&
+            Json_has_member ( request, "log_msrv" )
            )
        )
      { json_node_unref(request);
@@ -99,17 +100,17 @@
      }
 
     gchar *description = Normaliser_chaine ( Json_get_string ( request, "description" ) );
-    gchar *instance    = Normaliser_chaine ( Json_get_string ( request, "instance" ) );
+    gchar *tech_id     = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
     SQL_Write_new ( "UPDATE instances SET debug=%d, log_level=%d, log_db=%d, log_zmq=%d, log_trad=%d, description='%s' "
-                    "WHERE instance='%s'",
+                    "WHERE tech_id='%s'",
                     Json_get_int ( request, "debug" ), Json_get_int ( request, "log_level" ), Json_get_bool ( request, "log_db" ),
-                    Json_get_bool ( request, "log_zmq" ), Json_get_bool ( request, "log_trad" ), description, instance );
+                    Json_get_bool ( request, "log_zmq" ), Json_get_bool ( request, "log_trad" ), description, tech_id );
 
     Json_node_add_string ( request, "zmq_tag", "SET_LOG" );
-    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", instance, request );
+    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", tech_id, request );
 
     g_free(description);
-    g_free(instance);
+    g_free(tech_id);
     json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
