@@ -87,7 +87,7 @@
            { "data": null, "title":"Log_MSRV", "className": "align-middle text-center",
              "render": function (item)
               { var choix = [ { valeur: false, texte: "No" }, { valeur: true, texte: "Yes" } ];
-                return( Select ( "idMSRVLogMSRV_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.debug ) );
+                return( Select ( "idMSRVLogMSRV_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.log_msrv ) );
               }
            },
            { "data": null, "title":"Log_DB", "className": "align-middle text-center",

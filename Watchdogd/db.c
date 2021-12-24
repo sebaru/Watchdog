@@ -555,7 +555,7 @@ encore:
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Memory error. Don't update schema.", __func__ );
        return;
      }
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT database_version FROM instances WHERE tech_id='%s'", g_get_host_name() );
+    SQL_Select_to_json_node ( RootNode, NULL, "SELECT database_version FROM instances WHERE instance='%s'", g_get_host_name() );
     gint database_version;
     if (Json_has_member ( RootNode, "database_version" ) )
          { database_version = Json_get_int ( RootNode, "database_version" ); }
@@ -564,7 +564,6 @@ encore:
 
     Info_new( Config.log, Config.log_db, LOG_NOTICE,
              "%s: Actual Database_Version detected = %05d. Please wait while upgrading.", __func__, database_version );
-
 
     db = Init_DB_SQL();
     if (!db)
