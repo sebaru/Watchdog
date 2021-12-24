@@ -109,16 +109,12 @@
                },
          columns:
           [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
-            { "data": null, "title":"Enabled", "className": "align-middle text-center",
+            { "data": null, "title":"Enable", "className": "align-middle text-center",
                "render": function (item)
                 { if (item.enable==true)
-                   { return( Bouton ( "success", "Désactiver l'MODBUS",
-                                      "MODBUS_Disable", item.id, "Actif" ) );
-                   }
-                  else
-                   { return( Bouton ( "outline-secondary", "Activer l'MODBUS",
-                                      "MODBUS_Enable", item.id, "Désactivé" ) );
-                   }
+                  { return( Bouton ( "success", "Désactiver le module", "MODBUS_Disable", item.id, "Actif" ) ); }
+                 else
+                  { return( Bouton ( "outline-secondary", "Activer le module", "MODBUS_Enable", item.id, "Désactivé" ) ); }
                 },
             },
             { "data": null, "title":"Tech_id", "className": "align-middle text-center",

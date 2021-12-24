@@ -111,6 +111,14 @@
        rowId: "id",
        columns:
          [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
+           { "data": null, "title":"Enable", "className": "align-middle text-center",
+              "render": function (item)
+               { if (item.enable==true)
+                  { return( Bouton ( "success", "Désactiver le module", "PHIDGET_Disable", item.id, "Actif" ) ); }
+                 else
+                  { return( Bouton ( "outline-secondary", "Activer le module", "PHIDGET_Enable", item.id, "Désactivé" ) ); }
+               },
+           },
            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
              "render": function (item)
                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
