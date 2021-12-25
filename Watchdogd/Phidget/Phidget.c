@@ -139,12 +139,8 @@ end:
                  canal->map_tech_id, canal->map_acronyme, description, code );
      }
     else if ( !strcmp ( canal->classe, "DigitalOutput" ) )
-     { if (!canal->dls_do)
-        { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_DO.", __func__ );
-          return;
-        }
-       Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X).", __func__,
-                 canal->dls_do->tech_id, canal->dls_do->acronyme, description, code );
+     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X).", __func__,
+                 canal->map_tech_id, canal->map_acronyme, description, code );
      }
   }
 /******************************************************************************************************************************/
@@ -272,7 +268,6 @@ end:
  static void CCONV Phidget_onAttachHandler ( PhidgetHandle handle, void *ctx )
   { struct PHIDGET_ELEMENT *canal = ctx;
     int serial_number, nbr_canaux, port, num_canal;
-    gchar *tech_id, *acronyme;
 
     Phidget_getDeviceSerialNumber(handle, &serial_number);
     Phidget_getDeviceChannelCount(handle, PHIDCHCLASS_NOTHING, &nbr_canaux );
@@ -283,30 +278,11 @@ end:
          !strcmp ( canal->classe, "PHSensor" ) ||
          !strcmp ( canal->classe, "TemperatureSensor" ) ||
          !strcmp ( canal->classe, "VoltageRatioInput" ) )
-     { tech_id  = canal->map_tech_id;
-       acronyme = canal->map_acronyme;
-       Phidget_AnalogAttach ( canal );
-     }
-    else if ( !strcmp ( canal->classe, "DigitalInput" ) )
-     { tech_id  = canal->map_tech_id;
-       acronyme = canal->map_acronyme;
-     }
-    else if ( !strcmp ( canal->classe, "DigitalOutput" ) )
-     { if (!canal->dls_do)
-        { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_DO.", __func__ );
-          return;
-        }
-       tech_id  = canal->dls_do->tech_id;
-       acronyme = canal->dls_do->acronyme;
-     }
-    else
-     { tech_id  = "Unknown";
-       acronyme = "Unknown";
-     }
+     { Phidget_AnalogAttach ( canal ); }
 
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_NOTICE,
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached. %d channels available.",
-              __func__, tech_id, acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
+              __func__, canal->map_tech_id, canal->map_acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
 
     gchar description[64];
     g_snprintf( description, sizeof(description), "Management du module %s", canal->tech_id );
@@ -314,7 +290,7 @@ end:
     if (Dls_auto_create_plugin( canal->tech_id, description ) == FALSE)
      { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, canal->tech_id ); }
 
-    g_snprintf( description, sizeof(description), "Statud de la communication du module %s", canal->tech_id );
+    g_snprintf( description, sizeof(description), "Status de la communication du module %s", canal->tech_id );
     Mnemo_auto_create_DI ( FALSE, canal->tech_id, "IO_COMM", description );
 
     SubProcess_send_comm_to_master_new ( canal->module, TRUE );
@@ -327,40 +303,15 @@ end:
  static void CCONV Phidget_onDetachHandler ( PhidgetHandle handle, void *ctx )
   { struct PHIDGET_ELEMENT *canal = ctx;
     int serial_number, nbr_canaux, port, num_canal;
-    gchar *tech_id, *acronyme;
 
     Phidget_getDeviceSerialNumber(handle, &serial_number);
     Phidget_getDeviceChannelCount(handle, PHIDCHCLASS_NOTHING, &nbr_canaux );
     Phidget_getHubPort( handle, &port );
     Phidget_getChannel( handle, &num_canal );
 
-    if ( !strcmp ( canal->classe, "VoltageInput" ) ||
-         !strcmp ( canal->classe, "PHSensor" ) ||
-         !strcmp ( canal->classe, "TemperatureSensor" ) ||
-         !strcmp ( canal->classe, "VoltageRatioInput" ) )
-     { tech_id  = canal->map_tech_id;
-       acronyme = canal->map_acronyme;
-     }
-    else if ( !strcmp ( canal->classe, "DigitalInput" ) )
-     { tech_id  = canal->map_tech_id;
-       acronyme = canal->map_acronyme;
-     }
-    else if ( !strcmp ( canal->classe, "DigitalOutput" ) )
-     { if (!canal->dls_do)
-        { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_DO.", __func__ );
-          return;
-        }
-       tech_id  = canal->dls_do->tech_id;
-       acronyme = canal->dls_do->acronyme;
-     }
-    else
-     { tech_id  = "Unknown";
-       acronyme = "Unknown";
-     }
-
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_NOTICE,
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
-              __func__, tech_id, acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
+              __func__, canal->map_tech_id, canal->map_acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
     SubProcess_send_comm_to_master_new ( canal->module, FALSE );
   }
 /******************************************************************************************************************************/
@@ -680,10 +631,10 @@ error:
                 while (liste)
                  { struct PHIDGET_ELEMENT *canal = liste->data;
                    if ( !strcasecmp ( canal->classe, "DigitalOutput" ) &&
-                        !strcasecmp ( canal->dls_do->tech_id, tech_id ) &&
-                        !strcasecmp ( canal->dls_do->acronyme, acronyme ) )
+                        !strcasecmp ( canal->map_tech_id, tech_id ) &&
+                        !strcasecmp ( canal->map_acronyme, acronyme ) )
                     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: SET_DO %s:%s=%d", __func__,
-                                canal->dls_do->tech_id, canal->dls_do->acronyme, etat );
+                                canal->map_tech_id, canal->map_acronyme, etat );
                       if ( PhidgetDigitalOutput_setState( (PhidgetDigitalOutputHandle)canal->handle, etat ) != EPHIDGET_OK )
                        { Phidget_print_error ( canal ); }
                       break;

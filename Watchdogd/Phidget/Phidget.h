@@ -40,11 +40,9 @@
     gchar tech_id[32];
     gchar capteur[32];
     gchar classe[32];
-    gint intervalle;
+    gint  intervalle;
     gchar map_tech_id[32];
     gchar map_acronyme[64];
-    union { struct DLS_DO *dls_do;
-          };
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/
