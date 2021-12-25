@@ -30,14 +30,12 @@
 
         .wtd-synoptique-preview { height: 80px; }
         .wtd-img-bit-interne { width: 40px; }
-        .wtd-img-connecteur  { width: auto; max-width: 196px; height: 196px; padding: 20px; }
+        .wtd-img-connecteur  { object-fit: contain; height: 196px; padding: 10px; }
       </style>
 
     </head>
 
     <body>
-
-
 
   <div id="idToastAlert" class="toast" role="status" style="position: absolute; bottom: 50px; right: 50px; z-index: 99">
    <div class="toast-header">

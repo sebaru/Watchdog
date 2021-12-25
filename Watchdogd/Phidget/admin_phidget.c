@@ -34,7 +34,17 @@
 /* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
  void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
-  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+  { if ( Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+         Json_has_member ( request, "id" ) && Json_has_member ( request, "enable" ) )
+     { SQL_Write_new ( "UPDATE %s SET enable='%d' WHERE id='%d'", lib->name, Json_get_bool(request, "enable"),
+                       Json_get_int ( request, "id" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__,
+                 Json_get_string ( request, "uuid" ), Json_get_string ( request, "tech_id" ) );
+       soup_message_set_status (msg, SOUP_STATUS_OK);
+       return;
+     }
+
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
             Json_has_member ( request, "hostname" ) && Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "password" ) && Json_has_member ( request, "serial" )
            )
