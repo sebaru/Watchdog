@@ -712,7 +712,6 @@ error:
      { usleep(100000);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /******************************************************* Ecoute du master *****************************************************/
        JsonNode *request;
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
