@@ -38,12 +38,12 @@
   { struct SUBPROCESS *module; /* Module père de l'élément */
     PhidgetHandle handle;
     gchar tech_id[32];
-    gpointer bit_comm;
     gchar capteur[32];
     gchar classe[32];
     gint intervalle;
+    gchar map_tech_id[32];
+    gchar map_acronyme[64];
     union { struct DLS_AI *dls_ai;
-            struct DLS_DI *dls_di;
             struct DLS_DO *dls_do;
           };
   };

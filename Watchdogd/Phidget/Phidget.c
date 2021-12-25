@@ -139,12 +139,8 @@ end:
        Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, 0.0, FALSE );
      }
     else if ( !strcmp ( canal->classe, "DigitalInput" ) )
-     { if (!canal->dls_di)
-        { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_DI.", __func__ );
-          return;
-        }
-       Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X).", __func__,
-                 canal->dls_di->tech_id, canal->dls_di->acronyme, description, code );
+     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X).", __func__,
+                 canal->map_tech_id, canal->map_acronyme, description, code );
      }
     else if ( !strcmp ( canal->classe, "DigitalOutput" ) )
      { if (!canal->dls_do)
@@ -241,13 +237,9 @@ end:
 /******************************************************************************************************************************/
  static void CCONV Phidget_onDigitalInputChange ( PhidgetDigitalInputHandle handle, void *ctx, int valeur )
   { struct PHIDGET_ELEMENT *canal = ctx;
-    if (!canal->dls_di)
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_DI.", __func__ );
-       return;
-     }
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %d", __func__, canal->dls_di->tech_id, canal->dls_di->acronyme, valeur );
-    Dls_data_set_DI ( NULL, canal->dls_di->tech_id, canal->dls_di->acronyme, (gpointer)&canal->dls_di, valeur );
+              "%s: '%s':'%s' = %d", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+    Zmq_Send_DI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, (valeur !=0 ? TRUE : FALSE) );
   }
 /******************************************************************************************************************************/
 /* Phidget_AnalogAttach: Appelé quand un canal analogique est en cours d'attachement                                          */
@@ -326,12 +318,8 @@ end:
        Phidget_AnalogAttach ( canal );
      }
     else if ( !strcmp ( canal->classe, "DigitalInput" ) )
-     { if (!canal->dls_di)
-        { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_DI.", __func__ );
-          return;
-        }
-       tech_id  = canal->dls_di->tech_id;
-       acronyme = canal->dls_di->acronyme;
+     { tech_id  = canal->map_tech_id;
+       acronyme = canal->map_acronyme;
      }
     else if ( !strcmp ( canal->classe, "DigitalOutput" ) )
      { if (!canal->dls_do)
@@ -359,7 +347,7 @@ end:
     g_snprintf( description, sizeof(description), "Statud de la communication du module %s", canal->tech_id );
     Mnemo_auto_create_DI ( FALSE, canal->tech_id, "IO_COMM", description );
 
-    Dls_data_set_DI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, TRUE );
+    SubProcess_send_comm_to_master_new ( canal->module, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onAttachHandler: Appelé quand un canal est détaché                                                                 */
@@ -388,12 +376,8 @@ end:
        acronyme = canal->dls_ai->acronyme;
      }
     else if ( !strcmp ( canal->classe, "DigitalInput" ) )
-     { if (!canal->dls_di)
-        { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_DI.", __func__ );
-          return;
-        }
-       tech_id  = canal->dls_di->tech_id;
-       acronyme = canal->dls_di->acronyme;
+     { tech_id  = canal->map_tech_id;
+       acronyme = canal->map_acronyme;
      }
     else if ( !strcmp ( canal->classe, "DigitalOutput" ) )
      { if (!canal->dls_do)
@@ -411,7 +395,7 @@ end:
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_NOTICE,
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
               __func__, tech_id, acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
-    Dls_data_set_DI ( NULL, canal->tech_id, "IO_COMM", &canal->bit_comm, FALSE );
+    SubProcess_send_comm_to_master_new ( canal->module, FALSE );
   }
 /******************************************************************************************************************************/
 /* Charger_un_IO: Charge une IO dans la librairie                                                                             */
@@ -575,14 +559,12 @@ error:
        return;
      }
 
-    g_snprintf( canal->capteur,     sizeof(canal->capteur), "%s", capteur );                 /* Sauvegarde du type de capteur */
-    g_snprintf( canal->tech_id,     sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );   /* Sauvegarde du type de capteur */
-    g_snprintf( canal->classe,      sizeof(canal->classe), "%s", classe );                   /* Sauvegarde du type de capteur */
+    g_snprintf( canal->capteur, sizeof(canal->capteur), "%s", capteur );               /* Sauvegarde du type de capteur */
+    g_snprintf( canal->tech_id, sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );
+    g_snprintf( canal->classe,  sizeof(canal->classe), "%s", classe );                 /* Sauvegarde du type de capteur */
 
-    gchar *tech_id  = Json_get_string ( element, "tech_id" );
-    gchar *acronyme = Json_get_string ( element, "acronyme" );
-    Dls_data_get_DI ( tech_id, acronyme, (gpointer)&canal->dls_di );                      /* Récupération de l'élément DLS_DI */
-    if (!canal->dls_di) Dls_data_set_DI ( NULL, tech_id, acronyme, (gpointer)&canal->dls_di, FALSE );      /* Si n'existe pas */
+    g_snprintf( canal->map_tech_id,  sizeof(canal->map_tech_id),  "%s", Json_get_string ( element, "tech_id" ) );
+    g_snprintf( canal->map_acronyme, sizeof(canal->map_acronyme), "%s", Json_get_string ( element, "acronyme" ) );
 
     if (!strcasecmp(capteur, "DIGITAL-INPUT"))
      { if ( PhidgetDigitalInput_create( (PhidgetDigitalInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
