@@ -130,13 +130,9 @@ end:
          !strcmp ( canal->classe, "PHSensor" ) ||
          !strcmp ( canal->classe, "TemperatureSensor" ) ||
          !strcmp ( canal->classe, "VoltageRatioInput" ) )
-     { if (!canal->dls_ai)
-        { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
-          return;
-        }
-       Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;", __func__,
-                 canal->dls_ai->tech_id, canal->dls_ai->acronyme, description, code );
-       Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, 0.0, FALSE );
+     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;", __func__,
+                 canal->map_tech_id, canal->map_acronyme, description, code );
+       Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, 0.0, FALSE );
      }
     else if ( !strcmp ( canal->classe, "DigitalInput" ) )
      { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X).", __func__,
@@ -158,13 +154,9 @@ end:
 /******************************************************************************************************************************/
  static void CCONV Phidget_onPHSensorChange ( PhidgetPHSensorHandle handle, void *ctx, double valeur )
   { struct PHIDGET_ELEMENT *canal = ctx;
-    if (!canal->dls_ai)
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
-       return;
-     }
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur );
-    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
+              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+    Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onTemperatureSensorChange: Appelé quand un module I/O Temperaute a changé de valeur                                */
@@ -173,13 +165,9 @@ end:
 /******************************************************************************************************************************/
  static void CCONV Phidget_onTemperatureSensorChange ( PhidgetTemperatureSensorHandle handle, void *ctx, double valeur )
   { struct PHIDGET_ELEMENT *canal = ctx;
-    if (!canal->dls_ai)
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
-       return;
-     }
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
-    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
+              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+    Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
@@ -188,13 +176,9 @@ end:
 /******************************************************************************************************************************/
  static void CCONV Phidget_onVoltageInputChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur )
   { struct PHIDGET_ELEMENT *canal = ctx;
-    if (!canal->dls_ai)
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
-       return;
-     }
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
-    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
+              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+    Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                   */
@@ -204,14 +188,9 @@ end:
  static void CCONV Phidget_onVoltageSensorChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur,
                                                    Phidget_UnitInfo *sensorUnit )
   { struct PHIDGET_ELEMENT *canal = ctx;
-    if (!canal->dls_ai)
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
-       return;
-     }
-
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
-    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
+              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+    Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageRatoiInputChange: Appelé quand un module I/O RatioInput a changé de valeur                                */
@@ -221,14 +200,9 @@ end:
  static void CCONV Phidget_onVoltageRatioSensorChange ( PhidgetVoltageRatioInputHandle ch, void *ctx, double valeur,
                                                         Phidget_UnitInfo *sensorUnit)
   { struct PHIDGET_ELEMENT *canal = ctx;
-    if (!canal->dls_ai)
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
-       return;
-     }
-
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f %s", __func__, canal->dls_ai->tech_id, canal->dls_ai->acronyme, valeur, canal->dls_ai->unite );
-    Dls_data_set_AI ( canal->dls_ai->tech_id, canal->dls_ai->acronyme, (gpointer)&canal->dls_ai, valeur, TRUE );
+              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+    Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
@@ -309,12 +283,8 @@ end:
          !strcmp ( canal->classe, "PHSensor" ) ||
          !strcmp ( canal->classe, "TemperatureSensor" ) ||
          !strcmp ( canal->classe, "VoltageRatioInput" ) )
-     { if (!canal->dls_ai)
-        { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
-          return;
-        }
-       tech_id  = canal->dls_ai->tech_id;
-       acronyme = canal->dls_ai->acronyme;
+     { tech_id  = canal->map_tech_id;
+       acronyme = canal->map_acronyme;
        Phidget_AnalogAttach ( canal );
      }
     else if ( !strcmp ( canal->classe, "DigitalInput" ) )
@@ -368,12 +338,8 @@ end:
          !strcmp ( canal->classe, "PHSensor" ) ||
          !strcmp ( canal->classe, "TemperatureSensor" ) ||
          !strcmp ( canal->classe, "VoltageRatioInput" ) )
-     { if (!canal->dls_ai)
-        { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: no DLS_AI.", __func__ );
-          return;
-        }
-       tech_id  = canal->dls_ai->tech_id;
-       acronyme = canal->dls_ai->acronyme;
+     { tech_id  = canal->map_tech_id;
+       acronyme = canal->map_acronyme;
      }
     else if ( !strcmp ( canal->classe, "DigitalInput" ) )
      { tech_id  = canal->map_tech_id;
@@ -452,15 +418,13 @@ end:
      }
 
     canal->module = module;                                                                      /* Sauvegarde du module père */
-    g_snprintf( canal->capteur,     sizeof(canal->capteur), "%s", capteur );                 /* Sauvegarde du type de capteur */
-    g_snprintf( canal->tech_id,     sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );   /* Sauvegarde du type de capteur */
-    g_snprintf( canal->classe,      sizeof(canal->classe), "%s", classe );                   /* Sauvegarde du type de capteur */
+    g_snprintf( canal->capteur,      sizeof(canal->capteur), "%s", capteur );                /* Sauvegarde du type de capteur */
+    g_snprintf( canal->tech_id,      sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );
+    g_snprintf( canal->classe,       sizeof(canal->classe), "%s", classe );                  /* Sauvegarde du type de capteur */
+    g_snprintf( canal->map_tech_id,  sizeof(canal->map_tech_id),  "%s", Json_get_string ( element, "tech_id" ) );
+    g_snprintf( canal->map_acronyme, sizeof(canal->map_acronyme), "%s", Json_get_string ( element, "acronyme" ) );
 
     canal->intervalle = intervalle;                                               /* Sauvegarde de l'intervalle d'acquisition */
-    gchar *tech_id  = Json_get_string ( element, "tech_id" );
-    gchar *acronyme = Json_get_string ( element, "acronyme" );
-    Charger_confDB_AI ( tech_id, acronyme );
-    Dls_data_get_AI ( tech_id, acronyme, (gpointer)&canal->dls_ai );                      /* Récupération de l'élément DLS_AI */
 
     if (!strcasecmp(capteur, "ADP1000-PH"))
      { if ( PhidgetPHSensor_create( (PhidgetPHSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
@@ -559,10 +523,10 @@ error:
        return;
      }
 
-    g_snprintf( canal->capteur, sizeof(canal->capteur), "%s", capteur );               /* Sauvegarde du type de capteur */
-    g_snprintf( canal->tech_id, sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );
-    g_snprintf( canal->classe,  sizeof(canal->classe), "%s", classe );                 /* Sauvegarde du type de capteur */
-
+    canal->module = module;                                                                      /* Sauvegarde du module père */
+    g_snprintf( canal->capteur,      sizeof(canal->capteur), "%s", capteur );                /* Sauvegarde du type de capteur */
+    g_snprintf( canal->tech_id,      sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );
+    g_snprintf( canal->classe,       sizeof(canal->classe), "%s", classe );                  /* Sauvegarde du type de capteur */
     g_snprintf( canal->map_tech_id,  sizeof(canal->map_tech_id),  "%s", Json_get_string ( element, "tech_id" ) );
     g_snprintf( canal->map_acronyme, sizeof(canal->map_acronyme), "%s", Json_get_string ( element, "acronyme" ) );
 
@@ -609,13 +573,12 @@ error:
        return;
      }
 
-    g_snprintf( canal->capteur,     sizeof(canal->capteur), "%s", capteur );                 /* Sauvegarde du type de capteur */
-    g_snprintf( canal->tech_id,     sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );   /* Sauvegarde du type de capteur */
-    g_snprintf( canal->classe,      sizeof(canal->classe), "%s", classe );                   /* Sauvegarde du type de capteur */
-    gchar *tech_id  = Json_get_string ( element, "tech_id" );
-    gchar *acronyme = Json_get_string ( element, "acronyme" );
-    Dls_data_get_DO ( tech_id, acronyme, (gpointer)&canal->dls_do );                      /* Récupération de l'élément DLS_DI */
-    if (!canal->dls_do) Dls_data_set_DO ( NULL, tech_id, acronyme, (gpointer)&canal->dls_do, FALSE );      /* Si n'existe pas */
+    canal->module = module;                                                                      /* Sauvegarde du module père */
+    g_snprintf( canal->capteur,      sizeof(canal->capteur), "%s", capteur );                /* Sauvegarde du type de capteur */
+    g_snprintf( canal->tech_id,      sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );
+    g_snprintf( canal->classe,       sizeof(canal->classe), "%s", classe );                  /* Sauvegarde du type de capteur */
+    g_snprintf( canal->map_tech_id,  sizeof(canal->map_tech_id),  "%s", Json_get_string ( element, "tech_id" ) );
+    g_snprintf( canal->map_acronyme, sizeof(canal->map_acronyme), "%s", Json_get_string ( element, "acronyme" ) );
 
     if (!strcasecmp(capteur, "REL2001_0"))
      { if ( PhidgetDigitalOutput_create( (PhidgetDigitalOutputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;

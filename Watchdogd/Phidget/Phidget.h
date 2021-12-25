@@ -43,8 +43,7 @@
     gint intervalle;
     gchar map_tech_id[32];
     gchar map_acronyme[64];
-    union { struct DLS_AI *dls_ai;
-            struct DLS_DO *dls_do;
+    union { struct DLS_DO *dls_do;
           };
   };
 
