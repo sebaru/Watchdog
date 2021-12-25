@@ -78,7 +78,7 @@
                        "`intervalle` int(11) NOT NULL,"
                        "UNIQUE (hub_id, port, classe),"
                        "FOREIGN KEY (`hub_id`) REFERENCES `phidget` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;", lib->name );
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
        SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_DI` ("
                        "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                        "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
@@ -88,7 +88,7 @@
                        "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                        "UNIQUE (hub_id, port, classe),"
                        "FOREIGN KEY (`hub_id`) REFERENCES `phidget` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;", lib->name );
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
        SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_DO` ("
                        "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                        "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
@@ -98,7 +98,7 @@
                        "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                        "UNIQUE (hub_id, port, classe),"
                        "FOREIGN KEY (`hub_id`) REFERENCES `phidget` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;", lib->name );
+                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
        goto end;
      }
 end:
@@ -284,16 +284,7 @@ end:
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached. %d channels available.",
               __func__, canal->map_tech_id, canal->map_acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
 
-    gchar description[64];
-    g_snprintf( description, sizeof(description), "Management du module %s", canal->tech_id );
-
-    if (Dls_auto_create_plugin( canal->tech_id, description ) == FALSE)
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, canal->tech_id ); }
-
-    g_snprintf( description, sizeof(description), "Status de la communication du module %s", canal->tech_id );
-    Mnemo_auto_create_DI ( FALSE, canal->tech_id, "IO_COMM", description );
-
-    SubProcess_send_comm_to_master_new ( canal->module, TRUE );
+    canal->attached = TRUE;
   }
 /******************************************************************************************************************************/
 /* Phidget_onAttachHandler: Appelé quand un canal est détaché                                                                 */
@@ -312,7 +303,7 @@ end:
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_NOTICE,
               "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
               __func__, canal->map_tech_id, canal->map_acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
-    SubProcess_send_comm_to_master_new ( canal->module, FALSE );
+    canal->attached = FALSE;
   }
 /******************************************************************************************************************************/
 /* Charger_un_IO: Charge une IO dans la librairie                                                                             */
@@ -559,6 +550,9 @@ error:
     gchar *hostname    = Json_get_string ( module->config, "hostname" );
     gchar *description = Json_get_string ( module->config, "description" );
 
+    if (Dls_auto_create_plugin( tech_id, description ) == FALSE)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, tech_id ); }
+
     if (Json_get_bool ( module->config, "enable" ) == FALSE)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, tech_id );
        SubProcess_end ( module );
@@ -604,10 +598,20 @@ error:
                  tech_id, hostname, description );
      }
 
+    gboolean synthese_comm = FALSE;                                                /* Synthese de la comm de tous les sensors */
     while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
      { usleep(100000);
        sched_yield();
 
+/************************************************* Calcul de la comm **********************************************************/
+       GSList *elements = vars->Liste_sensors;
+       synthese_comm = TRUE;
+       while ( elements )                                             /* Si tous les sensors sont attached, alors comm = TRUE */
+        { struct PHIDGET_ELEMENT *element = elements->data;
+          synthese_comm &= element->attached;
+          elements = g_slist_next ( elements );
+        }
+       SubProcess_send_comm_to_master_new ( module, synthese_comm );               /* Périodiquement envoie la comm au master */
 /******************************************************* Ecoute du master *****************************************************/
        JsonNode *request;
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
@@ -624,8 +628,8 @@ error:
                 gchar *acronyme = Json_get_string ( request, "acronyme" );
                 gboolean etat   = Json_get_bool   ( request, "etat" );
 
-                Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s",
-                          __func__, tech_id, acronyme );
+                Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s=%d",
+                          __func__, tech_id, acronyme, etat );
 
                 GSList *liste = vars->Liste_sensors;
                 while (liste)

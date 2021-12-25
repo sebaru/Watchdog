@@ -38,6 +38,7 @@
   { struct SUBPROCESS *module; /* Module père de l'élément */
     PhidgetHandle handle;
     gchar tech_id[32];
+    gboolean attached;
     gchar capteur[32];
     gchar classe[32];
     gint  intervalle;
