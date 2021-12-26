@@ -42,7 +42,7 @@
        <div class="col form-group">
           <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">TechID</label>
-           <input id="idMODBUSTechID" required type="text" class="form-control" placeholder="Tech ID du module">
+           <input id="idPHIDGETTechID" required type="text" class="form-control" placeholder="Tech ID du module">
           </div>
         </div>
 
