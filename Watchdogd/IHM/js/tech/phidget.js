@@ -65,7 +65,7 @@
     $('#idPHIDGETDescription').val( selection.description );
     $('#idPHIDGETHostname').val( selection.hostname );
     $('#idPHIDGETPassword').val( selection.password );
-    $('#idPHIDGETSerial').val( selection.seral );
+    $('#idPHIDGETSerial').val( selection.serial );
     $('#idPHIDGETValider').off("click").on( "click", function () { PHIDGET_Set(selection); } );
     $('#idPHIDGETEdit').modal("show");
   }

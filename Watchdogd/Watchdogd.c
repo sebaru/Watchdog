@@ -394,12 +394,14 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { JsonNode *RootNode = Json_node_create();
+        { static gpointer bit_io_comm = NULL;
+          JsonNode *RootNode = Json_node_create();
           if (RootNode)
            { Json_node_add_string ( RootNode, "zmq_tag", "PING" );
              Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), Config.master_host, RootNode );
              json_node_unref(RootNode);
            }
+          Dls_data_set_WATCHDOG ( NULL, g_get_host_name(), "IO_COMM", &bit_io_comm, 900 );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
