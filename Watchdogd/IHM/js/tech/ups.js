@@ -41,7 +41,7 @@
   { var json_request =
      { uuid:           $('#idTargetProcess').val(),
        tech_id:        $('#idUPSTechID').val(),
-       descriptoin:    $('#idUPSDescription').val(),
+       description:    $('#idUPSDescription').val(),
        host:           $('#idUPSHost').val(),
        name:           $('#idUPSName').val(),
        admin_username: $('#idUPSAdminUsername').val(),
