@@ -164,6 +164,11 @@
     module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
     module->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
+    gchar *description = "Add description to database table";
+    if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
+    if (Dls_auto_create_plugin( tech_id, description ) == FALSE)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, tech_id, description ); }
+
     Mnemo_auto_create_WATCHDOG ( FALSE, tech_id, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is UP",
               __func__, module->lib->uuid, tech_id );

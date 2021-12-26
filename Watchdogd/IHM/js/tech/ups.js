@@ -41,6 +41,7 @@
   { var json_request =
      { uuid:           $('#idTargetProcess').val(),
        tech_id:        $('#idUPSTechID').val(),
+       descriptoin:    $('#idUPSDescription').val(),
        host:           $('#idUPSHost').val(),
        name:           $('#idUPSName').val(),
        admin_username: $('#idUPSAdminUsername').val(),
@@ -62,6 +63,7 @@
                         { return ( Response.instance ); }, selection.uuid );
     $('#idUPSTitre').text("Editer la connexion UPS " + selection.tech_id);
     $('#idUPSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idUPS", selection.tech_id ); } );
+    $('#idUPSDescription').val( selection.description );
     $('#idUPSHost').val( selection.host );
     $('#idUPSName').val( selection.name );
     $('#idUPSAdminUsername').val( selection.admin_username );
@@ -75,6 +77,7 @@
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idUPSTechID').val("").off("input").on("input", function () { Controle_tech_id( "idUPS", null ); } );
+    $('#idUPSDescription').val( "" );
     $('#idUPSHost').val( "" );
     $('#idUPSName').val( "" );
     $('#idUPSAdminUsername').val( "" );
@@ -126,6 +129,7 @@
              "render": function (item)
                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
            },
+           { "data": "description", "title":"Description", "className": "align-middle text-center " },
            { "data": "name", "title":"Name", "className": "align-middle text-center" },
            { "data": "host", "title":"Host", "className": "align-middle text-center" },
            { "data": "admin_username", "title":"Username", "className": "align-middle text-center" },

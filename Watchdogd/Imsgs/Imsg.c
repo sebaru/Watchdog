@@ -39,20 +39,17 @@
   { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
-    if (lib->database_version==0)
-     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                       "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                       "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                       "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
-                       "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`jabberid` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`password` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-       goto end;
-     }
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                    "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`jabberid` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`password` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
-end:
     Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
@@ -330,9 +327,6 @@ end:
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: No tech_id Or Jabber_id. Stopping.", __func__ );
        goto end;
      }
-
-    if (Dls_auto_create_plugin( tech_id, "Gestion messagerie instantanée" ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR", __func__, tech_id ); }
 
 reconnect:
     vars->signed_off = FALSE;

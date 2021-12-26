@@ -44,22 +44,18 @@
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
-    if (lib->database_version==0)
-     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                       "`id` int(11) NOT NULL AUTO_INCREMENT,"
-                       "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                       "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`description` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`token` VARCHAR(65) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`code_insee` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       "PRIMARY KEY (`id`) "
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-       goto end;
-     }
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`token` VARCHAR(65) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`code_insee` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    "PRIMARY KEY (`id`) "
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
-end:
     Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
@@ -206,9 +202,6 @@ end:
     struct METEO_VARS *vars = module->vars;
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
-
-    if (Dls_auto_create_plugin( tech_id, "Gestion de la météo" ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, tech_id ); }
 
     Mnemo_auto_create_HORLOGE ( FALSE, tech_id, "SUNRISE", "Horloge du levé du soleil" );
     Mnemo_auto_create_HORLOGE ( FALSE, tech_id, "SUNSET",  "Horloge du couché du soleil" );

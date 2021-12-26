@@ -121,9 +121,9 @@
               "render": function (item)
                 { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
             },
-            { "data": "hostname", "title":"Hostname", "className": "align-middle text-center " },
             { "data": "description", "title":"Description", "className": "align-middle text-center " },
             { "data": "watchdog", "title":"Watchdog (s)", "className": "align-middle text-center " },
+            { "data": "hostname", "title":"Hostname", "className": "align-middle text-center " },
             { "data": "max_request_par_sec", "title":"Max Requete/s", "className": "align-middle text-center " },
             { "data": null, "title":"IO_COMM", "className": "align-middle text-center",
               "render": function (item)

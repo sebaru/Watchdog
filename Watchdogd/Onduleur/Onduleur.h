@@ -35,8 +35,7 @@
  #define UPS_POLLING      100                                      /* Si tout va bien, on s'y connecte toutes les 10 secondes */
 
  struct UPS_VARS
-  { gint  nbr_connexion;                                                              /* Nombre de connexion OK dans le temps */
-    UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
+  { UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
     gboolean started;                                                                                      /* Est-il actif ?? */
     time_t date_next_connexion;
   };

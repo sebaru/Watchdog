@@ -36,6 +36,7 @@
   { var json_request =
        { uuid    : $('#idTargetProcess').val(),
          tech_id : $('#idIMSGSTechID').val(),
+         description: $('#idIMSGSDescription').val(),
          jabberid: $('#idIMSGSJabberID').val(),
          password: $('#idIMSGSPassword').val(),
        };
@@ -55,6 +56,7 @@
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=imsgs", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
     $('#idIMSGSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idIMSGS", selection.tech_id ); } );
+    $('#idIMSGSDescription').val( selection.description );
     $('#idIMSGSJabberID').val( selection.jabberid );
     $('#idIMSGSPassword').val( selection.password );
     $('#idIMSGSValider').off("click").on( "click", function () { IMSGS_Set(selection); } );
@@ -86,6 +88,7 @@
              "render": function (item)
                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
            },
+           { "data": "description", "title":"Description", "className": "align-middle text-center " },
            { "data": "jabberid", "title":"JabberID", "className": "align-middle " },
            { "data": null, "title":"IO_COMM", "className": "align-middle text-center",
              "render": function (item)

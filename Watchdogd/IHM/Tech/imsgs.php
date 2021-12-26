@@ -50,6 +50,13 @@
 
        <div class="col form-group">
           <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Description</label>
+           <input id="idIMSGSDescription" type="text" class="form-control" placeholder="Description du module">
+          </div>
+        </div>
+
+       <div class="col form-group">
+          <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">XMPP JabberID</label>
            <div class="input-group-prepend">
              <div class="input-group-text">@</div>

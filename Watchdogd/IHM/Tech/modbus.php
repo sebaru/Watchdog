@@ -47,15 +47,15 @@
 
        <div class="col form-group">
           <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Hostname</label>
-           <input id="idMODBUSHostname" required type="text" class="form-control" placeholder="@IP ou hostname">
+           <label class="col-5 col-sm-4 col-form-label text-right">Description</label>
+           <input id="idMODBUSDescription" type="text" class="form-control" placeholder="Ou est le module ?">
           </div>
         </div>
 
        <div class="col form-group">
           <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Description</label>
-           <input id="idMODBUSDescription" type="text" class="form-control" placeholder="Ou est le module ?">
+           <label class="col-5 col-sm-4 col-form-label text-right">Hostname</label>
+           <input id="idMODBUSHostname" required type="text" class="form-control" placeholder="@IP ou hostname">
           </div>
         </div>
 

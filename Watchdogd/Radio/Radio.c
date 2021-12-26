@@ -50,19 +50,15 @@
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
-    if (lib->database_version==0)
-     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                       "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                       "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                       "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-       goto end;
-     }
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
-end:
     Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
@@ -116,9 +112,6 @@ end:
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
-    if (Dls_auto_create_plugin( tech_id, "Gestion de la radio" ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, tech_id ); }
-
     SubProcess_send_comm_to_master_new ( module, TRUE );
 
     while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
@@ -132,15 +125,15 @@ end:
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "PLAY_RADIO" ) )
            { gchar *radio = Json_get_string ( request, "radio" );
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s : Diffusing %s", __func__, radio );
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Diffusing %s", __func__, tech_id, radio );
              Jouer_radio ( module, radio );
            }
           else if ( !strcasecmp( zmq_tag, "STOP_RADIO" ) )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s : Stopping radio", __func__ );
+           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Stopping radio", __func__, tech_id );
              Stopper_radio( module );
            }
           else
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: zmq_tag '%s' not for this thread", __func__, zmq_tag ); }
+           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: zmq_tag '%s' not for this thread", __func__, tech_id, zmq_tag ); }
           json_node_unref(request);
         }
      }

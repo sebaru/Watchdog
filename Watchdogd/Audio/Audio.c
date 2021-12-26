@@ -45,21 +45,17 @@
   { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
-    if (lib->database_version==0)
-     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                       "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                       "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                       "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
-                       "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`language` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`device` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-       goto end;
-     }
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                    "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`language` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`device` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
-end:
     Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
@@ -153,9 +149,6 @@ end:
     struct AUDIO_VARS *vars = module->vars;
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
-
-    if (Dls_auto_create_plugin( tech_id, "Gestion de l'audio diffusion" ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, tech_id ); }
 
     Mnemo_auto_create_DI ( FALSE, tech_id, "P_ALL", "Profil Audio: All Hps Enabled" );
     Mnemo_auto_create_DI ( FALSE, tech_id, "P_NONE", "Profil audio: All Hps disabled" );

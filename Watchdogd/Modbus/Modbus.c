@@ -53,22 +53,19 @@
   { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
-    if (lib->database_version==0)
-     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                       "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                       "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                       "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
-                       "`hostname` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`watchdog` INT(11) NOT NULL DEFAULT 50,"
-                       "`max_request_par_sec` INT(11) NOT NULL DEFAULT 50,"
-                       "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;", lib->name );
-       goto end;
-     }
-end:
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
+                    "`hostname` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`watchdog` INT(11) NOT NULL DEFAULT 50,"
+                    "`max_request_par_sec` INT(11) NOT NULL DEFAULT 50,"
+                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;", lib->name );
+
     Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
@@ -972,13 +969,8 @@ end:
   { SubProcess_init ( module, sizeof(struct MODBUS_VARS) );
     struct MODBUS_VARS *vars = module->vars;
 
-    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    gchar *tech_id             = Json_get_string ( module->config, "tech_id" );
     gint   max_request_par_sec = Json_get_int ( module->config, "max_request_par_sec" );
-
-    gchar description[128];
-    g_snprintf( description, sizeof(description), "Gestion du module Wago %s", tech_id );
-    if (Dls_auto_create_plugin( tech_id, description ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': DLS Create ERROR", __func__, tech_id ); }
 
     if (Json_get_bool ( module->config, "enable" ) == FALSE)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, tech_id );

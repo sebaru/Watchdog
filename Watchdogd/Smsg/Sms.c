@@ -44,24 +44,20 @@
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
-    if (lib->database_version==0)
-     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                       "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                       "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                       "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`description` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`ovh_service_name` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`ovh_application_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`ovh_application_secret` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`ovh_consumer_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                       "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
-                       "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-       goto end;
-     }
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`ovh_service_name` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`ovh_application_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`ovh_application_secret` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`ovh_consumer_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
+                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
-end:
     Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
@@ -548,9 +544,6 @@ end:
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
-    if (Dls_auto_create_plugin( tech_id, "Gestion du GSM" ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, tech_id ); }
-
     /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
     vars->sending_is_disabled = FALSE;                                                /* A l'init, l'envoi de SMS est autorisé */
     gint next_try = 0;
@@ -565,7 +558,7 @@ end:
        if (module->comm_status == FALSE && Partage->top >= next_try )
         { if (Smsg_connect(module)==FALSE)
            { next_try = Partage->top + 300;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s : Connect failed, trying in 30s", __func__ );
+             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Connect failed, trying in 30s", __func__, tech_id );
            }
         }
 
@@ -580,7 +573,7 @@ end:
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
                Json_get_int  ( request, "sms_notification" ) != MESSAGE_SMS_NONE )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", __func__,
+           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending msg '%s:%s' (%s)", __func__, tech_id,
                        Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                        Json_get_string ( request, "libelle" ) );
 
@@ -590,7 +583,7 @@ end:
           else if ( !strcasecmp ( zmq_tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
           else if ( !strcasecmp ( zmq_tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
           else
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: zmq_tag '%s' not for this thread", __func__, zmq_tag ); }
+           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: zmq_tag '%s' not for this thread", __func__, tech_id, zmq_tag ); }
           json_node_unref(request);
         }
      }

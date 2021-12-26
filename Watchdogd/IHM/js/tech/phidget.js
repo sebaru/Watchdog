@@ -123,8 +123,8 @@
              "render": function (item)
                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
            },
-           { "data": "hostname", "title":"Hostname", "className": "align-middle text-center " },
            { "data": "description", "title":"Description", "className": "align-middle text-center " },
+           { "data": "hostname", "title":"Hostname", "className": "align-middle text-center " },
            { "data": "password", "title":"Password", "className": "align-middle text-center " },
            { "data": "serial", "title":"Serial Number", "className": "align-middle text-center " },
            { "data": null, "title":"IO_COMM", "className": "align-middle text-center",

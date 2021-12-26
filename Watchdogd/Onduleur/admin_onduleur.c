@@ -48,7 +48,7 @@
     if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
             Json_has_member ( request, "host" ) && Json_has_member ( request, "name" ) &&
             Json_has_member ( request, "admin_username" ) && Json_has_member ( request, "admin_password" ) &&
-            Json_has_member ( request, "enable" )
+            Json_has_member ( request, "enable" ) && Json_has_member ( request, "description" )
            )
         )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -57,6 +57,7 @@
 
     gchar *uuid           = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
     gchar *tech_id        = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *description    = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *host           = Normaliser_chaine ( Json_get_string( request, "host" ) );
     gchar *name           = Normaliser_chaine ( Json_get_string( request, "name" ) );
     gchar *admin_username = Normaliser_chaine ( Json_get_string( request, "admin_username" ) );
@@ -65,21 +66,22 @@
 
     if (Json_has_member ( request, "id" ))
      { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', host='%s', name='%s', admin_username='%s', admin_password='%s', "
-                       "enable='%d' "
+                       "enable='%d', description='%s' "
                        "WHERE id='%d'",
-                       lib->name, uuid, tech_id, host, name, admin_username, admin_password, enable,
+                       lib->name, uuid, tech_id, host, name, admin_username, admin_password, enable, description,
                        Json_get_int ( request, "id" ) );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
      }
     else
      { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', host='%s', name='%s', admin_username='%s', admin_password='%s' "
-                       "enable='%d' ",
-                       lib->name, uuid, tech_id, host, name, admin_username, admin_password, enable );
+                       "enable='%d', description='%s' ",
+                       lib->name, uuid, tech_id, host, name, admin_username, admin_password, enable, description );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
      }
 
     g_free(uuid);
     g_free(tech_id);
+    g_free(description);
     g_free(host);
     g_free(name);
     g_free(admin_username);
