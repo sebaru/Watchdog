@@ -48,23 +48,20 @@
   { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
-    if (lib->database_version==0)
-     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `ups` ("
-                       "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                       "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                       "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                       "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
-                       "`host` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                       "`name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                       "`admin_username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                       "`admin_password` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                       "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
-       goto end;
-     }
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `ups` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
+                    "`host` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                    "`name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                    "`admin_username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                    "`admin_password` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
 
-end:
     Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
@@ -83,8 +80,18 @@ end:
        vars->started = FALSE;
      }
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE,
-              "%s: %s disconnected (host='%s')", __func__, tech_id, host );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "LOAD", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "REALPOWER", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_CHARGE", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "INPUT_HZ", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_HZ", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
+
+    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s disconnected (host='%s')", __func__, tech_id, host );
     SubProcess_send_comm_to_master_new ( module, FALSE );
   }
 /******************************************************************************************************************************/
@@ -172,65 +179,8 @@ end:
         }
      }
 
-/************************************************** PREPARE LES AI ************************************************************/
-    if (!vars->nbr_connexion)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                "%s: %s: Initialise le DLS et charge les AI ", __func__, tech_id );
-       if (Dls_auto_create_plugin( tech_id, "Gestion de l'onduleur" ) == FALSE)
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", tech_id ); }
-
-       Mnemo_auto_create_DI ( FALSE, tech_id, "OUTLET_1_STATUS", "Statut de la prise n°1" );
-       Mnemo_auto_create_DI ( FALSE, tech_id, "OUTLET_2_STATUS", "Statut de la prise n°2" );
-       Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_ONLINE", "UPS Online" );
-       Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_CHARGING", "UPS en charge" );
-       Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_ON_BATT",  "UPS sur batterie" );
-       Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
-       Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_ALARM",  "UPS en alarme !" );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "LOAD", "Charge onduleur", "%" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "LOAD", 0.0, FALSE );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "REALPOWER", "Charge onduleur", "W" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "REALPOWER", 0.0, FALSE );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_CHARGE", 0.0, FALSE );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "INPUT_HZ", 0.0, FALSE );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_HZ", 0.0, FALSE );
-
-       Mnemo_auto_create_AI ( FALSE, tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
-       Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
-
-       Mnemo_auto_create_DO ( FALSE, tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
-       Mnemo_auto_create_DO ( FALSE, tech_id, "LOAD_ON", "Active la sortie ondulée" );
-       Mnemo_auto_create_DO ( FALSE, tech_id, "OUTLET_1_OFF", "Désactive la prise n°1" );
-       Mnemo_auto_create_DO ( FALSE, tech_id, "OUTLET_1_ON", "Active la prise n°1" );
-       Mnemo_auto_create_DO ( FALSE, tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
-       Mnemo_auto_create_DO ( FALSE, tech_id, "OUTLET_2_ON", "Active la prise n°2" );
-       Mnemo_auto_create_DO ( FALSE, tech_id, "START_DEEP_BAT", "Active un test de décharge profond" );
-       Mnemo_auto_create_DO ( FALSE, tech_id, "START_QUICK_BAT", "Active un test de décharge léger" );
-       Mnemo_auto_create_DO ( FALSE, tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
-     }
-
     vars->date_next_connexion = 0;
     vars->started = TRUE;
-    vars->nbr_connexion++;
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s up and running (host='%s')", __func__, tech_id, host );
     SubProcess_send_comm_to_master_new ( module, TRUE );
     return(TRUE);
@@ -386,13 +336,39 @@ end:
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
-    if (Dls_auto_create_plugin( tech_id, "Gestion de l'onduleur" ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, tech_id ); }
-
     if (Json_get_bool ( module->config, "enable" ) == FALSE)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, tech_id );
        SubProcess_end ( module );
      }
+
+    Mnemo_auto_create_DI ( FALSE, tech_id, "OUTLET_1_STATUS", "Statut de la prise n°1" );
+    Mnemo_auto_create_DI ( FALSE, tech_id, "OUTLET_2_STATUS", "Statut de la prise n°2" );
+    Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_ONLINE", "UPS Online" );
+    Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_CHARGING", "UPS en charge" );
+    Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_ON_BATT",  "UPS sur batterie" );
+    Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
+    Mnemo_auto_create_DI ( FALSE, tech_id, "UPS_ALARM",  "UPS en alarme !" );
+
+    Mnemo_auto_create_AI ( FALSE, tech_id, "LOAD", "Charge onduleur", "%" );
+    Mnemo_auto_create_AI ( FALSE, tech_id, "REALPOWER", "Charge onduleur", "W" );
+    Mnemo_auto_create_AI ( FALSE, tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
+    Mnemo_auto_create_AI ( FALSE, tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
+    Mnemo_auto_create_AI ( FALSE, tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
+    Mnemo_auto_create_AI ( FALSE, tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
+    Mnemo_auto_create_AI ( FALSE, tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
+    Mnemo_auto_create_AI ( FALSE, tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
+    Mnemo_auto_create_AI ( FALSE, tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
+    Mnemo_auto_create_AI ( FALSE, tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
+
+    Mnemo_auto_create_DO ( FALSE, tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
+    Mnemo_auto_create_DO ( FALSE, tech_id, "LOAD_ON", "Active la sortie ondulée" );
+    Mnemo_auto_create_DO ( FALSE, tech_id, "OUTLET_1_OFF", "Désactive la prise n°1" );
+    Mnemo_auto_create_DO ( FALSE, tech_id, "OUTLET_1_ON", "Active la prise n°1" );
+    Mnemo_auto_create_DO ( FALSE, tech_id, "OUTLET_2_OFF", "Désactive la prise n°2" );
+    Mnemo_auto_create_DO ( FALSE, tech_id, "OUTLET_2_ON", "Active la prise n°2" );
+    Mnemo_auto_create_DO ( FALSE, tech_id, "START_DEEP_BAT", "Active un test de décharge profond" );
+    Mnemo_auto_create_DO ( FALSE, tech_id, "START_QUICK_BAT", "Active un test de décharge léger" );
+    Mnemo_auto_create_DO ( FALSE, tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
 
     while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
      { usleep(100000);
