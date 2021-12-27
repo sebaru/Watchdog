@@ -29,7 +29,7 @@ PKG_PROG_PKG_CONFIG
 
 AC_SUBST([systemdsystemunitdir], $($PKG_CONFIG --variable=systemdsystemunitdir systemd) )
 AC_SUBST([systemduserunitdir], $($PKG_CONFIG --variable=systemduserunitdir systemd) )
-
+AC_SUBST([sudoersdir], "/etc/sudoers.d" )
 AM_CONDITIONAL([HAVE_SYSTEMD], [test "x$with_systemdsystemunitdir" != "xno"])
 
 AM_DISABLE_STATIC

@@ -34,6 +34,7 @@ sysconf_DATA = watchdogd.abls.conf.sample
 pkgdata_DATA = init_db.sql base_icones.sql
 dist_systemdsystemunit_DATA = Watchdogd.service
 dist_systemduserunit_DATA = Watchdogd-user.service
+dist_sudoers_DATA = watchdogd.sudo.conf
 
 EXTRA_DIST = Watchdogd.service Watchdogd-user.service watchdogd.abls.conf init_db.sql base_icones.sql
 MAINTAINERCLEANFILES = Makefile.in
