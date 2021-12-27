@@ -1441,9 +1441,14 @@
 
        while(liste)
         { alias = (struct ALIAS *)liste->data;
-          if ( (!alias->used) )
-           { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
-             retour = TRAD_DLS_WARNING;
+          if ( alias->used == FALSE )
+           { if ( ! ( alias->classe == MNEMO_MOTIF &&                              /* Pas de warning pour les comments unused */
+                      !strcasecmp ( Get_option_chaine ( alias->options, T_FORME, "" ), "comment" )
+                    )
+                )
+              { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
+                retour = TRAD_DLS_WARNING;
+              }
            }
                                                                                         /* Alias Dynamiques, local uniquement */
           if (!strcmp(alias->tech_id, Dls_plugin.tech_id))
