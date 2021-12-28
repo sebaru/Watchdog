@@ -45,7 +45,7 @@
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
     SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                     "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
@@ -53,7 +53,6 @@
                     "`token` VARCHAR(65) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`code_insee` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    "PRIMARY KEY (`id`) "
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
     Process_set_database_version ( lib, 1 );
