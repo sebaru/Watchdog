@@ -34,6 +34,7 @@
     gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
     gint     num_ligne;                                                         /* N° de ligne du plugin en cours d'execution */
     gpointer bit_comm;
+    gpointer bit_io_comm;
     gpointer bit_msg_comm_ok;
     gpointer bit_msg_comm_hs;
     gpointer bit_defaut;
@@ -60,12 +61,14 @@
  extern gboolean Dls_data_get_bool_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_bool_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern void     Dls_data_set_BI        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur );
+ extern void     Dls_data_set_BI_groupe ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bi_p, gint groupe );
  extern void     Dls_data_set_MONO      ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur );
  extern gboolean Dls_data_get_DI        ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
  extern gboolean Dls_data_get_DI_up     ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
  extern gboolean Dls_data_get_DI_down   ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
  extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean valeur );
  extern void     Dls_data_set_MSG       ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat );
+ extern void     Dls_data_set_MSG_groupe( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gint groupe );
  extern void     Dls_data_set_tempo     ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *tempo_p, gboolean etat,
                                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
  extern gdouble  Dls_data_get_AO        ( gchar *tech_id, gchar *acronyme, gpointer *ao_p );

@@ -33,18 +33,11 @@
  #define AUDIO_JINGLE                3000                                    /* Jingle si pas de message au bout de 5 minutes */
  #define AUDIO_DEFAUT_LANGUAGE       "fr"                                                  /* Language par défaut pour le TTS */
 
- struct AUDIO_CONFIG
-  { struct LIBRAIRIE *lib;
-    gint last_audio;                                                                   /* Date de la derniere emission sonore */
-    gchar language[80];                                             /* Language de restitution vocal, au format google_speech */
-    gchar device[32];
-    guint nbr_diffusion_wav;
-    guint nbr_diffusion_google;
+ struct AUDIO_VARS
+  { gint last_audio;                                                                   /* Date de la derniere emission sonore */
     gboolean diffusion_enabled;                                                        /* Diffusion autorisée pourle thread ? */
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern gboolean Audio_Lire_config ( void );
- extern gchar *Audio_Admin_response( gchar *ligne );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

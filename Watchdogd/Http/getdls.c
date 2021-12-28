@@ -83,7 +83,7 @@
     while(liste)
      { gpointer comm = liste->data;
        JsonNode *json_comm = Json_node_create ();
-       Dls_BOOL_to_json ( json_comm, comm );
+       Dls_MONO_to_json ( json_comm, comm );
        Json_array_add_element (comm_array, json_comm );
        liste = g_slist_next( liste );
      }
@@ -169,15 +169,29 @@
           liste = g_slist_next(liste);
         }
      }
-/*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
-    else if (!strcasecmp ( classe, "BOOL" ))
-     { array = Json_node_add_array ( dls_run, "BOOL" );
-       liste = Partage->Dls_data_BOOL;
+/*--------------------------------------------------- Monostables ------------------------------------------------------------*/
+    else if (!strcasecmp ( classe, "MONO" ))
+     { array = Json_node_add_array ( dls_run, "MONO" );
+       liste = Partage->Dls_data_MONO;
        while(liste)
-        { struct DLS_BOOL *bit=liste->data;
+        { struct DLS_MONO *bit=liste->data;
           if (!strcasecmp(bit->tech_id, tech_id))
            { JsonNode *element = Json_node_create();
-             Dls_BOOL_to_json ( element, bit );
+             Dls_MONO_to_json ( element, bit );
+             Json_array_add_element ( array, element );
+           }
+          liste = g_slist_next(liste);
+        }
+     }
+/*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
+    else if (!strcasecmp ( classe, "BI" ))
+     { array = Json_node_add_array ( dls_run, "BI" );
+       liste = Partage->Dls_data_BI;
+       while(liste)
+        { struct DLS_BI *bit=liste->data;
+          if (!strcasecmp(bit->tech_id, tech_id))
+           { JsonNode *element = Json_node_create();
+             Dls_BI_to_json ( element, bit );
              Json_array_add_element ( array, element );
            }
           liste = g_slist_next(liste);

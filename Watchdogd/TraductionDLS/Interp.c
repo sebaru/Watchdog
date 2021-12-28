@@ -739,11 +739,18 @@
     action->sinon = New_chaine( taille );
 
     gint update = Get_option_entier ( options, T_UPDATE, 0 );
+    gint groupe = Get_option_entier ( options, T_GROUPE, 0 );
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, FALSE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+    if (groupe>0)
+     { g_snprintf( action->alors, taille, "   Dls_data_set_MSG_groupe ( vars, \"%s\", \"%s\", &_%s_%s, %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, groupe );
+     }
+    else
+     { g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+       g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, FALSE );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+     }
     return(action);
   }
 /******************************************************************************************************************************/
@@ -1029,18 +1036,25 @@
   { struct ACTION *action;
     int taille;
 
+    gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
+
     action = New_action();
     taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
-    if (barre)
+    if (groupe == 0)
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, %s );\n",
+                                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (barre ? "FALSE" : "TRUE") );
+     }
+    else if(barre)
      { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
-                                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI_groupe ( vars, \"%s\", \"%s\", &_%s_%s, %d );\n",
+                                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, groupe );
      }
+
     return(action);
   }
 /******************************************************************************************************************************/
@@ -1419,7 +1433,7 @@
         }
 
 /*----------------------------------------------- Prise en charge du peuplement de la database -------------------------------*/
-       gchar *Liste_BOOL = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
+       gchar *Liste_BI = NULL, *Liste_MONO = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
        gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
        gchar *Liste_CI = NULL, *Liste_CH = NULL;
        gchar *Liste_CADRANS = NULL, *Liste_MOTIF = NULL;
@@ -1427,9 +1441,14 @@
 
        while(liste)
         { alias = (struct ALIAS *)liste->data;
-          if ( (!alias->used) )
-           { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
-             retour = TRAD_DLS_WARNING;
+          if ( alias->used == FALSE )
+           { if ( ! ( alias->classe == MNEMO_MOTIF &&                              /* Pas de warning pour les comments unused */
+                      !strcasecmp ( Get_option_chaine ( alias->options, T_FORME, "" ), "comment" )
+                    )
+                )
+              { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
+                retour = TRAD_DLS_WARNING;
+              }
            }
                                                                                         /* Alias Dynamiques, local uniquement */
           if (!strcmp(alias->tech_id, Dls_plugin.tech_id))
@@ -1438,9 +1457,14 @@
               { case MNEMO_BUS:
                    break;
                 case MNEMO_BISTABLE:
+                 { gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
+                   Mnemo_auto_create_BI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, groupe );
+                   Liste_BI = Add_csv ( Liste_BI, alias->acronyme );
+                   break;
+                 }
                 case MNEMO_MONOSTABLE:
-                 { Mnemo_auto_create_BOOL ( TRUE, alias->classe, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_BOOL = Add_csv ( Liste_BOOL, alias->acronyme );
+                 { Mnemo_auto_create_MONO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+                   Liste_MONO = Add_csv ( Liste_MONO, alias->acronyme );
                    break;
                  }
                 case MNEMO_ENTREE:
@@ -1595,9 +1619,9 @@
                    break;
                  }
                 case MNEMO_MSG:
-                 { gint param;
-                   param = Get_option_entier ( alias->options, T_TYPE, MSG_ETAT );
-                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, param );
+                 { gint type   = Get_option_entier ( alias->options, T_TYPE, MSG_ETAT );
+                   gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
+                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, type, groupe );
                    Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme );
                    break;
                  }
@@ -1711,9 +1735,15 @@
        SQL_Write ( requete );
        g_free(requete);
 
-       requete = g_strconcat ( "DELETE FROM mnemos_BOOL WHERE deletable=1 AND tech_id='", tech_id, "' ",
-                               " AND acronyme NOT IN (", (Liste_BOOL?Liste_BOOL:"''") , ")", NULL );
-       if (Liste_BOOL) g_free(Liste_BOOL);
+       requete = g_strconcat ( "DELETE FROM mnemos_BI WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_BI?Liste_BI:"''") , ")", NULL );
+       if (Liste_BI) g_free(Liste_BI);
+       SQL_Write ( requete );
+       g_free(requete);
+
+       requete = g_strconcat ( "DELETE FROM mnemos_MONO WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_MONO?Liste_MONO:"''") , ")", NULL );
+       if (Liste_MONO) g_free(Liste_MONO);
        SQL_Write ( requete );
        g_free(requete);
 

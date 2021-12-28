@@ -3,7 +3,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function GPIOD_Sauver_parametre ( id )
   { var json_request =
-     { instance      : $('#idTargetInstance').val(),
+     { instance      : $('#idTargetProcess').val(),
        id            : id,
        mode_inout    : parseInt ($('#idModalGPIODInOut').val()),
        mode_activelow: parseInt($('#idModalGPIODActiveLow').val()),
@@ -15,7 +15,7 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function GPIOD_Load_config ()
-  { Send_to_API ( "GET", "/api/process/gpiod/status?instance="+$('#idTargetInstance').val(), null, function(Response)
+  { Send_to_API ( "GET", "/api/process/gpiod/status?instance="+$('#idTargetProcess').val(), null, function(Response)
      { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').slideUp(); }
                                   else { $('#idAlertThreadNotRunning').slideDown(); }
        $('#idGPIODTable').DataTable().clear();
@@ -31,7 +31,7 @@
  function GPIOD_Show_modal_map ( id )
   { table = $('#idGPIODTable').DataTable();
     selection = table.rows().data().filter( function(item) { return (item.id==id) } )[0];
-    $("#idModalGPIODTitre").text("Mapper la GPIO "+selection.gpio+ " sur " + $('#idTargetInstance').val() );
+    $("#idModalGPIODTitre").text("Mapper la GPIO "+selection.gpio+ " sur " + $('#idTargetProcess').val() );
     if (selection.mode_inout==0) { $("#idModalGPIODInOut").val("0"); }
                             else { $("#idModalGPIODInOut").val("1"); }
     $("#idModalGPIODInOut").off("change").on("change", function ()
@@ -44,8 +44,8 @@
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { $('#idTargetInstance').empty();
-    Select_from_api ( "idTargetInstance", "/api/instance/list", null, "instances", "instance_id", function (Response)
+  { $('#idTargetProcess').empty();
+    Select_from_api ( "idTargetProcess", "/api/instance/list", null, "instances", "instance_id", function (Response)
                        { return ( Response.instance_id ); }, "MASTER" );
     $('#idGPIODTable').DataTable(
      { pageLength : 50,

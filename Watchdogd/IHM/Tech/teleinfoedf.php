@@ -1,91 +1,75 @@
-<div class="container">
-
-   <div id="idAlertThreadNotRunning" class="alert alert-warning" role="alert" style="display: none">
-     <h4 class="alert-heading">Warning !</h4>
-         Thread <a href="/tech/process">TELEINFOEDF</a> is not running !
-   </div>
+<div class="container-fluid">
 
  <div class="row m-2">
-   <h3><img src="/img/linky.jpg" style="width:80px" alt="Teleinfo E.D.F"> Configuration des modules Téléinfo EDF</h3>
+   <div class="col-auto"><h3><img src="/img/linky.jpg" style="width:80px" alt="Teleinfo E.D.F"> Configuration des modules Téléinfo EDF</h3></div>
 
    <div class ="ml-auto btn-group align-items-start">
-        <button type="button" onclick="TINFO_Load_config()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
-        <!-- <button type="button" class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>-->
+        <button type="button" onclick="TELEINFO_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une connexion</button>
+        <button type="button" onclick="TELEINFO_Refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
    </div>
  </div>
 
 <hr>
 
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Choix du compteur</label>
-           <select id="idTargetInstance" class="custom-select border-info" onchange="TINFO_Load_config()"></select>
-     					</div>
-  					</div>
 
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Tech_ID</label>
-						     <input id="idTINFOTechID" type="text" class="form-control" maxlength="32" placeholder="Tech_ID du compteur EDF">
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Port</label>
-						     <input id="idTINFOPort" type="text" class="form-control" placeholder="Port de communication">
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Description</label>
-						     <input id="idTINFODescription" type="text" class="form-control" placeholder="Ou est le compteur ?">
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Statut Communication</label>
-						     <input disabled id="idTINFOComm" type="text" class="form-control" placeholder="Communication">
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Mode</label>
-						     <input disabled id="idTINFOMode" type="text" class="form-control" placeholder="Mode du module Teleinfo USB">
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Retry in</label>
-						     <input disabled id="idTINFORetry" type="text" class="form-control" placeholder="Délai avant nouvelle tentative de connexion">
-						     <div class="input-group-append">
-							     <span class="input-group-text">secondes</span>
-						     </div>
-     					</div>
-  					</div>
-
-       <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Last View</label>
-						     <input disabled id="idTINFOLastView" type="text" class="form-control" placeholder="Date de last view">
-						     <div class="input-group-append">
-							     <span class="input-group-text">secondes</span>
-						     </div>
-     					</div>
-  					</div>
-
-   <div class="row m-2">
-     <div class="ml-auto">
-        <button type="button" onclick="TINFO_Sauver_parametre()" class="btn btn-outline-success"><i class="fas fa-save"></i> Sauvegarder</button>
-			  </div>
-			</div>
+   <div class="table-responsive">
+     <table id="idTableTELEINFO" class="table table-striped table-bordered table-hover">
+       <thead class="thead-dark">
+       </thead>
+       <tbody>
+       </tbody>
+     </table>
+   </div>
 
 <!-- Container -->
 </div>
 
+
+<div id="idTELEINFOEdit" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content ">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idTELEINFOTitre"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+       <div class="col form-group">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Choix de l'instance</label>
+           <select id="idTargetProcess" class="custom-select border-info"></select>
+          </div>
+       </div>
+
+       <div class="col form-group">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">TELEINFO Tech_ID</label>
+           <input id="idTELEINFOTechID" type="text" class="form-control" maxlength="32" placeholder="Tech_ID du TELEINFO">
+          </div>
+       </div>
+
+       <div class="col form-group">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">TELEINFO Description</label>
+           <input id="idTELEINFODescription" type="text" class="form-control" placeholder="Description du téléphone et/ou sa position">
+          </div>
+       </div>
+
+       <div class="col form-group">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Port Device</label>
+           <input id="idTELEINFOPort" type="text" class="form-control" placeholder="FileSystem device /dev/xxx">
+          </div>
+       </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
+        <button id="idTELEINFOValider" type="button" class="btn btn-primary" data-dismiss="modal"><i class="fas fa-save"></i> Valider</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="/js/tech/teleinfoedf.js" type="text/javascript"></script>

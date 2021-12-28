@@ -60,7 +60,7 @@
     Show_modal_del ( "Détruire le module ?",
                      "Etes-vous sur de vouloir supprimer le module DLS et toutes ses dépendances (Mnémoniques, ...) ?",
                      selection.tech_id + " - " + selection.shortname + " - " + selection.name,
-                     "Valider_Dls_Del('"+tech_id+"')" );
+                     function () { Valider_Dls_Del(tech_id); } );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Dls_compiler ( tech_id )

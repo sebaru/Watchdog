@@ -61,7 +61,7 @@
   };
 
  struct DMX_CONFIG                                                                       /* Communication entre DLS et la DMX */
-  { struct LIBRAIRIE *lib;
+  { struct PROCESS *lib;
     gchar tech_id[32];                                                                               /* Tech_id du module DMX */
     gchar device[128];                                                              /* Nom du device USB associé au canal DMX */
     gint nbr_request;                                                                        /* Nombre de requete par seconde */

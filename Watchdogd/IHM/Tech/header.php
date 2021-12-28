@@ -30,14 +30,12 @@
 
         .wtd-synoptique-preview { height: 80px; }
         .wtd-img-bit-interne { width: 40px; }
-        .wtd-img-connecteur  { width: auto; height: 196px; }
+        .wtd-img-connecteur  { object-fit: contain; height: 196px; padding: 10px; }
       </style>
 
     </head>
 
     <body>
-
-
 
   <div id="idToastAlert" class="toast" role="status" style="position: absolute; bottom: 50px; right: 50px; z-index: 99">
    <div class="toast-header">
@@ -130,7 +128,7 @@
 </div>
 
 <header>
-	<nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
+ <nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
   <a class="navbar-brand" href="/"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>

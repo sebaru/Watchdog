@@ -27,26 +27,23 @@
 
 #ifndef _PHIDGET_H_
  #define _PHIDGET_H_
- #include <libsoup/soup.h>
- #include <json-glib/json-glib.h>
  #include <phidget22.h>
+ #include "watchdogd.h"
 
- struct PHIDGET_CONFIG                                                                 /* Communication entre DLS et la Phidget */
-  { struct LIBRAIRIE *lib;
-    GSList *Liste_sensors;
+ struct PHIDGET_VARS                                                                 /* Communication entre DLS et la Phidget */
+  { GSList *Liste_sensors; /* List of Phidget Elements */
   };
 
  struct PHIDGET_ELEMENT
-  { PhidgetHandle handle;
+  { struct SUBPROCESS *module; /* Module père de l'élément */
+    PhidgetHandle handle;
     gchar tech_id[32];
-    gpointer bit_comm;
+    gboolean attached;
     gchar capteur[32];
     gchar classe[32];
-    gint intervalle;
-    union { struct DLS_AI *dls_ai;
-            struct DLS_DI *dls_di;
-            struct DLS_DO *dls_do;
-          };
+    gint  intervalle;
+    gchar map_tech_id[32];
+    gchar map_acronyme[64];
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

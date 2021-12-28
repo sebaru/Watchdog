@@ -104,7 +104,7 @@
     Show_modal_del ( "Détruire le synoptique ?",
                      "Etes-vous sur de vouloir supprimer le synoptique suivant et toutes ses dépendances (DLS, mnémoniques, ...) ?",
                      selection.page+" - "+selection.libelle,
-                      "Valide_del_synoptique("+syn_id+")" );
+                     function () { Valide_del_synoptique(syn_id); } );
   }
 
 /******************************************************************************************************************************/

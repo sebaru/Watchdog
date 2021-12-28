@@ -121,6 +121,7 @@ newline       [\n\r]+
 "edge_down"                { DlsScanner_lval.val = T_EDGE_DOWN; return T_EDGE_DOWN; }
 "libelle"                  { DlsScanner_lval.val = T_LIBELLE;   return T_LIBELLE;   }
 "unite"                    { DlsScanner_lval.val = T_UNITE;     return T_UNITE;     }
+"groupe"                   { DlsScanner_lval.val = T_GROUPE;    return T_GROUPE;    }
 "random"                   { DlsScanner_lval.val = T_RANDOM;    return T_RANDOM;    }
 "update"                   { DlsScanner_lval.val = T_UPDATE;    return T_UPDATE;    }
 "etiquette"                { DlsScanner_lval.val = T_ETIQUETTE; return T_ETIQUETTE; }

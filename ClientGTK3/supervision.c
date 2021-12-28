@@ -635,7 +635,7 @@
        Json_node_add_int ( visuel, "angle", 0 );
        Json_node_add_int ( visuel, "posx", 40 );
        Json_node_add_int ( visuel, "posy", 40 );
-       Json_node_add_double ( visuel, "scale", 0.08 );
+       Json_node_add_double ( visuel, "scale", 0.06 );
        Afficher_un_motif ( NULL, 0, visuel, page );
      }
 
@@ -654,6 +654,26 @@
        Json_node_add_int ( visuel, "id", -1 );
        Json_node_add_int ( visuel, "angle", 0 );
        Json_node_add_int ( visuel, "posx", 60 );
+       Json_node_add_int ( visuel, "posy", 750 );
+       Json_node_add_double ( visuel, "scale", 1.0 );
+       Afficher_un_motif ( NULL, 0, visuel, page );
+     }
+
+    visuel = Json_node_create();
+    if (visuel)
+     { Json_node_add_string ( visuel, "forme", "comment" );
+       Json_node_add_string ( visuel, "gestion", "0" );
+       Json_node_add_string ( visuel, "mode", "annotation" );
+       Json_node_add_string ( visuel, "color", "black" );
+       Json_node_add_string ( visuel, "tech_id", "" );
+       Json_node_add_string ( visuel, "acronyme", "" );
+       Json_node_add_string ( visuel, "ihm_affichage", "complexe" );
+       gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), "%s", Json_get_string ( infos->syn, "date_create" ) );
+       Json_node_add_string ( visuel, "libelle", chaine );
+       Json_node_add_int ( visuel, "id", -1 );
+       Json_node_add_int ( visuel, "angle", 0 );
+       Json_node_add_int ( visuel, "posx", 950 );
        Json_node_add_int ( visuel, "posy", 750 );
        Json_node_add_double ( visuel, "scale", 1.0 );
        Afficher_un_motif ( NULL, 0, visuel, page );
@@ -689,7 +709,7 @@
        Json_node_add_string ( visuel, "libelle", "©ABLS-Habitat.fr" );
        Json_node_add_int ( visuel, "id", -1 );
        Json_node_add_int ( visuel, "angle", 0 );
-       Json_node_add_int ( visuel, "posx", 180 );
+       Json_node_add_int ( visuel, "posx", 160 );
        Json_node_add_int ( visuel, "posy", 40 );
        Json_node_add_double ( visuel, "scale", 1.0 );
        Afficher_un_motif ( NULL, 0, visuel, page );

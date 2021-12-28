@@ -41,7 +41,7 @@
     Show_modal_del ( "Détruire le tableau ?",
                      "Etes-vous sur de vouloir supprimer le tableau suivant ?",
                      selection.titre,
-                     "Tableau_Valide_delete("+id+")" );
+                     function () { Tableau_Valide_delete(id); } );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Tableau_Edit ( id )

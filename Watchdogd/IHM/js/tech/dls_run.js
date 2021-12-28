@@ -255,23 +255,15 @@
        responsive: true,
      });
 
-    $('#idTableBool').DataTable(
+    $('#idTableMONO').DataTable(
      { pageLength : 50,
        fixedHeader: true, paging: false, ordering: true, searching: true,
-       ajax: {	url : "/api/dls/run",	type : "GET", data: { tech_id: vars[3], classe: "BOOL" }, dataSrc: "BOOL",
+       ajax: {	url : "/api/dls/run",	type : "GET", data: { tech_id: vars[3], classe: "MONO" }, dataSrc: "MONO",
                error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
              },
        rowId: "id",
        columns:
          [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
-           { "data": null, "title":"Type", "className": "align-middle text-center",
-             "render": function (item)
-               { if (item.classe==0)
-                  { return( Bouton ( "primary", "Le bit est un bistable", null, null, "Bistable" ) ); }
-                 else
-                  { return( Bouton ( "info", "Le bit est un monostable", null, null, "Monostable" ) ); }
-               },
-           },
            { "data": null, "title":"Etat", "className": "align-middle ",
              "render": function (item)
                { if (item.etat==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
@@ -281,12 +273,7 @@
            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
              "render": function (item)
                { boutons = Bouton_actions_start ();
-                 if (item.classe==0) /* Si bistable */
-                  { boutons += Bouton_actions_add ( "success", "Activer le bit", "Dls_run_BI_set", item.acronyme, "power-off", null );
-                    boutons += Bouton_actions_add ( "secondary", "Désactiver le bit", "Dls_run_BI_reset", item.acronyme, "power-off", null );
-                  }
-                 else
-                  { boutons += Bouton_actions_add ( "success", "Activer le bit", "Dls_run_MONO_set", item.acronyme, "power-off", null ); }
+                 boutons += Bouton_actions_add ( "success", "Activer le bit", "Dls_run_MONO_set", item.acronyme, "power-off", null );
                  boutons += Bouton_actions_end ();
                  return(boutons);
                },
@@ -295,6 +282,36 @@
        /*order: [ [0, "desc"] ],*/
        responsive: true,
      });
+
+    $('#idTableBI').DataTable(
+     { pageLength : 50,
+       fixedHeader: true, paging: false, ordering: true, searching: true,
+       ajax: {	url : "/api/dls/run",	type : "GET", data: { tech_id: vars[3], classe: "BI" }, dataSrc: "BI",
+               error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+             },
+       rowId: "id",
+       columns:
+         [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
+           { "data": null, "title":"Etat", "className": "align-middle ",
+             "render": function (item)
+               { if (item.etat==true) { return( Bouton ( "success", "Le bit est a 1", null, null, "1" ) );        }
+                                 else { return( Bouton ( "outline-secondary", "Le bit est a 0", null, null, "0" ) ); }
+               },
+           },
+           { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
+             "render": function (item)
+               { boutons = Bouton_actions_start ();
+                 boutons += Bouton_actions_add ( "success", "Activer le bit", "Dls_run_BI_set", item.acronyme, "power-off", null );
+                 boutons += Bouton_actions_add ( "secondary", "Désactiver le bit", "Dls_run_BI_reset", item.acronyme, "power-off", null );
+                 boutons += Bouton_actions_end ();
+                 return(boutons);
+               },
+           }
+         ],
+       /*order: [ [0, "desc"] ],*/
+       responsive: true,
+     });
+
 
     $('#idTableVisuel').DataTable(
      { pageLength : 50,
@@ -331,7 +348,7 @@
            { "data": null, "title":"Etat", "className": "align-middle ",
              "render": function (item)
                { if (item.etat==true) { return( Bouton ( "success", "Le compteur décompte", null, null, "En décompte" ) );  }
-                                 else { return( Bouton ( "outline-warning", "Le compteur est échu", null, null, "échu" ) ); }
+                                 else { return( Bouton ( "warning", "Le compteur est échu", null, null, "échu" ) ); }
                },
            },
            { "data": null, "title":"Reste en décompte", "className": "align-middle text-center",

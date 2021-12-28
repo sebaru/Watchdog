@@ -17,7 +17,8 @@
        document.getElementById("idNbrDlsDO").innerHTML = Response.nbr_dls_do;
        document.getElementById("idNbrDlsAI").innerHTML = Response.nbr_dls_ai;
        document.getElementById("idNbrDlsAO").innerHTML = Response.nbr_dls_ao;
-       document.getElementById("idNbrDlsBOOL").innerHTML = Response.nbr_dls_bool;
+       document.getElementById("idNbrDlsBI").innerHTML = Response.nbr_dls_bi;
+       document.getElementById("idNbrDlsMONO").innerHTML = Response.nbr_dls_mono;
        document.getElementById("idNbrUsers").innerHTML = Response.nbr_users;
        document.getElementById("idNbrAuditLog").innerHTML = Response.nbr_audit_log;
        document.getElementById("idNbrSessions").innerHTML = Response.nbr_sessions;
