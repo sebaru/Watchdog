@@ -17,7 +17,7 @@
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableUPS').DataTable().ajax.reload(null, false);
+       UPS_Refresh();
      }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -33,7 +33,7 @@
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableUPS').DataTable().ajax.reload(null, false);
+       UPS_Refresh();
      }, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -52,7 +52,7 @@
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { if (selection && selection.uuid != json_request.uuid) Process_reload ( selection.uuid );/* Restart de l'ancien subprocess si uuid différent */
        Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableUPS').DataTable().ajax.reload(null, false);
+       UPS_Refresh();
      }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -90,7 +90,7 @@
   { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
-       $('#idTableUPS').DataTable().ajax.reload(null, false);
+       UPS_Refresh();
      }, null );
   }
 /**************************************** Supprime une connexion meteo ********************************************************/

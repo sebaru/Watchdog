@@ -20,7 +20,7 @@
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { if (selection && selection.uuid != json_request.uuid) Process_reload ( selection.uuid );/* Restart de l'ancien subprocess si uuid différent */
        Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableSMSG').DataTable().ajax.reload(null, false);
+       SMSG_Refresh();
      }, null );
   }
 /************************************ Demande l'envoi d'un SMS de test ********************************************************/
@@ -78,7 +78,7 @@
   { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
-       $('#idTableSMSG').DataTable().ajax.reload(null, false);
+       SMSG_Refresh();
      }, null );
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
