@@ -134,9 +134,9 @@
         }
        else
         { gchar description[128];
-	         g_snprintf( description, sizeof(description), "%s", buffer + strlen(name) + 9 );
-          Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
-                   "%s: %s: Reading GET UPSDESC %s", __func__, tech_id, description );
+          g_snprintf( description, sizeof(description), "%s", buffer + strlen(name) + 10 );
+          description [ strlen(description) - 1 ] = 0; /* supprime les " du début/fin */
+          Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: Reading GET UPSDESC %s", __func__, tech_id, description );
           SQL_Write_new ( "UPDATE %s SET description='%s' WHERE tech_id='%s'",
                           module->lib->name, description, tech_id );
         }
@@ -192,7 +192,7 @@
 /******************************************************************************************************************************/
  static void Onduleur_set_instcmd ( struct SUBPROCESS *module, gchar *nom_cmd )
   { struct UPS_VARS *vars = module->vars;
-	   gchar buffer[80];
+    gchar buffer[80];
 
     if (vars->started != TRUE) return;
 
@@ -225,7 +225,7 @@
 /******************************************************************************************************************************/
  static gchar *Onduleur_get_var ( struct SUBPROCESS *module, gchar *nom_var )
   { struct UPS_VARS *vars = module->vars;
-	   static gchar buffer[80];
+    static gchar buffer[80];
     gint retour_read;
 
     gchar *tech_id        = Json_get_string ( module->config, "tech_id" );

@@ -41,7 +41,6 @@
   { var json_request =
      { uuid:           $('#idTargetProcess').val(),
        tech_id:        $('#idUPSTechID').val(),
-       description:    $('#idUPSDescription').val(),
        host:           $('#idUPSHost').val(),
        name:           $('#idUPSName').val(),
        admin_username: $('#idUPSAdminUsername').val(),
@@ -63,7 +62,6 @@
                         { return ( Response.instance ); }, selection.uuid );
     $('#idUPSTitre').text("Editer la connexion UPS " + selection.tech_id);
     $('#idUPSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idUPS", selection.tech_id ); } );
-    $('#idUPSDescription').val( selection.description );
     $('#idUPSHost').val( selection.host );
     $('#idUPSName').val( selection.name );
     $('#idUPSAdminUsername').val( selection.admin_username );
@@ -77,7 +75,6 @@
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idUPSTechID').val("").off("input").on("input", function () { Controle_tech_id( "idUPS", null ); } );
-    $('#idUPSDescription').val( "" );
     $('#idUPSHost').val( "" );
     $('#idUPSName').val( "" );
     $('#idUPSAdminUsername').val( "" );
