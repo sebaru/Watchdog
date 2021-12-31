@@ -2,21 +2,21 @@
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Archive_purge ( )
-  { Send_to_API ( 'PUT', "/api/process/archive/purge", null, function (Response)
+  { Send_to_API ( 'PUT', "/api/archive/purge", null, function (Response)
      { $('#idModalInfoDetail').html("Execution du thread de purge: <strong>"+Response.exec_purge_thread+"</strong>" );
        $('#idModalInfo').modal("show");
      });
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Archive_clear (  )
-  { Send_to_API ( 'PUT', "/api/process/archive/clear", null, function (Response)
+  { Send_to_API ( 'PUT', "/api/archive/clear", null, function (Response)
      { $('#idModalInfoDetail').html("Nombre d'enregistrements droppés: <strong>"+Response.nbr_archive_deleted+"</strong>" );
        $('#idModalInfo').modal("show");
      });
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Archive_testdb (  )
-  { Send_to_API ( 'PUT', "/api/process/archive/testdb", null, function (Response)
+  { Send_to_API ( 'PUT', "/api/archive/testdb", null, function (Response)
      { $('#idModalInfoDetail').html("Etat du test de connexion: <strong>"+Response.result+"<br>" + Response.details + "</strong>" );
        $('#idModalInfo').modal("show");
      });
@@ -24,7 +24,7 @@
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Archive_Del ( table_name )
   { var json_request = JSON.stringify( { table_name : table_name } );
-    Send_to_API ( 'DELETE', "/api/process/archive/del", json_request, function ()
+    Send_to_API ( 'DELETE', "/api/archive/del", json_request, function ()
      { $('#idTableArchive').DataTable().ajax.reload(null, false);
      });
   }
@@ -52,11 +52,11 @@
        buffer_size: parseInt($('#idArchiveDBBufferSize').val()),
      };
     if ($('#idArchiveDBPassword').val().length > 0) { json_request.password = $('#idArchiveDBPassword').val(); }
-    Send_to_API ( 'POST', "/api/process/archive/set", JSON.stringify(json_request), null );
+    Send_to_API ( 'POST', "/api/archive/set", JSON.stringify(json_request), null );
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { Send_to_API ( "GET", "/api/process/archive/status", null, function ( Response )
+  { Send_to_API ( "GET", "/api/archive/status", null, function ( Response )
      { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').slideUp(); }
                                   else { $('#idAlertThreadNotRunning').slideDown(); }
        $('#idArchiveDBHostname').val(Response.hostname);
@@ -71,7 +71,7 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id",
-         ajax: {	url : "/api/process/archive/table_status",	type : "GET", dataSrc: "tables",
+         ajax: {	url : "/api/archive/table_status",	type : "GET", dataSrc: "tables",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:

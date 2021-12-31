@@ -108,6 +108,24 @@
                                        SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_acquitter ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                           SoupClientContext *client, gpointer user_data );
+
+ extern void Http_traiter_archive_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                        SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_archive_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                        SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_archive_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                           SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_archive_table_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                                 SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_archive_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                        SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_archive_clear ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                          SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_archive_purge ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                          SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_archive_testdb ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                           SoupClientContext *client, gpointer user_data );
+
  extern void Http_traiter_process_config ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                            SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_process_send ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
