@@ -229,11 +229,11 @@
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
     if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_bool_up ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( result, taille, "%sDls_data_get_BI_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_bool_down ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( result, taille, "%sDls_data_get_BI_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
@@ -313,13 +313,18 @@
     gint taille;
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
-    if ( (!barre) )
-         { g_snprintf( result, taille, "Dls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
-                       alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-    else { g_snprintf( result, taille, "!Dls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
-                       alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
+    if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
+     { g_snprintf( result, taille, "%sDls_data_get_MONO_up ( \"%s\", \"%s\", &_%s_%s )",
+                   (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+    else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
+     { g_snprintf( result, taille, "%sDls_data_get_MONO_down ( \"%s\", \"%s\", &_%s_%s )",
+                   (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+    else
+     { g_snprintf( result, taille, "%sDls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
+                   (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
    return(result);
  }
 /******************************************************************************************************************************/
@@ -1597,7 +1602,7 @@
 /***************************************************** Alias externe **********************************************************/
           else                                                             /* Alias externe : n'est pas défini dans le module */
            { gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-             if (cadran && 
+             if (cadran &&
                   ( alias->classe == MNEMO_ENTREE_ANA ||
                     alias->classe == MNEMO_REGISTRE ||
                     alias->classe == MNEMO_CPTH ||
