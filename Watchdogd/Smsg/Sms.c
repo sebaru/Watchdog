@@ -481,7 +481,7 @@
        else if ( nbr_results > 1 )                                           /* Si trop d'enregistrement, demande de préciser */
         { g_snprintf(chaine, sizeof(chaine), "Trop de résultats pour '%s'.", texte ); }    /* Envoi de l'erreur si pas trouvé */
        else
-        { Json_node_foreach_array_element ( RootNode, "results", Sms_Envoyer_commande_dls_data, from );
+        { Json_node_foreach_array_element ( RootNode, "results", Sms_Envoyer_commande_dls_data, module );
           g_snprintf(chaine, sizeof(chaine), "'%s': fait.", texte );
         }
       }
