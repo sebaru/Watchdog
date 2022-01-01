@@ -118,18 +118,6 @@
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
- void Thread_send_comm_to_master ( struct PROCESS *lib, gboolean etat )
-  { if (lib->comm_status != etat || lib->comm_next_update <= Partage->top)
-     { Zmq_Send_WATCHDOG_to_master ( lib, lib->name, "IO_COMM", 900 );
-       lib->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
-       lib->comm_status = etat;
-     }
-  }
-/******************************************************************************************************************************/
-/* Thread_send_comm_to_master: appelé par chaque thread pour envoyer le statut de la comm au master                           */
-/* Entrée: La structure afférente                                                                                             */
-/* Sortie: aucune                                                                                                             */
-/******************************************************************************************************************************/
  void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { Zmq_Send_WATCHDOG_to_master_new ( module, Json_get_string ( module->config, "tech_id" ), "IO_COMM", 900 );

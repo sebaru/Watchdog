@@ -47,7 +47,7 @@
     DMX_Send_RDM_Discovery_Request = 11,
   };
 
- #define DMX_RETRY       100                                             /* 10 secondes entre chaque retry si pb de connexion */
+ #define DMX_RETRY_DELAI 100                                             /* 10 secondes entre chaque retry si pb de connexion */
  #define DMX_CHANNEL     512
 
  struct TRAME_DMX                                                                               /* Definition d'une trame DMX */
@@ -60,13 +60,10 @@
     guchar end_delimiter;                                        /* (0xE7). Ne pas oublier le end_delimiter en fin de trame ! */
   };
 
- struct DMX_CONFIG                                                                       /* Communication entre DLS et la DMX */
-  { struct PROCESS *lib;
-    gchar tech_id[32];                                                                               /* Tech_id du module DMX */
-    gchar device[128];                                                              /* Nom du device USB associé au canal DMX */
-    gint nbr_request;                                                                        /* Nombre de requete par seconde */
+ struct DMX_VARS                                                                         /* Communication entre DLS et la DMX */
+  { gint nbr_request;                                                                        /* Nombre de requete par seconde */
     gint fd;                                                                       /* File Descriptor d'accès au port USB DMX */
-    gboolean comm_status;
+    gint date_next_retry;                                                                              /* Date de reconnexion */
     struct DLS_AO Canal[DMX_CHANNEL];                                          /* Tableau dynamique d'accès aux bits internes */
     gint taille_trame_dmx;
     struct TRAME_DMX Trame_dmx;

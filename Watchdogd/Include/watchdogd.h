@@ -176,7 +176,6 @@
  extern void Thread_init ( gchar *pr_name, gchar *classe, struct PROCESS *lib, gchar *version, gchar *description );
  extern void Thread_end ( struct PROCESS *lib );
  extern JsonNode *Thread_Listen_to_master ( struct PROCESS *lib );
- extern void Thread_send_comm_to_master ( struct PROCESS *lib, gboolean etat );
  extern JsonNode *SubProcess_Listen_to_master_new ( struct SUBPROCESS *module );
  extern void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat );
  extern void Process_Load_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
