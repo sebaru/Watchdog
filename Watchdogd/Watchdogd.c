@@ -217,7 +217,7 @@
     gchar *zmq_src_tech_id = Json_get_string ( request, "zmq_src_tech_id" );
     gchar *zmq_dst_tech_id = Json_get_string ( request, "zmq_dst_tech_id" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive %s from %s to %s/%s",
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive %s from %s to %s",
               __func__, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id );
 
          if ( !strcasecmp( zmq_tag, "SET_WATCHDOG") )
@@ -312,7 +312,7 @@
     gchar *zmq_src_tech_id   = Json_get_string ( request, "zmq_src_tech_id" );
     gchar *zmq_dst_tech_id   = Json_get_string ( request, "zmq_dst_tech_id" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive %s from %s to %s/%s",
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive %s from %s to %s",
               __func__, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id );
 
          if ( !strcasecmp( zmq_tag, "PING") )
