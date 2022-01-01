@@ -323,7 +323,6 @@
      }
 
     lib->Run_subprocess = dlsym( lib->dl_handle, "Run_subprocess" );                              /* Recherche de la fonction */
-    lib->Admin_json     = dlsym( lib->dl_handle, "Admin_json" );                                  /* Recherche de la fonction */
     lib->Admin_config   = dlsym( lib->dl_handle, "Admin_config" );                                /* Recherche de la fonction */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: %s loaded",
               __func__, lib->uuid, lib->nom_fichier );

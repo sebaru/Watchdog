@@ -90,7 +90,6 @@
     void (*Run_process)( struct PROCESS *lib );                                  /* Fonction principale de gestion du thread */
     void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
                                                                                  /* Fonction de gestion des commandes d'admin */
-    void *(*Admin_json)( struct PROCESS *lib, gpointer msg, const char *path, GHashTable *query, gint access_level );
     void *(*Admin_config)( struct PROCESS *lib, gpointer msg, JsonNode *RootNode );
 
     GSList *modules;                                                                           /* Liste des modules du thread */
