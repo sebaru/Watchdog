@@ -425,7 +425,7 @@
     gchar *map_tag = Json_get_string ( element, "map_tag" );
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: Match found -> '%s' '%s:%s' - %s", __func__,
               map_tag, tech_id, acro, libelle );
-    Zmq_Send_CDE_to_master ( module->lib, tech_id, acro );
+    Zmq_Send_CDE_to_master_new ( module, tech_id, acro );
   }
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
