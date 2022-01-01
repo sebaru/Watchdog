@@ -80,16 +80,16 @@
        vars->started = FALSE;
      }
 
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "LOAD", 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "REALPOWER", 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_CHARGE", 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "INPUT_HZ", 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_HZ", 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "LOAD", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "REALPOWER", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "BATTERY_CHARGE", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "INPUT_HZ", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "OUTPUT_HZ", 0.0, FALSE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s disconnected (host='%s')", __func__, tech_id, host );
     SubProcess_send_comm_to_master_new ( module, FALSE );
@@ -279,50 +279,50 @@
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "LOAD", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "LOAD", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "REALPOWER", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "REALPOWER", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_CHARGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "BATTERY_CHARGE", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "INPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "INPUT_VOLTAGE", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_RUNTIME", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "BATTERY_RUNTIME", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "BATTERY_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "BATTERY_VOLTAGE", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "INPUT_HZ", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "INPUT_HZ", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_CURRENT", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "OUTPUT_CURRENT", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_HZ", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "OUTPUT_HZ", atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master ( module->lib, tech_id, "OUTPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master_new ( module, tech_id, "OUTPUT_VOLTAGE", atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { Zmq_Send_DI_to_master ( module->lib, tech_id, "OUTLET_1_STATUS", !strcmp(reponse, "\"on\"") ); }
+     { Zmq_Send_DI_to_master_new ( module, tech_id, "OUTLET_1_STATUS", !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { Zmq_Send_DI_to_master ( module->lib, tech_id, "OUTLET_2_STATUS", !strcmp(reponse, "\"on\"") ); }
+     { Zmq_Send_DI_to_master_new ( module, tech_id, "OUTLET_2_STATUS", !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { Zmq_Send_DI_to_master ( module->lib, tech_id, "UPS_ONLINE",       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
-       Zmq_Send_DI_to_master ( module->lib, tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
-       Zmq_Send_DI_to_master ( module->lib, tech_id, "UPS_ON_BATT",      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
-       Zmq_Send_DI_to_master ( module->lib, tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
-       Zmq_Send_DI_to_master ( module->lib, tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
+     { Zmq_Send_DI_to_master_new ( module, tech_id, "UPS_ONLINE",       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master_new ( module, tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
+       Zmq_Send_DI_to_master_new ( module, tech_id, "UPS_ON_BATT",      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master_new ( module, tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master_new ( module, tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
-    Zmq_Send_DI_to_master ( module->lib, tech_id, "IO_COMM", TRUE );
+    Zmq_Send_DI_to_master_new ( module, tech_id, "IO_COMM", TRUE );
     return(TRUE);
   }
 /******************************************************************************************************************************/
