@@ -1,6 +1,6 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
- function MODBUS_refresh ( )
+ function MODBUS_Refresh ( )
   { $('#idTableMODBUS').DataTable().ajax.reload(null, false);
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -16,7 +16,7 @@
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableMODBUS').DataTable().ajax.reload(null, false);
+       MODBUS_Refresh();
      }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -32,7 +32,7 @@
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableMODBUS').DataTable().ajax.reload(null, false);
+       MODBUS_Refresh();
      }, null );
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
@@ -40,7 +40,7 @@
   { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
-       $('#idTableMODBUS').DataTable().ajax.reload(null, false);
+       MODBUS_Refresh();
      }, null );
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
@@ -67,7 +67,7 @@
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { if (selection && selection.uuid != json_request.uuid) Process_reload ( selection.uuid );/* Restart de l'ancien subprocess si uuid différent */
        Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableMODBUS').DataTable().ajax.reload(null, false);
+       MODBUS_Refresh();
      }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/

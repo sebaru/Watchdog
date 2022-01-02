@@ -90,7 +90,6 @@
     void (*Run_process)( struct PROCESS *lib );                                  /* Fonction principale de gestion du thread */
     void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
                                                                                  /* Fonction de gestion des commandes d'admin */
-    void *(*Admin_json)( struct PROCESS *lib, gpointer msg, const char *path, GHashTable *query, gint access_level );
     void *(*Admin_config)( struct PROCESS *lib, gpointer msg, JsonNode *RootNode );
 
     GSList *modules;                                                                           /* Liste des modules du thread */
@@ -177,7 +176,6 @@
  extern void Thread_init ( gchar *pr_name, gchar *classe, struct PROCESS *lib, gchar *version, gchar *description );
  extern void Thread_end ( struct PROCESS *lib );
  extern JsonNode *Thread_Listen_to_master ( struct PROCESS *lib );
- extern void Thread_send_comm_to_master ( struct PROCESS *lib, gboolean etat );
  extern JsonNode *SubProcess_Listen_to_master_new ( struct SUBPROCESS *module );
  extern void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat );
  extern void Process_Load_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );

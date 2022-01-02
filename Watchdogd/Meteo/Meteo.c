@@ -45,7 +45,7 @@
              "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
     SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                    "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                     "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
@@ -53,7 +53,6 @@
                     "`token` VARCHAR(65) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`code_insee` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    "PRIMARY KEY (`id`) "
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
     Process_set_database_version ( lib, 1 );
@@ -127,37 +126,37 @@
               "%s: day %02d -> temp_min=%02d, temp_max=%02d", __func__, day, temp_min, temp_max );
     gchar acronyme[64];
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "tmin" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "tmin" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "tmax" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "tmax" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "probarain" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probarain" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "probafrost" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probafrost" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "probafog" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probafog" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "probawind70" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probawind70" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "probawind100" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probawind100" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "gustx" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "gustx" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "wind10m" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "wind10m" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", day );
-    Zmq_Send_AI_to_master ( module->lib, tech_id, acronyme, 1.0*Json_get_int ( element, "gust10m" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "gust10m" ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */

@@ -17,7 +17,7 @@
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableUPS').DataTable().ajax.reload(null, false);
+       UPS_Refresh();
      }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -33,7 +33,7 @@
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableUPS').DataTable().ajax.reload(null, false);
+       UPS_Refresh();
      }, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -41,7 +41,6 @@
   { var json_request =
      { uuid:           $('#idTargetProcess').val(),
        tech_id:        $('#idUPSTechID').val(),
-       description:    $('#idUPSDescription').val(),
        host:           $('#idUPSHost').val(),
        name:           $('#idUPSName').val(),
        admin_username: $('#idUPSAdminUsername').val(),
@@ -52,7 +51,7 @@
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
      { if (selection && selection.uuid != json_request.uuid) Process_reload ( selection.uuid );/* Restart de l'ancien subprocess si uuid différent */
        Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
-       $('#idTableUPS').DataTable().ajax.reload(null, false);
+       UPS_Refresh();
      }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
@@ -63,7 +62,6 @@
                         { return ( Response.instance ); }, selection.uuid );
     $('#idUPSTitre').text("Editer la connexion UPS " + selection.tech_id);
     $('#idUPSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idUPS", selection.tech_id ); } );
-    $('#idUPSDescription').val( selection.description );
     $('#idUPSHost').val( selection.host );
     $('#idUPSName').val( selection.name );
     $('#idUPSAdminUsername').val( selection.admin_username );
@@ -77,7 +75,6 @@
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
     $('#idUPSTechID').val("").off("input").on("input", function () { Controle_tech_id( "idUPS", null ); } );
-    $('#idUPSDescription').val( "" );
     $('#idUPSHost').val( "" );
     $('#idUPSName').val( "" );
     $('#idUPSAdminUsername').val( "" );
@@ -90,7 +87,7 @@
   { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
-       $('#idTableUPS').DataTable().ajax.reload(null, false);
+       UPS_Refresh();
      }, null );
   }
 /**************************************** Supprime une connexion meteo ********************************************************/

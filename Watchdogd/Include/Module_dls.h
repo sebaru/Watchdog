@@ -57,9 +57,11 @@
  extern gboolean Dls_get_top_alerte ( void );
  extern gboolean Dls_get_top_alerte_fugitive ( void );
  extern gboolean Dls_data_get_BI        ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
+ extern gboolean Dls_data_get_BI_up     ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
+ extern gboolean Dls_data_get_BI_down   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_MONO      ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gboolean Dls_data_get_bool_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gboolean Dls_data_get_bool_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
+ extern gboolean Dls_data_get_MONO_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
+ extern gboolean Dls_data_get_MONO_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern void     Dls_data_set_BI        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur );
  extern void     Dls_data_set_BI_groupe ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bi_p, gint groupe );
  extern void     Dls_data_set_MONO      ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur );

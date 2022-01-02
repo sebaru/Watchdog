@@ -1,27 +1,27 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function MSRV_Refresh ( )
-  { $('#idTableMSRV').DataTable().ajax.reload(null, false); }
+ function INSTANCE_Refresh ( )
+  { $('#idTableINSTANCE').DataTable().ajax.reload(null, false); }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function MSRV_Sauver_parametre ( id )
-  { table = $('#idTableMSRV').DataTable();
+ function INSTANCE_Sauver_parametre ( id )
+  { table = $('#idTableINSTANCE').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
     var json_request =
      { instance   : selection.instance,
-       description: $("#idMSRVDescription_"+id).val(),
-       log_level  : parseInt($("#idMSRVLogLevel_"+id).val()),
-       log_msrv   : ($("#idMSRVLogMSRV_"+id).val()=="true" ? true : false),
-       log_db     : ($("#idMSRVLogDB_"+id).val()=="true" ? true : false),
-       log_zmq    : ($("#idMSRVLogZMQ_"+id).val()=="true" ? true : false),
-       log_trad   : ($("#idMSRVLogTRAD_"+id).val()=="true" ? true : false),
+       description: $("#idINSTANCEDescription_"+id).val(),
+       log_level  : parseInt($("#idINSTANCELogLevel_"+id).val()),
+       log_msrv   : ($("#idINSTANCELogMSRV_"+id).val()=="true" ? true : false),
+       log_db     : ($("#idINSTANCELogDB_"+id).val()=="true" ? true : false),
+       log_zmq    : ($("#idINSTANCELogZMQ_"+id).val()=="true" ? true : false),
+       log_trad   : ($("#idINSTANCELogTRAD_"+id).val()=="true" ? true : false),
      };
     Send_to_API ( 'POST', "/api/instance/set", JSON.stringify(json_request), function ()
-     { MSRV_Refresh ();
+     { INSTANCE_Refresh ();
      }, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function MSRV_Reset_Valider ( selection )
+ function INSTANCE_Reset_Valider ( selection )
   { var json_request = { zmq_tag: "INSTANCE_RESET", tech_id: selection.instance };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), function ()
      { Show_Info ( "Attendez le redémarrage" );
@@ -29,36 +29,36 @@
      }, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function MSRV_Reset ( id  )
-  { table = $('#idTableMSRV').DataTable();
+ function INSTANCE_Reset ( id  )
+  { table = $('#idTableINSTANCE').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
     Show_modal_del ( "Restarter cette instance "+selection.instance,
                      "Etes-vous sûr de vouloir relancer cette instance ?",
                      selection.instance + " - "+selection.description,
-                     function () { MSRV_Reset_Valider( selection ) } ) ;
+                     function () { INSTANCE_Reset_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function MSRV_Upgrade_Valider ( selection )
+ function INSTANCE_Upgrade_Valider ( selection )
   { var json_request = { zmq_tag: "INSTANCE_UPGRADE", tech_id: selection.instance };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), function ()
      { Show_Info ( "Attendez le download et le redémarrage" );
      }, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function MSRV_Upgrade ( id  )
-  { table = $('#idTableMSRV').DataTable();
+ function INSTANCE_Upgrade ( id  )
+  { table = $('#idTableINSTANCE').DataTable();
     selection = table.ajax.json().instances.filter( function(item) { return item.id==id } )[0];
     Show_modal_del ( "Upgrader cette instance "+selection.instance,
                      "Etes-vous sûr de vouloir upgrader cette instance ?",
                      selection.instance + " - "+selection.description,
-                     function () { MSRV_Upgrade_Valider( selection ) } ) ;
+                     function () { INSTANCE_Upgrade_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function MSRV_Reload_icons ( )
+ function INSTANCE_Reload_icons ( )
   { Send_to_API ( 'POST', "/api/instance/reload_icons", null, null, null ); }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { $('#idTableMSRV').DataTable(
+  { $('#idTableINSTANCE').DataTable(
      { pageLength : 50,
        fixedHeader: true, paging: false, ordering: true, searching: true,
        ajax: { url : "/api/instance/list", type : "GET", dataSrc: "instances",
@@ -80,31 +80,31 @@
            { "data": "start_time", "title":"Start time",   "className": "align-middle text-center" },
            { "data": null, "title":"Description", "className": "align-middle ",
              "render": function (item)
-              { return( Input ( "text", "idMSRVDescription_"+item.id, "MSRV_Sauver_parametre("+item.id+")",
+              { return( Input ( "text", "idINSTANCEDescription_"+item.id, "INSTANCE_Sauver_parametre("+item.id+")",
                                 "Description de l'instance", item.description, null ) );
               }
            },
            { "data": null, "title":"Log_MSRV", "className": "align-middle text-center",
              "render": function (item)
               { var choix = [ { valeur: false, texte: "No" }, { valeur: true, texte: "Yes" } ];
-                return( Select ( "idMSRVLogMSRV_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.log_msrv ) );
+                return( Select ( "idINSTANCELogMSRV_"+item.id, "INSTANCE_Sauver_parametre("+item.id+")", choix, item.log_msrv ) );
               }
            },
            { "data": null, "title":"Log_DB", "className": "align-middle text-center",
              "render": function (item)
               { var choix = [ { valeur: false, texte: "No" }, { valeur: true, texte: "Yes" } ];
-                return( Select ( "idMSRVLogDB_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.log_db ) );
+                return( Select ( "idINSTANCELogDB_"+item.id, "INSTANCE_Sauver_parametre("+item.id+")", choix, item.log_db ) );
               }
            },
            { "data": null, "title":"Log_ZMQ", "className": "align-middle text-center",
              "render": function (item)
               { var choix = [ { valeur: false, texte: "No" }, { valeur: true, texte: "Yes" } ];
-                return( Select ( "idMSRVLogZMQ_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.log_zmq ) );
+                return( Select ( "idINSTANCELogZMQ_"+item.id, "INSTANCE_Sauver_parametre("+item.id+")", choix, item.log_zmq ) );
               }           },
            { "data": null, "title":"Log_Trad", "className": "align-middle text-center",
              "render": function (item)
               { var choix = [ { valeur: false, texte: "No" }, { valeur: true, texte: "Yes" } ];
-                return( Select ( "idMSRVLogTRAD_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.log_trad ) );
+                return( Select ( "idINSTANCELogTRAD_"+item.id, "INSTANCE_Sauver_parametre("+item.id+")", choix, item.log_trad ) );
               }
            },
            { "data": null, "title":"Log Level", "className": "align-middle ",
@@ -114,14 +114,14 @@
                               { valeur: 5, texte: "Notice" },
                               { valeur: 4, texte: "Warning" },
                               { valeur: 3, texte: "Error" } ];
-                return( Select ( "idMSRVLogLevel_"+item.id, "MSRV_Sauver_parametre("+item.id+")", choix, item.log_level ) );
+                return( Select ( "idINSTANCELogLevel_"+item.id, "INSTANCE_Sauver_parametre("+item.id+")", choix, item.log_level ) );
               }
            },
            { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
              "render": function (item)
                { boutons = Bouton_actions_start ();
-                 boutons += Bouton_actions_add ( "warning", "Upgrade l'instance", "MSRV_Upgrade", item.id, "download", null );
-                 boutons += Bouton_actions_add ( "danger", "Restart l'instance", "MSRV_Reset", item.id, "redo", null );
+                 boutons += Bouton_actions_add ( "warning", "Upgrade l'instance", "INSTANCE_Upgrade", item.id, "download", null );
+                 boutons += Bouton_actions_add ( "danger", "Restart l'instance", "INSTANCE_Reset", item.id, "redo", null );
                  boutons += Bouton_actions_end ();
                  return(boutons);
                },

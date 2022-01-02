@@ -661,16 +661,25 @@ reload:
     soup_server_add_handler ( socket, "/api/tableau/map/list", Http_traiter_tableau_map_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/tableau/map/del",  Http_traiter_tableau_map_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/tableau/map/set",  Http_traiter_tableau_map_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/get",    Http_traiter_archive_get, NULL, NULL );
+
+    soup_server_add_handler ( socket, "/api/archive/set",          Http_traiter_archive_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/archive/get",          Http_traiter_archive_get, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/archive/status",       Http_traiter_archive_status, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/archive/table_status", Http_traiter_archive_table_status, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/archive/del",          Http_traiter_archive_del, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/archive/clear",        Http_traiter_archive_clear, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/archive/purge",        Http_traiter_archive_purge, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/archive/testdb",       Http_traiter_archive_testdb, NULL, NULL );
+
     soup_server_add_handler ( socket, "/api/process/reload", Http_traiter_process_reload, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/start",  Http_traiter_process_start, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/debug",  Http_traiter_process_debug, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/list",   Http_traiter_process_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/config", Http_traiter_process_config, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/send",   Http_traiter_process_send, NULL, NULL );
+
     soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/instance/set",
-                                                             Http_traiter_instance_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/instance/set",   Http_traiter_instance_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/instance/reload_icons",
                                                              Http_traiter_instance_reload_icons, NULL, NULL );
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );

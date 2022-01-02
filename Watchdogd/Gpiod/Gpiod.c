@@ -31,51 +31,37 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Gpiod.h"
 
- static struct GPIOD_CONFIG Cfg;
 /******************************************************************************************************************************/
-/* Gpiod_Creer_DB: Creer la base de données du thread                                                                         */
-/* Entrée: rien                                                                                                               */
+/* GpiodCreer_DB : Creation de la database du process                                                                         */
+/* Entrée: le pointeur sur la structure PROCESS                                                                               */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Gpiod_Creer_DB ( struct PROCESS *lib )
-  { gint database_version;
+  {
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+             "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
-    gchar *database_version_string = Recuperer_configDB_by_nom( Cfg.lib->name, "database_version" );
-    if (database_version_string)
-     { database_version = atoi( database_version_string );
-       g_free(database_version_string);
-     } else database_version=0;
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT' "
+                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
-    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE,
-             "%s: Database_Version detected = '%05d'. Thread_Version '%s'.", __func__, database_version, WTD_VERSION );
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_IO` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
+                    "`gpiod_id` int(11) NOT NULL,"
+                    "`num` INT(11) NOT NULL DEFAULT '0',"
+                    "`mode_inout` INT(11) NOT NULL DEFAULT '0',"
+                    "`mode_activelow` TINYINT(1) NOT NULL DEFAULT '0' "
+                    "UNIQUE (gpiod_id, num),"
+                    "FOREIGN KEY (`gpiod_id`) REFERENCES `%s` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name, lib->name );
 
-    if (database_version==0)
-     { SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `gpiod` ("
-                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci PRIMARY KEY,"
-                       "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                       "`tech_id` VARCHAR(32) NULL"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
-       SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `gpiod` ("
-                       "`id` INT(11) NOT NULL AUTO_INCREMENT,"
-                       "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                       "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                       "`num` INT(11) NOT NULL DEFAULT '0',"
-                       "`mode_inout` INT(11) NOT NULL DEFAULT '0',"
-                       "`mode_activelow` TINYINT(1) NOT NULL DEFAULT '0',"
-                       "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
-                       "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
-                       "PRIMARY KEY (`id`),"
-                       "FOREIGN KEY (`uuid`) REFERENCES `gpiod` (uuid) ON DELETE CASCADE ON UPDATE CASCADE,"
-                       "UNIQUE (`uuid`,`num`),"
-                       "UNIQUE (`tech_id`,`acronyme`)"
-                       ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
-       goto end;
-     }
-
-end:
-    SQL_Write_new ("INSERT IGNORE INTO `gpiod` SET uuid='%s'", lib->uuid );
-    database_version = 1;
-    Modifier_configDB_int ( lib->name, "database_version", database_version );
+    Process_set_database_version ( lib, 1 );
   }
 /******************************************************************************************************************************/
 /* Charger_un_gpio: Charge une configuration de GPIO                                                                          */
@@ -83,35 +69,42 @@ end:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_gpio (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct PROCESS *lib = user_data;
-    gint num                       = Json_get_int ( element, "num" );
-    Cfg.lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
-    Cfg.lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );
-    Cfg.lignes[num].gpio_ligne     = gpiod_chip_get_line( Cfg.chip, num );
-    Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+  { struct SUBPROCESS *module = user_data;
+    struct GPIOD_VARS *vars = module->vars;
+
+    gint num = Json_get_int ( element, "num" );
+    if (num >= vars->num_lines)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+                 "%s: GPIO%02d is out of range (>=%d)", __func__, num, vars->num_lines );
+       return;
+     }
+
+    vars->lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
+    vars->lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );
+    vars->lignes[num].gpio_ligne     = gpiod_chip_get_line( vars->chip, num );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
               "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__,
-              num, Cfg.lignes[num].mode_inout, Cfg.lignes[num].mode_activelow );
+              num, vars->lignes[num].mode_inout, vars->lignes[num].mode_activelow );
 
-
-    if (Cfg.lignes[num].mode_inout==0)
-     { gpiod_line_request_input ( Cfg.lignes[num].gpio_ligne, "Watchdog GPIO INPUT Thread" );
-       Cfg.lignes[num].etat = gpiod_line_get_value( Cfg.lignes[num].gpio_ligne );
+    if (vars->lignes[num].mode_inout==0)
+     { gpiod_line_request_input ( vars->lignes[num].gpio_ligne, "Watchdog GPIO INPUT Thread" );
+       vars->lignes[num].etat = gpiod_line_get_value( vars->lignes[num].gpio_ligne );
      }
     else
-     { gpiod_line_request_output( Cfg.lignes[num].gpio_ligne, "Watchdog GPIO OUTPUT Thread", Cfg.lignes[num].mode_activelow );
-       Cfg.lignes[num].etat = !Cfg.lignes[num].mode_activelow;
+     { gpiod_line_request_output( vars->lignes[num].gpio_ligne, "Watchdog GPIO OUTPUT Thread", vars->lignes[num].mode_activelow );
+       vars->lignes[num].etat = !vars->lignes[num].mode_activelow;
      }
 
     if (Json_has_member ( element, "tech_id" ) && Json_has_member ( element, "acronyme" ))
-     { g_snprintf ( Cfg.lignes[num].tech_id,  sizeof(Cfg.lignes[num].tech_id),  Json_get_string ( element, "tech_id" ) );
-       g_snprintf ( Cfg.lignes[num].acronyme, sizeof(Cfg.lignes[num].acronyme), Json_get_string ( element, "acronyme" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_INFO,
-                 "%s: GPIO%02d mappé sur '%s:%s'", __func__, num, Cfg.lignes[num].tech_id, Cfg.lignes[num].acronyme );
-       Cfg.lignes[num].mapped = TRUE;
+     { g_snprintf ( vars->lignes[num].tech_id,  sizeof(vars->lignes[num].tech_id),  Json_get_string ( element, "tech_id" ) );
+       g_snprintf ( vars->lignes[num].acronyme, sizeof(vars->lignes[num].acronyme), Json_get_string ( element, "acronyme" ) );
+       Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
+                 "%s: GPIO%02d mappé sur '%s:%s'", __func__, num, vars->lignes[num].tech_id, vars->lignes[num].acronyme );
+       vars->lignes[num].mapped = TRUE;
      }
     else
-     { Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: GPIO%02d not mapped", __func__, num );
-       Cfg.lignes[num].mapped = FALSE;
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: GPIO%02d not mapped", __func__, num );
+       vars->lignes[num].mapped = FALSE;
      }
   }
 /******************************************************************************************************************************/
@@ -119,102 +112,114 @@ end:
 /* Entrée: rien                                                                                                               */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gboolean Charger_tous_gpio ( struct PROCESS *lib )
+ static gboolean Charger_tous_gpio ( struct SUBPROCESS *module )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
-    if (SQL_Select_to_json_node ( RootNode, "gpios", "SELECT * FROM gpiod_io WHERE uuid='%s' ORDER BY num", lib->uuid ) == FALSE)
+    gint gpiod_id = Json_get_int ( module->config, "id" );
+    if (SQL_Select_to_json_node ( RootNode, "gpios",
+                                  "SELECT * FROM %d_IO WHERE gpiod_id='%d' ORDER BY num", module->lib->name, gpiod_id ) == FALSE)
      { json_node_unref(RootNode);
        return(FALSE);
      }
-    Json_node_foreach_array_element ( RootNode, "gpios", Charger_un_gpio, lib );
+    Json_node_foreach_array_element ( RootNode, "gpios", Charger_un_gpio, module );
     json_node_unref(RootNode);
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Main: Fonction principale du thread Gpiod                                                                                  */
+/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
+/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_process ( struct PROCESS *lib )
-  {
-reload:
-    memset( &Cfg, 0, sizeof(Cfg) );                                                 /* Mise a zero de la structure de travail */
-    Cfg.lib = lib;                                                 /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "gpiod", "I/O", lib, WTD_VERSION, "Manage Gpiod I/O" );
-    Gpiod_Creer_DB ( lib );                                                                 /* Création de la base de données */
+ void Run_subprocess ( struct SUBPROCESS *module )
+  { SubProcess_init ( module, sizeof(struct GPIOD_VARS) );
+    struct GPIOD_VARS *vars = module->vars;
 
-    Cfg.chip = gpiod_chip_open_lookup("gpiochip0");
-    if (!Cfg.chip)
-     { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: Error while loading chip 'gpiochip0'", __func__ );
-       Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
+    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
+    gint   gpiod_id = Json_get_int ( module->config, "id" );
+
+    vars->chip = gpiod_chip_open_lookup("gpiochip0");
+    if (!vars->chip)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Error while loading chip 'gpiochip0'", __func__, tech_id );
        goto end;
      }
-    else Info_new( Config.log, Cfg.lib->Thread_debug, LOG_NOTICE, "%s: chip 'gpiochip0' loaded", __func__ );
+    else Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: chip 'gpiochip0' loaded", __func__, tech_id );
 
-    Cfg.num_lines = gpiod_chip_num_lines(Cfg.chip);
-    if (Cfg.num_lines > GPIOD_MAX_LINE) Cfg.num_lines = GPIOD_MAX_LINE;
-    Info_new( Config.log, Cfg.lib->Thread_debug, LOG_INFO, "%s: found %d lines", __func__, Cfg.num_lines );
+    vars->num_lines = gpiod_chip_num_lines(vars->chip);
+    if (vars->num_lines > GPIOD_MAX_LINE) vars->num_lines = GPIOD_MAX_LINE;
+    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: found %d lines", __func__, tech_id, vars->num_lines );
 
-    for (gint cpt=0; cpt<Cfg.num_lines; cpt++)                                                                    /* Valeurs par défaut */
-     { SQL_Write_new ( "INSERT IGNORE INTO `%s_io` SET uuid='%s', num='%d', mode_inout='0', mode_activelow='0'",
-                       lib->name, lib->uuid, cpt );
+    for (gint cpt=0; cpt<vars->num_lines; cpt++)                                                        /* Valeurs par défaut */
+     { SQL_Write_new ( "INSERT IGNORE INTO `%s_IO` SET gpiod_id=%d, num='%d', mode_inout='0', mode_activelow='0'",
+                       module->lib->name, gpiod_id, cpt );
      }
 
-    if ( Charger_tous_gpio( lib ) == FALSE )                                                            /* Chargement des I/O */
-     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", __func__ );
-       Cfg.lib->Thread_run = FALSE;                                                             /* Le thread ne tourne plus ! */
+    vars->lignes = g_try_malloc0 ( sizeof( struct GPIOD_LIGNE ) * vars->num_lines );
+    if (!vars->lignes)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Memory Error while loading lignes", __func__, tech_id );
+       goto end;
      }
-    else Info_new( Config.log, lib->Thread_debug, LOG_INFO, "%s: %d GPIO Lines loaded", __func__, Cfg.num_lines );
+
+    if ( Charger_tous_gpio( module ) == FALSE )                                                         /* Chargement des I/O */
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Error while loading GPIO -> stop", __func__, tech_id );
+       goto end;                                                                                /* Le thread ne tourne plus ! */
+     }
+    else Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: %d GPIO Lines loaded", __func__, tech_id, vars->num_lines );
 
     gint last_top = 0, nbr_tour_par_sec = 0, nbr_tour = 0;                        /* Limitation du nombre de tour par seconde */
-    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { sched_yield();
-       usleep(Cfg.delai);
+    while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
+     { usleep(100000);
+       usleep(vars->delai);
+       sched_yield();
+
+       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 
        if (Partage->top>=last_top+10)                                                                /* Toutes les 1 secondes */
         { nbr_tour_par_sec = nbr_tour;
           nbr_tour = 0;
-          if(nbr_tour_par_sec > 50) Cfg.delai += 50;
-          else if(Cfg.delai>0) Cfg.delai -= 50;
+          if(nbr_tour_par_sec > 50) vars->delai += 50;
+          else if(vars->delai>0) vars->delai -= 50;
           last_top = Partage->top;
         }
 
-       for ( gint cpt = 0; cpt < Cfg.num_lines; cpt++ )
-        { if (Cfg.lignes[cpt].mode_inout == 0) /* Ligne d'entrée ? */
-           { gboolean etat = gpiod_line_get_value( Cfg.lignes[cpt].gpio_ligne );
-             if (etat != Cfg.lignes[cpt].etat) /* Détection de changement */
-              { Cfg.lignes[cpt].etat = etat;
-                if (Cfg.lignes[cpt].mapped) Zmq_Send_DI_to_master ( lib, Cfg.lignes[cpt].tech_id, Cfg.lignes[cpt].acronyme, etat );
-                Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: INPUT: GPIO%02d = %d", __func__, cpt, etat );
+       for ( gint cpt = 0; cpt < vars->num_lines; cpt++ )
+        { if (vars->lignes[cpt].mode_inout == 0) /* Ligne d'entrée ? */
+           { gboolean etat = gpiod_line_get_value( vars->lignes[cpt].gpio_ligne );
+             if (etat != vars->lignes[cpt].etat) /* Détection de changement */
+              { vars->lignes[cpt].etat = etat;
+                if (vars->lignes[cpt].mapped) Zmq_Send_DI_to_master_new ( module, vars->lignes[cpt].tech_id, vars->lignes[cpt].acronyme, etat );
+                Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: INPUT: GPIO%02d = %d", __func__, tech_id, cpt, etat );
                 break;
               }
            }
         }
 
-       JsonNode *request;                                                                          /* Ecoute du Master Server */
-       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
+/************************************************** Ecoute du Master  *********************************************************/
+       JsonNode *request;
+       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_DO" ) )
            { if (!Json_has_member ( request, "tech_id"))
-              { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: requete mal formée manque tech_id", __func__, tech_id ); }
              else if (!Json_has_member ( request, "acronyme" ))
-              { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: requete mal formée manque acronyme", __func__, tech_id ); }
              else if (!Json_has_member ( request, "etat" ))
-              { Info_new( Config.log, Cfg.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque etat", __func__ ); }
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: requete mal formée manque etat", __func__, tech_id ); }
              else
-              { gchar *tech_id  = Json_get_string ( request, "tech_id" );
-                gchar *acronyme = Json_get_string ( request, "acronyme" );
+              { gchar *target_tech_id  = Json_get_string ( request, "tech_id" );
+                gchar *target_acronyme = Json_get_string ( request, "acronyme" );
                 gboolean etat   = Json_get_bool   ( request, "etat" );
 
-                Info_new( Config.log, Cfg.lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s",
-                          __func__, tech_id, acronyme );
+                Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: Recu SET_DO from bus: %s:%s",
+                          __func__, tech_id, target_tech_id, target_acronyme );
 
-                for ( gint cpt = 0; cpt < Cfg.num_lines; cpt++ )
-                 { if (Cfg.lignes[cpt].mode_inout == 1 &&  /* Ligne de sortie ? */
-                       !strcasecmp ( Cfg.lignes[cpt].tech_id, tech_id ) &&
-                       !strcasecmp ( Cfg.lignes[cpt].acronyme, acronyme )
+                for ( gint cpt = 0; cpt < vars->num_lines; cpt++ )
+                 { if (vars->lignes[cpt].mode_inout == 1 &&  /* Ligne de sortie ? */
+                       !strcasecmp ( vars->lignes[cpt].tech_id, target_tech_id ) &&
+                       !strcasecmp ( vars->lignes[cpt].acronyme, target_acronyme )
                       )
-                    { Info_new( Config.log, lib->Thread_debug, LOG_DEBUG, "%s: OUTPUT: GPIO%02d = %d", __func__, cpt, etat );
-                      gpiod_line_set_value ( Cfg.lignes[cpt].gpio_ligne, (Cfg.lignes[cpt].mode_activelow ? !etat : etat) );
+                    { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: OUTPUT: GPIO%02d = %d", __func__, tech_id, cpt, etat );
+                      gpiod_line_set_value ( vars->lignes[cpt].gpio_ligne, (vars->lignes[cpt].mode_activelow ? !etat : etat) );
                       break;
                     }
                  }
@@ -224,15 +229,39 @@ reload:
         }
      }
 
-    for ( gint cpt=0; cpt < Cfg.num_lines; cpt++ )
-     { if (Cfg.lignes[cpt].gpio_ligne) gpiod_line_release( Cfg.lignes[cpt].gpio_ligne ); }
-
 end:
+    for ( gint cpt=0; cpt < vars->num_lines; cpt++ )
+     { if (vars->lignes[cpt].gpio_ligne) gpiod_line_release( vars->lignes[cpt].gpio_ligne ); }
+
+    if (vars->lignes) g_free(vars->lignes);
+
+    SubProcess_end(module);
+  }
+/******************************************************************************************************************************/
+/* Run_process: Run du Process                                                                                                */
+/* Entrée: la structure PROCESS associée                                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Run_process ( struct PROCESS *lib )
+  {
+reload:
+    Gpiod_Creer_DB ( lib );                                                                    /* Création de la DB du thread */
+    Thread_init ( "gpiod", "I/O", lib, WTD_VERSION, "Manage Gpiod I/O" );
+
+    lib->config = Json_node_create();
+    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
+
+    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
+    while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
+    Process_Unload_all_subprocess ( lib );
+
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;
      }
+
     Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

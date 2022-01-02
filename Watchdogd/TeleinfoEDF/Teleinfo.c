@@ -161,7 +161,7 @@
            { vars->mode = TINFO_RETRING;
              vars->date_next_retry = 0;
              vars->nbr_connexion = 0;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: Retrying Connexion.", __func__ );
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, tech_id );
            }
         }
        else if (vars->mode == TINFO_RETRING)

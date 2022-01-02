@@ -128,7 +128,18 @@
 /* Sortie: FALSE si n'a pas été pris en charge                                                                                */
 /******************************************************************************************************************************/
  static gboolean Handle_zmq_common ( JsonNode *request, gchar *zmq_tag, gchar *zmq_src_tech_id, gchar *zmq_dst_tech_id )
-  { if ( !strcasecmp( zmq_tag, "SUDO")  && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) )
+  {     if ( !strcasecmp( zmq_tag, "PROCESS_RELOAD") &&
+              Json_has_member ( request, "uuid" )
+            )
+     { return ( Process_reload_by_uuid ( Json_get_string ( request, "uuid" ) ) ); }
+    else if ( !strcasecmp( zmq_tag, "PROCESS_DEBUG") &&
+              Json_has_member ( request, "uuid" ) && Json_has_member ( request, "debug" )
+            )
+     { return ( Process_set_debug ( Json_get_string ( request, "uuid" ), Json_get_bool ( request, "debug" ) ) ); }
+
+    if ( strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) ) return(FALSE);                               /* Si pas pour nous */
+
+    if ( !strcasecmp( zmq_tag, "SUDO") )
      { gchar chaine[128];
        if (!Json_has_member ( request, "target" ))
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SUDO: wrong parameters from %s", __func__, zmq_src_tech_id );
@@ -140,7 +151,7 @@
        g_snprintf( chaine, sizeof(chaine), "%s &", target );
        system(chaine);
      }
-    else if ( !strcasecmp( zmq_tag, "EXECUTE")  && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) )
+    else if ( !strcasecmp( zmq_tag, "EXECUTE") )
      { if (!Json_has_member ( request, "target" ))
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: EXECUTE: wrong parameters from %s", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
@@ -161,19 +172,11 @@
           exit(0);
         }
      }
-    else if ( !strcasecmp( zmq_tag, "PROCESS_RELOAD") &&
-              Json_has_member ( request, "uuid" )
-            )
-     { Process_reload_by_uuid ( Json_get_string ( request, "uuid" ) ); }
-    else if ( !strcasecmp( zmq_tag, "PROCESS_DEBUG") &&
-              Json_has_member ( request, "uuid" ) && Json_has_member ( request, "debug" )
-            )
-     { Process_set_debug ( Json_get_string ( request, "uuid" ), Json_get_bool ( request, "debug" ) ); }
-    else if ( !strcasecmp( zmq_tag, "INSTANCE_RESET") && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) )
+    else if ( !strcasecmp( zmq_tag, "INSTANCE_RESET") )
      { Partage->com_msrv.Thread_run = FALSE;
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: INSTANCE_RESET: Stopping in progress", __func__ );
      }
-    else if ( !strcasecmp( zmq_tag, "INSTANCE_UPGRADE") && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) )
+    else if ( !strcasecmp( zmq_tag, "INSTANCE_UPGRADE") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: INSTANCE_UPGRADE: Upgrading in progress", __func__ );
        gint pid = fork();
        if (pid<0)
@@ -185,7 +188,7 @@
           exit(0);
         }
      }
-    else if ( !strcasecmp( zmq_tag, "SET_LOG") && !strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) )
+    else if ( !strcasecmp( zmq_tag, "SET_LOG") )
      { if ( !( Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
                Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_msrv" )
@@ -214,6 +217,9 @@
     gchar *zmq_src_tech_id = Json_get_string ( request, "zmq_src_tech_id" );
     gchar *zmq_dst_tech_id = Json_get_string ( request, "zmq_dst_tech_id" );
 
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive %s from %s to %s",
+              __func__, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id );
+
          if ( !strcasecmp( zmq_tag, "SET_WATCHDOG") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
               Json_has_member ( request, "consigne" ) ) )
@@ -228,6 +234,7 @@
                  Json_get_int ( request, "consigne" ) );
        Dls_data_set_WATCHDOG ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
                                Json_get_int    ( request, "consigne" ) );
+       return(TRUE);                                                                                                /* Traité */
      }
     else if ( !strcasecmp( zmq_tag, "SET_AI") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
@@ -243,6 +250,7 @@
                  Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        Dls_data_set_AI ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
                          Json_get_double ( request, "valeur" ),  Json_get_bool ( request, "in_range" ) );
+       return(TRUE);                                                                                                /* Traité */
      }
     else if ( !strcasecmp( zmq_tag, "SET_CDE") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
@@ -254,6 +262,7 @@
                  zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
        Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
+       return(TRUE);                                                                                                /* Traité */
      }
     else if ( !strcasecmp( zmq_tag, "SET_DI") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
@@ -266,9 +275,12 @@
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), Json_get_bool ( request, "etat" ) );
        Dls_data_set_DI ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                          NULL, Json_get_bool ( request, "etat" ) );
+       return(TRUE);                                                                                                /* Traité */
      }
     else if ( !strcasecmp( zmq_tag, "SLAVE_STOP") )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, zmq_src_tech_id ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, zmq_src_tech_id );
+       return(TRUE);                                                                                                /* Traité */
+     }
     else if ( !strcasecmp( zmq_tag, "SLAVE_START") )
      { struct DLS_AO *ao;
        GSList *liste;
@@ -285,13 +297,10 @@
            }
           liste = g_slist_next(liste);
         }
+       return(TRUE);                                                                                                /* Traité */
      }
-    else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
-                 __func__, zmq_src_tech_id, zmq_dst_tech_id, zmq_tag );
-       return(FALSE);                                                                                           /* Pas trouvé */
-     }
-    return(TRUE);                                                                                                   /* Traité */
+
+    return ( Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) );
   }
 /******************************************************************************************************************************/
 /* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                                     */
@@ -303,16 +312,15 @@
     gchar *zmq_src_tech_id   = Json_get_string ( request, "zmq_src_tech_id" );
     gchar *zmq_dst_tech_id   = Json_get_string ( request, "zmq_dst_tech_id" );
 
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive %s from %s to %s",
+              __func__, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id );
+
          if ( !strcasecmp( zmq_tag, "PING") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_tech_id );
        Partage->com_msrv.last_master_ping = Partage->top;
+       return(TRUE);                                                                                                /* Traité */
      }
-    else if ( !Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive UNKNOWN from %s to %s/%s",
-                 __func__, zmq_src_tech_id, zmq_dst_tech_id, zmq_tag );
-       return(FALSE);                                                                                           /* Pas trouvé */
-     }
-    return(TRUE);                                                                                                   /* Traité */
+    return ( Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) );
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
