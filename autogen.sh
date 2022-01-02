@@ -1,6 +1,7 @@
 #! /bin/sh
 
 echo "We're on branch "$(git branch --show-current)
+echo "Compiling "$(git describe --tags | tr -d '\n')
 git pull
 osFedora=`grep -e "^NAME.*Fedora.*" /etc/os-release`
 osRaspbian=`grep "ID=raspbian" /etc/os-release`
