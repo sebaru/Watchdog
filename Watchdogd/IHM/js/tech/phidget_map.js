@@ -17,7 +17,8 @@
   { Show_modal_del ( "Détruire le mapping ?", "Etes-vous sur de vouloir supprimer ce mapping ?",
                      selection.hub_description+":"+selection.capteur +
                      " <-> " + selection.tech_id + ":" + selection.acronyme + " - " +
-                     selection.libelle, "Valider_Phidget_Del('"+classe+"','"+selection.id+"')" );
+                     selection.libelle,
+                     function () { Valider_Phidget_Del(classe,selection.id); } );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del_DI ( id )

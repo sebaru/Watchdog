@@ -7,10 +7,10 @@ SUBDIRS = Include Dls TraductionDLS Smsg Modbus Audio Onduleur TeleinfoEDF Http 
 
 bin_SCRIPTS = Wtd_set_volume.sh Wtd_play_google.sh
 bin_PROGRAMS = Watchdogd
-Watchdogd_SOURCES = Watchdogd.c process.c Archive.c archiveDB.c admin_arch.c Erreur.c \
+Watchdogd_SOURCES = Watchdogd.c process.c Archive.c archiveDB.c Erreur.c \
                     zmq.c shm.c json.c Config.c Mnemo_Registre.c Mnemo_DI.c Mnemo_DO.c \
                     db.c Mnemonique.c Mnemo_AI.c Mnemo_CI.c Mnemo_CH.c Message.c \
-		    Mnemo_Horloges.c Mnemo_BOOL.c Mnemo_AO.c Mnemo_WATCHDOG.c \
+		    Mnemo_Horloges.c Mnemo_MONO.c Mnemo_BI.c Mnemo_AO.c Mnemo_WATCHDOG.c \
 		    Mnemo_Tempo.c Histo_msgs.c distrib_Events.c \
                     distrib_MSGxxx.c distrib_Ixxx.c mail.c http.c uuid.c \
                     Synoptiques.c Syn_visuels.c Syn_comment.c Syn_cadran.c
@@ -34,6 +34,7 @@ sysconf_DATA = watchdogd.abls.conf.sample
 pkgdata_DATA = init_db.sql base_icones.sql
 dist_systemdsystemunit_DATA = Watchdogd.service
 dist_systemduserunit_DATA = Watchdogd-user.service
+dist_sudoers_DATA = watchdogd.sudo.conf
 
 EXTRA_DIST = Watchdogd.service Watchdogd-user.service watchdogd.abls.conf init_db.sql base_icones.sql
 MAINTAINERCLEANFILES = Makefile.in

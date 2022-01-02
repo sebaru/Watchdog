@@ -42,7 +42,8 @@
       <ul>
       <li><h6 class="card-text"><span id="idNbrDls">-</span> Modules</h6></li>
       <li><h6 class="card-text"><span id="idNbrDlsLignes">-</span> Lignes</h6></li>
-      <li><h6 class="card-text"><span id="idNbrDlsBOOL">-</span> Mono/Bistables</h6></li>
+      <li><h6 class="card-text"><span id="idNbrDlsBI">-</span> Bistables</h6></li>
+      <li><h6 class="card-text"><span id="idNbrDlsMONO">-</span> Monostables</h6></li>
       <li><h6 class="card-text"><span id="idDlsBitparsec">-</span> bits par seconde</h6></li>
       <li><h6 class="card-text"><span id="idDlsTourparsec">-</span> tours par seconde</h6></li>
       <!--<h3 class="card-text text-center"><strong>56</h3>-->

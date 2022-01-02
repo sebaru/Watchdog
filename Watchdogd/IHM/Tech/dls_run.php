@@ -174,13 +174,13 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
 <div class="row m-2">
-      <h4><img style="width: 30px" data-toggle="tooltip" title="Mono et Bistables"
-                       src="/img/message.png" /> Monostables et Bistables</h4>
+      <h4><img style="width: 30px" data-toggle="tooltip" title="Monostables"
+                       src="/img/message.png" /> Monostables</h4>
      <div class="ml-auto">
-        <button type="button" onclick="Dls_run_refresh('idTableBool')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
+        <button type="button" onclick="Dls_run_refresh('idTableMONO')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
 </div>
-      <table id="idTableBool" class="table table-striped table-bordered table-hover">
+      <table id="idTableMONO" class="table table-striped table-bordered table-hover">
         <thead class="thead-dark">
         </thead>
         <tbody>
@@ -188,6 +188,21 @@
       </table>
       <hr>
 
+<!----------------------------------------------------------------------------------------------------------------------------->
+<div class="row m-2">
+      <h4><img style="width: 30px" data-toggle="tooltip" title="Bistables"
+                       src="/img/message.png" /> Bistables</h4>
+     <div class="ml-auto">
+        <button type="button" onclick="Dls_run_refresh('idTableBI')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
+			  </div>
+</div>
+      <table id="idTableBI" class="table table-striped table-bordered table-hover">
+        <thead class="thead-dark">
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <hr>
 
 <!----------------------------------------------------------------------------------------------------------------------------->
 <div class="row m-2">

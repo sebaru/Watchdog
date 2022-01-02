@@ -55,7 +55,7 @@
        JsonNode *element = Json_node_create ();
        Dls_VISUEL_to_json ( element, visu );
        Json_node_add_string ( element, "zmq_tag", "DLS_VISUEL" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus, "msrv", "*", element );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus, g_get_host_name(), "*", element );
        json_node_unref ( element );
      }
   }

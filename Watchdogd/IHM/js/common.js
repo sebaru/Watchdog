@@ -27,7 +27,7 @@
           if (method=="DELETE" || method=="POST") $('#idToastStatus').toast('show');
           if (fonction_ok != null) fonction_ok(Response);
         }
-       else { Show_Error( xhr.statusText );
+       else { if (xhr.status != 503) Show_Error( xhr.statusText );
               try { var Response = JSON.parse(xhr.responseText); }
               catch (error) { Response=undefined; }
               if (fonction_nok != null) fonction_nok(Response);
@@ -77,12 +77,24 @@
        $('#idModalError').modal("show");
      }
   }
-
+/********************************************* Chargement du synoptique 1 au démrrage *****************************************/
+ function Show_Info ( message )
+  { $('#idModalInfoDetail').html( htmlEncode(message) );
+    $('#idModalInfo').modal("show");
+  }
 /********************************************* Redirige la page ***************************************************************/
  function Redirect ( url )
   { /*$('body').fadeOut("high", function () { */ window.location = url; /* } );*/
   }
 
+ function Reload_when_ready ( )
+  { Send_to_API ( "GET", "/api/ping", null,
+                  function (Response) { if(Response.Thread_run == false) setTimeout ( function () { Reload_when_ready() }, 1000 );
+                                        else window.location.reload(false);
+                                      },
+                  function () { setTimeout ( function () { Reload_when_ready() }, 1000 ); }
+                );
+  }
 /********************************************* Barre de boutons ***************************************************************/
  function Bouton_actions_start ( )
   { return("<div class='btn-group btn-block' role='group' aria-label='ButtonGroup'>"); }
@@ -105,7 +117,10 @@
      { result = "<button "+
                 "class='btn btn-"+color+" btn-block btn-sm' "+
                 "data-toggle='tooltip' title='"+tooltip+"' "+
-                "onclick="+clic_func+"('"+key+"')>"+texte+
+                "onclick="+clic_func+"('"+key+"')>"+
+                "<span id='idButtonSpinner_"+key+"' class='spinner-border spinner-border-sm' style='display:none' "+
+                "role='status' aria-hidden='true'></span> "+
+                texte+
                 "</button>";
      }
    else
@@ -214,7 +229,8 @@
   }
 /****************************************** Escape les " et ' *****************************************************************/
  function htmlEncode ( string )
-  { if (string===null) return("null");
+  { if (string===undefined) return("null");
+    if (string===null) return("null");
     return ( string.replace(/'/g,'&apos;').replace(/"/g,'&quote;') ).replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 /****************************************** Are you sure **********************************************************************/
@@ -222,7 +238,7 @@
   { $('#idModalDelTitre').text ( htmlEncode(titre) );
     $('#idModalDelMessage').html( htmlEncode(message) );
     $('#idModalDelDetails').html( htmlEncode(details) );
-    $('#idModalDelValider').attr( "onclick", fonction );
+    $('#idModalDelValider').off("click").on( "click", fonction );
     $('#idModalDel').modal("show");
   }
 /********************************************* Renvoi un input ****************************************************************/

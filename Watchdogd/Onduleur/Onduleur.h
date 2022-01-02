@@ -34,23 +34,8 @@
  #define UPS_RETRY       1800                                              /* 3 minutes entre chaque retry si pb de connexion */
  #define UPS_POLLING      100                                      /* Si tout va bien, on s'y connecte toutes les 10 secondes */
 
- struct UPS_CONFIG                                                    /* Communication entre DLS et l'UPS */
-  { struct LIBRAIRIE *lib;
-    GSList *Modules_UPS;
-  };
-
- struct MODULE_UPS
-  { gboolean enable;                                                                   /* Le module doit-il tourner au boot ? */
-    gchar tech_id[32];                                                                                   /* Tech_id du module */
-    gchar description[80];                                                                                 /* Libelle associé */
-    gchar host[32];                                                                              /* Adresses IP du module UPS */
-    gchar name[32];                                                                               /* Nom de l'UPS sur le HOST */
-    gchar admin_username[32];                                                                             /* Username associé */
-    gchar admin_password[32];                                                                             /* Password associé */
-    gchar date_create[32];                                                                                /* Date de creation */
-    gpointer bit_comm;                                                            /* Pointer de raccourci pour le bit de comm */
-    gint  nbr_connexion;                                                              /* Nombre de connexion OK dans le temps */
-    UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
+ struct UPS_VARS
+  { UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
     gboolean started;                                                                                      /* Est-il actif ?? */
     time_t date_next_connexion;
   };

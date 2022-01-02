@@ -151,42 +151,21 @@
      }
     else Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Not Initialize (instance Slave).", __func__ );
 
-    g_snprintf( chaine, sizeof(chaine),
-               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='instance_is_master',valeur='%s' ", g_get_host_name(), (is_master ? "true" : "false") );
-    Lancer_requete_SQL ( db, chaine );
-
     gchar *master_host = Normaliser_chaine ( Json_get_string(request,"master_host") );
-    g_snprintf( chaine, sizeof(chaine),
-               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='master_host',valeur='%s' ", g_get_host_name(), master_host );
-    Lancer_requete_SQL ( db, chaine );
-    g_free(master_host);
-
     gchar *description = Normaliser_chaine ( Json_get_string(request,"description") );
-    g_snprintf( chaine, sizeof(chaine),
-               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='description',valeur='%s' ", g_get_host_name(), description );
-    Lancer_requete_SQL ( db, chaine );
+    SQL_Write_new ( "INSERT INTO instances SET instance='%s', is_master='%d', version='%s', start_time=NOW(), "
+                    "debug=0, log_db=0, log_trad=0, log_zmq=0, log_level=6,"
+                    "master_host='%s', description='%s', use_subdir='%d'",
+                    g_get_host_name(), is_master, WTD_VERSION, master_host, description, (Json_get_int(request,"use_subdir") ? "true" : "false") );
+    g_free(master_host);
+    g_free(description);
+
     if (is_master)
      { g_snprintf( chaine, sizeof(chaine), "UPDATE syns SET libelle='%s' WHERE id='1'", description );
        Lancer_requete_SQL ( db, chaine );
      }
     g_free(description);
 
-    g_snprintf( chaine, sizeof(chaine),
-               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',"
-               "nom='subdir',valeur='%s' ", g_get_host_name(), (Json_get_int(request,"use_subdir") ? "true" : "false") );
-    Lancer_requete_SQL ( db, chaine );
-    g_snprintf( chaine, sizeof(chaine),
-               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',nom='log_level',valeur='6' ", g_get_host_name() );
-    Lancer_requete_SQL ( db, chaine );
-    g_snprintf( chaine, sizeof(chaine),
-               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',nom='log_db',valeur='0' ", g_get_host_name() );
-    Lancer_requete_SQL ( db, chaine );
-    g_snprintf( chaine, sizeof(chaine),
-               "INSERT INTO config SET instance_id='%s',nom_thread='msrv',nom='log_zmq',valeur='0' ", g_get_host_name() );
-    Lancer_requete_SQL ( db, chaine );
     Libere_DB_SQL ( &db );
 /******************************************* Création fichier de config *******************************************************/
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Creating config file '%s'", __func__, fichier );

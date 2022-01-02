@@ -155,10 +155,19 @@
     gint    top;
   };
 
- struct DLS_BOOL
+ struct DLS_MONO
   { gchar   tech_id[NBR_CARAC_TECHID];
     gchar   acronyme[NBR_CARAC_ACRONYME];
-    gint    classe; /* Monostable/bistable */
+    gboolean etat;                                                                                      /* Etat actuel du bit */
+    gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
+    gboolean edge_up;
+    gboolean edge_down;
+  };
+
+ struct DLS_BI
+  { gchar   tech_id[NBR_CARAC_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME];
+    gint    groupe; /* Groupe 'radio' */
     gboolean etat;                                                                                      /* Etat actuel du bit */
     gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
     gboolean edge_up;
@@ -222,6 +231,7 @@
     gchar   acronyme[NBR_CARAC_ACRONYME];
     gboolean etat;
     gboolean etat_update;
+    gint groupe;
     gint last_change;
     gint last_on;
     gint changes;
@@ -273,13 +283,17 @@
     struct ZMQUEUE *zmq_to_master;
     GSList *Set_Dls_DI_Edge_up;                                                 /* liste des Mxxx a activer au debut tour prg */
     GSList *Set_Dls_DI_Edge_down;                                               /* liste des Mxxx a activer au debut tour prg */
-    GSList *Set_Dls_Bool_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
-    GSList *Set_Dls_Bool_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_MONO_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_MONO_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_BI_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_BI_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_DI_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_DI_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_Dls_Bool_Edge_up;                                             /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_Dls_Bool_Edge_down;                                           /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_MONO_Edge_up;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_MONO_Edge_down;                                           /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_BI_Edge_up;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_BI_Edge_down;                                           /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
@@ -316,8 +330,10 @@
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble valeur, gboolean in_range );
  extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur );
+ extern struct DLS_BI *Dls_data_BI_lookup ( gchar *tech_id, gchar *acronyme );
+ extern struct DLS_MONO *Dls_data_MONO_lookup ( gchar *tech_id, gchar *acronyme );
+ extern struct DLS_MESSAGES *Dls_data_MSG_lookup ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
- extern void Dls_data_set_MSG_init ( gchar *tech_id, gchar *acronyme, gboolean etat );
  extern gboolean Dls_data_get_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p );
  extern gboolean Dls_data_get_DO_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_DO_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );

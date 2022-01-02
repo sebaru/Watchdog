@@ -83,11 +83,15 @@
  extern gboolean Recuperer_mnemos_DO_suite( struct DB **db_orig );
  extern void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit );
 
- extern struct DB *Rechercher_BOOL ( gchar *tech_id, gchar *acronyme );                                 /* Dans mnemos_BOOL.c */
- extern gboolean Mnemo_auto_create_BOOL ( gboolean deletable, gint type, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
- extern void Charger_confDB_BOOL ( void );
- extern void Updater_confDB_BOOL ( void );
- extern void Dls_BOOL_to_json ( JsonNode *element, struct DLS_BOOL *bit );
+ extern void Charger_confDB_MONO ( void );                                                              /* Dans mnemos_MONO.c */
+ extern gboolean Mnemo_auto_create_MONO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
+ extern void Updater_confDB_MONO ( void );
+ extern void Dls_MONO_to_json ( JsonNode *element, struct DLS_MONO *bit );
+
+ extern void Charger_confDB_BI ( void );                                                                  /* Dans mnemos_BI.c */
+ extern gboolean Mnemo_auto_create_BI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gint groupe );
+ extern void Updater_confDB_BI ( void );
+ extern void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit );
 
  extern gboolean Mnemo_auto_create_AO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle );/* Dans mnemos_AO.c */
  extern gboolean Recuperer_mnemos_AO_by_text ( struct DB **db_retour, gchar *thread, gchar *text );

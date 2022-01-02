@@ -39,7 +39,7 @@
  #include "client.h"
  #include "ClientResources.h"
 
- #define TITRE_FENETRE "Watchdog ver" VERSION " - GTK3"
+ #define TITRE_FENETRE "Watchdog " WTD_VERSION " - GTK3"
 
 /***************************************************** Définition du menu *****************************************************/
 #ifdef bouh

@@ -23,21 +23,40 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 -- --------------------------------------------------------
 
---
--- Structure de la table `config`
---
-
-CREATE TABLE IF NOT EXISTS `config` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `instance_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `nom_thread` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE (`instance_id`,`nom_thread`,`nom`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
+CREATE TABLE IF NOT EXISTS `processes` (
+  `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
+  `uuid` VARCHAR(37) UNIQUE NOT NULL,
+  `instance` VARCHAR(64) NOT NULL,
+  `name` VARCHAR(64) NOT NULL,
+  `classe` VARCHAR(16) DEFAULT NULL,
+  `version` VARCHAR(32) DEFAULT NULL,
+  `database_version` INT(11) NOT NULL DEFAUT 0,
+  `enable` TINYINT(1) NOT NULL,
+  `started` TINYINT(1) DEFAULT 0,
+  `start_time` DATETIME DEFAULT NOW(),
+  `debug` TINYINT(1) NOT NULL,
+  `description` VARCHAR(128) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `instances` (
+  `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
+  `instance` VARCHAR(64) UNIQUE NOT NULL,
+  `is_master` TINYINT(1) NOT NULL DEFAULT 0,
+  `log_msrv` TINYINT(1) NOT NULL DEFAULT 0,
+  `log_db` TINYINT(1) NOT NULL DEFAULT 0,
+  `log_zmq` TINYINT(1) NOT NULL DEFAULT 0,
+  `log_trad` TINYINT(1) NOT NULL DEFAULT 0,
+  `use_subdir` TINYINT(1) NOT NULL DEFAULT 0,
+  `master_host` VARCHAR(64) NOT NULL DEFAULT '',
+  `log_level` INT(11) NOT NULL DEFAULT 6,
+  `start_time` DATETIME DEFAULT NOW(),
+  `database_version` INT(11) NOT NULL DEFAULT 0,
+  `description` VARCHAR(128) NOT NULL DEFAULT '',
+  `version` VARCHAR(128) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
+
 
 --
 -- Structure de la table `cameras`
@@ -45,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `config` (
 
 CREATE TABLE IF NOT EXISTS `cameras` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `location` varchar(600) NOT NULL,
+  `location` VARCHAR(600) NOT NULL,
   `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
@@ -58,6 +77,7 @@ CREATE TABLE IF NOT EXISTS `cameras` (
 
 CREATE TABLE IF NOT EXISTS `syns` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `date_create` DATETIME NOT NULL DEFAULT NOW(),
   `parent_id` INT(11) NOT NULL,
   `libelle` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'syn_maison.png',
@@ -133,17 +153,35 @@ CREATE TABLE IF NOT EXISTS `tableau_map` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `mnemos_BI`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_BI` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `deletable` TINYINT(1) NOT NULL DEFAULT '1',
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` VARCHAR(256] COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `etat` TINYINT(1) NOT NULL DEFAULT 0,
+  `groupe` INT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE (`tech_id`,`acronyme`),
+  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `mnemos`
 --
 
-CREATE TABLE IF NOT EXISTS `mnemos_BOOL` (
+CREATE TABLE IF NOT EXISTS `mnemos_MONO` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `deletable` tinyint(1) NOT NULL DEFAULT '1',
-  `type` INT(11) NOT NULL DEFAULT 0,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `deletable` TINYINT(1) NOT NULL DEFAULT '1',
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `etat` tinyint(1) NOT NULL DEFAULT 0,
+  `libelle` VARCHAR(256] COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `etat` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -594,6 +632,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `audio_profil` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',
   `audio_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
+  `groupe` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE(`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE

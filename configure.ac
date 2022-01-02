@@ -1,8 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-define ([GITTAG], m4_esyscmd_s([sh -c "git describe --tags | tr -d '\n'"]) )
-
-AC_INIT([Watchdog], [GITTAG],
+AC_INIT([Watchdog], [3.x],
         [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
 
 AC_DEFINE_UNQUOTED([WTD_VERSION], "[m4_esyscmd_s([sh -c "git describe --tags | tr -d '\n'"])]", [Numero de version])
@@ -31,7 +29,7 @@ PKG_PROG_PKG_CONFIG
 
 AC_SUBST([systemdsystemunitdir], $($PKG_CONFIG --variable=systemdsystemunitdir systemd) )
 AC_SUBST([systemduserunitdir], $($PKG_CONFIG --variable=systemduserunitdir systemd) )
-
+AC_SUBST([sudoersdir], "/etc/sudoers.d" )
 AM_CONDITIONAL([HAVE_SYSTEMD], [test "x$with_systemdsystemunitdir" != "xno"])
 
 AM_DISABLE_STATIC

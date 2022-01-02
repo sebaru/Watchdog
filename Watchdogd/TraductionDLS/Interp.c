@@ -229,11 +229,11 @@
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
     if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_bool_up ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( result, taille, "%sDls_data_get_BI_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_bool_down ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( result, taille, "%sDls_data_get_BI_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
@@ -313,13 +313,18 @@
     gint taille;
     taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
-    if ( (!barre) )
-         { g_snprintf( result, taille, "Dls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
-                       alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-    else { g_snprintf( result, taille, "!Dls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
-                       alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
+    if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
+     { g_snprintf( result, taille, "%sDls_data_get_MONO_up ( \"%s\", \"%s\", &_%s_%s )",
+                   (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+    else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
+     { g_snprintf( result, taille, "%sDls_data_get_MONO_down ( \"%s\", \"%s\", &_%s_%s )",
+                   (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+    else
+     { g_snprintf( result, taille, "%sDls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
+                   (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
    return(result);
  }
 /******************************************************************************************************************************/
@@ -739,11 +744,18 @@
     action->sinon = New_chaine( taille );
 
     gint update = Get_option_entier ( options, T_UPDATE, 0 );
+    gint groupe = Get_option_entier ( options, T_GROUPE, 0 );
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, FALSE );\n",
-                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+    if (groupe>0)
+     { g_snprintf( action->alors, taille, "   Dls_data_set_MSG_groupe ( vars, \"%s\", \"%s\", &_%s_%s, %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, groupe );
+     }
+    else
+     { g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, TRUE );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+       g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( vars, \"%s\", \"%s\", &_%s_%s, %s, FALSE );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (update ? "TRUE" : "FALSE") );
+     }
     return(action);
   }
 /******************************************************************************************************************************/
@@ -1029,18 +1041,25 @@
   { struct ACTION *action;
     int taille;
 
+    gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
+
     action = New_action();
     taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
-    if (barre)
+    if (groupe == 0)
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, %s );\n",
+                                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, (barre ? "FALSE" : "TRUE") );
+     }
+    else if(barre)
      { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( action->alors, taille, "   Dls_data_set_BI ( vars, \"%s\", \"%s\", &_%s_%s, TRUE );\n",
-                                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     { g_snprintf( action->alors, taille, "   Dls_data_set_BI_groupe ( vars, \"%s\", \"%s\", &_%s_%s, %d );\n",
+                                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, groupe );
      }
+
     return(action);
   }
 /******************************************************************************************************************************/
@@ -1074,8 +1093,8 @@
   }
 /******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
-/* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
-/* Sortie: False si il existe deja, true sinon                                                                                */
+/* Entrées: le tech_id/Acronyme de l'alias                                                                                    */
+/* Sortie: la structure, ou FALSE si erreur                                                                                   */
 /******************************************************************************************************************************/
  struct ALIAS *New_alias ( gchar *tech_id, gchar *acronyme, gint classe, GList *options )
   { struct ALIAS *alias;
@@ -1090,6 +1109,85 @@
     alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
     Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: '%s:%s'", __func__, alias->tech_id, alias->acronyme );
+
+    if (!strcmp(alias->tech_id, Dls_plugin.tech_id))     /* Pour tous les alias locaux, on créé une entrée en base de données */
+     { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE, "no libelle" );
+       switch(alias->classe)
+        { case MNEMO_BUS:
+             break;
+          case MNEMO_BISTABLE:
+           { gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
+             Mnemo_auto_create_BI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, groupe );
+             break;
+           }
+          case MNEMO_MONOSTABLE:
+           { Mnemo_auto_create_MONO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+             break;
+           }
+          case MNEMO_ENTREE:
+           { Mnemo_auto_create_DI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+             break;
+           }
+          case MNEMO_SORTIE:
+           { Mnemo_auto_create_DO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+             break;
+           }
+          case MNEMO_SORTIE_ANA:
+           { Mnemo_auto_create_AO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+             break;
+           }
+          case MNEMO_ENTREE_ANA:
+           { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme,
+                                    Get_option_chaine( alias->options, T_LIBELLE, NULL ),
+                                    Get_option_chaine( alias->options, T_UNITE, NULL ) );
+             break;
+           }
+          case MNEMO_TEMPO:
+           { Mnemo_auto_create_TEMPO ( Dls_plugin.tech_id, alias->acronyme, libelle );
+             break;
+           }
+          case MNEMO_HORLOGE:
+           { Mnemo_auto_create_HORLOGE ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+             break;
+           }
+          case MNEMO_REGISTRE:
+           { Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle,
+                                          Get_option_chaine( alias->options, T_UNITE, "no unit" ) );
+             break;
+           }
+          case MNEMO_WATCHDOG:
+           { Mnemo_auto_create_WATCHDOG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
+             break;
+           }
+          case MNEMO_MOTIF:
+           { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
+             gchar *couleur = Get_option_chaine( alias->options, T_COLOR, "black" );
+             gchar *mode    = Get_option_chaine( alias->options, T_MODE, "default" );
+             if (forme)
+              { Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
+                                                                                                  /* Création du visuel */
+                Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+              }
+             break;
+           }
+          case MNEMO_CPT_IMP:
+           { Mnemo_auto_create_CI ( Dls_plugin.tech_id, alias->acronyme, libelle,
+                                    Get_option_chaine ( alias->options, T_UNITE, "fois" ),
+                                    Get_option_double ( alias->options, T_MULTI, 1.0 ) );
+             break;
+           }
+          case MNEMO_CPTH:
+           { Mnemo_auto_create_CH ( Dls_plugin.tech_id, alias->acronyme, libelle );
+             break;
+           }
+          case MNEMO_MSG:
+           { gint type   = Get_option_entier ( alias->options, T_TYPE, MSG_ETAT );
+             gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
+             Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, type, groupe );
+             break;
+           }
+        }
+     }
 
     if (classe != MNEMO_MOTIF) return(alias);
 
@@ -1387,7 +1485,6 @@
 
           write(fd, include, strlen(include));
 
-
           liste = Alias;
           while(liste)
            { alias = (struct ALIAS *)liste->data;
@@ -1419,7 +1516,7 @@
         }
 
 /*----------------------------------------------- Prise en charge du peuplement de la database -------------------------------*/
-       gchar *Liste_BOOL = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
+       gchar *Liste_BI = NULL, *Liste_MONO = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
        gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
        gchar *Liste_CI = NULL, *Liste_CH = NULL;
        gchar *Liste_CADRANS = NULL, *Liste_MOTIF = NULL;
@@ -1427,255 +1524,107 @@
 
        while(liste)
         { alias = (struct ALIAS *)liste->data;
-          if ( (!alias->used) )
+          if ( alias->used == FALSE &&
+                ( ! ( alias->classe == MNEMO_MOTIF &&                              /* Pas de warning pour les comments unused */
+                      !strcasecmp ( Get_option_chaine ( alias->options, T_FORME, "" ), "comment" )
+                    )
+                )
+             )
            { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
              retour = TRAD_DLS_WARNING;
            }
                                                                                         /* Alias Dynamiques, local uniquement */
-          if (!strcmp(alias->tech_id, Dls_plugin.tech_id))
-           { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE, "no libelle" );
-             switch(alias->classe)
+          if (!strcmp(alias->tech_id, Dls_plugin.tech_id)) /* Calcul des alias locaux pour préparer la suppression automatique*/
+           { switch(alias->classe)
               { case MNEMO_BUS:
                    break;
                 case MNEMO_BISTABLE:
+                 { Liste_BI = Add_csv ( Liste_BI, alias->acronyme );
+                   break;
+                 }
                 case MNEMO_MONOSTABLE:
-                 { Mnemo_auto_create_BOOL ( TRUE, alias->classe, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_BOOL = Add_csv ( Liste_BOOL, alias->acronyme );
+                 { Liste_MONO = Add_csv ( Liste_MONO, alias->acronyme );
                    break;
                  }
                 case MNEMO_ENTREE:
-                 { Mnemo_auto_create_DI ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_DI = Add_csv ( Liste_DI, alias->acronyme );
+                 { Liste_DI = Add_csv ( Liste_DI, alias->acronyme );
                    break;
                  }
                 case MNEMO_SORTIE:
-                 { Mnemo_auto_create_DO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_DO = Add_csv ( Liste_DO, alias->acronyme );
+                 { Liste_DO = Add_csv ( Liste_DO, alias->acronyme );
                    break;
                  }
                 case MNEMO_SORTIE_ANA:
-                 { Mnemo_auto_create_AO ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_AO = Add_csv ( Liste_AO, alias->acronyme );
+                 { Liste_AO = Add_csv ( Liste_AO, alias->acronyme );
                    break;
                  }
                 case MNEMO_ENTREE_ANA:
-                 { Mnemo_auto_create_AI ( TRUE, Dls_plugin.tech_id, alias->acronyme,
-                                          Get_option_chaine( alias->options, T_LIBELLE, NULL ),
-                                          Get_option_chaine( alias->options, T_UNITE, NULL ) );
-                   Liste_AI = Add_csv ( Liste_AI, alias->acronyme );
-
-                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
+                 { Liste_AI = Add_csv ( Liste_AI, alias->acronyme );
                    break;
                  }
                 case MNEMO_TEMPO:
-                 { Mnemo_auto_create_TEMPO ( Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_TEMPO = Add_csv ( Liste_TEMPO, alias->acronyme );
-
-                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
+                 { Liste_TEMPO = Add_csv ( Liste_TEMPO, alias->acronyme );
                    break;
                  }
                 case MNEMO_HORLOGE:
-                 { Mnemo_auto_create_HORLOGE ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_HORLOGE = Add_csv ( Liste_HORLOGE, alias->acronyme );
+                 { Liste_HORLOGE = Add_csv ( Liste_HORLOGE, alias->acronyme );
                    break;
                  }
                 case MNEMO_REGISTRE:
-                 { Mnemo_auto_create_REGISTRE ( Dls_plugin.tech_id, alias->acronyme, libelle,
-                                                Get_option_chaine( alias->options, T_UNITE, "no unit" ) );
-                   Liste_REGISTRE = Add_csv ( Liste_REGISTRE, alias->acronyme );
-
-                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
+                 { Liste_REGISTRE = Add_csv ( Liste_REGISTRE, alias->acronyme );
                    break;
                  }
                 case MNEMO_WATCHDOG:
-                 { Mnemo_auto_create_WATCHDOG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_WATCHDOG = Add_csv ( Liste_WATCHDOG, alias->acronyme );
-
-                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 0 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
+                 { Liste_WATCHDOG = Add_csv ( Liste_WATCHDOG, alias->acronyme );
                    break;
                  }
                 case MNEMO_MOTIF:
                  { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
-                   gchar *couleur = Get_option_chaine( alias->options, T_COLOR, "black" );
-                   gchar *mode    = Get_option_chaine( alias->options, T_MODE, "default" );
                    if (forme)
-                    { Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
-                                                                                                        /* Création du visuel */
-                      Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
-                      Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );
+                    { Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );
                     }
                    break;
                  }
                 case MNEMO_CPT_IMP:
-                 { Mnemo_auto_create_CI ( Dls_plugin.tech_id, alias->acronyme, libelle,
-                                          Get_option_chaine ( alias->options, T_UNITE, "fois" ),
-                                          Get_option_double ( alias->options, T_MULTI, 1.0 ) );
-                   Liste_CI = Add_csv ( Liste_CI, alias->acronyme );
-
-                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 0 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
+                 { Liste_CI = Add_csv ( Liste_CI, alias->acronyme );
                    break;
                  }
                 case MNEMO_CPTH:
-                 { Mnemo_auto_create_CH ( Dls_plugin.tech_id, alias->acronyme, libelle );
-                   Liste_CH = Add_csv ( Liste_CH, alias->acronyme );
-
-                   gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 0 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
+                 { Liste_CH = Add_csv ( Liste_CH, alias->acronyme );
                    break;
                  }
                 case MNEMO_MSG:
-                 { gint param;
-                   param = Get_option_entier ( alias->options, T_TYPE, MSG_ETAT );
-                   Mnemo_auto_create_MSG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle, param );
-                   Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme );
+                 { Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme );
                    break;
                  }
               }
            }
 /***************************************************** Alias externe **********************************************************/
           else                                                             /* Alias externe : n'est pas défini dans le module */
-           { switch(alias->classe)
-              { case MNEMO_ENTREE_ANA:
-                 { gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
-                   break;
-                 }
-                case MNEMO_REGISTRE:
-                 { gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 2 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
-                   break;
-                 }
-                case MNEMO_CPTH:
-                 { gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 0 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
-                   break;
-                 }
-                case MNEMO_CPT_IMP:
-                 { gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-                   if (cadran)
-                    { Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                      Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                      Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                      Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                      Get_option_entier ( alias->options, T_DECIMAL, 0 )
-                                                    );
-                      Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-                    }
-                   break;
-                 }
-                case MNEMO_MOTIF:
-                 {                                                                 /* Création du LINK vers le visuel externe */
-                   Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
-                   Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );
-                   break;
-                 }
+           { gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
+             if (cadran &&
+                  ( alias->classe == MNEMO_ENTREE_ANA ||
+                    alias->classe == MNEMO_REGISTRE ||
+                    alias->classe == MNEMO_CPTH ||
+                    alias->classe == MNEMO_CPT_IMP
+                  )
+                )
+              { gint default_decimal = 0;
+				if (alias->classe == MNEMO_ENTREE_ANA || alias->classe == MNEMO_REGISTRE) default_decimal = 2;
+				Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
+                                                Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                                Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                                Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
+                                                Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
+                                                Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
+                                                Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
+                                                default_decimal
+                                              );
+                Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
+              }
+             if (alias->classe == MNEMO_MOTIF)                                     /* Création du LINK vers le visuel externe */
+              { Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+                /* a virer ? Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );*/
               }
            }
           liste = liste->next;
@@ -1711,9 +1660,15 @@
        SQL_Write ( requete );
        g_free(requete);
 
-       requete = g_strconcat ( "DELETE FROM mnemos_BOOL WHERE deletable=1 AND tech_id='", tech_id, "' ",
-                               " AND acronyme NOT IN (", (Liste_BOOL?Liste_BOOL:"''") , ")", NULL );
-       if (Liste_BOOL) g_free(Liste_BOOL);
+       requete = g_strconcat ( "DELETE FROM mnemos_BI WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_BI?Liste_BI:"''") , ")", NULL );
+       if (Liste_BI) g_free(Liste_BI);
+       SQL_Write ( requete );
+       g_free(requete);
+
+       requete = g_strconcat ( "DELETE FROM mnemos_MONO WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_MONO?Liste_MONO:"''") , ")", NULL );
+       if (Liste_MONO) g_free(Liste_MONO);
        SQL_Write ( requete );
        g_free(requete);
 
@@ -1761,7 +1716,6 @@
                        " AND acronyme NOT IN ( %s )",
                        tech_id, (Liste_MOTIF?Liste_MOTIF:"''") );
        if (Liste_MOTIF) g_free(Liste_MOTIF);
-
      }
     close(Id_log);
     Liberer_memoire();

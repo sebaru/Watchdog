@@ -1,146 +1,154 @@
  document.addEventListener('DOMContentLoaded', Load_page, false);
 
- function Ups_refresh ( )
-  { $('#idTableUps').DataTable().ajax.reload(null, false);
-  }
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Ups_enable_module ( tech_id )
-  { var json_request = JSON.stringify( { tech_id : tech_id } );
-    Send_to_API ( 'POST', "/api/process/ups/start", json_request, function ()
-     { $('#idTableUps').DataTable().ajax.reload(null, false);
-     });
-  }
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Ups_disable_module ( tech_id )
-  { var json_request = JSON.stringify( { tech_id : tech_id } );
-    Send_to_API ( 'POST', "/api/process/ups/stop", json_request, function ()
-     { $('#idTableUps').DataTable().ajax.reload(null, false);
-     });
-  }
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Ups_Del ( tech_id )
-  { var json_request = JSON.stringify( { tech_id : tech_id } );
-    Send_to_API ( 'DELETE', "/api/process/ups/del", json_request, function ()
-     { $('#idTableUps').DataTable().ajax.reload(null, false);
-     });
+/************************************ Demande de refresh **********************************************************************/
+ function UPS_Refresh ( )
+  { $('#idTableUPS').DataTable().ajax.reload(null, false);
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Ups_Del ( tech_id )
-  { table = $('#idTableUps').DataTable();
-    selection = table.ajax.json().ups.filter( function(item) { return item.tech_id==tech_id } )[0];
-    $('#idModalDelTitre').text ( "Détruire l'onduleur ?" );
-    $('#idModalDelMessage').html("Etes-vous sur de vouloir supprimer cet onduleur ?"+
-                                 "<hr>"+
-                                 "<strong>"+selection.tech_id + "</strong> - " + selection.name + "@" + selection.host
-                                );
-    $('#idModalDelValider').attr( "onclick", "Valider_Ups_Del('"+tech_id+"')" );
-    $('#idModalDel').modal("show");
-  }
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Ups_Edit ( tech_id )
-  { var json_request = JSON.stringify(
-       { tech_id : $('#idModalUpsEditTechID').val(),
-         host: $('#idModalUpsEditHost').val(),
-         name: $('#idModalUpsEditName').val(),
-         admin_username: $('#idModalUpsEditAdminUsername').val(),
-         admin_password: $('#idModalUpsEditAdminPassword').val(),
-       }
-     );
-    Send_to_API ( 'POST', "/api/process/ups/set", json_request, function ()
-     { $('#idTableUps').DataTable().ajax.reload(null, false);
-     });
+ function UPS_Disable ( id )
+  { table = $('#idTableUPS').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    var json_request =
+     { enable : false,
+       uuid   : selection.uuid,
+       tech_id: selection.tech_id,
+       id     : selection.id
+     };
+
+    Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
+     { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
+       UPS_Refresh();
+     }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Ups_Edit ( tech_id )
-  { table = $('#idTableUps').DataTable();
-    selection = table.ajax.json().ups.filter( function(item) { return item.tech_id==tech_id } )[0];
-    $('#idModalUpsEditTitre').text ( "Editer UPS - " + selection.tech_id );
-    $('#idModalUpsEditTechID').val ( selection.tech_id );
-    $('#idModalUpsEditTechID').attr ( "readonly", true );
-    $('#idModalUpsEditHost').val ( selection.host );
-    $('#idModalUpsEditName').val ( selection.name );
-    $('#idModalUpsEditAdminUsername').val( selection.admin_username );
-    $('#idModalUpsEditAdminPassword').val( selection.admin_password );
-    $('#idModalUpsEditValider').attr( "onclick", "Valider_Ups_Edit('"+tech_id+"')" );
-    $('#idModalUpsEdit').modal("show");
+ function UPS_Enable ( id )
+  { table = $('#idTableUPS').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    var json_request =
+     { enable : true,
+       uuid   : selection.uuid,
+       tech_id: selection.tech_id,
+       id     : selection.id
+     };
+
+    Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
+     { Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
+       UPS_Refresh();
+     }, null );
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Ups_Add ( )
-  { var json_request = JSON.stringify(
-       { tech_id: $('#idModalUpsEditTechID').val().toUpperCase(),
-         host: $('#idModalUpsEditHost').val(),
-         name: $('#idModalUpsEditName').val(),
-         admin_username: $('#idModalUpsEditAdminUsername').val(),
-         admin_password: $('#idModalUpsEditAdminPassword').val(),
-       }
-     );
-    Send_to_API ( 'POST', "/api/process/ups/add", json_request, function ()
-     { $('#idTableUps').DataTable().ajax.reload(null, false);
-     });
+ function UPS_Set ( selection )
+  { var json_request =
+     { uuid:           $('#idTargetProcess').val(),
+       tech_id:        $('#idUPSTechID').val(),
+       host:           $('#idUPSHost').val(),
+       name:           $('#idUPSName').val(),
+       admin_username: $('#idUPSAdminUsername').val(),
+       admin_password: $('#idUPSAdminPassword').val(),
+     };
+    if (selection) json_request.id = parseInt(selection.id);                                            /* Ajout ou édition ? */
+
+    Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
+     { if (selection && selection.uuid != json_request.uuid) Process_reload ( selection.uuid );/* Restart de l'ancien subprocess si uuid différent */
+       Process_reload ( json_request.uuid );                                /* Dans tous les cas, restart du subprocess cible */
+       UPS_Refresh();
+     }, null );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Ups_Add ()
-  { $('#idModalUpsEditTitre').text ( "Ajouter d'un onduleur" );
-    $('#idModalUpsEditTechID').val ( "" );
-    $('#idModalUpsEditTechID').attr ( "readonly", false );
-    $('#idModalUpsEditHost').val ( "" );
-    $('#idModalUpsEditName').val ( "" );
-    $('#idModalUpsEditAdminUsername').val( "" );
-    $('#idModalUpsEditAdminPassword').val( "" );
-    $('#idModalUpsEditValider').attr( "onclick", "Valider_Ups_Add()" );
-    $('#idModalUpsEdit').modal("show");
+ function UPS_Edit ( id )
+  { table = $('#idTableUPS').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
+                        { return ( Response.instance ); }, selection.uuid );
+    $('#idUPSTitre').text("Editer la connexion UPS " + selection.tech_id);
+    $('#idUPSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idUPS", selection.tech_id ); } );
+    $('#idUPSHost').val( selection.host );
+    $('#idUPSName').val( selection.name );
+    $('#idUPSAdminUsername').val( selection.admin_username );
+    $('#idUPSAdminPassword').val( selection.admin_password );
+    $('#idUPSValider').off("click").on( "click", function () { UPS_Set(selection); } );
+    $('#idUPSEdit').modal("show");
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function UPS_Add ( )
+  { $('#idUPSTitre').text("Ajouter un UPS");
+    Select_from_api ( "idTargetProcess", "/api/process/list", "name=ups", "Process", "uuid", function (Response)
+                        { return ( Response.instance ); }, null );
+    $('#idUPSTechID').val("").off("input").on("input", function () { Controle_tech_id( "idUPS", null ); } );
+    $('#idUPSHost').val( "" );
+    $('#idUPSName').val( "" );
+    $('#idUPSAdminUsername').val( "" );
+    $('#idUPSAdminPassword').val( "" );
+    $('#idUPSValider').off("click").on( "click", function () { UPS_Set(null); } );
+    $('#idUPSEdit').modal("show");
+  }
+/**************************************** Supprime une connexion meteo ********************************************************/
+ function UPS_Del_Valider ( selection )
+  { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
+    Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
+     { Process_reload ( json_request.uuid );
+       UPS_Refresh();
+     }, null );
+  }
+/**************************************** Supprime une connexion meteo ********************************************************/
+ function UPS_Del ( id )
+  { table = $('#idTableUPS').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    Show_modal_del ( "Supprimer la connexion "+selection.tech_id,
+                     "Etes-vous sûr de vouloir supprimer cette connexion ?",
+                     selection.tech_id + " - "+selection.name +"@"+ selection.host,
+                     function () { UPS_Del_Valider( selection ) } ) ;
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { Send_to_API ( "GET", "/api/process/ups/status", null, function(Response)
-     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').slideUp(); }
-                                  else { $('#idAlertThreadNotRunning').slideDown(); }
-     });
-    $('#idTableUps').DataTable(
-       { pageLength : 50,
-         fixedHeader: true,
-         rowId: "id",
-         ajax: {	url : "/api/process/ups/list",	type : "GET", dataSrc: "ups",
-                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+  { $('#idTableUPS').DataTable(
+     { pageLength : 50,
+       fixedHeader: true,
+       rowId: "id",
+       ajax: {	url : "/api/process/config", type : "GET", data: { name: "ups" }, dataSrc: "config",
+               error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+             },
+       columns:
+        [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
+           { "data": null, "title":"Enabled", "className": "align-middle text-center",
+              "render": function (item)
+               { if (item.enable==true)
+                  { return( Bouton ( "success", "Désactiver l'UPS",
+                                     "UPS_Disable", item.id, "Actif" ) );
+                  }
+                 else
+                  { return( Bouton ( "outline-secondary", "Activer l'UPS",
+                                     "UPS_Enable", item.id, "Désactivé" ) );
+                  }
                },
-         columns:
-          [ { "data": null, "title":"TechID", "className": "align-middle text-center",
-              "render": function (item)
-                { return( Lien ("/tech/dls_run/"+item.tech_id, "Voir le RUN", item.tech_id ) ); }
-            },
-            { "data": null, "title":"Enable", "className": "align-middle text-center",
-              "render": function (item)
-                { if (item.enable==false)
-                       { return( Bouton ( "outline-secondary", "Activer cet UPS", "Ups_enable_module", item.tech_id, "Désactivé" ) ); }
-                  else { return( Bouton ( "success", "Désactiver cet UPS", "Ups_disable_module", item.tech_id, "Actif" ) ); }
-                }
-            },
-            { "data": null, "title":"Started", "className": "align-middle text-center",
-              "render": function (item)
-                { if (item.started==false)
-                       { return( Bouton ( "outline-warning", "Cet UPS ne tourne pas", null, null, "Disconnected" ) ); }
-                  else { return( Bouton ( "success", "Cet UPS est activé", null, null, "Connected" ) ); }
-                }
-            },
-            { "data": "name", "title":"Name", "className": "align-middle text-center" },
-            { "data": "host", "title":"Host", "className": "align-middle text-center" },
-            { "data": "description", "title":"Description", "className": "align-middle text-center" },
-            { "data": "admin_username", "title":"Username", "className": "align-middle text-center" },
-            { "data": "admin_password", "title":"Password", "className": "align-middle text-center" },
-            { "data": "nbr_connexion", "title":"Nbr Connexion", "className": "align-middle text-center" },
-            { "data": "date_create", "title":"Date Création", "className": "align-middle text-center hidden-xs" },
-            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
-                { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet UPS", "Show_Modal_Ups_Edit", item.tech_id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer cet UPS", "Show_Modal_Ups_Del", item.tech_id, "trash", null );
-                  boutons += Bouton_actions_end ();
-                  return(boutons);
-                },
-            }
-          ],
+           },
+           { "data": null, "title":"Tech_id", "className": "align-middle text-center",
+             "render": function (item)
+               { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+           },
+           { "data": "description", "title":"Description", "className": "align-middle text-center " },
+           { "data": "name", "title":"Name", "className": "align-middle text-center" },
+           { "data": "host", "title":"Host", "className": "align-middle text-center" },
+           { "data": "admin_username", "title":"Username", "className": "align-middle text-center" },
+           { "data": "admin_password", "title":"Password", "className": "align-middle text-center" },
+           { "data": null, "title":"IO_COMM", "className": "align-middle text-center",
+             "render": function (item)
+               { if (item.comm==true) { return( Bouton ( "success", "Comm OK", null, null, "1" ) );        }
+                                 else { return( Bouton ( "outline-secondary", "Comm Failed", null, null, "0" ) ); }
+               },
+           },
+           { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
+             "render": function (item)
+               { boutons = Bouton_actions_start ();
+                 boutons += Bouton_actions_add ( "primary", "Editer la connexion", "UPS_Edit", item.id, "pen", null );
+                 boutons += Bouton_actions_add ( "danger", "Supprimer la connexion", "UPS_Del", item.id, "trash", null );
+                 boutons += Bouton_actions_end ();
+                 return(boutons);
+               },
+           }
+        ],
          /*order: [ [0, "desc"] ],*/
-         responsive: true,
-       }
-     );
-
+       responsive: true,
+     });
   }
+/*----------------------------------------------------------------------------------------------------------------------------*/

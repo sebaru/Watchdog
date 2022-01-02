@@ -38,6 +38,41 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
+ void Http_traiter_mnemos_tech_id ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_GET)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    if (SQL_Select_to_json_node ( RootNode, "tech_ids", "SELECT DISTINCT tech_id FROM dictionnaire" )==FALSE)
+     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+       json_node_unref ( RootNode );
+       return;
+     }
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
  void Http_traiter_mnemos_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                  SoupClientContext *client, gpointer user_data )
   { gchar chaine[256];
@@ -88,8 +123,10 @@
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_HORLOGE AS m WHERE m.tech_id='%s'", tech_id ); }
     else if (!strcasecmp ( classe, "TEMPO" ) )
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_Tempo AS m WHERE m.tech_id='%s'", tech_id ); }
-    else if (!strcasecmp ( classe, "BOOL" ) )
-     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_BOOL AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "MONO" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_MONO AS m WHERE m.tech_id='%s'", tech_id ); }
+    else if (!strcasecmp ( classe, "BI" ) )
+     { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_BI AS m WHERE m.tech_id='%s'", tech_id ); }
     else if (!strcasecmp ( classe, "WATCHDOG" ) )
      { g_snprintf(chaine, sizeof(chaine), "SELECT m.* from mnemos_WATCHDOG AS m WHERE m.tech_id='%s'", tech_id ); }
     else if (!strcasecmp ( classe, "MSG" ) )
@@ -233,7 +270,6 @@
     if (!Http_check_session( msg, session, 6 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
-
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
             Json_has_member ( request, "classe" )

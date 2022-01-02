@@ -30,14 +30,12 @@
 
         .wtd-synoptique-preview { height: 80px; }
         .wtd-img-bit-interne { width: 40px; }
-        .wtd-img-connecteur  { width: auto; height: 196px; }
+        .wtd-img-connecteur  { object-fit: contain; height: 196px; padding: 10px; }
       </style>
 
     </head>
 
     <body>
-
-
 
   <div id="idToastAlert" class="toast" role="status" style="position: absolute; bottom: 50px; right: 50px; z-index: 99">
    <div class="toast-header">
@@ -130,7 +128,7 @@
 </div>
 
 <header>
-	<nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
+ <nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
   <a class="navbar-brand" href="/"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -153,12 +151,12 @@
 
 
       <li class="nav-item dropdown">
-        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarINSTANCE" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-crown"></i> Instance
+        <a class="nav-link rounded dropdown-toggle" href="#" id="navbarDOMAINE" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-crown"></i> Domaine
         </a>
-        <div class="dropdown-menu" aria-labelledby="navbarINSTANCE">
-          <a class="dropdown-item" href="/tech/process"><i class="fas fa-microchip text-primary"></i> <span>Liste des Processus</span></a>
-          <a class="dropdown-item" href="/tech/msrv"><i class="fas fa-crown text-danger"></i> <span>Maintenance</span></a>
+        <div class="dropdown-menu" aria-labelledby="navbarDOMAINE">
+          <a class="dropdown-item" href="/tech/instance"><i class="fas fa-crown text-danger"></i> <span>Instances</span></a>
+          <a class="dropdown-item" href="/tech/process"><i class="fas fa-microchip text-primary"></i> <span>Processus</span></a>
           <a class="dropdown-item" href="/tech/archive"><i class="fas fa-database text-secondary"></i> <span>Archivage</span></a>
           <a class="dropdown-item" href="/tech/dashboard_courbes"> <i class="fas fa-chart-line text-secondary"></i> <span>Courbes</span> </a>
         </div>

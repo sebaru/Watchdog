@@ -52,7 +52,7 @@
 
 /******************************************** Définitions des prototypes ******************************************************/
  extern JsonNode *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme );
- extern gint Mnemo_auto_create_MSG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle, gint typologie );
+ extern gint Mnemo_auto_create_MSG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle, gint typologie, gint groupe );
  extern void Charger_confDB_MSG ( void );
  extern void Updater_confDB_MSG ( void );
  extern void Dls_MESSAGE_to_json ( JsonNode *element, struct DLS_MESSAGES *bit );

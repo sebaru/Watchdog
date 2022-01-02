@@ -38,14 +38,12 @@
 /******************************************************************************************************************************/
  void Gerer_arrive_Axxx_dls ( void )
   { JsonNode *RootNode;
-    struct DLS_DO *dout;
-    struct DLS_AO *ao;
     gint reste;
 
     if (!Partage->com_msrv.Liste_DO) goto suite_AO;                                               /* Si pas de a, on se barre */
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-    dout = (struct DLS_DO *)Partage->com_msrv.Liste_DO->data;                                  /* Recuperation du numero de a */
+    struct DLS_DO *dout = Partage->com_msrv.Liste_DO->data;                                    /* Recuperation du numero de a */
     Partage->com_msrv.Liste_DO = g_slist_remove ( Partage->com_msrv.Liste_DO, dout );
     reste = g_slist_length(Partage->com_msrv.Liste_DO);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
@@ -57,8 +55,8 @@
     if (RootNode)
      { Dls_DO_to_json ( RootNode, dout );
        Json_node_add_string ( RootNode, "zmq_tag", "SET_DO" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", RootNode );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", RootNode );
        json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
@@ -66,7 +64,7 @@
 suite_AO:
     if (!Partage->com_msrv.Liste_AO) return;                                                      /* Si pas de a, on se barre */
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-    ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;                                    /* Recuperation du numero de a */
+    struct DLS_AO *ao = Partage->com_msrv.Liste_AO->data;                                      /* Recuperation du numero de a */
     Partage->com_msrv.Liste_AO = g_slist_remove ( Partage->com_msrv.Liste_AO, ao );
     reste = g_slist_length(Partage->com_msrv.Liste_AO);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
@@ -78,8 +76,8 @@ suite_AO:
     if (RootNode)
      { Dls_AO_to_json ( RootNode, ao );
        Json_node_add_string ( RootNode, "zmq_tag", "SET_AO" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, "msrv", "*", RootNode );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   "msrv", "*", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", RootNode );
        json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }

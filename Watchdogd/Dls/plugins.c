@@ -318,6 +318,8 @@
  static gboolean Dls_Charger_un_plugin ( struct DLS_PLUGIN *dls, gboolean compil )
   { gchar nom_fichier_absolu[60];
 
+    if (Partage->com_dls.Thread_run == FALSE) return(FALSE);          /* si l'instance est en cours d'arret, on sort de suite */
+
     if (compil)
      { dls->compil_status = Compiler_source_dls( dls->tech_id );
        if (dls->compil_status<DLS_COMPIL_OK)
@@ -346,7 +348,7 @@
        dls->handle = NULL;
        return(FALSE);
      }
-    dls->version = dlsym( dls->handle, "version" );                                            /* Recherche de la fonction */
+    dls->version = dlsym( dls->handle, "version" );                                               /* Recherche de la fonction */
     if (!dls->version)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
                 "%s: Candidat '%s' does not provide version function", __func__, dls->tech_id );
@@ -393,16 +395,20 @@
         { Dls_data_set_MSG ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
      }
 
-    liste_bit = Partage->Dls_data_BOOL;                                               /* Decharge tous les booleens du module */
+    liste_bit = Partage->Dls_data_MONO;                                               /* Decharge tous les monoeens du module */
     while(liste_bit)
-     { struct DLS_BOOL *bool = liste_bit->data;
+     { struct DLS_MONO *mono = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
-       if (!strcasecmp(bool->tech_id, plugin->tech_id) && strcasecmp(bool->acronyme, "IO_COMM") )
-        {      if (bool->classe == MNEMO_BISTABLE)
-           { Dls_data_set_BI   ( &plugin->vars, bool->tech_id, bool->acronyme, (gpointer)&bool, FALSE ); }
-          else if (bool->classe == MNEMO_MONOSTABLE)
-           { Dls_data_set_MONO ( &plugin->vars, bool->tech_id, bool->acronyme, (gpointer)&bool, FALSE ); }
-        }
+       if (!strcasecmp(mono->tech_id, plugin->tech_id) && strcasecmp(mono->acronyme, "IO_COMM") )
+        { Dls_data_set_MONO ( &plugin->vars, mono->tech_id, mono->acronyme, (gpointer)&mono, FALSE ); }
+     }
+
+    liste_bit = Partage->Dls_data_BI;                                               /* Decharge tous les bieens du module */
+    while(liste_bit)
+     { struct DLS_BI *bi = liste_bit->data;
+       liste_bit = g_slist_next(liste_bit);
+       if (!strcasecmp(bi->tech_id, plugin->tech_id) && strcasecmp(bi->acronyme, "IO_COMM") )
+        { Dls_data_set_BI   ( &plugin->vars, bi->tech_id, bi->acronyme, (gpointer)&bi, FALSE ); }
      }
 
     liste_bit = Partage->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */

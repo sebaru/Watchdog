@@ -40,174 +40,157 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Dmx.h"
- struct DMX_CONFIG Cfg_dmx;
+
 /******************************************************************************************************************************/
-/* Dmx_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                    */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Smsg_Creer_DB : Creation de la database du process                                                                         */
+/* Entrée: le pointeur sur la structure PROCESS                                                                               */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static gboolean Dmx_Lire_config ( void )
-  { gchar *nom, *valeur;
-    struct DB *db;
+ static void Dmx_Creer_DB ( struct PROCESS *lib )
+  {
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+             "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
 
-    Cfg_dmx.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
-    Creer_configDB ( Cfg_dmx.lib->name, "debug", "false" );
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
+                    "`device` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT' "
+                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
-    g_snprintf( Cfg_dmx.tech_id, sizeof(Cfg_dmx.tech_id), "DMX01" );
-    Creer_configDB ( Cfg_dmx.lib->name, "tech_id", Cfg_dmx.tech_id );
-
-    g_snprintf( Cfg_dmx.device, sizeof(Cfg_dmx.device), "/dev/ttyUSB0" );
-    Creer_configDB ( Cfg_dmx.lib->name, "device", Cfg_dmx.device );
-
-    if ( ! Recuperer_configDB( &db, Cfg_dmx.lib->name ) )                                          /* Connexion a la base de données */
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_WARNING,
-                "%s: Database connexion failed. Using Default Parameters", __func__ );
-       return(FALSE);
-     }
-
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur );   /* Print Config */
-            if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_dmx.lib->Thread_debug = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
-        { g_snprintf( Cfg_dmx.tech_id, sizeof(Cfg_dmx.tech_id), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "device" ) )
-        { g_snprintf( Cfg_dmx.device, sizeof(Cfg_dmx.device), "%s", valeur ); }
-     }
-    return(TRUE);
+    Process_set_database_version ( lib, 1 );
   }
+
 /******************************************************************************************************************************/
 /* Dmx_do_mapping : mappe les entrees/sorties Wago avec la zone de mémoire interne dynamique                                  */
 /* Entrée : la structure referencant le module                                                                                */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
- static void Dmx_do_mapping ( void )
-  { gchar critere[80];
+ static void Dmx_do_mapping ( struct SUBPROCESS *module )
+  { struct DMX_VARS *vars = module->vars;
+    gchar critere[80];
     struct DB *db;
-    gint cpt;
 
+    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    cpt = 0;
-    g_snprintf( critere, sizeof(critere),"%s:AO%%", Cfg_dmx.tech_id );
-    if ( ! Recuperer_mnemos_AO_by_text ( &db, Cfg_dmx.lib->name, critere ) )
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+    gint cpt = 0;
+    g_snprintf( critere, sizeof(critere),"%s:AO%%", tech_id );
+    if ( ! Recuperer_mnemos_AO_by_text ( &db, module->lib->name, critere ) )
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( Recuperer_mnemos_AO_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *map_text = db->row[2], *libelle = db->row[3];
        gchar *min = db->row[4], *max = db->row[5], *type=db->row[6], *valeur = db->row[7];
        gchar debut[80];
        gint num;
-       Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' '%s:%s' - %s", __func__,
+       Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: Match found '%s' '%s:%s' - %s", __func__, tech_id, 
                  map_text, tech_id, acro, libelle );
        if ( sscanf ( map_text, "%[^:]:AO%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (1<=num && num<=DMX_CHANNEL)
-           { g_snprintf( Cfg_dmx.Canal[num-1].tech_id, sizeof(Cfg_dmx.Canal[num-1].tech_id), "%s", tech_id );
-             g_snprintf( Cfg_dmx.Canal[num-1].acronyme, sizeof(Cfg_dmx.Canal[num-1].acronyme), "%s", acro );
-             Cfg_dmx.Canal[num-1].min    = atof(min);
-             Cfg_dmx.Canal[num-1].max    = atof(max);
-             Cfg_dmx.Canal[num-1].type   = atoi(type);
-             Cfg_dmx.Canal[num-1].valeur = 0.0;                        /*atof(valeur); a l'init, on considère le canal à zero */
-             Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO,
+           { g_snprintf( vars->Canal[num-1].tech_id,  sizeof(vars->Canal[num-1].tech_id), "%s", tech_id );
+             g_snprintf( vars->Canal[num-1].acronyme, sizeof(vars->Canal[num-1].acronyme), "%s", acro );
+             vars->Canal[num-1].min    = atof(min);
+             vars->Canal[num-1].max    = atof(max);
+             vars->Canal[num-1].type   = atoi(type);
+             vars->Canal[num-1].valeur = 0.0;                        /*atof(valeur); a l'init, on considère le canal à zero */
+             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
                        "%s: AO Canal %d : '%s:%s'=%s ('%s') loaded", __func__, num, tech_id, acro, valeur, libelle );
              cpt++;
            }
-          else Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
+          else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          map_text, num, DMX_CHANNEL );
         }
-       else Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, map_text );
+       else Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, map_text );
      }
-    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_INFO, "%s: %d AO loaded", __func__, cpt );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %d AO loaded", __func__, cpt );
 
-    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: DMX '%s' : mapping done", __func__, Cfg_dmx.tech_id );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: DMX '%s' : mapping done", __func__, tech_id );
   }
 /******************************************************************************************************************************/
 /* Dmx_init: Initialisation de la ligne DMX                                                                                   */
 /* Entrée: Néant.                                                                                                             */
 /* Sortie: -1 si erreur, sinon, le FileDescriptor associé                                                                     */
 /******************************************************************************************************************************/
- static void Dmx_init ( void )
-  {
-    Cfg_dmx.fd = open( Cfg_dmx.device, O_RDWR | O_NOCTTY /*| O_NONBLOCK*/ );
-    if (Cfg_dmx.fd<0)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Impossible d'ouvrir le device '%s', retour=%d (%s)", __func__,
-                 Cfg_dmx.device, Cfg_dmx.fd, strerror(errno) );
-       return;
+ static gboolean Dmx_init ( struct SUBPROCESS *module )
+  { struct DMX_VARS *vars = module->vars;
+    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    gchar *device  = Json_get_string ( module->config, "device" );
+    
+    vars->fd = open( device, O_RDWR | O_NOCTTY /*| O_NONBLOCK*/ );
+    if (vars->fd<0)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Impossible d'ouvrir le device '%s', retour=%d (%s)", __func__,
+                 tech_id, device, vars->fd, strerror(errno) );
+       return(FALSE);
      }
 
-    Cfg_dmx.taille_trame_dmx = sizeof(struct TRAME_DMX);
-    memset ( &Cfg_dmx.Trame_dmx, 0, sizeof(struct TRAME_DMX) );
-    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Ouverture port dmx okay %s", __func__, Cfg_dmx.device );
-    Cfg_dmx.comm_status = TRUE;
-    Dmx_do_mapping();
+    vars->taille_trame_dmx = sizeof(struct TRAME_DMX);
+    memset ( &vars->Trame_dmx, 0, sizeof(struct TRAME_DMX) );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Ouverture port dmx okay %s",
+              __func__, tech_id, device );
+    SubProcess_send_comm_to_master_new ( module, TRUE );
+    Dmx_do_mapping( module );
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Dmx_close: Fermeture de la ligne DMX                                                                                       */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Dmx_close ( void )
-  { if ( Cfg_dmx.fd != -1 )
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Fermeture device '%s' dmx okay", __func__, Cfg_dmx.device );
-       close(Cfg_dmx.fd);
-       Cfg_dmx.fd = -1;
+ static void Dmx_close ( struct SUBPROCESS *module )
+  { struct DMX_VARS *vars = module->vars;
+    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    if ( vars->fd != -1 )
+     { close(vars->fd);
+       Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE,
+		         "%s: %s: Fermeture device '%s' dmx okay", __func__, tech_id, Json_get_string ( module->config, "device" ) );
+	   vars->fd = -1;
      }
-    Zmq_Send_WATCHDOG_to_master ( Cfg_dmx.lib, Cfg_dmx.tech_id, "IO_COMM", 0 );
-    Cfg_dmx.comm_status = FALSE;
+    SubProcess_send_comm_to_master_new ( module, FALSE );
   }
 /******************************************************************************************************************************/
 /* Envoyer_trame_dmx_request: envoie une trame DMX au token USB                                                               */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
- static gboolean Envoyer_trame_dmx_request( void )
-  { gint cpt;
-    if (Cfg_dmx.comm_status == FALSE) return(FALSE);
-    Cfg_dmx.Trame_dmx.start_delimiter = 0x7E;
-    Cfg_dmx.Trame_dmx.label      = DMX_Output_Only_Send_DMX_Packet_Request;
-    Cfg_dmx.Trame_dmx.length_lsb =  (sizeof(Cfg_dmx.Trame_dmx.channel)+1) & 0xFF;
-    Cfg_dmx.Trame_dmx.length_msb =  ((sizeof(Cfg_dmx.Trame_dmx.channel)+1) >> 8) & 0xFF;
-    Cfg_dmx.Trame_dmx.start_code = 0; /* Start Code DMX = 0 */
-    for (cpt=0; cpt<DMX_CHANNEL; cpt++) { Cfg_dmx.Trame_dmx.channel[cpt] = (guchar)Cfg_dmx.Canal[cpt].valeur; }
-    Cfg_dmx.Trame_dmx.end_delimiter = 0xE7; /* End delimiter */
-    if ( write( Cfg_dmx.fd, &Cfg_dmx.Trame_dmx, sizeof(struct TRAME_DMX) ) != sizeof(struct TRAME_DMX) )/* Ecriture de la trame */
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Write Trame Error '%s'", __func__, strerror(errno) );
-       Dmx_close();
+ static gboolean Envoyer_trame_dmx_request( struct SUBPROCESS *module )
+  { struct DMX_VARS *vars = module->vars;
+    if (module->comm_status == FALSE) return(FALSE);
+
+    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    vars->Trame_dmx.start_delimiter = 0x7E;
+    vars->Trame_dmx.label      = DMX_Output_Only_Send_DMX_Packet_Request;
+    vars->Trame_dmx.length_lsb =  (sizeof(vars->Trame_dmx.channel)+1) & 0xFF;
+    vars->Trame_dmx.length_msb =  ((sizeof(vars->Trame_dmx.channel)+1) >> 8) & 0xFF;
+    vars->Trame_dmx.start_code = 0; /* Start Code DMX = 0 */
+    for (gint cpt=0; cpt<DMX_CHANNEL; cpt++) { vars->Trame_dmx.channel[cpt] = (guchar)vars->Canal[cpt].valeur; }
+    vars->Trame_dmx.end_delimiter = 0xE7; /* End delimiter */
+    if ( write( vars->fd, &vars->Trame_dmx, sizeof(struct TRAME_DMX) ) != sizeof(struct TRAME_DMX) )/* Ecriture de la trame */
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Write Trame Error '%s'", __func__, tech_id, strerror(errno) );
+       Dmx_close(module);
        return(FALSE);
      }
-    Cfg_dmx.nbr_request++;
+    vars->nbr_request++;
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Main: Fonction principale du MODBUS                                                                                        */
+/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
+/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_thread ( struct LIBRAIRIE *lib )
-  {
-reload:
-    memset( &Cfg_dmx, 0, sizeof(Cfg_dmx) );                                         /* Mise a zero de la structure de travail */
-    Cfg_dmx.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "dmx", "I/O", lib, WTD_VERSION, "Manage Dmx System" );
-    Dmx_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
+ void Run_subprocess ( struct SUBPROCESS *module )
+  { SubProcess_init ( module, sizeof(struct DMX_VARS) );
+    struct DMX_VARS *vars = module->vars;
 
-    if (Dls_auto_create_plugin( Cfg_dmx.tech_id, "Gestion du DMX" ) == FALSE)
-     { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR\n", Cfg_dmx.tech_id ); }
+    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
-    Mnemo_auto_create_WATCHDOG ( FALSE, Cfg_dmx.tech_id, "IO_COMM", "Statut de la communication avec le token DMX" );
-
-    Dmx_init();
-    Envoyer_trame_dmx_request();
-    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
+    while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
      { usleep(1000);
        sched_yield();
 
-       if (Cfg_dmx.comm_status == FALSE)
-        { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: Acces DMX not opened, sleeping 5s before retrying.", __func__);
-          sleep(5);
-          lib->Thread_reload = TRUE;
-          break;
-        }
-
-       if (!Partage->top%600) Zmq_Send_WATCHDOG_to_master ( Cfg_dmx.lib, Cfg_dmx.tech_id, "IO_COMM", 900 );
-
-/********************************************************* Envoi de SMS *******************************************************/
+       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+/********************************************************* Ecoute du master ***************************************************/
        JsonNode *request;
-       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
+       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_AO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
@@ -216,37 +199,89 @@ reload:
              gchar *acronyme = Json_get_string ( request, "acronyme" );
              gint   valeur   = Json_get_int    ( request, "valeur" );
              if (!tech_id)
-              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
              else if (!acronyme)
-              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
              else if (!valeur)
-              { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque valeur", __func__ ); }
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque valeur", __func__ ); }
              else
               { for (gint num=0; num<DMX_CHANNEL; num++)
-                 { if (!strcasecmp( Cfg_dmx.Canal[num].tech_id, tech_id) &&
-                       !strcasecmp( Cfg_dmx.Canal[num].acronyme, acronyme))
-                    { Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Setting %s:%s=%f (Canal %d)", __func__,
+                 { if (!strcasecmp( vars->Canal[num].tech_id, tech_id) &&
+                       !strcasecmp( vars->Canal[num].acronyme, acronyme))
+                    { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: Setting %s:%s=%f (Canal %d)", __func__,
                                 tech_id, acronyme, valeur, num );
-                      Cfg_dmx.Canal[num].valeur = valeur;
+                      vars->Canal[num].valeur = valeur;
                       break;
                     }
 
                  }
-                Envoyer_trame_dmx_request();
+                Envoyer_trame_dmx_request(module);
               }
            }
           json_node_unref(request);
         }
-     }                                                                                         /* Fin du while partage->arret */
 
-    Info_new( Config.log, Cfg_dmx.lib->Thread_debug, LOG_NOTICE, "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
-    Dmx_close();
+/************************************************* Traitement opérationnel ****************************************************/
+       if (module->comm_status == FALSE && vars->date_next_retry <= Partage->top )
+        { vars->date_next_retry = 0;
+          Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, tech_id );
+          if ( Dmx_init(module) == FALSE )
+           { vars->date_next_retry = Partage->top + DMX_RETRY_DELAI; }
+          else
+           { Envoyer_trame_dmx_request(module); }                 /* Envoie d'une trame à l'init sans attendre la comm master */
+        }
+
+       if (!(Partage->top % 50))                                                                /* Test toutes les 5 secondes */
+        { gboolean closing = FALSE;
+          struct stat buf;
+          gint retour;
+          retour = fstat( vars->fd, &buf );
+          if (retour == -1)
+           { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+                      "%s: %s: Fstat Error (%s), closing and re-trying in %ds", __func__, tech_id,
+                       strerror(errno), DMX_RETRY_DELAI/10 );
+             closing = TRUE;
+           }
+          else if ( buf.st_nlink < 1 )
+           { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+                      "%s: %s: USB device disappeared. Closing and re-trying in %ds", __func__, tech_id, DMX_RETRY_DELAI/10 );
+             closing = TRUE;
+           }
+          if (closing == TRUE)
+           { Dmx_close ( module );
+			 vars->date_next_retry = Partage->top + DMX_RETRY_DELAI;
+           }
+        }
+     }                                                                                         /* Fin du while partage->arret */
+    Dmx_close(module);
+
+    SubProcess_end(module);
+  }
+/******************************************************************************************************************************/
+/* Run_process: Run du Process                                                                                                */
+/* Entrée: la structure PROCESS associée                                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Run_process ( struct PROCESS *lib )
+  {
+reload:
+    Dmx_Creer_DB ( lib );                                                                      /* Création de la DB du thread */
+    Thread_init ( "dmx", "I/O", lib, WTD_VERSION, "Manage Dmx System" );
+
+    lib->config = Json_node_create();
+    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
+
+    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
+    while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
+    Process_Unload_all_subprocess ( lib );
 
     if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
      { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
        lib->Thread_reload = FALSE;
        goto reload;
      }
+
     Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
