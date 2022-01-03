@@ -64,7 +64,20 @@
                     "`watchdog` INT(11) NOT NULL DEFAULT 50,"
                     "`max_request_par_sec` INT(11) NOT NULL DEFAULT 50,"
                     "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;", lib->name );
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
+
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_DI` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                    "`%s_id` int(11) NOT NULL,"
+                    "`num` int(11) NOT NULL,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "UNIQUE (%s_id, num),"
+                    "FOREIGN KEY (`%s_id`) REFERENCES `%s` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                    "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;",
+                    lib->name, lib->name, lib->name, lib->name, lib->name );
 
     Process_set_database_version ( lib, 1 );
   }
@@ -868,18 +881,24 @@
                vars->mode = MODBUS_GET_NBR_AI;
                break;
           case MODBUS_GET_NBR_AI:
-               vars->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
-               Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree ANA",
-                         __func__, tech_id, vars->nbr_entree_ana
-                       );
-               vars->mode = MODBUS_GET_NBR_AO;
+                { vars->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
+                  Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree ANA",
+                            __func__, tech_id, vars->nbr_entree_ana
+                          );
+                  for (gint cpt=0; cpt<vars->nbr_entree_ana; cpt++)
+                   { SQL_Write_new ( "INSERT IGNORE INTO %s_AI SET modbus_id=%d, num=%d", Json_get_int ( module->config, "id" ), cpt ); }
+                  vars->mode = MODBUS_GET_NBR_AO;
+                }
                break;
           case MODBUS_GET_NBR_AO:
-               vars->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
-               Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie ANA",
-                         __func__, tech_id, vars->nbr_sortie_ana
-                       );
-               vars->mode = MODBUS_GET_NBR_DI;
+                { vars->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
+                  Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie ANA",
+                            __func__, tech_id, vars->nbr_sortie_ana
+                          );
+                  for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
+                   { SQL_Write_new ( "INSERT IGNORE INTO %s_AO SET modbus_id=%d, num=%d", Json_get_int ( module->config, "id" ), cpt ); }
+                  vars->mode = MODBUS_GET_NBR_DI;
+                }
                break;
           case MODBUS_GET_NBR_DI:
                 { gint nbr;
@@ -887,15 +906,20 @@
                   vars->nbr_entree_tor = nbr;
                   Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree TOR",
                             __func__, tech_id, vars->nbr_entree_tor );
+                  for (gint cpt=0; cpt<vars->nbr_entree_tor; cpt++)
+                   { SQL_Write_new ( "INSERT IGNORE INTO %s_DI SET modbus_id=%d, num=%d", Json_get_int ( module->config, "id" ), cpt ); }
                   vars->mode = MODBUS_GET_NBR_DO;
                 }
                break;
           case MODBUS_GET_NBR_DO:
-               vars->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
-               Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie TOR",
-                         __func__, tech_id, vars->nbr_sortie_tor );
-               vars->mode = MODBUS_GET_DI;
-               Modbus_do_mapping( module );                                        /* Initialise le mapping des I/O du module */
+                { vars->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
+                  Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie TOR",
+                            __func__, tech_id, vars->nbr_sortie_tor );
+                  for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
+                   { SQL_Write_new ( "INSERT IGNORE INTO %s_DO SET modbus_id=%d, num=%d", Json_get_int ( module->config, "id" ), cpt ); }
+                  Modbus_do_mapping( module );                                     /* Initialise le mapping des I/O du module */
+                  vars->mode = MODBUS_GET_DI;
+                }
                break;
         }
      }

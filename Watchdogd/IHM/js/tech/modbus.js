@@ -144,5 +144,150 @@
          responsive: true,
        }
      );
+
+    $('#idTableMODBUS_DI').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         rowId: "id", paging: false,
+         ajax: {	url : "/api/process/config", type : "GET", data: { name: "modbus", "classe": "DI" }, dataSrc: "config",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         columns:
+          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
+            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
+            { "data": null, "title":"Map", "className": "align-middle text-center",
+              "render": function (item)
+                { return( "<->" ); }
+            },
+            { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+            },
+            { "data": "acronyme", "title":"BIT Acronyme", "className": "align-middle text-center" },
+            { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
+            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_DI", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_DI", item.id, "trash", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
+            },
+          ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
+    $('#idTableMODBUS_DO').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         rowId: "id", paging: false,
+         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "MODBUS", "classe": "DO" },
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         columns:
+          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
+            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
+            { "data": null, "title":"Map", "className": "align-middle text-center",
+              "render": function (item)
+                { return( "<->" ); }
+            },
+            { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+            },
+            { "data": "acronyme", "title":"BIT Acronyme", "className": "align-middle text-center" },
+            { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
+            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_DO", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_DO", item.id, "trash", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
+            },
+          ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
+    $('#idTableMODBUS_AI').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         rowId: "id", paging: false,
+         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "MODBUS", "classe": "AI" },
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         columns:
+          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
+            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
+             { "data": null, "title":"Map", "className": "align-middle text-center",
+              "render": function (item)
+                { return( "<->" ); }
+            },
+            { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+            },
+            { "data": null, "title":"BIT Acronyme", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir le graphe", item.acronyme ) ); }
+            },
+            { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
+            { "data": null, "title":"Echange vocaux", "className": "align-left text-center",
+              "render": function (item)
+                { return( "Question : "+item.map_question_vocale+"<br>Réponse:"+item.map_reponse_vocale ); }
+            },
+            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_AI", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_AI", item.id, "trash", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
+            },
+          ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
+    $('#idTableMODBUS_AO').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         rowId: "id", paging: false,
+         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "MODBUS", "classe": "AO" },
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         columns:
+          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
+            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
+            { "data": null, "title":"Map", "className": "align-middle text-center",
+              "render": function (item)
+                { return( "<->" ); }
+            },
+            { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+            },
+            { "data": "acronyme", "title":"BIT Acronyme", "className": "align-middle text-center" },
+            { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
+            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_AO", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_AO", item.id, "trash", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
+            },
+          ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
+    $('#idTabEntreeTor').tab('show');
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

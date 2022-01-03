@@ -102,9 +102,20 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "config",
-                              "SELECT p.uuid, p.instance, config.* FROM %s AS config "
-                              "INNER JOIN processes AS p ON p.uuid = config.uuid ", name ); /* Contenu du Status */
+    gchar *classe = g_hash_table_lookup ( query, "classe" );
+    if (!classe)
+     { SQL_Select_to_json_node ( RootNode, "config",
+                                "SELECT p.uuid, p.instance, config.* FROM %s AS config "
+                                "INNER JOIN processes AS p ON p.uuid = config.uuid ", name );/* Contenu de la table du process */
+     }
+    else
+     { Normaliser_as_ascii ( classe );
+       SQL_Select_to_json_node ( RootNode, "config",
+                                "SELECT p.uuid, p.instance, config.tech_id, details.* FROM %s AS config "
+                                "INNER JOIN %s_%s AS details ON details.%s_id = config.id "
+                                "INNER JOIN processes AS p ON p.uuid = config.uuid ",
+                                name, name, classe, name );                                    /* Contenu de la table details */
+     }
 
     Json_node_foreach_array_element ( RootNode, "config", Http_process_add_comm, NULL );
     gchar *buf = Json_node_to_string ( RootNode );

@@ -38,13 +38,13 @@
 
  <div class="row m-2">
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="Show_Modal_Map_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping DI</button>
+        <button type="button" onclick="MODBUS_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping DI</button>
    </div>
  </div>
-    <table id="idTableModbusMapDI" class="table table-striped table-bordered table-hover w-100">
+    <table id="idTableMODBUS_DI" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
-				  </thead>
-			   <tbody>
+      </thead>
+      <tbody>
       </tbody>
     </table>
 </div>
@@ -54,14 +54,14 @@
 
  <div class="row m-2">
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="Show_Modal_Map_Edit_DO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping DO</button>
+        <button type="button" onclick="MODBUS_Edit_DO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping DO</button>
    </div>
  </div>
 
-    <table id="idTableModbusMapDO" class="table table-striped table-bordered table-hover w-100">
+    <table id="idTableMODBUS_DO" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
-				  </thead>
-			   <tbody>
+      </thead>
+      <tbody>
       </tbody>
     </table>
 </div>
@@ -70,14 +70,14 @@
 
  <div class="row m-2">
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="Show_Modal_Map_Edit_AI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping AI</button>
+        <button type="button" onclick="MODBUS_Edit_AI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping AI</button>
    </div>
  </div>
 
-    <table id="idTableModbusMapAI" class="table table-striped table-bordered table-hover w-100">
+    <table id="idTableMODBUS_AI" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
-				  </thead>
-			   <tbody>
+      </thead>
+      <tbody>
       </tbody>
     </table>
 </div>
@@ -85,13 +85,13 @@
 <div id="idTabSortieAna" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
  <div class="row m-2">
    <div class ="ml-auto btn-group">
-        <button type="button" onclick="Show_Modal_Map_Edit_AO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping AO</button>
+        <button type="button" onclick="MODBUS_Edit_AO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping AO</button>
    </div>
  </div>
-    <table id="idTableModbusMapAO" class="table table-striped table-bordered table-hover w-100">
+    <table id="idTableMODBUS_AO" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
-				  </thead>
-			   <tbody>
+      </thead>
+      <tbody>
       </tbody>
     </table>
 </div>
@@ -101,11 +101,11 @@
 </div>
 
 <!------------------------------------------------- Modal Edit Digital Input -------------------------------------------------->
-<div id="idModalEditDI" class="modal fade" tabindex="-1" role="dialog">
+<div id="idMODBUSEditDI" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalEditDITitre"></span></h5>
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idMODBUSEditDITitre"></span></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -113,55 +113,55 @@
       <div class="modal-body">
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-						     <select id="idModalEditDIWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
+           <select id="idMODBUSEditDIWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Wago DI</label>
-						     <input id="idModalEditDIWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="DIxx">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Wago DI</label>
+           <input id="idMODBUSEditDIWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="DIxx">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalEditDIRechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idModalEditDI', 'DI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idMODBUSEditDIRechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idMODBUSEditDI', 'DI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditDISelectTechID" required onchange="ModbusMap_Update_Choix_Acronyme('idModalEditDI', 'DI')" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idMODBUSEditDISelectTechID" required onchange="ModbusMap_Update_Choix_Acronyme('idMODBUSEditDI', 'DI')" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditDISelectAcronyme" required class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idMODBUSEditDISelectAcronyme" required class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-        <button id="idModalEditDIValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
+        <button id="idMODBUSEditDIValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
       </div>
     </div>
   </div>
 </div>
 
 <!------------------------------------------------- Modal Edit Digital Output ------------------------------------------------->
-<div id="idModalEditDO" class="modal fade" tabindex="-1" role="dialog">
+<div id="idMODBUSEditDO" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalEditDOTitre"></span></h5>
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idMODBUSEditDOTitre"></span></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -169,55 +169,55 @@
       <div class="modal-body">
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-						     <select id="idModalEditDOWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
+           <select id="idMODBUSEditDOWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Wago DO</label>
-						     <input id="idModalEditDOWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="DOxx">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Wago DO</label>
+           <input id="idMODBUSEditDOWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="DOxx">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalEditDORechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idModalEditDO', 'DO')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idMODBUSEditDORechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idMODBUSEditDO', 'DO')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditDOSelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditDO', 'DO')" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idMODBUSEditDOSelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idMODBUSEditDO', 'DO')" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditDOSelectAcronyme" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idMODBUSEditDOSelectAcronyme" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-        <button id="idModalEditDOValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
+        <button id="idMODBUSEditDOValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
       </div>
     </div>
   </div>
 </div>
 
 <!------------------------------------------------- Modal Edit Analog Input --------------------------------------------------->
-<div id="idModalEditAI" class="modal fade" tabindex="-1" role="dialog">
+<div id="idMODBUSEditAI" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalEditAITitre"></span></h5>
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idMODBUSEditAITitre"></span></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -225,99 +225,99 @@
       <div class="modal-body">
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-						     <select id="idModalEditAIWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
+           <select id="idMODBUSEditAIWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Wago AI</label>
-						     <input id="idModalEditAIWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="AIxx">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Wago AI</label>
+           <input id="idMODBUSEditAIWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="AIxx">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Type de borne</label>
-						     <select id="idModalEditAIType" class="custom-select border-info">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Type de borne</label>
+           <select id="idMODBUSEditAIType" class="custom-select border-info">
              <option value="3">4/20 mA 750455</option>
              <option value="4">Pt-100 750461</option>
            </select>
-     					</div>
-   					</div>
+          </div>
+        </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
-						     <input id="idModalEditAIUnite" type="text" class="form-control" placeholder="°C, km/h, ...">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
+           <input id="idMODBUSEditAIUnite" type="text" class="form-control" placeholder="°C, km/h, ...">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Minimum</label>
-						     <input id="idModalEditAIMin" type="number" class="form-control" placeholder="Valeur Min">
-     					</div>
-   					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Minimum</label>
+           <input id="idMODBUSEditAIMin" type="number" class="form-control" placeholder="Valeur Min">
+          </div>
+        </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Maximum</label>
-						     <input id="idModalEditAIMax" type="number" class="form-control" placeholder="Valeur Max">
-     					</div>
-   					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Maximum</label>
+           <input id="idMODBUSEditAIMax" type="number" class="form-control" placeholder="Valeur Max">
+          </div>
+        </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalEditAIRechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idModalEditAI', 'AI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idMODBUSEditAIRechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idMODBUSEditAI', 'AI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditAISelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditAI', 'AI')" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idMODBUSEditAISelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idMODBUSEditAI', 'AI')" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditAISelectAcronyme" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idMODBUSEditAISelectAcronyme" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Question Vocale</label>
-						     <input id="idModalEditAIMapQuestionVoc" type="text" class="form-control" placeholder="Question vocale associée">
-     					</div>
-   					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Question Vocale</label>
+           <input id="idMODBUSEditAIMapQuestionVoc" type="text" class="form-control" placeholder="Question vocale associée">
+          </div>
+        </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Réponse Vocale</label>
-						     <input id="idModalEditAIMapReponseVoc" type="text" class="form-control" placeholder="Réponse vocale associée">
-     					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Réponse Vocale</label>
+           <input id="idMODBUSEditAIMapReponseVoc" type="text" class="form-control" placeholder="Réponse vocale associée">
+          </div>
           <small>$1 est la valeur dynamique du bit interne</small>
       </div>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-        <button id="idModalEditAIValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
+        <button id="idMODBUSEditAIValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
       </div>
     </div>
   </div>
 </div>
 <!------------------------------------------------- Modal Edit Analog Output -------------------------------------------------->
-<div id="idModalEditAO" class="modal fade" tabindex="-1" role="dialog">
+<div id="idMODBUSEditAO" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content ">
       <div class="modal-header bg-info text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idModalEditAOTitre"></span></h5>
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idMODBUSEditAOTitre"></span></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -325,90 +325,90 @@
       <div class="modal-body">
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-						     <select id="idModalEditAOWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
+           <select id="idMODBUSEditAOWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Wago AO</label>
-						     <input id="idModalEditAOWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="AOxx">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Wago AO</label>
+           <input id="idMODBUSEditAOWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="AOxx">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Type de Borne</label>
-						     <select id="idModalEditAOType" class="custom-select border-info">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Type de Borne</label>
+           <select id="idMODBUSEditAOType" class="custom-select border-info">
              <option value="0">a definir</option>
              <option value="1">a definir</option>
            </select>
-     					</div>
-  					</div>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
-						     <input id="idModalEditAOUnite" type="text" class="form-control" placeholder="°C, km/h, ...">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
+           <input id="idMODBUSEditAOUnite" type="text" class="form-control" placeholder="°C, km/h, ...">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Min</label>
-						     <input id="idModalEditAOMin" type="number" class="form-control" placeholder="Valeur Min">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Min</label>
+           <input id="idMODBUSEditAOMin" type="number" class="form-control" placeholder="Valeur Min">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Max</label>
-						     <input id="idModalEditAOMax" type="number" class="form-control" placeholder="Valeur Max">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Max</label>
+           <input id="idMODBUSEditAOMax" type="number" class="form-control" placeholder="Valeur Max">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalEditAORechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idModalEditAO', 'AO')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idMODBUSEditAORechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idMODBUSEditAO', 'AO')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditAOSelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idModalEditAO', 'AO')" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idMODBUSEditAOSelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idMODBUSEditAO', 'AO')" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditAOSelectAcronyme" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idMODBUSEditAOSelectAcronyme" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Question Vocale</label>
-						     <input id="idModalEditMapQuestionVoc" type="text" class="form-control" placeholder="Question vocale associée">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Question Vocale</label>
+           <input id="idMODBUSEditMapQuestionVoc" type="text" class="form-control" placeholder="Question vocale associée">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Réponse Vocale</label>
-						     <input id="idModalEditMapReponseVoc" type="text" class="form-control" placeholder="Réponse vocale associée">
-     					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Réponse Vocale</label>
+           <input id="idMODBUSEditMapReponseVoc" type="text" class="form-control" placeholder="Réponse vocale associée">
+          </div>
           <small>$1 est la valeur dynamique du bit interne</small>
-  					</div>
+       </div>
 
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-        <button id="idModalEditValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
+        <button id="idMODBUSEditValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
       </div>
     </div>
   </div>
