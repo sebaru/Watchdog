@@ -184,6 +184,12 @@
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
        Libere_DB_SQL ( &db );
+       if (array_name)
+        { gchar chaine[80];
+          g_snprintf(chaine, sizeof(chaine), "nbr_%s", array_name );
+          Json_node_add_int ( RootNode, chaine, 0 );
+          Json_node_add_array( RootNode, array_name );                            /* Ajoute un array vide en cas d'erreur SQL */
+        }
        return(FALSE);
      }
     else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
