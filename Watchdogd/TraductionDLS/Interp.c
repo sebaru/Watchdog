@@ -1533,99 +1533,54 @@
            { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
              retour = TRAD_DLS_WARNING;
            }
-                                                                                        /* Alias Dynamiques, local uniquement */
-          if (!strcmp(alias->tech_id, Dls_plugin.tech_id)) /* Calcul des alias locaux pour préparer la suppression automatique*/
-           { switch(alias->classe)
-              { case MNEMO_BUS:
-                   break;
-                case MNEMO_BISTABLE:
-                 { Liste_BI = Add_csv ( Liste_BI, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_MONOSTABLE:
-                 { Liste_MONO = Add_csv ( Liste_MONO, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_ENTREE:
-                 { Liste_DI = Add_csv ( Liste_DI, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_SORTIE:
-                 { Liste_DO = Add_csv ( Liste_DO, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_SORTIE_ANA:
-                 { Liste_AO = Add_csv ( Liste_AO, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_ENTREE_ANA:
-                 { Liste_AI = Add_csv ( Liste_AI, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_TEMPO:
-                 { Liste_TEMPO = Add_csv ( Liste_TEMPO, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_HORLOGE:
-                 { Liste_HORLOGE = Add_csv ( Liste_HORLOGE, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_REGISTRE:
-                 { Liste_REGISTRE = Add_csv ( Liste_REGISTRE, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_WATCHDOG:
-                 { Liste_WATCHDOG = Add_csv ( Liste_WATCHDOG, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_MOTIF:
-                 { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
-                   if (forme)
-                    { Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );
-                    }
-                   break;
-                 }
-                case MNEMO_CPT_IMP:
-                 { Liste_CI = Add_csv ( Liste_CI, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_CPTH:
-                 { Liste_CH = Add_csv ( Liste_CH, alias->acronyme );
-                   break;
-                 }
-                case MNEMO_MSG:
-                 { Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme );
-                   break;
-                 }
+/************************ Calcul des alias locaux pour préparer la suppression automatique ************************************/
+          if (!strcmp(alias->tech_id, Dls_plugin.tech_id))
+           {      if (alias->classe == MNEMO_BUS)        { }
+             else if (alias->classe == MNEMO_BISTABLE)   { Liste_BI = Add_csv ( Liste_BI, alias->acronyme ); }
+             else if (alias->classe == MNEMO_MONOSTABLE) { Liste_MONO = Add_csv ( Liste_MONO, alias->acronyme ); }
+             else if (alias->classe == MNEMO_ENTREE)     { Liste_DI = Add_csv ( Liste_DI, alias->acronyme ); }
+             else if (alias->classe == MNEMO_SORTIE)     { Liste_DO = Add_csv ( Liste_DO, alias->acronyme ); }
+             else if (alias->classe == MNEMO_SORTIE_ANA) { Liste_AO = Add_csv ( Liste_AO, alias->acronyme ); }
+             else if (alias->classe == MNEMO_ENTREE_ANA) { Liste_AI = Add_csv ( Liste_AI, alias->acronyme ); }
+             else if (alias->classe == MNEMO_TEMPO)      { Liste_TEMPO = Add_csv ( Liste_TEMPO, alias->acronyme ); }
+             else if (alias->classe == MNEMO_HORLOGE)    { Liste_HORLOGE = Add_csv ( Liste_HORLOGE, alias->acronyme ); }
+             else if (alias->classe == MNEMO_REGISTRE)   { Liste_REGISTRE = Add_csv ( Liste_REGISTRE, alias->acronyme ); }
+             else if (alias->classe == MNEMO_WATCHDOG)   { Liste_WATCHDOG = Add_csv ( Liste_WATCHDOG, alias->acronyme ); }
+             else if (alias->classe == MNEMO_CPT_IMP)    { Liste_CI = Add_csv ( Liste_CI, alias->acronyme ); }
+             else if (alias->classe == MNEMO_CPTH)       { Liste_CH = Add_csv ( Liste_CH, alias->acronyme ); }
+             else if (alias->classe == MNEMO_MSG)        { Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme ); }
+             else if (alias->classe == MNEMO_MOTIF)
+              { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
+                if (forme) { Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme ); }
               }
            }
-/***************************************************** Alias externe **********************************************************/
-          else                                                             /* Alias externe : n'est pas défini dans le module */
-           { gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
-             if (cadran &&
-                  ( alias->classe == MNEMO_ENTREE_ANA ||
-                    alias->classe == MNEMO_REGISTRE ||
-                    alias->classe == MNEMO_CPTH ||
-                    alias->classe == MNEMO_CPT_IMP
-                  )
-                )
-              { gint default_decimal = 0;
-				if (alias->classe == MNEMO_ENTREE_ANA || alias->classe == MNEMO_REGISTRE) default_decimal = 2;
-				Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
-                                                Get_option_double ( alias->options, T_MIN, 0.0 ),
-                                                Get_option_double ( alias->options, T_MAX, 100.0 ),
-                                                Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
-                                                Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
-                                                Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
-                                                Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
-                                                default_decimal
-                                              );
-                Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
-              }
-             if (alias->classe == MNEMO_MOTIF)                                     /* Création du LINK vers le visuel externe */
-              { Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
-                /* a virer ? Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );*/
-              }
+/***************************************************** Création des visuels externes ******************************************/
+          else if (alias->classe == MNEMO_MOTIF)                                   /* Création du LINK vers le visuel externe */
+           { Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+              /* a virer ? Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );*/
+           }
+
+/***************************************************** Création des cadrans ***************************************************/
+          gchar *cadran = Get_option_chaine( alias->options, T_CADRAN, NULL );
+          if (cadran &&
+               ( alias->classe == MNEMO_ENTREE_ANA ||
+                 alias->classe == MNEMO_REGISTRE ||
+                 alias->classe == MNEMO_CPTH ||
+                 alias->classe == MNEMO_CPT_IMP
+               )
+             )
+           { gint default_decimal = 0;
+             if (alias->classe == MNEMO_ENTREE_ANA || alias->classe == MNEMO_REGISTRE) default_decimal = 2;
+             Synoptique_auto_create_CADRAN ( &Dls_plugin, alias->tech_id, alias->acronyme, cadran,
+                                             Get_option_double ( alias->options, T_MIN, 0.0 ),
+                                             Get_option_double ( alias->options, T_MAX, 100.0 ),
+                                             Get_option_double ( alias->options, T_SEUIL_NTB, 5.0 ),
+                                             Get_option_double ( alias->options, T_SEUIL_NB, 10.0 ),
+                                             Get_option_double ( alias->options, T_SEUIL_NH, 90.0 ),
+                                             Get_option_double ( alias->options, T_SEUIL_NTH, 05.0 ),
+                                             default_decimal
+                                           );
+             Liste_CADRANS = Add_alias_csv ( Liste_CADRANS, alias->tech_id, alias->acronyme );
            }
           liste = liste->next;
         }
