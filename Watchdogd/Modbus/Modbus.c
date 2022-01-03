@@ -886,7 +886,9 @@
                             __func__, tech_id, vars->nbr_entree_ana
                           );
                   for (gint cpt=0; cpt<vars->nbr_entree_ana; cpt++)
-                   { SQL_Write_new ( "INSERT IGNORE INTO %s_AI SET modbus_id=%d, num=%d", Json_get_int ( module->config, "id" ), cpt ); }
+                   { SQL_Write_new ( "INSERT IGNORE INTO %s_AI SET modbus_id=%d, num=%d",
+                                     module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                   }
                   vars->mode = MODBUS_GET_NBR_AO;
                 }
                break;
@@ -896,7 +898,9 @@
                             __func__, tech_id, vars->nbr_sortie_ana
                           );
                   for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                   { SQL_Write_new ( "INSERT IGNORE INTO %s_AO SET modbus_id=%d, num=%d", Json_get_int ( module->config, "id" ), cpt ); }
+                   { SQL_Write_new ( "INSERT IGNORE INTO %s_AO SET modbus_id=%d, num=%d",
+                                     module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                   }
                   vars->mode = MODBUS_GET_NBR_DI;
                 }
                break;
@@ -907,7 +911,9 @@
                   Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree TOR",
                             __func__, tech_id, vars->nbr_entree_tor );
                   for (gint cpt=0; cpt<vars->nbr_entree_tor; cpt++)
-                   { SQL_Write_new ( "INSERT IGNORE INTO %s_DI SET modbus_id=%d, num=%d", Json_get_int ( module->config, "id" ), cpt ); }
+                   { SQL_Write_new ( "INSERT IGNORE INTO %s_DI SET modbus_id=%d, num=%d",
+                                     module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                   }
                   vars->mode = MODBUS_GET_NBR_DO;
                 }
                break;
@@ -916,7 +922,9 @@
                   Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie TOR",
                             __func__, tech_id, vars->nbr_sortie_tor );
                   for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                   { SQL_Write_new ( "INSERT IGNORE INTO %s_DO SET modbus_id=%d, num=%d", Json_get_int ( module->config, "id" ), cpt ); }
+                   { SQL_Write_new ( "INSERT IGNORE INTO %s_DO SET modbus_id=%d, num=%d",
+                                     module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                   }
                   Modbus_do_mapping( module );                                     /* Initialise le mapping des I/O du module */
                   vars->mode = MODBUS_GET_DI;
                 }
