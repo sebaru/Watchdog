@@ -2521,11 +2521,14 @@ encore:
 
     if (database_version < 6082)
      { SQL_Write_new ("ALTER TABLE instances CHANGE `debug` `log_msrv` TINYINT(1) NOT NULL DEFAULT 0"); }
-    /* A prévoir SQL_Write_new ("DROP TABLE mnemos_BOOL"); */
-    /* A prévoir SQL_Write_new ("DROP TABLE modbus_module"); */
+
+    if (database_version < 6083)
+     { SQL_Write_new ("DROP TABLE mnemos_BOOL");
+       SQL_Write_new ("DROP TABLE modbus_module");
+     }
 
 fin:
-    database_version = 6082;
+    database_version = 6083;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

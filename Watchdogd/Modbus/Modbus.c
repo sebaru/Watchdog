@@ -66,20 +66,27 @@
                     "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
 
-    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_DI` ("
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `modbus_DI` ("
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                    "`%s_id` int(11) NOT NULL,"
+                    "`modbus_id` int(11) NOT NULL",
                     "`num` int(11) NOT NULL,"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                    "UNIQUE (%s_id, num),"
-                    "FOREIGN KEY (`%s_id`) REFERENCES `%s` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,"
+                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NULL DEFAULT NULL,"
+                    "UNIQUE (modbus_id, num),"
+                    "UNIQUE (tech_id, acronyme),"
+                    "FOREIGN KEY (`modbus_id`) REFERENCES `modbus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
                     "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;",
-                    lib->name, lib->name, lib->name, lib->name, lib->name );
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
 
-    Process_set_database_version ( lib, 1 );
+    if (lib->database_version < 2)
+     { SQL_Write_new ( "INSERT INTO modbus_DI (modbus_id, num, tech_id, acronyme) "
+                       "SELECT modbus.id AS modbus_id, CONVERT ( REPLACE(mnemos_DI.map_tag, 'DI', ''), INTEGER) AS num, "
+                       "mnemos_DI.tech_id AS tech_id, mnemos_DI.acronyme AS acronyme "
+                       "FROM mnemos_DI INNER JOIN modbus WHERE modbus.tech_id = mnemos_DI.map_tech_id" );
+     }
+
+    Process_set_database_version ( lib, 2 );
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -100,6 +107,7 @@
     vars->request = FALSE;
     vars->nbr_deconnect++;
     vars->date_retente = Partage->top + MODBUS_RETRY;
+    if (vars->DI_root) json_node_unref(vars->DI_root);
     if (vars->DI) g_free(vars->DI);
     if (vars->AI) g_free(vars->AI);
     if (vars->DO) g_free(vars->DO);
@@ -183,6 +191,7 @@
     vars->started = TRUE;
     vars->mode = MODBUS_GET_DESCRIPTION;
     vars->DI = NULL;
+    vars->DI_root = NULL;
     vars->AI = NULL;
     vars->DO = NULL;
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module Connected", __func__, tech_id );
@@ -665,12 +674,37 @@
      } else Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
                       "%s: '%s': Allocated %d AI", __func__, tech_id, vars->nbr_entree_ana );
 
-    vars->DI = g_try_malloc0( sizeof(gpointer) * vars->nbr_entree_tor );
-    if (!vars->DI)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , tech_id);
-       return;
-     } else Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                      "%s: '%s': Allocated %d DI", __func__, tech_id, vars->nbr_entree_tor );
+/***************************************************** Mapping des DigitalInput ***********************************************/
+    vars->DI_root = Json_node_create();
+    if (!vars->DI_root)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , tech_id); }
+    else
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__, tech_id, vars->nbr_entree_tor );
+       SQL_Select_to_json_node ( vars->DI_root, "modbus_DI",
+                                 "SELECT di.* FROM modbus_DI AS di INNER JOIN modbus on di.modbus_id = modbus.id "
+                                 "WHERE modbus.tech_id='%s' ORDER by num", tech_id );
+
+       vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
+       if (!vars->DI)
+        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , tech_id);
+          return;
+        }
+
+       JsonArray *array = Json_get_array ( vars->DI_root, "modbus_DI" );
+       for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->DI_root, "modbus_DI" ) ); cpt ++ )
+        { JsonNode *element = json_array_get_element ( array, cpt );
+          gint num = Json_get_int (element, "num");
+          if (num < vars->nbr_entree_tor)
+           { vars->DI[num] = element;
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping : DI%03d -> %s:%s", __func__, tech_id,
+                       Json_get_int    ( vars->DI[cpt], "num" ),
+                       Json_get_string ( vars->DI[cpt], "tech_id" ),
+                       Json_get_string ( vars->DI[cpt], "acronyme" ) );
+             Json_node_add_int ( vars->DI[num], "etat", -1 );
+           } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI : num %d out of range '%d'",
+                            __func__, tech_id, num, vars->nbr_entree_tor );
+        }
+     }
 
     vars->DO = g_try_malloc0( sizeof(gpointer) * vars->nbr_sortie_tor );
     if (!vars->DO)
@@ -704,22 +738,6 @@
     if ( ! Recuperer_mnemos_DI_by_tag ( &db, tech_id, "DI%%" ) )
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
                  __func__, tech_id, critere );
-     }
-    else while ( Recuperer_mnemos_DI_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *map_tag = db->row[2];
-       gint num;
-       Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
-                 __func__, tech_id, map_tag, tech_id, acro, libelle );
-       if ( sscanf ( map_tag, "DI%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
-        { if (num<vars->nbr_entree_tor)
-           { Dls_data_get_DI ( tech_id, acro, &vars->DI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
-             if(vars->DI[num] == NULL) Dls_data_set_DI ( NULL, tech_id, acro, &vars->DI[num], FALSE );/* Sinon, on le crée */
-           }
-          else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, tech_id, map_tag, num, vars->nbr_entree_tor );
-        }
-       else Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
-                      __func__, tech_id, map_tag );
      }
 /*********************************** Recherche des events DO a raccrocher aux bits internes ***********************************/
     if ( ! Recuperer_mnemos_DO_by_tag ( &db, tech_id, "DO%%" ) )
@@ -780,7 +798,13 @@
        else switch (vars->mode)
         { case MODBUS_GET_DI:
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
-                { Dls_data_set_DI ( NULL, NULL, NULL, (gpointer)&vars->DI[cpt], (vars->response.data[ cpt_byte ] & cpt_poid) );
+                { gint new_etat = (vars->response.data[ cpt_byte ] & cpt_poid);
+                  gint old_etat = Json_get_int ( vars->DI[cpt], "etat" );
+                  if (old_etat != new_etat)
+                   { Zmq_Send_DI_to_master_new ( module, Json_get_string ( vars->DI[cpt], "tech_id" ),
+                                                         Json_get_string ( vars->DI[cpt], "acronyme" ), new_etat );
+                     Json_node_add_int ( vars->DI[cpt], "etat", new_etat );
+                   }
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
                 }
