@@ -63,6 +63,18 @@
     Normaliser_as_ascii ( classe );
 
 /************************************************ Préparation du buffer JSON **************************************************/
+    GSList *liste = Partage->com_msrv.Librairies;                                        /* Parcours de toutes les librairies */
+    while(liste)
+     { struct PROCESS *lib = liste->data;
+       if ( ! strcasecmp( thread, lib->name ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste)
+     { soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Not a thread" );
+       return;
+     }
+
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
@@ -70,10 +82,7 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "mappings",
-                             "SELECT config.tech_id AS thread_tech_id, details.* FROM %s AS config "
-                             "INNER JOIN %s_%s AS details ON details.%s_id = config.id ",
-                             thread, thread, classe, thread );                                 /* Contenu de la table details */
+    SQL_Select_to_json_node ( RootNode, "mappings", "SELECT * FROM %s_%s ", thread, classe );  /* Contenu de la table details */
 
     gchar *buf = Json_node_to_string ( RootNode );
     json_node_unref ( RootNode );
