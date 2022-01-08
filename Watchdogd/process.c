@@ -340,8 +340,7 @@
 /******************************************************************************************************************************/
  gboolean Process_reload_by_uuid ( gchar *uuid )
   { gboolean found = FALSE;
-    GSList *liste;
-    liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
+    GSList *liste = Partage->com_msrv.Librairies;                                        /* Parcours de toutes les librairies */
     while(liste)
      { struct PROCESS *lib = liste->data;
        if ( ! strcasecmp( uuid, lib->uuid ) )
@@ -363,8 +362,7 @@
 /******************************************************************************************************************************/
  gboolean Process_set_debug ( gchar *uuid, gboolean debug )
   { gboolean found = FALSE;
-    GSList *liste;
-    liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
+    GSList *liste = Partage->com_msrv.Librairies;                                        /* Parcours de toutes les librairies */
     while(liste)
      { struct PROCESS *lib = liste->data;
        if ( ! strcasecmp( uuid, lib->uuid ) )

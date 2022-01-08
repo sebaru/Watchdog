@@ -680,7 +680,7 @@
                                  "SELECT di.*, mappings.tech_id, mappings.acronyme FROM modbus_DI AS di "
                                  "INNER JOIN mappings ON mappings.thread_tech_id  = di.thread_tech_id "
                                  "                   AND mappings.thread_acronyme = di.thread_acronyme "
-                                 "WHERE modbus.thread_tech_id='%s'", thread_tech_id );
+                                 "WHERE di.thread_tech_id='%s'", thread_tech_id );
 
        vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
        if (!vars->DI)
