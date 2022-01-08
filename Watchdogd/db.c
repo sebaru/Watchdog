@@ -2527,6 +2527,16 @@ encore:
        SQL_Write_new ("DROP TABLE modbus_module");
      }
 
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
+                   "`thread_tech_id` VARCHAR(32) NOT NULL,"
+                   "`thread_acronyme` VARCHAR(64) NOT NULL,"
+                   "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
+                   "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
+                   "UNIQUE (`thread_tech_id`,`thread_acronyme`),"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "UNIQUE (`thread_tech_id`,`thread_acronyme`,`tech_id`,`acronyme`)"
+                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");
+
 fin:
     database_version = 6083;
 

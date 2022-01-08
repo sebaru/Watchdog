@@ -334,8 +334,8 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Process_reload_by_uuid: Restart le process en paremetre                                                                    */
-/* Entrée: Le nom du thread                                                                                                   */
+/* Process_reload_by_uuid: Restart le process en parametre                                                                    */
+/* Entrée: L'uuid du thread                                                                                                   */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Process_reload_by_uuid ( gchar *uuid )

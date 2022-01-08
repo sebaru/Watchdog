@@ -2,16 +2,17 @@
 
  function MODBUS_Refresh ( )
   { $('#idTableMODBUS').DataTable().ajax.reload(null, false);
+    $('#idTableMODBUS_DI').DataTable().ajax.reload(null, false);
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function MODBUS_Disable ( id )
   { table = $('#idTableMODBUS').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { enable : false,
-       uuid   : selection.uuid,
-       tech_id: selection.tech_id,
-       id     : selection.id
+     { enable        : false,
+       uuid          : selection.uuid,
+       thread_tech_id: selection.thread_tech_id,
+       id            : selection.id
      };
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
@@ -24,10 +25,10 @@
   { table = $('#idTableMODBUS').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { enable : true,
-       uuid   : selection.uuid,
-       tech_id: selection.tech_id,
-       id     : selection.id
+     { enable        : true,
+       uuid          : selection.uuid,
+       thread_tech_id: selection.thread_tech_id,
+       id            : selection.id
      };
 
     Send_to_API ( "POST", "/api/process/config", JSON.stringify(json_request), function(Response)
@@ -37,7 +38,7 @@
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
  function MODBUS_Del_Valider ( selection )
-  { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
+  { var json_request = { uuid : selection.uuid, thread_tech_id: selection.tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
        MODBUS_Refresh();
@@ -47,19 +48,19 @@
  function MODBUS_Del ( id )
   { table = $('#idTableMODBUS').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Supprimer la connexion "+selection.tech_id,
+    Show_modal_del ( "Supprimer la connexion "+selection.thread_tech_id,
                      "Etes-vous sûr de vouloir supprimer cette connexion ?",
-                     selection.tech_id + " - "+selection.hostnamename +" - "+ selection.description,
+                     selection.thread_tech_id + " - "+selection.hostname +" - "+ selection.description,
                      function () { MODBUS_Del_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function MODBUS_Set ( selection )
   { var json_request =
      { uuid:           $('#idTargetProcess').val(),
-       tech_id:        $('#idMODBUSTechID').val(),
-       hostname: $('#idMODBUSHostname').val(),
-       description: $('#idMODBUSDescription').val(),
-       watchdog: parseInt($('#idMODBUSWatchdog').val()),
+       thread_tech_id: $('#idMODBUSTechID').val(),
+       hostname:       $('#idMODBUSHostname').val(),
+       description:    $('#idMODBUSDescription').val(),
+       watchdog:       parseInt($('#idMODBUSWatchdog').val()),
        max_request_par_sec: parseInt($('#idMODBUSMaxRequestParSec').val()),
      };
     if (selection) json_request.id = parseInt(selection.id);                                            /* Ajout ou édition ? */
@@ -76,8 +77,9 @@
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=modbus", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
-    $('#idMODBUSTitre').text("Editer la connexion MODBUS " + selection.tech_id);
-    $('#idMODBUSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idMODBUS", selection.tech_id ); } );
+    $('#idMODBUSTitre').text("Editer la connexion MODBUS " + selection.thread_tech_id);
+    $('#idMODBUSTechID').val( selection.thread_tech_id )
+      .off("input").on("input", function () { Controle_tech_id( "idMODBUS", selection.thread_tech_id ); } ).trigger("input");
     $('#idMODBUSHostname').val ( selection.hostname );
     $('#idMODBUSDescription').val( selection.description );
     $('#idMODBUSWatchdog').val( selection.watchdog );
@@ -97,6 +99,30 @@
     $('#idMODBUSMaxRequestParSec').val( "" );
     $('#idMODBUSValider').off("click").on( "click", function () { MODBUS_Set(null); } );
     $('#idMODBUSEdit').modal("show");
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function MODBUS_Map_DI_valider ( selection )
+  { if ($('#idMODALMapSelectTechID').val() == null) return;
+    if ($('#idMODALMapSelectAcronyme').val() == null) return;
+
+    var json_request =
+     { thread_tech_id : selection.thread_tech_id,
+       thread_acronyme: "DI"+selection.num.toString().padStart( 3, '0' ),
+       tech_id        : $('#idMODALMapSelectTechID').val().toUpperCase(),
+       acronyme       : $('#idMODALMapSelectAcronyme').val().toUpperCase(),
+     };
+    Send_to_API ( 'POST', "/api/map/set", JSON.stringify(json_request), function () { MODBUS_Refresh(); });
+    $('#idMODALMap').modal("hide");
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function MODBUS_Map_DI ( id )
+  { table = $('#idTableMODBUS_DI').DataTable();
+    selection = table.ajax.json().mappings.filter( function(item) { return item.id==id } )[0];
+    $('#idMODALMapTitre').text( "Mapper "+selection.thread_tech_id+":DI"+selection.num );
+    $('#idMODALMapRechercherTechID').off("input").on("input", function () { Common_Updater_Choix_TechID ( "idMODALMap", "DI" ); } );
+    Common_Updater_Choix_TechID ( "idMODALMap", "DI", selection.tech_id, selection.acronyme );
+    $('#idMODALMapValider').off("click").on( "click", function () { MODBUS_Map_DI_valider(selection); } );
+    $('#idMODALMap').modal("show");
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
@@ -119,7 +145,7 @@
             },
             { "data": null, "title":"Tech_id", "className": "align-middle text-center",
               "render": function (item)
-                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+                { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
             },
             { "data": "description", "title":"Description", "className": "align-middle text-center " },
             { "data": "watchdog", "title":"Watchdog (s)", "className": "align-middle text-center " },
@@ -149,36 +175,24 @@
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/process/config", type : "GET", data: { name: "modbus", "classe": "DI" }, dataSrc: "config",
+         ajax: {	url : "/api/process/config", type : "GET", data: { name: "modbus", classe: "DI" }, dataSrc: "config",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
-            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
-            { "data": null, "title":"Map", "className": "align-middle text-center",
+          [ { "data": null, "title":"WAGO TechID", "className": "align-middle text-center",
               "render": function (item)
-                { return( "<->" ); }
+                { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
             },
-            { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
+            { "data": null, "title":"WAGO I/O", "className": "align-middle text-center",
               "render": function (item)
-                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
-            },
-            { "data": "acronyme", "title":"BIT Acronyme", "className": "align-middle text-center" },
-            { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
-            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
-                { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_DI", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_DI", item.id, "trash", null );
-                  boutons += Bouton_actions_end ();
-                  return(boutons);
-                },
+                { return( item.thread_acronyme ); }
             },
           ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
        }
      );
-
+/*
     $('#idTableMODBUS_DO').DataTable(
        { pageLength : 50,
          fixedHeader: true,
@@ -208,7 +222,7 @@
                 },
             },
           ],
-         /*order: [ [0, "desc"] ],*/
+
          responsive: true,
        }
      );
@@ -249,7 +263,7 @@
                 },
             },
           ],
-         /*order: [ [0, "desc"] ],*/
+
          responsive: true,
        }
      );
@@ -283,10 +297,10 @@
                 },
             },
           ],
-         /*order: [ [0, "desc"] ],*/
+
          responsive: true,
        }
-     );
+     );*/
 
     $('#idTabEntreeTor').tab('show');
   }

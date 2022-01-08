@@ -641,7 +641,6 @@ reload:
     soup_server_add_handler ( socket, "/api/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/map/list",       Http_traiter_map_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/map/del",        Http_traiter_map_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/map/set",        Http_traiter_map_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/list",       Http_traiter_syn_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/del",        Http_traiter_syn_del, NULL, NULL );

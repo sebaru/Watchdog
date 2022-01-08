@@ -35,17 +35,17 @@
 /******************************************************************************************************************************/
  void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
   {
-    if ( Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+    if ( Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) &&
          Json_has_member ( request, "id" ) && Json_has_member ( request, "enable" ) )
      { SQL_Write_new ( "UPDATE %s SET enable='%d' WHERE id='%d'", lib->name, Json_get_bool(request, "enable"),
                        Json_get_int ( request, "id" ) );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__,
-                 Json_get_string ( request, "uuid" ), Json_get_string ( request, "tech_id" ) );
+                 Json_get_string ( request, "uuid" ), Json_get_string ( request, "thread_tech_id" ) );
        soup_message_set_status (msg, SOUP_STATUS_OK);
        return;
      }
 
-    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) &&
             Json_has_member ( request, "hostname" ) && Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "watchdog" ) && Json_has_member ( request, "max_request_par_sec" )
            )
@@ -55,27 +55,27 @@
      }
 
     gchar *uuid                = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
-    gchar *tech_id             = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *thread_tech_id      = Normaliser_chaine ( Json_get_string( request, "thread_tech_id" ) );
     gchar *hostname            = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
     gchar *description         = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gint   watchdog            = Json_get_int( request, "watchdog" );
     gint   max_request_par_sec = Json_get_int( request, "max_request_par_sec" );
 
     if (Json_has_member ( request, "id" ))
-     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', hostname='%s', description='%s', watchdog='%d', max_request_par_sec='%d' "
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', thread_tech_id='%s', hostname='%s', description='%s', watchdog='%d', max_request_par_sec='%d' "
                        "WHERE id='%d'",
-                       lib->name, uuid, tech_id, hostname, description, watchdog, max_request_par_sec,
+                       lib->name, uuid, thread_tech_id, hostname, description, watchdog, max_request_par_sec,
                        Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, thread_tech_id );
      }
     else
-     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', hostname='%s', description='%s', watchdog='%d', max_request_par_sec='%d' ",
-                       lib->name, uuid, tech_id, hostname, description, watchdog, max_request_par_sec );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', thread_tech_id='%s', hostname='%s', description='%s', watchdog='%d', max_request_par_sec='%d' ",
+                       lib->name, uuid, thread_tech_id, hostname, description, watchdog, max_request_par_sec );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, thread_tech_id );
      }
 
     g_free(uuid);
-    g_free(tech_id);
+    g_free(thread_tech_id);
     g_free(hostname);
     g_free(description);
 

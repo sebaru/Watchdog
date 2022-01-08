@@ -127,6 +127,49 @@
   </div>
 </div>
 
+<!------------------------------------------------- Modal Map ----------------------------------------------------------------->
+<div id="idMODALMap" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content ">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idMODALMapTitre"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+       <div class="col form-group">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idMODALMapRechercherTechID" type="text" class="col-7 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
+
+       <div class="col form-group">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idMODALMapSelectTechID" required class="col-7 custom-select border-info"></select>
+          </div>
+       </div>
+
+       <div class="col form-group">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idMODALMapSelectAcronyme" required class="col-7 custom-select border-info"></select>
+          </div>
+       </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
+        <button id="idMODALMapValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!----------------------------------------------------------------------------------------------------------------------------->
 <header>
  <nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
   <a class="navbar-brand" href="/"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>

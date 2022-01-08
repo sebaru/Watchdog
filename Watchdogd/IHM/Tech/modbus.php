@@ -37,11 +37,11 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
 <div id="idTabEntreeTor" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
 
- <div class="row m-2">
+<!-- <div class="row m-2">
    <div class ="ml-auto btn-group">
         <button type="button" onclick="MODBUS_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping DI</button>
    </div>
- </div>
+ </div>-->
     <table id="idTableMODBUS_DI" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
       </thead>

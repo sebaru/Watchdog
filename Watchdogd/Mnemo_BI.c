@@ -91,9 +91,9 @@
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: BI '%s:%s'=%d loaded", __func__, tech_id, acronyme, etat );
   }
 /******************************************************************************************************************************/
-/* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
+/* Charger_confDB_BI: Recupération de la conf des entrées TOR                                                                 */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Charger_confDB_BI ( void )
   { gint cpt = 0;
@@ -108,7 +108,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d BI loaded", __func__, cpt );
   }
 /******************************************************************************************************************************/
-/* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
+/* Updater_confDB_BI: Update les parametres d'un bit interne en database                                                      */
 /* Entrée: néant                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/

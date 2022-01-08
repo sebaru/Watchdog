@@ -111,9 +111,9 @@
     else
      { Normaliser_as_ascii ( classe );
        SQL_Select_to_json_node ( RootNode, "config",
-                                "SELECT p.uuid, p.instance, config.tech_id, details.* FROM %s AS config "
+                                "SELECT config.tech_id AS thread_tech_id, details.*, mappings.tech_id, mappings.acronyme FROM %s AS config "
                                 "INNER JOIN %s_%s AS details ON details.%s_id = config.id "
-                                "INNER JOIN processes AS p ON p.uuid = config.uuid ",
+                                "LEFT JOIN mappings ON mappings.thread_tech_id = config.thread_tech_id AND mappings.thread_acronyme = details.thread_acronyme ",
                                 name, name, classe, name );                                    /* Contenu de la table details */
      }
 
@@ -139,7 +139,7 @@
        return;
      }
 
-    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) ) )
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -149,11 +149,10 @@
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
      { SQL_Select_to_json_node ( RootNode, NULL, "SELECT name FROM processes WHERE uuid = '%s'", uuid );
-       gchar *tech_id = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-       SQL_Write_new ( "DELETE FROM %s WHERE tech_id='%s'", Json_get_string( RootNode, "name" ), tech_id );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' deleted.", __func__, uuid, tech_id );
-
-       g_free(tech_id);
+       gchar *thread_tech_id = Normaliser_chaine ( Json_get_string ( request, "thread_tech_id" ) );
+       SQL_Write_new ( "DELETE FROM %s WHERE tech_id='%s'", Json_get_string( RootNode, "name" ), thread_tech_id );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' deleted.", __func__, uuid, thread_tech_id );
+       g_free(thread_tech_id);
        json_node_unref(RootNode);
      }
     g_free(uuid);
@@ -176,7 +175,7 @@
        return;
      }
 
-    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) ) )
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;

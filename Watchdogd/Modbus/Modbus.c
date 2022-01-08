@@ -46,7 +46,7 @@
 
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
-/* Entrée: le pointeur sur la PROCESS                                                                                       */
+/* Entrée: le pointeur sur la PROCESS                                                                                         */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Modbus_Creer_DB ( struct PROCESS *lib )
@@ -57,7 +57,7 @@
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                     "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                     "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
                     "`hostname` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
@@ -69,24 +69,20 @@
     SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `modbus_DI` ("
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                    "`modbus_id` int(11) NOT NULL",
-                    "`num` int(11) NOT NULL,"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,"
-                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NULL DEFAULT NULL,"
-                    "UNIQUE (modbus_id, num),"
-                    "UNIQUE (tech_id, acronyme),"
-                    "FOREIGN KEY (`modbus_id`) REFERENCES `modbus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "UNIQUE (thread_tech_id, thread_acronyme),"
+                    "FOREIGN KEY (`thread_tech_id`) REFERENCES `modbus` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
 
-    if (lib->database_version < 2)
-     { SQL_Write_new ( "INSERT INTO modbus_DI (modbus_id, num, tech_id, acronyme) "
-                       "SELECT modbus.id AS modbus_id, CONVERT ( REPLACE(mnemos_DI.map_tag, 'DI', ''), INTEGER) AS num, "
-                       "mnemos_DI.tech_id AS tech_id, mnemos_DI.acronyme AS acronyme "
-                       "FROM mnemos_DI INNER JOIN modbus WHERE modbus.tech_id = mnemos_DI.map_tech_id" );
+    if (lib->database_version < 3)
+     { SQL_Write_new ( "INSERT INTO mappings (thread_tech_id, thread_acronyme, tech_id, acronyme) "
+                       "SELECT map_tech_id, "
+                       "CONCAT ( 'DI', LPAD ( CONVERT (REPLACE ( mnemos_DI.map_tag, 'DI', '' ), INTEGER ), 3, '0' ) ), tech_id, acronyme "
+                       "FROM mnemos_DI WHERE map_thread ='MODBUS' " );
      }
 
-    Process_set_database_version ( lib, 2 );
+    Process_set_database_version ( lib, 3 );
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -98,8 +94,8 @@
     if (!module) return;
     if (vars->started == FALSE) return;
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     close ( vars->connexion );
     vars->connexion = 0;
@@ -112,7 +108,7 @@
     if (vars->AI) g_free(vars->AI);
     if (vars->DO) g_free(vars->DO);
     SubProcess_send_comm_to_master_new ( module, FALSE );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Module '%s' disconnected", __func__, tech_id, hostname );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Module '%s' disconnected", __func__, thread_tech_id, hostname );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -126,8 +122,8 @@
     struct addrinfo hints;
     gint connexion = 0, s;
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
@@ -139,12 +135,12 @@
     sndtimeout.tv_usec =  0;
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s' : Trying to connect module to '%s'", __func__,
-              tech_id, hostname );
+              thread_tech_id, hostname );
 
     s = getaddrinfo( hostname, "502", &hints, &result);
     if (s != 0)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-                "%s: '%s': getaddrinfo Failed for module %s (%s)", __func__, tech_id, hostname, gai_strerror(s) );
+                "%s: '%s': getaddrinfo Failed for module %s (%s)", __func__, thread_tech_id, hostname, gai_strerror(s) );
        return(FALSE);
      }
 
@@ -157,26 +153,26 @@
      { connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
        if (connexion == -1)
         { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-                   "%s: '%s': Socket creation failed for modbus '%s'", __func__, tech_id, hostname );
+                   "%s: '%s': Socket creation failed for modbus '%s'", __func__, thread_tech_id, hostname );
           continue;
         }
 
        if ( setsockopt ( connexion, SOL_SOCKET, SO_SNDTIMEO, (char *)&sndtimeout, sizeof(sndtimeout)) < 0 )
         { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-                   "%s: '%s': Socket Set Options failed for modbus '%s'", __func__, tech_id, hostname );
+                   "%s: '%s': Socket Set Options failed for modbus '%s'", __func__, thread_tech_id, hostname );
           continue;
         }
 
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
         { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                   "%s: '%s': Using family=%d for host '%s'", __func__, tech_id, rp->ai_family, hostname );
+                   "%s: '%s': Using family=%d for host '%s'", __func__, thread_tech_id, rp->ai_family, hostname );
 
           break;  /* Success */
         }
        else
         { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
                    "%s: '%s': connexion refused by module '%s' family=%d error '%s'", __func__,
-                   tech_id, hostname, rp->ai_family, strerror(errno) );
+                   thread_tech_id, hostname, rp->ai_family, strerror(errno) );
         }
        close(connexion);                                                       /* Suppression de la socket qui n'a pu aboutir */
      }
@@ -194,7 +190,7 @@
     vars->DI_root = NULL;
     vars->AI = NULL;
     vars->DO = NULL;
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module Connected", __func__, tech_id );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module Connected", __func__, thread_tech_id );
 
     return(TRUE);
   }
@@ -206,8 +202,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -221,11 +217,11 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-               "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+               "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
        vars->request = TRUE;                                                                      /* Une requete a élé lancée */
      }
   }
@@ -237,8 +233,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -252,11 +248,11 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-               "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+               "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -269,8 +265,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -284,11 +280,11 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-               "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+               "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -301,8 +297,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -316,11 +312,11 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-               "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+               "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
        vars->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -336,8 +332,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -351,11 +347,11 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-               "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+               "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
        vars->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -368,8 +364,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -383,11 +379,11 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+                "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
        vars->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -399,8 +395,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -414,11 +410,11 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-               "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+               "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -430,8 +426,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -445,11 +441,11 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-               "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+               "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -461,8 +457,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -476,11 +472,11 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-               "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+               "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -492,8 +488,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -507,12 +503,12 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                 "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+                 "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, tech_id );
-       vars->request = TRUE;                                                                    /* Une requete a élé lancée */
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': OK", __func__, thread_tech_id );
+       vars->request = TRUE;                                                                      /* Une requete a élé lancée */
      }
   }
 /******************************************************************************************************************************/
@@ -524,8 +520,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -539,7 +535,7 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                 "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+                 "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else { vars->request = TRUE; }                                                                /* Une requete a élé lancée */
@@ -553,8 +549,8 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
     requete.transaction_id = htons(vars->transaction_id);
@@ -568,7 +564,7 @@
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                 "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+                 "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else { vars->request = TRUE; }                                                                /* Une requete a élé lancée */
@@ -583,8 +579,8 @@
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint cpt_poid, cpt_byte, cpt, taille, nbr_data;
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
     nbr_data = ((vars->nbr_sortie_tor-1)/8)+1;
@@ -611,7 +607,7 @@
     gint retour = write ( vars->connexion, &requete, taille+6 );
     if ( retour != taille+6 )                                                                          /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                 "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+                 "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else { vars->request = TRUE; }                                                                /* Une requete a élé lancée */
@@ -626,8 +622,8 @@
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint cpt_byte, cpt, taille;
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
-    gchar *hostname = Json_get_string ( module->config, "hostname" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
     vars->transaction_id++;
@@ -650,7 +646,7 @@
     gint retour = write ( vars->connexion, &requete, taille+6 );
     if ( retour != taille+6 )                                                                          /* Envoi de la requete */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                 "%s: '%s': failed for module '%s': error %d/%s", __func__, tech_id, hostname, retour, strerror(errno) );
+                 "%s: '%s': failed for module '%s': error %d/%s", __func__, thread_tech_id, hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else { vars->request = TRUE; }                                                                /* Une requete a élé lancée */
@@ -665,104 +661,101 @@
     gchar critere[80];
     struct DB *db;
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     vars->AI = g_try_malloc0( sizeof(gpointer) * vars->nbr_entree_ana );
     if (!vars->AI)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, thread_tech_id );
        return;
      } else Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                      "%s: '%s': Allocated %d AI", __func__, tech_id, vars->nbr_entree_ana );
+                      "%s: '%s': Allocated %d AI", __func__, thread_tech_id, vars->nbr_entree_ana );
 
 /***************************************************** Mapping des DigitalInput ***********************************************/
     vars->DI_root = Json_node_create();
     if (!vars->DI_root)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , tech_id); }
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , thread_tech_id); }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__, tech_id, vars->nbr_entree_tor );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__, thread_tech_id, vars->nbr_entree_tor );
        SQL_Select_to_json_node ( vars->DI_root, "modbus_DI",
-                                 "SELECT di.* FROM modbus_DI AS di INNER JOIN modbus on di.modbus_id = modbus.id "
-                                 "WHERE modbus.tech_id='%s' ORDER by num", tech_id );
+                                 "SELECT di.*, mappings.tech_id, mappings.acronyme FROM modbus_DI AS di "
+                                 "INNER JOIN mappings ON mappings.thread_tech_id  = di.thread_tech_id "
+                                 "                   AND mappings.thread_acronyme = di.thread_acronyme "
+                                 "WHERE modbus.thread_tech_id='%s'", thread_tech_id );
 
        vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
        if (!vars->DI)
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , tech_id);
+        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , thread_tech_id);
           return;
         }
 
        JsonArray *array = Json_get_array ( vars->DI_root, "modbus_DI" );
        for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->DI_root, "modbus_DI" ) ); cpt ++ )
         { JsonNode *element = json_array_get_element ( array, cpt );
-          gint num = Json_get_int (element, "num");
-          if (num < vars->nbr_entree_tor)
+          gint num;
+          if (sscanf ( Json_get_string ( element, "thread_acronyme" ), "DI%d", &num ) == 1 && num < vars->nbr_entree_tor)
            { vars->DI[num] = element;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping : DI%03d -> %s:%s", __func__, tech_id,
-                       Json_get_int    ( vars->DI[cpt], "num" ),
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping : DI%03d -> %s:%s", __func__, thread_tech_id,
+                       num,
                        Json_get_string ( vars->DI[cpt], "tech_id" ),
                        Json_get_string ( vars->DI[cpt], "acronyme" ) );
-             Json_node_add_int ( vars->DI[num], "etat", -1 );
-           } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI : num %d out of range '%d'",
-                            __func__, tech_id, num, vars->nbr_entree_tor );
+             Json_node_add_int ( vars->DI[num], "etat", -1 );                 /* Pour forcer une premiere comm vers le master */
+           } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI : num %d out of range '%d' OR sscanf error",
+                            __func__, thread_tech_id, num, vars->nbr_entree_tor );
         }
      }
 
     vars->DO = g_try_malloc0( sizeof(gpointer) * vars->nbr_sortie_tor );
     if (!vars->DO)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, thread_tech_id );
        return;
      } else Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                      "%s: '%s': Allocated %d DO", __func__, tech_id, vars->nbr_sortie_tor );
+                      "%s: '%s': Allocated %d DO", __func__, thread_tech_id, vars->nbr_sortie_tor );
 
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    if ( ! Recuperer_mnemos_AI_by_tag ( &db, tech_id, "AI%%" ) )
+    if ( ! Recuperer_mnemos_AI_by_tag ( &db, thread_tech_id, "AI%%" ) )
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
-                 __func__, tech_id, critere );
+                 __func__, thread_tech_id, critere );
      }
     else while ( Recuperer_mnemos_AI_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *map_tag = db->row[2], *libelle = db->row[3];
        gint num;
        Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
-                 __func__, tech_id, map_tag, tech_id, acro, libelle );
+                 __func__, thread_tech_id, map_tag, tech_id, acro, libelle );
        if ( sscanf ( map_tag, "AI%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<vars->nbr_entree_ana)
            { Charger_confDB_AI ( tech_id, acro );
              Dls_data_get_AI ( tech_id, acro, &vars->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
            }
           else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, tech_id, map_tag, num, vars->nbr_entree_ana );
+                         __func__, thread_tech_id, map_tag, num, vars->nbr_entree_ana );
         }
        else Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
-                      __func__, tech_id, map_tag );
-     }
-/******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    if ( ! Recuperer_mnemos_DI_by_tag ( &db, tech_id, "DI%%" ) )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
-                 __func__, tech_id, critere );
+                      __func__, thread_tech_id, map_tag );
      }
 /*********************************** Recherche des events DO a raccrocher aux bits internes ***********************************/
-    if ( ! Recuperer_mnemos_DO_by_tag ( &db, tech_id, "DO%%" ) )
+    if ( ! Recuperer_mnemos_DO_by_tag ( &db, thread_tech_id, "DO%%" ) )
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
-                 __func__, tech_id, critere );
+                 __func__, thread_tech_id, critere );
      }
     else while ( Recuperer_mnemos_DO_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *map_tag = db->row[2];
        gint num;
        Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
-                 __func__, tech_id, map_tag, tech_id, acro, libelle );
+                 __func__, thread_tech_id, map_tag, tech_id, acro, libelle );
        if ( sscanf ( map_tag, "DO%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
         { if (num<vars->nbr_sortie_tor)
            { Dls_data_get_DO ( tech_id, acro, &vars->DO[num] );        /* bit déjà existant deja dans la structure DLS DATA */
              if(vars->DO[num] == NULL) Dls_data_set_DO ( NULL, tech_id, acro, &vars->DO[num], FALSE );     /* Sinon, on le crée */
            }
           else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, tech_id, map_tag, num, vars->nbr_sortie_tor );
+                         __func__, thread_tech_id, map_tag, num, vars->nbr_sortie_tor );
         }
        else Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
-                      __func__, tech_id, map_tag );
+                      __func__, thread_tech_id, map_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module '%s' : mapping done",
-              __func__, tech_id, Json_get_string ( module->config, "description" ) );
+              __func__, thread_tech_id, Json_get_string ( module->config, "description" ) );
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
@@ -774,188 +767,189 @@
     vars->nbr_oct_lu = 0;
     vars->request = FALSE;                                                                       /* Une requete a été traitée */
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if ( (guint16) vars->response.proto_id )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': wrong proto_id", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': wrong proto_id", __func__, thread_tech_id );
        Deconnecter_module( module );
      }
-    else
-     { int cpt_byte, cpt_poid, cpt;
-       vars->date_last_reponse = Partage->top;                                                     /* Estampillage de la date */
-       SubProcess_send_comm_to_master_new ( module, TRUE );
-       if (ntohs(vars->response.transaction_id) != vars->transaction_id)                                  /* Mauvaise reponse */
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-                   "%s: '%s': wrong transaction_id: attendu %d, recu %d", __func__, tech_id,
-                    vars->transaction_id, ntohs(vars->response.transaction_id) );
-        }
-       if ( vars->response.fct >=0x80 )
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-                   "%s: '%s': Erreur Reponse, Error %d, Exception code %d", __func__, tech_id,
-                    vars->response.fct, (int)vars->response.data[0] );
-          Deconnecter_module( module );
-        }
-       else switch (vars->mode)
-        { case MODBUS_GET_DI:
-               for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
-                { gint new_etat = (vars->response.data[ cpt_byte ] & cpt_poid);
-                  gint old_etat = Json_get_int ( vars->DI[cpt], "etat" );
-                  if (old_etat != new_etat)
-                   { Zmq_Send_DI_to_master_new ( module, Json_get_string ( vars->DI[cpt], "tech_id" ),
-                                                         Json_get_string ( vars->DI[cpt], "acronyme" ), new_etat );
-                     Json_node_add_int ( vars->DI[cpt], "etat", new_etat );
-                   }
-                  cpt_poid = cpt_poid << 1;
-                  if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
-                }
-               vars->mode = MODBUS_GET_AI;
-               break;
-          case MODBUS_GET_AI:
-               for ( cpt = 0; cpt<vars->nbr_entree_ana; cpt++)
-                { struct DLS_AI *ai = vars->AI[cpt];
-                  if (!ai) continue;                                                 /* Si pas mappé, bah on ne la stocke pas */
-                  switch( ai->type )
-                   { case WAGO_750455:
-                          if ( ! (vars->response.data[ 2*cpt + 2 ] & 0x03) )
-                           { int reponse;
-                             reponse  = vars->response.data[ 2*cpt + 1 ] << 5;
-                             reponse |= vars->response.data[ 2*cpt + 2 ] >> 3;
-                             Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt],
-                                              (gdouble)(reponse*(ai->max - ai->min))/4095.0 + ai->min, TRUE );
-                           }
-                          else { Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt], 0.0, FALSE ); }
-                          break;
-                     case WAGO_750461:                                                                         /* Borne PT100 */
-                           { gint16 reponse;
-                             reponse  = vars->response.data[ 2*cpt + 1 ] << 8;
-                             reponse |= vars->response.data[ 2*cpt + 2 ];
-                             if (reponse > -2000 && reponse < 8500)
-                              { Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt], (gdouble)(reponse/10.0), TRUE ); }
-                             else { Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt], 0.0, FALSE ); }
-                           }
-                          break;
-                   }
-                }
-               vars->mode = MODBUS_SET_DO;
-               break;
-          case MODBUS_SET_DO:
-               vars->mode = MODBUS_SET_AO;
-               break;
-          case MODBUS_SET_AO:
-               vars->mode = MODBUS_GET_DI;
-               break;
-          case MODBUS_GET_DESCRIPTION:
-             { gchar chaine[32];
-               gint taille;
-               memset ( chaine, 0, sizeof(chaine) );
-               taille = vars->response.data[0];
-               if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
-               chaine[0] = ntohs( (gint16)vars->response.data[1] );
-               chaine[2] = ntohs( (gint16)vars->response.data[3] );
-               chaine[taille] = 0;
-               Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Description (size %d) = '%s'",
-                         __func__, tech_id, taille, chaine );
-               vars->mode = MODBUS_GET_FIRMWARE;
-               break;
-            }
-          case MODBUS_GET_FIRMWARE:
-             { gchar chaine[64];
-               gint taille;
-               memset ( chaine, 0, sizeof(chaine) );
-               taille = vars->response.data[0];
-               if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
-               chaine[0] = ntohs( (gint16)vars->response.data[1] );
-               chaine[2] = ntohs( (gint16)vars->response.data[3] );
-               chaine[taille] = 0;
-               Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Firmware (size %d) = '%s'",
-                         __func__, tech_id, taille, chaine );
-               vars->mode = MODBUS_INIT_WATCHDOG1;
-               break;
-            }
-          case MODBUS_INIT_WATCHDOG1:
-               Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Watchdog1 = %d %d",
-                         __func__, tech_id,
-                         ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
-                         ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
-                       );
-               vars->mode = MODBUS_INIT_WATCHDOG2;
-               break;
-          case MODBUS_INIT_WATCHDOG2:
-               Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Watchdog2 = %d %d",
-                         __func__, tech_id,
-                         ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
-                         ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
-                       );
-               vars->mode = MODBUS_INIT_WATCHDOG3;
-               break;
-          case MODBUS_INIT_WATCHDOG3:
-               Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Watchdog3 = %d %d",
-                         __func__, tech_id,
-                         ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
-                         ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
-                       );
-               vars->mode = MODBUS_INIT_WATCHDOG4;
-               break;
-          case MODBUS_INIT_WATCHDOG4:
-               Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Watchdog4 = %d %d",
-                         __func__, tech_id,
-                         ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
-                         ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
-                       );
-               vars->mode = MODBUS_GET_NBR_AI;
-               break;
-          case MODBUS_GET_NBR_AI:
-                { vars->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
-                  Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree ANA",
-                            __func__, tech_id, vars->nbr_entree_ana
-                          );
-                  for (gint cpt=0; cpt<vars->nbr_entree_ana; cpt++)
-                   { SQL_Write_new ( "INSERT IGNORE INTO %s_AI SET modbus_id=%d, num=%d",
-                                     module->lib->name, Json_get_int ( module->config, "id" ), cpt );
-                   }
-                  vars->mode = MODBUS_GET_NBR_AO;
-                }
-               break;
-          case MODBUS_GET_NBR_AO:
-                { vars->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
-                  Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie ANA",
-                            __func__, tech_id, vars->nbr_sortie_ana
-                          );
-                  for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                   { SQL_Write_new ( "INSERT IGNORE INTO %s_AO SET modbus_id=%d, num=%d",
-                                     module->lib->name, Json_get_int ( module->config, "id" ), cpt );
-                   }
-                  vars->mode = MODBUS_GET_NBR_DI;
-                }
-               break;
-          case MODBUS_GET_NBR_DI:
-                { gint nbr;
-                  nbr = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
-                  vars->nbr_entree_tor = nbr;
-                  Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree TOR",
-                            __func__, tech_id, vars->nbr_entree_tor );
-                  for (gint cpt=0; cpt<vars->nbr_entree_tor; cpt++)
-                   { SQL_Write_new ( "INSERT IGNORE INTO %s_DI SET modbus_id=%d, num=%d",
-                                     module->lib->name, Json_get_int ( module->config, "id" ), cpt );
-                   }
-                  vars->mode = MODBUS_GET_NBR_DO;
-                }
-               break;
-          case MODBUS_GET_NBR_DO:
-                { vars->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
-                  Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie TOR",
-                            __func__, tech_id, vars->nbr_sortie_tor );
-                  for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                   { SQL_Write_new ( "INSERT IGNORE INTO %s_DO SET modbus_id=%d, num=%d",
-                                     module->lib->name, Json_get_int ( module->config, "id" ), cpt );
-                   }
-                  Modbus_do_mapping( module );                                     /* Initialise le mapping des I/O du module */
-                  vars->mode = MODBUS_GET_DI;
-                }
-               break;
-        }
+
+    gint cpt_byte, cpt_poid, cpt;
+    vars->date_last_reponse = Partage->top;                                                        /* Estampillage de la date */
+    SubProcess_send_comm_to_master_new ( module, TRUE );
+    if (ntohs(vars->response.transaction_id) != vars->transaction_id)                                     /* Mauvaise reponse */
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+                "%s: '%s': wrong transaction_id: attendu %d, recu %d", __func__, thread_tech_id,
+                 vars->transaction_id, ntohs(vars->response.transaction_id) );
      }
-    memset (&vars->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
+    if ( vars->response.fct >=0x80 )
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+                "%s: '%s': Erreur Reponse, Error %d, Exception code %d", __func__, thread_tech_id,
+                 vars->response.fct, (int)vars->response.data[0] );
+       Deconnecter_module( module );
+       return;
+     }
+    switch (vars->mode)
+     { case MODBUS_GET_DI:
+            for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
+             { gint new_etat = (vars->response.data[ cpt_byte ] & cpt_poid);
+               gint old_etat = Json_get_int ( vars->DI[cpt], "etat" );
+               if (old_etat != new_etat)
+                { Zmq_Send_DI_to_master_new ( module, Json_get_string ( vars->DI[cpt], "tech_id" ),
+                                                      Json_get_string ( vars->DI[cpt], "acronyme" ), new_etat );
+                  Json_node_add_int ( vars->DI[cpt], "etat", new_etat );
+                }
+               cpt_poid = cpt_poid << 1;
+               if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
+             }
+            vars->mode = MODBUS_GET_AI;
+            break;
+       case MODBUS_GET_AI:
+            for ( cpt = 0; cpt<vars->nbr_entree_ana; cpt++)
+             { struct DLS_AI *ai = vars->AI[cpt];
+               if (!ai) continue;                                                    /* Si pas mappé, bah on ne la stocke pas */
+               switch( ai->type )
+                { case WAGO_750455:
+                       if ( ! (vars->response.data[ 2*cpt + 2 ] & 0x03) )
+                        { int reponse;
+                          reponse  = vars->response.data[ 2*cpt + 1 ] << 5;
+                          reponse |= vars->response.data[ 2*cpt + 2 ] >> 3;
+                          Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt],
+                                           (gdouble)(reponse*(ai->max - ai->min))/4095.0 + ai->min, TRUE );
+                        }
+                       else { Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt], 0.0, FALSE ); }
+                       break;
+                  case WAGO_750461:                                                                            /* Borne PT100 */
+                        { gint16 reponse;
+                          reponse  = vars->response.data[ 2*cpt + 1 ] << 8;
+                          reponse |= vars->response.data[ 2*cpt + 2 ];
+                          if (reponse > -2000 && reponse < 8500)
+                           { Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt], (gdouble)(reponse/10.0), TRUE ); }
+                          else { Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt], 0.0, FALSE ); }
+                        }
+                       break;
+                }
+             }
+            vars->mode = MODBUS_SET_DO;
+            break;
+       case MODBUS_SET_DO:
+            vars->mode = MODBUS_SET_AO;
+            break;
+       case MODBUS_SET_AO:
+            vars->mode = MODBUS_GET_DI;
+            break;
+       case MODBUS_GET_DESCRIPTION:
+          { gchar chaine[32];
+            gint taille;
+            memset ( chaine, 0, sizeof(chaine) );
+            taille = vars->response.data[0];
+            if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
+            chaine[0] = ntohs( (gint16)vars->response.data[1] );
+            chaine[2] = ntohs( (gint16)vars->response.data[3] );
+            chaine[taille] = 0;
+            Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Description (size %d) = '%s'",
+                      __func__, thread_tech_id, taille, chaine );
+            vars->mode = MODBUS_GET_FIRMWARE;
+            break;
+         }
+       case MODBUS_GET_FIRMWARE:
+          { gchar chaine[64];
+            gint taille;
+            memset ( chaine, 0, sizeof(chaine) );
+            taille = vars->response.data[0];
+            if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
+            chaine[0] = ntohs( (gint16)vars->response.data[1] );
+            chaine[2] = ntohs( (gint16)vars->response.data[3] );
+            chaine[taille] = 0;
+            Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Firmware (size %d) = '%s'",
+                      __func__, thread_tech_id, taille, chaine );
+            vars->mode = MODBUS_INIT_WATCHDOG1;
+            break;
+         }
+       case MODBUS_INIT_WATCHDOG1:
+            Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Watchdog1 = %d %d",
+                      __func__, thread_tech_id,
+                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
+                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
+                    );
+            vars->mode = MODBUS_INIT_WATCHDOG2;
+            break;
+       case MODBUS_INIT_WATCHDOG2:
+            Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Watchdog2 = %d %d",
+                      __func__, thread_tech_id,
+                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
+                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
+                    );
+            vars->mode = MODBUS_INIT_WATCHDOG3;
+            break;
+       case MODBUS_INIT_WATCHDOG3:
+            Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Watchdog3 = %d %d",
+                      __func__, thread_tech_id,
+                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
+                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
+                    );
+            vars->mode = MODBUS_INIT_WATCHDOG4;
+            break;
+       case MODBUS_INIT_WATCHDOG4:
+            Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Watchdog4 = %d %d",
+                      __func__, thread_tech_id,
+                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
+                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
+                    );
+            vars->mode = MODBUS_GET_NBR_AI;
+            break;
+       case MODBUS_GET_NBR_AI:
+             { vars->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
+               Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree ANA",
+                         __func__, thread_tech_id, vars->nbr_entree_ana
+                       );
+               for (gint cpt=0; cpt<vars->nbr_entree_ana; cpt++)
+                { SQL_Write_new ( "INSERT IGNORE INTO %s_AI SET modbus_id=%d, num=%d",
+                                  module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                }
+               vars->mode = MODBUS_GET_NBR_AO;
+             }
+            break;
+       case MODBUS_GET_NBR_AO:
+             { vars->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
+               Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie ANA",
+                         __func__, thread_tech_id, vars->nbr_sortie_ana
+                       );
+               for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
+                { SQL_Write_new ( "INSERT IGNORE INTO %s_AO SET modbus_id=%d, num=%d",
+                                  module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                }
+               vars->mode = MODBUS_GET_NBR_DI;
+             }
+            break;
+       case MODBUS_GET_NBR_DI:
+             { gint nbr;
+               nbr = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
+               vars->nbr_entree_tor = nbr;
+               Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree TOR",
+                         __func__, thread_tech_id, vars->nbr_entree_tor );
+               for (gint cpt=0; cpt<vars->nbr_entree_tor; cpt++)
+                { SQL_Write_new ( "INSERT IGNORE INTO modbus_DI SET thread_tech_id='%s', thread_acronyme='DI%03d'",
+                                  thread_tech_id, cpt );
+                  SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='DI%03d'",
+                                  thread_tech_id, cpt );
+                }
+               vars->mode = MODBUS_GET_NBR_DO;
+             }
+            break;
+       case MODBUS_GET_NBR_DO:
+             { vars->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
+               Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie TOR",
+                         __func__, thread_tech_id, vars->nbr_sortie_tor );
+               for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
+                { SQL_Write_new ( "INSERT IGNORE INTO %s_DO SET modbus_id=%d, num=%d",
+                                  module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                }
+               Modbus_do_mapping( module );                                        /* Initialise le mapping des I/O du module */
+               vars->mode = MODBUS_GET_DI;
+             }
+            break;
+     }
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
@@ -968,13 +962,13 @@
     struct timeval tv;
     gint retval, cpt;
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (vars->date_last_reponse + 600 < Partage->top)                                      /* Detection attente trop longue */
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
                 "%s: '%s': Timeout module started=%d, mode=%02d, "
                 "transactionID=%06d, nbr_deconnect=%02d, last_reponse=%03ds ago, retente=in %03ds, date_next_eana=in %03ds",
-                 __func__, tech_id, vars->started, vars->mode, vars->transaction_id, vars->nbr_deconnect,
+                 __func__, thread_tech_id, vars->started, vars->mode, vars->transaction_id, vars->nbr_deconnect,
                 (Partage->top - vars->date_last_reponse)/10,
                 (vars->date_retente > Partage->top   ? (vars->date_retente   - Partage->top)/10 : -1),
                 (vars->date_next_eana > Partage->top ? (vars->date_next_eana - Partage->top)/10 : -1)
@@ -997,7 +991,7 @@
 
        if (bute>=sizeof(struct TRAME_MODBUS_REPONSE))
         { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-                   "%s: '%s': bute = %d >= %d (sizeof(module->reponse)=%d, taille recue = %d)", __func__, tech_id,
+                   "%s: '%s': bute = %d >= %d (sizeof(module->reponse)=%d, taille recue = %d)", __func__, thread_tech_id,
                     bute, sizeof(struct TRAME_MODBUS_REPONSE), sizeof(vars->response), ntohs(vars->response.taille) );
           Deconnecter_module( module );
           return;
@@ -1011,7 +1005,7 @@
         }
        else
         { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                    "%s: '%s': Read Error. Get %d, error %s", __func__, tech_id, cpt, strerror(errno) );
+                    "%s: '%s': Read Error. Get %d, error %s", __func__, thread_tech_id, cpt, strerror(errno) );
           Deconnecter_module ( module );
         }
       }
@@ -1025,11 +1019,11 @@
   { SubProcess_init ( module, sizeof(struct MODBUS_VARS) );
     struct MODBUS_VARS *vars = module->vars;
 
-    gchar *tech_id             = Json_get_string ( module->config, "tech_id" );
-    gint   max_request_par_sec = Json_get_int ( module->config, "max_request_par_sec" );
+    gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
+    gint   max_request_par_sec = Json_get_int    ( module->config, "max_request_par_sec" );
 
     if (Json_get_bool ( module->config, "enable" ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, thread_tech_id );
        SubProcess_end ( module );
      }
 
@@ -1037,6 +1031,20 @@
      { usleep(vars->delai);
        sched_yield();
 
+       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+/********************************************************* Ecoute du master ***************************************************/
+       JsonNode *request;
+       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
+        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
+          if ( !strcasecmp( zmq_tag, "SUBPROCESS_REMAP" ) )
+           { if (  Json_has_member ( request, "thread_tech_id" ) &&
+                  !strcasecmp( Json_get_string ( request, "thread_tech_id" ), thread_tech_id ) )
+              { Deconnecter_module ( module ); }
+           }
+          json_node_unref(request);
+        }
+
+/********************************************************* Toutes les secondes ************************************************/
        if (Partage->top>=vars->last_top+10)                                                          /* Toutes les 1 secondes */
         { vars->nbr_request_par_sec = vars->nbr_request;
           vars->nbr_request = 0;
@@ -1049,7 +1057,7 @@
        if ( vars->started == FALSE )                                               /* Si attente retente, on change de module */
         { if ( vars->date_retente <= Partage->top && Connecter_module(module)==FALSE )
            { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Module DOWN. retrying in %ds",
-                       __func__, tech_id, MODBUS_RETRY/10 );
+                       __func__, thread_tech_id, MODBUS_RETRY/10 );
              vars->date_retente = Partage->top + MODBUS_RETRY;
            }
         }
