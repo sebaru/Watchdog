@@ -134,8 +134,8 @@
   { gchar chaine[128];
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
-    g_snprintf( chaine, sizeof(chaine), "W-%s-%s", module->lib->name, tech_id );                   /* Positionne le nom noyau */
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    g_snprintf( chaine, sizeof(chaine), "W-%s-%s", module->lib->name, thread_tech_id );            /* Positionne le nom noyau */
     gchar *upper_name = g_ascii_strup ( chaine, -1 );
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
     g_free(upper_name);
@@ -144,7 +144,7 @@
      { module->vars = g_try_malloc0 ( sizeof_vars );
        if (!module->vars)
         { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: Memory error.", __func__,
-                    module->lib->uuid, tech_id );
+                    module->lib->uuid, thread_tech_id );
           SubProcess_end ( module );                            /* Pas besoin de return : SubProcess_end fait un pthread_exit */
         }
      }
@@ -154,12 +154,12 @@
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
-    if (Dls_auto_create_plugin( tech_id, description ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, tech_id, description ); }
+    if (Dls_auto_create_plugin( thread_tech_id, description ) == FALSE)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, thread_tech_id, description ); }
 
-    Mnemo_auto_create_WATCHDOG ( FALSE, tech_id, "IO_COMM", "Statut de la communication" );
+    Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is UP",
-              __func__, module->lib->uuid, tech_id );
+              __func__, module->lib->uuid, thread_tech_id );
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
@@ -172,7 +172,7 @@
     Zmq_Close ( module->zmq_from_bus );
     Zmq_Close ( module->zmq_to_master );
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is DOWN",
-              __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id") );
+              __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id") );
     pthread_exit(0);
   }
 /******************************************************************************************************************************/
@@ -187,7 +187,7 @@
     struct SUBPROCESS *module = g_try_malloc0( sizeof(struct SUBPROCESS) );
     if (!module)
      { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: Not Enought Memory",
-                 __func__, module->lib->uuid, Json_get_string ( element, "tech_id" ) );
+                 __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
        return;
      }
     module->lib    = lib;
@@ -195,25 +195,25 @@
 
     if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
      { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: pthread_attr_init failed",
-                 __func__, module->lib->uuid, Json_get_string ( element, "tech_id" ) );
+                 __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
        return;
      }
 
     if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )                       /* On le laisse joinable au boot */
      { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: pthread_setdetachstate failed",
-                 __func__, module->lib->uuid, Json_get_string ( element, "tech_id" ) );
+                 __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
        return;
      }
 
     if ( pthread_create( &module->TID, &attr, (void *)lib->Run_subprocess, module ) )
      { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: pthread_create failed (%s)",
-                 __func__, module->lib->uuid, Json_get_string ( element, "tech_id" ) );
+                 __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
        return;
      }
     pthread_attr_destroy(&attr);                                                                        /* Libération mémoire */
     lib->modules = g_slist_append ( lib->modules, module );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s: loaded",
-              __func__, module->lib->uuid, Json_get_string ( element, "tech_id" ) );
+              __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
   }
 /******************************************************************************************************************************/
 /* Process_Unload_one_subprocess: Demarre u nmodule du thread en parametre                                                    */
@@ -225,10 +225,10 @@
      { struct SUBPROCESS *module = lib->modules->data;
        lib->modules = g_slist_remove ( lib->modules, module );
        Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: UUID %s/%s: Wait for sub-process end",
-                 __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id" ) );
+                 __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id" ) );
        pthread_join( module->TID, NULL );                                                              /* Attente fin du fils */
        Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s: unloaded",
-                 __func__, module->lib->uuid, Json_get_string ( module->config, "tech_id" ) );
+                 __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id" ) );
        g_free(module);
      }
   }

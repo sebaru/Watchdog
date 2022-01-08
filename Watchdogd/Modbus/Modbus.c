@@ -69,8 +69,8 @@
     SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `modbus_DI` ("
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                    "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "UNIQUE (thread_tech_id, thread_acronyme),"
                     "FOREIGN KEY (`thread_tech_id`) REFERENCES `modbus` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
