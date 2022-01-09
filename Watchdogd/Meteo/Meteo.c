@@ -48,7 +48,7 @@
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                     "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                     "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`token` VARCHAR(65) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`code_insee` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
@@ -64,7 +64,7 @@
 /******************************************************************************************************************************/
  static void Meteo_get_ephemeride ( struct SUBPROCESS *module )
   { gchar query[256];
-    gchar *tech_id    = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *token      = Json_get_string ( module->config, "token" );
     gchar *code_insee = Json_get_string ( module->config, "code_insee" );
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/ephemeride/0?token=%s&insee=%s", token, code_insee );
@@ -94,14 +94,14 @@
        gchar *sunrise       = Json_get_string ( ephemeride, "sunrise" );
        gchar *sunset        = Json_get_string ( ephemeride, "sunset" );
        if ( sscanf ( sunrise, "%d:%d", &heure, &minute ) == 2)
-        { Horloge_del_all_ticks ( tech_id, "SUNRISE" );
-          Horloge_add_tick      ( tech_id, "SUNRISE", heure, minute );
+        { Horloge_del_all_ticks ( thread_tech_id, "SUNRISE" );
+          Horloge_add_tick      ( thread_tech_id, "SUNRISE", heure, minute );
           Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
                    "%s: %s -> sunrise at %02d:%02d", __func__, city_name, heure, minute );
         }
        if ( sscanf ( sunset, "%d:%d", &heure, &minute ) == 2)
-        { Horloge_del_all_ticks ( tech_id, "SUNSET" );
-          Horloge_add_tick      ( tech_id, "SUNSET", heure, minute );
+        { Horloge_del_all_ticks ( thread_tech_id, "SUNSET" );
+          Horloge_add_tick      ( thread_tech_id, "SUNSET", heure, minute );
           Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
                    "%s: %s ->  sunset at %02d:%02d", __func__, city_name, heure, minute );
         }
@@ -118,7 +118,7 @@
 /******************************************************************************************************************************/
  static void Meteo_update_forecast ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct SUBPROCESS *module = user_data;
-    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gint day       = Json_get_int ( element, "day" );
     gint temp_min  = Json_get_int ( element, "tmin" );
     gint temp_max  = Json_get_int ( element, "tmax" );
@@ -126,37 +126,37 @@
               "%s: day %02d -> temp_min=%02d, temp_max=%02d", __func__, day, temp_min, temp_max );
     gchar acronyme[64];
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "tmin" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "tmin" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "tmax" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "tmax" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probarain" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probarain" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probafrost" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probafrost" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probafog" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probafog" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probawind70" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probawind70" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "probawind100" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probawind100" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "gustx" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "gustx" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "wind10m" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "wind10m" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
 
     g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", day );
-    Zmq_Send_AI_to_master_new ( module, tech_id, acronyme, 1.0*Json_get_int ( element, "gust10m" ), TRUE );
+    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "gust10m" ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */
@@ -165,12 +165,13 @@
 /******************************************************************************************************************************/
  static void Meteo_get_forecast ( struct SUBPROCESS *module )
   { gchar query[256];
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *token      = Json_get_string ( module->config, "token" );
     gchar *code_insee = Json_get_string ( module->config, "code_insee" );
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/forecast/daily?token=%s&insee=%s", token, code_insee );
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
-             "%s: Starting getting data for code_insee '%s'", __func__, code_insee );
+             "%s: %s: Starting getting data for code_insee '%s'", __func__, thread_tech_id, code_insee );
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
@@ -180,9 +181,9 @@
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code ( soup_msg );
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: Status %d, reason %s", __func__, thread_tech_id, status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase ); }
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Error: %s\n", __func__, thread_tech_id, reason_phrase ); }
     else
      { JsonNode *response = Http_Response_Msg_to_Json ( soup_msg );
        Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module );
@@ -200,34 +201,34 @@
   { SubProcess_init ( module, sizeof(struct METEO_VARS) );
     struct METEO_VARS *vars = module->vars;
 
-    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    Mnemo_auto_create_HORLOGE ( FALSE, tech_id, "SUNRISE", "Horloge du levé du soleil" );
-    Mnemo_auto_create_HORLOGE ( FALSE, tech_id, "SUNSET",  "Horloge du couché du soleil" );
+    Mnemo_auto_create_HORLOGE ( FALSE, thread_tech_id, "SUNRISE", "Horloge du levé du soleil" );
+    Mnemo_auto_create_HORLOGE ( FALSE, thread_tech_id, "SUNSET",  "Horloge du couché du soleil" );
     for (gint cpt=0; cpt<=13; cpt++)
      { gchar acronyme[64];
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Température minimum", "°C" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Température minimum", "°C" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Température maximum", "°C" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Température maximum", "°C" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Probabilité de pluie (0-100%)", "%" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de pluie (0-100%)", "%" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Probabilité de gel (0-100%)", "%" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de gel (0-100%)", "%" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Probabilité de brouillard (0-100%)", "%" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de brouillard (0-100%)", "%" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Probabilité de vent > 70km/h  (0-100%)", "%" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de vent > 70km/h  (0-100%)", "%" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Probabilité de vent > 100km/h (0-100%)", "%" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de vent > 100km/h (0-100%)", "%" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Vitesse des rafales de vent si orage", "km/h" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Vitesse des rafales de vent si orage", "km/h" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Vent moyen à 10 mètres", "km/h" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Vent moyen à 10 mètres", "km/h" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme, "Direction du vent", "°" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Direction du vent", "°" );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", cpt );
-       Mnemo_auto_create_AI ( FALSE, tech_id, acronyme,  "Vitesse des rafales de vent", "km/h" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme,  "Vitesse des rafales de vent", "km/h" );
      }
 
     Meteo_get_ephemeride( module );
