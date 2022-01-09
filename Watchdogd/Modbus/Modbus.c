@@ -792,12 +792,14 @@
     switch (vars->mode)
      { case MODBUS_GET_DI:
             for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
-             { gint new_etat = (vars->response.data[ cpt_byte ] & cpt_poid);
-               gint old_etat = Json_get_int ( vars->DI[cpt], "etat" );
-               if (old_etat != new_etat)
-                { Zmq_Send_DI_to_master_new ( module, Json_get_string ( vars->DI[cpt], "tech_id" ),
-                                                      Json_get_string ( vars->DI[cpt], "acronyme" ), new_etat );
-                  Json_node_add_int ( vars->DI[cpt], "etat", new_etat );
+             { if (vars->DI[cpt])                                                                   /* Si l'entrée est mappée */
+                { gint new_etat = (vars->response.data[ cpt_byte ] & cpt_poid);
+                  gint old_etat = Json_get_int ( vars->DI[cpt], "etat" );
+                  if (old_etat != new_etat)
+                   { Zmq_Send_DI_to_master_new ( module, Json_get_string ( vars->DI[cpt], "tech_id" ),
+                                                         Json_get_string ( vars->DI[cpt], "acronyme" ), new_etat );
+                     Json_node_add_int ( vars->DI[cpt], "etat", new_etat );
+                   }
                 }
                cpt_poid = cpt_poid << 1;
                if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
