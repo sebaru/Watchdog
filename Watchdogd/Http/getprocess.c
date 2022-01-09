@@ -73,8 +73,8 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Http_process_add_comm (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { if (!Json_has_member( element, "tech_id" )) return;
-    gchar *tech_id = Json_get_string ( element, "tech_id" );
+  { if (!Json_has_member( element, "thread_tech_id" )) return;
+    gchar *tech_id = Json_get_string ( element, "thread_tech_id" );
     Json_node_add_bool ( element, "comm", Dls_data_get_WATCHDOG ( tech_id, "IO_COMM", NULL ) );
   }
 /******************************************************************************************************************************/
@@ -341,15 +341,15 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "zmq_tag" ) ) )
+    if ( ! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "zmq_tag" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: %s -> %s", __func__,
-              Json_get_string ( request, "tech_id" ), Json_get_string ( request, "zmq_tag" ) );
-    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Json_get_string ( request, "tech_id" ), request );
+              Json_get_string ( request, "thread_tech_id" ), Json_get_string ( request, "zmq_tag" ) );
+    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Json_get_string ( request, "thread_tech_id" ), request );
 /*************************************************** Envoi au client **********************************************************/
     json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
