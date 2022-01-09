@@ -111,7 +111,7 @@
     else
      { Normaliser_as_ascii ( classe );
        SQL_Select_to_json_node ( RootNode, "config",
-                                "SELECT config.tech_id AS thread_tech_id, details.*, mappings.tech_id, mappings.acronyme FROM %s AS config "
+                                "SELECT details.*, mappings.tech_id, mappings.acronyme FROM %s AS config "
                                 "INNER JOIN %s_%s AS details ON details.%s_id = config.id "
                                 "LEFT JOIN mappings ON mappings.thread_tech_id = config.thread_tech_id AND mappings.thread_acronyme = details.thread_acronyme ",
                                 name, name, classe, name );                                    /* Contenu de la table details */
