@@ -195,13 +195,13 @@
      }
 
     if (!Json_has_member( request, "zmq_src_tech_id"))
-     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_src_tech_id'. Dropping.", __func__ );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_src_tech_id'. Dropping '%s'.", __func__, buf );
        json_node_unref(request);
        return(NULL);
      }
 
     if (!Json_has_member( request, "zmq_dst_tech_id"))
-     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_dst_tech_id'. Dropping.", __func__ );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_dst_tech_id'. Dropping '%s'.", __func__, buf );
        json_node_unref(request);
        return(NULL);
      }
