@@ -35,7 +35,7 @@
 /* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
  void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
-  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "description" ) &&
+  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "ovh_service_name" ) && Json_has_member ( request, "ovh_application_key" ) &&
             Json_has_member ( request, "ovh_consumer_key" ) && Json_has_member ( request, "ovh_application_secret" )
            ) )
@@ -44,7 +44,7 @@
      }
 
     gchar *uuid                   = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
-    gchar *tech_id                = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *thread_tech_id         = Normaliser_chaine ( Json_get_string( request, "thread_tech_id" ) );
     gchar *description            = Normaliser_chaine ( Json_get_string( request, "description" ) );
     gchar *ovh_service_name       = Normaliser_chaine ( Json_get_string( request, "ovh_service_name" ) );
     gchar *ovh_application_key    = Normaliser_chaine ( Json_get_string( request, "ovh_application_key" ) );
@@ -52,21 +52,21 @@
     gchar *ovh_consumer_key       = Normaliser_chaine ( Json_get_string( request, "ovh_consumer_key" ) );
 
     if (Json_has_member ( request, "id" ))
-     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', thread_tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
                        "ovh_application_secret='%s', ovh_consumer_key='%s' WHERE id='%d'",
-                       lib->name, uuid, tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key,
+                       lib->name, uuid, thread_tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key,
                        Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, thread_tech_id );
      }
     else
-     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', thread_tech_id='%s', description='%s', ovh_service_name='%s', ovh_application_key='%s',"
                        "ovh_application_secret='%s', ovh_consumer_key='%s' ",
-                       lib->name, uuid, tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
+                       lib->name, uuid, thread_tech_id, description, ovh_service_name, ovh_application_key, ovh_application_secret, ovh_consumer_key );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, thread_tech_id );
      }
 
     g_free(uuid);
-    g_free(tech_id);
+    g_free(thread_tech_id);
     g_free(description);
     g_free(ovh_service_name);
     g_free(ovh_application_key);

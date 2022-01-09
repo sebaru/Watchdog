@@ -8,7 +8,7 @@
  function SMSG_Set ( selection )
   { var json_request =
      { uuid:        $('#idTargetProcess').val(),
-       tech_id:     $('#idSMSGTechID').val(),
+       thread_tech_id:     $('#idSMSGTechID').val(),
        description: $('#idSMSGDescription').val(),
        ovh_service_name:       $('#idSMSGOVHServiceName').val(),
        ovh_application_key:    $('#idSMSGOVHApplicationKey').val(),
@@ -28,7 +28,7 @@
   { table = $('#idTableSMSG').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { tech_id: selection.tech_id,
+     { thread_tech_id: selection.thread_tech_id,
        zmq_tag: "test_gsm"
      };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
@@ -38,7 +38,7 @@
   { table = $('#idTableSMSG').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { tech_id: selection.tech_id,
+     { thread_tech_id: selection.thread_tech_id,
        zmq_tag : "test_ovh"
      };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
@@ -49,8 +49,8 @@
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=smsg", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
-    $('#idSMSGTitre').text("Editer la connexion GSM " + selection.tech_id);
-    $('#idSMSGTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idSMSG", selection.tech_id ); } );
+    $('#idSMSGTitre').text("Editer la connexion GSM " + selection.thread_tech_id);
+    $('#idSMSGTechID').val( selection.thread_tech_id ).off("input").on("input", function () { Controle_thread_tech_id( "idSMSG", selection.thread_tech_id ); } );
     $('#idSMSGDescription').val( selection.description );
     $('#idSMSGOVHServiceName').val( selection.ovh_service_name );
     $('#idSMSGOVHApplicationKey').val( selection.ovh_application_key );
@@ -64,7 +64,7 @@
   { $('#idSMSGTitre').text("Ajouter un équipement GSM");
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=smsg", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
-    $('#idSMSGTechID').val("").off("input").on("input", function () { Controle_tech_id( "idSMSG", null ); } );
+    $('#idSMSGTechID').val("").off("input").on("input", function () { Controle_thread_tech_id( "idSMSG", null ); } );
     $('#idSMSGDescription').val("");
     $('#idSMSGOVHServiceName').val("");
     $('#idSMSGOVHApplicationKey').val("");
@@ -75,7 +75,7 @@
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
  function SMSG_Del_Valider ( selection )
-  { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
+  { var json_request = { uuid : selection.uuid, thread_tech_id: selection.thread_tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
        SMSG_Refresh();
@@ -85,9 +85,9 @@
  function SMSG_Del ( id )
   { table = $('#idTableSMSG').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Supprimer la connexion "+selection.tech_id,
+    Show_modal_del ( "Supprimer la connexion "+selection.thread_tech_id,
                      "Etes-vous sûr de vouloir supprimer cette connexion ?",
-                     selection.tech_id + " - "+selection.description,
+                     selection.thread_tech_id + " - "+selection.description,
                      function () { SMSG_Del_Valider( selection ) } ) ;
   }
 /********************************************* Appelé au chargement de la page ************************************************/
@@ -103,7 +103,7 @@
          [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
              "render": function (item)
-               { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+               { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
            },
            { "data": "description", "title":"Description", "className": "align-middle " },
            { "data": "ovh_consumer_key", "title":"OVH Consumer Key", "className": "align-middle " },
