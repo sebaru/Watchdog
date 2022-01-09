@@ -9,14 +9,14 @@
   { table = $('#idTableIMSGS').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { tech_id: selection.tech_id,
+     { thread_tech_id: selection.thread_tech_id,
        zmq_tag : "test"
      };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
  function IMSGS_Del_Valider ( selection )
-  { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
+  { var json_request = { uuid : selection.uuid, thread_tech_id: selection.thread_tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
        $('#idTableIMSGS').DataTable().ajax.reload(null, false);
@@ -26,16 +26,16 @@
  function IMSGS_Del ( id )
   { table = $('#idTableIMSGS').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Supprimer la connexion "+selection.tech_id,
+    Show_modal_del ( "Supprimer la connexion "+selection.thread_tech_id,
                      "Etes-vous sûr de vouloir supprimer cette connexion ?",
-                     selection.tech_id + " - "+selection.jabberid,
+                     selection.thread_tech_id + " - "+selection.jabberid,
                      function () { IMSGS_Del_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function IMSGS_Set ( selection )
   { var json_request =
        { uuid    : $('#idTargetProcess').val(),
-         tech_id : $('#idIMSGSTechID').val(),
+         thread_tech_id : $('#idIMSGSTechID').val(),
          description: $('#idIMSGSDescription').val(),
          jabberid: $('#idIMSGSJabberID').val(),
          password: $('#idIMSGSPassword').val(),
@@ -52,10 +52,10 @@
  function IMSGS_Edit ( id )
   { table = $('#idTableIMSGS').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    $('#idIMSGSTitre').text("Editer la conexion " + selection.tech_id);
+    $('#idIMSGSTitre').text("Editer la conexion " + selection.thread_tech_id);
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=imsgs", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
-    $('#idIMSGSTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idIMSGS", selection.tech_id ); } );
+    $('#idIMSGSTechID').val( selection.thread_tech_id ).off("input").on("input", function () { Controle_thread_tech_id( "idIMSGS", selection.thread_tech_id ); } );
     $('#idIMSGSDescription').val( selection.description );
     $('#idIMSGSJabberID').val( selection.jabberid );
     $('#idIMSGSPassword').val( selection.password );
@@ -67,7 +67,7 @@
   { $('#idIMSGSTitre').text("Ajouter une connexion XMPP");
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=imsgs", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
-    $('#idIMSGSTechID').val("").off("input").on("input", function () { Controle_tech_id( "idIMSGS", null ); } );
+    $('#idIMSGSTechID').val("").off("input").on("input", function () { Controle_thread_tech_id( "idIMSGS", null ); } );
     $('#idIMSGSJabberID').val( "" );
     $('#idIMSGSPassword').val( "" );
     $('#idIMSGSValider').off("click").on( "click", function () { IMSGS_Set(null); } );
@@ -86,7 +86,7 @@
          [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
              "render": function (item)
-               { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+               { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
            },
            { "data": "description", "title":"Description", "className": "align-middle text-center " },
            { "data": "jabberid", "title":"JabberID", "className": "align-middle " },
