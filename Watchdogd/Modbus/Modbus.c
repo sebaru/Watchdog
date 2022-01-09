@@ -680,7 +680,7 @@
                                  "SELECT di.*, mappings.tech_id, mappings.acronyme FROM modbus_DI AS di "
                                  "INNER JOIN mappings ON mappings.thread_tech_id  = di.thread_tech_id "
                                  "                   AND mappings.thread_acronyme = di.thread_acronyme "
-                                 "WHERE di.thread_tech_id='%s'", thread_tech_id );
+                                 "WHERE di.thread_tech_id='%s' AND mappings.tech_id IS NOT NULL", thread_tech_id );
 
        vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
        if (!vars->DI)
@@ -694,12 +694,12 @@
           gint num;
           if (sscanf ( Json_get_string ( element, "thread_acronyme" ), "DI%d", &num ) == 1 && num < vars->nbr_entree_tor)
            { vars->DI[num] = element;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping : DI%03d -> %s:%s", __func__, thread_tech_id,
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping: DI%03d -> %s:%s", __func__, thread_tech_id,
                        num,
                        Json_get_string ( vars->DI[cpt], "tech_id" ),
                        Json_get_string ( vars->DI[cpt], "acronyme" ) );
              Json_node_add_int ( vars->DI[num], "etat", -1 );                 /* Pour forcer une premiere comm vers le master */
-           } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI : num %d out of range '%d' OR sscanf error",
+           } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI: num %d out of range '%d' OR sscanf error",
                             __func__, thread_tech_id, num, vars->nbr_entree_tor );
         }
      }
