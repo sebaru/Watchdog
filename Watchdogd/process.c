@@ -112,7 +112,9 @@
 /* Sortie: JSonNode * sir il y a un message, sinon NULL                                                                       */
 /******************************************************************************************************************************/
  JsonNode *SubProcess_Listen_to_master_new ( struct SUBPROCESS *module )
-  { return ( Recv_zmq_with_json( module->zmq_from_bus, Json_get_string ( module->config, "tech_id" ), (gchar *)&module->zmq_buffer, sizeof(module->zmq_buffer) ) ); }
+  { return ( Recv_zmq_with_json( module->zmq_from_bus, Json_get_string ( module->config, "thread_tech_id" ),
+             (gchar *)&module->zmq_buffer, sizeof(module->zmq_buffer) ) );
+  }
 /******************************************************************************************************************************/
 /* Thread_send_comm_to_master: appelé par chaque thread pour envoyer le statut de la comm au master                           */
 /* Entrée: La structure afférente                                                                                             */
@@ -120,7 +122,7 @@
 /******************************************************************************************************************************/
  void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
-     { Zmq_Send_WATCHDOG_to_master_new ( module, Json_get_string ( module->config, "tech_id" ), "IO_COMM", 900 );
+     { Zmq_Send_WATCHDOG_to_master_new ( module, Json_get_string ( module->config, "thread_tech_id" ), "IO_COMM", 900 );
        module->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
        module->comm_status = etat;
      }
