@@ -39,7 +39,7 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function INSTANCE_Upgrade_Valider ( selection )
-  { var json_request = { zmq_tag: "INSTANCE_UPGRADE", tech_id: selection.instance };
+  { var json_request = { zmq_tag: "INSTANCE_UPGRADE", thread_tech_id: selection.instance };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), function ()
      { Show_Info ( "Attendez le download et le redémarrage" );
      }, null );
