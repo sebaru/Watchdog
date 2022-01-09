@@ -49,7 +49,7 @@
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` datetime NOT NULL DEFAULT NOW(),"
                     "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                     "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`language` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`device` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
@@ -148,10 +148,10 @@
   { SubProcess_init ( module, sizeof(struct AUDIO_VARS) );
     struct AUDIO_VARS *vars = module->vars;
 
-    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    Mnemo_auto_create_DI ( FALSE, tech_id, "P_ALL", "Profil Audio: All Hps Enabled" );
-    Mnemo_auto_create_DI ( FALSE, tech_id, "P_NONE", "Profil audio: All Hps disabled" );
+    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_ALL", "Profil Audio: All Hps Enabled" );
+    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_NONE", "Profil audio: All Hps disabled" );
 
     gboolean retour = Jouer_google_speech( module, "Instance démarrée !" );
     SubProcess_send_comm_to_master_new ( module, retour );
@@ -166,11 +166,11 @@
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
-               Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+               Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "acronyme" ) &&
                Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
                strcasecmp( Json_get_string( request, "audio_profil" ), "P_NONE" ) )
-           { gchar *tech_id       = Json_get_string ( request, "tech_id" );
+           { gchar *thread_tech_id       = Json_get_string ( request, "thread_tech_id" );
              gchar *acronyme      = Json_get_string ( request, "acronyme" );
              gchar *audio_profil  = Json_get_string ( request, "audio_profil" );
              gchar *audio_libelle = Json_get_string ( request, "audio_libelle" );
@@ -178,13 +178,13 @@
              gint typologie = Json_get_int ( request, "typologie" );
 
              Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
-                       "%s: Recu message '%s:%s' (audio_profil=%s)", __func__, tech_id, acronyme, audio_profil );
+                       "%s: Recu message '%s:%s' (audio_profil=%s)", __func__, thread_tech_id, acronyme, audio_profil );
 
              if ( vars->diffusion_enabled == FALSE &&
                   ! (typologie == MSG_ALERTE || typologie == MSG_DANGER)
                 )                                                               /* Bit positionné quand arret diffusion audio */
               { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                          "%s: Envoi audio inhibé. Dropping '%s:%s'", __func__, tech_id, acronyme );
+                          "%s: Envoi audio inhibé. Dropping '%s:%s'", __func__, thread_tech_id, acronyme );
               }
              else
               { Envoyer_commande_dls_data( "AUDIO", audio_profil );                   /* Pos. du profil audio via interne */
