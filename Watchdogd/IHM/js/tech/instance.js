@@ -22,7 +22,7 @@
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function INSTANCE_Reset_Valider ( selection )
-  { var json_request = { zmq_tag: "INSTANCE_RESET", tech_id: selection.instance };
+  { var json_request = { zmq_tag: "INSTANCE_RESET", thread_tech_id: selection.instance };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), function ()
      { Show_Info ( "Attendez le redémarrage" );
        Reload_when_ready();
