@@ -71,6 +71,17 @@
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                     "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`num` INT(11) NOT NULL DEFAULT 0,"
+                    "UNIQUE (thread_tech_id, thread_acronyme),"
+                    "FOREIGN KEY (`thread_tech_id`) REFERENCES `modbus` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `modbus_DO` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`num` INT(11) NOT NULL DEFAULT 0,"
                     "UNIQUE (thread_tech_id, thread_acronyme),"
                     "FOREIGN KEY (`thread_tech_id`) REFERENCES `modbus` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
@@ -81,8 +92,13 @@
                        "CONCAT ( 'DI', LPAD ( CONVERT (REPLACE ( mnemos_DI.map_tag, 'DI', '' ), INTEGER ), 3, '0' ) ), tech_id, acronyme "
                        "FROM mnemos_DI WHERE map_thread ='MODBUS' " );
      }
-
-    Process_set_database_version ( lib, 3 );
+    if (lib->database_version < 4)
+     { SQL_Write_new ( "INSERT INTO mappings (thread_tech_id, thread_acronyme, tech_id, acronyme) "
+                       "SELECT map_tech_id, "
+                       "CONCAT ( 'DO', LPAD ( CONVERT (REPLACE ( mnemos_DO.map_tag, 'DO', '' ), INTEGER ), 3, '0' ) ), tech_id, acronyme "
+                       "FROM mnemos_DO WHERE map_thread ='MODBUS' " );
+     }
+    Process_set_database_version ( lib, 4 );
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -106,6 +122,7 @@
     if (vars->DI_root) json_node_unref(vars->DI_root);
     if (vars->DI) g_free(vars->DI);
     if (vars->AI) g_free(vars->AI);
+    if (vars->DO_root) json_node_unref(vars->DO_root);
     if (vars->DO) g_free(vars->DO);
     SubProcess_send_comm_to_master_new ( module, FALSE );
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Module '%s' disconnected", __func__, thread_tech_id, hostname );
@@ -134,7 +151,7 @@
     sndtimeout.tv_sec  = 10;
     sndtimeout.tv_usec =  0;
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s' : Trying to connect module to '%s'", __func__,
+    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s : Trying to connect module to '%s'", __func__,
               thread_tech_id, hostname );
 
     s = getaddrinfo( hostname, "502", &hints, &result);
@@ -599,7 +616,7 @@
      { for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<vars->nbr_sortie_tor; cpt++ )
         { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
           if ( vars->DO[cpt] )
-           { if (Dls_data_get_DO( NULL, NULL, &vars->DO[cpt] ) ) { requete.data[cpt_byte] |= cpt_poid; } }
+           { if (Json_get_bool ( vars->DO[cpt], "etat" )) { requete.data[cpt_byte] |= cpt_poid; } }
           cpt_poid = cpt_poid << 1;
         }
      }
@@ -675,42 +692,68 @@
     if (!vars->DI_root)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , thread_tech_id); }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__, thread_tech_id, vars->nbr_entree_tor );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__,thread_tech_id, vars->nbr_entree_tor );
        SQL_Select_to_json_node ( vars->DI_root, "modbus_DI",
-                                 "SELECT di.*, mappings.tech_id, mappings.acronyme FROM modbus_DI AS di "
+                                 "SELECT di.*, m.* FROM modbus_DI AS di "
                                  "INNER JOIN mappings ON mappings.thread_tech_id  = di.thread_tech_id "
                                  "                   AND mappings.thread_acronyme = di.thread_acronyme "
+                                 "INNER JOIN mnemos_DI AS m ON m.tech_id = mappings.tech_id AND m.acronyme = mappings.acronyme "
                                  "WHERE di.thread_tech_id='%s' AND mappings.tech_id IS NOT NULL", thread_tech_id );
 
        vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
        if (!vars->DI)
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , thread_tech_id);
+        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__, thread_tech_id);
           return;
         }
 
        JsonArray *array = Json_get_array ( vars->DI_root, "modbus_DI" );
        for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->DI_root, "modbus_DI" ) ); cpt ++ )
         { JsonNode *element = json_array_get_element ( array, cpt );
-          gint num;
-          if (sscanf ( Json_get_string ( element, "thread_acronyme" ), "DI%d", &num ) == 1 && num < vars->nbr_entree_tor)
+          gint num = Json_get_int ( element, "num" );
+          if (num > 0 && num < vars->nbr_entree_tor)
            { vars->DI[num] = element;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping: DI%03d -> %s:%s", __func__, thread_tech_id,
-                       num,
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping: %s -> %s:%s", __func__, thread_tech_id,
+                       Json_get_string ( vars->DI[cpt], "thread_acronyme" ),
                        Json_get_string ( vars->DI[cpt], "tech_id" ),
                        Json_get_string ( vars->DI[cpt], "acronyme" ) );
              Json_node_add_int ( vars->DI[num], "etat", -1 );                 /* Pour forcer une premiere comm vers le master */
-           } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI: num %d out of range '%d' OR sscanf error",
+           } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI: num %d out of range '%d'",
                             __func__, thread_tech_id, num, vars->nbr_entree_tor );
         }
      }
+/***************************************************** Mapping des DigitalOutput **********************************************/
+    vars->DO_root = Json_node_create();
+    if (!vars->DO_root)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, thread_tech_id); }
+    else
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DO", __func__, thread_tech_id, vars->nbr_sortie_tor );
+       SQL_Select_to_json_node ( vars->DO_root, "modbus_DO",
+                                 "SELECT do.*, m.* FROM modbus_DO AS do "
+                                 "INNER JOIN mappings ON mappings.thread_tech_id  = do.thread_tech_id "
+                                 "                   AND mappings.thread_acronyme = do.thread_acronyme "
+                                 "INNER JOIN mnemos_DO AS m ON m.tech_id = mappings.tech_id AND m.acronyme = mappings.acronyme "
+                                 "WHERE do.thread_tech_id='%s' AND mappings.tech_id IS NOT NULL", thread_tech_id );
 
-    vars->DO = g_try_malloc0( sizeof(gpointer) * vars->nbr_sortie_tor );
-    if (!vars->DO)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, thread_tech_id );
-       return;
-     } else Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                      "%s: '%s': Allocated %d DO", __func__, thread_tech_id, vars->nbr_sortie_tor );
+       vars->DO = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_sortie_tor );
+       if (!vars->DO)
+        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, thread_tech_id);
+          return;
+        }
 
+       JsonArray *array = Json_get_array ( vars->DO_root, "modbus_DO" );
+       for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->DO_root, "modbus_DO" ) ); cpt ++ )
+        { JsonNode *element = json_array_get_element ( array, cpt );
+          gint num = Json_get_int ( element, "num" );
+          if (num > 0 && num < vars->nbr_sortie_tor)
+           { vars->DO[num] = element;
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping: %s -> %s:%s", __func__, thread_tech_id,
+                       Json_get_string ( vars->DO[cpt], "thread_acronyme" ),
+                       Json_get_string ( vars->DO[cpt], "tech_id" ),
+                       Json_get_string ( vars->DO[cpt], "acronyme" ) );
+           } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DO: num %d out of range '%d'",
+                            __func__, thread_tech_id, num, vars->nbr_entree_tor );
+        }
+     }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     if ( ! Recuperer_mnemos_AI_by_tag ( &db, thread_tech_id, "AI%%" ) )
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
@@ -728,27 +771,6 @@
            }
           else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
                          __func__, thread_tech_id, map_tag, num, vars->nbr_entree_ana );
-        }
-       else Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
-                      __func__, thread_tech_id, map_tag );
-     }
-/*********************************** Recherche des events DO a raccrocher aux bits internes ***********************************/
-    if ( ! Recuperer_mnemos_DO_by_tag ( &db, thread_tech_id, "DO%%" ) )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
-                 __func__, thread_tech_id, critere );
-     }
-    else while ( Recuperer_mnemos_DO_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *map_tag = db->row[2];
-       gint num;
-       Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
-                 __func__, thread_tech_id, map_tag, tech_id, acro, libelle );
-       if ( sscanf ( map_tag, "DO%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
-        { if (num<vars->nbr_sortie_tor)
-           { Dls_data_get_DO ( tech_id, acro, &vars->DO[num] );        /* bit déjà existant deja dans la structure DLS DATA */
-             if(vars->DO[num] == NULL) Dls_data_set_DO ( NULL, tech_id, acro, &vars->DO[num], FALSE );     /* Sinon, on le crée */
-           }
-          else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, thread_tech_id, map_tag, num, vars->nbr_sortie_tor );
         }
        else Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
                       __func__, thread_tech_id, map_tag );
@@ -906,8 +928,10 @@
                          __func__, thread_tech_id, vars->nbr_entree_ana
                        );
                for (gint cpt=0; cpt<vars->nbr_entree_ana; cpt++)
-                { SQL_Write_new ( "INSERT IGNORE INTO %s_AI SET modbus_id=%d, num=%d",
-                                  module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                { SQL_Write_new ( "INSERT IGNORE INTO modbus_AI SET thread_tech_id='%s', thread_acronyme='AI%03d', num=%d",
+                                  thread_tech_id, cpt, cpt );
+                  SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='AI%03d'",
+                                  thread_tech_id, cpt );
                 }
                vars->mode = MODBUS_GET_NBR_AO;
              }
@@ -918,8 +942,10 @@
                          __func__, thread_tech_id, vars->nbr_sortie_ana
                        );
                for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                { SQL_Write_new ( "INSERT IGNORE INTO %s_AO SET modbus_id=%d, num=%d",
-                                  module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                { SQL_Write_new ( "INSERT IGNORE INTO modbus_AO SET thread_tech_id='%s', thread_acronyme='AO%03d', num=%d",
+                                  thread_tech_id, cpt, cpt );
+                  SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='AO%03d'",
+                                  thread_tech_id, cpt );
                 }
                vars->mode = MODBUS_GET_NBR_DI;
              }
@@ -931,8 +957,8 @@
                Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree TOR",
                          __func__, thread_tech_id, vars->nbr_entree_tor );
                for (gint cpt=0; cpt<vars->nbr_entree_tor; cpt++)
-                { SQL_Write_new ( "INSERT IGNORE INTO modbus_DI SET thread_tech_id='%s', thread_acronyme='DI%03d'",
-                                  thread_tech_id, cpt );
+                { SQL_Write_new ( "INSERT IGNORE INTO modbus_DI SET thread_tech_id='%s', thread_acronyme='DI%03d', num=%d",
+                                  thread_tech_id, cpt, cpt );
                   SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='DI%03d'",
                                   thread_tech_id, cpt );
                 }
@@ -944,8 +970,10 @@
                Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie TOR",
                          __func__, thread_tech_id, vars->nbr_sortie_tor );
                for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                { SQL_Write_new ( "INSERT IGNORE INTO %s_DO SET modbus_id=%d, num=%d",
-                                  module->lib->name, Json_get_int ( module->config, "id" ), cpt );
+                { SQL_Write_new ( "INSERT IGNORE INTO modbus_DO SET thread_tech_id='%s', thread_acronyme='DO%03d', num=%d",
+                                  thread_tech_id, cpt, cpt );
+                  SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='DO%03d'",
+                                  thread_tech_id, cpt );
                 }
                Modbus_do_mapping( module );                                        /* Initialise le mapping des I/O du module */
                vars->mode = MODBUS_GET_DI;
@@ -1038,7 +1066,33 @@
        JsonNode *request;
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if ( !strcasecmp( zmq_tag, "SUBPROCESS_REMAP" ) )
+          if ( !strcasecmp( zmq_tag, "SET_DO" ) )
+           { if (!Json_has_member ( request, "tech_id"))
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque tech_id", __func__, thread_tech_id ); }
+             else if (!Json_has_member ( request, "acronyme" ))
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque acronyme", __func__, thread_tech_id ); }
+             else if (!Json_has_member ( request, "etat" ))
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque etat", __func__, thread_tech_id ); }
+             else
+              { gchar *tech_id  = Json_get_string ( request, "tech_id" );
+                gchar *acronyme = Json_get_string ( request, "acronyme" );
+                gboolean etat   = Json_get_bool   ( request, "etat" );
+
+                Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Recu SET_DO from bus: %s:%s=%d",
+                          __func__, thread_tech_id, tech_id, acronyme, etat );
+
+                for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
+                 { if ( !strcasecmp ( Json_get_string(vars->DO[cpt], "tech_id"), tech_id ) &&
+                        !strcasecmp ( Json_get_string(vars->DO[cpt], "acronyme"), acronyme ) )
+                    { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': SET_DO %s:%s=%d", __func__,
+                                thread_tech_id, tech_id, acronyme, etat );
+                      Json_node_add_bool ( vars->DO[cpt], "etat", etat );
+                      break;
+                    }
+                 }
+              }
+           }
+          else if ( !strcasecmp( zmq_tag, "SUBPROCESS_REMAP" ) )
            { if (  Json_has_member ( request, "thread_tech_id" ) &&
                   !strcasecmp( Json_get_string ( request, "thread_tech_id" ), thread_tech_id ) )
               { Deconnecter_module ( module ); }

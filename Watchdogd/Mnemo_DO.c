@@ -36,9 +36,9 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
-/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
-/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/* Mnemo_auto_create_DO: Ajoute un mnemo DO en base                                                                           */
+/* Entrée: les parametres du mnemo                                                                                            */
+/* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_DO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;

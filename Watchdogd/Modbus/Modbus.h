@@ -113,11 +113,10 @@
     gint nbr_request_par_sec;                                                                /* Nombre de requete par seconde */
     gint delai;                                                  /* delai d'attente pour limiter le nb de request par seconde */
     struct TRAME_MODBUS_REPONSE response;
-    JsonNode *DI_root;                                                                 /* Tableau dynamique de mapping des DI */
-    JsonNode **DI;                                                             /* Tableau dynamique d'accès aux bits internes */
+    JsonNode *DI_root, **DI;                                                           /* Tableau dynamique de mapping des DI */
+    JsonNode *DO_root, **DO;                                                           /* Tableau dynamique de mapping des DO */
     gpointer *AI;                                                              /* Tableau dynamique d'accès aux bits internes */
     gpointer *MSG_AI_OUT_OF_RANGE;                                             /* Tableau dynamique d'accès aux bits internes */
-    gpointer *DO;                                                              /* Tableau dynamique d'accès aux bits internes */
     gpointer bit_comm;                                                                       /* Bit interne d'etat de la comm */
   };
 
