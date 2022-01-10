@@ -487,7 +487,9 @@
        return;
      }
     SQL_Select_to_json_node ( RootNode, "results",
-                              "SELECT * FROM mnemos_DI WHERE map_thread='COMMAND_TEXT' AND map_tag LIKE '%%%s%%'", texte );
+                              "SELECT * FROM mnemos_DI AS m "
+                              "INNER JOIN mappings_text AS map ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
+                              "WHERE map.tag LIKE '%%%s%%'", texte );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
      { g_snprintf(chaine, sizeof(chaine), "'%s' not found.", texte );
