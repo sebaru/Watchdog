@@ -556,6 +556,16 @@ encore:
        return;
      }
 
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_DI` ("
+                   "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`deletable` TINYINT(1) NOT NULL DEFAULT '1',"
+                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings_text` ("
                    "`tag` VARCHAR(128) UNIQUE NOT NULL,"
                    "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
@@ -2551,6 +2561,9 @@ encore:
      { SQL_Write_new ("INSERT INTO mappings_text "
 		              "SELECT map_tag, tech_id, acronyme "
 		              "FROM mnemos_DI WHERE map_thread='COMMAND_TEXT'");
+       SQL_Write_new ("ALTER TABLE mnemos_DI DROP map_tag");
+       SQL_Write_new ("ALTER TABLE mnemos_DI DROP map_thread");
+       SQL_Write_new ("ALTER TABLE mnemos_DI DROP map_tech_id");
      }
 
 fin:
