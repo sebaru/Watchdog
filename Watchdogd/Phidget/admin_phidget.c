@@ -34,17 +34,17 @@
 /* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
  void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
-  { if ( Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+  { if ( Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) &&
          Json_has_member ( request, "id" ) && Json_has_member ( request, "enable" ) )
      { SQL_Write_new ( "UPDATE %s SET enable='%d' WHERE id='%d'", lib->name, Json_get_bool(request, "enable"),
                        Json_get_int ( request, "id" ) );
        Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__,
-                 Json_get_string ( request, "uuid" ), Json_get_string ( request, "tech_id" ) );
+                 Json_get_string ( request, "uuid" ), Json_get_string ( request, "thread_tech_id" ) );
        soup_message_set_status (msg, SOUP_STATUS_OK);
        return;
      }
 
-    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) &&
             Json_has_member ( request, "hostname" ) && Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "password" ) && Json_has_member ( request, "serial" )
            )
@@ -53,137 +53,34 @@
        return;
      }
 
-    gchar *uuid        = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
-    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    gchar *hostname    = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
-    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
-    gchar *password    = Normaliser_chaine ( Json_get_string( request, "password" ) );
-    gchar *serial      = Normaliser_chaine ( Json_get_string( request, "serial" ) );
+    gchar *uuid           = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
+    gchar *thread_tech_id = Normaliser_chaine ( Json_get_string( request, "thread_tech_id" ) );
+    gchar *hostname       = Normaliser_chaine ( Json_get_string( request, "hostname" ) );
+    gchar *description    = Normaliser_chaine ( Json_get_string( request, "description" ) );
+    gchar *password       = Normaliser_chaine ( Json_get_string( request, "password" ) );
+    gchar *serial         = Normaliser_chaine ( Json_get_string( request, "serial" ) );
 
     if (Json_has_member ( request, "id" ))
-     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', description='%s', hostname='%s', password='%s', serial='%s' ",
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', thread_tech_id='%s', description='%s', hostname='%s', password='%s', serial='%s' ",
                        "WHERE id='%d'",
-                       lib->name, uuid, tech_id, description, hostname, password, serial,
+                       lib->name, uuid, thread_tech_id, description, hostname, password, serial,
                        Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, thread_tech_id );
      }
     else
-     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', description='%s', hostname='%s', password='%s', serial='%s' ",
-                       lib->name, uuid, tech_id, description, hostname, password, serial );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', thread_tech_id='%s', description='%s', hostname='%s', password='%s', serial='%s' ",
+                       lib->name, uuid, thread_tech_id, description, hostname, password, serial );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, thread_tech_id );
      }
 
     g_free(uuid);
-    g_free(tech_id);
+    g_free(thread_tech_id);
     g_free(hostname);
     g_free(description);
     g_free(password);
     g_free(serial);
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
-  }
-/******************************************************************************************************************************/
-/* Admin_json_phidget_start_stop: Start ou Stop un Hub Phidget                                                            */
-/* Entrées: la connexion Websocket, le champ start/stop                                                                       */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_start_stop ( struct PROCESS *Lib, SoupMessage *msg, gboolean start )
-  { if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "id" ) ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
-       return;
-     }
-
-    gint id = Json_get_int ( request, "id" );
-    json_node_unref(request);
-
-
-    if (SQL_Write_new ( "UPDATE phidget SET enable='%d' WHERE id='%d'", start, id ) )
-     { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Lib->Thread_reload = TRUE;
-     }
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-  }
-/******************************************************************************************************************************/
-/* Admin_json_phidget_map_list: Recupère la liste des mapping d'une certaine classe pour le thread phidget                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_map_list ( struct PROCESS *lib, GHashTable *query, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    gpointer classe = g_hash_table_lookup ( query, "classe" );
-    if (!classe)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    if (! strcasecmp( classe, "DI" ) )
-     { if (SQL_Select_to_json_node ( RootNode, "mappings",
-                                    "SELECT m.tech_id, m.acronyme, m.libelle, "
-                                    "hub.hostname AS hub_hostname, hub.description AS hub_description, "
-                                    "di.* FROM phidget_DI AS di "
-                                    "INNER JOIN phidget AS hub ON di.hub_id = hub.id "
-                                    "INNER JOIN mnemos_DI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', di.port ) " ) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref ( RootNode );
-          return;
-        }
-     }
-    else if (! strcasecmp( classe, "DO" ) )
-     { if (SQL_Select_to_json_node ( RootNode, "mappings",
-                                    "SELECT m.tech_id, m.acronyme, m.libelle, "
-                                    "hub.hostname AS hub_hostname, hub.description AS hub_description, "
-                                    "do.* FROM phidget_DO AS do "
-                                    "INNER JOIN phidget AS hub ON do.hub_id = hub.id "
-                                    "INNER JOIN mnemos_DO AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', do.port ) " ) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref ( RootNode );
-          return;
-        }
-     }
-    else if (! strcasecmp( classe, "AI" ) )
-     { if (SQL_Select_to_json_node ( RootNode, "mappings",
-                                    "SELECT m.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale, m.min, m.max, m.unite, "
-                                    "hub.hostname AS hub_hostname, hub.description AS hub_description, "
-                                    "ai.* FROM phidget_AI AS ai "
-                                    "INNER JOIN phidget AS hub ON ai.hub_id = hub.id "
-                                    "INNER JOIN mnemos_AI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', ai.port ) " ) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref ( RootNode );
-          return;
-        }
-     }
-    else
-     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong class" );
-       json_node_unref ( RootNode );
-		     return;
-     }
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Admin_json_phidget_map_set: ajoute un mapping dans la base de données Phidget                                              */
@@ -199,7 +96,7 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+    if ( ! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "acronyme" ) &&
             Json_has_member ( request, "capteur" ) && Json_has_member ( request, "classe" ) &&
             Json_has_member ( request, "hub_id" ) && Json_has_member ( request, "port" )
            )
@@ -209,7 +106,7 @@
        return;
      }
 
-    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *thread_tech_id     = Normaliser_chaine ( Json_get_string( request, "thread_tech_id" ) );
     gchar *acronyme    = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
     gchar *capteur     = Normaliser_chaine ( Json_get_string( request, "capteur" ) );
     gchar *classe      = Json_get_string( request, "classe" );
@@ -231,15 +128,15 @@
     else phidget_classe="Unknown";
 
     if (! strcasecmp( classe, "DI" ) )
-     { SQL_Write_new ( "UPDATE mnemos_DI SET map_thread='PHIDGET', map_tech_id=NULL "
-                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') ",
+     { SQL_Write_new ( "UPDATE mnemos_DI SET map_thread='PHIDGET', map_thread_tech_id=NULL "
+                       "WHERE map_thread_tech_id=CONCAT ( (SELECT thread_tech_id FROM phidget WHERE id=%d), '_P%d') ",
                        hub_id, port
                      );
 
        SQL_Write_new ( "UPDATE mnemos_DI SET map_thread='PHIDGET', "
-                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') "
-                       "WHERE tech_id='%s' AND acronyme='%s'",
-                       hub_id, port, tech_id, acronyme
+                       "map_thread_tech_id=CONCAT ( (SELECT thread_tech_id FROM phidget WHERE id=%d), '_P%d') "
+                       "WHERE thread_tech_id='%s' AND acronyme='%s'",
+                       hub_id, port, thread_tech_id, acronyme
                      );
 
        if (SQL_Write_new ( "INSERT INTO phidget_DI SET hub_id=%d, port=%d, classe='%s', capteur='%s' "
@@ -251,15 +148,15 @@
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
     else if (! strcasecmp( classe, "DO" ) )
-     { SQL_Write_new ( "UPDATE mnemos_DO SET map_thread='PHIDGET', map_tech_id=NULL "
-                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') ",
+     { SQL_Write_new ( "UPDATE mnemos_DO SET map_thread='PHIDGET', map_thread_tech_id=NULL "
+                       "WHERE map_thread_tech_id=CONCAT ( (SELECT thread_tech_id FROM phidget WHERE id=%d), '_P%d') ",
                        hub_id, port
                      );
 
        SQL_Write_new ( "UPDATE mnemos_DO SET map_thread='PHIDGET', "
-                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') "
-                       "WHERE tech_id='%s' AND acronyme='%s'",
-                       hub_id, port, tech_id, acronyme
+                       "map_thread_tech_id=CONCAT ( (SELECT thread_tech_id FROM phidget WHERE id=%d), '_P%d') "
+                       "WHERE thread_tech_id='%s' AND acronyme='%s'",
+                       hub_id, port, thread_tech_id, acronyme
                      );
 
        if (SQL_Write_new ( "INSERT INTO phidget_DO SET hub_id=%d, port=%d, classe='%s', capteur='%s' "
@@ -279,8 +176,8 @@
           goto end;
         }
 
-       SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', map_tech_id=NULL "
-                       "WHERE map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d') ",
+       SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', map_thread_tech_id=NULL "
+                       "WHERE map_thread_tech_id=CONCAT ( (SELECT thread_tech_id FROM phidget WHERE id=%d), '_P%d') ",
                        hub_id, port
                      );
 
@@ -289,13 +186,13 @@
        gchar *map_reponse_vocale  = Normaliser_chaine( Json_get_string ( request, "map_reponse_vocale" ) );
 
        SQL_Write_new ( "UPDATE mnemos_AI SET map_thread='PHIDGET', "
-                       "map_tech_id=CONCAT ( (SELECT tech_id FROM phidget WHERE id=%d), '_P%d'), "
+                       "map_thread_tech_id=CONCAT ( (SELECT thread_tech_id FROM phidget WHERE id=%d), '_P%d'), "
                        "min='%d', max='%d', unite='%s', map_question_vocale='%s', map_reponse_vocale='%s' "
-                       "WHERE tech_id='%s' AND acronyme='%s'",
+                       "WHERE thread_tech_id='%s' AND acronyme='%s'",
                        hub_id, port,
                        Json_get_int ( request, "min" ), Json_get_int ( request, "max" ), unite,
                        map_question_vocale, map_reponse_vocale,
-                       tech_id, acronyme
+                       thread_tech_id, acronyme
                      );
        g_free(unite);
        g_free(map_question_vocale);
@@ -304,7 +201,7 @@
        if (SQL_Write_new ( "INSERT INTO phidget_AI SET hub_id=%d, port=%d, intervalle=%d, classe='%s', capteur='%s' "
                            "ON DUPLICATE KEY UPDATE intervalle=VALUES(intervalle),"
                            "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
-                           hub_id, port, Json_get_int( request, "intervalle" ), phidget_classe, capteur, tech_id, acronyme
+                           hub_id, port, Json_get_int( request, "intervalle" ), phidget_classe, capteur, thread_tech_id, acronyme
                          ))
           { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
@@ -313,73 +210,9 @@
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
     Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */
 end:
-    g_free(tech_id);
+    g_free(thread_tech_id);
     g_free(acronyme);
     g_free(capteur);
     json_node_unref(request);
-  }
-/******************************************************************************************************************************/
-/* Admin_json_phidget_map_del: supprime un mapping dans la base de données Phidget                                            */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Admin_json_phidget_map_del ( struct PROCESS *Lib, SoupMessage *msg )
-  { if (msg->method != SOUP_METHOD_DELETE)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "classe" ) && Json_has_member ( request, "id" )) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
-       return;
-     }
-
-    gchar *classe      = Json_get_string( request, "classe" );
-
-    if (! strcasecmp( classe, "DI" ) )
-     { if (SQL_Write_new ( "DELETE FROM phidget_DI WHERE id='%d'", Json_get_int ( request, "id" ) ))
-          { soup_message_set_status (msg, SOUP_STATUS_OK); }
-       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-     }
-    else if (! strcasecmp( classe, "AI" ) )
-     { if (SQL_Write_new ( "DELETE FROM phidget_AI WHERE id='%d'", Json_get_int ( request, "id" ) ))
-          { soup_message_set_status (msg, SOUP_STATUS_OK); }
-       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-     }
-    else if (! strcasecmp( classe, "DO" ) )
-     { if (SQL_Write_new ( "DELETE FROM phidget_DO WHERE id='%d'", Json_get_int ( request, "id" ) ))
-          { soup_message_set_status (msg, SOUP_STATUS_OK); }
-       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-     }
-    else if (! strcasecmp( classe, "AO" ) )
-     { if (SQL_Write_new ( "DELETE FROM phidget_AO WHERE id='%d'", Json_get_int ( request, "id" ) ))
-          { soup_message_set_status (msg, SOUP_STATUS_OK); }
-       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-     }
-    else
-     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
-    json_node_unref(request);
-  }
-/******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- void Admin_json ( struct PROCESS *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
-  { if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
-       return;
-     }
-         if (!strcasecmp(path, "/hub/start")) { Admin_json_phidget_start_stop ( lib, msg, TRUE ); }
-    else if (!strcasecmp(path, "/hub/stop"))  { Admin_json_phidget_start_stop ( lib, msg, FALSE ); }
-    else if (!strcasecmp(path, "/map/list"))  { Admin_json_phidget_map_list ( lib, query, msg ); }
-    else if (!strcasecmp(path, "/map/set"))   { Admin_json_phidget_map_set ( lib, msg ); }
-    else if (!strcasecmp(path, "/map/del"))   { Admin_json_phidget_map_del ( lib, msg ); }
-    else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-    return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
