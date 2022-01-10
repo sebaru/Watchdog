@@ -79,57 +79,6 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Recuperer_mnemo_baseDB_by_command_text: Recupération de la liste des mnemo par command_text                                */
-/* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
-/* Sortie: FALSE si erreur                                                      ********************                          */
-/******************************************************************************************************************************/
- gboolean Recuperer_mnemos_DO_by_tag ( struct DB **db_retour, gchar *tech_id, gchar *tag )
-  { gchar requete[1024];
-    gchar *commande;
-    gboolean retour;
-    struct DB *db;
-
-    commande = Normaliser_chaine ( tag );
-    if (!commande)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible tag", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.map_tag, m.libelle "
-               "FROM mnemos_DO as m"
-               " WHERE m.map_tech_id='%s' AND m.map_tag LIKE '%s'", tech_id, commande );
-    g_free(commande);
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base                                  */
-/* Entrée: un pointeur sur la connexion de baase de données                                                                   */
-/* Sortie: une structure nouvellement allouée                                                                                 */
-/******************************************************************************************************************************/
- gboolean Recuperer_mnemos_DO_suite( struct DB **db_orig )
-  { struct DB *db;
-
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    return(TRUE);                                                                                    /* Résultat dans db->row */
-  }
-/******************************************************************************************************************************/
 /* Dls_DO_to_json : Formate un bit au format JSON                                                                             */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */

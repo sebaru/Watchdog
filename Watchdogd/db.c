@@ -556,6 +556,26 @@ encore:
        return;
      }
 
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings_text` ("
+                   "`tag` VARCHAR(128) UNIQUE NOT NULL,"
+                   "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
+                   "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "UNIQUE (`tag`,`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
+                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");
+
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
+                   "`thread_tech_id` VARCHAR(32) NOT NULL,"
+                   "`thread_acronyme` VARCHAR(64) NOT NULL,"
+                   "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
+                   "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
+                   "UNIQUE (`thread_tech_id`,`thread_acronyme`),"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "UNIQUE (`thread_tech_id`,`thread_acronyme`,`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
+                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");
+
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Memory error. Don't update schema.", __func__ );
@@ -2527,18 +2547,14 @@ encore:
        SQL_Write_new ("DROP TABLE modbus_module");
      }
 
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
-                   "`thread_tech_id` VARCHAR(32) NOT NULL,"
-                   "`thread_acronyme` VARCHAR(64) NOT NULL,"
-                   "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
-                   "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
-                   "UNIQUE (`thread_tech_id`,`thread_acronyme`),"
-                   "UNIQUE (`tech_id`,`acronyme`),"
-                   "UNIQUE (`thread_tech_id`,`thread_acronyme`,`tech_id`,`acronyme`)"
-                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");
+    if (database_version < 6084)
+     { SQL_Write_new ("INSERT INTO mappings_text "
+		              "SELECT map_tag, tech_id, acronyme "
+		              "FROM mnemos_DI WHERE map_thread='COMMAND_TEXT'");
+     }
 
 fin:
-    database_version = 6083;
+    database_version = 6084;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
