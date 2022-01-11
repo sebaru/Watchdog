@@ -34,69 +34,12 @@
  extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
-/* Admin_json_map_list: Recupère la liste des mapping d'une certaine classe pour un thread donné                              */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- void Http_traiter_map_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                              SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-
-    gchar *thread = g_hash_table_lookup ( query, "thread" );
-    if (!thread)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres thread");
-       return;
-     }
-    Normaliser_as_ascii ( thread );
-
-    gpointer classe = g_hash_table_lookup ( query, "classe" );
-    if (!classe)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres classe");
-       return;
-     }
-    Normaliser_as_ascii ( classe );
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    GSList *liste = Partage->com_msrv.Librairies;                                        /* Parcours de toutes les librairies */
-    while(liste)
-     { struct PROCESS *lib = liste->data;
-       if ( ! strcasecmp( thread, lib->name ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste)
-     { soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Not a thread" );
-       return;
-     }
-
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    SQL_Select_to_json_node ( RootNode, "mappings", "SELECT * FROM %s_%s ", thread, classe );  /* Contenu de la table details */
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
 /* Http_traiter_map_set: ajoute un mapping dans la base de données                                                            */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- void Http_traiter_map_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                             SoupClientContext *client, gpointer user_data )
+ void Http_traiter_map ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                         SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;

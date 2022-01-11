@@ -3,7 +3,7 @@
  var Charts = new Array();
 
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
- function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
+ async function Send_to_API ( method, URL, parametre, fonction_ok, fonction_nok )
   { var xhr = new XMLHttpRequest;
     $(".ClassLoadingSpinner").show();
     if (method=="POST" || method=="PUT") { ContentType = 'application/json'; }

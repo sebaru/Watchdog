@@ -101,27 +101,18 @@
     $('#idMODBUSEdit').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function MODBUS_Map_DI_valider ( selection )
-  { if ($('#idMODALMapSelectTechID').val() == null) return;
-    if ($('#idMODALMapSelectAcronyme').val() == null) return;
-
-    var json_request =
-     { thread_tech_id : selection.thread_tech_id,
-       thread_acronyme: "DI"+selection.num.toString().padStart( 3, '0' ),
-       tech_id        : $('#idMODALMapSelectTechID').val().toUpperCase(),
-       acronyme       : $('#idMODALMapSelectAcronyme').val().toUpperCase(),
-     };
-    Send_to_API ( 'POST', "/api/map/set", JSON.stringify(json_request), function () { MODBUS_Refresh(); });
-    $('#idMODALMap').modal("hide");
-  }
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
  function MODBUS_Map_DI ( id )
   { table = $('#idTableMODBUS_DI').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return item.id==id } )[0];
-    $('#idMODALMapTitre').text( "Mapper "+selection.thread_tech_id+":DI"+selection.num );
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    $('#idMODALMapTitre').text( "Mapper "+selection.thread_tech_id+":"+selection.thread_acronyme );
     $('#idMODALMapRechercherTechID').off("input").on("input", function () { Common_Updater_Choix_TechID ( "idMODALMap", "DI" ); } );
     Common_Updater_Choix_TechID ( "idMODALMap", "DI", selection.tech_id, selection.acronyme );
-    $('#idMODALMapValider').off("click").on( "click", function () { MODBUS_Map_DI_valider(selection); } );
+    $('#idMODALMapValider').off("click").on( "click", function ()
+     { $('#idMODALMap').modal("hide");
+       COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
+                    $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
+                  ).then ( () => { MODBUS_Refresh(); } );
+     });
     $('#idMODALMap').modal("show");
   }
 /********************************************* Appelé au chargement de la page ************************************************/
@@ -186,6 +177,21 @@
             { "data": null, "title":"WAGO I/O", "className": "align-middle text-center",
               "render": function (item)
                 { return( item.thread_acronyme ); }
+            },
+            { "data": null, "title":"Mapped on", "className": "align-middle text-center",
+              "render": function (item)
+                { if(item.tech_id)
+                   { return ( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) +":" + item.acronyme
+                              + ", " + item.libelle );
+                   } else return( "--" );
+                }
+            },
+            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "primary", "Mapper cet objet", "MODBUS_Map_DI", item.id, "directions", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
             },
           ],
          /*order: [ [0, "desc"] ],*/
