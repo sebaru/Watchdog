@@ -37,11 +37,6 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
 <div id="idTabEntreeTor" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
 
-<!-- <div class="row m-2">
-   <div class ="ml-auto btn-group">
-        <button type="button" onclick="MODBUS_Edit_DI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping DI</button>
-   </div>
- </div>-->
     <table id="idTableMODBUS_DI" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
       </thead>
@@ -52,12 +47,6 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
 <div id="idTabSortieTor" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
-
- <div class="row m-2">
-   <div class ="ml-auto btn-group">
-        <button type="button" onclick="MODBUS_Edit_DO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping DO</button>
-   </div>
- </div>
 
     <table id="idTableMODBUS_DO" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
@@ -101,117 +90,6 @@
 <!-- Container -->
 </div>
 
-<!------------------------------------------------- Modal Edit Digital Input -------------------------------------------------->
-<div id="idMODBUSEditDI" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-    <div class="modal-content ">
-      <div class="modal-header bg-info text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idMODBUSEditDITitre"></span></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-           <select id="idMODBUSEditDIWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Wago DI</label>
-           <input id="idMODBUSEditDIWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="DIxx">
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-           <input id="idMODBUSEditDIRechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idMODBUSEditDI', 'DI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-           <select id="idMODBUSEditDISelectTechID" required onchange="ModbusMap_Update_Choix_Acronyme('idMODBUSEditDI', 'DI')" class="col-9 custom-select border-info"></select>
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-           <select id="idMODBUSEditDISelectAcronyme" required class="col-9 custom-select border-info"></select>
-          </div>
-       </div>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-        <button id="idMODBUSEditDIValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!------------------------------------------------- Modal Edit Digital Output ------------------------------------------------->
-<div id="idMODBUSEditDO" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-    <div class="modal-content ">
-      <div class="modal-header bg-info text-white">
-        <h5 class="modal-title text-justify"><i class="fas fa-pen"></i> <span id="idMODBUSEditDOTitre"></span></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-           <select id="idMODBUSEditDOWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Wago DO</label>
-           <input id="idMODBUSEditDOWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="DOxx">
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-           <input id="idMODBUSEditDORechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idMODBUSEditDO', 'DO')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-           <select id="idMODBUSEditDOSelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idMODBUSEditDO', 'DO')" class="col-9 custom-select border-info"></select>
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-           <select id="idMODBUSEditDOSelectAcronyme" class="col-9 custom-select border-info"></select>
-          </div>
-       </div>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-        <button id="idMODBUSEditDOValider" type="button" class="btn btn-primary"><i class="fas fa-save"></i> Valider</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!------------------------------------------------- Modal Edit Analog Input --------------------------------------------------->
 <div id="idMODBUSEditAI" class="modal fade" tabindex="-1" role="dialog">

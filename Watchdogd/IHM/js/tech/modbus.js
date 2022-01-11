@@ -38,7 +38,7 @@
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
  function MODBUS_Del_Valider ( selection )
-  { var json_request = { uuid : selection.uuid, thread_tech_id: selection.tech_id };
+  { var json_request = { uuid : selection.uuid, thread_tech_id: selection.thread_tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
        MODBUS_Refresh();
@@ -107,6 +107,21 @@
     $('#idMODALMapTitre').text( "Mapper "+selection.thread_tech_id+":"+selection.thread_acronyme );
     $('#idMODALMapRechercherTechID').off("input").on("input", function () { Common_Updater_Choix_TechID ( "idMODALMap", "DI" ); } );
     Common_Updater_Choix_TechID ( "idMODALMap", "DI", selection.tech_id, selection.acronyme );
+    $('#idMODALMapValider').off("click").on( "click", function ()
+     { $('#idMODALMap').modal("hide");
+       COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
+                    $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
+                  ).then ( () => { MODBUS_Refresh(); } );
+     });
+    $('#idMODALMap').modal("show");
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function MODBUS_Map_DO ( id )
+  { table = $('#idTableMODBUS_DO').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    $('#idMODALMapTitre').text( "Mapper "+selection.thread_tech_id+":"+selection.thread_acronyme );
+    $('#idMODALMapRechercherTechID').off("input").on("input", function () { Common_Updater_Choix_TechID ( "idMODALMap", "DO" ); } );
+    Common_Updater_Choix_TechID ( "idMODALMap", "DO", selection.tech_id, selection.acronyme );
     $('#idMODALMapValider').off("click").on( "click", function ()
      { $('#idMODALMap').modal("hide");
        COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
@@ -198,40 +213,44 @@
          responsive: true,
        }
      );
-/*
+
     $('#idTableMODBUS_DO').DataTable(
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "MODBUS", "classe": "DO" },
+         ajax: {	url : "/api/process/config", type : "GET", data: { name: "modbus", classe: "DO" }, dataSrc: "config",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
-            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
-            { "data": null, "title":"Map", "className": "align-middle text-center",
+          [ { "data": null, "title":"WAGO TechID", "className": "align-middle text-center",
               "render": function (item)
-                { return( "<->" ); }
+                { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
             },
-            { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
+            { "data": null, "title":"WAGO I/O", "className": "align-middle text-center",
               "render": function (item)
-                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+                { return( item.thread_acronyme ); }
             },
-            { "data": "acronyme", "title":"BIT Acronyme", "className": "align-middle text-center" },
-            { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
+            { "data": null, "title":"Mapped on", "className": "align-middle text-center",
+              "render": function (item)
+                { if(item.tech_id)
+                   { return ( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) +":" + item.acronyme
+                              + ", " + item.libelle );
+                   } else return( "--" );
+                }
+            },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_DO", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_DO", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "primary", "Mapper cet objet", "MODBUS_Map_DO", item.id, "directions", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
             },
           ],
-
+         /*order: [ [0, "desc"] ],*/
          responsive: true,
        }
      );
+/*
 
     $('#idTableMODBUS_AI').DataTable(
        { pageLength : 50,
