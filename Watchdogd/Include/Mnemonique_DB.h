@@ -77,6 +77,7 @@
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
 
  extern gboolean Mnemo_auto_create_DO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle );/* Dans mnemos_DO.c */
+ extern void Updater_confDB_DO ( void );
  extern void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit );
 
  extern void Charger_confDB_MONO ( void );                                                              /* Dans mnemos_MONO.c */

@@ -1093,7 +1093,7 @@
               }
            }
           else if ( !strcasecmp( zmq_tag, "SUBPROCESS_REMAP" ) )
-           { if (  Json_has_member ( request, "thread_tech_id" ) &&
+           { if ( Json_has_member ( request, "thread_tech_id" ) &&
                   !strcasecmp( Json_get_string ( request, "thread_tech_id" ), thread_tech_id ) )
               { Deconnecter_module ( module ); }
            }

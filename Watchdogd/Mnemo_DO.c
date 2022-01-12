@@ -79,6 +79,28 @@
     return (retour);
   }
 /******************************************************************************************************************************/
+/* Updater_confDO: Mise a jour des valeurs des DigitalOutput en base                                                          */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Updater_confDB_DO( void )
+  { GSList *liste;
+    gint cpt;
+
+    cpt = 0;
+    liste = Partage->Dls_data_DO;
+    while ( liste )
+     { struct DLS_DO *dout = liste->data;
+       SQL_Write_new( "UPDATE mnemos_DO as m SET etat='%d' "
+                      "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                      dout->etat, dout->tech_id, dout->acronyme );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d DO updated", __func__, cpt );
+  }
+/******************************************************************************************************************************/
 /* Dls_DO_to_json : Formate un bit au format JSON                                                                             */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
