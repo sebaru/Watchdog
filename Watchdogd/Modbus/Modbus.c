@@ -1081,13 +1081,13 @@
                 Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Recu SET_DO from bus: %s:%s=%d",
                           __func__, thread_tech_id, tech_id, acronyme, etat );
 
-                for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                 { if ( vars->DO[cpt] &&
-                        !strcasecmp ( Json_get_string(vars->DO[cpt], "tech_id"), tech_id ) &&
-                        !strcasecmp ( Json_get_string(vars->DO[cpt], "acronyme"), acronyme ) )
+                for (gint num=0; num<vars->nbr_sortie_tor; num++)
+                 { if ( vars->DO[num] &&
+                        !strcasecmp ( Json_get_string(vars->DO[num], "tech_id"), tech_id ) &&
+                        !strcasecmp ( Json_get_string(vars->DO[num], "acronyme"), acronyme ) )
                     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': SET_DO %s:%s=%d", __func__,
                                 thread_tech_id, tech_id, acronyme, etat );
-                      Json_node_add_bool ( vars->DO[cpt], "etat", etat );
+                      Json_node_add_bool ( vars->DO[num], "etat", etat );
                       break;
                     }
                  }
