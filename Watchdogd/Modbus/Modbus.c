@@ -1082,7 +1082,8 @@
                           __func__, thread_tech_id, tech_id, acronyme, etat );
 
                 for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                 { if ( !strcasecmp ( Json_get_string(vars->DO[cpt], "tech_id"), tech_id ) &&
+                 { if ( vars->DO[cpt] &&
+                        !strcasecmp ( Json_get_string(vars->DO[cpt], "tech_id"), tech_id ) &&
                         !strcasecmp ( Json_get_string(vars->DO[cpt], "acronyme"), acronyme ) )
                     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': SET_DO %s:%s=%d", __func__,
                                 thread_tech_id, tech_id, acronyme, etat );
