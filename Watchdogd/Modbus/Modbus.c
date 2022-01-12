@@ -710,12 +710,12 @@
        for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->DI_root, "modbus_DI" ) ); cpt ++ )
         { JsonNode *element = json_array_get_element ( array, cpt );
           gint num = Json_get_int ( element, "num" );
-          if (num > 0 && num < vars->nbr_entree_tor)
+          if ( 0 <= num && num < vars->nbr_entree_tor )
            { vars->DI[num] = element;
              Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping: %s -> %s:%s", __func__, thread_tech_id,
-                       Json_get_string ( vars->DI[cpt], "thread_acronyme" ),
-                       Json_get_string ( vars->DI[cpt], "tech_id" ),
-                       Json_get_string ( vars->DI[cpt], "acronyme" ) );
+                       Json_get_string ( vars->DI[num], "thread_acronyme" ),
+                       Json_get_string ( vars->DI[num], "tech_id" ),
+                       Json_get_string ( vars->DI[num], "acronyme" ) );
              Json_node_add_int ( vars->DI[num], "etat", -1 );                 /* Pour forcer une premiere comm vers le master */
            } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI: num %d out of range '%d'",
                             __func__, thread_tech_id, num, vars->nbr_entree_tor );
@@ -744,14 +744,14 @@
        for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->DO_root, "modbus_DO" ) ); cpt ++ )
         { JsonNode *element = json_array_get_element ( array, cpt );
           gint num = Json_get_int ( element, "num" );
-          if (num > 0 && num < vars->nbr_sortie_tor)
+          if ( 0 <= num && num < vars->nbr_sortie_tor )
            { vars->DO[num] = element;
              Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping: %s -> %s:%s", __func__, thread_tech_id,
-                       Json_get_string ( vars->DO[cpt], "thread_acronyme" ),
-                       Json_get_string ( vars->DO[cpt], "tech_id" ),
-                       Json_get_string ( vars->DO[cpt], "acronyme" ) );
+                       Json_get_string ( vars->DO[num], "thread_acronyme" ),
+                       Json_get_string ( vars->DO[num], "tech_id" ),
+                       Json_get_string ( vars->DO[num], "acronyme" ) );
            } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DO: num %d out of range '%d'",
-                            __func__, thread_tech_id, num, vars->nbr_entree_tor );
+                            __func__, thread_tech_id, num, vars->nbr_sortie_tor );
         }
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/

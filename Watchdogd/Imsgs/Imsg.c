@@ -370,7 +370,7 @@ reconnect:
                Json_get_bool ( request, "alive" ) == TRUE )
            { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Sending msg '%s:%s' (%s)", __func__,
                        jabber_id,
-                       Json_get_string ( request, "thread_tech_id" ), Json_get_string ( request, "acronyme" ),
+                       Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                        Json_get_string ( request, "libelle" ) );
              gchar chaine[256];
              g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( request, "dls_shortname" ), Json_get_string ( request, "libelle" ) );

@@ -19,8 +19,6 @@
      </table>
    </div>
 
-   <div class="alert alert-secondary">Configuration transverse</div>
-
 <!-- Container -->
 </div>
 
