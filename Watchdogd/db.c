@@ -578,15 +578,6 @@ encore:
                    "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
 
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings_text` ("
-                   "`tag` VARCHAR(128) UNIQUE NOT NULL,"
-                   "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
-                   "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
-                   "UNIQUE (`tech_id`,`acronyme`),"
-                   "UNIQUE (`tag`,`tech_id`,`acronyme`),"
-                   "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
-                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");
-
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
                    "`thread_tech_id` VARCHAR(32) NOT NULL,"
                    "`thread_acronyme` VARCHAR(64) NOT NULL,"
@@ -2581,8 +2572,13 @@ encore:
     if (database_version < 6085)
      { SQL_Write_new ("ALTER TABLE `mnemos_DO` ADD `etat` BOOLEAN NOT NULL DEFAULT FALSE AFTER `acronyme`;"); }
 
+    if (database_version < 6086)
+     { SQL_Write_new ("INSERT INTO mappings SELECT '_COMMAND_TEXT', tag, tech_id, acronyme FROM mappings_text;");
+       SQL_Write_new ("DROP TABLE mappings_text;");
+     }
+
 fin:
-    database_version = 6085;
+    database_version = 6086;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
