@@ -1067,10 +1067,8 @@
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_DO" ) )
-           { gchar *tech_id  = Json_get_string ( request, "thread_tech_id" );
+           { gchar *tech_id  = Json_get_string ( request, "tech_id" );
              gchar *acronyme = Json_get_string ( request, "acronyme" );
-             if (strcasecmp (tech_id, thread_tech_id))
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Pas pour nous", __func__, thread_tech_id ); }
              if (!tech_id)
               { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque tech_id", __func__, thread_tech_id ); }
              else if (!acronyme)
@@ -1079,7 +1077,7 @@
               { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque etat", __func__, thread_tech_id ); }
              else
               { gboolean etat = Json_get_bool ( request, "etat" );
-                Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Recu SET_DO from bus: %s:%s=%d",
+                Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Recu SET_DO from bus: %s:%s=%d",
                           __func__, thread_tech_id, tech_id, acronyme, etat );
 
                 for (gint num=0; num<vars->nbr_sortie_tor; num++)

@@ -398,7 +398,7 @@
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_DO" ) )
-           { gchar *tech_id  = Json_get_string ( request, "thread_tech_id" );
+           { gchar *tech_id  = Json_get_string ( request, "tech_id" );
              gchar *acronyme = Json_get_string ( request, "acronyme" );
              if (strcasecmp (tech_id, thread_tech_id))
               { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Pas pour nous", __func__, thread_tech_id ); }
