@@ -36,32 +36,33 @@
 /******************************************************************************************************************************/
  void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
   {
-    if ( ! (Json_has_member ( request, "uuid" )  && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "description" ) &&
+    if ( ! (Json_has_member ( request, "uuid" )  && Json_has_member ( request, "thread_tech_id" ) &&
+            Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "token" ) && Json_has_member ( request, "code_insee" )
            ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gchar *uuid        = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
-    gchar *tech_id     = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
-    gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
-    gchar *token       = Normaliser_chaine ( Json_get_string( request, "token" ) );
-    gchar *code_insee  = Normaliser_chaine ( Json_get_string( request, "code_insee" ) );
+    gchar *uuid           = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
+    gchar *thread_tech_id = Normaliser_chaine ( Json_get_string( request, "thread_tech_id" ) );
+    gchar *description    = Normaliser_chaine ( Json_get_string( request, "description" ) );
+    gchar *token          = Normaliser_chaine ( Json_get_string( request, "token" ) );
+    gchar *code_insee     = Normaliser_chaine ( Json_get_string( request, "code_insee" ) );
 
     if (Json_has_member ( request, "id" ))
-     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', description='%s', token='%s', code_insee='%s' WHERE id='%d'",
-                       lib->name, uuid, tech_id, description, token, code_insee, Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, lib->uuid, tech_id );
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', thread_tech_id='%s', description='%s', token='%s', code_insee='%s' WHERE id='%d'",
+                       lib->name, uuid, thread_tech_id, description, token, code_insee, Json_get_int ( request, "id" ) );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, lib->uuid, thread_tech_id );
      }
     else
-     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', description='%s', token='%s', code_insee='%s'",
-                       lib->name, uuid, tech_id, description, token, code_insee );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, lib->uuid, tech_id );
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', thread_tech_id='%s', description='%s', token='%s', code_insee='%s'",
+                       lib->name, uuid, thread_tech_id, description, token, code_insee );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, lib->uuid, thread_tech_id );
      }
 
     g_free(uuid);
-    g_free(tech_id);
+    g_free(thread_tech_id);
     g_free(description);
     g_free(token);
     g_free(code_insee);

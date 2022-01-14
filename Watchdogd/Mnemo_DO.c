@@ -36,9 +36,9 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
-/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
-/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/* Mnemo_auto_create_DO: Ajoute un mnemo DO en base                                                                           */
+/* Entrée: les parametres du mnemo                                                                                            */
+/* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_DO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
@@ -79,55 +79,26 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Recuperer_mnemo_baseDB_by_command_text: Recupération de la liste des mnemo par command_text                                */
-/* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
-/* Sortie: FALSE si erreur                                                      ********************                          */
+/* Updater_confDO: Mise a jour des valeurs des DigitalOutput en base                                                          */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Recuperer_mnemos_DO_by_tag ( struct DB **db_retour, gchar *tech_id, gchar *tag )
-  { gchar requete[1024];
-    gchar *commande;
-    gboolean retour;
-    struct DB *db;
+ void Updater_confDB_DO( void )
+  { GSList *liste;
+    gint cpt;
 
-    commande = Normaliser_chaine ( tag );
-    if (!commande)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible tag", __func__ );
-       return(FALSE);
+    cpt = 0;
+    liste = Partage->Dls_data_DO;
+    while ( liste )
+     { struct DLS_DO *dout = liste->data;
+       SQL_Write_new( "UPDATE mnemos_DO as m SET etat='%d' "
+                      "WHERE m.tech_id='%s' AND m.acronyme='%s';",
+                      dout->etat, dout->tech_id, dout->acronyme );
+       liste = g_slist_next(liste);
+       cpt++;
      }
 
-    g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.map_tag, m.libelle "
-               "FROM mnemos_DO as m"
-               " WHERE m.map_tech_id='%s' AND m.map_tag LIKE '%s'", tech_id, commande );
-    g_free(commande);
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base                                  */
-/* Entrée: un pointeur sur la connexion de baase de données                                                                   */
-/* Sortie: une structure nouvellement allouée                                                                                 */
-/******************************************************************************************************************************/
- gboolean Recuperer_mnemos_DO_suite( struct DB **db_orig )
-  { struct DB *db;
-
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    return(TRUE);                                                                                    /* Résultat dans db->row */
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d DO updated", __func__, cpt );
   }
 /******************************************************************************************************************************/
 /* Dls_DO_to_json : Formate un bit au format JSON                                                                             */

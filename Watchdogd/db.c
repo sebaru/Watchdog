@@ -556,6 +556,48 @@ encore:
        return;
      }
 
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_DI` ("
+                   "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
+                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_DO` ("
+                   "`id` INT(11) PRIMARY KEYL AUTO_INCREMENT,"
+                   "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
+                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`etat` BOOLEAN NOT NULL DEFAULT '0',"
+                   "`libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "UNIQUE (`map_tech_id`,`map_tag`),"
+                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings_text` ("
+                   "`tag` VARCHAR(128) UNIQUE NOT NULL,"
+                   "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
+                   "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "UNIQUE (`tag`,`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
+                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");
+
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
+                   "`thread_tech_id` VARCHAR(32) NOT NULL,"
+                   "`thread_acronyme` VARCHAR(64) NOT NULL,"
+                   "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
+                   "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
+                   "UNIQUE (`thread_tech_id`,`thread_acronyme`),"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "UNIQUE (`thread_tech_id`,`thread_acronyme`,`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
+                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");
+
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Memory error. Don't update schema.", __func__ );
@@ -2521,11 +2563,26 @@ encore:
 
     if (database_version < 6082)
      { SQL_Write_new ("ALTER TABLE instances CHANGE `debug` `log_msrv` TINYINT(1) NOT NULL DEFAULT 0"); }
-    /* A prévoir SQL_Write_new ("DROP TABLE mnemos_BOOL"); */
-    /* A prévoir SQL_Write_new ("DROP TABLE modbus_module"); */
+
+    if (database_version < 6083)
+     { SQL_Write_new ("DROP TABLE mnemos_BOOL");
+       SQL_Write_new ("DROP TABLE modbus_module");
+     }
+
+    if (database_version < 6084)
+     { SQL_Write_new ("INSERT INTO mappings_text "
+                      "SELECT map_tag, tech_id, acronyme "
+                      "FROM mnemos_DI WHERE map_thread='COMMAND_TEXT'");
+       SQL_Write_new ("ALTER TABLE mnemos_DI DROP map_tag");
+       SQL_Write_new ("ALTER TABLE mnemos_DI DROP map_thread");
+       SQL_Write_new ("ALTER TABLE mnemos_DI DROP map_tech_id");
+     }
+
+    if (database_version < 6085)
+     { SQL_Write_new ("ALTER TABLE `mnemos_DO` ADD `etat` BOOLEAN NOT NULL DEFAULT FALSE AFTER `acronyme`;"); }
 
 fin:
-    database_version = 6082;
+    database_version = 6085;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

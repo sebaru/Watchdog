@@ -9,14 +9,14 @@
   { table = $('#idTableMETEO').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { tech_id: selection.tech_id,
+     { thread_tech_id: selection.thread_tech_id,
        zmq_tag : "test"
      };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
  function METEO_Del_Valider ( selection )
-  { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
+  { var json_request = { uuid : selection.uuid, thread_tech_id: selection.thread_tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
        $('#idTableMETEO').DataTable().ajax.reload(null, false);
@@ -26,19 +26,19 @@
  function METEO_Del ( id )
   { table = $('#idTableMETEO').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Supprimer la connexion "+selection.tech_id,
+    Show_modal_del ( "Supprimer la connexion "+selection.thread_tech_id,
                      "Etes-vous sûr de vouloir supprimer cette connexion ?",
-                     selection.tech_id + " - code insee "+selection.code_insee,
+                     selection.thread_tech_id + " - code insee "+selection.code_insee,
                      function () { METEO_Del_Valider( selection ) } ) ;
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function METEO_Set ( selection )
   { var json_request =
-       { uuid       : $('#idTargetProcess').val(),
-         tech_id    : $('#idMETEOTechID').val().toUpperCase(),
-         token      : $('#idMETEOToken').val(),
-         description: $('#idMETEODescription').val(),
-         code_insee : $('#idMETEOCodeInsee').val(),
+       { uuid          : $('#idTargetProcess').val(),
+         thread_tech_id: $('#idMETEOTechID').val().toUpperCase(),
+         token         : $('#idMETEOToken').val(),
+         description   : $('#idMETEODescription').val(),
+         code_insee    : $('#idMETEOCodeInsee').val(),
        };
     if (selection) json_request.id = parseInt(selection.id);                                            /* Ajout ou édition ? */
 
@@ -52,10 +52,10 @@
  function METEO_Edit ( id )
   { table = $('#idTableMETEO').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    $('#idMETEOTitre').text("Editer la source Météo " + selection.tech_id);
+    $('#idMETEOTitre').text("Editer la source Météo " + selection.thread_tech_id);
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=meteo", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
-    $('#idMETEOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idMETEO", selection.tech_id ); } );
+    $('#idMETEOTechID').val( selection.thread_tech_id ).off("input").on("input", function () { Controle_thread_tech_id( "idMETEO", selection.thread_tech_id ); } );
     $('#idMETEODescription').val( selection.description );
     $('#idMETEOToken').val( selection.token );
     $('#idMETEOCodeInsee').val( selection.code_insee );
@@ -67,7 +67,7 @@
   { $('#idMETEOTitre').text("Ajouter une source Météo");
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=meteo", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
-    $('#idMETEOTechID').val("").off("input").on("input", function () { Controle_tech_id( "idMETEO", null ); } );
+    $('#idMETEOTechID').val("").off("input").on("input", function () { Controle_thread_tech_id( "idMETEO", null ); } );
     $('#idMETEODescription').val("");
     $('#idMETEOToken').val("");
     $('#idMETEOCodeInsee').val("");
@@ -87,7 +87,7 @@
          [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
              "render": function (item)
-               { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+               { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
            },
            { "data": "description", "title":"Description", "className": "align-middle " },
            { "data": "token", "title":"token", "className": "align-middle " },

@@ -149,8 +149,7 @@
   { if (!zmq) return(FALSE);
 
     if (!RootNode)
-     { Info_new( Config.log, Config.log_zmq, LOG_ERR,
-                 "%s: RootNode is null. Cannot send empty json", __func__ );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: RootNode is null. Cannot send empty json", __func__ );
        return(FALSE);
      }
 
@@ -196,13 +195,13 @@
      }
 
     if (!Json_has_member( request, "zmq_src_tech_id"))
-     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_src_tech_id'. Dropping.", __func__ );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_src_tech_id'. Dropping '%s'.", __func__, buf );
        json_node_unref(request);
        return(NULL);
      }
 
     if (!Json_has_member( request, "zmq_dst_tech_id"))
-     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_dst_tech_id'. Dropping.", __func__ );
+     { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: No 'zmq_dst_tech_id'. Dropping '%s'.", __func__, buf );
        json_node_unref(request);
        return(NULL);
      }
@@ -239,7 +238,7 @@
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_bool   ( body, "etat", etat );
-    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "tech_id" ), Config.master_host, body );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -256,7 +255,7 @@
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_double ( body, "valeur", valeur );
     Json_node_add_bool   ( body, "in_range", in_range );
-    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "tech_id" ), Config.master_host, body );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -271,7 +270,7 @@
     Json_node_add_string ( body, "zmq_tag", "SET_CDE" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
-    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "tech_id" ), Config.master_host, body );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -287,7 +286,7 @@
     Json_node_add_string ( body, "tech_id",  tech_id ); /* target */
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_int    ( body, "consigne", consigne );
-    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "tech_id" ), Config.master_host, body );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, body );
     json_node_unref(body);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -43,7 +43,7 @@
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` datetime NOT NULL DEFAULT NOW(),"
                     "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                     "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`jabberid` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`password` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
@@ -158,7 +158,9 @@
        goto end;
      }
     SQL_Select_to_json_node ( RootNode, "results",
-                              "SELECT * FROM mnemos_DI WHERE map_thread='COMMAND_TEXT' AND map_tag LIKE '%%%s%%'", message );
+                              "SELECT * FROM mnemos_DI AS m "
+                              "INNER JOIN mappings_text AS map ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
+                              "WHERE map.tag LIKE '%%%s%%'", message );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
@@ -177,20 +179,20 @@
        GList *results = Results;
        while(results)
         { JsonNode *element = results->data;
-          gchar *tech_id  = Json_get_string ( element, "tech_id" );
+          gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
           gchar *acronyme = Json_get_string ( element, "acronyme" );
           gchar *libelle  = Json_get_string ( element, "libelle" );
-          gchar *map_tag  = Json_get_string ( element, "map_tag" );
+          gchar *tag      = Json_get_string ( element, "tag" );
           Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: Match found from '%s' -> '%s' '%s:%s' - %s", __func__,
-                    from, map_tag, tech_id, acronyme, libelle );
-          Imsgs_Envoi_message_to ( module, from, map_tag );                                     /* Envoi des différents choix */
+                    from, tag, thread_tech_id, acronyme, libelle );
+          Imsgs_Envoi_message_to ( module, from, tag );                                     /* Envoi des différents choix */
           results = g_list_next(results);
         }
        if ( nbr_results == 1)
         { JsonNode *element = Results->data;
-          gchar *tech_id  = Json_get_string ( element, "tech_id" );
+          gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
           gchar *acronyme = Json_get_string ( element, "acronyme" );
-          Zmq_Send_CDE_to_master_new ( module, tech_id, acronyme );
+          Zmq_Send_CDE_to_master_new ( module, thread_tech_id, acronyme );
         }
        g_list_free(results);
      }
@@ -320,11 +322,11 @@ end:
   { SubProcess_init ( module, sizeof(struct IMSGS_VARS) );
     struct IMSGS_VARS *vars = module->vars;
 
-    gchar *tech_id   = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id   = Json_get_string ( module->config, "thread_tech_id" );
     gchar *jabber_id = Json_get_string ( module->config, "jabberid" );
 
-    if ( ! (tech_id && jabber_id) )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: No tech_id Or Jabber_id. Stopping.", __func__ );
+    if ( ! (thread_tech_id && jabber_id) )
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: No thread_tech_id Or Jabber_id. Stopping.", __func__ );
        goto end;
      }
 

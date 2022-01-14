@@ -9,7 +9,7 @@
        }
      );
     Send_to_API ( 'DELETE', "/api/map/del", json_request, function()
-     { $('#idTableModbusMap'+type).DataTable().ajax.reload(null, false);
+     { $('#idTableMODBUS_'+type).DataTable().ajax.reload(null, false);
        $('#idToastStatus').toast('show');
      }, null );
   }
@@ -24,120 +24,120 @@
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del_DI ( id )
-  { table = $('#idTableModbusMapDI').DataTable();
+  { table = $('#idTableMODBUS_DI').DataTable();
     selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     Show_Modal_Map_Del ( "DI", selection )
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del_DO ( id )
-  { table = $('#idTableModbusMapDO').DataTable();
+  { table = $('#idTableMODBUS_DO').DataTable();
     selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     Show_Modal_Map_Del ( "DO", selection )
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del_AI ( id )
-  { table = $('#idTableModbusMapAI').DataTable();
+  { table = $('#idTableMODBUS_AI').DataTable();
     selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     Show_Modal_Map_Del ( "AI", selection )
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Map_Del_AO ( id )
-  { table = $('#idTableModbusMapAO').DataTable();
+  { table = $('#idTableMODBUS_AO').DataTable();
     selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
     Show_Modal_Map_Del ( "AO", selection )
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Edit_DI ( )
-  { if ($('#idModalEditDISelectTechID').val() == null) return;
-    if ($('#idModalEditDISelectAcronyme').val() == null) return;
-    if (!isNum("idModalEditDIWagoTag")) return;
+  { if ($('#idMODBUSEditDISelectTechID').val() == null) return;
+    if ($('#idMODBUSEditDISelectAcronyme').val() == null) return;
+    if (!isNum("idMODBUSEditDIWagoTag")) return;
     var json_request = JSON.stringify(
        { classe     : 'DI',
          thread     : 'MODBUS',
-         tech_id    : $('#idModalEditDISelectTechID').val().toUpperCase(),
-         acronyme   : $('#idModalEditDISelectAcronyme').val().toUpperCase(),
-         map_tech_id: $('#idModalEditDIWagoTechID').val(),
-         map_tag    : "DI"+$('#idModalEditDIWagoTag').val(),
+         tech_id    : $('#idMODBUSEditDISelectTechID').val().toUpperCase(),
+         acronyme   : $('#idMODBUSEditDISelectAcronyme').val().toUpperCase(),
+         map_tech_id: $('#idMODBUSEditDIWagoTechID').val(),
+         map_tag    : "DI"+$('#idMODBUSEditDIWagoTag').val(),
        }
      );
     Send_to_API ( 'POST', "/api/map/set", json_request, function ()
-     { $('#idTableModbusMapDI').DataTable().ajax.reload(null, false);
+     { $('#idTableMODBUS_DI').DataTable().ajax.reload(null, false);
        Process_reload ( null, "MODBUS", false );
      });
-    $('#idModalEditDI').modal("hide");
+    $('#idMODBUSEditDI').modal("hide");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Edit_DO ( )
-  { if ($('#idModalEditDOSelectTechID').val() == null) return;
-    if ($('#idModalEditDOSelectAcronyme').val() == null) return;
-    if (!isNum("idModalEditDOWagoTag")) return;
-    table = $('#idTableModbusMapDO').DataTable();
+  { if ($('#idMODBUSEditDOSelectTechID').val() == null) return;
+    if ($('#idMODBUSEditDOSelectAcronyme').val() == null) return;
+    if (!isNum("idMODBUSEditDOWagoTag")) return;
+    table = $('#idTableMODBUS_DO').DataTable();
     var json_request = JSON.stringify(
        { classe     : 'DO',
          thread     : 'MODBUS',
-         tech_id    : $('#idModalEditDOSelectTechID').val().toUpperCase(),
-         acronyme   : $('#idModalEditDOSelectAcronyme').val().toUpperCase(),
-         map_tech_id: $('#idModalEditDOWagoTechID').val().toUpperCase(),
-         map_tag    : "DO"+$('#idModalEditDOWagoTag').val(),
+         tech_id    : $('#idMODBUSEditDOSelectTechID').val().toUpperCase(),
+         acronyme   : $('#idMODBUSEditDOSelectAcronyme').val().toUpperCase(),
+         map_tech_id: $('#idMODBUSEditDOWagoTechID').val().toUpperCase(),
+         map_tag    : "DO"+$('#idMODBUSEditDOWagoTag').val(),
        }
      );
     Send_to_API ( 'POST', "/api/map/set", json_request, function ()
-     { $('#idTableModbusMapDO').DataTable().ajax.reload(null, false);
+     { $('#idTableMODBUS_DO').DataTable().ajax.reload(null, false);
        Process_reload ( null, "MODBUS", false );
      });
-    $('#idModalEditDO').modal("hide");
+    $('#idMODBUSEditDO').modal("hide");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Edit_AI ( )
-  { if ($('#idModalEditAISelectTechID').val() == null) return;
-    if ($('#idModalEditAISelectAcronyme').val() == null) return;
-    if (!isNum("idModalEditAIWagoTag")) return;
+  { if ($('#idMODBUSEditAISelectTechID').val() == null) return;
+    if ($('#idMODBUSEditAISelectAcronyme').val() == null) return;
+    if (!isNum("idMODBUSEditAIWagoTag")) return;
     var json_request = JSON.stringify(
        { classe     : 'AI',
          thread     : 'MODBUS',
-         tech_id    : $('#idModalEditAISelectTechID').val().toUpperCase(),
-         acronyme   : $('#idModalEditAISelectAcronyme').val().toUpperCase(),
-         map_tech_id: $('#idModalEditAIWagoTechID').val().toUpperCase(),
-         map_tag    : "AI"+$('#idModalEditAIWagoTag').val(),
-         type       : parseInt($('#idModalEditAIType').val()),
-         min        : parseInt($('#idModalEditAIMin').val()),
-         max        : parseInt($('#idModalEditAIMax').val()),
-         unite      : $('#idModalEditAIUnite').val(),
-         map_question_vocale: $('#idModalEditAI #idModalEditMapQuestionVoc').val(),
-         map_reponse_vocale : $('#idModalEditAI #idModalEditMapReponseVoc').val(),
+         tech_id    : $('#idMODBUSEditAISelectTechID').val().toUpperCase(),
+         acronyme   : $('#idMODBUSEditAISelectAcronyme').val().toUpperCase(),
+         map_tech_id: $('#idMODBUSEditAIWagoTechID').val().toUpperCase(),
+         map_tag    : "AI"+$('#idMODBUSEditAIWagoTag').val(),
+         type       : parseInt($('#idMODBUSEditAIType').val()),
+         min        : parseInt($('#idMODBUSEditAIMin').val()),
+         max        : parseInt($('#idMODBUSEditAIMax').val()),
+         unite      : $('#idMODBUSEditAIUnite').val(),
+         map_question_vocale: $('#idMODBUSEditAI #idMODBUSEditMapQuestionVoc').val(),
+         map_reponse_vocale : $('#idMODBUSEditAI #idMODBUSEditMapReponseVoc').val(),
        }
      );
     Send_to_API ( 'POST', "/api/map/set", json_request, function ()
-     { $('#idTableModbusMapAI').DataTable().ajax.reload(null, false);
+     { $('#idTableMODBUS_AI').DataTable().ajax.reload(null, false);
        Process_reload ( null, "MODBUS", false );
      });
-    $('#idModalEditAI').modal("hide");
+    $('#idMODBUSEditAI').modal("hide");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Modbus_Edit_AO ( )
-  { if ($('#idModalEditAOSelectTechID').val() == null) return;
-    if ($('#idModalEditAOSelectAcronyme').val() == null) return;
-    if (!isNum("idModalEditAOWagoTag")) return;
+  { if ($('#idMODBUSEditAOSelectTechID').val() == null) return;
+    if ($('#idMODBUSEditAOSelectAcronyme').val() == null) return;
+    if (!isNum("idMODBUSEditAOWagoTag")) return;
     var json_request = JSON.stringify(
        { classe     : 'AO',
          thread     : 'MODBUS',
-         tech_id    : $('#idModalEditAOSelectTechID').val().toUpperCase(),
-         acronyme   : $('#idModalEditAOSelectAcronyme').val().toUpperCase(),
-         map_tech_id: $('#idModalEditAOWagoTechID').val().toUpperCase(),
-         map_tag    : "AO"+$('#idModalEditAOWagoTag').val(),
-         type       : parseInt($('#idModalEditAOType').val()),
-         min        : parseInt($('#idModalEditAOMin').val()),
-         max        : parseInt($('#idModalEditAOMax').val()),
-         unite      : $('#idModalEditAOUnite').val(),
-         map_question_vocale: $('#idModalEditAO #idModalEditMapQuestionVoc').val(),
-         map_reponse_vocale : $('#idModalEditAO #idModalEditMapReponseVoc').val(),
+         tech_id    : $('#idMODBUSEditAOSelectTechID').val().toUpperCase(),
+         acronyme   : $('#idMODBUSEditAOSelectAcronyme').val().toUpperCase(),
+         map_tech_id: $('#idMODBUSEditAOWagoTechID').val().toUpperCase(),
+         map_tag    : "AO"+$('#idMODBUSEditAOWagoTag').val(),
+         type       : parseInt($('#idMODBUSEditAOType').val()),
+         min        : parseInt($('#idMODBUSEditAOMin').val()),
+         max        : parseInt($('#idMODBUSEditAOMax').val()),
+         unite      : $('#idMODBUSEditAOUnite').val(),
+         map_question_vocale: $('#idMODBUSEditAO #idMODBUSEditMapQuestionVoc').val(),
+         map_reponse_vocale : $('#idMODBUSEditAO #idMODBUSEditMapReponseVoc').val(),
        }
      );
     Send_to_API ( 'POST', "/api/map/set", json_request, function ()
-     { $('#idTableModbusMapAO').DataTable().ajax.reload(null, false);
+     { $('#idTableMODBUS_AO').DataTable().ajax.reload(null, false);
        Process_reload ( null, "MODBUS", false );
      });
-    $('#idModalEditAO').modal("hide");
+    $('#idMODBUSEditAO').modal("hide");
   }
 /********************************************* Controle du saisie du modal ****************************************************/
  function ModbusMap_Update_Choix_Acronyme ( ids, classe )
@@ -148,122 +148,118 @@
   { Common_Updater_Choix_TechID ( ids, classe, def_tech_id, def_acronyme );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Edit_DI ( id )
+ function MODBUS_Edit_DI ( id )
   { if (id>0)
-     { table = $('#idTableModbusMapDI').DataTable();
+     { table = $('#idTableMODBUS_DI').DataTable();
        selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-       $('#idModalEditDITitre').text ( "Editer MAP DI - " + selection.map_tech_id + ":" + selection.map_tag );
-       ModbusMap_Update_Choix_Tech_ID( 'idModalEditDI', 'DI', selection.tech_id, selection.acronyme );
-       Select_from_api ( "idModalEditDIWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
+       $('#idMODBUSEditDITitre').text ( "Editer MAP DI - " + selection.map_tech_id + ":" + selection.map_tag );
+       ModbusMap_Update_Choix_Tech_ID( 'idMODBUSEditDI', 'DI', selection.tech_id, selection.acronyme );
+       Select_from_api ( "idMODBUSEditDIWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
                          function (item) { return(item.tech_id) }, selection.map_tech_id );
-       $('#idModalEditDIWagoTag').val ( selection.map_tag.substring(2) );
-       $('#idModalEditDIValider').attr( "onclick", "Valider_Modbus_Edit_DI()" );
+       $('#idMODBUSEditDIWagoTag').val ( selection.map_tag.substring(2) );
+       $('#idMODBUSEditDIValider').attr( "onclick", "Valider_Modbus_Edit_DI()" );
      }
     else
-     { $('#idModalEditDITitre').text ( "Ajouter un mapping DI" );
-       Select_from_api ( "idModalEditDIWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
+     { $('#idMODBUSEditDITitre').text ( "Ajouter un mapping DI" );
+       Select_from_api ( "idMODBUSEditDIWagoTechID", "/api/process/config", "name=modbus", "config", "tech_id",
                          function (item) { return(item.tech_id) }, null );
-       $('#idModalEditDIWagoTag').val ( "0" );
-       $('#idModalEditDIRechercherTechID').val ( '' );
-       $('#idModalEditDIValider').attr( "onclick", "Valider_Modbus_Edit_DI()" );
-       ModbusMap_Update_Choix_Tech_ID( 'idModalEditDI', 'DI', null, null );
+       $('#idMODBUSEditDIWagoTag').val ( "0" );
+       $('#idMODBUSEditDIRechercherTechID').val ( '' );
+       $('#idMODBUSEditDIValider').attr( "onclick", "Valider_Modbus_Edit_DI()" );
+       ModbusMap_Update_Choix_Tech_ID( 'idMODBUSEditDI', 'DI', null, null );
      }
-    $('#idModalEditDI').modal("show");
+    $('#idMODBUSEditDI').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Edit_DO ( id )
+ function MODBUS_Edit_DO ( id )
   { if (id>0)
-     { table = $('#idTableModbusMapDO').DataTable();
+     { table = $('#idTableMODBUS_DO').DataTable();
        selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-       $('#idModalEditDOTitre').text ( "Editer MAP DO - " + selection.map_tech_id + ":" + selection.map_tag );
-       ModbusMap_Update_Choix_Tech_ID( 'idModalEditDO', 'DO', selection.tech_id, selection.acronyme );
-       Select_from_api ( "idModalEditDOWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
+       $('#idMODBUSEditDOTitre').text ( "Editer MAP DO - " + selection.map_tech_id + ":" + selection.map_tag );
+       ModbusMap_Update_Choix_Tech_ID( 'idMODBUSEditDO', 'DO', selection.tech_id, selection.acronyme );
+       Select_from_api ( "idMODBUSEditDOWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
                          function (item) { return(item.tech_id) }, selection.map_tech_id );
-       $('#idModalEditDOWagoTag').val ( selection.map_tag.substring(2) );
-       $('#idModalEditDOValider').attr( "onclick", "Valider_Modbus_Edit_DO()" );
+       $('#idMODBUSEditDOWagoTag').val ( selection.map_tag.substring(2) );
+       $('#idMODBUSEditDOValider').attr( "onclick", "Valider_Modbus_Edit_DO()" );
      }
     else
-     { $('#idModalEditDOTitre').text ( "Ajouter un mapping DO" );
-       Select_from_api ( "idModalEditDOWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
+     { $('#idMODBUSEditDOTitre').text ( "Ajouter un mapping DO" );
+       Select_from_api ( "idMODBUSEditDOWagoTechID", "/api/process/config", "name=modbus", "config", "tech_id",
                          function (item) { return(item.tech_id) }, null );
-       $('#idModalEditDOWagoTag').val ( "0" );
-       $('#idModalEditDORechercherTechID').val ( '' );
-       $('#idModalEditDOValider').attr( "onclick", "Valider_Modbus_Edit_DO()" );
-       ModbusMap_Update_Choix_Tech_ID( 'idModalEditDO', 'DO', null, null );
+       $('#idMODBUSEditDOWagoTag').val ( "0" );
+       $('#idMODBUSEditDORechercherTechID').val ( '' );
+       $('#idMODBUSEditDOValider').attr( "onclick", "Valider_Modbus_Edit_DO()" );
+       ModbusMap_Update_Choix_Tech_ID( 'idMODBUSEditDO', 'DO', null, null );
      }
-    $('#idModalEditDO').modal("show");
+    $('#idMODBUSEditDO').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Edit_AI ( id )
+ function MODBUS_Edit_AI ( id )
   { if (id>0)
-     { table = $('#idTableModbusMapAI').DataTable();
+     { table = $('#idTableMODBUS_AI').DataTable();
        selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-       $('#idModalEditAITitre').text ( "Editer MAP AI - " + selection.map_tech_id + ":" + selection.map_tag );
-       ModbusMap_Update_Choix_Tech_ID( 'idModalEditAI', 'AI', selection.tech_id, selection.acronyme );
-       Select_from_api ( "idModalEditAIWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
+       $('#idMODBUSEditAITitre').text ( "Editer MAP AI - " + selection.map_tech_id + ":" + selection.map_tag );
+       ModbusMap_Update_Choix_Tech_ID( 'idMODBUSEditAI', 'AI', selection.tech_id, selection.acronyme );
+       Select_from_api ( "idMODBUSEditAIWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
                          function (item) { return(item.tech_id) }, selection.map_tech_id );
-       $('#idModalEditAIWagoTag').val ( selection.map_tag.substring(2) );
-       $('#idModalEditAIType').val ( selection.type );
-       $('#idModalEditAIMin').val ( selection.min );
-       $('#idModalEditAIMax').val ( selection.max );
-       $('#idModalEditAIUnite').val ( selection.unite );
-       $('#idModalEditAIMapQuestionVoc').val ( selection.map_question_vocale );
-       $('#idModalEditAIMapReponseVoc').val ( selection.map_reponse_vocale );
-       $('#idModalEditAIValider').attr( "onclick", "Valider_Modbus_Edit_AI()" );
+       $('#idMODBUSEditAIWagoTag').val ( selection.map_tag.substring(2) );
+       $('#idMODBUSEditAIType').val ( selection.type );
+       $('#idMODBUSEditAIMin').val ( selection.min );
+       $('#idMODBUSEditAIMax').val ( selection.max );
+       $('#idMODBUSEditAIUnite').val ( selection.unite );
+       $('#idMODBUSEditAIMapQuestionVoc').val ( selection.map_question_vocale );
+       $('#idMODBUSEditAIMapReponseVoc').val ( selection.map_reponse_vocale );
+       $('#idMODBUSEditAIValider').attr( "onclick", "Valider_Modbus_Edit_AI()" );
      }
     else
-     { $('#idModalEditAITitre').text ( "Ajouter un MAP AI" );
-       Select_from_api ( "idModalEditAIWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
+     { $('#idMODBUSEditAITitre').text ( "Ajouter un MAP AI" );
+       Select_from_api ( "idMODBUSEditAIWagoTechID", "/api/process/config", "name=modbus", "config", "tech_id",
                          function (item) { return(item.tech_id) }, null );
-       $('#idModalEditAIWagoTag').val ( "0" );
-       $('#idModalEditAIRechercherTechID').val ( '' );
-       $('#idModalEditAIType').val ( 0 );
-       $('#idModalEditAIMapQuestionVoc').val ( '' );
-       $('#idModalEditAIMapReponseVoc').val ( '' );
-       $('#idModalEditAIValider').attr( "onclick", "Valider_Modbus_Edit_AI()" );
-       ModbusMap_Update_Choix_Tech_ID( 'idModalEditAI', 'AI', null, null );
+       $('#idMODBUSEditAIWagoTag').val ( "0" );
+       $('#idMODBUSEditAIRechercherTechID').val ( '' );
+       $('#idMODBUSEditAIType').val ( 0 );
+       $('#idMODBUSEditAIMapQuestionVoc').val ( '' );
+       $('#idMODBUSEditAIMapReponseVoc').val ( '' );
+       $('#idMODBUSEditAIValider').attr( "onclick", "Valider_Modbus_Edit_AI()" );
+       ModbusMap_Update_Choix_Tech_ID( 'idMODBUSEditAI', 'AI', null, null );
      }
-    $('#idModalEditAI').modal("show");
+    $('#idMODBUSEditAI').modal("show");
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Edit_AO ( id )
+ function MODBUS_Edit_AO ( id )
   { if (id>0)
-     { table = $('#idTableModbusMapAO').DataTable();
+     { table = $('#idTableMODBUS_AO').DataTable();
        selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-       $('#idModalEditAOTitre').text ( "Editer MAP AO - " + selection.map_tech_id + ":" + selection.map_tag );
-       ModbusMap_Update_Choix_Tech_ID( 'idModalEditAO', 'AO', selection.tech_id, selection.acronyme );
-       Select_from_api ( "idModalEditAOWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
+       $('#idMODBUSEditAOTitre').text ( "Editer MAP AO - " + selection.map_tech_id + ":" + selection.map_tag );
+       ModbusMap_Update_Choix_Tech_ID( 'idMODBUSEditAO', 'AO', selection.tech_id, selection.acronyme );
+       Select_from_api ( "idMODBUSEditAOWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
                          function (item) { return(item.tech_id) }, selection.map_tech_id );
-       $('#idModalEditAOWagoTag').val ( selection.map_tag.substring(2) );
-       $('#idModalEditAOType').val ( selection.type );
-       $('#idModalEditAOMin').val ( selection.min );
-       $('#idModalEditAOMax').val ( selection.max );
-       $('#idModalEditAOUnite').val ( selection.unite );
-       $('#idModalEditAOMapQuestionVoc').val ( selection.map_question_vocale );
-       $('#idModalEditAOMapReponseVoc').val ( selection.map_reponse_vocale );
-       $('#idModalEditAOValider').attr( "onclick", "Valider_Modbus_Edit_AO()" );
+       $('#idMODBUSEditAOWagoTag').val ( selection.map_tag.substring(2) );
+       $('#idMODBUSEditAOType').val ( selection.type );
+       $('#idMODBUSEditAOMin').val ( selection.min );
+       $('#idMODBUSEditAOMax').val ( selection.max );
+       $('#idMODBUSEditAOUnite').val ( selection.unite );
+       $('#idMODBUSEditAOMapQuestionVoc').val ( selection.map_question_vocale );
+       $('#idMODBUSEditAOMapReponseVoc').val ( selection.map_reponse_vocale );
+       $('#idMODBUSEditAOValider').attr( "onclick", "Valider_Modbus_Edit_AO()" );
      }
     else
-     { $('#idModalEditAOTitre').text ( "Ajouter un MAP AO" );
-       Select_from_api ( "idModalEditAOWagoTechID", "/api/process/modbus/list", null, "modules", "tech_id",
+     { $('#idMODBUSEditAOTitre').text ( "Ajouter un MAP AO" );
+       Select_from_api ( "idMODBUSEditAOWagoTechID", "/api/process/config", "name=modbus", "config", "tech_id",
                          function (item) { return(item.tech_id) }, null );
-       $('#idModalEditAOWagoTag').val ( "0" );
-       $('#idModalEditAORechercherTechID').val ( '' );
-       $('#idModalEditAOType').val ( 0 );
-       $('#idModalEditAOMapQuestionVoc').val ( '' );
-       $('#idModalEditAOMapReponseVoc').val ( '' );
-       $('#idModalEditAOValider').attr( "onclick", "Valider_Modbus_Edit_AO()" );
-       ModbusMap_Update_Choix_Tech_ID( 'idModalEditAO', 'AO', null, null );
+       $('#idMODBUSEditAOWagoTag').val ( "0" );
+       $('#idMODBUSEditAORechercherTechID').val ( '' );
+       $('#idMODBUSEditAOType').val ( 0 );
+       $('#idMODBUSEditAOMapQuestionVoc').val ( '' );
+       $('#idMODBUSEditAOMapReponseVoc').val ( '' );
+       $('#idMODBUSEditAOValider').attr( "onclick", "Valider_Modbus_Edit_AO()" );
+       ModbusMap_Update_Choix_Tech_ID( 'idMODBUSEditAO', 'AO', null, null );
      }
-    $('#idModalEditAO').modal("show");
+    $('#idMODBUSEditAO').modal("show");
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
-  { Send_to_API ( "GET", "/api/process/modbus/status", null, function(Response)
-     { if (Response.thread_is_running) { $('#idAlertThreadNotRunning').slideUp(); }
-                                  else { $('#idAlertThreadNotRunning').slideDown(); }
-     });
-    $('#idTableModbusMapDI').DataTable(
+  { $('#idTableMODBUS_DI').DataTable(
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
@@ -285,7 +281,7 @@
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "Show_Modal_Map_Edit_DI", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_DI", item.id, "pen", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_DI", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
@@ -297,7 +293,7 @@
        }
      );
 
-    $('#idTableModbusMapDO').DataTable(
+    $('#idTableMODBUS_DO').DataTable(
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
@@ -319,7 +315,7 @@
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "Show_Modal_Map_Edit_DO", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_DO", item.id, "pen", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_DO", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
@@ -331,7 +327,7 @@
        }
      );
 
-    $('#idTableModbusMapAI').DataTable(
+    $('#idTableMODBUS_AI').DataTable(
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
@@ -360,7 +356,7 @@
             },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "Show_Modal_Map_Edit_AI", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_AI", item.id, "pen", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_AI", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
@@ -372,7 +368,7 @@
        }
      );
 
-    $('#idTableModbusMapAO').DataTable(
+    $('#idTableMODBUS_AO').DataTable(
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
@@ -394,7 +390,7 @@
             { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "Show_Modal_Map_Edit_AO", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_AO", item.id, "pen", null );
                   boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_AO", item.id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);

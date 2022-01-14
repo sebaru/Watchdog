@@ -52,7 +52,7 @@
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
                     "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                     "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`port` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
@@ -70,12 +70,12 @@
     int fd;
 
     gchar *port    = Json_get_string ( module->config, "port" );
-    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     fd = open( port, O_RDONLY | O_NOCTTY | O_NONBLOCK | O_CLOEXEC );
     if (fd<0)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-               "%s: %s: Impossible d'ouvrir le port teleinfo '%s', erreur %d", __func__, tech_id, port, fd );
+               "%s: %s: Impossible d'ouvrir le port teleinfo '%s', erreur %d", __func__, thread_tech_id, port, fd );
        return(-1);
      }
     memset(&oldtio, 0, sizeof(oldtio) );
@@ -91,16 +91,16 @@
 
     if (!vars->nbr_connexion)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                "%s: %s: Charge les AI ", __func__, tech_id );
+                "%s: %s: Charge les AI ", __func__, thread_tech_id );
 
-       Mnemo_auto_create_AI ( FALSE, tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
-       Mnemo_auto_create_AI ( FALSE, tech_id, "ISOUS", "Intensité EDF souscrite ", "A" );
-       Mnemo_auto_create_AI ( FALSE, tech_id, "BASE",  "Index option BASE", "Wh" );
-       Mnemo_auto_create_AI ( FALSE, tech_id, "HCHC",  "Index heures creuses", "Wh" );
-       Mnemo_auto_create_AI ( FALSE, tech_id, "HCHP",  "Index heures pleines", "Wh" );
-       Mnemo_auto_create_AI ( FALSE, tech_id, "IINST", "Intensité EDF instantanée", "A" );
-       Mnemo_auto_create_AI ( FALSE, tech_id, "IMAX",  "Intensité EDF maximale", "A" );
-       Mnemo_auto_create_AI ( FALSE, tech_id, "PAPP",  "Puissance apparente EDF consommée", "VA" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "ISOUS", "Intensité EDF souscrite ", "A" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "BASE",  "Index option BASE", "Wh" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "HCHC",  "Index heures creuses", "Wh" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "HCHP",  "Index heures pleines", "Wh" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "IINST", "Intensité EDF instantanée", "A" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "IMAX",  "Intensité EDF maximale", "A" );
+       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "PAPP",  "Puissance apparente EDF consommée", "VA" );
      }
     SubProcess_send_comm_to_master_new ( module, TRUE );
     vars->nbr_connexion++;
@@ -113,16 +113,16 @@
 /******************************************************************************************************************************/
  static void Processer_trame( struct SUBPROCESS *module )
   { struct TELEINFO_VARS *vars = module->vars;
-    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-         if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { Zmq_Send_AI_to_master_new ( module, tech_id, "ADCO",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { Zmq_Send_AI_to_master_new ( module, tech_id, "ISOUS", atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { Zmq_Send_AI_to_master_new ( module, tech_id, "BASE",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { Zmq_Send_AI_to_master_new ( module, tech_id, "HCHC",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { Zmq_Send_AI_to_master_new ( module, tech_id, "HCHP",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { Zmq_Send_AI_to_master_new ( module, tech_id, "IINST", atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { Zmq_Send_AI_to_master_new ( module, tech_id, "IMAX",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { Zmq_Send_AI_to_master_new ( module, tech_id, "PAPP",  atof(vars->buffer + 5), TRUE ); }
+         if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "ADCO",  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "ISOUS", atof(vars->buffer + 6), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BASE",  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "HCHC",  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "HCHP",  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "IINST", atof(vars->buffer + 6), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "IMAX",  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "PAPP",  atof(vars->buffer + 5), TRUE ); }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     vars->last_view = Partage->top;
   }
@@ -138,7 +138,7 @@
     struct timeval tv;
     fd_set fdselect;
 
-    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
@@ -161,20 +161,20 @@
            { vars->mode = TINFO_RETRING;
              vars->date_next_retry = 0;
              vars->nbr_connexion = 0;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, tech_id );
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, thread_tech_id );
            }
         }
        else if (vars->mode == TINFO_RETRING)
         { vars->fd = Init_teleinfo( module );
           if (vars->fd<0)                                                               /* On valide l'acces aux ports */
            { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-                       "%s: %s: Init TELEINFO failed. Re-trying in %ds", __func__, tech_id, TINFO_RETRY_DELAI/10 );
+                       "%s: %s: Init TELEINFO failed. Re-trying in %ds", __func__, thread_tech_id, TINFO_RETRY_DELAI/10 );
              vars->mode = TINFO_WAIT_BEFORE_RETRY;
              vars->date_next_retry = Partage->top + TINFO_RETRY_DELAI;
            }
           else
            { vars->mode = TINFO_CONNECTED;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Acces TELEINFO FD=%d", __func__, tech_id, vars->fd );
+             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Acces TELEINFO FD=%d", __func__, thread_tech_id, vars->fd );
            }
         }
        if (vars->mode != TINFO_CONNECTED) continue;
@@ -206,7 +206,7 @@
                     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
                     Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
                              "%s: %s: BufferOverflow, dropping trame (nbr_octet_lu=%d, cpt=%d, taille buffer=%d)",
-                              __func__, tech_id, nbr_octet_lu, cpt, TAILLE_BUFFER_TELEINFO  );
+                              __func__, thread_tech_id, nbr_octet_lu, cpt, TAILLE_BUFFER_TELEINFO  );
                   }
            }
         }
@@ -217,13 +217,13 @@
           retour = fstat( vars->fd, &buf );
           if (retour == -1)
            { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-                      "%s: %s: Fstat Error (%s), closing connexion and re-trying in %ds", __func__, tech_id,
+                      "%s: %s: Fstat Error (%s), closing connexion and re-trying in %ds", __func__, thread_tech_id,
                        strerror(errno), TINFO_RETRY_DELAI/10 );
              closing = TRUE;
            }
           else if ( buf.st_nlink < 1 )
            { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
-                      "%s: %s: USB device disappeared. Closing connexion and re-trying in %ds", __func__, tech_id, TINFO_RETRY_DELAI/10 );
+                      "%s: %s: USB device disappeared. Closing connexion and re-trying in %ds", __func__, thread_tech_id, TINFO_RETRY_DELAI/10 );
              closing = TRUE;
            }
           if (closing == TRUE)

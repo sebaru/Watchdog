@@ -59,7 +59,7 @@
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` datetime NOT NULL DEFAULT NOW(),"
                     "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
                     "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
                     "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
                     "`hostname` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
@@ -70,34 +70,37 @@
     SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_AI` ("
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                    "`hub_id` int(11) NOT NULL,"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`port` int(11) NOT NULL,"
                     "`classe` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`capteur` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`intervalle` int(11) NOT NULL,"
-                    "UNIQUE (hub_id, port, classe),"
-                    "FOREIGN KEY (`hub_id`) REFERENCES `phidget` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
+                    "UNIQUE (thread_tech_id, thread_acronyme),"
+                    "FOREIGN KEY (`thread_tech_id`) REFERENCES `%s` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name, lib->name );
     SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_DI` ("
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                    "`hub_id` int(11) NOT NULL,"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`port` int(11) NOT NULL,"
                     "`classe` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                    "UNIQUE (hub_id, port, classe),"
-                    "FOREIGN KEY (`hub_id`) REFERENCES `phidget` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
+                    "UNIQUE (thread_tech_id, thread_acronyme),"
+                    "FOREIGN KEY (`thread_tech_id`) REFERENCES `%s` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name, lib->name );
     SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s_DO` ("
                     "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                     "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                    "`hub_id` int(11) NOT NULL,"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`port` int(11) NOT NULL,"
                     "`classe` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`capteur` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                    "UNIQUE (hub_id, port, classe),"
-                    "FOREIGN KEY (`hub_id`) REFERENCES `phidget` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
+                    "UNIQUE (thread_tech_id, thread_acronyme),"
+                    "FOREIGN KEY (`thread_tech_id`) REFERENCES `%s` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name, lib->name );
 
     Process_set_database_version ( lib, 1 );
   }
@@ -108,12 +111,14 @@
 /******************************************************************************************************************************/
  static void Phidget_print_error ( struct PHIDGET_ELEMENT *canal )
   { PhidgetReturnCode errorCode;
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     size_t errorDetailLen = 256;
     const gchar* errorString;
     gchar errorDetail[errorDetailLen];
     Phidget_getLastError(&errorCode, &errorString, errorDetail, &errorDetailLen);
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR,
-              "%s: Phidget Error %d for '%s' (%s) : %s - %s", __func__, errorCode, canal->capteur, canal->classe, errorString, errorDetail );
+              "%s: %s: Phidget Error %d for '%s' (%s) : %s - %s", __func__,
+              thread_tech_id, errorCode, canal->capteur, canal->classe, errorString, errorDetail );
   }
 /******************************************************************************************************************************/
 /* Phidget_onAIError: Appelé quand une erreur est constatée sur le module Phidget                                             */
@@ -123,20 +128,24 @@
  static void CCONV Phidget_onError (PhidgetHandle ph, void *ctx, Phidget_ErrorEventCode code, const char *description)
   { struct PHIDGET_ELEMENT *canal = ctx;
 
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     if ( !strcmp ( canal->classe, "VoltageInput" ) ||
          !strcmp ( canal->classe, "PHSensor" ) ||
          !strcmp ( canal->classe, "TemperatureSensor" ) ||
          !strcmp ( canal->classe, "VoltageRatioInput" ) )
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;", __func__,
+     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR,
+		         "%s: %s: Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;", __func__, thread_tech_id,
                  canal->map_tech_id, canal->map_acronyme, description, code );
        Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, 0.0, FALSE );
      }
     else if ( !strcmp ( canal->classe, "DigitalInput" ) )
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X).", __func__,
+     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR,
+		         "%s: %s: Error for '%s:%s' : '%s' (code %X).", __func__, thread_tech_id,
                  canal->map_tech_id, canal->map_acronyme, description, code );
      }
     else if ( !strcmp ( canal->classe, "DigitalOutput" ) )
-     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR, "%s: Error for '%s:%s' : '%s' (code %X).", __func__,
+     { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR,
+		         "%s: %s: Error for '%s:%s' : '%s' (code %X).", __func__, thread_tech_id,
                  canal->map_tech_id, canal->map_acronyme, description, code );
      }
   }
@@ -147,8 +156,9 @@
 /******************************************************************************************************************************/
  static void CCONV Phidget_onPHSensorChange ( PhidgetPHSensorHandle handle, void *ctx, double valeur )
   { struct PHIDGET_ELEMENT *canal = ctx;
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+              "%s: %s: '%s':'%s' = %f", __func__, thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
     Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -158,8 +168,9 @@
 /******************************************************************************************************************************/
  static void CCONV Phidget_onTemperatureSensorChange ( PhidgetTemperatureSensorHandle handle, void *ctx, double valeur )
   { struct PHIDGET_ELEMENT *canal = ctx;
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+              "%s: %s: '%s':'%s' = %f", __func__, thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
     Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -169,8 +180,9 @@
 /******************************************************************************************************************************/
  static void CCONV Phidget_onVoltageInputChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur )
   { struct PHIDGET_ELEMENT *canal = ctx;
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+              "%s: %s: '%s':'%s' = %f", __func__, thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
     Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -181,8 +193,9 @@
  static void CCONV Phidget_onVoltageSensorChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur,
                                                    Phidget_UnitInfo *sensorUnit )
   { struct PHIDGET_ELEMENT *canal = ctx;
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+              "%s: %s: '%s':'%s' = %f", __func__, thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
     Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -193,8 +206,9 @@
  static void CCONV Phidget_onVoltageRatioSensorChange ( PhidgetVoltageRatioInputHandle ch, void *ctx, double valeur,
                                                         Phidget_UnitInfo *sensorUnit)
   { struct PHIDGET_ELEMENT *canal = ctx;
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %f", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+              "%s: %s: '%s':'%s' = %f", __func__, thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
     Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -204,8 +218,9 @@
 /******************************************************************************************************************************/
  static void CCONV Phidget_onDigitalInputChange ( PhidgetDigitalInputHandle handle, void *ctx, int valeur )
   { struct PHIDGET_ELEMENT *canal = ctx;
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
-              "%s: '%s':'%s' = %d", __func__, canal->map_tech_id, canal->map_acronyme, valeur );
+              "%s: %s: '%s':'%s' = %d", __func__, thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
     Zmq_Send_DI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, (valeur !=0 ? TRUE : FALSE) );
   }
 /******************************************************************************************************************************/
@@ -266,6 +281,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     int serial_number, nbr_canaux, port, num_canal;
 
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Phidget_getDeviceSerialNumber(handle, &serial_number);
     Phidget_getDeviceChannelCount(handle, PHIDCHCLASS_NOTHING, &nbr_canaux );
     Phidget_getHubPort( handle, &port );
@@ -278,8 +294,8 @@
      { Phidget_AnalogAttach ( canal ); }
 
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_NOTICE,
-              "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached. %d channels available.",
-              __func__, canal->map_tech_id, canal->map_acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
+              "%s: %s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') attached. %d channels available.",
+              __func__, thread_tech_id, canal->map_tech_id, canal->map_acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
 
     canal->attached = TRUE;
   }
@@ -292,14 +308,15 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     int serial_number, nbr_canaux, port, num_canal;
 
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Phidget_getDeviceSerialNumber(handle, &serial_number);
     Phidget_getDeviceChannelCount(handle, PHIDCHCLASS_NOTHING, &nbr_canaux );
     Phidget_getHubPort( handle, &port );
     Phidget_getChannel( handle, &num_canal );
 
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_NOTICE,
-              "%s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
-              __func__, canal->map_tech_id, canal->map_acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
+              "%s: %s: '%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
+              __func__, thread_tech_id, canal->map_tech_id, canal->map_acronyme, serial_number, port, canal->classe, num_canal, nbr_canaux );
     canal->attached = FALSE;
   }
 /******************************************************************************************************************************/
@@ -336,7 +353,7 @@
  static void Charger_un_AI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct SUBPROCESS *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
-    gchar *hub_tech_id = Json_get_string(module->config, "tech_id");
+    gchar *thread_tech_id = Json_get_string(module->config, "thread_tech_id");
     gchar *capteur  = Json_get_string(element, "capteur");
     gchar *classe   = Json_get_string(element, "classe");
     gint port       = Json_get_int   (element, "port");
@@ -345,20 +362,20 @@
     gint intervalle = Json_get_int   (element, "intervalle");
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-              "%s: Hub %s('%s') (S/N %d), port '%d' capteur '%s'",
-              __func__, hub_tech_id, hub, serial, port, capteur );
+              "%s: %s('%s'): S/N %d, port '%d' capteur '%s'",
+              __func__, thread_tech_id, hub, serial, port, capteur );
 
     struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
     if (!canal)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                 "%s: Memory Error on hub %s('%s') (S/N %d), port '%d' capteur '%s'",
-                 __func__, hub_tech_id, hub, serial, port, capteur );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+                 "%s: %s('%s'): Memory Error (S/N %d), port '%d' capteur '%s'",
+                 __func__, thread_tech_id, hub, serial, port, capteur );
        return;
      }
 
     canal->module = module;                                                                      /* Sauvegarde du module père */
     g_snprintf( canal->capteur,      sizeof(canal->capteur), "%s", capteur );                /* Sauvegarde du type de capteur */
-    g_snprintf( canal->tech_id,      sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );
+    g_snprintf( canal->tech_id,      sizeof(canal->tech_id), "%s_P%d", thread_tech_id, port );
     g_snprintf( canal->classe,       sizeof(canal->classe), "%s", classe );                  /* Sauvegarde du type de capteur */
     g_snprintf( canal->map_tech_id,  sizeof(canal->map_tech_id),  "%s", Json_get_string ( element, "tech_id" ) );
     g_snprintf( canal->map_acronyme, sizeof(canal->map_acronyme), "%s", Json_get_string ( element, "acronyme" ) );
@@ -443,7 +460,7 @@ error:
  static void Charger_un_DI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct SUBPROCESS *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
-    gchar *hub_tech_id = Json_get_string(module->config, "tech_id");
+    gchar *thread_tech_id = Json_get_string(module->config, "thread_tech_id");
     gchar *capteur  = Json_get_string(element, "capteur");
     gchar *classe   = Json_get_string(element, "classe");
     gchar *hub      = Json_get_string(element, "hub_description");
@@ -452,19 +469,19 @@ error:
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
               "%s: Hub %s('%s') (S/N %d), port '%d' capteur '%s'",
-              __func__, hub_tech_id, hub, serial, port, capteur );
+              __func__, thread_tech_id, hub, serial, port, capteur );
 
     struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
     if (!canal)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
                  "%s: Memory Error on hub %s('%s') (S/N %d), port '%d' capteur '%s'",
-                 __func__, hub_tech_id, hub, serial, port, capteur );
+                 __func__, thread_tech_id, hub, serial, port, capteur );
        return;
      }
 
     canal->module = module;                                                                      /* Sauvegarde du module père */
     g_snprintf( canal->capteur,      sizeof(canal->capteur), "%s", capteur );                /* Sauvegarde du type de capteur */
-    g_snprintf( canal->tech_id,      sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );
+    g_snprintf( canal->tech_id,      sizeof(canal->tech_id), "%s_P%d", thread_tech_id, port );
     g_snprintf( canal->classe,       sizeof(canal->classe), "%s", classe );                  /* Sauvegarde du type de capteur */
     g_snprintf( canal->map_tech_id,  sizeof(canal->map_tech_id),  "%s", Json_get_string ( element, "tech_id" ) );
     g_snprintf( canal->map_acronyme, sizeof(canal->map_acronyme), "%s", Json_get_string ( element, "acronyme" ) );
@@ -493,7 +510,7 @@ error:
  static void Charger_un_DO (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct SUBPROCESS *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
-    gchar *hub_tech_id = Json_get_string(module->config, "tech_id");
+    gchar *thread_tech_id = Json_get_string(module->config, "thread_tech_id");
     gchar *capteur     = Json_get_string(element, "capteur");
     gchar *classe      = Json_get_string(element, "classe");
     gint port          = Json_get_int   (element, "port");
@@ -502,19 +519,19 @@ error:
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
               "%s: Hub %s('%s') (S/N %d), port '%d' capteur '%s'",
-              __func__, hub_tech_id, hub, serial, port, capteur );
+              __func__, thread_tech_id, hub, serial, port, capteur );
 
     struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
     if (!canal)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
                  "%s: Memory Error on hub %s('%s') (S/N %d), port '%d' capteur '%s'",
-                 __func__, hub_tech_id, hub, serial, port, capteur );
+                 __func__, thread_tech_id, hub, serial, port, capteur );
        return;
      }
 
     canal->module = module;                                                                      /* Sauvegarde du module père */
     g_snprintf( canal->capteur,      sizeof(canal->capteur), "%s", capteur );                /* Sauvegarde du type de capteur */
-    g_snprintf( canal->tech_id,      sizeof(canal->tech_id), "%s_P%d", hub_tech_id, port );
+    g_snprintf( canal->tech_id,      sizeof(canal->tech_id), "%s_P%d", thread_tech_id, port );
     g_snprintf( canal->classe,       sizeof(canal->classe), "%s", classe );                  /* Sauvegarde du type de capteur */
     g_snprintf( canal->map_tech_id,  sizeof(canal->map_tech_id),  "%s", Json_get_string ( element, "tech_id" ) );
     g_snprintf( canal->map_acronyme, sizeof(canal->map_acronyme), "%s", Json_get_string ( element, "acronyme" ) );
@@ -543,16 +560,16 @@ error:
   { SubProcess_init ( module, sizeof(struct PHIDGET_VARS) );
     struct PHIDGET_VARS *vars = module->vars;
 
-    gchar *tech_id     = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname    = Json_get_string ( module->config, "hostname" );
     gchar *description = Json_get_string ( module->config, "description" );
 
     if (Json_get_bool ( module->config, "enable" ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Not Enabled. Stopping SubProcess", __func__, thread_tech_id );
        SubProcess_end ( module );
      }
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: Chargement du HUB '%s'('%s')", __func__, hostname, description );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Loading %s('%s')", __func__, thread_tech_id, hostname, description );
 
     PhidgetNet_addServer( hostname, hostname, 5661, Json_get_string(module->config, "password"), 0);
 /* Chargement des I/O */
@@ -564,20 +581,21 @@ error:
                                   "WHERE hub.enable=1" ) == TRUE)
      { Json_node_foreach_array_element ( module->config, "AI", Charger_un_AI, module ); }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Error Loading AI for %s: '%s'('%s')", __func__,
-                 tech_id, hostname, description );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Error Loading AI: '%s'('%s')", __func__,
+                 thread_tech_id, hostname, description );
      }
 
     if (SQL_Select_to_json_node ( module->config, "DI",
                                   "SELECT hub.serial AS hub_serial,hub.description AS hub_description, "
                                   "di.*,m.tech_id,m.acronyme FROM phidget_DI AS di "
-                                  "INNER JOIN phidget AS hub ON hub.id=di.hub_id "
-                                  "INNER JOIN mnemos_DI AS m ON m.map_tech_id = CONCAT ( hub.tech_id, '_P', di.port ) "
+                                  "INNER JOIN phidget AS hub ON hub.thread_tech_id=di.thread_tech_id "
+                                  "INNER JOIN mappings AS m ON m.thread_tech_id  = hub.thread_tech_id "
+                                  "                        AND m.thread_acronyme = di.thread_acronyme "
                                   "WHERE hub.enable=1" ) == TRUE)
      { Json_node_foreach_array_element ( module->config, "DI", Charger_un_DI, module ); }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Error Loading DI for %s: '%s'('%s')", __func__,
-                 tech_id, hostname, description );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Error Loading DI: '%s'('%s')", __func__,
+                 thread_tech_id, hostname, description );
      }
 
     if (SQL_Select_to_json_node ( module->config, "DO",
@@ -588,8 +606,8 @@ error:
                                   "WHERE hub.enable=1" ) == TRUE)
      { Json_node_foreach_array_element ( module->config, "DO", Charger_un_DO, module ); }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Error Loading DO for %s: '%s'('%s')", __func__,
-                 tech_id, hostname, description );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Error Loading DO: '%s'('%s')", __func__,
+                 thread_tech_id, hostname, description );
      }
 
     gboolean synthese_comm = FALSE;                                                /* Synthese de la comm de tous les sensors */
@@ -622,8 +640,8 @@ error:
                 gchar *acronyme = Json_get_string ( request, "acronyme" );
                 gboolean etat   = Json_get_bool   ( request, "etat" );
 
-                Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s=%d",
-                          __func__, tech_id, acronyme, etat );
+                Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: Recu SET_DO from bus: %s:%s=%d",
+                          __func__, thread_tech_id, tech_id, acronyme, etat );
 
                 GSList *liste = vars->Liste_sensors;
                 while (liste)
@@ -631,8 +649,8 @@ error:
                    if ( !strcasecmp ( canal->classe, "DigitalOutput" ) &&
                         !strcasecmp ( canal->map_tech_id, tech_id ) &&
                         !strcasecmp ( canal->map_acronyme, acronyme ) )
-                    { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: SET_DO %s:%s=%d", __func__,
-                                canal->map_tech_id, canal->map_acronyme, etat );
+                    { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: SET_DO %s:%s=%d", __func__,
+                                thread_tech_id, canal->map_tech_id, canal->map_acronyme, etat );
                       if ( PhidgetDigitalOutput_setState( (PhidgetDigitalOutputHandle)canal->handle, etat ) != EPHIDGET_OK )
                        { Phidget_print_error ( canal ); }
                       break;

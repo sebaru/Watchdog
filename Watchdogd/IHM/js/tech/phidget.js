@@ -11,7 +11,7 @@
     var json_request =
      { enable : false,
        uuid   : selection.uuid,
-       tech_id: selection.tech_id,
+       thread_tech_id: selection.thread_tech_id,
        id     : selection.id
      };
 
@@ -27,7 +27,7 @@
     var json_request =
      { enable : true,
        uuid   : selection.uuid,
-       tech_id: selection.tech_id,
+       thread_tech_id: selection.thread_tech_id,
        id     : selection.id
      };
 
@@ -40,7 +40,7 @@
  function PHIDGET_Set ( selection )
   { var json_request =
      { uuid:        $('#idTargetProcess').val(),
-       tech_id:     $('#idPHIDGETTechID').val(),
+       thread_tech_id:     $('#idPHIDGETTechID').val(),
        description: $('#idPHIDGETDescription').val(),
        hostname   : $('#idPHIDGETHostname').val(),
        password   : $('#idPHIDGETPassword').val(),
@@ -60,8 +60,8 @@
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=phidget", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
-    $('#idPHIDGETTitre').text("Editer la connexion " + selection.tech_id);
-    $('#idPHIDGETTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idPHIDGET", selection.tech_id ); } );
+    $('#idPHIDGETTitre').text("Editer la connexion " + selection.thread_tech_id);
+    $('#idPHIDGETTechID').val( selection.thread_tech_id ).off("input").on("input", function () { Controle_thread_tech_id( "idPHIDGET", selection.thread_tech_id ); } );
     $('#idPHIDGETDescription').val( selection.description );
     $('#idPHIDGETHostname').val( selection.hostname );
     $('#idPHIDGETPassword').val( selection.password );
@@ -74,7 +74,7 @@
   { $('#idPHIDGETTitre').text("Ajouter un équipement GSM");
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=phidget", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
-    $('#idPHIDGETTechID').val("").off("input").on("input", function () { Controle_tech_id( "idPHIDGET", null ); } );
+    $('#idPHIDGETTechID').val("").off("input").on("input", function () { Controle_thread_tech_id( "idPHIDGET", null ); } );
     $('#idPHIDGETDescription').val("");
     $('#idPHIDGETHostname').val( "" );
     $('#idPHIDGETPassword').val( "" );
@@ -84,7 +84,7 @@
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
  function PHIDGET_Del_Valider ( selection )
-  { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
+  { var json_request = { uuid : selection.uuid, thread_tech_id: selection.thread_tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
        PHIDGET_Refresh();
@@ -94,9 +94,9 @@
  function PHIDGET_Del ( id )
   { table = $('#idTablePHIDGET').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Supprimer la connexion "+selection.tech_id,
+    Show_modal_del ( "Supprimer la connexion "+selection.thread_tech_id,
                      "Etes-vous sûr de vouloir supprimer cette connexion ?",
-                     selection.tech_id + " - "+selection.description,
+                     selection.thread_tech_id + " - "+selection.description,
                      function () { PHIDGET_Del_Valider( selection ) } ) ;
   }
 
@@ -121,7 +121,7 @@
            },
            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
              "render": function (item)
-               { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+               { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
            },
            { "data": "description", "title":"Description", "className": "align-middle text-center " },
            { "data": "hostname", "title":"Hostname", "className": "align-middle text-center " },

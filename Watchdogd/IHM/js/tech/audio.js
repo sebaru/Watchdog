@@ -8,7 +8,7 @@
  function AUDIO_Set ( selection )
   { var json_request =
      { uuid:     $('#idTargetProcess').val(),
-       tech_id : $('#idAUDIOTechID').val(),
+       thread_tech_id : $('#idAUDIOTechID').val(),
        language: $('#idAUDIOLanguage').val(),
        device  : $('#idAUDIODevice').val(),
        description: $('#idAUDIODescription').val(),
@@ -26,7 +26,7 @@
   { table = $('#idTableAUDIO').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     var json_request =
-     { tech_id: selection.tech_id,
+     { thread_tech_id: selection.thread_tech_id,
        zmq_tag: "test"
      };
     Send_to_API ( 'POST', "/api/process/send", JSON.stringify(json_request), null );
@@ -37,8 +37,8 @@
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=audio", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, selection.uuid );
-    $('#idAUDIOTitre').text("Editer la connexion GSM " + selection.tech_id);
-    $('#idAUDIOTechID').val( selection.tech_id ).off("input").on("input", function () { Controle_tech_id( "idAUDIO", selection.tech_id ); } );
+    $('#idAUDIOTitre').text("Editer la connexion GSM " + selection.thread_tech_id);
+    $('#idAUDIOTechID').val( selection.thread_tech_id ).off("input").on("input", function () { Controle_thread_tech_id( "idAUDIO", selection.thread_tech_id ); } );
     $('#idAUDIOLanguage').val( selection.language );
     $('#idAUDIODevice').val( selection.device );
     $('#idAUDIODescription').val( selection.description );
@@ -50,7 +50,7 @@
   { $('#idAUDIOTitre').text("Ajouter une zone AUDIO");
     Select_from_api ( "idTargetProcess", "/api/process/list", "name=audio", "Process", "uuid", function (Response)
                         { return ( Response.instance ); }, null );
-    $('#idAUDIOTechID').val("").off("input").on("input", function () { Controle_tech_id( "idAUDIO", null ); } );
+    $('#idAUDIOTechID').val("").off("input").on("input", function () { Controle_thread_tech_id( "idAUDIO", null ); } );
     $('#idAUDIOLanguage').val( "" );
     $('#idAUDIODevice').val( "" );
     $('#idAUDIODescription').val( "" );
@@ -59,7 +59,7 @@
   }
 /**************************************** Supprime une connexion meteo ********************************************************/
  function AUDIO_Del_Valider ( selection )
-  { var json_request = { uuid : selection.uuid, tech_id: selection.tech_id };
+  { var json_request = { uuid : selection.uuid, thread_tech_id: selection.thread_tech_id };
     Send_to_API ( 'DELETE', "/api/process/config", JSON.stringify(json_request), function(Response)
      { Process_reload ( json_request.uuid );
        $('#idTableAUDIO').DataTable().ajax.reload(null, false);
@@ -69,9 +69,9 @@
  function AUDIO_Del ( id )
   { table = $('#idTableAUDIO').DataTable();
     selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
-    Show_modal_del ( "Supprimer la zone de diffusion "+selection.tech_id,
+    Show_modal_del ( "Supprimer la zone de diffusion "+selection.thread_tech_id,
                      "Etes-vous sûr de vouloir supprimer cette zone de diffusion ?",
-                     selection.tech_id + " - "+selection.description,
+                     selection.thread_tech_id + " - "+selection.description,
                      function () { AUDIO_Del_Valider( selection ) } ) ;
   }
 /********************************************* Appelé au chargement de la page ************************************************/
@@ -87,7 +87,7 @@
          [ { "data": "instance",   "title":"Instance",   "className": "align-middle text-center" },
            { "data": null, "title":"Tech_id", "className": "align-middle text-center",
              "render": function (item)
-               { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+               { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
            },
            { "data": "description", "title":"Description", "className": "align-middle " },
            { "data": "language", "title":"Language", "className": "align-middle " },

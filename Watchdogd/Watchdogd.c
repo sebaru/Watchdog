@@ -114,6 +114,7 @@
   { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saving DLS_DATA", __func__ );
     Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
+    Updater_confDB_DO();                                                            /* Sauvegarde des valeurs des Sorties TOR */
     Updater_confDB_CH();                                                                  /* Sauvegarde des compteurs Horaire */
     Updater_confDB_CI();                                                              /* Sauvegarde des compteurs d'impulsion */
     Updater_confDB_AI();                                                              /* Sauvegarde des compteurs d'impulsion */
@@ -182,7 +183,7 @@
        if (pid<0)
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: INSTANCE_UPGRADE: erreur Fork target '%s'", __func__ ); }
        else if (!pid)
-        { system("cd; cd SRC; ./autogen.sh; sudo make install;" );
+        { system("cd SRC; ./autogen.sh; sudo make install;" );
           Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: INSTANCE_UPGRADE: done. Restarting.", __func__ );
           system("sudo systemctl restart Watchdogd" );
           exit(0);

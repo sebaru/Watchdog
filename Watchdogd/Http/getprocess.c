@@ -73,8 +73,8 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Http_process_add_comm (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { if (!Json_has_member( element, "tech_id" )) return;
-    gchar *tech_id = Json_get_string ( element, "tech_id" );
+  { if (!Json_has_member( element, "thread_tech_id" )) return;
+    gchar *tech_id = Json_get_string ( element, "thread_tech_id" );
     Json_node_add_bool ( element, "comm", Dls_data_get_WATCHDOG ( tech_id, "IO_COMM", NULL ) );
   }
 /******************************************************************************************************************************/
@@ -102,9 +102,21 @@
        return;
      }
 
-    SQL_Select_to_json_node ( RootNode, "config",
-                              "SELECT p.uuid, p.instance, config.* FROM %s AS config "
-                              "INNER JOIN processes AS p ON p.uuid = config.uuid ", name ); /* Contenu du Status */
+    gchar *classe = g_hash_table_lookup ( query, "classe" );
+    if (!classe)
+     { SQL_Select_to_json_node ( RootNode, "config",
+                                "SELECT p.uuid, p.instance, config.* FROM %s AS config "
+                                "INNER JOIN processes AS p ON p.uuid = config.uuid ", name );/* Contenu de la table du process */
+     }
+    else
+     { Normaliser_as_ascii ( classe );
+       SQL_Select_to_json_node ( RootNode, "config",
+                                "SELECT details.*, mappings.tech_id, mappings.acronyme, mnemo.libelle FROM %s AS config "
+                                "INNER JOIN %s_%s AS details ON details.thread_tech_id = config.thread_tech_id "
+                                "LEFT JOIN mappings ON mappings.thread_tech_id = details.thread_tech_id AND mappings.thread_acronyme = details.thread_acronyme "
+                                "LEFT JOIN mnemos_%s AS mnemo ON mappings.tech_id = mnemo.tech_id AND mappings.acronyme = mnemo.acronyme ",
+                                name, name, classe, classe );                                          /* Contenu de la table details */
+     }
 
     Json_node_foreach_array_element ( RootNode, "config", Http_process_add_comm, NULL );
     gchar *buf = Json_node_to_string ( RootNode );
@@ -128,7 +140,7 @@
        return;
      }
 
-    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) ) )
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -138,11 +150,10 @@
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
      { SQL_Select_to_json_node ( RootNode, NULL, "SELECT name FROM processes WHERE uuid = '%s'", uuid );
-       gchar *tech_id = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-       SQL_Write_new ( "DELETE FROM %s WHERE tech_id='%s'", Json_get_string( RootNode, "name" ), tech_id );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' deleted.", __func__, uuid, tech_id );
-
-       g_free(tech_id);
+       gchar *thread_tech_id = Normaliser_chaine ( Json_get_string ( request, "thread_tech_id" ) );
+       SQL_Write_new ( "DELETE FROM %s WHERE tech_id='%s'", Json_get_string( RootNode, "name" ), thread_tech_id );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' deleted.", __func__, uuid, thread_tech_id );
+       g_free(thread_tech_id);
        json_node_unref(RootNode);
      }
     g_free(uuid);
@@ -165,7 +176,7 @@
        return;
      }
 
-    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) ) )
+    if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -331,15 +342,15 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "zmq_tag" ) ) )
+    if ( ! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "zmq_tag" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: %s -> %s", __func__,
-              Json_get_string ( request, "tech_id" ), Json_get_string ( request, "zmq_tag" ) );
-    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Json_get_string ( request, "tech_id" ), request );
+              Json_get_string ( request, "thread_tech_id" ), Json_get_string ( request, "zmq_tag" ) );
+    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Json_get_string ( request, "thread_tech_id" ), request );
 /*************************************************** Envoi au client **********************************************************/
     json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);

@@ -34,7 +34,7 @@
 /* Sortie : la base de données est mise à jour                                                                                */
 /******************************************************************************************************************************/
  void Admin_config ( struct PROCESS *lib, gpointer msg, JsonNode *request )
-  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) &&
+  { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) &&
             Json_has_member ( request, "jabberid" ) && Json_has_member ( request, "password" ) &&
             Json_has_member ( request, "description" )
            ) )
@@ -43,25 +43,25 @@
      }
 
     gchar *uuid     = Normaliser_chaine ( Json_get_string( request, "uuid" ) );
-    gchar *tech_id  = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
+    gchar *thread_tech_id  = Normaliser_chaine ( Json_get_string( request, "thread_tech_id" ) );
     gchar *jabberid = Normaliser_chaine ( Json_get_string( request, "jabberid" ) );
     gchar *password = Normaliser_chaine ( Json_get_string( request, "password" ) );
     gchar *description = Normaliser_chaine ( Json_get_string( request, "description" ) );
 
     if (Json_has_member ( request, "id" ))
-     { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', jabberid='%s', password='%s', description='%s' WHERE id='%d'",
-                       lib->name, uuid, tech_id, jabberid, password, description,
+     { SQL_Write_new ( "UPDATE %s SET uuid='%s', thread_tech_id='%s', jabberid='%s', password='%s', description='%s' WHERE id='%d'",
+                       lib->name, uuid, thread_tech_id, jabberid, password, description,
                        Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, thread_tech_id );
      }
     else
-     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', jabberid='%s', password='%s', description='%s' ",
-                       lib->name, uuid, tech_id, jabberid, password, description );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
+     { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', thread_tech_id='%s', jabberid='%s', password='%s', description='%s' ",
+                       lib->name, uuid, thread_tech_id, jabberid, password, description );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, thread_tech_id );
      }
 
     g_free(uuid);
-    g_free(tech_id);
+    g_free(thread_tech_id);
     g_free(description);
     g_free(jabberid);
     g_free(password);

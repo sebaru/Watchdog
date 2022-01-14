@@ -24,6 +24,16 @@
            "</select>"
           );
   }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ async function COMMON_Map ( thread_tech_id, thread_acronyme, tech_id, acronyme )
+  { var json_request =
+     { thread_tech_id : thread_tech_id,
+       thread_acronyme: thread_acronyme,
+       tech_id        : tech_id.toUpperCase(),
+       acronyme       : acronyme.toUpperCase(),
+     };
+    await Send_to_API ( 'POST', "/api/map", JSON.stringify(json_request) );
+  }
 /************************************ Controle de saisie avant envoi **********************************************************/
  function Controle_tech_id ( id_modal, tech_id_initial )
   { FormatPage = RegExp(/^[a-zA-Z0-9_\.]+$/);
