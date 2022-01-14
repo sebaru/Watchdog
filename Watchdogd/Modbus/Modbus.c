@@ -1067,17 +1067,16 @@
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_DO" ) )
-           { if (!Json_has_member ( request, "tech_id"))
+           { gchar *tech_id  = Json_get_string ( request, "tech_id" );
+             gchar *acronyme = Json_get_string ( request, "acronyme" );
+             if (!tech_id)
               { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque tech_id", __func__, thread_tech_id ); }
-             else if (!Json_has_member ( request, "acronyme" ))
+             else if (!acronyme)
               { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque acronyme", __func__, thread_tech_id ); }
              else if (!Json_has_member ( request, "etat" ))
               { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque etat", __func__, thread_tech_id ); }
              else
-              { gchar *tech_id  = Json_get_string ( request, "tech_id" );
-                gchar *acronyme = Json_get_string ( request, "acronyme" );
-                gboolean etat   = Json_get_bool   ( request, "etat" );
-
+              { gboolean etat = Json_get_bool ( request, "etat" );
                 Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Recu SET_DO from bus: %s:%s=%d",
                           __func__, thread_tech_id, tech_id, acronyme, etat );
 
