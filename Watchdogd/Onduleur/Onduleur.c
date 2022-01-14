@@ -398,15 +398,16 @@
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "SET_DO" ) )
-           { gchar *thread_tech_id, *acronyme;
-             thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
-             acronyme = Json_get_string ( request, "acronyme" );
-             if (!thread_tech_id)
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque thread_tech_id", __func__ ); }
+           { gchar *tech_id  = Json_get_string ( request, "thread_tech_id" );
+             gchar *acronyme = Json_get_string ( request, "acronyme" );
+             if (!tech_id)
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque tech_id", __func__, thread_tech_id ); }
              else if (!acronyme)
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque acronyme", __func__, thread_tech_id ); }
+             else if (strcasecmp (tech_id, thread_tech_id))
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Pas pour nous", __func__, thread_tech_id ); }
              else
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: Recu SET_DO from bus: %s:%s", __func__, thread_tech_id, acronyme );
+              { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s:' Recu SET_DO from bus: %s:%s", __func__, thread_tech_id, tech_id, acronyme );
 
                 if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
                 if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( module, "load.on" );
