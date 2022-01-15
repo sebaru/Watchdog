@@ -1,34 +1,7 @@
 document.addEventListener('DOMContentLoaded', Load_page, false);
 
-/************************************ Envoi les infos de modifications synoptique *********************************************/
- function Valider_Map_Del ( classe, id )
-  { var json_request = JSON.stringify(
-       { classe : classe,
-         id     : id,
-       }
-     );
-    Send_to_API ( "DELETE", "/api/map/del", json_request, function(Response)
-     { $('#idTableTXT').DataTable().ajax.reload(null, false);
-     }, null );
-  }
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Del ( classe, selection )
-  { $('#idModalDelTitre').text ( "Détruire le mapping ?" );
-    $('#idModalDelMessage').html("Etes-vous sur de vouloir supprimer ce mapping ?"+
-                                 "<hr>"+
-                                 "<strong>"+selection.map_tech_id+":"+selection.map_tag +
-                                 " <-> " + selection.tech_id + ":" + selection.acronyme + "</strong>" +
-                                 "<br>" + selection.libelle
-                                );
-    $('#idModalDelValider').attr( "onclick",
-                                  "Valider_Map_Del('"+classe+"','"+selection.id+"')" );
-    $('#idModalDel').modal("show");
-  }
-/********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Del_DI ( id )
-  { table = $('#idTableTXT').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-    Show_Modal_Map_Del ( "DI", selection )
+ function COMMAND_TEXT_Refresh ( )
+  { $('#idTableTXT').DataTable().ajax.reload(null, false);
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
  function Valider_Edit_DI ( )
@@ -55,37 +28,19 @@ document.addEventListener('DOMContentLoaded', Load_page, false);
   { Common_Updater_Choix_TechID ( 'idModalEdit', 'DI', def_tech_id, def_acronyme );
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function Show_Modal_Map_Edit_DI ( id )
-  { if (id>0)
-     { table = $('#idTableTXT').DataTable();
-       selection = table.ajax.json().mappings.filter( function(item) { return (item.id==id) } )[0];
-       $('#idModalEditDI #idModalEditTitre').text ( "Editer MAP TXT" );
-       TXTMap_Update_Choix_Tech_ID( selection.tech_id, selection.acronyme );
-       $('#idModalEditDI #idModalEditTXTTag').val  ( selection.map_tag );
-       $('#idModalEditDI #idModalEditTXTTag').attr ( "readonly", false );
-       $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI()" );
-       Send_to_API ( "GET", "/api/process/smsg/list", null, function (Response)
-        { $('#idModalEditTXTTechID').empty();
-          $.each ( Response.TXTs, function ( i, TXT )
-           { $('#idModalEditTXTTechID').append("<option value='"+TXT.tech_id+"'"+
-                                                (TXT.tech_id == selection.tech_id ? "selected" : "")+">"+
-                                                 TXT.tech_id+ " (" +TXT.description+")</option>"); } );
-        });
-     }
-    else
-     { $('#idModalEditDI #idModalEditTitre').text ( "Ajouter un mapping DI" );
-       $('#idModalEditRechercherTechID').val ( '' );
-       $('#idModalEditDI #idModalEditTXTTag').val     ( '' );
-       $('#idModalEditDI #idModalEditTXTTag').attr ( "readonly", false );
-       $('#idModalEditDI #idModalEditValider').attr( "onclick", "Valider_Edit_DI()" );
-       Send_to_API ( "GET", "/api/process/smsg/list", null, function (Response)
-        { $('#idModalEditTXTTechID').empty();
-          $.each ( Response.TXTs, function ( i, TXT )
-           { $('#idModalEditTXTTechID').append("<option value='"+TXT.tech_id+"'>"+TXT.tech_id+ " (" +TXT.description+")</option>"); } );
-        });
-       TXTMap_Update_Choix_Tech_ID( null, null );
-     }
-    $('#idModalEditDI').modal("show");
+ function COMMAND_TEXT_Map_DI ( id )
+  { table = $('#idTableTXT').DataTable();
+    selection = table.ajax.json().mappings.filter( function(item) { return item.id==id } )[0];
+    $('#idMODALMapTitre').text( "Mapper le texte '"+selection.thread_acronyme+"'" );
+    $('#idMODALMapRechercherTechID').off("input").on("input", function () { Common_Updater_Choix_TechID ( "idMODALMap", "DI" ); } );
+    Common_Updater_Choix_TechID ( "idMODALMap", "DI", selection.tech_id, selection.acronyme );
+    $('#idMODALMapValider').off("click").on( "click", function ()
+     { $('#idMODALMap').modal("hide");
+       COMMON_Map ( "_COMMAND_TEXT", selection.thread_acronyme,
+                    $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
+                  ).then ( () => { COMMAND_TEXT_Refresh(); } );
+     });
+    $('#idMODALMap').modal("show");
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
@@ -95,26 +50,21 @@ document.addEventListener('DOMContentLoaded', Load_page, false);
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "COMMAND_TEXT", "classe": "DI" },
+         ajax: {	url : "/api/map",	type : "GET", dataSrc: "mappings", data: { "thread_tech_id": "_COMMAND_TEXT" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ /*{ "data": "map_tech_id", "title":"TXT TechID", "className": "align-middle text-center" },*/
-            { "data": "map_tag", "title":"Texte Source", "className": "align-middle text-center" },
-            { "data": null, "title":"Map", "className": "align-middle text-center",
-              "render": function (item)
-                { return( "->" ); }
+          [ { "data": "thread_acronyme", "title":"Texte Source", "className": "align-middle text-center" },
+            { "data": null, "title":"Mapped on", "className": "align-middle text-center",
+              "render": function (item)                { if(item.tech_id)
+                   { return ( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) +":" + item.acronyme
+                              + ", " + item.libelle );
+                   } else return( "--" );
+                }
             },
-            { "data": null, "title":"DLS Tech_id", "className": "align-middle text-center",
-              "render": function (item)
-                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
-            },
-            { "data": "acronyme", "title":"DLS Acronyme", "className": "align-middle text-center" },
-            { "data": "libelle", "title":"DLS Libelle", "className": "align-middle text-center" },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "Show_Modal_Map_Edit_DI", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_DI", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "primary", "Mapper cette commande", "COMMAND_TEXT_Map_DI", item.id, "directions", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

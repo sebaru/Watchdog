@@ -34,18 +34,50 @@
  extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
-/* Http_traiter_map_set: ajoute un mapping dans la base de données                                                            */
+/* Http_traiter_map_get: récupère une liste de mapping (en dehors du mapping de thread)                                       */
 /* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
+/* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_map ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                         SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+ static void Http_traiter_map_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data )
+  { struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (!Http_check_session( msg, session, 6 )) return;
+
+    gchar *thread_tech_id_src = g_hash_table_lookup ( query, "thread_tech_id" );
+    if (!thread_tech_id_src)
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres classe");
+       return;
      }
 
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    gchar *thread_tech_id  = Normaliser_chaine ( thread_tech_id_src );
+    SQL_Select_to_json_node ( RootNode, "mappings",
+                              "SELECT * FROM mappings AS map "
+                              "LEFT JOIN mnemos_DI AS mnemo ON map.tech_id = mnemo.tech_id AND map.acronyme = mnemo.acronyme "
+                              "WHERE thread_tech_id='%s' ", thread_tech_id
+                            );
+    g_free(thread_tech_id);
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_map_set: ajoute un mapping dans la base de données                                                            */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Http_traiter_map_post ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                     SoupClientContext *client, gpointer user_data )
+  { struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (!Http_check_session( msg, session, 6 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
@@ -80,7 +112,7 @@
     SQL_Write_new ( "UPDATE mappings SET tech_id = NULL, acronyme = NULL "
                     "WHERE tech_id = '%s' AND acronyme = '%s'", tech_id, acronyme );
 
-    SQL_Write_new ( "UPDATE mappings SET tech_id = '%s', acronyme = '%s' "
+    SQL_Write_new ( "UPDATE mappings SET tech_id = UPPER('%s'), acronyme = '%s' "
                     "WHERE thread_tech_id = '%s' AND thread_acronyme = '%s'", tech_id, acronyme, thread_tech_id, thread_acronyme );
 
     if ( strcasecmp ( old_thread_tech_id, thread_tech_id ) )
@@ -109,5 +141,16 @@
     g_free(thread_acronyme);
     json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_map_set: ajoute un mapping dans la base de données                                                            */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_map ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                         SoupClientContext *client, gpointer user_data )
+  { if (msg->method == SOUP_METHOD_POST) return ( Http_traiter_map_post ( server, msg, path, query, client, user_data ) );
+    if (msg->method == SOUP_METHOD_GET ) return ( Http_traiter_map_get  ( server, msg, path, query, client, user_data ) );
+    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
