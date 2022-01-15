@@ -218,34 +218,34 @@
     gchar *zmq_src_tech_id = Json_get_string ( request, "zmq_src_tech_id" );
     gchar *zmq_dst_tech_id = Json_get_string ( request, "zmq_dst_tech_id" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive %s from %s to %s",
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: receive '%s' from '%s' to '%s'",
               __func__, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id );
 
          if ( !strcasecmp( zmq_tag, "SET_WATCHDOG") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
               Json_has_member ( request, "consigne" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_WATCHDOG : wrong parameters from %s", __func__, zmq_src_tech_id );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_WATCHDOG : wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
 
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: SET_WATCHDOG from %s to %s : '%s:%s'+=%d", __func__,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                 "%s: SET_WATCHDOG from '%s' to '%s': '%s:%s'=%d", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                  Json_get_int ( request, "consigne" ) );
        Dls_data_set_WATCHDOG ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
-                               Json_get_int    ( request, "consigne" ) );
+                               Json_get_int ( request, "consigne" ) );
        return(TRUE);                                                                                                /* Traité */
      }
     else if ( !strcasecmp( zmq_tag, "SET_AI") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
               Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" )) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_AI : wrong parameters from %s", __func__, zmq_src_tech_id );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_AI: wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
 
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: SET_AI from %s to %s : '%s:%s'=%f (range=%d)", __func__,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                 "%s: SET_AI from '%s' to '%s' : '%s:%s'=%f (range=%d)", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                  Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
@@ -255,11 +255,11 @@
      }
     else if ( !strcasecmp( zmq_tag, "SET_CDE") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE : wrong parameters from %s", __func__, zmq_src_tech_id );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE : wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: SET_CDE=1 from %s to %s : bit techid %s acronyme %s", __func__,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                 "%s: SET_CDE from '%s' to '%s': '%s:%s'=1", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
        Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
@@ -267,11 +267,11 @@
      }
     else if ( !strcasecmp( zmq_tag, "SET_DI") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_DI : wrong parameters from %s", __func__, zmq_src_tech_id );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_DI : wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: SET_DI from %s to %s : '%s:%s'=%d", __func__,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                 "%s: SET_DI from '%s' to '%s': '%s:%s'=%d", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), Json_get_bool ( request, "etat" ) );
        Dls_data_set_DI ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
@@ -313,11 +313,11 @@
     gchar *zmq_src_tech_id   = Json_get_string ( request, "zmq_src_tech_id" );
     gchar *zmq_dst_tech_id   = Json_get_string ( request, "zmq_dst_tech_id" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive %s from %s to %s",
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: receive '%s' from '%s' to '%s'",
               __func__, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id );
 
          if ( !strcasecmp( zmq_tag, "PING") )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s", __func__, zmq_src_tech_id );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from '%s'", __func__, zmq_src_tech_id );
        Partage->com_msrv.last_master_ping = Partage->top;
        return(TRUE);                                                                                                /* Traité */
      }
@@ -338,7 +338,7 @@
     gchar *requete = SQL_Read_from_file ( "base_icones.sql" );                                    /* Load DB icons at startup */
     if (!requete)
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB Error.", __func__ ); }
-    else  if (!SQL_Writes ( requete ))
+    else if (!SQL_Writes ( requete ))
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB SQL Error.", __func__ ); }
     else Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB Loaded.", __func__ );
     if (requete) g_free(requete);
