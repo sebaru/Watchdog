@@ -192,9 +192,13 @@
         }
        if ( nbr_results == 1)
         { JsonNode *element = Results->data;
-          gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
-          gchar *acronyme = Json_get_string ( element, "acronyme" );
-          Zmq_Send_CDE_to_master_new ( module, thread_tech_id, acronyme );
+          gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+          gchar *tech_id         = Json_get_string ( element, "tech_id" );
+          gchar *acronyme        = Json_get_string ( element, "acronyme" );
+          gchar *libelle         = Json_get_string ( element, "libelle" );
+          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+                    thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+          Zmq_Send_CDE_to_master_new ( module, tech_id, acronyme );
         }
        g_list_free(results);
      }
