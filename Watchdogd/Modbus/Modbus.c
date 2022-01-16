@@ -124,6 +124,10 @@
     if (vars->AI)      { g_free(vars->AI); vars->AI = NULL; }
     if (vars->DO_root) { json_node_unref(vars->DO_root); vars->DO_root = NULL; }
     if (vars->DO)      { g_free(vars->DO); vars->DO = NULL; }
+    vars->nbr_entree_tor = 0;
+    vars->nbr_entree_ana = 0;
+    vars->nbr_sortie_ana = 0;
+    vars->nbr_sortie_tor = 0;
     SubProcess_send_comm_to_master_new ( module, FALSE );
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Module '%s' disconnected", __func__, thread_tech_id, hostname );
   }
@@ -1081,7 +1085,7 @@
                           __func__, thread_tech_id, tech_id, acronyme, etat );
 
                 for (gint num=0; num<vars->nbr_sortie_tor; num++)
-                 { if ( vars->DO[num] &&
+                 { if ( vars->DO && vars->DO[num] &&
                         !strcasecmp ( Json_get_string(vars->DO[num], "tech_id"), tech_id ) &&
                         !strcasecmp ( Json_get_string(vars->DO[num], "acronyme"), acronyme ) )
                     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': SET_DO %s:%s=%d", __func__,
