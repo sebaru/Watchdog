@@ -132,18 +132,20 @@
   { struct SUBPROCESS *module = userdata;
     struct IMSGS_VARS *vars = module->vars;
 
+    gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
+
     const gchar *from = xmpp_stanza_get_attribute ( stanza, "from" );
     gchar *message    = xmpp_message_get_body ( stanza );
     if (!from || !message)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: Error : from or message = NULL", __func__ );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': Error : from or message = NULL", __func__, thread_tech_id );
        return(1);
      }
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: From '%s' -> '%s'", __func__, from, message );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': From '%s' -> '%s'", __func__, thread_tech_id, from, message );
 
     if (Imsgs_recipient_is_allow_command ( module, from ) == FALSE)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                "%s : unknown sender '%s' or not allow to send command. Dropping message...", __func__, from );
+                "%s: '%s': unknown sender '%s' or not allow to send command. Dropping message...", __func__, thread_tech_id, from );
        goto end;
      }
 
@@ -154,7 +156,7 @@
 
     JsonNode *RootNode = Json_node_create();
     if ( RootNode == NULL )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s : Memory Error for '%s'", __func__, from );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for '%s'", __func__, thread_tech_id, from );
        goto end;
      }
     SQL_Select_to_json_node ( RootNode, "results",
@@ -163,7 +165,7 @@
                               "WHERE map.thread_tech_id='_COMMAND_TEXT' AND map.thread_acronyme LIKE '%%%s%%'", message );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, message );
        Imsgs_Envoi_message_to( module, from, "Error searching Database .. Sorry .." );
        goto end;
      }
@@ -179,13 +181,13 @@
        GList *results = Results;
        while(results)
         { JsonNode *element = results->data;
-          gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
-          gchar *acronyme = Json_get_string ( element, "acronyme" );
-          gchar *libelle  = Json_get_string ( element, "libelle" );
-          gchar *tag      = Json_get_string ( element, "tag" );
-          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: Match found from '%s' -> '%s' '%s:%s' - %s", __func__,
-                    from, tag, thread_tech_id, acronyme, libelle );
-          Imsgs_Envoi_message_to ( module, from, tag );                                     /* Envoi des différents choix */
+          gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+          gchar *tech_id         = Json_get_string ( element, "tech_id" );
+          gchar *acronyme        = Json_get_string ( element, "acronyme" );
+          gchar *libelle         = Json_get_string ( element, "libelle" );
+          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+                    thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+          Imsgs_Envoi_message_to ( module, from, thread_acronyme );                              /* Envoi des différents choix */
           results = g_list_next(results);
         }
        if ( nbr_results == 1)

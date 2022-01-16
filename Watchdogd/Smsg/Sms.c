@@ -436,14 +436,14 @@
 /******************************************************************************************************************************/
  static void Sms_Envoyer_commande_dls_data ( JsonArray *array, guint index, JsonNode *element, void *user_data )
   { struct SUBPROCESS *module = user_data;
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    gchar *tech_id = Json_get_string ( element, "tech_id" );
-    gchar *acro    = Json_get_string ( element, "acronyme" );
-    gchar *libelle = Json_get_string ( element, "libelle" );
-    gchar *map_tag = Json_get_string ( element, "map_tag" );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Match found -> '%s' '%s:%s' - %s", __func__,
-              thread_tech_id, map_tag, tech_id, acro, libelle );
-    Zmq_Send_CDE_to_master_new ( module, thread_tech_id, acro );
+    gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+    gchar *tech_id         = Json_get_string ( element, "tech_id" );
+    gchar *acronyme        = Json_get_string ( element, "acronyme" );
+    gchar *libelle         = Json_get_string ( element, "libelle" );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s:  map found for '%s' -> '%s:%s' - %s", __func__,
+              thread_tech_id, thread_acronyme, tech_id, acronyme, libelle );
+    Zmq_Send_CDE_to_master_new ( module, thread_tech_id, acronyme );
   }
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
