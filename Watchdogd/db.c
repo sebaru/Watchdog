@@ -567,7 +567,7 @@ encore:
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_DO` ("
-                   "`id` INT(11) PRIMARY KEYL AUTO_INCREMENT,"
+                   "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
                    "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"

@@ -966,6 +966,13 @@ printf("%s: New bloc maintenance\n", __func__ );
                                                trame_motif->pixbuf,
                                                0.0, 0.0, NULL );
 
+    if (page->type==TYPE_PAGE_SUPERVISION)
+     { g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",
+                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+       g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
+                         G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
+     }
+     
     trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );   /* Et ajout dans la liste */
     trame_motif->image  = trame_motif->images;                                     /* Synchro sur image numero 1 */
     trame_motif->nbr_images++;

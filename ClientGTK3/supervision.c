@@ -46,6 +46,7 @@
   { struct PAGE_NOTEBOOK *page = user_data;
     struct TYPE_INFO_SUPERVISION *infos = page->infos;
 
+    g_source_remove( infos->timer_id );
     printf("%s: close 2 page=%p!\n", __func__, page );
     json_node_unref( infos->syn );
     Trame_detruire_trame( infos->Trame );
@@ -68,7 +69,6 @@
   { struct TYPE_INFO_SUPERVISION *infos = page->infos;
 
     printf("%s: close 1 page=%p!\n", __func__, page );
-    g_source_remove( infos->timer_id );
     if ( soup_websocket_connection_get_state ( infos->ws_motifs ) == SOUP_WEBSOCKET_STATE_OPEN )
      { soup_websocket_connection_close ( infos->ws_motifs, 0, "Thanks, Bye !" ); }
     else Detruire_page_supervision_2 ( infos->ws_motifs, page );
@@ -146,8 +146,10 @@
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { JsonBuilder *builder = Json_create ();
     if (!builder) return;
-    Json_add_string ( builder, "tech_id",  Json_get_string ( trame_motif->visuel, "clic_tech_id" ) );
-    Json_add_string ( builder, "acronyme", Json_get_string ( trame_motif->visuel, "clic_acronyme" ) );
+    Json_add_string ( builder, "tech_id",  Json_get_string ( trame_motif->visuel, "tech_id" ) );
+    gchar chaine[128];
+    g_snprintf( chaine, sizeof(chaine), "%s_CLIC", Json_get_string ( trame_motif->visuel, "acronyme" ) );
+    Json_add_string ( builder, "acronyme", chaine );
     printf("%s: envoi syn_clic '%s':'%s'\n", __func__,
            Json_get_string ( trame_motif->visuel, "clic_tech_id" ), Json_get_string ( trame_motif->visuel, "clic_acronyme" ) );
     Envoi_json_au_serveur ( trame_motif->page->client, "POST", builder, "/api/syn/clic", NULL );
@@ -196,20 +198,7 @@
            }
         }
        else if ( ((GdkEventButton *)event)->button == 1)                          /* Release sur le motif qui a été appuyé ?? */
-        { switch( Json_get_int ( trame_motif->visuel, "dialog" ) )
-           { case ACTION_SANS:      printf("action sans !!\n");
-                                    break;
-             case ACTION_IMMEDIATE: printf("action immediate !!\n");
-                                    Envoyer_action_immediate( trame_motif );
-                                    break;
-/*             case ACTION_CONFIRME: printf("action programme !!\n");
-                                    Envoyer_action_programme( trame_motif );
-                                    break;*/
-/*             case ACTION_DIFFERE:
-             case ACTION_REPETE:
-                                    break;*/
-             default: printf("Clic_sur_motif_supervision: type dialog inconnu\n");
-           }
+        { Envoyer_action_immediate( trame_motif );
         }
      }
   }
