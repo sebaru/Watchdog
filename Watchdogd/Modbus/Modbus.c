@@ -119,11 +119,11 @@
     vars->request = FALSE;
     vars->nbr_deconnect++;
     vars->date_retente = Partage->top + MODBUS_RETRY;
-    if (vars->DI_root) json_node_unref(vars->DI_root);
-    if (vars->DI) g_free(vars->DI);
-    if (vars->AI) g_free(vars->AI);
-    if (vars->DO_root) json_node_unref(vars->DO_root);
-    if (vars->DO) g_free(vars->DO);
+    if (vars->DI_root) { json_node_unref(vars->DI_root); vars->DI_root = NULL; }
+    if (vars->DI)      { g_free(vars->DI); vars->DI = NULL; }
+    if (vars->AI)      { g_free(vars->AI); vars->AI = NULL; }
+    if (vars->DO_root) { json_node_unref(vars->DO_root); vars->DO_root = NULL; }
+    if (vars->DO)      { g_free(vars->DO); vars->DO = NULL; }
     SubProcess_send_comm_to_master_new ( module, FALSE );
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Module '%s' disconnected", __func__, thread_tech_id, hostname );
   }
