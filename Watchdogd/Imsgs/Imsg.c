@@ -178,19 +178,21 @@
         { Imsgs_Envoi_message_to( module, from, "Aîe, plusieurs choix sont possibles ... :" ); }
 
        GList *Results = json_array_get_elements ( Json_get_array ( RootNode, "results" ) );
-       GList *results = Results;
-       while(results)
-        { JsonNode *element = results->data;
-          gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
-          gchar *tech_id         = Json_get_string ( element, "tech_id" );
-          gchar *acronyme        = Json_get_string ( element, "acronyme" );
-          gchar *libelle         = Json_get_string ( element, "libelle" );
-          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
-                    thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
-          Imsgs_Envoi_message_to ( module, from, thread_acronyme );                              /* Envoi des différents choix */
-          results = g_list_next(results);
+       if ( nbr_results > 1 )
+        { GList *results = Results;
+          while(results)
+           { JsonNode *element = results->data;
+             gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+             gchar *tech_id         = Json_get_string ( element, "tech_id" );
+             gchar *acronyme        = Json_get_string ( element, "acronyme" );
+             gchar *libelle         = Json_get_string ( element, "libelle" );
+             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+                       thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+             Imsgs_Envoi_message_to ( module, from, thread_acronyme );                              /* Envoi des différents choix */
+             results = g_list_next(results);
+           }
         }
-       if ( nbr_results == 1)
+       else if ( nbr_results == 1)
         { JsonNode *element = Results->data;
           gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
           gchar *tech_id         = Json_get_string ( element, "tech_id" );
@@ -199,8 +201,9 @@
           Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
                     thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
           Zmq_Send_CDE_to_master_new ( module, tech_id, acronyme );
+          Imsgs_Envoi_message_to ( module, from, "Fait." );                                     /* Envoi des différents choix */
         }
-       g_list_free(results);
+       g_list_free(Results);
      }
 end:
     json_node_unref( RootNode );

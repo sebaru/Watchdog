@@ -430,22 +430,6 @@
     json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
-/* Sms_Envoyer_commande_dls_data : Envoi un message json au client en parametre data                                         */
-/* Entrée : Le tableau, l'index, l'element json et le destinataire                                                            */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Sms_Envoyer_commande_dls_data ( JsonArray *array, guint index, JsonNode *element, void *user_data )
-  { struct SUBPROCESS *module = user_data;
-    gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
-    gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
-    gchar *tech_id         = Json_get_string ( element, "tech_id" );
-    gchar *acronyme        = Json_get_string ( element, "acronyme" );
-    gchar *libelle         = Json_get_string ( element, "libelle" );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s:  map found for '%s' -> '%s:%s' - %s", __func__,
-              thread_tech_id, thread_acronyme, tech_id, acronyme, libelle );
-    Zmq_Send_CDE_to_master_new ( module, tech_id, acronyme );
-  }
-/******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
 /* Entrée: le message text à traiter                                                                                          */
 /* Sortie : Néant                                                                                                             */
@@ -492,20 +476,47 @@
                               "WHERE map.thread_tech_id='_COMMAND_TEXT' AND map.thread_acronyme LIKE '%%%s%%'", texte );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { g_snprintf(chaine, sizeof(chaine), "'%s' not found.", texte );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Error searching Database for '%s'", __func__, thread_tech_id, texte );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, texte );
+       Envoyer_smsg_gsm_text ( module, "Error searching Database .. Sorry .." );
+       goto end;
      }
+
+    gint nbr_results = Json_get_int ( RootNode, "nbr_results" );
+    if ( nbr_results == 0 )
+     { Envoyer_smsg_gsm_text ( module, "Je n'ai pas trouvé, désolé." ); }
     else
-     { gint nbr_results = Json_get_int ( RootNode, "nbr_results" );
-       if ( nbr_results == 0 )
-        { g_snprintf(chaine, sizeof(chaine), "'%s' not found.", texte ); }                 /* Envoi de l'erreur si pas trouvé */
-       else if ( nbr_results > 1 )                                           /* Si trop d'enregistrement, demande de préciser */
-        { g_snprintf(chaine, sizeof(chaine), "Trop de résultats pour '%s'.", texte ); }    /* Envoi de l'erreur si pas trouvé */
-       else
-        { Json_node_foreach_array_element ( RootNode, "results", Sms_Envoyer_commande_dls_data, module );
-          g_snprintf(chaine, sizeof(chaine), "'%s': fait.", texte );
+     { if ( nbr_results > 1 )                                               /* Si trop d'enregistrements, demande de préciser */
+        { Envoyer_smsg_gsm_text ( module, "Aîe, plusieurs choix sont possibles ... :" ); }
+
+       GList *Results = json_array_get_elements ( Json_get_array ( RootNode, "results" ) );
+       if ( nbr_results > 1 )
+        { GList *results = Results;
+          while(results)
+           { JsonNode *element = results->data;
+             gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+             gchar *tech_id         = Json_get_string ( element, "tech_id" );
+             gchar *acronyme        = Json_get_string ( element, "acronyme" );
+             gchar *libelle         = Json_get_string ( element, "libelle" );
+             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+                       thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+             Envoyer_smsg_gsm_text ( module, thread_acronyme );                                 /* Envoi des différents choix */
+             results = g_list_next(results);
+           }
         }
-      }
+       else if ( nbr_results == 1)
+        { JsonNode *element = Results->data;
+          gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+          gchar *tech_id         = Json_get_string ( element, "tech_id" );
+          gchar *acronyme        = Json_get_string ( element, "acronyme" );
+          gchar *libelle         = Json_get_string ( element, "libelle" );
+          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+                    thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+          Zmq_Send_CDE_to_master_new ( module, tech_id, acronyme );
+          Envoyer_smsg_gsm_text ( module, "Fait." );
+        }
+       g_list_free(Results);
+     }
+end:
     json_node_unref( RootNode );
     Envoyer_smsg_gsm_text ( module, chaine );
   }
