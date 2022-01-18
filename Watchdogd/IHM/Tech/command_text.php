@@ -8,9 +8,9 @@
 
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2 text-center">
-           <label class="col-2 col-form-label text-right">Ajouter une commande textuelle</label>
+           <label class="col-3 col-form-label text-right">Ajouter une commande textuelle</label>
            <input id="idModalCommandTextAdd" type="text" class="col-4 form-control" placeholder="Nouvelle commande textuelle">
-           <button type="button" onclick="COMMAND_TEXT_Add_" class="ml-2 mr-auto btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
+           <button type="button" onclick="COMMAND_TEXT_Add()" class="ml-2 mr-auto btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
  </div>
 
     <table id="idTableTXT" class="table table-striped table-bordered table-hover">

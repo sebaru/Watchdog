@@ -82,6 +82,19 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
+    if ( Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
+      ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ))
+       )
+     { gchar *thread_tech_id  = Normaliser_chaine ( Json_get_string( request, "thread_tech_id" ) );
+       gchar *thread_acronyme = Normaliser_chaine ( Json_get_string( request, "thread_acronyme" ) );
+       SQL_Write_new ( "INSERT INTO mappings SET thread_tech_id = '%s', thread_acronyme='%s'", thread_tech_id, thread_acronyme );
+       g_free(thread_tech_id);
+       g_free(thread_acronyme);
+       json_node_unref(request);
+       soup_message_set_status (msg, SOUP_STATUS_OK);
+       return;
+     }
+
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
             Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" )
            )
