@@ -115,7 +115,7 @@
                                 "INNER JOIN %s_%s AS details ON details.thread_tech_id = config.thread_tech_id "
                                 "LEFT JOIN mappings ON mappings.thread_tech_id = details.thread_tech_id AND mappings.thread_acronyme = details.thread_acronyme "
                                 "LEFT JOIN mnemos_%s AS mnemo ON mappings.tech_id = mnemo.tech_id AND mappings.acronyme = mnemo.acronyme ",
-                                name, name, classe, classe );                                          /* Contenu de la table details */
+                                name, name, classe, classe );                                  /* Contenu de la table details */
      }
 
     Json_node_foreach_array_element ( RootNode, "config", Http_process_add_comm, NULL );

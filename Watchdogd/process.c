@@ -286,7 +286,7 @@
        return(FALSE);
      }
     pthread_join( lib->TID, NULL );                                                                    /* Attente fin du fils */
-    lib->TID = NULL;
+    lib->TID = 0;
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UUID %s: Process %s stopped",
               __func__, lib->uuid, lib->nom_fichier );
     return(TRUE);

@@ -124,7 +124,7 @@
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
 
-    Json_add_int    ( builder, "syn_id",   infos->syn_id );
+    Json_add_int    ( builder, "syn_id",   Json_get_int ( infos->syn, "id" ) );
     Envoi_json_au_serveur ( page->client, "POST", builder, "/api/syn/ack", NULL );
   }
 /******************************************************************************************************************************/
@@ -538,9 +538,8 @@
     page->type   = TYPE_PAGE_SUPERVISION;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
     infos->syn = Json_get_from_string ( buffer_brut );
-    infos->syn_id = Json_get_int ( infos->syn, "id" );
     infos->timer_id = g_timeout_add( 500, Timer, page );
-    printf("%s: ---- chargement id %d \n", __func__, infos->syn_id );
+    printf("%s: ---- chargement id %d \n", __func__, Json_get_int ( infos->syn, "id" ) );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;
@@ -638,7 +637,7 @@
        Json_node_add_string ( visuel, "acronyme", "" );
        Json_node_add_string ( visuel, "ihm_affichage", "complexe" );
        gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), "SYN_%05d", infos->syn_id );
+       g_snprintf( chaine, sizeof(chaine), "SYN_%05d", Json_get_int ( infos->syn, "id" ) );
        Json_node_add_string ( visuel, "libelle", chaine );
        Json_node_add_int ( visuel, "id", -1 );
        Json_node_add_int ( visuel, "angle", 0 );
