@@ -608,7 +608,7 @@ end:
                Json_get_bool ( request, "alive" ) == TRUE &&
                Json_get_int  ( request, "sms_notification" ) != MESSAGE_SMS_NONE )
            { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending msg '%s:%s' (%s)", __func__, thread_tech_id,
-                       Json_get_string ( request, "thread_tech_id" ), Json_get_string ( request, "acronyme" ),
+                       Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                        Json_get_string ( request, "libelle" ) );
 
 /*************************************************** Envoi en mode GSM ********************************************************/
