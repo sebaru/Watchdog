@@ -128,7 +128,7 @@ alias_classe:     T_BI             {{ $$=MNEMO_BISTABLE;       }}
                 | SORTIE           {{ $$=MNEMO_SORTIE;         }}
                 | T_MSG            {{ $$=MNEMO_MSG;            }}
                 | T_TEMPO          {{ $$=MNEMO_TEMPO;          }}
-                | T_VISUEL         {{ $$=MNEMO_MOTIF;          }}
+                | T_VISUEL         {{ $$=MNEMO_VISUEL;          }}
                 | T_CPT_H          {{ $$=MNEMO_CPTH;           }}
                 | T_CPT_IMP        {{ $$=MNEMO_CPT_IMP;        }}
                 | T_ANALOG_INPUT   {{ $$=MNEMO_ENTREE_ANA;     }}
@@ -648,7 +648,7 @@ une_action:     T_NOP
                       if ($1 && (alias->classe==MNEMO_TEMPO ||
                                  alias->classe==MNEMO_MSG ||
                                  alias->classe==MNEMO_BUS ||
-                                 alias->classe==MNEMO_MOTIF ||
+                                 alias->classe==MNEMO_VISUEL ||
                                  alias->classe==MNEMO_DIGITAL_OUTPUT ||
                                  alias->classe==MNEMO_WATCHDOG ||
                                  alias->classe==MNEMO_MONOSTABLE)
@@ -670,7 +670,7 @@ une_action:     T_NOP
                          case MNEMO_MONOSTABLE: $$=New_action_mono( alias );              break;
                          case MNEMO_CPTH      : $$=New_action_cpt_h( alias, options );    break;
                          case MNEMO_CPT_IMP   : $$=New_action_cpt_imp( alias, options );  break;
-                         case MNEMO_MOTIF     : $$=New_action_visuel( alias, options );    break;
+                         case MNEMO_VISUEL     : $$=New_action_visuel( alias, options );    break;
                          case MNEMO_WATCHDOG  : $$=New_action_WATCHDOG( alias, options ); break;
                          default: { Emettre_erreur_new( "'%s:%s' syntax error", alias->tech_id, alias->acronyme );
                                     $$=New_action();
