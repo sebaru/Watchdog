@@ -345,12 +345,12 @@
 
 /************************************************* Socket ZMQ interne *********************************************************/
     Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_from_bus                 = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    zmq_from_bus                 = Zmq_Bind ( ZMQ_PULL, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket pour une instance master ****************************************************/
     Partage->com_msrv.zmq_to_slave = Zmq_Bind ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
     if (!Partage->com_msrv.zmq_to_slave) goto end;
-    zmq_from_slave                 = Zmq_Bind ( ZMQ_ROUTER, "listen-to-slave", "tcp", "*", 5556 );
+    zmq_from_slave                 = Zmq_Bind ( ZMQ_PULL, "listen-to-slave", "tcp", "*", 5556 );
     if (!zmq_from_slave) goto end;
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single)                                                                             /* Si demarrage des thread */
@@ -458,10 +458,10 @@ end:
 
 /************************************************* Socket ZMQ interne *********************************************************/
     Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_from_bus                 = Zmq_Bind ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    zmq_from_bus                 = Zmq_Bind ( ZMQ_PULL, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket de subscription au master ***************************************************/
-    Partage->com_msrv.zmq_to_master = Zmq_Connect ( ZMQ_DEALER, "pub-to-master", "tcp", Config.master_host, 5556 );
+    Partage->com_msrv.zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "tcp", Config.master_host, 5556 );
     if (!Partage->com_msrv.zmq_to_master) goto end;
     zmq_from_master                 = Zmq_Connect ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
     if (!zmq_from_master) goto end;

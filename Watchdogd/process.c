@@ -78,7 +78,7 @@
                     classe, lib->version, lib->database_version, lib->description, lib->uuid );
 
     lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    lib->zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
               "%s: UUID %s: Process is UP '%s' (%s) de classe '%s' (debug = %d)", __func__,
@@ -152,7 +152,7 @@
      }
 
     module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    module->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    module->zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
