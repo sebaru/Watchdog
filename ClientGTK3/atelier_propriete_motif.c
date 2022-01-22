@@ -389,7 +389,7 @@ printf("%s\n", __func__ );
 /**********************************************************************************************************/
  static void Afficher_mnemo_ctrl ( void )
   { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
-    mnemo.type = MNEMO_MOTIF;
+    mnemo.type = MNEMO_VISUEL;
     mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bit_ctrl) );
     Trame_motif->motif->bit_controle = mnemo.num;
 

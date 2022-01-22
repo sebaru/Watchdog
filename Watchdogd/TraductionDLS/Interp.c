@@ -1100,7 +1100,7 @@
   { if ( ! Get_alias_par_acronyme ( tech_id, acronyme ) )                                               /* Si pas déjà défini */
      { GList *ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(libelle) );
        ss_options = New_option_chaine ( ss_options, T_FORME, g_strdup(forme) );
-       struct ALIAS *alias_dep = New_alias ( tech_id, acronyme, MNEMO_MOTIF, ss_options );
+       struct ALIAS *alias_dep = New_alias ( tech_id, acronyme, MNEMO_VISUEL, ss_options );
        if (alias_dep) alias_dep->used = 1;                         /* &Par défaut, on considère qu'une dependance est utilisée */
      }
   }
@@ -1172,7 +1172,7 @@
            { Mnemo_auto_create_WATCHDOG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
              break;
            }
-          case MNEMO_MOTIF:
+          case MNEMO_VISUEL:
            { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
              gchar *couleur = Get_option_chaine( alias->options, T_COLOR, "black" );
              gchar *mode    = Get_option_chaine( alias->options, T_MODE, "default" );
@@ -1248,7 +1248,7 @@
        json_node_unref ( result );
      }
     else if ( Json_has_member ( result, "classe" ) && !strcmp ( Json_get_string ( result, "classe" ), "VISUEL" ) )
-     { alias = New_alias ( tech_id, acronyme, MNEMO_MOTIF, options );
+     { alias = New_alias ( tech_id, acronyme, MNEMO_VISUEL, options );
        json_node_unref ( result );
      }
     else
@@ -1530,7 +1530,7 @@
        while(liste)
         { alias = (struct ALIAS *)liste->data;
           if ( alias->used == FALSE &&
-                ( ! ( alias->classe == MNEMO_MOTIF &&                              /* Pas de warning pour les comments unused */
+                ( ! ( alias->classe == MNEMO_VISUEL &&                              /* Pas de warning pour les comments unused */
                       !strcasecmp ( Get_option_chaine ( alias->options, T_FORME, "" ), "comment" )
                     )
                 )
@@ -1554,13 +1554,13 @@
              else if (alias->classe == MNEMO_CPT_IMP)    { Liste_CI = Add_csv ( Liste_CI, alias->acronyme ); }
              else if (alias->classe == MNEMO_CPTH)       { Liste_CH = Add_csv ( Liste_CH, alias->acronyme ); }
              else if (alias->classe == MNEMO_MSG)        { Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme ); }
-             else if (alias->classe == MNEMO_MOTIF)
+             else if (alias->classe == MNEMO_VISUEL)
               { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
                 if (forme) { Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme ); }
               }
            }
 /***************************************************** Création des visuels externes ******************************************/
-          else if (alias->classe == MNEMO_MOTIF)                                   /* Création du LINK vers le visuel externe */
+          else if (alias->classe == MNEMO_VISUEL)                                   /* Création du LINK vers le visuel externe */
            { Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
               /* a virer ? Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );*/
            }
