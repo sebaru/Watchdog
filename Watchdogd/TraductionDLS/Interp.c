@@ -1189,9 +1189,9 @@
                 else                                              /* Pour tous les visuels "classiques", on créé un bit _CLIC */
                  { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
                    New_alias_dependance_DI ( tech_id, ss_acronyme, "Clic sur le visuel depuis l'IHM" );
+                   Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
+                   Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
                  }
-                Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
-                Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
               }
              break;
            }

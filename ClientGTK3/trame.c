@@ -589,59 +589,6 @@ printf("%s: New comment : %s\n", __func__, comment );
     trame_motif->gif_hauteur = (gint)bounds.y2-bounds.y1;
   }
 /******************************************************************************************************************************/
-/* Trame_ajout_visuel_bloc_maintenance: Prépare un pixbuf pour le bloc maintenance en parametre                               */
-/* Entrée: la page, la description du bloc maintenance                                                                        */
-/* Sortie: False si erreur                                                                                                    */
-/******************************************************************************************************************************/
- static gboolean Trame_ajout_visuel_bloc_maintenance ( struct PAGE_NOTEBOOK *page, JsonNode *visuel )
-  { struct TRAME *trame;
-    GooCanvasItem *item;
-
-         if (page->type == TYPE_PAGE_SUPERVISION) trame = ((struct TYPE_INFO_SUPERVISION *)page->infos)->Trame;
-    else if (page->type == TYPE_PAGE_ATELIER)     trame = ((struct TYPE_INFO_ATELIER *)page->infos)->Trame_atelier;
-    else return(FALSE);
-
-    struct TRAME_ITEM_MOTIF *trame_motif = Trame_new_item();
-    if (!trame_motif) { printf("%s: Erreur mémoire\n", __func__); return(FALSE); }
-
-    trame_motif->visuel = visuel;
-    trame_motif->page   = page;
-    trame_motif->type   = TYPE_MOTIF;
-    trame_motif->mode   = 0;                                                                         /* Sauvegarde etat motif */
-    trame_motif->cligno = 0;                                                                         /* Sauvegarde etat motif */
-
-    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                             /* Groupe MOTIF */
-
-    item = goo_canvas_image_new ( trame_motif->item_groupe, NULL, 0.0, 0.0, NULL );
-    trame_motif->items = g_slist_append ( trame_motif->items, item );
-    if (page->type == TYPE_PAGE_SUPERVISION)
-     { g_signal_connect( G_OBJECT(item), "button-press-event",   G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
-       g_signal_connect( G_OBJECT(item), "button-release-event", G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
-     }
-
-    item = goo_canvas_image_new ( trame_motif->item_groupe, NULL, 95.0, 00.0, NULL );
-    trame_motif->items = g_slist_append ( trame_motif->items, item );
-    if (page->type == TYPE_PAGE_SUPERVISION)
-     { g_signal_connect( G_OBJECT(item), "button-press-event",   G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
-       g_signal_connect( G_OBJECT(item), "button-release-event", G_CALLBACK(Clic_sur_bouton_supervision), trame_motif );
-     }
-
-    item = goo_canvas_rect_new ( trame_motif->item_groupe, 75.0, 5.0, 10.0, 10.0,
-                                 "fill_color", "lime", "stroke_color", "gray", NULL );
-    trame_motif->items = g_slist_append ( trame_motif->items, item );
-
-    Trame_redessiner_visuel_complexe ( trame_motif, visuel );
-    Trame_calculer_bounds ( trame_motif );
-    Trame_create_poignees ( trame_motif );
-    Trame_rafraichir_motif ( trame_motif );
-
-printf("%s: New bloc maintenance\n", __func__ );
-    pthread_mutex_lock ( &trame->lock );
-    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
-    pthread_mutex_unlock ( &trame->lock );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Trame_ajout_visuel_encadre: Ajoute un visuel encadré sur le canvas                                                         */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
@@ -807,7 +754,6 @@ printf("%s: New bloc maintenance\n", __func__ );
   { gchar *forme = Json_get_string ( visuel, "forme" );
          if ( !strcasecmp ( forme, "encadre" ) )           { return ( Trame_ajout_visuel_encadre          ( page, visuel ) ); }
     else if ( !strcasecmp ( forme, "bouton" ) )            { return ( Trame_ajout_visuel_bouton           ( page, visuel ) ); }
-    else if ( !strcasecmp ( forme, "bloc_maintenance" ) )  { return ( Trame_ajout_visuel_bloc_maintenance ( page, visuel ) ); }
     else if ( !strcasecmp ( forme, "comment" ) )           { return ( Trame_ajout_visuel_comment          ( page, visuel ) ); }
     return(FALSE);
   }
@@ -837,32 +783,6 @@ printf("%s: New bloc maintenance\n", __func__ );
   { gchar *forme = Json_get_string ( trame_motif->visuel, "forme" );
     gchar *mode  = Json_get_string ( visuel, "mode" );
     gchar *color = Json_get_string ( visuel, "color" );
-
-    if ( !strcasecmp ( forme, "bloc_maintenance" ) )
-     { gchar *couleur_service,  *couleur_maintenance;
-       if (!mode) mode="service";
-
-       GooCanvasItem *bouton_service     = g_slist_nth_data ( trame_motif->items, 0 );
-       GooCanvasItem *bouton_maintenance = g_slist_nth_data ( trame_motif->items, 1 );
-       GooCanvasItem *rect_maintenance   = g_slist_nth_data ( trame_motif->items, 2 );
-
-       if (!strcasecmp ( mode, "maintenance" ))
-        { couleur_maintenance = "gray"; couleur_service="blue";
-          g_object_set( rect_maintenance, "fill_color", "yellow", NULL );
-        }
-       else
-        { couleur_maintenance = "blue"; couleur_service="gray";
-          g_object_set( rect_maintenance, "fill_color", "lime", NULL );
-        }
-       Json_node_add_string ( trame_motif->visuel, "mode", mode );                /* sauvegarde du mode en cours */
-       g_object_set( bouton_service, "pixbuf",
-                     Trame_Make_svg_bouton ( couleur_service, "  Service  " ), NULL );
-
-       g_object_set( bouton_maintenance, "pixbuf",
-                     Trame_Make_svg_bouton ( couleur_maintenance, "Maintenance" ), NULL );
-
-       return;
-     }
 
     Json_node_add_string ( trame_motif->visuel, "mode", mode );                   /* sauvegarde du mode en cours */
     Json_node_add_string ( trame_motif->visuel, "color", color );                 /* sauvegarde du mode en cours */
