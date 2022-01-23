@@ -86,6 +86,19 @@
                     "FOREIGN KEY (`thread_tech_id`) REFERENCES `modbus` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
 
+    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `modbus_AI` ("
+                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
+                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                    "`num` INT(11) NOT NULL DEFAULT 0,"
+                    "`type_borne` INT(11) NOT NULL DEFAULT 0,"
+                    "`min` FLOAT NOT NULL DEFAULT 0,"
+                    "`max` FLOAT NOT NULL DEFAULT 100,"
+                    "UNIQUE (thread_tech_id, thread_acronyme),"
+                    "FOREIGN KEY (`thread_tech_id`) REFERENCES `modbus` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+
     if (lib->database_version < 3)
      { SQL_Write_new ( "INSERT INTO mappings (thread_tech_id, thread_acronyme, tech_id, acronyme) "
                        "SELECT map_tech_id, "
@@ -98,7 +111,18 @@
                        "CONCAT ( 'DO', LPAD ( CONVERT (REPLACE ( mnemos_DO.map_tag, 'DO', '' ), INTEGER ), 3, '0' ) ), tech_id, acronyme "
                        "FROM mnemos_DO WHERE map_thread ='MODBUS' " );
      }
-    Process_set_database_version ( lib, 4 );
+    if (lib->database_version < 5)
+     { SQL_Write_new ( "INSERT INTO mappings (thread_tech_id, thread_acronyme, tech_id, acronyme) "
+                       "SELECT map_tech_id, "
+                       "CONCAT ( 'AI', LPAD ( CONVERT (REPLACE ( mnemos_AI.map_tag, 'AI', '' ), INTEGER ), 3, '0' ) ), tech_id, acronyme "
+                       "FROM mnemos_AI WHERE map_thread ='MODBUS' " );
+       SQL_Write_new ( "UPDATE modbus_AI "
+                       "INNER JOIN mappings AS map ON map.thread_tech_id  = modbus_AI.thread_tech_id "
+                                                                  "AND map.thread_acronyme = modbus_AI.thread_acronyme "
+                       "INNER JOIN mnemos_AI as m ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
+                       "SET mnemos_AI.type_borne = m.type" );
+     }
+    Process_set_database_version ( lib, 5 );
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -121,6 +145,7 @@
     vars->date_retente = Partage->top + MODBUS_RETRY;
     if (vars->DI_root) { json_node_unref(vars->DI_root); vars->DI_root = NULL; }
     if (vars->DI)      { g_free(vars->DI); vars->DI = NULL; }
+    if (vars->AI_root) { json_node_unref(vars->AI_root); vars->AI_root = NULL; }
     if (vars->AI)      { g_free(vars->AI); vars->AI = NULL; }
     if (vars->DO_root) { json_node_unref(vars->DO_root); vars->DO_root = NULL; }
     if (vars->DO)      { g_free(vars->DO); vars->DO = NULL; }
@@ -207,10 +232,6 @@
     vars->transaction_id = 1;
     vars->started = TRUE;
     vars->mode = MODBUS_GET_DESCRIPTION;
-    vars->DI = NULL;
-    vars->DI_root = NULL;
-    vars->AI = NULL;
-    vars->DO = NULL;
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module Connected", __func__, thread_tech_id );
 
     return(TRUE);
@@ -679,17 +700,44 @@
 /******************************************************************************************************************************/
  static void Modbus_do_mapping ( struct SUBPROCESS *module )
   { struct MODBUS_VARS *vars = module->vars;
-    gchar critere[80];
-    struct DB *db;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    vars->AI = g_try_malloc0( sizeof(gpointer) * vars->nbr_entree_ana );
-    if (!vars->AI)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, thread_tech_id );
-       return;
-     } else Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                      "%s: '%s': Allocated %d AI", __func__, thread_tech_id, vars->nbr_entree_ana );
+/***************************************************** Mapping des AIgitalInput ***********************************************/
+    vars->AI_root = Json_node_create();
+    if (!vars->AI_root)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__ , thread_tech_id); }
+    else
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d AI", __func__,thread_tech_id, vars->nbr_entree_ana );
+       SQL_Select_to_json_node ( vars->AI_root, "modbus_AI",
+                                 "SELECT AI.*, m.* FROM modbus_AI AS AI "
+                                 "INNER JOIN mappings ON mappings.thread_tech_id  = AI.thread_tech_id "
+                                 "                   AND mappings.thread_acronyme = AI.thread_acronyme "
+                                 "INNER JOIN mnemos_AI AS m ON m.tech_id = mappings.tech_id AND m.acronyme = mappings.acronyme "
+                                 "WHERE AI.thread_tech_id='%s' AND mappings.tech_id IS NOT NULL", thread_tech_id );
+
+       vars->AI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_ana );
+       if (!vars->AI)
+        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, thread_tech_id);
+          return;
+        }
+
+       JsonArray *array = Json_get_array ( vars->AI_root, "modbus_AI" );
+       for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->AI_root, "modbus_AI" ) ); cpt ++ )
+        { JsonNode *element = json_array_get_element ( array, cpt );
+          gint num = Json_get_int ( element, "num" );
+          if ( 0 <= num && num < vars->nbr_entree_ana )
+           { vars->AI[num] = element;
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping: %s -> %s:%s", __func__, thread_tech_id,
+                       Json_get_string ( vars->AI[num], "thread_acronyme" ),
+                       Json_get_string ( vars->AI[num], "tech_id" ),
+                       Json_get_string ( vars->AI[num], "acronyme" ) );
+             Json_node_add_int  ( vars->AI[num], "valeur", -1 );                 /* Pour forcer une premiere comm vers le master */
+             Json_node_add_bool ( vars->AI[num], "inrange", FALSE );
+           } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map AI: num %d out of range '%d'",
+                            __func__, thread_tech_id, num, vars->nbr_entree_ana );
+        }
+     }
 
 /***************************************************** Mapping des DigitalInput ***********************************************/
     vars->DI_root = Json_node_create();
@@ -759,27 +807,6 @@
         }
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    if ( ! Recuperer_mnemos_AI_by_tag ( &db, thread_tech_id, "AI%%" ) )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'",
-                 __func__, thread_tech_id, critere );
-     }
-    else while ( Recuperer_mnemos_AI_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *map_tag = db->row[2], *libelle = db->row[3];
-       gint num;
-       Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Map found '%s' '%s:%s' - %s",
-                 __func__, thread_tech_id, map_tag, tech_id, acro, libelle );
-       if ( sscanf ( map_tag, "AI%d", &num ) == 1 )                                          /* Découpage de la ligne ev_text */
-        { if (num<vars->nbr_entree_ana)
-           { Charger_confDB_AI ( tech_id, acro );
-             Dls_data_get_AI ( tech_id, acro, &vars->AI[num] );        /* bit déjà existant deja dans la structure DLS DATA */
-           }
-          else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map '%s': num %d out of range '%d'",
-                         __func__, thread_tech_id, map_tag, num, vars->nbr_entree_ana );
-        }
-       else Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': event '%s': Sscanf Error",
-                      __func__, thread_tech_id, map_tag );
-     }
-/******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Module '%s' : mapping done",
               __func__, thread_tech_id, Json_get_string ( module->config, "description" ) );
   }
@@ -834,28 +861,40 @@
             break;
        case MODBUS_GET_AI:
             for ( cpt = 0; cpt<vars->nbr_entree_ana; cpt++)
-             { struct DLS_AI *ai = vars->AI[cpt];
-               if (!ai) continue;                                                    /* Si pas mappé, bah on ne la stocke pas */
-               switch( ai->type )
-                { case WAGO_750455:
-                       if ( ! (vars->response.data[ 2*cpt + 2 ] & 0x03) )
-                        { int reponse;
-                          reponse  = vars->response.data[ 2*cpt + 1 ] << 5;
-                          reponse |= vars->response.data[ 2*cpt + 2 ] >> 3;
-                          Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt],
-                                           (gdouble)(reponse*(ai->max - ai->min))/4095.0 + ai->min, TRUE );
-                        }
-                       else { Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt], 0.0, FALSE ); }
-                       break;
-                  case WAGO_750461:                                                                            /* Borne PT100 */
-                        { gint16 reponse;
-                          reponse  = vars->response.data[ 2*cpt + 1 ] << 8;
-                          reponse |= vars->response.data[ 2*cpt + 2 ];
-                          if (reponse > -2000 && reponse < 8500)
-                           { Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt], (gdouble)(reponse/10.0), TRUE ); }
-                          else { Dls_data_set_AI ( NULL, NULL, &vars->AI[cpt], 0.0, FALSE ); }
-                        }
-                       break;
+             { if (vars->AI[cpt])                                                                   /* Si l'entrée est mappée */
+                { gint type_borne = Json_get_int ( vars->AI[cpt], "type_borne" );
+                  gboolean old_inrange = Json_get_bool ( vars->AI[cpt], "inrange" );
+                  gboolean new_inrange = ((vars->response.data[ 2*cpt + 2 ] & 0x03) ? FALSE : TRUE);
+                  gint old_valeur_int  = Json_get_int ( vars->AI[cpt], "valeur" );
+                  gint new_valeur_int;
+                  gdouble new_valeur;
+                  switch( type_borne )
+                   { case WAGO_750455:
+                          new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 5;
+                          new_valeur_int |= vars->response.data[ 2*cpt + 2 ] >> 3;
+                          break;
+                     case WAGO_750461:                                                                            /* Borne PT100 */
+                          new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 8;
+                          new_valeur_int |= vars->response.data[ 2*cpt + 2 ];
+                          break;
+                   }
+                  if (old_valeur_int != new_valeur_int || old_inrange != new_inrange)
+                   { switch( type_borne )
+                      { case WAGO_750455:
+                             gdouble min = Json_get_double ( vars->AI[cpt], "min" );
+                             gdouble max = Json_get_double ( vars->AI[cpt], "max" );
+                             new_valeur  = (new_valeur_int*(max - min))/4095.0 + min;
+                             break;
+                        case WAGO_750461:                                                                            /* Borne PT100 */
+                             new_valeur  = new_valeur_int/10.0;
+                             break;
+                      }
+                     Zmq_Send_AI_to_master_new ( module, Json_get_string ( vars->AI[cpt], "tech_id" ),
+                                                         Json_get_string ( vars->AI[cpt], "acronyme" ),
+                                                         new_valeur, new_inrange );
+                     Json_node_add_int  ( vars->AI[cpt], "valeur",  new_valeur_int );
+                     Json_node_add_bool ( vars->AI[cpt], "inrange", new_inrange );
+                   }
                 }
              }
             vars->mode = MODBUS_SET_DO;
