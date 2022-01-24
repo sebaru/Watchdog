@@ -569,14 +569,26 @@ encore:
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_DO` ("
                    "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
-                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
                    "`etat` BOOLEAN NOT NULL DEFAULT '0',"
                    "`libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
                    "UNIQUE (`tech_id`,`acronyme`),"
-                   "UNIQUE (`map_tech_id`,`map_tag`),"
                    "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_AI` ("
+                   "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
+                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "`valeur` FLOAT NOT NULL DEFAULT '0',"
+                   "`unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                   "`archivage` INT(11) NOT NULL DEFAULT '2',"
+                   "UNIQUE (`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
                    "`thread_tech_id` VARCHAR(32) NOT NULL,"

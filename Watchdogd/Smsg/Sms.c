@@ -623,7 +623,7 @@ end:
      }
     Smsg_disconnect(module);
 
-    SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE uuid='%s'", module->lib->name, vars->nbr_sms,  module->lib->uuid );
+    SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE uuid='%s'", module->lib->name, vars->nbr_sms, module->lib->uuid );
 
     SubProcess_end(module);
   }
