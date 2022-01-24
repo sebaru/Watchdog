@@ -118,9 +118,9 @@
                        "FROM mnemos_AI WHERE map_thread ='MODBUS' " );
        SQL_Write_new ( "UPDATE modbus_AI "
                        "INNER JOIN mappings AS map ON map.thread_tech_id  = modbus_AI.thread_tech_id "
-                                                                  "AND map.thread_acronyme = modbus_AI.thread_acronyme "
+                                                 "AND map.thread_acronyme = modbus_AI.thread_acronyme "
                        "INNER JOIN mnemos_AI as m ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
-                       "SET mnemos_AI.type_borne = m.type" );
+                       "SET modbus_AI.type_borne = m.type" );
      }
     Process_set_database_version ( lib, 5 );
   }
@@ -870,24 +870,28 @@
                   gdouble new_valeur;
                   switch( type_borne )
                    { case WAGO_750455:
-                          new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 5;
-                          new_valeur_int |= vars->response.data[ 2*cpt + 2 ] >> 3;
-                          break;
-                     case WAGO_750461:                                                                            /* Borne PT100 */
-                          new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 8;
-                          new_valeur_int |= vars->response.data[ 2*cpt + 2 ];
-                          break;
+                      { new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 5;
+                        new_valeur_int |= vars->response.data[ 2*cpt + 2 ] >> 3;
+                        break;
+                      }
+                     case WAGO_750461:                                                                         /* Borne PT100 */
+                      { new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 8;
+                        new_valeur_int |= vars->response.data[ 2*cpt + 2 ];
+                        break;
+                      }
                    }
                   if (old_valeur_int != new_valeur_int || old_inrange != new_inrange)
                    { switch( type_borne )
                       { case WAGO_750455:
-                             gdouble min = Json_get_double ( vars->AI[cpt], "min" );
-                             gdouble max = Json_get_double ( vars->AI[cpt], "max" );
-                             new_valeur  = (new_valeur_int*(max - min))/4095.0 + min;
-                             break;
-                        case WAGO_750461:                                                                            /* Borne PT100 */
-                             new_valeur  = new_valeur_int/10.0;
-                             break;
+                         { gdouble min = Json_get_double ( vars->AI[cpt], "min" );
+                           gdouble max = Json_get_double ( vars->AI[cpt], "max" );
+                           new_valeur  = (new_valeur_int*(max - min))/4095.0 + min;
+                           break;
+                         }
+                        case WAGO_750461:                                                                      /* Borne PT100 */
+                         { new_valeur  = new_valeur_int/10.0;
+                           break;
+                         }
                       }
                      Zmq_Send_AI_to_master_new ( module, Json_get_string ( vars->AI[cpt], "tech_id" ),
                                                          Json_get_string ( vars->AI[cpt], "acronyme" ),
