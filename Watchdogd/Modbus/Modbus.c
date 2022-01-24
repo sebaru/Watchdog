@@ -120,7 +120,7 @@
                        "INNER JOIN mappings AS map ON map.thread_tech_id  = modbus_AI.thread_tech_id "
                                                  "AND map.thread_acronyme = modbus_AI.thread_acronyme "
                        "INNER JOIN mnemos_AI as m ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
-                       "SET modbus_AI.type_borne = m.type" );
+                       "SET modbus_AI.type_borne = m.type, modbus_AI.min = m.min, modbus_AI.max = m.max" );
      }
     Process_set_database_version ( lib, 5 );
   }
@@ -864,7 +864,7 @@
              { if (vars->AI[cpt])                                                                   /* Si l'entrée est mappée */
                 { gint type_borne = Json_get_int ( vars->AI[cpt], "type_borne" );
                   gboolean old_inrange = Json_get_bool ( vars->AI[cpt], "inrange" );
-                  gboolean new_inrange = ((vars->response.data[ 2*cpt + 2 ] & 0x03) ? FALSE : TRUE);
+                  gboolean new_inrange;
                   gint old_valeur_int  = Json_get_int ( vars->AI[cpt], "valeur" );
                   gint new_valeur_int;
                   gdouble new_valeur;
@@ -872,11 +872,13 @@
                    { case WAGO_750455:
                       { new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 5;
                         new_valeur_int |= vars->response.data[ 2*cpt + 2 ] >> 3;
+                        new_inrange = !(vars->response.data[ 2*cpt + 2 ] & 0x03);
                         break;
                       }
                      case WAGO_750461:                                                                         /* Borne PT100 */
                       { new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 8;
                         new_valeur_int |= vars->response.data[ 2*cpt + 2 ];
+                        if (new_valeur_int > -2000 && new_valeur_int < 8500) new_inrange = TRUE; else new_inrange = FALSE;
                         break;
                       }
                    }
