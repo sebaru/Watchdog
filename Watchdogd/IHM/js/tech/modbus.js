@@ -147,6 +147,20 @@
      });
     $('#idMODALMap').modal("show");
   }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function MODBUS_Edit_AI ( id )
+  { table = $('#idTableMODBUS_AI').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    $('#idMODBUSEditAI').text( "Configurer "+selection.thread_tech_id+":"+selection.thread_acronyme );
+    $('#idMODBUSEditAITypeBorne').val ( selection.type_borne );
+    $('#idMODBUSEditAIMin').val ( selection.min );
+    $('#idMODBUSEditAIMax').val ( selection.max );
+    $('#idMODBUSEditAIValider').off("click").on( "click", function ()
+     { $('#idMODBUSEditAI').modal("hide");
+       /*Send_to_API().then ( () => { MODBUS_Refresh(); } );*/
+     });
+    $('#idMODBUSEditAI').modal("show");
+  }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
   { $('#idTableMODBUS').DataTable(
@@ -304,6 +318,7 @@
             },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "primary", "Editer cet objet", "MODBUS_Edit_AI", item.id, "pen", null );
                   boutons += Bouton_actions_add ( "primary", "Mapper cet objet", "MODBUS_Map_AI", item.id, "directions", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
