@@ -23,26 +23,26 @@
      }, null);
   }
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_start ( uuid )
+ function Process_clic_enable ( uuid )
   { var json_request = JSON.stringify(
        { uuid  : uuid,
          status: true,
        }
      );
     $("#idButtonSpinner_"+uuid).show();
-    Send_to_API ( "POST", "/api/process/start", json_request, function(Response)
+    Send_to_API ( "POST", "/api/process/enable", json_request, function(Response)
      { setTimeout ( function () { $('#idTableProcess').DataTable().ajax.reload(); }, 2000 );
      }, null);
   }
 /********************************************* Reload Process *****************************************************************/
- function Process_clic_stop ( uuid )
+ function Process_clic_disable ( uuid )
   { var json_request = JSON.stringify(
        { uuid  : uuid,
          status: false,
        }
      );
     $("#idButtonSpinner_"+uuid).show();
-    Send_to_API ( "POST", "/api/process/start", json_request, function(Response)
+    Send_to_API ( "POST", "/api/process/enable", json_request, function(Response)
      { setTimeout ( function () { $('#idTableProcess').DataTable().ajax.reload(); }, 2000 );
      }, null);
   }
@@ -64,15 +64,15 @@
               "render": function (item)
                 { return( item.uuid.slice(0, 8) ); }
             },
-            { "data": null, "title":"Started", "className": "align-middle text-center",
+            { "data": null, "title":"Enabled", "className": "align-middle text-center",
               "render": function (item)
-                { if (item.started==true)
+                { if (item.enabled==true)
                    { return( Bouton ( "success", "Désactiver le process",
-                                      "Process_clic_stop", item.uuid, "Actif" ) );
+                                      "Process_clic_disable", item.uuid, "Oui" ) );
                    }
                   else
                    { return( Bouton ( "outline-secondary", "Activer le process",
-                                      "Process_clic_start", item.uuid, "Inactif" ) );
+                                      "Process_clic_enable", item.uuid, "Non" ) );
                    }
                 },
             },

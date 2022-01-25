@@ -247,6 +247,9 @@
 
     CopyUnicodeString(sms.SMSC.Number, PhoneSMSC.Number);                                       /* Set SMSC number in message */
 
+    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+              "%s: %s: Try to send to %s (%s)", __func__, thread_tech_id, telephone, libelle );
+
     vars->gammu_send_status = ERR_TIMEOUT;
     error = GSM_SendSMS(vars->gammu_machine, &sms);                                                        /* Send message */
     if (error != ERR_NONE)

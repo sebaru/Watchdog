@@ -672,7 +672,7 @@ reload:
     soup_server_add_handler ( socket, "/api/archive/testdb",       Http_traiter_archive_testdb, NULL, NULL );
 
     soup_server_add_handler ( socket, "/api/process/reload", Http_traiter_process_reload, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/start",  Http_traiter_process_start, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/process/enable", Http_traiter_process_enable, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/debug",  Http_traiter_process_debug, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/list",   Http_traiter_process_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/process/config", Http_traiter_process_config, NULL, NULL );

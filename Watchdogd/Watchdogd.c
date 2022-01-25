@@ -224,7 +224,7 @@
          if ( !strcasecmp( zmq_tag, "SET_WATCHDOG") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
               Json_has_member ( request, "consigne" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_WATCHDOG : wrong parameters from '%s'", __func__, zmq_src_tech_id );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_WATCHDOG: wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
 
@@ -245,7 +245,7 @@
         }
 
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: SET_AI from '%s' to '%s' : '%s:%s'=%f (range=%d)", __func__,
+                 "%s: SET_AI from '%s' to '%s': '%s:%s'=%f (range=%d)", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id,
                  Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                  Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
@@ -255,7 +255,7 @@
      }
     else if ( !strcasecmp( zmq_tag, "SET_CDE") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE : wrong parameters from '%s'", __func__, zmq_src_tech_id );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE: wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
@@ -267,7 +267,7 @@
      }
     else if ( !strcasecmp( zmq_tag, "SET_DI") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_DI : wrong parameters from '%s'", __func__, zmq_src_tech_id );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_DI: wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
        Info_new( Config.log, Config.log_msrv, LOG_INFO,

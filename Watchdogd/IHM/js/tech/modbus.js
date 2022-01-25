@@ -3,6 +3,8 @@
  function MODBUS_Refresh ( )
   { $('#idTableMODBUS').DataTable().ajax.reload(null, false);
     $('#idTableMODBUS_DI').DataTable().ajax.reload(null, false);
+    $('#idTableMODBUS_DO').DataTable().ajax.reload(null, false);
+    $('#idTableMODBUS_AI').DataTable().ajax.reload(null, false);
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function MODBUS_Disable ( id )
@@ -122,6 +124,21 @@
     $('#idMODALMapTitre').text( "Mapper "+selection.thread_tech_id+":"+selection.thread_acronyme );
     $('#idMODALMapRechercherTechID').off("input").on("input", function () { Common_Updater_Choix_TechID ( "idMODALMap", "DO" ); } );
     Common_Updater_Choix_TechID ( "idMODALMap", "DO", selection.tech_id, selection.acronyme );
+    $('#idMODALMapValider').off("click").on( "click", function ()
+     { $('#idMODALMap').modal("hide");
+       COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
+                    $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
+                  ).then ( () => { MODBUS_Refresh(); } );
+     });
+    $('#idMODALMap').modal("show");
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function MODBUS_Map_AI ( id )
+  { table = $('#idTableMODBUS_AI').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    $('#idMODALMapTitre').text( "Mapper "+selection.thread_tech_id+":"+selection.thread_acronyme );
+    $('#idMODALMapRechercherTechID').off("input").on("input", function () { Common_Updater_Choix_TechID ( "idMODALMap", "AI" ); } );
+    Common_Updater_Choix_TechID ( "idMODALMap", "AI", selection.tech_id, selection.acronyme );
     $('#idMODALMapValider').off("click").on( "click", function ()
      { $('#idMODALMap').modal("hide");
        COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
@@ -254,6 +271,50 @@
          responsive: true,
        }
      );
+
+    $('#idTableMODBUS_AI').DataTable(
+       { pageLength : 50,
+         fixedHeader: true,
+         rowId: "id", paging: false,
+         ajax: {	url : "/api/process/config", type : "GET", data: { name: "modbus", classe: "AI" }, dataSrc: "config",
+                 error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
+               },
+         columns:
+          [ { "data": null, "title":"WAGO TechID", "className": "align-middle text-center",
+              "render": function (item)
+                { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
+            },
+            { "data": null, "title":"WAGO I/O", "className": "align-middle text-center",
+              "render": function (item)
+                { return( item.thread_acronyme ); }
+            },
+            { "data": null, "title":"Mapped on", "className": "align-middle text-center",
+              "render": function (item)                { if(item.tech_id)
+                   { return ( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) +":" + item.acronyme );
+                   } else return( "--" );
+                }
+            },
+            { "data": null, "title":"Description", "className": "align-middle text-center",
+              "render": function (item)
+                { if(item.tech_id) { return ( item.libelle ); } else return( "--" ); }
+            },
+            { "data": null, "title":"Unité", "className": "align-middle text-center",
+              "render": function (item)
+                { return( htmlEncode ( item.unite ) ); }
+            },
+            { "data": null, "title":"Actions", "orderable": false, "render": function (item)
+                { boutons = Bouton_actions_start ();
+                  boutons += Bouton_actions_add ( "primary", "Mapper cet objet", "MODBUS_Map_AI", item.id, "directions", null );
+                  boutons += Bouton_actions_end ();
+                  return(boutons);
+                },
+            },
+          ],
+         /*order: [ [0, "desc"] ],*/
+         responsive: true,
+       }
+     );
+
 /*
 
     $('#idTableMODBUS_AI').DataTable(
