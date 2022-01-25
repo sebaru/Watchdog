@@ -870,14 +870,14 @@
                   gdouble new_valeur;
                   switch( type_borne )
                    { case WAGO_750455:
-                      { new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 5;
-                        new_valeur_int |= vars->response.data[ 2*cpt + 2 ] >> 3;
+                      { new_valeur_int  = (gint)vars->response.data[ 2*cpt + 1 ] << 5;
+                        new_valeur_int |= (gint)vars->response.data[ 2*cpt + 2 ] >> 3;
                         new_inrange = !(vars->response.data[ 2*cpt + 2 ] & 0x03);
                         break;
                       }
                      case WAGO_750461:                                                                         /* Borne PT100 */
-                      { new_valeur_int  = vars->response.data[ 2*cpt + 1 ] << 8;
-                        new_valeur_int |= vars->response.data[ 2*cpt + 2 ];
+                      { new_valeur_int  = (gint)vars->response.data[ 2*cpt + 1 ] << 8;
+                        new_valeur_int |= (gint)vars->response.data[ 2*cpt + 2 ];
                         if (new_valeur_int > -2000 && new_valeur_int < 8500) new_inrange = TRUE; else new_inrange = FALSE;
                         break;
                       }
