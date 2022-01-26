@@ -257,7 +257,7 @@
        Partage->com_dls.Reset_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Reset_Dls_MONO_Edge_down, mono );
        mono->edge_down = TRUE;
      }
-    while( Partage->com_dls.Set_Dls_BI_Edge_up )                                       /* A-t-on un biean up a allumer ?? */
+    while( Partage->com_dls.Set_Dls_BI_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
      { struct DLS_BI *bi = Partage->com_dls.Set_Dls_BI_Edge_up->data;
        Partage->com_dls.Set_Dls_BI_Edge_up   = g_slist_remove  ( Partage->com_dls.Set_Dls_BI_Edge_up, bi );
        Partage->com_dls.Reset_Dls_BI_Edge_up = g_slist_prepend ( Partage->com_dls.Reset_Dls_BI_Edge_up, bi );
@@ -288,22 +288,22 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Reset_edge ( void )
-  { while( Partage->com_dls.Reset_Dls_MONO_Edge_up )                                     /* A-t-on un monoean up a allumer ?? */
+  { while( Partage->com_dls.Reset_Dls_MONO_Edge_up )                                     /* A-t-on un boolean up a allumer ?? */
      { struct DLS_MONO *mono = Partage->com_dls.Reset_Dls_MONO_Edge_up->data;
        Partage->com_dls.Reset_Dls_MONO_Edge_up = g_slist_remove ( Partage->com_dls.Reset_Dls_MONO_Edge_up, mono );
        mono->edge_up = FALSE;
      }
-    while( Partage->com_dls.Reset_Dls_MONO_Edge_down )                                 /* A-t-on un monoean down a allumer ?? */
+    while( Partage->com_dls.Reset_Dls_MONO_Edge_down )                                 /* A-t-on un boolean down a allumer ?? */
      { struct DLS_MONO *mono = Partage->com_dls.Reset_Dls_MONO_Edge_down->data;
        Partage->com_dls.Reset_Dls_MONO_Edge_down = g_slist_remove ( Partage->com_dls.Reset_Dls_MONO_Edge_down, mono );
        mono->edge_down = FALSE;
      }
-    while( Partage->com_dls.Reset_Dls_BI_Edge_up )                                     /* A-t-on un biean up a allumer ?? */
+    while( Partage->com_dls.Reset_Dls_BI_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
      { struct DLS_BI *bi = Partage->com_dls.Reset_Dls_BI_Edge_up->data;
        Partage->com_dls.Reset_Dls_BI_Edge_up = g_slist_remove ( Partage->com_dls.Reset_Dls_BI_Edge_up, bi );
        bi->edge_up = FALSE;
      }
-    while( Partage->com_dls.Reset_Dls_BI_Edge_down )                                 /* A-t-on un biean down a allumer ?? */
+    while( Partage->com_dls.Reset_Dls_BI_Edge_down )                                   /* A-t-on un boolean down a allumer ?? */
      { struct DLS_BI *bi = Partage->com_dls.Reset_Dls_BI_Edge_down->data;
        Partage->com_dls.Reset_Dls_BI_Edge_down = g_slist_remove ( Partage->com_dls.Reset_Dls_BI_Edge_down, bi );
        bi->edge_down = FALSE;
@@ -543,8 +543,8 @@ end:
     return( bi->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bi_up: Remonte le front montant d'un biean                                                                    */
-/* Sortie : TRUE sur le biean vient de passer à UP                                                                            */
+/* Dls_data_get_bi_up: Remonte le front montant d'un boolean                                                                    */
+/* Sortie : TRUE sur le boolean vient de passer à UP                                                                            */
 /******************************************************************************************************************************/
  gboolean Dls_data_get_BI_up ( gchar *tech_id, gchar *acronyme, gpointer *bi_p )
   { struct DLS_BI *bi;
@@ -559,8 +559,8 @@ end:
     return( bi->edge_up );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bi_down: Remonte le front descendant d'un biean                                                               */
-/* Sortie : TRUE sur le biean vient de passer à DOWN                                                                          */
+/* Dls_data_get_bi_down: Remonte le front descendant d'un boolean                                                               */
+/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                          */
 /******************************************************************************************************************************/
  gboolean Dls_data_get_BI_down ( gchar *tech_id, gchar *acronyme, gpointer *bi_p )
   { struct DLS_BI *bi;
@@ -614,8 +614,8 @@ end:
     return( mono->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_mono_up: Remonte le front montant d'un monoean                                                                */
-/* Sortie : TRUE sur le monoean vient de passer à UP                                                                          */
+/* Dls_data_get_mono_up: Remonte le front montant d'un boolean                                                                */
+/* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
 /******************************************************************************************************************************/
  gboolean Dls_data_get_MONO_up ( gchar *tech_id, gchar *acronyme, gpointer *mono_p )
   { struct DLS_MONO *mono;
@@ -630,8 +630,8 @@ end:
     return( mono->edge_up );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_mono_down: Remonte le front descendant d'un monoean                                                           */
-/* Sortie : TRUE sur le monoean vient de passer à DOWN                                                                        */
+/* Dls_data_get_mono_down: Remonte le front descendant d'un boolean                                                           */
+/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
 /******************************************************************************************************************************/
  gboolean Dls_data_get_MONO_down ( gchar *tech_id, gchar *acronyme, gpointer *mono_p )
   { struct DLS_MONO *mono;
@@ -914,15 +914,6 @@ end:
 
     ai->valeur  = valeur;
     ai->inrange = in_range;
-
-    if ( (ai->archivage == 1 && ai->last_arch + 50     <= Partage->top) ||
-         (ai->archivage == 2 && ai->last_arch + 600    <= Partage->top) ||
-         (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||
-         (ai->archivage == 4 && ai->last_arch + 864000 <= Partage->top)
-       )
-     { Ajouter_arch( ai->tech_id, ai->acronyme, ai->valeur );                                         /* Archivage si besoin */
-       ai->last_arch = Partage->top;
-     }
   }
 /******************************************************************************************************************************/
 /* Met à jour la sortie analogique à partir de sa valeur avant mise a l'echelle                                               */
@@ -1910,18 +1901,21 @@ end:
           Partage->com_dls.Thread_reload_with_recompil = FALSE;
         }
 
+/******************************************************************************************************************************/
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
         { Dls_data_set_MONO ( NULL, "SYS", "TOP_5HZ", &dls_top_5hz, TRUE );
           Dls_data_set_BI   ( NULL, "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz,
                              !Dls_data_get_BI ( "SYS", "FLIPFLOP_5HZ", &dls_flipflop_5hz) );
           last_top_5hz = Partage->top;
         }
+/******************************************************************************************************************************/
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
         { Dls_data_set_MONO ( NULL, "SYS", "TOP_2HZ", &dls_top_2hz, TRUE );
           Dls_data_set_BI   ( NULL, "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz,
                              !Dls_data_get_BI ( "SYS", "FLIPFLOP_2HZ", &dls_flipflop_2hz) );
           last_top_2hz = Partage->top;
         }
+/******************************************************************************************************************************/
        if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
         { Dls_data_set_MONO ( NULL, "SYS", "TOP_1SEC", &dls_top_1sec, TRUE );
           Dls_data_set_BI   ( NULL, "SYS", "FLIPFLOP_1SEC", &dls_flipflop_1sec,
@@ -1943,33 +1937,66 @@ end:
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
           Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE );        /* historique */
         }
-       if (Partage->top-last_top_2sec>=20)                                                             /* Toutes les secondes */
+/******************************************************************************************************************************/
+       if (Partage->top-last_top_2sec>=20)                                                           /* Toutes les 2 secondes */
         { Dls_data_set_BI ( NULL, "SYS", "FLIPFLOP_2SEC", &dls_flipflop_2sec,
                            !Dls_data_get_BI ( "SYS", "FLIPFLOP_2SEC", &dls_flipflop_2sec) );
           last_top_2sec = Partage->top;
         }
+/******************************************************************************************************************************/
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_MONO ( NULL, "SYS", "TOP_5SEC", &dls_top_5sec, TRUE );
+          GSList *liste = Partage->Dls_data_AI;
+          while (liste)
+           { struct DLS_AI *ai = liste->data;
+			 if ( ai->archivage == 1 )
+              { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->inrange ? ai->valeur : 0.0) );          /* Archivage si besoin */
+                ai->last_arch = Partage->top;
+              }
+             liste = g_slist_next(liste);
+           }
           last_top_5sec = Partage->top;
         }
-       if (Partage->top-last_top_10sec>=100)                                                              /* Toutes les secondes */
+/******************************************************************************************************************************/
+       if (Partage->top-last_top_10sec>=100)                                                        /* Toutes les 10 secondes */
         { Dls_data_set_MONO ( NULL, "SYS", "TOP_10SEC", &dls_top_10sec, TRUE );
           last_top_10sec = Partage->top;
         }
+/******************************************************************************************************************************/
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
         { Dls_data_set_MONO ( NULL, "SYS", "TOP_1MIN", &dls_top_1min, TRUE );
           Dls_data_set_AI ( "SYS", "NBR_MSG_QUEUE", &dls_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
           Dls_data_set_AI ( "SYS", "NBR_VISUEL_QUEUE", &dls_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
+          GSList *liste = Partage->Dls_data_AI;
+          while (liste)
+           { struct DLS_AI *ai = liste->data;
+			 if ( ai->archivage == 2 )
+              { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->inrange ? ai->valeur : 0.0) );          /* Archivage si besoin */
+                ai->last_arch = Partage->top;
+              }
+             liste = g_slist_next(liste);
+           }
           last_top_1min = Partage->top;
         }
-
+/******************************************************************************************************************************/
        if (Partage->top-last_top_10min>=6000)                                                        /* Toutes les 10 minutes */
         { JsonNode *result = Json_node_create();
           if (result)
            { SQL_Select_to_json_node ( result, NULL, "SELECT SUM(nbr_ligne) AS nbr_ligne_total FROM dls" );
              Dls_data_set_AI ( "SYS", "NBR_LIGNE_DLS", &dls_nbr_ligne_dls, Json_get_int( result, "nbr_ligne_total" )*1.0, TRUE );
              json_node_unref(result);
+           }
+          GSList *liste = Partage->Dls_data_AI;
+          while (liste)
+           { struct DLS_AI *ai = liste->data;
+			 if ( (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||
+                  (ai->archivage == 4 && ai->last_arch + 864000 <= Partage->top)
+                )
+              { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->inrange ? ai->valeur : 0.0) );          /* Archivage si besoin */
+                ai->last_arch = Partage->top;
+              }
+             liste = g_slist_next(liste);
            }
           last_top_10min = Partage->top;
         }
