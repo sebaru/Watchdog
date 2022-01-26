@@ -981,23 +981,6 @@ printf("%s: New comment : %s\n", __func__, comment );
        g_signal_connect( G_OBJECT(trame_motif->item), "enter-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
        g_signal_connect( G_OBJECT(trame_motif->item), "leave-notify-event",   G_CALLBACK(Clic_sur_motif), trame_motif );
        g_signal_connect( G_OBJECT(trame_motif->item), "motion-notify-event",  G_CALLBACK(Clic_sur_motif), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-press-event",   G_CALLBACK(Agrandir_hg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hg), "button-release-event", G_CALLBACK(Agrandir_hg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hg), "motion-notify-event",  G_CALLBACK(Agrandir_hg), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-press-event",   G_CALLBACK(Agrandir_hd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hd), "button-release-event", G_CALLBACK(Agrandir_hd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_hd), "motion-notify-event",  G_CALLBACK(Agrandir_hd), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-press-event",   G_CALLBACK(Agrandir_bg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bg), "button-release-event", G_CALLBACK(Agrandir_bg), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bg), "motion-notify-event",  G_CALLBACK(Agrandir_bg), trame_motif );
-
-       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-press-event",   G_CALLBACK(Agrandir_bd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bd), "button-release-event", G_CALLBACK(Agrandir_bd), trame_motif );
-       g_signal_connect( G_OBJECT(trame_motif->select_bd), "motion-notify-event",  G_CALLBACK(Agrandir_bd), trame_motif );
-
      }
     else
      { g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-press-event",

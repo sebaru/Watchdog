@@ -138,15 +138,7 @@
  extern void Mettre_echelle_selection_1_1 ( struct PAGE_NOTEBOOK *page );
  extern void Mettre_echelle_selection_1_Y ( struct PAGE_NOTEBOOK *page );
  extern void Mettre_echelle_selection_X_1 ( struct PAGE_NOTEBOOK *page );
-                                                                                                   /* Dans atelier_agrandir.c */
- extern void Agrandir_bd ( GooCanvasItem *widget, GooCanvasItem *target,
-                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Agrandir_bg ( GooCanvasItem *widget, GooCanvasItem *target,
-                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Agrandir_hd ( GooCanvasItem *widget, GooCanvasItem *target,
-                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Agrandir_hg ( GooCanvasItem *widget, GooCanvasItem *target,
-                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
+
  extern void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data);/* Dans atelier_motif.c */
  extern void Updater_un_visuel( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *motif );
                                                                                                     /* Dans atelier_comment.c */
