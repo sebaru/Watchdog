@@ -48,6 +48,7 @@
  extern gboolean Zmq_Send_as_raw ( struct ZMQUEUE *zmq, void *buf, gint taille );
  extern gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
  extern void Zmq_Send_DI_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gboolean etat );
+ extern void Zmq_Send_AI_to_master ( struct SUBPROCESS *module, JsonNode *ai);
  extern void Zmq_Send_AI_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gdouble valeur, gboolean in_range);
  extern void Zmq_Send_CDE_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme );
  extern void Zmq_Send_WATCHDOG_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gint consigne );

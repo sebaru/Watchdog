@@ -95,6 +95,7 @@
                     "`type_borne` INT(11) NOT NULL DEFAULT 0,"
                     "`min` FLOAT NOT NULL DEFAULT 0,"
                     "`max` FLOAT NOT NULL DEFAULT 100,"
+                    "`unite` VARCHAR(32) NOT NULL DEFAULT '',"
                     "UNIQUE (thread_tech_id, thread_acronyme),"
                     "FOREIGN KEY (`thread_tech_id`) REFERENCES `modbus` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
@@ -122,7 +123,14 @@
                        "INNER JOIN mnemos_AI as m ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
                        "SET modbus_AI.type_borne = m.type, modbus_AI.min = m.min, modbus_AI.max = m.max" );
      }
-    Process_set_database_version ( lib, 5 );
+    if (lib->database_version < 6)
+     { SQL_Write_new ( "ALTER TABLE modbus_AI ADD unite VARCHAR(32) NOT NULL DEFAULT ''");
+       SQL_Write_new ( "UPDATE modbus_AI AS ai "
+                       "INNER JOIN mappings AS map ON ai.thread_tech_id = map.thread_tech_id AND ai.thread_acronyme = map.thread_acronyme "
+                       "INNER JOIN mnemos_AI as m ON m.tech_id=map.tech_id AND m.acronyme=map.acronyme "
+                       "SET ai.unite=m.unite");
+     }
+    Process_set_database_version ( lib, 6 );
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -732,8 +740,8 @@
                        Json_get_string ( vars->AI[num], "thread_acronyme" ),
                        Json_get_string ( vars->AI[num], "tech_id" ),
                        Json_get_string ( vars->AI[num], "acronyme" ) );
-             Json_node_add_int  ( vars->AI[num], "valeur", -1 );                 /* Pour forcer une premiere comm vers le master */
-             Json_node_add_bool ( vars->AI[num], "inrange", FALSE );
+             Json_node_add_int  ( vars->AI[num], "valeur_int", -1 );          /* Pour forcer une premiere comm vers le master */
+             Json_node_add_bool ( vars->AI[num], "in_range", FALSE );
            } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map AI: num %d out of range '%d'",
                             __func__, thread_tech_id, num, vars->nbr_entree_ana );
         }
@@ -863,26 +871,26 @@
             for ( cpt = 0; cpt<vars->nbr_entree_ana; cpt++)
              { if (vars->AI[cpt])                                                                   /* Si l'entrée est mappée */
                 { gint type_borne = Json_get_int ( vars->AI[cpt], "type_borne" );
-                  gboolean old_inrange = Json_get_bool ( vars->AI[cpt], "inrange" );
-                  gboolean new_inrange;
-                  gint old_valeur_int  = Json_get_int ( vars->AI[cpt], "valeur" );
+                  gboolean old_in_range = Json_get_bool ( vars->AI[cpt], "in_range" );
+                  gboolean new_in_range;
+                  gint old_valeur_int  = Json_get_int ( vars->AI[cpt], "valeur_int" );
                   gint new_valeur_int;
                   gdouble new_valeur;
                   switch( type_borne )
                    { case WAGO_750455:
                       { new_valeur_int  = (gint)vars->response.data[ 2*cpt + 1 ] << 5;
                         new_valeur_int |= (gint)vars->response.data[ 2*cpt + 2 ] >> 3;
-                        new_inrange = !(vars->response.data[ 2*cpt + 2 ] & 0x03);
+                        new_in_range    = !(vars->response.data[ 2*cpt + 2 ] & 0x03);
                         break;
                       }
                      case WAGO_750461:                                                                         /* Borne PT100 */
                       { new_valeur_int  = (gint)vars->response.data[ 2*cpt + 1 ] << 8;
                         new_valeur_int |= (gint)vars->response.data[ 2*cpt + 2 ];
-                        if (new_valeur_int > -2000 && new_valeur_int < 8500) new_inrange = TRUE; else new_inrange = FALSE;
+                        if (new_valeur_int > -2000 && new_valeur_int < 8500) new_in_range = TRUE; else new_in_range = FALSE;
                         break;
                       }
                    }
-                  if (old_valeur_int != new_valeur_int || old_inrange != new_inrange)
+                  if (old_valeur_int != new_valeur_int || old_in_range != new_in_range)
                    { switch( type_borne )
                       { case WAGO_750455:
                          { gdouble min = Json_get_double ( vars->AI[cpt], "min" );
@@ -895,11 +903,10 @@
                            break;
                          }
                       }
-                     Zmq_Send_AI_to_master_new ( module, Json_get_string ( vars->AI[cpt], "tech_id" ),
-                                                         Json_get_string ( vars->AI[cpt], "acronyme" ),
-                                                         new_valeur, new_inrange );
-                     Json_node_add_int  ( vars->AI[cpt], "valeur",  new_valeur_int );
-                     Json_node_add_bool ( vars->AI[cpt], "inrange", new_inrange );
+                     Json_node_add_int     ( vars->AI[cpt], "valeur_int", new_valeur_int );
+                     Json_node_add_double  ( vars->AI[cpt], "valeur",     new_valeur );
+                     Json_node_add_bool    ( vars->AI[cpt], "in_range",   new_in_range );
+                     Zmq_Send_AI_to_master ( module, vars->AI[cpt] );
                    }
                 }
              }
