@@ -108,6 +108,21 @@
     return (retour);
   }
 /******************************************************************************************************************************/
+/* Mnemo_create_json_AI: Créé un JSON pour une AI                                                                             */
+/* Entrée: la structure SUBPROCESS, les parametres de l'AI                                                                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ JsonNode *Mnemo_create_thread_AI ( gchar *thread_tech_id, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    Json_node_add_string ( node, "unite", unite );
+    Json_node_add_int    ( node, "archivage", archivage );
+    return(node);
+  }
+/******************************************************************************************************************************/
 /* Rechercher_AI_by_text: Recupération des champs de base de données pour le AI par map                                       */
 /* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
 /* Sortie: la struct DB                                                                                                       */

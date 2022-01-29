@@ -98,12 +98,12 @@
 /******************************************************************************************************************************/
  static gint MSRV_Comparer_clef_thread ( JsonNode *node1, JsonNode *node2 )
   { gchar *ttech_id_1 = Json_get_string ( node1, "thread_tech_id" );
-	gchar *ttech_id_2 = Json_get_string ( node2, "thread_tech_id" );
-	gint result = strcasecmp ( ttech_id_1, ttech_id_2 );
-	if (result) return(result);
-	gchar *tacronyme_1 = Json_get_string ( node1, "thread_acronyme" );
-	gchar *tacronyme_2 = Json_get_string ( node2, "thread_acronyme" );
-	return( strcasecmp ( tacronyme_1, tacronyme_2 ) );
+    gchar *ttech_id_2 = Json_get_string ( node2, "thread_tech_id" );
+    gint result = strcasecmp ( ttech_id_1, ttech_id_2 );
+    if (result) return(result);
+    gchar *tacronyme_1 = Json_get_string ( node1, "thread_acronyme" );
+    gchar *tacronyme_2 = Json_get_string ( node2, "thread_acronyme" );
+    return( strcasecmp ( tacronyme_1, tacronyme_2 ) );
   }
 /******************************************************************************************************************************/
 /* MSRV_Comparer_clef_local: Compare deux clefs locales dans le mapping                                                       */
@@ -111,12 +111,12 @@
 /******************************************************************************************************************************/
  static gint MSRV_Comparer_clef_local ( JsonNode *node1, JsonNode *node2 )
   { gchar *tech_id_1 = Json_get_string ( node1, "tech_id" );
-	gchar *tech_id_2 = Json_get_string ( node2, "tech_id" );
-	gint result = strcasecmp ( tech_id_1, tech_id_2 );
-	if (result) return(result);
-	gchar *acronyme_1 = Json_get_string ( node1, "acronyme" );
-	gchar *acronyme_2 = Json_get_string ( node2, "acronyme" );
-	return( strcasecmp ( acronyme_1, acronyme_2 ) );
+    gchar *tech_id_2 = Json_get_string ( node2, "tech_id" );
+    gint result = strcasecmp ( tech_id_1, tech_id_2 );
+    if (result) return(result);
+    gchar *acronyme_1 = Json_get_string ( node1, "acronyme" );
+    gchar *acronyme_2 = Json_get_string ( node2, "acronyme" );
+    return( strcasecmp ( acronyme_1, acronyme_2 ) );
   }
 /******************************************************************************************************************************/
 /* MSRV_Remap: Charge les données de mapping en mémoire                                                                       */
@@ -300,6 +300,7 @@
                                Json_get_int ( request, "consigne" ) );
        return(TRUE);                                                                                                /* Traité */
      }
+/************************************ Positionne une valeur d'une Entrée Analogique *******************************************/
     else if ( !strcasecmp( zmq_tag, "SET_AI") )
      { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
               Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" )) )
@@ -308,22 +309,48 @@
         }
 
        gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
-       gchar *tech_id = thread_tech_id;
        gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-       gchar *acronyme = thread_acronyme;
+       gchar *tech_id         = thread_tech_id;
+       gchar *acronyme        = thread_acronyme;
 
        JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
        if (map)
         { tech_id  = Json_get_string ( map, "tech_id" );
           acronyme = Json_get_string ( map, "acronyme" );
         }
-       
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: SET_AI from '%s' to '%s': '%s:%s'=%f (range=%d)", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, tech_id, acronyme,
+                 "%s: SET_AI from '%s' to '%s': '%s:%s/'%s:%s'=%f (range=%d)", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        Dls_data_set_AI ( tech_id, acronyme, NULL,
                          Json_get_double ( request, "valeur" ),  Json_get_bool ( request, "in_range" ) );
+       return(TRUE);                                                                                                /* Traité */
+     }
+/************************************ Création des mnemos et mappings depuis les threads **************************************/
+    else if ( !strcasecmp( zmq_tag, "CREATE_AI") )
+     { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: CREATE_MNEMO: wrong parameters from '%s'", __func__, zmq_src_tech_id );
+          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
+        }
+
+       gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
+       gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
+       gchar *tech_id         = thread_tech_id;
+       gchar *acronyme        = thread_acronyme;
+
+       SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id = '%s', thread_acronyme = '%s'",
+                       thread_tech_id, thread_acronyme );
+
+       JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
+       if (map)
+        { tech_id  = Json_get_string ( map, "tech_id" );
+          acronyme = Json_get_string ( map, "acronyme" );
+        }
+
+       Dls_data_AI_create ( tech_id, acronyme );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                 "%s: CREATE_AI from '%s' to '%s': New AI '%s:%s'/'%s:%s'", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
        return(TRUE);                                                                                                /* Traité */
      }
     else if ( !strcasecmp( zmq_tag, "SET_CDE") )
@@ -887,7 +914,7 @@ end:
        zmq_ctx_term( Partage->zmq_ctx );
        zmq_ctx_destroy( Partage->zmq_ctx );
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-       
+
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MONO", __func__ );
        g_slist_foreach (Partage->Dls_data_MONO, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_MONO);
