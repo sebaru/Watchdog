@@ -140,6 +140,10 @@
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
 
+    JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
+    GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
+    GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
+
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
     GSList *Dls_data_MONO;                                                                           /* Liste des monostables */
     GSList *Dls_data_BI;                                                                               /* Liste des bistables */
@@ -156,11 +160,9 @@
   };
 
 /************************************************ Définitions des prototypes **************************************************/
- extern void Charger_config_bit_interne( void );                                                          /* Dans Watchdogd.c */
- extern gint Activer_ecoute ( void );                                                                        /* Dans ecoute.c */
+ extern void MSRV_Remap( void );                                                                          /* Dans Watchdogd.c */
 
- extern struct PARTAGE *_init ( void );                                                                         /* Dans shm.c */
- extern struct PARTAGE *Shm_init ( void );
+ extern struct PARTAGE *Shm_init ( void );                                                                      /* Dans shm.c */
  extern gboolean Shm_stop ( struct PARTAGE *partage );
 
  extern void Stopper_fils ( void );                                                                         /* Dans process.c */

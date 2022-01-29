@@ -93,6 +93,69 @@
      }
   }
 /******************************************************************************************************************************/
+/* MSRV_Comparer_clef_thread: Compare deux clef thread dans le mapping                                                        */
+/* Entrée: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static gint MSRV_Comparer_clef_thread ( JsonNode *node1, JsonNode *node2 )
+  { gchar *ttech_id_1 = Json_get_string ( node1, "thread_tech_id" );
+	gchar *ttech_id_2 = Json_get_string ( node2, "thread_tech_id" );
+	gint result = strcasecmp ( ttech_id_1, ttech_id_2 );
+	if (result) return(result);
+	gchar *tacronyme_1 = Json_get_string ( node1, "thread_acronyme" );
+	gchar *tacronyme_2 = Json_get_string ( node2, "thread_acronyme" );
+	return( strcasecmp ( tacronyme_1, tacronyme_2 ) );
+  }
+/******************************************************************************************************************************/
+/* MSRV_Comparer_clef_local: Compare deux clefs locales dans le mapping                                                       */
+/* Entrée: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static gint MSRV_Comparer_clef_local ( JsonNode *node1, JsonNode *node2 )
+  { gchar *tech_id_1 = Json_get_string ( node1, "tech_id" );
+	gchar *tech_id_2 = Json_get_string ( node2, "tech_id" );
+	gint result = strcasecmp ( tech_id_1, tech_id_2 );
+	if (result) return(result);
+	gchar *acronyme_1 = Json_get_string ( node1, "acronyme" );
+	gchar *acronyme_2 = Json_get_string ( node2, "acronyme" );
+	return( strcasecmp ( acronyme_1, acronyme_2 ) );
+  }
+/******************************************************************************************************************************/
+/* MSRV_Remap: Charge les données de mapping en mémoire                                                                       */
+/* Entrée: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MSRV_Remap( void )
+  { pthread_mutex_lock( &Partage->com_msrv.synchro );
+    if (Partage->Maps_from_thread)
+     { g_tree_destroy ( Partage->Maps_from_thread );
+       Partage->Maps_from_thread = NULL;
+     }
+    if (Partage->Maps_to_thread)
+     { g_tree_destroy ( Partage->Maps_to_thread );
+       Partage->Maps_to_thread = NULL;
+     }
+    if (Partage->Maps_root)
+     { json_node_unref ( Partage->Maps_root );
+       Partage->Maps_root = NULL;
+     }
+
+    Partage->Maps_from_thread = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_thread );
+    Partage->Maps_to_thread   = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_local );
+
+    Partage->Maps_root = Json_node_create ();
+    if (Partage->Maps_root)
+     { SQL_Select_to_json_node ( Partage->Maps_root, "mappings", "SELECT * FROM mappings" );
+       GList *Results = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "mappings" ) );
+       GList *results = Results;
+       while(results)
+        { JsonNode *element = results->data;
+          g_tree_insert ( Partage->Maps_from_thread, element, element );
+          g_tree_insert ( Partage->Maps_to_thread, element, element );
+          results = g_list_next(results);
+        }
+       g_list_free(Results);
+     }
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+  }
+/******************************************************************************************************************************/
 /* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données                                   */
 /* Entrée: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -238,18 +301,28 @@
        return(TRUE);                                                                                                /* Traité */
      }
     else if ( !strcasecmp( zmq_tag, "SET_AI") )
-     { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+     { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
               Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" )) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_AI: wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
 
+       gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
+       gchar *tech_id = thread_tech_id;
+       gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
+       gchar *acronyme = thread_acronyme;
+
+       JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
+       if (map)
+        { tech_id  = Json_get_string ( map, "tech_id" );
+          acronyme = Json_get_string ( map, "acronyme" );
+        }
+       
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
                  "%s: SET_AI from '%s' to '%s': '%s:%s'=%f (range=%d)", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id,
-                 Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
+                 zmq_src_tech_id, zmq_dst_tech_id, tech_id, acronyme,
                  Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-       Dls_data_set_AI ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
+       Dls_data_set_AI ( tech_id, acronyme, NULL,
                          Json_get_double ( request, "valeur" ),  Json_get_bool ( request, "in_range" ) );
        return(TRUE);                                                                                                /* Traité */
      }
@@ -368,6 +441,9 @@
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
      }
 
+/***************************************** Charge le mapping des bits internes ************************************************/
+    MSRV_Remap();
+
 /***************************************** Debut de la boucle sans fin ********************************************************/
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
@@ -433,6 +509,9 @@ end:
     Zmq_Close ( Partage->com_msrv.zmq_to_slave );
     Zmq_Close ( zmq_from_slave );
 
+    if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
+    if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
+    if (Partage->Maps_root) json_node_unref ( Partage->Maps_root );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
   }
@@ -808,6 +887,7 @@ end:
        zmq_ctx_term( Partage->zmq_ctx );
        zmq_ctx_destroy( Partage->zmq_ctx );
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
+       
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MONO", __func__ );
        g_slist_foreach (Partage->Dls_data_MONO, (GFunc) g_free, NULL );
        g_slist_free (Partage->Dls_data_MONO);
