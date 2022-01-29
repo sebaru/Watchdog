@@ -298,6 +298,12 @@
               "render": function (item)
                 { if(item.tech_id) { return ( item.libelle ); } else return( "--" ); }
             },
+            { "data": null, "title":"Type Borne", "className": "align-middle text-center",
+              "render": function (item)
+                { return( "type_borne = " + item.type_borne ); }
+            },
+            { "data": "min", "title":"min", "className": "align-middle text-center" },
+            { "data": "max", "title":"max", "className": "align-middle text-center" },
             { "data": null, "title":"Unité", "className": "align-middle text-center",
               "render": function (item)
                 { return( htmlEncode ( item.unite ) ); }
