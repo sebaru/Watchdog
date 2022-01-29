@@ -28,7 +28,7 @@ Watchdog_client_gtk3_SOURCES = Watchdog-client.c ClientResources.c ClientResourc
                                supervision_cadran.c timer.c \
                                liste_synoptique.c \
                                atelier.c atelier_motif.c atelier_passerelle.c atelier_cadran.c atelier_comment.c \
-                               atelier_clic_trame.c atelier_selection.c atelier_agrandir.c atelier_propriete_motif.c
+                               atelier_clic_trame.c atelier_selection.c 
 
 Watchdog_client_gtk3_LDFLAGS = `pkg-config --libs gtk+-3.0 goocanvas-2.0 libsoup-2.4 librsvg-2.0 glib-2.0 json-glib-1.0` -lm
 

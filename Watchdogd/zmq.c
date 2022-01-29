@@ -259,6 +259,16 @@
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
+/* Zmq_Send_AI_to_master: Envoie le bit AI au master selon le status                                                          */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Zmq_Send_AI_to_master ( struct SUBPROCESS *module, JsonNode *ai )
+  { if (!module) return;
+    Json_node_add_string ( ai, "zmq_tag", "SET_AI" );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, ai );
+  }
+/******************************************************************************************************************************/
 /* Zmq_Send_CDE_to_master_new: Envoie le bit CDE au master selon le status                                                    */
 /* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */

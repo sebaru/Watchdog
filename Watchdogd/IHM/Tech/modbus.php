@@ -95,34 +95,13 @@
 
        <div class="col form-group">
           <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Wago Tech_ID</label>
-           <select id="idMODBUSEditAIWagoTechID" class="custom-select border-info" placeholder="Module WAGO"></select>
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Wago AI</label>
-           <input id="idMODBUSEditAIWagoTag" type="number" required min=0 max=128 class="form-control" placeholder="AIxx">
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">Type de borne</label>
-           <select id="idMODBUSEditAIType" class="custom-select border-info">
-             <option value="3">4/20 mA 750455</option>
-             <option value="4">Pt-100 750461</option>
+           <select id="idMODBUSEditAITypeBorne" class="custom-select border-info">
+             <option value="3">750455 - 4/20 mA</option>
+             <option value="4">750462 - Pt-100</option>
            </select>
           </div>
         </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
-           <input id="idMODBUSEditAIUnite" type="text" class="form-control" placeholder="°C, km/h, ...">
-          </div>
-       </div>
 
        <div class="col form-group">
           <div class="input-group">
@@ -140,39 +119,11 @@
 
        <div class="col form-group">
           <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-           <input id="idMODBUSEditAIRechercherTechID" oninput="ModbusMap_Update_Choix_Tech_ID('idMODBUSEditAI', 'AI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+           <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
+           <input id="idMODBUSEditAIUnite" type="text" class="form-control" placeholder="°C, km/h, ...">
           </div>
        </div>
 
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-           <select id="idMODBUSEditAISelectTechID" onchange="ModbusMap_Update_Choix_Acronyme('idMODBUSEditAI', 'AI')" class="col-9 custom-select border-info"></select>
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-           <select id="idMODBUSEditAISelectAcronyme" class="col-9 custom-select border-info"></select>
-          </div>
-       </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Question Vocale</label>
-           <input id="idMODBUSEditAIMapQuestionVoc" type="text" class="form-control" placeholder="Question vocale associée">
-          </div>
-        </div>
-
-       <div class="col form-group">
-          <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Réponse Vocale</label>
-           <input id="idMODBUSEditAIMapReponseVoc" type="text" class="form-control" placeholder="Réponse vocale associée">
-          </div>
-          <small>$1 est la valeur dynamique du bit interne</small>
-       </div>
       </div>
 
       <div class="modal-footer">

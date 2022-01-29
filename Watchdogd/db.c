@@ -584,7 +584,6 @@ encore:
                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
                    "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
                    "`valeur` FLOAT NOT NULL DEFAULT '0',"
-                   "`unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                    "`archivage` INT(11) NOT NULL DEFAULT '2',"
                    "UNIQUE (`tech_id`,`acronyme`),"
                    "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
