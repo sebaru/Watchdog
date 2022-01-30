@@ -142,7 +142,9 @@
 
     Partage->Maps_root = Json_node_create ();
     if (Partage->Maps_root)
-     { SQL_Select_to_json_node ( Partage->Maps_root, "mappings", "SELECT * FROM mappings" );
+     { SQL_Select_to_json_node ( Partage->Maps_root, "mappings",
+                                 "SELECT * FROM mappings "
+                                 "WHERE tech_id IS NOT NULL AND acronyme IS NOT NULL" );
        GList *Results = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "mappings" ) );
        GList *results = Results;
        while(results)
