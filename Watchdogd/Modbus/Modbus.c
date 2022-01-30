@@ -722,7 +722,7 @@
     else
      { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d AI", __func__,thread_tech_id, vars->nbr_entree_ana );
        SQL_Select_to_json_node ( vars->AI_root, "modbus_AI",
-                                 "SELECT 'AI' AS classe, * FROM modbus_AI "
+                                 "SELECT *, 'AI' AS classe FROM modbus_AI "
                                  "WHERE thread_tech_id='%s'", thread_tech_id );
 
        vars->AI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_ana );
