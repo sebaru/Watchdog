@@ -376,7 +376,7 @@
        if (!liste)
         { wtd = g_try_malloc0 ( sizeof(struct DLS_WATCHDOG) );
           if (!wtd)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
              return;
            }
           g_snprintf( wtd->acronyme, sizeof(wtd->acronyme), "%s", acronyme );
@@ -431,7 +431,7 @@ end:
 /******************************************************************************************************************************/
  struct DLS_BI *Dls_data_BI_lookup ( gchar *tech_id, gchar *acronyme )
   { struct DLS_BI *bi;
-    if (!tech_id || !acronyme) return(FALSE);
+    if (!tech_id || !acronyme) return(NULL);
     GSList *liste = Partage->Dls_data_BI;
     while (liste)                                                                               /* A la recherche du message. */
      { bi = (struct DLS_BI *)liste->data;
@@ -441,7 +441,7 @@ end:
 
     bi = g_try_malloc0 ( sizeof(struct DLS_BI) );
     if (!bi)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
        return(NULL);
      }
     g_snprintf( bi->acronyme, sizeof(bi->acronyme), "%s", acronyme );
@@ -458,7 +458,7 @@ end:
 /******************************************************************************************************************************/
  struct DLS_MONO *Dls_data_MONO_lookup ( gchar *tech_id, gchar *acronyme )
   { struct DLS_MONO *mono;
-    if (!tech_id || !acronyme) return(FALSE);
+    if (!tech_id || !acronyme) return(NULL);
     GSList *liste = Partage->Dls_data_MONO;
     while (liste)                                                                               /* A la recherche du message. */
      { mono = (struct DLS_MONO *)liste->data;
@@ -468,7 +468,7 @@ end:
 
     mono = g_try_malloc0 ( sizeof(struct DLS_MONO) );
     if (!mono)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
        return(NULL);
      }
     g_snprintf( mono->acronyme, sizeof(mono->acronyme), "%s", acronyme );
@@ -665,7 +665,7 @@ end:
        if (!liste)
         { di = g_try_malloc0 ( sizeof(struct DLS_DI) );
           if (!di)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
              return;
            }
           g_snprintf( di->acronyme, sizeof(di->acronyme), "%s", acronyme );
@@ -804,7 +804,7 @@ end:
        if (!liste)
         { dout = g_try_malloc0 ( sizeof(struct DLS_DO) );
           if (!dout)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
              return;
            }
           g_snprintf( dout->acronyme, sizeof(dout->acronyme), "%s", acronyme );
@@ -884,33 +884,9 @@ end:
 /******************************************************************************************************************************/
  void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble valeur, gboolean in_range )
   { struct DLS_AI *ai;
-
-    if (!ai_p || !*ai_p)
-     { GSList *liste;
-       if ( !(acronyme && tech_id) ) return;
-       liste = Partage->Dls_data_AI;
-       while (liste)
-        { ai = (struct DLS_AI *)liste->data;
-          if ( !strcasecmp ( ai->acronyme, acronyme ) && !strcasecmp( ai->tech_id, tech_id ) ) break;
-          liste = g_slist_next(liste);
-        }
-
-       if (!liste)
-        { ai = g_try_malloc0 ( sizeof(struct DLS_AI) );
-          if (!ai)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
-             return;
-           }
-          g_snprintf( ai->acronyme, sizeof(ai->acronyme), "%s", acronyme );
-          g_snprintf( ai->tech_id,  sizeof(ai->tech_id),  "%s", tech_id );
-          pthread_mutex_lock( &Partage->com_dls.synchro_data );
-          Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
-          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: adding AI '%s:%s'=%f", __func__, tech_id, acronyme, valeur );
-        }
-       if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
-      }
-    else ai = (struct DLS_AI *)*ai_p;
+    ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
+    if (!ai) ai = Dls_data_AI_create ( tech_id, acronyme );
+    if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
 
     ai->valeur  = valeur;
     ai->inrange = in_range;
@@ -935,7 +911,7 @@ end:
        if (!liste)
         { ao = g_try_malloc0 ( sizeof(struct DLS_AO) );
           if (!ao)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
              return;
            }
           g_snprintf( ao->acronyme, sizeof(ao->acronyme), "%s", acronyme );
@@ -982,7 +958,7 @@ end:
        if (!liste)
         { cpt_imp = g_try_malloc0 ( sizeof(struct DLS_CI) );
           if (!cpt_imp)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
              return;
            }
           g_snprintf( cpt_imp->acronyme, sizeof(cpt_imp->acronyme), "%s", acronyme );
@@ -1080,7 +1056,7 @@ end:
        if (!liste)
         { cpt_h = g_try_malloc0 ( sizeof(struct DLS_CH) );
           if (!cpt_h)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
              return;
            }
           g_snprintf( cpt_h->acronyme, sizeof(cpt_h->acronyme), "%s", acronyme );
@@ -1152,27 +1128,56 @@ end:
     return( cpt_h->valeur );
   }
 /******************************************************************************************************************************/
+/* Dls_data_AI_lookup : Recupere la structure AI selon tech_id/acronyme                                                       */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ struct DLS_AI *Dls_data_AI_lookup ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
+  { struct DLS_AI *ai;
+    if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
+     { ai = (struct DLS_AI *)*ai_p;
+       return( ai );
+     }
+    if (!tech_id || !acronyme) return(NULL);
+
+    GSList *liste = Partage->Dls_data_AI;
+    while (liste)                                                                               /* A la recherche du message. */
+     { ai = (struct DLS_AI *)liste->data;
+       if ( !strcasecmp( ai->tech_id, tech_id ) && !strcasecmp( ai->acronyme, acronyme ) )
+        { if (ai_p) *ai_p = (gpointer)ai;                                           /* Sauvegarde pour acceleration si besoin */
+          return(ai);
+        }
+       liste = g_slist_next(liste);
+     }
+    return(NULL);
+  }
+/******************************************************************************************************************************/
+/* Dls_data_AI_lookup : Recupere la structure AI selon tech_id/acronyme                                                       */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ struct DLS_AI *Dls_data_AI_create ( gchar *tech_id, gchar *acronyme )
+  { if (!tech_id || !acronyme) return(NULL);
+    struct DLS_AI *ai = Dls_data_AI_lookup ( tech_id, acronyme, NULL );
+    if (ai) return(ai);
+    ai = g_try_malloc0 ( sizeof(struct DLS_AI) );
+    if (!ai)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+       return(NULL);
+     }
+    g_snprintf( ai->acronyme, sizeof(ai->acronyme), "%s", acronyme );
+    g_snprintf( ai->tech_id,  sizeof(ai->tech_id),  "%s", tech_id );
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );
+    Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: adding AI '%s:%s'", __func__, tech_id, acronyme );
+    return(ai);
+  }
+/******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  gdouble Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
-  { struct DLS_AI *ai;
-    GSList *liste;
-    if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
-     { ai = (struct DLS_AI *)*ai_p;
-       return( ai->valeur );
-     }
-    if (!tech_id || !acronyme) return(0.0);
-
-    liste = Partage->Dls_data_AI;
-    while (liste)
-     { ai = (struct DLS_AI *)liste->data;
-       if ( !strcasecmp ( ai->acronyme, acronyme ) && !strcasecmp( ai->tech_id, tech_id ) ) break;
-       liste = g_slist_next(liste);
-     }
-
-    if (!liste) return(0.0);
-    if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
+  { struct DLS_AI *ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
+    if (!ai) return(0.0);
     return( ai->valeur );
   }
 /******************************************************************************************************************************/
@@ -1204,13 +1209,9 @@ end:
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  gboolean Dls_data_get_AI_inrange ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
-  { struct DLS_AI *ai;
-    Dls_data_get_AI ( tech_id, acronyme, ai_p );
-    if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
-     { ai = (struct DLS_AI *)*ai_p;
-       return( ai->inrange );
-     }
-    return(FALSE);
+  { struct DLS_AI *ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
+    if (!ai) return(FALSE);
+    return( ai->inrange );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
@@ -1233,7 +1234,7 @@ end:
        if (!liste)
         { tempo = g_try_malloc0 ( sizeof(struct DLS_TEMPO) );
           if (!tempo)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
              return;
            }
           g_snprintf( tempo->acronyme, sizeof(tempo->acronyme), "%s", acronyme );
@@ -1310,7 +1311,7 @@ end:
 
     msg = g_try_malloc0 ( sizeof(struct DLS_MESSAGES) );
     if (!msg)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
        return(NULL);
      }
     g_snprintf( msg->acronyme, sizeof(msg->acronyme), "%s", acronyme );
@@ -1477,7 +1478,7 @@ end:
        if (!liste)
         { visu = g_try_malloc0 ( sizeof(struct DLS_VISUEL) );
           if (!visu)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
              return;
            }
           g_snprintf( visu->acronyme, sizeof(visu->acronyme), "%s", acronyme );
@@ -1542,7 +1543,7 @@ end:
         { reg = g_try_malloc0 ( sizeof(struct DLS_REGISTRE) );
           if (!reg)
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
-                       "%s: Memory error for '%s:%s'", __func__, acronyme, tech_id );
+                       "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
              return;
            }
           g_snprintf( reg->acronyme, sizeof(reg->acronyme), "%s", acronyme );

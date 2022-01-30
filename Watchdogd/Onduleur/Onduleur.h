@@ -38,6 +38,7 @@
   { UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
     gboolean started;                                                                                      /* Est-il actif ?? */
     time_t date_next_connexion;
+    JsonNode *Load;
   };
 
 /************************************************* Déclaration des prototypes *************************************************/

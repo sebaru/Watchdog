@@ -128,30 +128,14 @@
     SQL_Write_new ( "UPDATE mappings SET tech_id = UPPER('%s'), acronyme = '%s' "
                     "WHERE thread_tech_id = '%s' AND thread_acronyme = '%s'", tech_id, acronyme, thread_tech_id, thread_acronyme );
 
-    if ( strcasecmp ( old_thread_tech_id, thread_tech_id ) )
-     { JsonNode *RootNode = Json_node_create ();
-       if (RootNode)
-        { Json_node_add_string ( RootNode, "thread_tech_id", old_thread_tech_id );
-          Json_node_add_string ( RootNode, "zmq_tag", "SUBPROCESS_REMAP" );
-          Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );
-        }
-       json_node_unref ( RootNode );
-     }
-
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode)
-     { Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-       Json_node_add_string ( RootNode, "zmq_tag", "SUBPROCESS_REMAP" );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );
-     }
-    json_node_unref ( RootNode );
-
-    Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */
-
     g_free(tech_id);
     g_free(acronyme);
     g_free(thread_tech_id);
     g_free(thread_acronyme);
+
+    MSRV_Remap();
+    Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */
+
     json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }

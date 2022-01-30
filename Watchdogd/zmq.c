@@ -259,6 +259,16 @@
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
+/* Zmq_Send_Create_IO: Demande au master de creer une IO                                                                      */
+/* Entrée: la structure SUBPROCESS, la classe, le json associé                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Zmq_Send_Create_AI ( struct SUBPROCESS *module, JsonNode *node )
+  { if (!module) return;
+    Json_node_add_string ( node, "zmq_tag", "CREATE_AI" );
+    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, node );
+  }
+/******************************************************************************************************************************/
 /* Zmq_Send_AI_to_master: Envoie le bit AI au master selon le status                                                          */
 /* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */

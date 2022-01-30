@@ -95,7 +95,9 @@
                     "`type_borne` INT(11) NOT NULL DEFAULT 0,"
                     "`min` FLOAT NOT NULL DEFAULT 0,"
                     "`max` FLOAT NOT NULL DEFAULT 100,"
+                    "`libelle` VARCHAR(128) NOT NULL DEFAULT '',"
                     "`unite` VARCHAR(32) NOT NULL DEFAULT '',"
+                    "`archivage` INT(11) NOT NULL DEFAULT 0,"
                     "UNIQUE (thread_tech_id, thread_acronyme),"
                     "FOREIGN KEY (`thread_tech_id`) REFERENCES `modbus` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
@@ -125,10 +127,12 @@
      }
     if (lib->database_version < 6)
      { SQL_Write_new ( "ALTER TABLE modbus_AI ADD unite VARCHAR(32) NOT NULL DEFAULT ''");
+       SQL_Write_new ( "ALTER TABLE modbus_AI ADD libelle VARCHAR(128) NOT NULL DEFAULT ''");
+       SQL_Write_new ( "ALTER TABLE modbus_AI ADD archivage INT(11) NOT NULL DEFAULT 0");
        SQL_Write_new ( "UPDATE modbus_AI AS ai "
                        "INNER JOIN mappings AS map ON ai.thread_tech_id = map.thread_tech_id AND ai.thread_acronyme = map.thread_acronyme "
                        "INNER JOIN mnemos_AI as m ON m.tech_id=map.tech_id AND m.acronyme=map.acronyme "
-                       "SET ai.unite=m.unite");
+                       "SET ai.unite=m.unite, ai.libelle=m.libelle, ai.archivage=m.archivage");
      }
     Process_set_database_version ( lib, 6 );
   }
@@ -702,11 +706,11 @@
     else { vars->request = TRUE; }                                                                /* Une requete a élé lancée */
   }
 /******************************************************************************************************************************/
-/* Modbus_do_mapping : mappe les entrees/sorties Wago avec la zone de mémoire interne dynamique                               */
+/* Modbus_load_io_config : Charge les données des IO du module                                                                */
 /* Entrée : la structure referencant le module                                                                                */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
- static void Modbus_do_mapping ( struct SUBPROCESS *module )
+ static void Modbus_load_io_config ( struct SUBPROCESS *module )
   { struct MODBUS_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -714,15 +718,12 @@
 /***************************************************** Mapping des AIgitalInput ***********************************************/
     vars->AI_root = Json_node_create();
     if (!vars->AI_root)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__ , thread_tech_id); }
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, thread_tech_id); }
     else
      { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d AI", __func__,thread_tech_id, vars->nbr_entree_ana );
        SQL_Select_to_json_node ( vars->AI_root, "modbus_AI",
-                                 "SELECT AI.*, m.* FROM modbus_AI AS AI "
-                                 "INNER JOIN mappings ON mappings.thread_tech_id  = AI.thread_tech_id "
-                                 "                   AND mappings.thread_acronyme = AI.thread_acronyme "
-                                 "INNER JOIN mnemos_AI AS m ON m.tech_id = mappings.tech_id AND m.acronyme = mappings.acronyme "
-                                 "WHERE AI.thread_tech_id='%s' AND mappings.tech_id IS NOT NULL", thread_tech_id );
+                                 "SELECT * FROM modbus_AI "
+                                 "WHERE thread_tech_id='%s'", thread_tech_id );
 
        vars->AI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_ana );
        if (!vars->AI)
@@ -731,15 +732,17 @@
         }
 
        JsonArray *array = Json_get_array ( vars->AI_root, "modbus_AI" );
-       for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->AI_root, "modbus_AI" ) ); cpt ++ )
+       for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->AI_root, "modbus_AI" ) ); cpt++ )
         { JsonNode *element = json_array_get_element ( array, cpt );
           gint num = Json_get_int ( element, "num" );
           if ( 0 <= num && num < vars->nbr_entree_ana )
            { vars->AI[num] = element;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping: %s -> %s:%s", __func__, thread_tech_id,
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': New AI '%s' (%s, %s)", __func__, thread_tech_id,
                        Json_get_string ( vars->AI[num], "thread_acronyme" ),
-                       Json_get_string ( vars->AI[num], "tech_id" ),
-                       Json_get_string ( vars->AI[num], "acronyme" ) );
+                       Json_get_string ( vars->AI[num], "libelle" ),
+                       Json_get_string ( vars->AI[num], "unite" ) );
+             Json_node_add_bool ( vars->AI[num], "deletable", TRUE );
+             Zmq_Send_Create_AI ( module, vars->AI[num] );
              Json_node_add_int  ( vars->AI[num], "valeur_int", -1 );          /* Pour forcer une premiere comm vers le master */
              Json_node_add_bool ( vars->AI[num], "in_range", FALSE );
            } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map AI: num %d out of range '%d'",
@@ -750,7 +753,7 @@
 /***************************************************** Mapping des DigitalInput ***********************************************/
     vars->DI_root = Json_node_create();
     if (!vars->DI_root)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__ , thread_tech_id); }
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__, thread_tech_id); }
     else
      { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__,thread_tech_id, vars->nbr_entree_tor );
        SQL_Select_to_json_node ( vars->DI_root, "modbus_DI",
@@ -1031,7 +1034,7 @@
                   SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='DO%03d'",
                                   thread_tech_id, cpt );
                 }
-               Modbus_do_mapping( module );                                        /* Initialise le mapping des I/O du module */
+               Modbus_load_io_config( module );                                                  /* Initialise les IO modules */
                vars->mode = MODBUS_GET_DI;
              }
             break;
@@ -1147,11 +1150,6 @@
                     }
                  }
               }
-           }
-          else if ( !strcasecmp( zmq_tag, "SUBPROCESS_REMAP" ) )
-           { if ( Json_has_member ( request, "thread_tech_id" ) &&
-                  !strcasecmp( Json_get_string ( request, "thread_tech_id" ), thread_tech_id ) )
-              { Deconnecter_module ( module ); }
            }
           json_node_unref(request);
         }

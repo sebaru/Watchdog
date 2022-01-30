@@ -349,7 +349,9 @@
     Mnemo_auto_create_DI ( FALSE, thread_tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
     Mnemo_auto_create_DI ( FALSE, thread_tech_id, "UPS_ALARM",  "UPS en alarme !" );
 
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "LOAD", "Charge onduleur", "%" );
+    vars->Load = Mnemo_create_thread_AI ( thread_tech_id, "LOAD", "Charge onduleur", "%", 2 );
+    Zmq_Send_Create_AI ( module, vars->Load );
+    
     Mnemo_auto_create_AI ( FALSE, thread_tech_id, "REALPOWER", "Charge onduleur", "W" );
     Mnemo_auto_create_AI ( FALSE, thread_tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
     Mnemo_auto_create_AI ( FALSE, thread_tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
