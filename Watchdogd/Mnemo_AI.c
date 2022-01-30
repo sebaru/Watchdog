@@ -161,9 +161,6 @@
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
      { ai = NULL;
        Dls_data_set_AI ( db->row[0], db->row[1], (void *)&ai, atof(db->row[2]), FALSE );
-       ai->min       = atof(db->row[3]);
-       ai->max       = atof(db->row[4]);
-       ai->type      = atoi(db->row[5]);
        g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[6] );
        ai->archivage = atoi(db->row[7]);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s'=%f %s loaded", __func__,
@@ -201,11 +198,8 @@
  void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit )
   { Json_node_add_string ( element, "tech_id",      bit->tech_id );
     Json_node_add_string ( element, "acronyme",     bit->acronyme );
-    Json_node_add_double ( element, "valeur_min",   bit->min );
-    Json_node_add_double ( element, "valeur_max",   bit->max );
     Json_node_add_double ( element, "valeur",       bit->valeur );
     Json_node_add_string ( element, "unite",        bit->unite );
-    Json_node_add_int    ( element, "type",         bit->type );
     Json_node_add_int    ( element, "in_range",     bit->inrange );
     Json_node_add_int    ( element, "last_arch",    bit->last_arch );
     Json_node_add_int    ( element, "archivage",    bit->archivage );

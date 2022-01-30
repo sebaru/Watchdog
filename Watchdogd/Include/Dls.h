@@ -123,9 +123,6 @@
  struct DLS_AI
   { gchar   acronyme[NBR_CARAC_ACRONYME];
     gchar   tech_id[NBR_CARAC_TECHID];
-    gdouble min;
-    gdouble max;
-    guint   type;                                                                                  /* Type de gestion de l'EA */
     gchar   unite[NBR_CARAC_UNITE];                                                                                        /* Km, h, ° ... */
     gdouble valeur;
     guint   last_arch;                                                                         /* Date de la derniere archive */
