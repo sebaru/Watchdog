@@ -722,7 +722,7 @@
     else
      { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d AI", __func__,thread_tech_id, vars->nbr_entree_ana );
        SQL_Select_to_json_node ( vars->AI_root, "modbus_AI",
-                                 "SELECT * FROM modbus_AI "
+                                 "SELECT 'AI' AS classe, * FROM modbus_AI "
                                  "WHERE thread_tech_id='%s'", thread_tech_id );
 
        vars->AI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_ana );
@@ -741,7 +741,6 @@
                        Json_get_string ( vars->AI[num], "thread_acronyme" ),
                        Json_get_string ( vars->AI[num], "libelle" ),
                        Json_get_string ( vars->AI[num], "unite" ) );
-             Zmq_Send_Create_IO ( module, vars->AI[num] );
            } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map AI: num %d out of range '%d'",
                             __func__, thread_tech_id, num, vars->nbr_entree_ana );
         }
