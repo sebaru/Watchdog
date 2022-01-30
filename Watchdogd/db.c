@@ -2590,7 +2590,7 @@ encore:
      }
 
     if (database_version < 6087)
-     { SQL_Write_new ("ALTER TABLE mappings ADD `classe` VARCHAR(32) NULL DEFAULT NULL BEFORE 'thread_tech_id'"); }
+     { SQL_Write_new ("ALTER TABLE mappings ADD `classe` VARCHAR(32) NULL DEFAULT NULL FIRST"); }
 
 fin:
     database_version = 6087;

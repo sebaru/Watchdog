@@ -45,9 +45,6 @@
  extern gboolean Mnemo_auto_create_AI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src );
  extern JsonNode *Mnemo_create_subprocess_AI ( struct SUBPROCESS *module, gchar *thread_acronyme,
                                                gchar *libelle, gchar *unite, gint archivage );
- extern gboolean Recuperer_mnemos_AI_by_tag ( struct DB **db_retour, gchar *tech_id, gchar *tag );
- extern gboolean Recuperer_mnemos_AI_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips );
- extern gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
 
  extern void Activer_horlogeDB ( void );                                                            /* Dans Mnemos_Horloges.c */
