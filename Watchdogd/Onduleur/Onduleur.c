@@ -274,39 +274,40 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static gboolean Interroger_ups( struct SUBPROCESS *module )
-  { gchar *reponse;
+  { struct UPS_VARS *vars = module->vars;
+    gchar *reponse;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "LOAD", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Load, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "REALPOWER", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Realpower, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BATTERY_CHARGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Battery_charge, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "INPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Input_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BATTERY_RUNTIME", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Battery_runtime, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BATTERY_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Battery_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "INPUT_HZ", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Input_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "OUTPUT_CURRENT", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Output_current, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "OUTPUT_HZ", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Output_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "OUTPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Output_voltage, atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
@@ -322,7 +323,7 @@
        Zmq_Send_DI_to_master_new ( module, thread_tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
        Zmq_Send_DI_to_master_new ( module, thread_tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
-    Zmq_Send_DI_to_master_new ( module, thread_tech_id, "IO_COMM", TRUE );
+
     return(TRUE);
   }
 /******************************************************************************************************************************/

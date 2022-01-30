@@ -873,43 +873,29 @@
             for ( cpt = 0; cpt<vars->nbr_entree_ana; cpt++)
              { if (vars->AI[cpt])                                                                   /* Si l'entrée est mappée */
                 { gint type_borne = Json_get_int ( vars->AI[cpt], "type_borne" );
-                  gboolean old_in_range = Json_get_bool ( vars->AI[cpt], "in_range" );
                   gboolean new_in_range;
-                  gint old_valeur_int  = Json_get_int ( vars->AI[cpt], "valeur_int" );
                   gint new_valeur_int;
                   gdouble new_valeur;
                   switch( type_borne )
                    { case WAGO_750455:
                       { new_valeur_int  = (gint)vars->response.data[ 2*cpt + 1 ] << 5;
                         new_valeur_int |= (gint)vars->response.data[ 2*cpt + 2 ] >> 3;
+                        gdouble min = Json_get_double ( vars->AI[cpt], "min" );
+                        gdouble max = Json_get_double ( vars->AI[cpt], "max" );
+                        new_valeur  = (new_valeur_int*(max - min))/4095.0 + min;
                         new_in_range    = !(vars->response.data[ 2*cpt + 2 ] & 0x03);
                         break;
                       }
                      case WAGO_750461:                                                                         /* Borne PT100 */
                       { new_valeur_int  = (gint)vars->response.data[ 2*cpt + 1 ] << 8;
                         new_valeur_int |= (gint)vars->response.data[ 2*cpt + 2 ];
+                        new_valeur  = new_valeur_int/10.0;
                         if (new_valeur_int > -2000 && new_valeur_int < 8500) new_in_range = TRUE; else new_in_range = FALSE;
                         break;
                       }
+                     default : new_valeur=0.0; new_in_range=FALSE;
                    }
-                  if (old_valeur_int != new_valeur_int || old_in_range != new_in_range)
-                   { switch( type_borne )
-                      { case WAGO_750455:
-                         { gdouble min = Json_get_double ( vars->AI[cpt], "min" );
-                           gdouble max = Json_get_double ( vars->AI[cpt], "max" );
-                           new_valeur  = (new_valeur_int*(max - min))/4095.0 + min;
-                           break;
-                         }
-                        case WAGO_750461:                                                                      /* Borne PT100 */
-                         { new_valeur  = new_valeur_int/10.0;
-                           break;
-                         }
-                      }
-                     Json_node_add_int     ( vars->AI[cpt], "valeur_int", new_valeur_int );
-                     Json_node_add_double  ( vars->AI[cpt], "valeur",     new_valeur );
-                     Json_node_add_bool    ( vars->AI[cpt], "in_range",   new_in_range );
-                     Zmq_Send_AI_to_master ( module, vars->AI[cpt] );
-                   }
+                  Zmq_Send_AI_to_master ( module, vars->AI[cpt], new_valeur, new_in_range );
                 }
              }
             vars->mode = MODBUS_SET_DO;

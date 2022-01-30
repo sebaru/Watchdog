@@ -273,10 +273,16 @@
 /* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_AI_to_master ( struct SUBPROCESS *module, JsonNode *ai )
+ void Zmq_Send_AI_to_master ( struct SUBPROCESS *module, JsonNode *ai, gdouble valeur, gboolean in_range )
   { if (!module) return;
     Json_node_add_string ( ai, "zmq_tag", "SET_AI" );
-    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, ai );
+    gdouble  old_valeur   = Json_get_double ( ai, "valeur" );
+    gboolean old_in_range = Json_get_bool   ( ai, "in_range" );
+    if ( old_valeur != valeur || old_in_range != in_range )
+     { Json_node_add_double ( ai, "valeur", valeur );
+       Json_node_add_bool   ( ai, "in_range", in_range );
+       Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, ai );
+     }
   }
 /******************************************************************************************************************************/
 /* Zmq_Send_CDE_to_master_new: Envoie le bit CDE au master selon le status                                                    */
