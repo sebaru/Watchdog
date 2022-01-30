@@ -66,7 +66,7 @@
             },
             { "data": null, "title":"Enabled", "className": "align-middle text-center",
               "render": function (item)
-                { if (item.enabled==true)
+                { if (item.enable==true)
                    { return( Bouton ( "success", "Désactiver le process",
                                       "Process_clic_disable", item.uuid, "Oui" ) );
                    }
