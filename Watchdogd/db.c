@@ -2592,8 +2592,11 @@ encore:
     if (database_version < 6087)
      { SQL_Write_new ("ALTER TABLE mappings ADD `classe` VARCHAR(32) NULL DEFAULT NULL FIRST"); }
 
+    if (database_version < 6088)
+     { SQL_Write_new ("ALTER TABLE mappings ADD `libelle` VARCHAR(128) NULL DEFAULT NULL"); }
+
 fin:
-    database_version = 6087;
+    database_version = 6088;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

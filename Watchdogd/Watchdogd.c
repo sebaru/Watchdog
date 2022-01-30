@@ -334,9 +334,9 @@
         { g_snprintf ( ai->libelle, sizeof(ai->libelle), "%s", Json_get_string ( request, "libelle" ) );
           g_snprintf ( ai->unite,   sizeof(ai->unite),   "%s", Json_get_string ( request, "unite" ) );
           ai->archivage = Json_get_int ( request, "archivage" );
-          SQL_Write_new ( "INSERT INTO mappings SET classe='AI', thread_tech_id = '%s', thread_acronyme = '%s' "
-                          "ON DUPLICATE KEY UPDATE classe=VALUE(classe)",
-                          thread_tech_id, thread_acronyme );
+          SQL_Write_new ( "INSERT INTO mappings SET classe='AI', thread_tech_id = '%s', thread_acronyme = '%s', libelle='%s' "
+                          "ON DUPLICATE KEY UPDATE classe=VALUE(classe), libelle=VALUE(libelle)",
+                          thread_tech_id, thread_acronyme, ai->libelle );
         }
        return(TRUE);                                                                                                /* Traité */
      }
