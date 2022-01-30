@@ -32,17 +32,17 @@
 
  struct METEO_VARS
   { gint  last_request;
-    JsonNode *Temp_min[13];
-    JsonNode *Temp_max[13];
-    JsonNode *Proba_pluie[13];
-    JsonNode *Proba_gel[13];
-    JsonNode *Proba_brouillard[13];
-    JsonNode *Proba_vent_70[13];
-    JsonNode *Proba_vent_100[13];
-    JsonNode *Proba_vent_orage[13];
-    JsonNode *Vent_10m[13];
-    JsonNode *Direction_vent[13];
-    JsonNode *Rafale_vent[13];
+    JsonNode *Temp_min[14];
+    JsonNode *Temp_max[14];
+    JsonNode *Proba_pluie[14];
+    JsonNode *Proba_gel[14];
+    JsonNode *Proba_brouillard[14];
+    JsonNode *Proba_vent_70[14];
+    JsonNode *Proba_vent_100[14];
+    JsonNode *Proba_vent_orage[14];
+    JsonNode *Vent_10m[14];
+    JsonNode *Direction_vent[14];
+    JsonNode *Rafale_vent[14];
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/

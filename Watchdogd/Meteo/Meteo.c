@@ -185,7 +185,7 @@
 
     Mnemo_auto_create_HORLOGE ( FALSE, thread_tech_id, "SUNRISE", "Horloge du levé du soleil" );
     Mnemo_auto_create_HORLOGE ( FALSE, thread_tech_id, "SUNSET",  "Horloge du couché du soleil" );
-    for (gint cpt=0; cpt<=13; cpt++)
+    for (gint cpt=0; cpt<14; cpt++)
      { gchar acronyme[64];
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", cpt );
        vars->Temp_min[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Température minimum", "°C", ARCHIVE_1_HEURE );
@@ -233,7 +233,7 @@
         }
      }
 
-    for (gint cpt=0; cpt<=13; cpt++)
+    for (gint cpt=0; cpt<14; cpt++)
      { json_node_unref ( vars->Temp_min[cpt] );
        json_node_unref ( vars->Temp_max[cpt] );
        json_node_unref ( vars->Proba_pluie[cpt] );
