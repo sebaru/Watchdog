@@ -65,8 +65,7 @@
 /* Sortie: l'identifiant de la connexion                                                                                      */
 /******************************************************************************************************************************/
  static int Init_teleinfo ( struct SUBPROCESS *module )
-  { struct TELEINFO_VARS *vars = module->vars;
-    struct termios oldtio;
+  { struct termios oldtio;
     int fd;
 
     gchar *port    = Json_get_string ( module->config, "port" );
@@ -89,21 +88,7 @@
     tcflush(fd, TCIOFLUSH);
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: Ouverture port teleinfo okay %s", __func__, port );
 
-    if (!vars->nbr_connexion)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
-                "%s: %s: Charge les AI ", __func__, thread_tech_id );
-
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "ADCO",  "N° d’identification du compteur", "numéro" );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "ISOUS", "Intensité EDF souscrite ", "A" );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "BASE",  "Index option BASE", "Wh" );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "HCHC",  "Index heures creuses", "Wh" );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "HCHP",  "Index heures pleines", "Wh" );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "IINST", "Intensité EDF instantanée", "A" );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "IMAX",  "Intensité EDF maximale", "A" );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, "PAPP",  "Puissance apparente EDF consommée", "VA" );
-     }
     SubProcess_send_comm_to_master_new ( module, TRUE );
-    vars->nbr_connexion++;
     return(fd);
   }
 /******************************************************************************************************************************/
@@ -113,16 +98,15 @@
 /******************************************************************************************************************************/
  static void Processer_trame( struct SUBPROCESS *module )
   { struct TELEINFO_VARS *vars = module->vars;
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-         if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "ADCO",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "ISOUS", atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BASE",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "HCHC",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "HCHP",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "IINST", atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "IMAX",  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "PAPP",  atof(vars->buffer + 5), TRUE ); }
+         if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Adco,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { Zmq_Send_AI_to_master ( module, vars->Isous, atof(vars->buffer + 6), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Base,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Hchc,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Hchp,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { Zmq_Send_AI_to_master ( module, vars->Iinst, atof(vars->buffer + 6), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Imax,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Papp,  atof(vars->buffer + 5), TRUE ); }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     vars->last_view = Partage->top;
   }
@@ -139,6 +123,15 @@
     fd_set fdselect;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+
+    vars->Adco  = Mnemo_create_subprocess_AI ( module, "ADCO",  "N° d’identification du compteur", "numéro", 4 );
+    vars->Isous = Mnemo_create_subprocess_AI ( module, "ISOUS", "Intensité EDF souscrite ", "A", 2 );
+    vars->Base  = Mnemo_create_subprocess_AI ( module, "BASE",  "Index option BASE", "Wh", 2 );
+    vars->Hchc  = Mnemo_create_subprocess_AI ( module, "HCHC",  "Index heures creuses", "Wh", 2 );
+    vars->Hchp  = Mnemo_create_subprocess_AI ( module, "HCHP",  "Index heures pleines", "Wh", 2 );
+    vars->Iinst = Mnemo_create_subprocess_AI ( module, "IINST", "Intensité EDF instantanée", "A", 2 );
+    vars->Imax  = Mnemo_create_subprocess_AI ( module, "IMAX",  "Intensité EDF maximale", "A", 2 );
+    vars->Papp  = Mnemo_create_subprocess_AI ( module, "PAPP",  "Puissance apparente EDF consommée", "VA", 2 );
 
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
@@ -160,7 +153,6 @@
         { if ( vars->date_next_retry <= Partage->top )
            { vars->mode = TINFO_RETRING;
              vars->date_next_retry = 0;
-             vars->nbr_connexion = 0;
              Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, thread_tech_id );
            }
         }
@@ -235,6 +227,15 @@
         }
      }
     close(vars->fd);                                                                          /* Fermeture de la connexion FD */
+
+    json_node_unref ( vars->Adco );
+    json_node_unref ( vars->Isous );
+    json_node_unref ( vars->Base );
+    json_node_unref ( vars->Hchc );
+    json_node_unref ( vars->Hchp );
+    json_node_unref ( vars->Iinst );
+    json_node_unref ( vars->Imax );
+    json_node_unref ( vars->Papp );
 
     SubProcess_end(module);
   }

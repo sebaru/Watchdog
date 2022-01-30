@@ -321,9 +321,9 @@
           acronyme = Json_get_string ( map, "acronyme" );
         }
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: SET_AI from '%s' to '%s': '%s:%s/'%s:%s'=%f (range=%d)", __func__,
+                 "%s: SET_AI from '%s' to '%s': '%s:%s/'%s:%s'=%f %s (range=%d)", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-                 Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
+                 Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
        Dls_data_set_AI ( tech_id, acronyme, NULL,
                          Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        return(TRUE);                                                                                                /* Traité */
