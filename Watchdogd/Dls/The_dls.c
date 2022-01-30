@@ -879,19 +879,6 @@ end:
     return( dout->edge_down );
   }
 /******************************************************************************************************************************/
-/* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble valeur, gboolean in_range )
-  { struct DLS_AI *ai;
-    ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
-    if (!ai) ai = Dls_data_AI_create ( tech_id, acronyme );
-    if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
-
-    ai->valeur  = valeur;
-    ai->inrange = in_range;
-  }
-/******************************************************************************************************************************/
 /* Met à jour la sortie analogique à partir de sa valeur avant mise a l'echelle                                               */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
@@ -1131,7 +1118,7 @@ end:
 /* Dls_data_AI_lookup : Recupere la structure AI selon tech_id/acronyme                                                       */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- struct DLS_AI *Dls_data_AI_lookup ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
+ static struct DLS_AI *Dls_data_AI_lookup ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
   { struct DLS_AI *ai;
     if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
      { ai = (struct DLS_AI *)*ai_p;
@@ -1148,16 +1135,7 @@ end:
         }
        liste = g_slist_next(liste);
      }
-    return(NULL);
-  }
-/******************************************************************************************************************************/
-/* Dls_data_AI_lookup : Recupere la structure AI selon tech_id/acronyme                                                       */
-/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
-/******************************************************************************************************************************/
- struct DLS_AI *Dls_data_AI_create ( gchar *tech_id, gchar *acronyme )
-  { if (!tech_id || !acronyme) return(NULL);
-    struct DLS_AI *ai = Dls_data_AI_lookup ( tech_id, acronyme, NULL );
-    if (ai) return(ai);
+
     ai = g_try_malloc0 ( sizeof(struct DLS_AI) );
     if (!ai)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
@@ -1179,6 +1157,19 @@ end:
   { struct DLS_AI *ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
     if (!ai) return(0.0);
     return( ai->valeur );
+  }
+/******************************************************************************************************************************/
+/* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble valeur, gboolean in_range )
+  { struct DLS_AI *ai;
+    ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
+    if (!ai) return;
+    if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
+
+    ai->valeur  = valeur;
+    ai->inrange = in_range;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */

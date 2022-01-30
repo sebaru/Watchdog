@@ -323,36 +323,28 @@
                  zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        Dls_data_set_AI ( tech_id, acronyme, NULL,
-                         Json_get_double ( request, "valeur" ),  Json_get_bool ( request, "in_range" ) );
+                         Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        return(TRUE);                                                                                                /* Traité */
      }
 /************************************ Création des mnemos et mappings depuis les threads **************************************/
-    else if ( !strcasecmp( zmq_tag, "CREATE_AI") )
-     { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: CREATE_MNEMO: wrong parameters from '%s'", __func__, zmq_src_tech_id );
+    else if ( !strcasecmp( zmq_tag, "CREATE_IO") )
+     { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) ))
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: CREATE_IO: wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
 
        gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
        gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-       gchar *tech_id         = thread_tech_id;
-       gchar *acronyme        = thread_acronyme;
 
        SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id = '%s', thread_acronyme = '%s'",
                        thread_tech_id, thread_acronyme );
 
-       JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
-       if (map)
-        { tech_id  = Json_get_string ( map, "tech_id" );
-          acronyme = Json_get_string ( map, "acronyme" );
-        }
-
-       Dls_data_AI_create ( tech_id, acronyme );
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: CREATE_AI from '%s' to '%s': New AI '%s:%s'/'%s:%s'", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
+                 "%s: CREATE_IO from '%s' to '%s': '%s:%s'", __func__,
+                 zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme );
        return(TRUE);                                                                                                /* Traité */
      }
+/************************************ Réaction sur SET_CDE ********************************************************************/
     else if ( !strcasecmp( zmq_tag, "SET_CDE") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE: wrong parameters from '%s'", __func__, zmq_src_tech_id );

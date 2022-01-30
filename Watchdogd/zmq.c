@@ -263,9 +263,9 @@
 /* Entrée: la structure SUBPROCESS, la classe, le json associé                                                                */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_Create_AI ( struct SUBPROCESS *module, JsonNode *node )
+ void Zmq_Send_Create_IO ( struct SUBPROCESS *module, JsonNode *node )
   { if (!module) return;
-    Json_node_add_string ( node, "zmq_tag", "CREATE_AI" );
+    Json_node_add_string ( node, "zmq_tag", "CREATE_IO" );
     Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, node );
   }
 /******************************************************************************************************************************/
