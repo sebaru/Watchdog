@@ -741,7 +741,6 @@
                        Json_get_string ( vars->AI[num], "thread_acronyme" ),
                        Json_get_string ( vars->AI[num], "libelle" ),
                        Json_get_string ( vars->AI[num], "unite" ) );
-             Json_node_add_bool ( vars->AI[num], "deletable", TRUE );
              Zmq_Send_Create_IO ( module, vars->AI[num] );
              Json_node_add_int  ( vars->AI[num], "valeur_int", -1 );          /* Pour forcer une premiere comm vers le master */
              Json_node_add_bool ( vars->AI[num], "in_range", FALSE );

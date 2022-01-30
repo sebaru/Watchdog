@@ -112,14 +112,17 @@
 /* Entrée: la structure SUBPROCESS, les parametres de l'AI                                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- JsonNode *Mnemo_create_thread_AI ( gchar *thread_tech_id, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
+ JsonNode *Mnemo_create_subprocess_AI ( struct SUBPROCESS *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
   { JsonNode *node = Json_node_create();
     if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "AI" );
     Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
     Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
     Json_node_add_string ( node, "libelle", libelle );
     Json_node_add_string ( node, "unite", unite );
     Json_node_add_int    ( node, "archivage", archivage );
+    Zmq_Send_Create_IO ( module, node );
     return(node);
   }
 /******************************************************************************************************************************/

@@ -330,7 +330,9 @@
      }
 /************************************ Création des mnemos et mappings depuis les threads **************************************/
     else if ( !strcasecmp( zmq_tag, "CREATE_IO") )
-     { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) ))
+     { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
+              Json_has_member ( request, "classe" )
+             ))
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: CREATE_IO: wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
@@ -338,7 +340,8 @@
        gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
        gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
 
-       SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id = '%s', thread_acronyme = '%s'",
+       SQL_Write_new ( "INSERT INTO mappings SET classe='%s', thread_tech_id = '%s', thread_acronyme = '%s' "
+                       "ON DUPLICATE KEY UPDATE classe=VALUE(classe)",
                        thread_tech_id, thread_acronyme );
 
        Info_new( Config.log, Config.log_msrv, LOG_INFO,

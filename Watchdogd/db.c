@@ -590,6 +590,7 @@ encore:
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
+                   "`classe` VARCHAR(32) NULL DEFAULT NULL,"
                    "`thread_tech_id` VARCHAR(32) NOT NULL,"
                    "`thread_acronyme` VARCHAR(64) NOT NULL,"
                    "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
@@ -2588,8 +2589,11 @@ encore:
        SQL_Write_new ("DROP TABLE mappings_text;");
      }
 
+    if (database_version < 6087)
+     { SQL_Write_new ("ALTER TABLE mappings ADD `classe` VARCHAR(32) NULL DEFAULT NULL BEFORE 'thread_tech_id'"); }
+
 fin:
-    database_version = 6086;
+    database_version = 6087;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
