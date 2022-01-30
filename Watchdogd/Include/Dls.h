@@ -121,9 +121,10 @@
   };
 
  struct DLS_AI
-  { gchar   acronyme[NBR_CARAC_ACRONYME];
-    gchar   tech_id[NBR_CARAC_TECHID];
-    gchar   unite[NBR_CARAC_UNITE];                                                                                        /* Km, h, ° ... */
+  { gchar   acronyme[64];
+    gchar   tech_id[32];
+    gchar   libelle[128];                                                                                     /* Km, h, ° ... */
+    gchar   unite[32];                                                                                        /* Km, h, ° ... */
     gdouble valeur;
     guint   last_arch;                                                                         /* Date de la derniere archive */
     guint   inrange;

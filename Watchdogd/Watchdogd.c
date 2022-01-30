@@ -305,7 +305,10 @@
 /************************************ Positionne une valeur d'une Entrée Analogique *******************************************/
     else if ( !strcasecmp( zmq_tag, "SET_AI") )
      { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-              Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" )) )
+              Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
+              Json_has_member ( request, "libelle" ) && Json_has_member ( request, "unite" )
+             )
+          )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_AI: wrong parameters from '%s'", __func__, zmq_src_tech_id );
           return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
         }
@@ -324,8 +327,11 @@
                  "%s: SET_AI from '%s' to '%s': '%s:%s/'%s:%s'=%f %s (range=%d)", __func__,
                  zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
-       Dls_data_set_AI ( tech_id, acronyme, NULL,
+       struct DLS_AI *ai = NULL;
+       Dls_data_set_AI ( tech_id, acronyme, ai,
                          Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
+       g_snprintf ( ai->libelle, sizeof(ai->libelle), "%s", Json_get_string ( request, "libelle" ) );
+       g_snprintf ( ai->unite,   sizeof(ai->unite),   "%s", Json_get_string ( request, "unite" ) );
        return(TRUE);                                                                                                /* Traité */
      }
 /************************************ Création des mnemos et mappings depuis les threads **************************************/

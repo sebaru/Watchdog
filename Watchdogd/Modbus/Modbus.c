@@ -742,8 +742,6 @@
                        Json_get_string ( vars->AI[num], "libelle" ),
                        Json_get_string ( vars->AI[num], "unite" ) );
              Zmq_Send_Create_IO ( module, vars->AI[num] );
-             Json_node_add_int  ( vars->AI[num], "valeur_int", -1 );          /* Pour forcer une premiere comm vers le master */
-             Json_node_add_bool ( vars->AI[num], "in_range", FALSE );
            } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map AI: num %d out of range '%d'",
                             __func__, thread_tech_id, num, vars->nbr_entree_ana );
         }
