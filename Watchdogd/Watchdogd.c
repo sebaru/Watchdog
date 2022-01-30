@@ -328,7 +328,7 @@
                  zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
        struct DLS_AI *ai = NULL;
-       Dls_data_set_AI ( tech_id, acronyme, ai,
+       Dls_data_set_AI ( tech_id, acronyme, &ai,
                          Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        g_snprintf ( ai->libelle, sizeof(ai->libelle), "%s", Json_get_string ( request, "libelle" ) );
        g_snprintf ( ai->unite,   sizeof(ai->unite),   "%s", Json_get_string ( request, "unite" ) );
