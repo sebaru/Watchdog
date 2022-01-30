@@ -33,6 +33,14 @@
 
  #define NOM_TABLE_ARCH    "histo_bit"
 
+ enum
+  { ARCHIVE_NONE,
+    ARCHIVE_5_SEC,
+    ARCHIVE_1_MIN,
+    ARCHIVE_1_HEURE,
+    ARCHIVE_1_JOUR
+  };
+
  struct ARCHDB
   { guint   date_sec;                                                                                     /* Date de la photo */
     guint   date_usec;                                                                                    /* Date de la photo */

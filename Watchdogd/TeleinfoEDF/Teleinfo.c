@@ -124,14 +124,14 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    vars->Adco  = Mnemo_create_subprocess_AI ( module, "ADCO",  "N° d’identification du compteur", "numéro", 4 );
-    vars->Isous = Mnemo_create_subprocess_AI ( module, "ISOUS", "Intensité EDF souscrite ", "A", 2 );
-    vars->Base  = Mnemo_create_subprocess_AI ( module, "BASE",  "Index option BASE", "Wh", 2 );
-    vars->Hchc  = Mnemo_create_subprocess_AI ( module, "HCHC",  "Index heures creuses", "Wh", 2 );
-    vars->Hchp  = Mnemo_create_subprocess_AI ( module, "HCHP",  "Index heures pleines", "Wh", 2 );
-    vars->Iinst = Mnemo_create_subprocess_AI ( module, "IINST", "Intensité EDF instantanée", "A", 2 );
-    vars->Imax  = Mnemo_create_subprocess_AI ( module, "IMAX",  "Intensité EDF maximale", "A", 2 );
-    vars->Papp  = Mnemo_create_subprocess_AI ( module, "PAPP",  "Puissance apparente EDF consommée", "VA", 2 );
+    vars->Adco  = Mnemo_create_subprocess_AI ( module, "ADCO",  "N° d’identification du compteur", "numéro", ARCHIVE_1_JOUR );
+    vars->Isous = Mnemo_create_subprocess_AI ( module, "ISOUS", "Intensité EDF souscrite ", "A", ARCHIVE_1_MIN );
+    vars->Base  = Mnemo_create_subprocess_AI ( module, "BASE",  "Index option BASE", "Wh", ARCHIVE_1_MIN );
+    vars->Hchc  = Mnemo_create_subprocess_AI ( module, "HCHC",  "Index heures creuses", "Wh", ARCHIVE_1_MIN );
+    vars->Hchp  = Mnemo_create_subprocess_AI ( module, "HCHP",  "Index heures pleines", "Wh", ARCHIVE_1_MIN );
+    vars->Iinst = Mnemo_create_subprocess_AI ( module, "IINST", "Intensité EDF instantanée", "A", ARCHIVE_1_MIN );
+    vars->Imax  = Mnemo_create_subprocess_AI ( module, "IMAX",  "Intensité EDF maximale", "A", ARCHIVE_1_MIN );
+    vars->Papp  = Mnemo_create_subprocess_AI ( module, "PAPP",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
 
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );

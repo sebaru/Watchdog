@@ -350,16 +350,16 @@
     Mnemo_auto_create_DI ( FALSE, thread_tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
     Mnemo_auto_create_DI ( FALSE, thread_tech_id, "UPS_ALARM",  "UPS en alarme !" );
 
-    vars->Load            = Mnemo_create_subprocess_AI ( module, "LOAD", "Charge onduleur", "%", 2 );
-    vars->Realpower       = Mnemo_create_subprocess_AI ( module, "REALPOWER", "Charge onduleur", "W", 2 );
-    vars->Battery_charge  = Mnemo_create_subprocess_AI ( module, "BATTERY_CHARGE", "Charge batterie", "%", 2 );
-    vars->Input_voltage   = Mnemo_create_subprocess_AI ( module, "INPUT_VOLTAGE", "Tension d'entrée", "V", 2 );
-    vars->Battery_runtime = Mnemo_create_subprocess_AI ( module, "BATTERY_RUNTIME", "Durée de batterie restante", "s", 2 );
-    vars->Battery_voltage = Mnemo_create_subprocess_AI ( module, "BATTERY_VOLTAGE", "Tension batterie", "V", 2 );
-    vars->Input_hz        = Mnemo_create_subprocess_AI ( module, "INPUT_HZ", "Fréquence d'entrée", "HZ", 2 );
-    vars->Output_current  = Mnemo_create_subprocess_AI ( module, "OUTPUT_CURRENT", "Courant de sortie", "A", 2 );
-    vars->Output_hz       = Mnemo_create_subprocess_AI ( module, "OUTPUT_HZ", "Fréquence de sortie", "HZ", 2 );
-    vars->Output_voltage  = Mnemo_create_subprocess_AI ( module, "OUTPUT_VOLTAGE", "Tension de sortie", "V", 2 );
+    vars->Load            = Mnemo_create_subprocess_AI ( module, "LOAD", "Charge onduleur", "%", ARCHIVE_1_MIN );
+    vars->Realpower       = Mnemo_create_subprocess_AI ( module, "REALPOWER", "Charge onduleur", "W", ARCHIVE_1_MIN );
+    vars->Battery_charge  = Mnemo_create_subprocess_AI ( module, "BATTERY_CHARGE", "Charge batterie", "%", ARCHIVE_1_MIN );
+    vars->Input_voltage   = Mnemo_create_subprocess_AI ( module, "INPUT_VOLTAGE", "Tension d'entrée", "V", ARCHIVE_1_MIN );
+    vars->Battery_runtime = Mnemo_create_subprocess_AI ( module, "BATTERY_RUNTIME", "Durée de batterie restante", "s", ARCHIVE_1_MIN );
+    vars->Battery_voltage = Mnemo_create_subprocess_AI ( module, "BATTERY_VOLTAGE", "Tension batterie", "V", ARCHIVE_1_MIN );
+    vars->Input_hz        = Mnemo_create_subprocess_AI ( module, "INPUT_HZ", "Fréquence d'entrée", "HZ", ARCHIVE_1_MIN );
+    vars->Output_current  = Mnemo_create_subprocess_AI ( module, "OUTPUT_CURRENT", "Courant de sortie", "A", ARCHIVE_1_MIN );
+    vars->Output_hz       = Mnemo_create_subprocess_AI ( module, "OUTPUT_HZ", "Fréquence de sortie", "HZ", ARCHIVE_1_MIN );
+    vars->Output_voltage  = Mnemo_create_subprocess_AI ( module, "OUTPUT_VOLTAGE", "Tension de sortie", "V", ARCHIVE_1_MIN );
 
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "LOAD_ON", "Active la sortie ondulée" );

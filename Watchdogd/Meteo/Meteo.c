@@ -188,27 +188,27 @@
     for (gint cpt=0; cpt<=13; cpt++)
      { gchar acronyme[64];
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", cpt );
-       vars->Temp_min[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Température minimum", "°C", 3 );
+       vars->Temp_min[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Température minimum", "°C", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", cpt );
-       vars->Temp_max[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Température maximum", "°C", 3 );
+       vars->Temp_max[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Température maximum", "°C", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", cpt );
-       vars->Proba_pluie[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de pluie (0-100%)", "%", 3 );
+       vars->Proba_pluie[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de pluie (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", cpt );
-       vars->Proba_gel[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de gel (0-100%)", "%", 3 );
+       vars->Proba_gel[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de gel (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", cpt );
-       vars->Proba_brouillard[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de brouillard (0-100%)", "%", 3 );
+       vars->Proba_brouillard[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de brouillard (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", cpt );
-       vars->Proba_vent_70[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de vent > 70km/h  (0-100%)", "%", 3 );
+       vars->Proba_vent_70[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de vent > 70km/h  (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", cpt );
-       vars->Proba_vent_100[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de vent > 100km/h (0-100%)", "%", 3 );
+       vars->Proba_vent_100[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de vent > 100km/h (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", cpt );
-       vars->Proba_vent_orage[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Vitesse des rafales de vent si orage", "km/h", 3 );
+       vars->Proba_vent_orage[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Vitesse des rafales de vent si orage", "km/h", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", cpt );
-       vars->Vent_10m[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Vent moyen à 10 mètres", "km/h", 3 );
+       vars->Vent_10m[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Vent moyen à 10 mètres", "km/h", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", cpt );
-       vars->Direction_vent[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Direction du vent", "°", 3 );
+       vars->Direction_vent[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Direction du vent", "°", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", cpt );
-       vars->Rafale_vent[cpt] = Mnemo_create_subprocess_AI ( module, acronyme,  "Vitesse des rafales de vent", "km/h", 3 );
+       vars->Rafale_vent[cpt] = Mnemo_create_subprocess_AI ( module, acronyme,  "Vitesse des rafales de vent", "km/h", ARCHIVE_1_HEURE );
      }
 
     Meteo_get_ephemeride( module );
