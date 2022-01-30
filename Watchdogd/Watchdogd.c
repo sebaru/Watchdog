@@ -342,7 +342,7 @@
 
        SQL_Write_new ( "INSERT INTO mappings SET classe='%s', thread_tech_id = '%s', thread_acronyme = '%s' "
                        "ON DUPLICATE KEY UPDATE classe=VALUE(classe)",
-                       thread_tech_id, thread_acronyme );
+                       Json_get_string ( request, "classe" ), thread_tech_id, thread_acronyme );
 
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
                  "%s: CREATE_IO from '%s' to '%s': '%s:%s'", __func__,
