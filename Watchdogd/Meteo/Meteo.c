@@ -118,45 +118,25 @@
 /******************************************************************************************************************************/
  static void Meteo_update_forecast ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct SUBPROCESS *module = user_data;
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    struct METEO_VARS *vars = module->vars;
+
     gint day       = Json_get_int ( element, "day" );
     gint temp_min  = Json_get_int ( element, "tmin" );
     gint temp_max  = Json_get_int ( element, "tmax" );
     Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
               "%s: day %02d -> temp_min=%02d, temp_max=%02d", __func__, day, temp_min, temp_max );
-    gchar acronyme[64];
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "tmin" ), TRUE );
 
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "tmax" ), TRUE );
-
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probarain" ), TRUE );
-
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probafrost" ), TRUE );
-
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probafog" ), TRUE );
-
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probawind70" ), TRUE );
-
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "probawind100" ), TRUE );
-
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "gustx" ), TRUE );
-
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "wind10m" ), TRUE );
-
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
-
-    g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", day );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, acronyme, 1.0*Json_get_int ( element, "gust10m" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Proba_pluie[day],      1.0*Json_get_int ( element, "probarain" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Proba_gel[day],        1.0*Json_get_int ( element, "probafrost" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Proba_brouillard[day], 1.0*Json_get_int ( element, "probafog" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Proba_vent_70[day],    1.0*Json_get_int ( element, "probawind70" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Proba_vent_100[day],   1.0*Json_get_int ( element, "probawind100" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Proba_vent_orage[day], 1.0*Json_get_int ( element, "gustx" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Vent_10m[day],         1.0*Json_get_int ( element, "wind10m" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Direction_vent[day],   1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
+    Zmq_Send_AI_to_master ( module, vars->Rafale_vent[day],      1.0*Json_get_int ( element, "gust10m" ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */
@@ -208,27 +188,27 @@
     for (gint cpt=0; cpt<=13; cpt++)
      { gchar acronyme[64];
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Température minimum", "°C" );
+       vars->Temp_min[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Température minimum", "°C", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Température maximum", "°C" );
+       vars->Temp_max[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Température maximum", "°C", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de pluie (0-100%)", "%" );
+       vars->Proba_pluie[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de pluie (0-100%)", "%", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de gel (0-100%)", "%" );
+       vars->Proba_gel[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de gel (0-100%)", "%", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de brouillard (0-100%)", "%" );
+       vars->Proba_brouillard[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de brouillard (0-100%)", "%", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de vent > 70km/h  (0-100%)", "%" );
+       vars->Proba_vent_70[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de vent > 70km/h  (0-100%)", "%", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Probabilité de vent > 100km/h (0-100%)", "%" );
+       vars->Proba_vent_100[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de vent > 100km/h (0-100%)", "%", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Vitesse des rafales de vent si orage", "km/h" );
+       vars->Proba_vent_orage[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Vitesse des rafales de vent si orage", "km/h", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Vent moyen à 10 mètres", "km/h" );
+       vars->Vent_10m[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Vent moyen à 10 mètres", "km/h", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme, "Direction du vent", "°" );
+       vars->Direction_vent[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Direction du vent", "°", 3 );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", cpt );
-       Mnemo_auto_create_AI ( FALSE, thread_tech_id, acronyme,  "Vitesse des rafales de vent", "km/h" );
+       vars->Rafale_vent[cpt] = Mnemo_create_subprocess_AI ( module, acronyme,  "Vitesse des rafales de vent", "km/h", 3 );
      }
 
     Meteo_get_ephemeride( module );
@@ -252,6 +232,21 @@
           json_node_unref(request);
         }
      }
+
+    for (gint cpt=0; cpt<=13; cpt++)
+     { json_node_unref ( vars->Temp_min[cpt] );
+       json_node_unref ( vars->Temp_max[cpt] );
+       json_node_unref ( vars->Proba_pluie[cpt] );
+       json_node_unref ( vars->Proba_gel[cpt] );
+       json_node_unref ( vars->Proba_brouillard[cpt] );
+       json_node_unref ( vars->Proba_vent_70[cpt] );
+       json_node_unref ( vars->Proba_vent_100[cpt] );
+       json_node_unref ( vars->Proba_vent_orage[cpt] );
+       json_node_unref ( vars->Vent_10m[cpt] );
+       json_node_unref ( vars->Direction_vent[cpt] );
+       json_node_unref ( vars->Rafale_vent[cpt] );
+     }
+
     SubProcess_end(module);
   }
 /******************************************************************************************************************************/
