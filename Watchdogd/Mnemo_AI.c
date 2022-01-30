@@ -122,7 +122,6 @@
     Json_node_add_string ( node, "libelle", libelle );
     Json_node_add_string ( node, "unite", unite );
     Json_node_add_int    ( node, "archivage", archivage );
-    Zmq_Send_Create_IO ( module, node );
     return(node);
   }
 /******************************************************************************************************************************/

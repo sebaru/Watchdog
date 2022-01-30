@@ -328,31 +328,16 @@
                  zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
        struct DLS_AI *ai = NULL;
-       Dls_data_set_AI ( tech_id, acronyme, &ai,
+       Dls_data_set_AI ( tech_id, acronyme, (gpointer)&ai,
                          Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-       g_snprintf ( ai->libelle, sizeof(ai->libelle), "%s", Json_get_string ( request, "libelle" ) );
-       g_snprintf ( ai->unite,   sizeof(ai->unite),   "%s", Json_get_string ( request, "unite" ) );
-       return(TRUE);                                                                                                /* Traité */
-     }
-/************************************ Création des mnemos et mappings depuis les threads **************************************/
-    else if ( !strcasecmp( zmq_tag, "CREATE_IO") )
-     { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-              Json_has_member ( request, "classe" )
-             ))
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: CREATE_IO: wrong parameters from '%s'", __func__, zmq_src_tech_id );
-          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
+       if (Json_get_bool ( request, "first_send" ) == TRUE )
+        { g_snprintf ( ai->libelle, sizeof(ai->libelle), "%s", Json_get_string ( request, "libelle" ) );
+          g_snprintf ( ai->unite,   sizeof(ai->unite),   "%s", Json_get_string ( request, "unite" ) );
+          ai->archivage = Json_get_int ( request, "archivage" );
+          SQL_Write_new ( "INSERT INTO mappings SET classe='AI', thread_tech_id = '%s', thread_acronyme = '%s' "
+                          "ON DUPLICATE KEY UPDATE classe=VALUE(classe)",
+                          thread_tech_id, thread_acronyme );
         }
-
-       gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
-       gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-
-       SQL_Write_new ( "INSERT INTO mappings SET classe='%s', thread_tech_id = '%s', thread_acronyme = '%s' "
-                       "ON DUPLICATE KEY UPDATE classe=VALUE(classe)",
-                       Json_get_string ( request, "classe" ), thread_tech_id, thread_acronyme );
-
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: CREATE_IO from '%s' to '%s': '%s:%s'", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme );
        return(TRUE);                                                                                                /* Traité */
      }
 /************************************ Réaction sur SET_CDE ********************************************************************/
