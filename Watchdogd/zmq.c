@@ -232,7 +232,7 @@
 /******************************************************************************************************************************/
  void Zmq_Send_DI_to_master ( struct SUBPROCESS *module, JsonNode *di, gboolean etat )
   { if (!module) return;
-    Json_node_add_string ( di, "zmq_tag", "SET_AI" );
+    Json_node_add_string ( di, "zmq_tag", "SET_DI" );
     gboolean update = FALSE;
     if (!Json_has_member ( di, "etat" )) { Json_node_add_bool ( di, "first_send", TRUE ); update = TRUE; }
     else

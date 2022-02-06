@@ -572,7 +572,7 @@ encore:
                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
                    "`etat` BOOLEAN NOT NULL DEFAULT '0',"
-                   "`libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
                    "UNIQUE (`tech_id`,`acronyme`),"
                    "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
@@ -595,6 +595,7 @@ encore:
                    "`thread_acronyme` VARCHAR(64) NOT NULL,"
                    "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
                    "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
+                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
                    "UNIQUE (`thread_tech_id`,`thread_acronyme`),"
                    "UNIQUE (`tech_id`,`acronyme`),"
                    "UNIQUE (`thread_tech_id`,`thread_acronyme`,`tech_id`,`acronyme`),"
@@ -2595,8 +2596,11 @@ encore:
     if (database_version < 6088)
      { SQL_Write_new ("ALTER TABLE mappings ADD `libelle` VARCHAR(128) NULL DEFAULT NULL"); }
 
+    if (database_version < 6089)
+     { SQL_Write_new ("UPDATE mappings SET libelle='default' WHERE libelle IS NULL"); }
+
 fin:
-    database_version = 6088;
+    database_version = 6089;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

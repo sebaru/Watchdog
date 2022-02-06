@@ -72,6 +72,7 @@
                     "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`thread_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                     "`num` INT(11) NOT NULL DEFAULT 0,"
+                    "`libelle` VARCHAR(128) NOT NULL DEFAULT '',"
                     "UNIQUE (thread_tech_id, thread_acronyme),"
                     "FOREIGN KEY (`thread_tech_id`) REFERENCES `modbus` (`thread_tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                     ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
@@ -134,7 +135,11 @@
                        "INNER JOIN mnemos_AI as m ON m.tech_id=map.tech_id AND m.acronyme=map.acronyme "
                        "SET ai.unite=m.unite, ai.libelle=m.libelle, ai.archivage=m.archivage");
      }
-    Process_set_database_version ( lib, 6 );
+
+    if (lib->database_version < 7)
+     { SQL_Write_new ( "ALTER TABLE modbus_DI ADD `libelle` VARCHAR(128) NOT NULL DEFAULT ''"); }
+
+    Process_set_database_version ( lib, 7 );
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
