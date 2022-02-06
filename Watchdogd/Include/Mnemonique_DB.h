@@ -73,6 +73,7 @@
  extern void Dls_REGISTRE_to_json ( JsonNode *element, struct DLS_REGISTRE *bit );
 
  extern gboolean Mnemo_auto_create_DI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle );/* Dans mnemos_DI.c */
+ extern JsonNode *Mnemo_create_subprocess_DI ( struct SUBPROCESS *module, gchar *thread_acronyme, gchar *libelle );
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
 
  extern gboolean Mnemo_auto_create_DO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle );/* Dans mnemos_DO.c */

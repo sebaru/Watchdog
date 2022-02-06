@@ -121,8 +121,8 @@
   };
 
  struct DLS_AI
-  { gchar   acronyme[64];
-    gchar   tech_id[32];
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gchar   unite[32];                                                                                        /* Km, h, ° ... */
     gdouble valeur;
@@ -173,16 +173,18 @@
   };
 
  struct DLS_DI
-  { gchar   tech_id[NBR_CARAC_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME];
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gboolean etat;
     gboolean edge_up;
     gboolean edge_down;
   };
 
  struct DLS_DO
-  { gchar   tech_id[NBR_CARAC_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME];
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gboolean etat;
     gboolean edge_up;
     gboolean edge_down;

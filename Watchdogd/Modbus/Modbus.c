@@ -753,11 +753,8 @@
     else
      { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__,thread_tech_id, vars->nbr_entree_tor );
        SQL_Select_to_json_node ( vars->DI_root, "modbus_DI",
-                                 "SELECT di.*, m.* FROM modbus_DI AS di "
-                                 "INNER JOIN mappings ON mappings.thread_tech_id  = di.thread_tech_id "
-                                 "                   AND mappings.thread_acronyme = di.thread_acronyme "
-                                 "INNER JOIN mnemos_DI AS m ON m.tech_id = mappings.tech_id AND m.acronyme = mappings.acronyme "
-                                 "WHERE di.thread_tech_id='%s' AND mappings.tech_id IS NOT NULL", thread_tech_id );
+                                 "SELECT *, 'DI' AS classe FROM modbus_DI "
+                                 "WHERE thread_tech_id='%s'", thread_tech_id );
 
        vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
        if (!vars->DI)
@@ -766,16 +763,14 @@
         }
 
        JsonArray *array = Json_get_array ( vars->DI_root, "modbus_DI" );
-       for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->DI_root, "modbus_DI" ) ); cpt ++ )
+       for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->DI_root, "modbus_DI" ) ); cpt++ )
         { JsonNode *element = json_array_get_element ( array, cpt );
           gint num = Json_get_int ( element, "num" );
           if ( 0 <= num && num < vars->nbr_entree_tor )
            { vars->DI[num] = element;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Mapping: %s -> %s:%s", __func__, thread_tech_id,
-                       Json_get_string ( vars->DI[num], "thread_acronyme" ),
-                       Json_get_string ( vars->DI[num], "tech_id" ),
-                       Json_get_string ( vars->DI[num], "acronyme" ) );
-             Json_node_add_int ( vars->DI[num], "etat", -1 );                 /* Pour forcer une premiere comm vers le master */
+             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': New DI '%s' (%s)", __func__, thread_tech_id,
+                       Json_get_string ( vars->AI[num], "thread_acronyme" ),
+                       Json_get_string ( vars->AI[num], "libelle" ));
            } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI: num %d out of range '%d'",
                             __func__, thread_tech_id, num, vars->nbr_entree_tor );
         }
@@ -854,12 +849,7 @@
             for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
              { if (vars->DI[cpt])                                                                   /* Si l'entrée est mappée */
                 { gint new_etat = (vars->response.data[ cpt_byte ] & cpt_poid);
-                  gint old_etat = Json_get_int ( vars->DI[cpt], "etat" );
-                  if (old_etat != new_etat)
-                   { Zmq_Send_DI_to_master_new ( module, Json_get_string ( vars->DI[cpt], "tech_id" ),
-                                                         Json_get_string ( vars->DI[cpt], "acronyme" ), new_etat );
-                     Json_node_add_int ( vars->DI[cpt], "etat", new_etat );
-                   }
+                  Zmq_Send_DI_to_master ( module, vars->DI[cpt], new_etat );
                 }
                cpt_poid = cpt_poid << 1;
                if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }

@@ -49,6 +49,14 @@
     JsonNode *Output_current;
     JsonNode *Output_hz;
     JsonNode *Output_voltage;
+/*********************************************************** Digital Input ****************************************************/
+    JsonNode *Outlet_1_status;
+    JsonNode *Outlet_2_status;
+    JsonNode *Ups_online;
+    JsonNode *Ups_charging;
+    JsonNode *Ups_on_batt;
+    JsonNode *Ups_replace_batt;
+    JsonNode *Ups_alarm;
   };
 
 /************************************************* Déclaration des prototypes *************************************************/
