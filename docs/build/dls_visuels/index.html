@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Sébastien et Bruno Lefèvre">
+  <link rel="canonical" href="https://docs.abls-habitat.fr/dls_visuels/">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Les Visuels - Watchdog Docs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../extra.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Les Visuels";
+    var mkdocs_page_input_path = "dls_visuels.md";
+    var mkdocs_page_url = "/dls_visuels/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Watchdog Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <p class="caption"><span class="caption-text">Découverte</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Tour d'horizon</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../galerie/">Galerie</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Prise en main</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../guide_demarrage/">Guide de démarrage</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Guide de l'utilisateur</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../users/">Typologie des Utilisateurs</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Programmation D.L.S</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../dls/">Le concept</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_alias/">Les alias</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_link/">Les liens</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_logique/">La logique</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_calculs/">Les calculs</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_entre_tor/">Les entrées T.O.R</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Les Visuels</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#comment-piloter-un-visuel">Comment piloter un visuel</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#les-couleurs">Les couleurs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#les-visuels-complexes">Les visuels complexes</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Les formes de visuels</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_visuel_bouton/">Les boutons</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_visuel_comment/">Les commentaires</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visuels/">Inventaire des Visuels</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Pour nous aider</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../auteurs/">Qui sommes-nous ?</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Watchdog Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Programmation D.L.S &raquo;</li>
+        
+      
+    
+    <li>Les Visuels</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="les-visuels-_i">Les Visuels <strong>_I</strong></h1>
+<p>Les visuels, bit de classe <strong>_I</strong> vous permettent de matérialiser un objet, une commande, ou encore un état.
+Chaque visuel est représenté par le <strong>TECH_ID</strong> de son D.L.S parent, et par son <strong>ACRONYME</strong>.
+Par exemple, voici la définition la plus simple d'un visuel:</p>
+<pre><code>/* Nous sommes dans le D.L.S "SONO" */
+/* Déclaration d'un visuel MON_VISUEL, de forme 'haut_parleur' */
+#define MON_VISUEL &lt;-&gt; _I(forme="haut_parleur");
+</code></pre>
+<p>Cette déclaration vous permet ensuite d'utiliser <strong>MON_VISUEL</strong> a l'intérieur même du D.L.S <strong>SONO</strong>.
+Pour faire apparaitre ce visuel sur un autre D.L.S, il faudra utiliser un <a href="../dls_link/">lien</a> précisant son identification complète
+<strong>SONO:MON_VISUEL</strong>.</p>
+<hr />
+<h2 id="comment-piloter-un-visuel">Comment piloter un visuel</h2>
+<p>Chaque visuel s'appui sur des options, permettant de définir facilement la déclinaison souhaitée par le <a href="/users.md">technicien</a>
+Ces options sont représentées dans la grammaire <a href="/dls.md">D.L.S</a> par les mots clefs suivants:</p>
+<ul>
+<li><code>mode</code>: il s'agit du mode principal d'affichage du visuel. Pour une porte, il peut s'agir du mode <code>ouverte</code> ou <code>fermée</code> par exemple.</li>
+<li><code>color</code>: il s'agit de la couleur souhaitée d'affichage du visuel. Les couleurs sont représentées par leurs noms en anglais.</li>
+<li><code>cligno</code>: cette option permet de faire clignoter le visuel dans l'interface.</li>
+</ul>
+<p>Voici des exemples de déclinaisons d'une même forme selon plusieurs <code>mode</code> et <code>color</code>:</p>
+<pre><code>/* Nous sommes dans le D.L.S "SONO" */
+/* Déclaration d'un visuel MON_VISUEL, de forme 'haut_parleur' */
+/* Par défaut, le visuel est dans le mode inactif, en blanc */
+#define MON_HAUT_PARLEUR &lt;-&gt; _I(forme="haut_parleur", mode="inactif", color="white");
+
+/* Si MA_CONDITION est vraie, le visuel est actif, de couleur rouge, */
+/* et clignotant */
+- MA_CONDITION -&gt; MON_HAUT_PARLEUR(mode="actif", color="red", cligno);
+</code></pre>
+<hr />
+<h2 id="les-couleurs">Les couleurs</h2>
+<p>Les couleurs HTML sont reconnues, dans le format string, comme ci dessous:</p>
+<ul>
+<li>black</li>
+<li>white</li>
+<li>blue</li>
+<li>darkgreen</li>
+<li>gray</li>
+<li>green</li>
+<li>lightblue</li>
+<li>orange</li>
+<li>red</li>
+<li>yellow</li>
+</ul>
+<hr />
+<h2 id="les-visuels-complexes">Les visuels complexes</h2>
+<p>Certaines formes de visuelles sont particulières, dans le sens ou le visuel en question est construit de manière dynamique.
+Ces visuels complexes sont les suivants:</p>
+<table>
+<thead>
+<tr>
+<th align="center">forme</th>
+<th align="left">description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><a href="../dls_visuel_bouton/">bouton</a></td>
+<td align="left">Ce visuel affiche un bouton dont le titre est le <code>libelle</code></td>
+</tr>
+<tr>
+<td align="center">bloc_maintenance</td>
+<td align="left">Ce visuel affiche le bloc Service/Maintenance, en fonction du <code>mode</code></td>
+</tr>
+<tr>
+<td align="center"><a href="../dls_visuel_comment/">comment</a></td>
+<td align="left">Ce visuel affiche son <code>libelle</code> sous la forme de texte, avec une police et une couleur dependants du <code>mode</code> et <code>color</code></td>
+</tr>
+<tr>
+<td align="center">encadre</td>
+<td align="left">Ce visuel affiche un cadre de couleur <code>color</code>, surmonté d'un titre selon le <code>libelle</code>. La taille du cadre est determinée selon son <code>mode</code></td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../dls_visuel_bouton/" class="btn btn-neutral float-right" title="Les boutons">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../dls_entre_tor/" class="btn btn-neutral" title="Les entrées T.O.R"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../dls_entre_tor/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../dls_visuel_bouton/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

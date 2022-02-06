@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Sébastien et Bruno Lefèvre">
+  <link rel="canonical" href="https://docs.abls-habitat.fr/dls_entre_tor/">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Les entrées T.O.R - Watchdog Docs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../extra.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Les entr\u00e9es T.O.R";
+    var mkdocs_page_input_path = "dls_entre_tor.md";
+    var mkdocs_page_url = "/dls_entre_tor/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Watchdog Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <p class="caption"><span class="caption-text">Découverte</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Tour d'horizon</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../galerie/">Galerie</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Prise en main</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../guide_demarrage/">Guide de démarrage</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Guide de l'utilisateur</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../users/">Typologie des Utilisateurs</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Programmation D.L.S</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../dls/">Le concept</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_alias/">Les alias</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_link/">Les liens</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_logique/">La logique</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_calculs/">Les calculs</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Les entrées T.O.R</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#declarer-une-entree-tor">Déclarer une Entrée TOR</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#usage-dans-une-expression">Usage dans une EXPRESSION</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#variation-dls">Variation DLS</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_visuels/">Les Visuels</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Les formes de visuels</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_visuel_bouton/">Les boutons</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_visuel_comment/">Les commentaires</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visuels/">Inventaire des Visuels</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Pour nous aider</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../auteurs/">Qui sommes-nous ?</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Watchdog Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Programmation D.L.S &raquo;</li>
+        
+      
+    
+    <li>Les entrées T.O.R</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="programmation-dls-les-entrees-tor">Programmation D.L.S: les Entrées T.O.R</h1>
+<p>Une entrée TOR (Tout Ou Rien) est un bit interne de la <a href="../dls/#memoire-d'informations">mémoire d'information</a>, de classse <em>_E</em>.</p>
+<p>Chaque entrée TOR à pour valeur booléenne soit 0, soit 1, et ne peut être positionnée que dans une <strong>EXPRESSION</strong>.</p>
+<h2 id="declarer-une-entree-tor">Déclarer une Entrée TOR</h2>
+<p>Dans la zone d'<a href="../dls_alias/">ALIAS</a>, déclarez une entrée TOR de cette façon:</p>
+<pre><code>#define ACRONYME &lt;-&gt; _E(options);
+</code></pre>
+<p>Elle commence directement par une chaine de caractères représentant l'<strong>ACRONYME</strong>, puis une double flèche (un inférieur « &lt; », un tiret « - », un supérieur « &gt; »),
+la classe _E, et enfin un point virgule terminal.</p>
+<p>Les options suivantes peuvent être affectées à ce bit interne :</p>
+<ul>
+<li>libelle: Permet d'adjoindre une description au bit interne.</li>
+</ul>
+<p>Exemple complet:</p>
+<pre><code>/* Nous sommes dans le DLS "PORTE" */
+#define MON_ENTREE &lt;-&gt; _E (libelle="Capteur d'ouverture de la porte");
+</code></pre>
+<h2 id="usage-dans-une-expression">Usage dans une EXPRESSION</h2>
+<p>Exemple de syntaxe dans une <strong>EXPRESSION</strong>:</p>
+<pre><code>- MON_ENTREE → MON_BISTABLE;       /* Si MON_ENTREE = 1 alors MON_BISTABLE = 1 */
+- /MON_ENTREE → /MON_BISTABLE;     /* Si MON_ENTREE = 0 alors MON_BISTABLE = 0 */
+</code></pre>
+<h2 id="variation-dls">Variation DLS</h2>
+<p>Dans une <strong>EXPRESSION</strong>, il est possible de moduler la sémantique du bit interne en utilisant les options suivantes:</p>
+<ul>
+<li>MON_ENTREE(edge_up): permet de ne prendre en compte que les fronts montants (vrai lorsque l'entrée passe de 0 à 1)</li>
+<li>MON_ENTREE(edge_down): permet de ne prendre en compte que les fronts descendants (vrai lorsque l'entrée passe de 1 à 0)</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../dls_visuels/" class="btn btn-neutral float-right" title="Les Visuels">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../dls_calculs/" class="btn btn-neutral" title="Les calculs"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../dls_calculs/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../dls_visuels/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

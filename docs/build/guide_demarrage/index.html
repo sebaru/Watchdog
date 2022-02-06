@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Sébastien et Bruno Lefèvre">
+  <link rel="canonical" href="https://docs.abls-habitat.fr/guide_demarrage/">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Guide de démarrage - Watchdog Docs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../extra.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Guide de d\u00e9marrage";
+    var mkdocs_page_input_path = "guide_demarrage.md";
+    var mkdocs_page_url = "/guide_demarrage/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Watchdog Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <p class="caption"><span class="caption-text">Découverte</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Tour d'horizon</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../galerie/">Galerie</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Prise en main</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Guide de démarrage</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#pre-requis">Pré-requis</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#installation-en-ligne-de-commande">Installation en ligne de commande</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#installation-web">Installation web</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#arretrelance-et-suivi-de-linstance-systeme">Arrêt/Relance et suivi de l'instance Système</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#commandes-de-lancement-et-darret">Commandes de lancement et d'arret</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#commandes-daffichage-des-logs">Commandes d'affichage des logs</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#arretrelance-et-suivi-de-linstance-user">Arrêt/Relance et suivi de l'instance User</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#commandes-de-lancement-et-darret_1">Commandes de lancement et d'arret</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#commandes-daffichage-des-logs_1">Commandes d'affichage des logs</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#upgrader-une-instance-existante">Upgrader une instance existante</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#utilisateurs-par-defaut">Utilisateurs par défaut</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Guide de l'utilisateur</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../users/">Typologie des Utilisateurs</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Programmation D.L.S</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls/">Le concept</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_alias/">Les alias</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_link/">Les liens</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_logique/">La logique</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_calculs/">Les calculs</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_entre_tor/">Les entrées T.O.R</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_visuels/">Les Visuels</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Les formes de visuels</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_visuel_bouton/">Les boutons</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../dls_visuel_comment/">Les commentaires</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visuels/">Inventaire des Visuels</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Pour nous aider</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../auteurs/">Qui sommes-nous ?</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Watchdog Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Prise en main &raquo;</li>
+        
+      
+    
+    <li>Guide de démarrage</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="bienvenue-sur-watchdog"><img src="/img/abls.svg" width=100> Bienvenue sur Watchdog !</h1>
+<p>Vous trouverez sur ce site l'ensemble de la documentation technique permettant de prendre en main ce système de gestion d'habitat.
+Cette documentation s'adresse aux personnes ayant la responsabilité de l'installation et du maintien des systèmes et sous-systèmes composant un domaine complet.</p>
+<p>Elle présente les guides d'installation, l'architecture, les concepts, les modes d'emploi, ainsi les bonnes pratiques de mise en oeuvre.</p>
+<hr />
+<h2 id="pre-requis">Pré-requis</h2>
+<p>Les socles minimums sur lesquels le système a été testé puis validé:</p>
+<ul>
+<li>Fedora 34 ou supérieure</li>
+<li>Debian Bullseye ou supérieure</li>
+<li>RaspiOS (basée sur Bullseye)</li>
+</ul>
+<p>Vous aurez également besoin des droits d'administration, via <em>sudo</em> par exemple.</p>
+<hr />
+<h2 id="installation">Installation</h2>
+<ol>
+<li>Pour une primo-installation, la procédure d'installation recommandée est celle en <a href="#installation-en-ligne-de-commande">ligne de commande</a></li>
+<li>Puis complétez par <a href="#installation-web">l'installation web</a>.</li>
+</ol>
+<p>Vous pouvez également, dans le cadre d'upgrade par exemple, utiliser la méthode de mise à jour basée sur <a href="#upgrader-une-instance-existante">le repository SVN</a>.</p>
+<h3 id="installation-en-ligne-de-commande">Installation en ligne de commande</h3>
+<p>Depuis un terminal, lancez la commande suivante et répondez ensuite aux questions posées:</p>
+<pre><code> sudo bash -c "$(wget https://svn.abls-habitat.fr/repo/Watchdog/prod/INSTALL.sh -q -O -)"
+</code></pre>
+<p>Si vous souhaitez installer en mode <strong>User</strong>, précisez-le lorsque cela vous sera demandé.</p>
+<ul>
+<li>Le mode <strong>System</strong> est préconisé pour des machines ne s'éteignant jamais, en général headless. Il est adapté aux instances <em>Master</em> ou <em>Slave</em></li>
+<li>Le mode <strong>User</strong> est adapté aux machines allumées de manière intermittente, comme les PC utilisés comme media center par exemple.
+Il est plutot utilisé avec des instances <em>Slave</em></li>
+</ul>
+<p>N'oubliez pas de noter le mot de passe associé à la base de données.</p>
+<p>Laissez-vous ensuite <a href="#installation-web">guider</a> par l'installation graphique.</p>
+<h3 id="installation-web">Installation web</h3>
+<p>Dans le cadre d'une instance <strong>User</strong>, ouvrez dans un navigateur l'URL suivante:</p>
+<pre><code> https://localhost:5560/install
+</code></pre>
+<p>Pour une instance <strong>System</strong>, remplacez <em>localhost</em> par le nom de la machine qui héberge cette instance.</p>
+<p>Vous obtiendrez la page d'installation suivante après avoir accepté l'exception de sécurité liée au certificat SSL auto-signé:</p>
+<p><img alt="install" src="/img/ihm_install.png" /></p>
+<p>Entrez alors les paramètres de votre nouvelle instance.
+Pour une instance <strong>Master</strong> en mode <strong>System</strong>, la configuration par défaut est adaptée.</p>
+<ol>
+<li>Le nom de votre habitat (exemple: <em>Ma maison</em>, <em>Mon appart</em>)</li>
+<li>Le nom du serveur de base de données associé. Pour une instance <em>Master</em>, <em>localhost</em> est le choix par défaut.
+Pour une instance <strong>Slave</strong> le serveur de base de données est en général celui portant l'instance <strong>Master</strong></li>
+<li>Le port présentant le service de base de données, par défaut <em>3306</em></li>
+<li>Le nom de la base de données, par défaut <em>WatchdogDB</em></li>
+<li>Le nom de l'utilisateur de la base de données, par défaut <em>watchdog</em></li>
+<li>Le mot de passe associé a l'utilisateur, noté lors de la première phase d'installation en ligne de commande</li>
+<li>L'utilisateur système qui fera tourner le service. Par défaut <em>watchdog</em>. Porte uniquement pour les instances en mode <strong>System</strong></li>
+<li>Précisez si le <em>working directory</em> est le home (SubDirectory=<em>No</em>), ou home/.watchdog (SubDirectory=<em>Yes</em>)</li>
+<li>Précisez si l'instance est <strong>Master</strong> ou <strong>Slave</strong></li>
+<li>Enfin, dans le cadre d'instance <strong>Slave</strong>, précisez le hostname de l'instance <strong>Master</strong></li>
+</ol>
+<hr />
+<h2 id="arretrelance-et-suivi-de-linstance-systeme">Arrêt/Relance et suivi de l'instance <strong>Système</strong></h2>
+<h3 id="commandes-de-lancement-et-darret">Commandes de lancement et d'arret</h3>
+<p>Les commandes suivantes permettent alors de demarrer, stopper, restarter l'instance Système:</p>
+<pre><code>[watchdog@Server ~]$ sudo systemctl start Watchdogd.service
+[watchdog@Server ~]$ sudo systemctl stop Watchdogd.service
+[watchdog@Server ~]$ sudo systemctl restart Watchdogd.service
+</code></pre>
+<h3 id="commandes-daffichage-des-logs">Commandes d'affichage des logs</h3>
+<p>Les commandes suivantes permettent d'afficher les logs de l'instance:</p>
+<pre><code>[watchdog@Server ~]$ sudo journalctl -f -u Watchdogd.service
+</code></pre>
+<hr />
+<h2 id="arretrelance-et-suivi-de-linstance-user">Arrêt/Relance et suivi de l'instance <strong>User</strong></h2>
+<h3 id="commandes-de-lancement-et-darret_1">Commandes de lancement et d'arret</h3>
+<p>Les commandes suivantes permettent alors de demarrer, stopper, restarter l'instance en UserMode:</p>
+<pre><code>[moi@Server ~]$ systemctl --user start Watchdogd-user.service
+[moi@Server ~]$ systemctl --user stop Watchdogd-user.service
+[moi@Server ~]$ systemctl --user restart Watchdogd-user.service
+</code></pre>
+<h3 id="commandes-daffichage-des-logs_1">Commandes d'affichage des logs</h3>
+<p>Les commandes suivantes permettent d'afficher les logs de l'instance:</p>
+<pre><code>[moi@Server ~]$ journalctl --user -f -u Watchdogd-user.service
+</code></pre>
+<hr />
+<h2 id="upgrader-une-instance-existante">Upgrader une instance existante</h2>
+<p>Pour mettre à niveau votre instance, vous pouvez suivre les mises à jour automatiques de la branche de production
+du repository <strong><a href="https://svn.abls-habitat.fr/websvn/browse/Watchdog/prod/">prod</a></strong>.</p>
+<p>Pour cela, tapez les commandes suivantes dans un terminal:</p>
+<pre><code>svn co https://svn.abls-habitat.fr/repo/Watchdog/prod Watchdog
+cd Watchdog
+./autogen.sh
+sudo make install
+sudo systemctl restart Watchdogd
+</code></pre>
+<hr />
+<h2 id="utilisateurs-par-defaut">Utilisateurs par défaut</h2>
+<p>A l'installation, deux comptes sont pre-enregistrés: les comptes <strong>root</strong> et <strong>guest</strong></p>
+<ul>
+<li>Le compte <strong>root</strong> est un compte administrateur (privilège maximum : Level 9). Son mot de passe par défaut est <strong>password</strong></li>
+<li>Le compte <strong>guest</strong> est un compte utilisateur avec des privilèges minimaux (Level 1). Son mot de passe par défaut est <strong>guest</strong></li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../users/" class="btn btn-neutral float-right" title="Typologie des Utilisateurs">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../galerie/" class="btn btn-neutral" title="Galerie"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../galerie/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../users/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
