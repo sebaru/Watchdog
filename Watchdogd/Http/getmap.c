@@ -59,7 +59,6 @@
     gchar *thread_tech_id  = Normaliser_chaine ( thread_tech_id_src );
     SQL_Select_to_json_node ( RootNode, "mappings",
                               "SELECT * FROM mappings AS map "
-                              "LEFT JOIN mnemos_DI AS mnemo ON map.tech_id = mnemo.tech_id AND map.acronyme = mnemo.acronyme "
                               "WHERE thread_tech_id='%s' ", thread_tech_id
                             );
     g_free(thread_tech_id);
@@ -81,13 +80,14 @@
     if (!Http_check_session( msg, session, 6 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
-
+                                                            /* Création d'une entrée, notamment pour le mapping _COMMAND_TEXT */
     if ( Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
       ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ))
        )
      { gchar *thread_tech_id  = Normaliser_chaine ( Json_get_string( request, "thread_tech_id" ) );
        gchar *thread_acronyme = Normaliser_chaine ( Json_get_string( request, "thread_acronyme" ) );
-       SQL_Write_new ( "INSERT INTO mappings SET thread_tech_id = '%s', thread_acronyme='%s'", thread_tech_id, thread_acronyme );
+       SQL_Write_new ( "INSERT INTO mappings SET thread_tech_id = UPPER('%s'), thread_acronyme=UPPER('%s')",
+                       thread_tech_id, thread_acronyme );
        g_free(thread_tech_id);
        g_free(thread_acronyme);
        json_node_unref(request);
@@ -109,24 +109,14 @@
     gchar *tech_id         = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
     gchar *acronyme        = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
 
-    gchar old_thread_tech_id[32];
-    bzero ( old_thread_tech_id, sizeof(old_thread_tech_id) );
-
-    JsonNode *OldNode = Json_node_create ();
-    if (OldNode)
-     { SQL_Select_to_json_node ( OldNode, NULL,
-                                 "SELECT thread_tech_id FROM mappings "
-                                 "WHERE mappings.tech_id = '%s' AND mappings.acronyme = '%s'", tech_id, acronyme );
-       if (Json_has_member ( OldNode, "thread_tech_id" ))
-        { g_snprintf ( old_thread_tech_id, sizeof(old_thread_tech_id), "%s", Json_get_string ( OldNode, "thread_tech_id" ) ); }
-       json_node_unref ( OldNode );
-     }
-
     SQL_Write_new ( "UPDATE mappings SET tech_id = NULL, acronyme = NULL "
                     "WHERE tech_id = '%s' AND acronyme = '%s'", tech_id, acronyme );
 
-    SQL_Write_new ( "UPDATE mappings SET tech_id = UPPER('%s'), acronyme = '%s' "
-                    "WHERE thread_tech_id = '%s' AND thread_acronyme = '%s'", tech_id, acronyme, thread_tech_id, thread_acronyme );
+    SQL_Write_new ( "INSERT INTO mappings SET "
+                    "thread_tech_id = UPPER('%s'), thread_acronyme = UPPER('%s'), "
+                    "tech_id = UPPER('%s'), acronyme = '%s' "
+                    "ON DUPLICATE KEY UPDATE tech_id = '%s', acronyme = '%s'",
+                    thread_tech_id, thread_acronyme, tech_id, acronyme, tech_id, acronyme );
 
     g_free(tech_id);
     g_free(acronyme);
@@ -140,7 +130,7 @@
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
-/* Http_traiter_map_set: ajoute un mapping dans la base de données                                                            */
+/* Http_traiter_map: Gère la mapping entre les thread et les bits DLS                                                         */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
