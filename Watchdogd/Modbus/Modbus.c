@@ -769,8 +769,8 @@
           if ( 0 <= num && num < vars->nbr_entree_tor )
            { vars->DI[num] = element;
              Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': New DI '%s' (%s)", __func__, thread_tech_id,
-                       Json_get_string ( vars->AI[num], "thread_acronyme" ),
-                       Json_get_string ( vars->AI[num], "libelle" ));
+                       Json_get_string ( vars->DI[num], "thread_acronyme" ),
+                       Json_get_string ( vars->DI[num], "libelle" ));
            } else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': map DI: num %d out of range '%d'",
                             __func__, thread_tech_id, num, vars->nbr_entree_tor );
         }
