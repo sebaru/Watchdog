@@ -230,43 +230,42 @@
 /* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_DI_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gboolean etat )
+ void Zmq_Send_DI_to_master ( struct SUBPROCESS *module, JsonNode *di, gboolean etat )
   { if (!module) return;
-    JsonNode *body = Json_node_create ();
-    if(!body) return;
-    Json_node_add_string ( body, "zmq_tag", "SET_DI" );
-    Json_node_add_string ( body, "tech_id",  tech_id );
-    Json_node_add_string ( body, "acronyme", acronyme );
-    Json_node_add_bool   ( body, "etat", etat );
-    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, body );
-    json_node_unref(body);
+    Json_node_add_string ( di, "zmq_tag", "SET_DI" );
+    gboolean update = FALSE;
+    if (!Json_has_member ( di, "etat" )) { Json_node_add_bool ( di, "first_send", TRUE ); update = TRUE; }
+    else
+     { Json_node_add_bool ( di, "first_send", FALSE );
+       gboolean old_etat = Json_get_bool ( di, "etat" );
+       if ( old_etat != etat ) update = TRUE;
+     }
+    if (update)
+     { Json_node_add_bool ( di, "etat", etat );
+       Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, di );
+     }
   }
 /******************************************************************************************************************************/
 /* Zmq_Send_AI_to_master: Envoie le bit AI au master selon le status                                                          */
 /* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Zmq_Send_AI_to_master_new ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gdouble valeur, gboolean in_range)
-  { if (!module) return;
-    JsonNode *body = Json_node_create ();
-    if(!body) return;
-    Json_node_add_string ( body, "zmq_tag", "SET_AI" );
-    Json_node_add_string ( body, "tech_id",  tech_id );
-    Json_node_add_string ( body, "acronyme", acronyme );
-    Json_node_add_double ( body, "valeur", valeur );
-    Json_node_add_bool   ( body, "in_range", in_range );
-    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, body );
-    json_node_unref(body);
-  }
-/******************************************************************************************************************************/
-/* Zmq_Send_AI_to_master: Envoie le bit AI au master selon le status                                                          */
-/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Zmq_Send_AI_to_master ( struct SUBPROCESS *module, JsonNode *ai )
+ void Zmq_Send_AI_to_master ( struct SUBPROCESS *module, JsonNode *ai, gdouble valeur, gboolean in_range )
   { if (!module) return;
     Json_node_add_string ( ai, "zmq_tag", "SET_AI" );
-    Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, ai );
+    gboolean update = FALSE;
+    if (!Json_has_member ( ai, "valeur" )) { Json_node_add_bool ( ai, "first_send", TRUE ); update = TRUE; }
+    else
+     { Json_node_add_bool ( ai, "first_send", FALSE );
+       gdouble  old_valeur   = Json_get_double ( ai, "valeur" );
+       gboolean old_in_range = Json_get_bool   ( ai, "in_range" );
+       if ( old_valeur != valeur || old_in_range != in_range ) update = TRUE;
+     }
+    if (update)
+     { Json_node_add_double ( ai, "valeur", valeur );
+       Json_node_add_bool   ( ai, "in_range", in_range );
+       Zmq_Send_json_node ( module->zmq_to_master, Json_get_string ( module->config, "thread_tech_id" ), Config.master_host, ai );
+     }
   }
 /******************************************************************************************************************************/
 /* Zmq_Send_CDE_to_master_new: Envoie le bit CDE au master selon le status                                                    */

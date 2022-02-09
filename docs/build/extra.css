@@ -1,0 +1,7 @@
+
+ .wy-nav-content { max-width: 100%; }
+ .wy-side-scroll      { background-color: steelblue; }
+ .wy-side-nav-search  { background-color: rgba(30,28,56,1.0); }
+
+ img[alt="imgvisuel"] { max-width:128px; max-height:128px }
+ img[alt="imgmax800"] { max-width:800px; max-height:800px }

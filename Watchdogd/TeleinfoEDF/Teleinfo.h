@@ -44,7 +44,14 @@
     gint  fd;                                                               /* File Descriptor d'acces au module Teleinfo USB */
     gchar buffer[TAILLE_BUFFER_TELEINFO];
     gint  last_view;                                                                            /* Date du dernier echange OK */
-    gint  nbr_connexion;                                                                        /* Date du dernier echange OK */
+    JsonNode *Adco;
+    JsonNode *Isous;
+    JsonNode *Base;
+    JsonNode *Hchc;
+    JsonNode *Hchp;
+    JsonNode *Iinst;
+    JsonNode *Imax;
+    JsonNode *Papp;
  };
 
 /************************************************ Définitions des prototypes **************************************************/

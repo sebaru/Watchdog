@@ -439,7 +439,6 @@
 /******************************************************************************************************************************/
  static void Traiter_commande_sms ( struct SUBPROCESS *module, gchar *from, gchar *texte )
   { struct SMS_VARS *vars = module->vars;
-    gchar chaine[160];
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     if ( Smsg_is_allow_cde ( module, from ) == FALSE )
@@ -521,7 +520,6 @@
      }
 end:
     json_node_unref( RootNode );
-    Envoyer_smsg_gsm_text ( module, chaine );
   }
 /******************************************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                                               */

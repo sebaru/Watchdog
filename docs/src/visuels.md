@@ -3,6 +3,7 @@
 
 * [application](visuels_application.md)
 * [bouton](visuels_bouton.md)
+* [capteur](visuels_capteur.md)
 * [chauffage](visuels_chauffage.md)
 * [divers](visuels_divers.md)
 * [electrique](visuels_electrique.md)

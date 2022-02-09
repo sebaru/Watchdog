@@ -108,90 +108,21 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_AI_by_text: Recupération des champs de base de données pour le AI par map                                       */
-/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
-/* Sortie: la struct DB                                                                                                       */
+/* Mnemo_create_json_AI: Créé un JSON pour une AI                                                                             */
+/* Entrée: la structure SUBPROCESS, les parametres de l'AI                                                                    */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Recuperer_mnemos_AI_by_tag ( struct DB **db_retour, gchar *tech_id, gchar *tag )
-  { gchar requete[1024];
-    gchar *commande;
-    gboolean retour;
-    struct DB *db;
-
-    commande = Normaliser_chaine ( tag );
-    if (!commande)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible tag", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.map_tag, m.libelle "
-               "FROM mnemos_AI as m "
-               " WHERE m.map_tech_id='%s' AND m.map_tag LIKE '%s'", tech_id, commande );
-    g_free(commande);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
-/* Rechercher_AI_by_map_snips: Recupere l'AI lié au parametre snips                                                           */
-/* Entrée: le map_snips a rechercher                                                                                          */
-/* Sortie: la struct DB                                                                                                       */
-/******************************************************************************************************************************/
- gboolean Recuperer_mnemos_AI_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips )
-  { gchar requete[1024];
-    gchar *commande;
-    gboolean retour;
-    struct DB *db;
-
-    commande = Normaliser_chaine ( map_snips );
-    if (!commande)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale "
-               "FROM mnemos_AI as m"
-               " WHERE m.map_question_vocale LIKE '%s'", commande );
-    g_free(commande);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base                                  */
-/* Entrée: un pointeur sur la connexion de baase de données                                                                   */
-/* Sortie: une structure nouvellement allouée                                                                                 */
-/******************************************************************************************************************************/
- gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig )
-  { struct DB *db;
-
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    return(TRUE);                                                                                    /* Résultat dans db->row */
+ JsonNode *Mnemo_create_subprocess_AI ( struct SUBPROCESS *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "AI" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    Json_node_add_string ( node, "unite", unite );
+    Json_node_add_int    ( node, "archivage", archivage );
+    return(node);
   }
 /******************************************************************************************************************************/
 /* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
@@ -227,9 +158,6 @@
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
      { ai = NULL;
        Dls_data_set_AI ( db->row[0], db->row[1], (void *)&ai, atof(db->row[2]), FALSE );
-       ai->min       = atof(db->row[3]);
-       ai->max       = atof(db->row[4]);
-       ai->type      = atoi(db->row[5]);
        g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[6] );
        ai->archivage = atoi(db->row[7]);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s'=%f %s loaded", __func__,
@@ -267,11 +195,8 @@
  void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit )
   { Json_node_add_string ( element, "tech_id",      bit->tech_id );
     Json_node_add_string ( element, "acronyme",     bit->acronyme );
-    Json_node_add_double ( element, "valeur_min",   bit->min );
-    Json_node_add_double ( element, "valeur_max",   bit->max );
     Json_node_add_double ( element, "valeur",       bit->valeur );
     Json_node_add_string ( element, "unite",        bit->unite );
-    Json_node_add_int    ( element, "type",         bit->type );
     Json_node_add_int    ( element, "in_range",     bit->inrange );
     Json_node_add_int    ( element, "last_arch",    bit->last_arch );
     Json_node_add_int    ( element, "archivage",    bit->archivage );

@@ -88,6 +88,21 @@
     return (retour);
   }
 /******************************************************************************************************************************/
+/* Mnemo_create_subprocess_DI: Créé un JSON pour une DI                                                                       */
+/* Entrée: la structure SUBPROCESS, les parametres de la DI                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ JsonNode *Mnemo_create_subprocess_DI ( struct SUBPROCESS *module, gchar *thread_acronyme, gchar *libelle )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "DI" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    return(node);
+  }
+/******************************************************************************************************************************/
 /* Dls_DI_to_json : Formate un bit au format JSON                                                                             */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */

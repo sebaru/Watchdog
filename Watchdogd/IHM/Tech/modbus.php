@@ -58,12 +58,6 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
 <div id="idTabEntreeAna" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
 
- <div class="row m-2">
-   <div class ="ml-auto btn-group">
-        <button type="button" onclick="MODBUS_Edit_AI('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping AI</button>
-   </div>
- </div>
-
     <table id="idTableMODBUS_AI" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
       </thead>
@@ -73,11 +67,7 @@
 </div>
 <!----------------------------------------------------------------------------------------------------------------------------->
 <div id="idTabSortieAna" class="tab-pane fade in table-responsive mt-1" role="tabpanel">
- <div class="row m-2">
-   <div class ="ml-auto btn-group">
-        <button type="button" onclick="MODBUS_Edit_AO('-1')" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter un mapping AO</button>
-   </div>
- </div>
+
     <table id="idTableMODBUS_AO" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
       </thead>
