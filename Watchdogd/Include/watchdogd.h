@@ -40,6 +40,7 @@
  #include "Db.h"
  #include "config.h"
  #include "Dls.h"
+ #include "Http.h"
  #include "Config.h"
  #include "Archive.h"
  #include "Message_DB.h"
@@ -95,6 +96,7 @@
     struct COM_DB com_db;                                                      /* Interfaçage avec le code de gestion des BDD */
     struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
+    struct COM_HTTP com_http;                                                                       /* Zone mémoire pour HTTP */
     struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
 
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
@@ -150,11 +152,6 @@
  extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
-
- extern JsonNode *Http_Msg_to_Json ( SoupMessage *msg );                                                       /* Dans http.c */
- extern JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg );
- extern gint Http_Msg_status_code ( SoupMessage *msg );
- extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
 
  extern void New_uuid ( gchar *target );                                                                       /* Dans uuid.c */
 

@@ -38,75 +38,49 @@
  #include "Http.h"
  struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
-/* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
-/* Entrée: le pointeur sur la PROCESS                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- gboolean Http_Lire_config ( void )
-  { gchar *nom, *valeur;
-    struct DB *db;
-
-    Cfg_http.lib->Thread_debug = FALSE;
-    Creer_configDB ( Cfg_http.lib->name, "debug", "false" );
-
-    g_snprintf( Cfg_http.ssl_cert_filepath, sizeof(Cfg_http.ssl_cert_filepath), "%s", HTTP_DEFAUT_FILE_CERT );
-    Creer_configDB ( Cfg_http.lib->name, "ssl_file_cert", Cfg_http.ssl_cert_filepath );
-
-    g_snprintf( Cfg_http.ssl_private_key_filepath, sizeof(Cfg_http.ssl_private_key_filepath), "%s", HTTP_DEFAUT_FILE_KEY );
-    Creer_configDB ( Cfg_http.lib->name, "ssl_file_key", Cfg_http.ssl_private_key_filepath );
-
-    Cfg_http.ssl_enable = TRUE;
-    Creer_configDB ( Cfg_http.lib->name, "ssl", "true" );
-
-    Cfg_http.tcp_port = 5560;
-    Creer_configDB_int ( Cfg_http.lib->name, "tcp_port", Cfg_http.tcp_port );
-
-    Cfg_http.wtd_session_expiry = 6000; /* En 1/10 secondes */
-    Creer_configDB_int ( Cfg_http.lib->name, "wtd_session_expiry", Cfg_http.wtd_session_expiry );
-
-    if ( ! Recuperer_configDB( &db, Cfg_http.lib->name ) )                                          /* Connexion a la base de données */
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "%s: Database connexion failed. Using Default Parameters", __func__ );
-       return(FALSE);
-     }
-
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     {      if ( ! g_ascii_strcasecmp ( nom, "ssl_file_cert" ) )
-        { g_snprintf( Cfg_http.ssl_cert_filepath, sizeof(Cfg_http.ssl_cert_filepath), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "ssl_file_key" ) )
-        { g_snprintf( Cfg_http.ssl_private_key_filepath, sizeof(Cfg_http.ssl_private_key_filepath), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "ssl" ) )
-        { if ( g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.ssl_enable = FALSE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "tcp_port" ) )
-        { Cfg_http.tcp_port = atoi(valeur);  }
-       else if ( ! g_ascii_strcasecmp ( nom, "wtd_session_expiry" ) )
-        { Cfg_http.wtd_session_expiry = atoi(valeur); }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.lib->Thread_debug = TRUE;  }
-     }
-    return(TRUE);
+ JsonNode *Http_Msg_to_Json ( SoupMessage *msg )
+  { GBytes *request_brute;
+    gsize taille;
+    g_object_get ( msg, "request-body-data", &request_brute, NULL );
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
+    if ( !request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
+    return(request);
   }
 /******************************************************************************************************************************/
-/* Http_redirect_to_slave: Proxifie une requete vers un slave                                                                 */
-/* Entrée : le message source, le nom de l'instance cible                                                                     */
-/* Sortie : le contenu de la reponse du slave                                                                                 */
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- void Http_redirect_to_slave ( SoupMessage *msg, gchar *target )
-  { SoupSession *connexion;
-    connexion = soup_session_new();
-    g_object_set ( G_OBJECT(connexion), "ssl-strict", FALSE, NULL );
-    SoupURI *URI = soup_uri_copy (soup_message_get_uri (msg));
-    soup_uri_set_host ( URI, target );
-    SoupMessage *new_msg = soup_message_new_from_uri ( msg->method, URI );
-    soup_uri_free(URI);
-    soup_message_set_request ( new_msg, "application/json; charset=UTF-8",
-                               SOUP_MEMORY_COPY, msg->request_body->data, msg->request_body->length );
-    soup_session_send_message ( connexion, new_msg );
-    soup_message_set_status  ( msg, new_msg->status_code );
-    soup_message_set_response ( msg, "application/json; charset=UTF-8",
-                                SOUP_MEMORY_COPY, new_msg->response_body->data, new_msg->response_body->length );
-    g_object_unref ( new_msg );
-    g_object_unref( connexion );
+ JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg )
+  { GBytes *reponse_brute;
+    gsize taille;
+    g_object_get ( msg, "response-body-data", &reponse_brute, NULL );
+    JsonNode *reponse = Json_get_from_string ( g_bytes_get_data ( reponse_brute, &taille ) );
+    return(reponse);
+  }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ gint Http_Msg_status_code ( SoupMessage *msg )
+  { gint status;
+    g_object_get ( msg, "status-code", &status, NULL );
+    return(status);
+  }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ gchar *Http_Msg_reason_phrase ( SoupMessage *msg )
+  { gchar *phrase;
+    g_object_get ( msg, "reason-phrase", &phrase, NULL );
+    return(phrase);
   }
 /******************************************************************************************************************************/
 /* Http_destroy_session: Libère une session en paramètre                                                                      */
@@ -252,7 +226,7 @@
 /******************************************************************************************************************************/
  struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client )
   { struct HTTP_CLIENT_SESSION *session = Http_rechercher_session_by_msg ( msg );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: sid '%s' (%s@%s, Level %d) : '%s'", __func__,
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: sid '%s' (%s@%s, Level %d) : '%s'", __func__,
               (session ? session->wtd_session : "none"),
               (session ? session->username : "none"), soup_client_context_get_host(client),
               (session ? session->access_level : -1), path
@@ -293,7 +267,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -322,10 +296,10 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (session)
      { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: sid '%s' ('%s', level %d) disconnected", __func__,
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: sid '%s' ('%s', level %d) disconnected", __func__,
                  session->wtd_session, session->username, session->access_level );
        g_free(session);
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                  "%s: '%d' session left", __func__, g_slist_length(Cfg_http.liste_http_clients) );
      }
     soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -345,7 +319,7 @@
      }
 
     if (!Config.installed)
-     {	Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Redirecting to /tech/install", __func__ );
+     {	Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Redirecting to /tech/install", __func__ );
        soup_message_set_redirect (msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/tech/install" );
 		     return;
      }
@@ -365,7 +339,7 @@
 
     name = Normaliser_chaine ( Json_get_string ( request, "username" ) );                    /* Formatage correct des chaines */
     if (!name)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
        json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -377,14 +351,14 @@
 
     struct DB *db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: DB connexion failed for user '%s'", __func__, Json_get_string ( request, "username" ) );
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
      }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: DB request failed for user '%s'",__func__, Json_get_string ( request, "username" ) );
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
@@ -394,19 +368,19 @@
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "%s: User '%s' not found in DB", __func__, Json_get_string ( request, "username" ) );
        json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: User '%s' (%s) found in database.",
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: User '%s' (%s) found in database.",
               __func__, db->row[0], db->row[1] );
 
 /*********************************************************** Compte du client *************************************************/
     if (atoi(db->row[3]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: User '%s' not enabled",
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: User '%s' not enabled",
                  __func__, db->row[0] );
        Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
@@ -416,7 +390,7 @@
      }
 /*********************************************** Authentification du client par login mot de passe ****************************/
     if ( Http_check_utilisateur_password( db->row[4], db->row[5], Json_get_string ( request, "password" ) ) == FALSE )/* Comparaison MDP */
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Password error for '%s' (%s)",
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Password error for '%s' (%s)",
                  __func__, db->row[0], db->row[1] );
        Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
@@ -429,7 +403,7 @@
     if (!session)
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Session creation Error", __func__ );
+       Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Session creation Error", __func__ );
        json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
@@ -456,7 +430,7 @@
     time(&session->last_request);
     New_uuid ( session->wtd_session );
     if (strlen(session->wtd_session) != 36)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
        g_free(session);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "UUID Error");
        return;
@@ -464,13 +438,13 @@
     Cfg_http.liste_http_clients = g_slist_append ( Cfg_http.liste_http_clients, session );
 
     Http_add_cookie ( msg, "wtd_session", session->wtd_session, 180*SOUP_COOKIE_MAX_AGE_ONE_DAY );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
               session->username, session->host );
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -519,7 +493,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -578,48 +552,38 @@
 /* Entrée: une structure PROCESS                                                                                            */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_process ( struct PROCESS *lib )
-  { gint last_pulse = 0;
-    GError *error;
+ void Http_Start_API ( void )
+  { GError *error;
 
-reload:
-    memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
-    Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
-    Thread_init ( "http", "IHM/API", lib, WTD_VERSION, "Manage Web Services with external Devices" );
-    Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
-
-    SoupServer *socket = soup_server_new("server-header", "Watchdogd HTTP Server", NULL);
+    SoupServer *socket = Partage->com_http.socket = soup_server_new( "server-header", "Watchdogd API Server", NULL);
     if (!socket)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
-       goto end;
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
+       return;
      }
 
-    if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
-     { struct stat sbuf;
-       if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1 ||                                   /* Test présence du fichier */
-            stat ( Cfg_http.ssl_private_key_filepath, &sbuf ) == -1 )                             /* Test présence du fichier */
-        { gchar chaine[256];
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "%s: unable to load '%s' and '%s' (error '%s'). Generating new ones.", __func__,
-                    Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath, strerror(errno) );
-          g_snprintf( chaine, sizeof(chaine),
-                      "openssl req -subj '/C=FR/ST=FRANCE/O=ABLS-HABITAT/OU=PRODUCTION/CN=Watchdog Server on %s' -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -out '%s' -keyout '%s'",
-                      g_get_host_name(), Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath );
-          system( chaine );
-        }
+    struct stat sbuf;
+    if ( stat ( HTTP_DEFAUT_FILE_CERT, &sbuf ) == -1 ||                                           /* Test présence du fichier */
+         stat ( HTTP_DEFAUT_FILE_KEY, &sbuf ) == -1 )                                             /* Test présence du fichier */
+     { gchar chaine[256];
+       Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: unable to load '%s' and '%s' (error '%s'). Generating new ones.", __func__,
+                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, strerror(errno) );
+       g_snprintf( chaine, sizeof(chaine),
+                   "openssl req -subj '/C=FR/ST=FRANCE/O=ABLS-HABITAT/OU=PRODUCTION/CN=Watchdog Server on %s' -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -out '%s' -keyout '%s'",
+                   g_get_host_name(), HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
+       system( chaine );
+     }
 
-       if (soup_server_set_ssl_cert_file ( socket, Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath, &error ))
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: SSL Loaded with '%s' and '%s'", __func__,
-                    Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath );
-        }
-       else
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
-                     __func__, Cfg_http.ssl_cert_filepath, Cfg_http.ssl_private_key_filepath, error->message  );
-          g_error_free(error);
-        }
+    if (soup_server_set_ssl_cert_file ( socket, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error ))
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: SSL Loaded with '%s' and '%s'", __func__,
+                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
      }
     else
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: SSL is disabled", __func__ ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
+                  __func__, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
+       g_error_free(error);
+       return;
+     }
 
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
@@ -704,76 +668,61 @@ reload:
        soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
      }
 
-    if (!soup_server_listen_all (socket, Cfg_http.tcp_port, (Cfg_http.ssl_enable ? SOUP_SERVER_LISTEN_HTTPS : 0), &error))
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: SoupServer Listen Failed '%s' !", __func__, error->message );
+    if (!soup_server_listen_all (socket, HTTP_DEFAUT_TCP_PORT, SOUP_SERVER_LISTEN_HTTPS, &error))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer Listen Failed '%s' !", __func__, error->message );
        g_error_free(error);
-       goto end;
+       soup_server_disconnect(socket);
+       Partage->com_http.socket = NULL;
+       return;
      }
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-              "%s: HTTP SoupServer Listen OK on port %d, SSL=%d !", __func__,
-              Cfg_http.tcp_port, Cfg_http.ssl_enable );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO,
+              "%s: HTTP SoupServer SSL Listen OK on port %d !", __func__, HTTP_DEFAUT_TCP_PORT );
 
-    GMainLoop *loop = g_main_loop_new (NULL, TRUE);
-    GMainContext *loop_context = g_main_loop_get_context ( loop );
-
+    Partage->com_http.loop = g_main_loop_new (NULL, TRUE);
     Http_Load_sessions ();
-    Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
-    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
-     { usleep(1000);
-       sched_yield();
+  }
 
-       if (Cfg_http.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Thread Reload !", __func__ );
-          break;
+/******************************************************************************************************************************/
+/* Http_Send_websocket: Envoie les informations aux clients connectés                                                         */
+/* Entrée: néant                                                                                                              */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_Send_web_socket ( void )
+  { static gint last_pulse = 0;
+    Http_Envoyer_les_cadrans ();
+
+    if ( Partage->top > last_pulse + 50 )
+     { last_pulse = Partage->top;
+       JsonNode *pulse = Json_node_create();
+       if (pulse)
+        { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
+          Http_ws_send_to_all ( pulse );
+          json_node_unref(pulse);
         }
-
-       Http_Envoyer_les_cadrans ();
-
-       JsonNode *request;
-       while ( (request = Thread_Listen_to_master ( lib ) ) != NULL)
-        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-               if (!strcasecmp( zmq_tag, "DLS_HISTO" ))    { Http_ws_send_to_all( request ); }
-          else if (!strcasecmp( zmq_tag, "DLS_VISUEL" ))   { Http_ws_send_to_all( request ); }
-          else if (!strcasecmp( zmq_tag, "SET_SYN_VARS" )) { Http_ws_send_to_all( request ); }
-          json_node_unref ( request );
-        }
-
-       if ( Partage->top > last_pulse + 50 )
-        { last_pulse = Partage->top;
-          JsonNode *pulse = Json_node_create();
-          if (pulse)
-           { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
-             Http_ws_send_to_all ( pulse );
-             json_node_unref(pulse);
+       pthread_mutex_lock( &Partage->com_http.synchro );
+       GSList *liste = Cfg_http.liste_http_clients;
+       while(liste)
+        { struct HTTP_CLIENT_SESSION *client = liste->data;
+          liste = g_slist_next ( liste );
+          if (client->last_request + Cfg_http.wtd_session_expiry < Partage->top )
+           { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, client );
+             Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
+             Http_destroy_session ( client );
            }
-          pthread_mutex_lock( &Cfg_http.lib->synchro );
-          GSList *liste = Cfg_http.liste_http_clients;
-          while(liste)
-           { struct HTTP_CLIENT_SESSION *client = liste->data;
-             liste = g_slist_next ( liste );
-             if (client->last_request + Cfg_http.wtd_session_expiry < Partage->top )
-              { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, client );
-                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
-                Http_destroy_session ( client );
-              }
-           }
-          pthread_mutex_unlock( &Cfg_http.lib->synchro );
         }
-
-       g_main_context_iteration ( loop_context, FALSE );
+       pthread_mutex_unlock( &Partage->com_http.synchro );
      }
-
-    soup_server_disconnect (socket);                                                            /* Arret du serveur WebSocket */
-    g_main_loop_unref(loop);
-
+ 
+    g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop) , FALSE );
+  }
+/******************************************************************************************************************************/
+/* Http_Stop_API: Arrete les service d'API de l'instance                                                                      */
+/* Entrée: néant                                                                                                              */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_Stop_API ( void )
+  { soup_server_disconnect ( Partage->com_http.socket );                                        /* Arret du serveur WebSocket */
+    g_main_loop_unref( Partage->com_http.loop );
     Http_Save_and_close_sessions();
-
-end:
-    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
-       lib->Thread_reload = FALSE;
-       goto reload;
-     }
-    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

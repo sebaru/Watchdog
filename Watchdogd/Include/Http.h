@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/HttpMobile/Http.h        Déclaration structure internes des WebServices                                          */
+/* Watchdogd/Include/Http.h        Déclaration structure internes des WebServices                                             */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -27,13 +27,19 @@
 
 #ifndef _HTTP_H_
  #define _HTTP_H_
- #include <libsoup/soup.h>
- #include <json-glib/json-glib.h>
 
  #define HTTP_DEFAUT_FILE_CERT         "https_api_cert.pem"
  #define HTTP_DEFAUT_FILE_KEY          "https_api_key.pem"
  #define HTTP_DEFAUT_TCP_PORT          5560
 
+ struct COM_HTTP                                                                     /* Communication entre le serveur et DLS */
+  { pthread_t TID;                                                                                   /* Identifiant du thread */
+    pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
+    SoupServer *socket;
+    GMainLoop *loop;
+    GMainContext *loop_context;
+  };
+  
  struct WS_CLIENT_SESSION
   { SoupWebsocketConnection *connexion;
     SoupClientContext *context;
@@ -79,7 +85,19 @@
   };
 
 /*************************************************** Définitions des prototypes ***********************************************/
- extern gboolean Http_Lire_config ( void );
+ extern JsonNode *Http_Msg_to_Json ( SoupMessage *msg );                                                       /* Dans http.c */
+ extern JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg );
+ extern gint Http_Msg_status_code ( SoupMessage *msg );
+ extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
+ extern struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupMessage *msg );
+ extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
+ extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level );
+ extern void Http_Start_API ( void );
+ extern void Http_Send_web_socket ( void );
+ extern void Http_Stop_API ( void );
+
+
+
  extern void Http_traiter_status  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

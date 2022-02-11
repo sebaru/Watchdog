@@ -56,6 +56,7 @@
        Dls_VISUEL_to_json ( element, visu );
        Json_node_add_string ( element, "zmq_tag", "DLS_VISUEL" );
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus, g_get_host_name(), "*", element );
+       Http_ws_send_to_all( element );
        json_node_unref ( element );
      }
   }

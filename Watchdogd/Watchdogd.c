@@ -393,6 +393,10 @@
         }
        return(TRUE);                                                                                                /* Traité */
      }
+    else if ( !strcasecmp( zmq_tag, "SET_SYN_VARS") )
+     { Http_ws_send_to_all( request );
+       return(TRUE);                                                                                                /* Traité */
+     }
     else if ( !strcasecmp( zmq_tag, "SLAVE_STOP") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, zmq_src_tech_id );
        return(TRUE);                                                                                                /* Traité */
@@ -483,6 +487,7 @@
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
      }
 
+    Http_Start_API();                                                                           /* Démarrage de l'API interne */
 /***************************************** Charge le mapping des bits internes ************************************************/
     MSRV_Remap();
 
@@ -499,6 +504,7 @@
        Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
+       Http_Send_web_socket();                                                                 /* On s'occupe des client HTTP */
 
        request = Recv_zmq_with_json( zmq_from_slave, g_get_host_name(), (gchar *)&buffer, sizeof(buffer) );
        if (request)
@@ -546,6 +552,7 @@
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
+    Http_Stop_API();                                                                                /* Arret de l'API interne */
     Zmq_Close ( Partage->com_msrv.zmq_to_bus );
     Zmq_Close ( zmq_from_bus );
     Zmq_Close ( Partage->com_msrv.zmq_to_slave );
@@ -597,6 +604,7 @@ end:
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
      }
 
+    Http_Start_API();                                                                           /* Démarrage de l'API interne */
 /***************************************** Debut de la boucle sans fin ********************************************************/
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
@@ -665,6 +673,7 @@ end:
 end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
+    Http_Stop_API();                                                                                /* Arret de l'API interne */
     Zmq_Close ( Partage->com_msrv.zmq_to_bus );
     Zmq_Close ( zmq_from_bus );
     Zmq_Close ( Partage->com_msrv.zmq_to_master );
@@ -820,6 +829,7 @@ end:
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
+       pthread_mutex_init( &Partage->com_http.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro_traduction, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );

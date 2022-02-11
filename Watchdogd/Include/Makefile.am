@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 noinst_HEADERS    = Db.h Message_DB.h Histo_DB.h Erreur.h \
-                    Config.h \
+                    Config.h Http.h \
                     Zmq.h Json.h Process.h \
                     Synoptiques_DB.h  \
                     Mnemonique_DB.h \

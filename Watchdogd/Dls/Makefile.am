@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Dls/Makefile.am          Profil de compilation de l'interface DLS Watchdog                   */
-#* Projet WatchDog version 3.0       Gestion d'habitat                      ven 01 aoû 2003 11:37:48 CEST */
+#* Projet WatchDog version 3.0       Gestion d'habitat                      ven 01 aoÃ» 2003 11:37:48 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=
