@@ -36,7 +36,6 @@
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
  #include "Http.h"
- struct HTTP_CONFIG Cfg_http;
 /******************************************************************************************************************************/
 /* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
 /* Entrée: le messages                                                                                                        */
@@ -98,17 +97,17 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Http_Save_and_close_sessions ( void )
-  { while ( Cfg_http.liste_http_clients )
-     { struct HTTP_CLIENT_SESSION *session = Cfg_http.liste_http_clients->data;
+  { while ( Partage->com_http.liste_http_clients )
+     { struct HTTP_CLIENT_SESSION *session = Partage->com_http.liste_http_clients->data;
        SQL_Write_new ( "INSERT INTO users_sessions SET id='%d', username='%s', appareil='%s', useragent='%s', "
                        "wtd_session='%s', host='%s', last_request='%d' "
                        "ON DUPLICATE KEY UPDATE last_request=VALUES(last_request)",
                        session->id, session->username, session->appareil, session->useragent,
                        session->wtd_session, session->host, session->last_request );
-       Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
+       Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, session );
        Http_destroy_session(session);
      }
-    Cfg_http.liste_http_clients = NULL;
+    Partage->com_http.liste_http_clients = NULL;
   }
 /******************************************************************************************************************************/
 /* Http_Load_sessions: Charge les sessions en base de données                                                                 */
@@ -126,8 +125,8 @@
     session->id           = Json_get_int ( element, "id" );
     session->access_level = Json_get_int ( element, "access_level" );
     session->last_request = Json_get_int ( element, "last_request" );
-    Cfg_http.liste_http_clients = g_slist_prepend ( Cfg_http.liste_http_clients, session );
-    if (session->id >= Cfg_http.num_session) Cfg_http.num_session = session->id+1;            /* Calcul du MAX du num session */
+    Partage->com_http.liste_http_clients = g_slist_prepend ( Partage->com_http.liste_http_clients, session );
+    if (session->id >= Partage->com_http.num_session) Partage->com_http.num_session = session->id+1;            /* Calcul du MAX du num session */
   }
 /******************************************************************************************************************************/
 /* Http_Load_sessions: Charge les sessions en base de données                                                                 */
@@ -140,7 +139,7 @@
                                                     "FROM users_sessions AS session "
                                                     "INNER JOIN users AS user ON session.username = user.username"
                             );
-    Cfg_http.num_session = 0;
+    Partage->com_http.num_session = 0;
     if (Json_has_member ( RootNode, "sessions" ))
      { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
     json_node_unref(RootNode);
@@ -190,7 +189,7 @@
        const char *name = soup_cookie_get_name (cookie);
        if (!strcmp(name,"wtd_session"))
         { gchar *wtd_session = soup_cookie_get_value(cookie);
-          GSList *clients = Cfg_http.liste_http_clients;
+          GSList *clients = Partage->com_http.liste_http_clients;
           while(clients)
            { struct HTTP_CLIENT_SESSION *session = clients->data;
              if (!strcmp(session->wtd_session, wtd_session))
@@ -214,7 +213,7 @@
  static void Http_add_cookie ( SoupMessage *msg, gchar *name, gchar *value, gint life )
   { SoupCookie *cookie = soup_cookie_new ( name, value, "", "/", life );
     soup_cookie_set_http_only ( cookie, TRUE );
-    if (Cfg_http.ssl_enable) soup_cookie_set_secure ( cookie, TRUE );
+    soup_cookie_set_secure ( cookie, TRUE );
     GSList *liste = g_slist_append ( NULL, cookie );
     soup_cookies_to_response ( liste, msg );
     g_slist_free(liste);
@@ -295,12 +294,12 @@
      }
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (session)
-     { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, session );
+     { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, session );
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: sid '%s' ('%s', level %d) disconnected", __func__,
                  session->wtd_session, session->username, session->access_level );
        g_free(session);
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: '%d' session left", __func__, g_slist_length(Cfg_http.liste_http_clients) );
+                 "%s: '%d' session left", __func__, g_slist_length(Partage->com_http.liste_http_clients) );
      }
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
@@ -409,9 +408,9 @@
        return;
      }
 
-    pthread_mutex_lock( &Cfg_http.lib->synchro );                                  /* On prend un numéro de session tout neuf */
-    session->id = Cfg_http.num_session++;
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    pthread_mutex_lock( &Partage->com_http.synchro );                                  /* On prend un numéro de session tout neuf */
+    session->id = Partage->com_http.num_session++;
+    pthread_mutex_unlock( &Partage->com_http.synchro );
 
     g_snprintf( session->username, sizeof(session->username), "%s", db->row[0] );
     gchar *useragent = Normaliser_chaine ( Json_get_string ( request, "useragent" ) );
@@ -435,7 +434,7 @@
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "UUID Error");
        return;
      }
-    Cfg_http.liste_http_clients = g_slist_append ( Cfg_http.liste_http_clients, session );
+    Partage->com_http.liste_http_clients = g_slist_append ( Partage->com_http.liste_http_clients, session );
 
     Http_add_cookie ( msg, "wtd_session", session->wtd_session, 180*SOUP_COOKIE_MAX_AGE_ONE_DAY );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
@@ -700,19 +699,19 @@
           json_node_unref(pulse);
         }
        pthread_mutex_lock( &Partage->com_http.synchro );
-       GSList *liste = Cfg_http.liste_http_clients;
+       GSList *liste = Partage->com_http.liste_http_clients;
        while(liste)
         { struct HTTP_CLIENT_SESSION *client = liste->data;
           liste = g_slist_next ( liste );
-          if (client->last_request + Cfg_http.wtd_session_expiry < Partage->top )
-           { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, client );
+          if (client->last_request + 864000 < Partage->top )
+           { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, client );
              Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
              Http_destroy_session ( client );
            }
         }
        pthread_mutex_unlock( &Partage->com_http.synchro );
      }
- 
+
     if (Partage->com_http.loop) g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
   }
 /******************************************************************************************************************************/

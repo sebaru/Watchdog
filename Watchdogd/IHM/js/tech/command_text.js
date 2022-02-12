@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', Load_page, false);
     Send_to_API ( 'POST', "/api/map", json_request, function () { COMMAND_TEXT_Refresh (); });
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
- function COMMAND_TEXT_Map_DI ( id )
+ function COMMAND_TEXT_Map_DI ( id_map )
   { table = $('#idTableTXT').DataTable();
-    selection = table.ajax.json().mappings.filter( function(item) { return item.id==id } )[0];
+    selection = table.ajax.json().mappings.filter( function(item) { return item.id_map==id_map } )[0];
     $('#idMODALMapTitre').text( "Mapper le texte '"+selection.thread_acronyme+"'" );
     $('#idMODALMapRechercherTechID').off("input").on("input", function () { Common_Updater_Choix_TechID ( "idMODALMap", "DI" ); } );
     Common_Updater_Choix_TechID ( "idMODALMap", "DI", selection.tech_id, selection.acronyme );
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', Load_page, false);
     $('#idTableTXT').DataTable(
        { pageLength : 50,
          fixedHeader: true,
-         rowId: "id", paging: false,
+         rowId: "id_map", paging: false,
          ajax: {	url : "/api/map",	type : "GET", dataSrc: "mappings", data: { "thread_tech_id": "_COMMAND_TEXT" },
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', Load_page, false);
             },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "primary", "Mapper cette commande", "COMMAND_TEXT_Map_DI", item.id, "directions", null );
+                  boutons += Bouton_actions_add ( "primary", "Mapper cette commande", "COMMAND_TEXT_Map_DI", item.id_map, "directions", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

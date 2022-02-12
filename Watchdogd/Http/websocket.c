@@ -28,7 +28,6 @@
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
 /* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
@@ -47,8 +46,8 @@
 /******************************************************************************************************************************/
  void Http_ws_send_to_all ( JsonNode *node )
   { gchar *buf = Json_node_to_string ( node );
-    pthread_mutex_lock( &Cfg_http.lib->synchro );
-    GSList *sessions = Cfg_http.liste_http_clients;
+    pthread_mutex_lock( &Partage->com_http.synchro );
+    GSList *sessions = Partage->com_http.liste_http_clients;
     while ( sessions )
      { struct HTTP_CLIENT_SESSION *session = sessions->data;
        GSList *liste_ws = session->liste_ws_clients;
@@ -59,7 +58,7 @@
         }
        sessions = g_slist_next ( sessions );
      }
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    pthread_mutex_unlock( &Partage->com_http.synchro );
     g_free(buf);
   }
 /******************************************************************************************************************************/
@@ -82,17 +81,17 @@
 /******************************************************************************************************************************/
  static void Http_ws_on_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
   { struct WS_CLIENT_SESSION *client = user_data;
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Message received !", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Message received !", __func__ );
     gsize taille;
 
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
        return;
      }
 
     if (!Json_has_member ( response, "zmq_tag" ))
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'zmq_tag') !", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'zmq_tag') !", __func__ );
        json_node_unref(response);
        return;
      }
@@ -101,18 +100,18 @@
 
     if(!strcasecmp(zmq_tag,"CONNECT"))
      { if ( ! (Json_has_member( response, "wtd_session") ))
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: WebSocket without wtd_session !", __func__ ); }
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket without wtd_session !", __func__ ); }
        else
         { gchar *wtd_session = Json_get_string ( response, "wtd_session");
-          GSList *liste = Cfg_http.liste_http_clients;
+          GSList *liste = Partage->com_http.liste_http_clients;
           while ( liste )                                                      /* Recherche de la session HTTP correspondante */
            { struct HTTP_CLIENT_SESSION *http_session = liste->data;
              if (!strcmp(http_session->wtd_session, wtd_session))
               { client->http_session = http_session;
-                pthread_mutex_lock( &Cfg_http.lib->synchro );
+                pthread_mutex_lock( &Partage->com_http.synchro );
                 http_session->liste_ws_clients = g_slist_prepend ( http_session->liste_ws_clients, client );
-                pthread_mutex_unlock( &Cfg_http.lib->synchro );
-                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: session found for '%s' !", __func__, http_session->username );
+                pthread_mutex_unlock( &Partage->com_http.synchro );
+                Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: session found for '%s' !", __func__, http_session->username );
                 break;
               }
              liste = g_slist_next ( liste );
@@ -121,7 +120,7 @@
      }
 
     if (!client->http_session)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Not authorized !", __func__ ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Not authorized !", __func__ ); }
     json_node_unref(response);
   }
 /******************************************************************************************************************************/
@@ -130,8 +129,8 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Http_Envoyer_les_cadrans ( void )
-  { pthread_mutex_lock( &Cfg_http.lib->synchro );
-    GSList *sessions = Cfg_http.liste_http_clients;
+  { pthread_mutex_lock( &Partage->com_http.synchro );
+    GSList *sessions = Partage->com_http.liste_http_clients;
     while ( sessions )
      { struct HTTP_CLIENT_SESSION *session = sessions->data;
        GSList *cadrans = session->Liste_bit_cadrans;
@@ -157,7 +156,7 @@
         }
        sessions = g_slist_next(sessions);
      }
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    pthread_mutex_unlock( &Partage->com_http.synchro );
   }
 /******************************************************************************************************************************/
 /* Http_ws_destroy_session: Supprime une session WS                                                                           */
@@ -167,12 +166,12 @@
  void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client )
   { if (client->http_session)
      { struct HTTP_CLIENT_SESSION *session = client->http_session;
-       pthread_mutex_lock( &Cfg_http.lib->synchro );
+       pthread_mutex_lock( &Partage->com_http.synchro );
        session->liste_ws_clients = g_slist_remove ( session->liste_ws_clients, client );
-       pthread_mutex_unlock( &Cfg_http.lib->synchro );
+       pthread_mutex_unlock( &Partage->com_http.synchro );
        g_slist_free ( client->Liste_bit_visuels );
      }
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Session closed !", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Session closed !", __func__ );
     g_object_unref(client->connexion);
     g_free(client);
   }
@@ -186,7 +185,7 @@
     Http_ws_destroy_session ( client );
   }
  static void Http_ws_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
+  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_websocket: Traite une requete websocket                                                                       */
@@ -195,11 +194,11 @@
 /******************************************************************************************************************************/
  void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
                                               SoupClientContext *context, gpointer user_data)
-  { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: WebSocket Opened %p state %d!", __func__, connexion,
+  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Opened %p state %d!", __func__, connexion,
               soup_websocket_connection_get_state (connexion) );
     struct WS_CLIENT_SESSION *client = g_try_malloc0( sizeof(struct WS_CLIENT_SESSION) );
     if(!client)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: WebSocket Memory error. Closing !", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: WebSocket Memory error. Closing !", __func__ );
        return;
      }
     client->connexion = connexion;

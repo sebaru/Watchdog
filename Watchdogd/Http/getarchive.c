@@ -31,8 +31,6 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
-
 
 /******************************************************************************************************************************/
 /* Http_traiter_archive_testdb: Test la response vers le serveur de base de données                                           */

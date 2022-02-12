@@ -32,7 +32,6 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -85,7 +84,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -278,7 +277,7 @@ end:
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -522,7 +521,7 @@ end:
     g_snprintf( http_cadran->tech_id,  sizeof(http_cadran->tech_id),  "%s", tech_id  );
     g_snprintf( http_cadran->acronyme, sizeof(http_cadran->acronyme), "%s", acronyme );
     g_snprintf( http_cadran->classe,   sizeof(http_cadran->classe),   "%s", Json_get_string( new_cadran, "classe" ) );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s: user '%s': Abonné au CADRAN %s:%s", __func__,
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: user '%s': Abonné au CADRAN %s:%s", __func__,
               session->username, http_cadran->tech_id, http_cadran->acronyme );
     session->Liste_bit_cadrans = g_slist_prepend( session->Liste_bit_cadrans, http_cadran );
   }
@@ -573,7 +572,7 @@ end:
 
     SQL_Select_to_json_node ( result, NULL, "SELECT access_level,libelle FROM syns WHERE id=%d", syn_id );
     if ( !(Json_has_member ( result, "access_level" ) && Json_has_member ( result, "libelle" )) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
        soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Syn not found");
        json_node_unref ( result );
        return;

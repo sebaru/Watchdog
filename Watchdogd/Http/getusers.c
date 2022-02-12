@@ -32,7 +32,6 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
 
  #define USER_TAILLE_SALT  128
  #define USER_TAILLE_HASH  (EVP_MAX_MD_SIZE*2+1)
@@ -303,12 +302,12 @@
 
     gint target_id = Json_get_int( request, "id" );
 
-    GSList *liste = Cfg_http.liste_http_clients;
+    GSList *liste = Partage->com_http.liste_http_clients;
     while(liste)
      { struct HTTP_CLIENT_SESSION *target = liste->data;
        if ( target->id == target_id )
         { if ( session->access_level>target->access_level || !strcmp(session->username,target->username) )
-           { Cfg_http.liste_http_clients = g_slist_remove ( Cfg_http.liste_http_clients, target );
+           { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, target );
              Audit_log ( session, "Session '%d' for '%s' on '%s' killed", target->id, target->username, target->appareil );
              g_free(target);
              soup_message_set_status (msg, SOUP_STATUS_OK );
@@ -340,7 +339,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -373,13 +372,13 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
     JsonArray *sessions = Json_node_add_array ( RootNode, "Sessions" );
-    GSList *liste = Cfg_http.liste_http_clients;
+    GSList *liste = Partage->com_http.liste_http_clients;
     while(liste)
      { struct HTTP_CLIENT_SESSION *sess = liste->data;
        if ( (sess->access_level < session->access_level) ||
@@ -433,7 +432,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }

@@ -31,7 +31,7 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
+
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_list: Traite une requete sur l'URI process/list                                            */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -52,7 +52,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -97,7 +97,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -152,7 +152,7 @@
      { SQL_Select_to_json_node ( RootNode, NULL, "SELECT name FROM processes WHERE uuid = '%s'", uuid );
        gchar *thread_tech_id = Normaliser_chaine ( Json_get_string ( request, "thread_tech_id" ) );
        SQL_Write_new ( "DELETE FROM %s WHERE tech_id='%s'", Json_get_string( RootNode, "name" ), thread_tech_id );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' deleted.", __func__, uuid, thread_tech_id );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: subprocess '%s/%s' deleted.", __func__, uuid, thread_tech_id );
        g_free(thread_tech_id);
        json_node_unref(RootNode);
      }
@@ -202,12 +202,12 @@
     json_node_unref(RootNode);
 
     if (liste && !lib->Admin_config)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: library %s do not have Admin_config.", __func__, lib->name );
        soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Missing function admin_config" );
      }
     else if (liste && lib->Admin_config)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Admin_config called by '%s' for %s.",
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Admin_config called by '%s' for %s.",
                  __func__, session->username, path );
        lib->Admin_config ( lib, msg, request );
      }
@@ -265,11 +265,11 @@
 
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: %s", __func__, uuid, (debug ? "Setting debug ON" : "Setting debug OFF") );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UUID %s: %s", __func__, uuid, (debug ? "Setting debug ON" : "Setting debug OFF") );
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS_DEBUG" );
        Json_node_add_string ( RootNode, "uuid", uuid );
        Json_node_add_bool   ( RootNode, "debug", debug );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );
+       /*Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );*/
        json_node_unref(RootNode);
      }
     g_free(uuid);
@@ -314,10 +314,10 @@
 
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: %s", __func__, uuid, (status ? "Enabling" : "Disabling") );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UUID %s: %s", __func__, uuid, (status ? "Enabling" : "Disabling") );
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS_RELOAD" );
        Json_node_add_string ( RootNode, "uuid", uuid );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );
+       /*Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );*/
        json_node_unref(RootNode);
      }
     g_free(uuid);
@@ -348,9 +348,9 @@
        return;
      }
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: %s -> %s", __func__,
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %s -> %s", __func__,
               Json_get_string ( request, "thread_tech_id" ), Json_get_string ( request, "zmq_tag" ) );
-    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Json_get_string ( request, "thread_tech_id" ), request );
+    /*Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", Json_get_string ( request, "thread_tech_id" ), request );*/
 /*************************************************** Envoi au client **********************************************************/
     json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
@@ -389,10 +389,10 @@
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
      { SQL_Select_to_json_node ( RootNode, NULL, "SELECT uuid, instance, name FROM processes WHERE uuid='%s'", uuid );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for UUID %s: %s:%s", __func__,
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Reloading start for UUID %s: %s:%s", __func__,
                  uuid, Json_get_string ( RootNode, "instance" ), Json_get_string ( RootNode, "name" ) );
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS_RELOAD" );
-       Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );
+       /*Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );*/
        json_node_unref(RootNode);
      }
     g_free(uuid);

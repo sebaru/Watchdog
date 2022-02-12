@@ -590,6 +590,7 @@ encore:
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
+                   "`id_map` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`classe` VARCHAR(32) NULL DEFAULT NULL,"
                    "`thread_tech_id` VARCHAR(32) NOT NULL,"
                    "`thread_acronyme` VARCHAR(64) NOT NULL,"
@@ -2599,8 +2600,11 @@ encore:
     if (database_version < 6089)
      { SQL_Write_new ("UPDATE mappings SET libelle='default' WHERE libelle IS NULL"); }
 
+    if (database_version < 6090)
+     { SQL_Write_new ("ALTER TABLE mappings ADD `id_map` INT(11) PRIMARY KEY AUTO_INCREMENT FIRST"); }
+
 fin:
-    database_version = 6089;
+    database_version = 6090;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

@@ -34,7 +34,6 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
 /* Http_traiter_mnemos_validate: Valide la presence ou non d'un tech_id/acronyme dans le dico                                 */
@@ -71,7 +70,7 @@
     unlink(filename);
     gint fd = open ( filename, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR );
     if (fd==-1)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: File '%s' upload failed '%s''", __func__, filename, strerror(errno) );
        return;
      }
@@ -88,7 +87,7 @@
           system(chaine);
         }
      }
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
               "%s: File '%s' uploaded with size='%d'", __func__, filename, taille );
 
     Audit_log ( session, "File '%s' uploaded (size=%d)", filename, taille );
@@ -183,7 +182,7 @@
        g_snprintf ( fichier, sizeof(fichier), "%s/IHM/index.php", WTD_PKGDATADIR );
      }
     g_strfreev(URI);
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s : Serving file %s", __func__, fichier );
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s : Serving file %s", __func__, fichier );
 
 /*--------------------------------------------------- LEcture header ---------------------------------------------------------*/
     if (has_template)
@@ -211,7 +210,7 @@
 
 /*--------------------------------------------------- Lecture fichier --------------------------------------------------------*/
     if (stat (fichier, &stat_buf)==-1)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : File '%s' not found", __func__, fichier );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : File '%s' not found", __func__, fichier );
        soup_message_set_status_full ( msg, SOUP_STATUS_NOT_FOUND, "File not found" );
        g_free(result);
        return;
@@ -221,7 +220,7 @@
     taille_result += stat_buf.st_size;
     new_result = g_try_realloc ( result, taille_result );
     if (!new_result)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : File '%s' Realloc error", __func__, fichier );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : File '%s' Realloc error", __func__, fichier );
        g_free(result);
        soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        return;
@@ -229,7 +228,7 @@
 
    fd = open ( fichier, O_RDONLY );
     if (fd==-1)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : File '%s' open error '%s'", __func__, fichier, strerror(errno) );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : File '%s' open error '%s'", __func__, fichier, strerror(errno) );
        g_free(result);
        soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Open Error" );
        return;

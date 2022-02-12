@@ -38,8 +38,11 @@
     SoupServer *socket;
     GMainLoop *loop;
     GMainContext *loop_context;
+    GSList *liste_http_clients;
+    gint num_session;
+
   };
-  
+
  struct WS_CLIENT_SESSION
   { SoupWebsocketConnection *connexion;
     SoupClientContext *context;
@@ -59,18 +62,6 @@
     time_t last_request;
     GSList *liste_ws_clients;
   };
-
- struct HTTP_CONFIG
-  { struct PROCESS *lib;
-
-    gint tcp_port;                                           /* Port d'écoute TCP (HTTP ou HTTPS, selon le paramètre suivant) */
-    gboolean ssl_enable;                                                                             /* TRUE si connexion SSL */
-    gchar ssl_cert_filepath[80];
-    gchar ssl_private_key_filepath[80];
-    GSList *liste_http_clients;
-    gint wtd_session_expiry;
-    gint num_session;
- };
 
 /******************************************************************************************************************************/
  struct HTTP_CADRAN
@@ -95,8 +86,6 @@
  extern void Http_Start_API ( void );
  extern void Http_Send_web_socket ( void );
  extern void Http_Stop_API ( void );
-
-
 
  extern void Http_traiter_status  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
