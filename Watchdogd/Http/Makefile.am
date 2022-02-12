@@ -5,18 +5,18 @@
 #**********************************************************************************************************/
 SUBDIRS=
 
-lib_LTLIBRARIES              = libwatchdog-http.la
+noinst_LTLIBRARIES           = libwatchdog-http.la
 libwatchdog_http_la_SOURCES  = Http.c install.c getstatus.c bus.c audit_log.c \
                                websocket.c gethisto_msgs.c getprocess.c getdls.c getsyn.c gettableau.c \
                                getarchive.c getusers.c getmnemos.c getinstance.c getfile.c getmap.c gethorloge.c
 
 
-libwatchdog_http_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
+libwatchdog_http_la_LDFLAGS = `pkg-config --libs glib-2.0 openssl gthread-2.0 json-glib-1.0 libsoup-2.4` \
                               `mysql_config --libs` \
                               -rdynamic
 
 
-libwatchdog_http_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
+libwatchdog_http_la_CFLAGS = `pkg-config --cflags glib-2.0 openssl gthread-2.0 json-glib-1.0 libsoup-2.4` \
                                `mysql_config --cflags`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \

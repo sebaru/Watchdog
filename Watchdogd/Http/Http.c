@@ -553,7 +553,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Http_Start_API ( void )
-  { GError *error;
+  { GError *error = NULL;
 
     SoupServer *socket = Partage->com_http.socket = soup_server_new( "server-header", "Watchdogd API Server", NULL);
     if (!socket)
@@ -664,7 +664,7 @@
     soup_server_add_handler ( socket, "/api/upload",         Http_traiter_upload, NULL, NULL );
     soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
     if (Config.instance_is_master==TRUE)
-     { static gchar *protocols[] = { "live-motifs" };
+     { static gchar *protocols[] = { "live-motifs", NULL };
        soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
      }
 
@@ -713,7 +713,7 @@
        pthread_mutex_unlock( &Partage->com_http.synchro );
      }
  
-    g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop) , FALSE );
+    if (Partage->com_http.loop) g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
   }
 /******************************************************************************************************************************/
 /* Http_Stop_API: Arrete les service d'API de l'instance                                                                      */
