@@ -866,22 +866,21 @@
              { if (vars->AI[cpt])                                                                   /* Si l'entrée est mappée */
                 { gint type_borne = Json_get_int ( vars->AI[cpt], "type_borne" );
                   gboolean new_in_range;
-                  gint new_valeur_int;
                   gdouble new_valeur;
                   switch( type_borne )
                    { case WAGO_750455:
-                      { new_valeur_int  = (gint)vars->response.data[ 2*cpt + 1 ] << 5;
-                        new_valeur_int |= (gint)vars->response.data[ 2*cpt + 2 ] >> 3;
-                        gdouble min = Json_get_double ( vars->AI[cpt], "min" );
-                        gdouble max = Json_get_double ( vars->AI[cpt], "max" );
-                        new_valeur  = (new_valeur_int*(max - min))/4095.0 + min;
-                        new_in_range    = !(vars->response.data[ 2*cpt + 2 ] & 0x03);
+                      { gint16 new_valeur_int  = (gint16)vars->response.data[ 2*cpt + 1 ] << 5;
+                               new_valeur_int |= (gint16)vars->response.data[ 2*cpt + 2 ] >> 3;
+                        gdouble min  = Json_get_double ( vars->AI[cpt], "min" );
+                        gdouble max  = Json_get_double ( vars->AI[cpt], "max" );
+                        new_valeur   = ((gint)new_valeur_int*(max - min))/4095.0 + min;
+                        new_in_range = !(vars->response.data[ 2*cpt + 2 ] & 0x03);
                         break;
                       }
                      case WAGO_750461:                                                                         /* Borne PT100 */
-                      { new_valeur_int  = (gint)vars->response.data[ 2*cpt + 1 ] << 8;
-                        new_valeur_int |= (gint)vars->response.data[ 2*cpt + 2 ];
-                        new_valeur  = new_valeur_int/10.0;
+                      { gint16 new_valeur_int  = (gint16)vars->response.data[ 2*cpt + 1 ] << 8;
+                               new_valeur_int |= (gint16)vars->response.data[ 2*cpt + 2 ];
+                        new_valeur  = ((gint)new_valeur_int)/10.0;
                         if (new_valeur_int > -2000 && new_valeur_int < 8500) new_in_range = TRUE; else new_in_range = FALSE;
                         break;
                       }
