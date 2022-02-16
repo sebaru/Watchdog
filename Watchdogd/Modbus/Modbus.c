@@ -880,6 +880,7 @@
                      case WAGO_750461:                                                                         /* Borne PT100 */
                       { gint16 new_valeur_int  = (gint16)vars->response.data[ 2*cpt + 1 ] << 8;
                                new_valeur_int |= (gint16)vars->response.data[ 2*cpt + 2 ];
+                               new_valeur_int |= (gint16)vars->response.data[ 2*cpt + 2 ];
                         new_valeur  = ((gint)new_valeur_int)/10.0;
                         if (new_valeur_int > -2000 && new_valeur_int < 8500) new_in_range = TRUE; else new_in_range = FALSE;
                         break;

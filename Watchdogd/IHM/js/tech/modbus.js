@@ -113,7 +113,8 @@
      { $('#idMODALMap').modal("hide");
        COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
                     $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
-                  ).then ( () => { MODBUS_Refresh(); } );
+                  );
+       MODBUS_Refresh();;
      });
     $('#idMODALMap').modal("show");
   }
@@ -128,7 +129,8 @@
      { $('#idMODALMap').modal("hide");
        COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
                     $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
-                  ).then ( () => { MODBUS_Refresh(); } );
+                  );
+       MODBUS_Refresh();
      });
     $('#idMODALMap').modal("show");
   }
@@ -143,7 +145,8 @@
      { $('#idMODALMap').modal("hide");
        COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
                     $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
-                  ).then ( () => { MODBUS_Refresh(); } );
+                  );
+       MODBUS_Refresh();
      });
     $('#idMODALMap').modal("show");
   }

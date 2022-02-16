@@ -2537,7 +2537,6 @@ encore:
                       "`uuid` VARCHAR(37) UNIQUE NOT NULL,"
                       "`instance` VARCHAR(64) NOT NULL,"
                       "`name` VARCHAR(64) NOT NULL,"
-                      "`debug` TINYINT(1) NOT NULL,"
                       "`classe` VARCHAR(16) DEFAULT NULL,"
                       "`version` VARCHAR(32) DEFAULT NULL,"
                       "`database_version` int(11) NOT NULL DEFAULT 0,"

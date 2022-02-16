@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', Load_page, false);
      { $('#idMODALMap').modal("hide");
        COMMON_Map ( "_COMMAND_TEXT", selection.thread_acronyme,
                     $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
-                  ).then ( () => { COMMAND_TEXT_Refresh(); } );
+                  );
+       COMMAND_TEXT_Refresh();
      });
     $('#idMODALMap').modal("show");
   }
