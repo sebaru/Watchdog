@@ -328,7 +328,7 @@
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
                   boutons += Bouton_actions_add ( "primary", "Editer cet objet", "MODBUS_Edit_AI", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "secondary", "Mapper cet objet", "MODBUS_Map_AI", item.id, "directions", null );
+                  boutons += Bouton_actions_add ( "primary", "Mapper cet objet", "MODBUS_Map_AI", item.id, "directions", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
