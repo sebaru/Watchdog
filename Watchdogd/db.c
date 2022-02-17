@@ -557,7 +557,7 @@ encore:
      }
 
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_DI` ("
-                   "`id_mnemos_DI` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`mnemos_DI_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
@@ -567,7 +567,7 @@ encore:
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_DO` ("
-                   "`id_mnemos_DO` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`mnemos_DO_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
@@ -578,7 +578,7 @@ encore:
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
 
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_AI` ("
-                   "`id_mnemos_AI` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`mnemos_AI_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
                    "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
@@ -590,7 +590,7 @@ encore:
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
-                   "`id_mappings` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`mappings_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`classe` VARCHAR(32) NULL DEFAULT NULL,"
                    "`thread_tech_id` VARCHAR(32) NOT NULL,"
                    "`thread_acronyme` VARCHAR(64) NOT NULL,"
@@ -2623,14 +2623,14 @@ encore:
      { SQL_Write_new ("UPDATE mappings SET libelle='default' WHERE libelle IS NULL"); }
 
     if (database_version < 6090)
-     { SQL_Write_new ("ALTER TABLE mappings ADD `id_mappings` INT(11) PRIMARY KEY AUTO_INCREMENT FIRST"); }
+     { SQL_Write_new ("ALTER TABLE mappings ADD `mappings_id` INT(11) PRIMARY KEY AUTO_INCREMENT FIRST"); }
 
     if (database_version < 6092)
-     { SQL_Write_new ("ALTER TABLE mnemos_DO       CHANGE `id`     `id_mnemos_DO` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_DI       CHANGE `id`     `id_mnemos_DI` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_AI       CHANGE `id`     `id_mnemos_AI` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_AO       CHANGE `id`     `id_mnemos_AO` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mappings        CHANGE `id_map` `id_mappings` INT(11) NOT NULL AUTO_INCREMENT" );
+     { SQL_Write_new ("ALTER TABLE mnemos_DO       CHANGE `id`     `mnemos_DO_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE mnemos_DI       CHANGE `id`     `mnemos_DI_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE mnemos_AI       CHANGE `id`     `mnemos_AI_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE mnemos_AO       CHANGE `id`     `mnemos_AO_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE mappings        CHANGE `id_map` `mappings_id` INT(11) NOT NULL AUTO_INCREMENT" );
      }
 
     if (database_version < 6093)
@@ -2675,10 +2675,10 @@ fin:
        "CREATE OR REPLACE VIEW dictionnaire AS "
        "SELECT dls_id,'DLS' AS classe, -1 AS classe_int,tech_id,shortname as acronyme,name as libelle, 'none' as unite FROM dls UNION "
        "SELECT id,'SYNOPTIQUE' AS classe, -1 AS classe_int,page as tech_id, NULL as acronyme,libelle, 'none' as unite FROM syns UNION "
-       "SELECT id_mnemos_AI,'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_AI UNION "
-       "SELECT id_mnemos_DI,'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DI UNION "
-       "SELECT id_mnemos_DO,'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DO UNION "
-       "SELECT id_mnemos_AO,'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_AO UNION "
+       "SELECT mnemos_AI_id,'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_AI UNION "
+       "SELECT mnemos_DI_id,'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DI UNION "
+       "SELECT mnemos_DO_id,'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DO UNION "
+       "SELECT mnemos_AO_id,'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_AO UNION "
        "SELECT id,'BI' AS classe, 0 AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_BI UNION "
        "SELECT id,'MONO' AS classe, 1 AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_MONO UNION "
        "SELECT id,'CH' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_CH UNION "
