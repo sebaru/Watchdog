@@ -439,14 +439,7 @@
           g_snprintf( lib->name, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
           g_snprintf( lib->nom_fichier,  sizeof(lib->nom_fichier), "%s/libwatchdog-server-%s.so", Config.librairie_dir, lib->name );
 
-          g_snprintf( chaine, sizeof(chaine), "%s.uuid", lib->name );                      /* Récupère l'UUID sur le FS local */
-          gint fd = open ( chaine, O_RDONLY );
-          if (fd>0) { read ( fd, lib->uuid, 36 ); }
-          else { New_uuid ( lib->uuid );
-                 fd = creat ( chaine, S_IRUSR | S_IWUSR );
-                 write ( fd, lib->uuid, 36 );
-               }
-          close(fd);
+          UUID_Load ( lib->name, lib->uuid );                                              /* Récupère l'UUID sur le FS local */
 
           SQL_Write_new ( "INSERT INTO processes SET instance='%s', uuid='%s', name='%s', database_version=0, enable=0, debug=0 "
                           "ON DUPLICATE KEY UPDATE instance=VALUES(instance)", g_get_host_name(), lib->uuid, lib->name );

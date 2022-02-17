@@ -427,7 +427,7 @@
     Libere_DB_SQL( &db );
 
     time(&session->last_request);
-    New_uuid ( session->wtd_session );
+    UUID_New ( session->wtd_session );
     if (strlen(session->wtd_session) != 36)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
        g_free(session);

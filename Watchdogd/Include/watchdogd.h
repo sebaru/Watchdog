@@ -153,7 +153,7 @@
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 
- extern void New_uuid ( gchar *target );                                                                       /* Dans uuid.c */
-
+ extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
+ extern void UUID_Load ( gchar *thread, gchar *target );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

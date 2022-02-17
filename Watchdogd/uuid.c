@@ -25,15 +25,36 @@
  * Boston, MA  02110-1301  USA
  */
 
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+
  #include "watchdogd.h"
 /******************************************************************************************************************************/
-/* New_uuid: Génère un nouveau UUID dans le buffer en paramètre                                                               */
+/* UUID_New: Génère un nouveau UUID dans le buffer en paramètre                                                               */
 /* Entrée: le buffer a remplir                                                                                                */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void New_uuid ( gchar *target )
+ void UUID_New ( gchar *target )
   { uuid_t uuid_hex;
     uuid_generate(uuid_hex);
     uuid_unparse_lower(uuid_hex, target );
   }
+/******************************************************************************************************************************/
+/* UUID_Load: Génère un nouveau UUID pour le thread en parametre et le stocke sur disque                                      */
+/* Entrée: le buffer a remplir                                                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void UUID_Load ( gchar *thread, gchar *target )
+  { gchar chaine[256];
+    g_snprintf( chaine, sizeof(chaine), "%s.uuid", thread );                               /* Récupère l'UUID sur le FS local */
+    gint fd = open ( chaine, O_RDONLY );
+    if (fd>0) { read ( fd, target, 36 ); }
+    else { UUID_New ( target );
+           fd = creat ( chaine, S_IRUSR | S_IWUSR );
+           write ( fd, target, 36 );
+         }
+    close(fd);
+ }
 /*----------------------------------------------------------------------------------------------------------------------------*/
