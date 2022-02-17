@@ -529,8 +529,8 @@
      }
 
     SQL_Select_to_json_node ( syn_enfants, "enfants",
-                              "SELECT id FROM syns "
-                              "WHERE parent_id='%d' AND id!=1",                        /* Pas de bouclage sur le synoptique 1 */
+                              "SELECT syn_id FROM syns "
+                              "WHERE parent_id='%d' AND syn_id!=1",                    /* Pas de bouclage sur le synoptique 1 */
                               id );
 
     Json_node_foreach_array_element ( syn_enfants, "enfants", Dls_recalculer_arbre_syn_for_childs, dls_syn );

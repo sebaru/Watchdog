@@ -676,7 +676,7 @@ encore:
      { SQL_Write_new ("ALTER TABLE dls             CHANGE `id`     `dls_id` INT(11) NOT NULL AUTO_INCREMENT" ); }
 
     if (database_version < 6094)
-     { SQL_Write_new ("ALTER TABLE syn             CHANGE `id`     `syn_id` INT(11) NOT NULL AUTO_INCREMENT" ); }
+     { SQL_Write_new ("ALTER TABLE syns            CHANGE `id`     `syn_id` INT(11) NOT NULL AUTO_INCREMENT" ); }
 /* a prévoir:
        SQL_Write_new ("ALTER TABLE mnemos_BI       CHANGE `id`     `id_mnemos_BI` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_MONO     CHANGE `id`     `id_mnemos_MONO` INT(11) NOT NULL AUTO_INCREMENT" );
