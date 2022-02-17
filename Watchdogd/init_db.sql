@@ -303,26 +303,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_R` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `mnemos_VISUEL`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_VISUEL` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
-  `mode`  VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray',
-  `libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL,
-  `access_level` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE (`tech_id`, `acronyme`),
-  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `syns_camerasup`
 --
 
@@ -390,32 +370,6 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `groupe` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_visuels`
---
-
-CREATE TABLE IF NOT EXISTS `syns_visuels` (
-  `visuel_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `mnemo_id` INT(11) NOT NULL,
-  `dls_id` INT(11) NOT NULL,
-  `rafraich` INT(11) NOT NULL DEFAULT '0',
-  `posx` INT(11) NOT NULL DEFAULT '0',
-  `posy` INT(11) NOT NULL DEFAULT '0',
-  `larg` INT(11) NOT NULL DEFAULT '0',
-  `haut` INT(11) NOT NULL DEFAULT '0',
-  `angle` INT(11) NOT NULL DEFAULT '0',
-  `scale` FLOAT NOT NULL DEFAULT '1.0',
-  `dialog` INT(11) NOT NULL DEFAULT '0',
-  `gestion` INT(11) NOT NULL DEFAULT '0',
-  `groupe` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`visuel_id`),
-  UNIQUE (`dls_id`, `mnemo_id`),
-  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_VISUEL` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------

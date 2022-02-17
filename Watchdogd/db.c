@@ -613,8 +613,8 @@ encore:
                    "`access_level` INT(11) NOT NULL DEFAULT '0',"
                    "`mode_affichage` TINYINT(1) NOT NULL DEFAULT '0',"
                    "FOREIGN KEY (`parent_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-
                    ") ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+
     SQL_Write_new ("INSERT IGNORE INTO `syns` (`syn_id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES"
                    "(1, 1, 'Accueil', 'Defaut Page', 0);");
 
@@ -641,6 +641,40 @@ encore:
     SQL_Write_new ("INSERT IGNORE INTO `dls` (`dls_id`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES "
                    "(1, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);");
 
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_VISUEL` ("
+                   "`mnemos_VISUEL_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                   "`forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',"
+                   "`mode`  VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray',"
+                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`access_level` INT(11) NOT NULL DEFAULT '0',"
+                   "UNIQUE (`tech_id`, `acronyme`),"
+                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+
+
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `syns_visuels` ("
+                   "`visuel_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`mnemo_id` INT(11) NOT NULL,"
+                   "`dls_id` INT(11) NOT NULL,"
+                   "`rafraich` INT(11) NOT NULL DEFAULT '0',"
+                   "`posx` INT(11) NOT NULL DEFAULT '0',"
+                   "`posy` INT(11) NOT NULL DEFAULT '0',"
+                   "`larg` INT(11) NOT NULL DEFAULT '0',"
+                   "`haut` INT(11) NOT NULL DEFAULT '0',"
+                   "`angle` INT(11) NOT NULL DEFAULT '0',"
+                   "`scale` FLOAT NOT NULL DEFAULT '1.0',"
+                   "`dialog` INT(11) NOT NULL DEFAULT '0',"
+                   "`gestion` INT(11) NOT NULL DEFAULT '0',"
+                   "`groupe` INT(11) NOT NULL DEFAULT '0',"
+                   "UNIQUE (`dls_id`, `mnemo_id`),"
+                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_VISUEL` (`mnemos_VISUEL_id`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                   "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`dls_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+
+
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Memory error. Don't update schema.", __func__ );
@@ -664,7 +698,7 @@ encore:
 
     if (database_version==0) goto fin;
 
-    if (database_version < 6092)
+    if (database_version < 6093)
      { SQL_Write_new ("ALTER TABLE mnemos_DO       CHANGE `id`     `mnemos_DO_id` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_DI       CHANGE `id`     `mnemos_DI_id` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_AI       CHANGE `id`     `mnemos_AI_id` INT(11) NOT NULL AUTO_INCREMENT" );
@@ -672,11 +706,10 @@ encore:
        SQL_Write_new ("ALTER TABLE mappings        CHANGE `id_map` `mappings_id` INT(11) NOT NULL AUTO_INCREMENT" );
      }
 
-    if (database_version < 6093)
-     { SQL_Write_new ("ALTER TABLE dls             CHANGE `id`     `dls_id` INT(11) NOT NULL AUTO_INCREMENT" ); }
-
     if (database_version < 6094)
-     { SQL_Write_new ("ALTER TABLE syns            CHANGE `id`     `syn_id` INT(11) NOT NULL AUTO_INCREMENT" ); }
+     { SQL_Write_new ("ALTER TABLE dls             CHANGE `id`     `dls_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE syns            CHANGE `id`     `syn_id` INT(11) NOT NULL AUTO_INCREMENT" );
+     }
 /* a prévoir:
        SQL_Write_new ("ALTER TABLE mnemos_BI       CHANGE `id`     `id_mnemos_BI` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_MONO     CHANGE `id`     `id_mnemos_MONO` INT(11) NOT NULL AUTO_INCREMENT" );
