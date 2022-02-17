@@ -570,7 +570,7 @@ end:
        return;
      }
 
-    SQL_Select_to_json_node ( result, NULL, "SELECT access_level,libelle FROM syns WHERE id=%d", syn_id );
+    SQL_Select_to_json_node ( result, NULL, "SELECT access_level,libelle FROM syns WHERE syn_id=%d", syn_id );
     if ( !(Json_has_member ( result, "access_level" ) && Json_has_member ( result, "libelle" )) )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
        soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Syn not found");
@@ -598,13 +598,13 @@ end:
     while ( cur_syn_id != 1 )
      { JsonNode *cur_syn = Json_node_create();
        if (!cur_syn) break;
-       SQL_Select_to_json_node ( cur_syn, NULL, "SELECT id, parent_id, image, libelle FROM syns WHERE id=%d", cur_syn_id );
+       SQL_Select_to_json_node ( cur_syn, NULL, "SELECT syn_id, parent_id, image, libelle FROM syns WHERE id=%d", cur_syn_id );
        Json_array_add_element ( parents, cur_syn );
        cur_syn_id = Json_get_int ( cur_syn, "parent_id" );
      }
 
     if (SQL_Select_to_json_node ( synoptique, NULL,
-                                 "SELECT * FROM syns WHERE id='%d' AND access_level<='%d'",
+                                 "SELECT * FROM syns WHERE syn_id='%d' AND access_level<='%d'",
                                   syn_id, session->access_level) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref(synoptique);
@@ -613,8 +613,8 @@ end:
     gint full_syn = Json_get_int ( synoptique, "mode_affichage" );
 /*-------------------------------------------------- Envoi les data des synoptiques fils -------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "child_syns",
-                                 "SELECT s.* FROM syns AS s INNER JOIN syns as s2 ON s.parent_id=s2.id "
-                                 "WHERE s2.id='%d' AND s.id!=1 AND s.access_level<='%d'",
+                                 "SELECT s.* FROM syns AS s INNER JOIN syns as s2 ON s.parent_id=s2.syn_id "
+                                 "WHERE s2.syn_id='%d' AND s.syn_id!=1 AND s.access_level<='%d'",
                                  syn_id, session->access_level) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref(synoptique);
