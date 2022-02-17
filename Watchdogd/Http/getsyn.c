@@ -90,11 +90,11 @@
      }
 
     if (SQL_Select_to_json_node ( RootNode, "synoptiques",
-                                 "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle, psyn.id AS pid, "
-                                         "(SELECT COUNT(*) FROM dls WHERE dls.syn_id=syn.id) AS dls_count, "
-                                         "(SELECT COUNT(*) FROM syns AS sub_syn WHERE syn.id=sub_syn.parent_id) AS subsyn_count "
+                                 "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle, psyn.syn_id AS pid, "
+                                         "(SELECT COUNT(*) FROM dls WHERE dls.syn_id=syn.syn_id) AS dls_count, "
+                                         "(SELECT COUNT(*) FROM syns AS sub_syn WHERE syn.syn_id=sub_syn.parent_id) AS subsyn_count "
                                  "FROM syns AS syn "
-                                 "INNER JOIN syns AS psyn ON psyn.id=syn.parent_id "
+                                 "INNER JOIN syns AS psyn ON psyn.syn_id=syn.parent_id "
                                  "WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
@@ -628,7 +628,7 @@ end:
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "passerelles",
                                     "SELECT pass.*,syn.page,syn.libelle FROM syns_pass as pass "
-                                    "INNER JOIN syns as syn ON pass.syn_cible_id=syn.id "
+                                    "INNER JOIN syns as syn ON pass.syn_cible_id=syn.syn_id "
                                     "WHERE pass.syn_id=%d AND syn.access_level<=%d",
                                      syn_id, session->access_level ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -640,7 +640,7 @@ end:
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "liens",
                                      "SELECT lien.* FROM syns_liens AS lien "
-                                     "INNER JOIN syns as syn ON lien.syn_id=syn.id "
+                                     "INNER JOIN syns as syn ON lien.syn_id=syn.syn_id "
                                      "WHERE lien.syn_id=%d AND syn.access_level<=%d",
                                      syn_id, session->access_level ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -652,7 +652,7 @@ end:
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "rectangles",
                                     "SELECT rectangle.* FROM syns_rectangles AS rectangle "
-                                    "INNER JOIN syns as syn ON rectangle.syn_id=syn.id "
+                                    "INNER JOIN syns as syn ON rectangle.syn_id=syn.syn_id "
                                     "WHERE rectangle.syn_id=%d AND syn.access_level<=%d",
                                     syn_id, session->access_level ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -664,7 +664,7 @@ end:
     if (full_syn)
      { if (SQL_Select_to_json_node ( synoptique, "comments",
                                     "SELECT comment.* FROM syns_comments AS comment "
-                                    "INNER JOIN syns as syn ON comment.syn_id=syn.id "
+                                    "INNER JOIN syns as syn ON comment.syn_id=syn.syn_id "
                                     "WHERE comment.syn_id=%d AND syn.access_level<=%d",
                                     syn_id, session->access_level ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -676,7 +676,7 @@ end:
     if (SQL_Select_to_json_node ( synoptique, "cameras",
                                  "SELECT cam.*,src.location,src.libelle FROM syns_camerasup AS cam "
                                  "INNER JOIN cameras AS src ON cam.camera_src_id=src.id "
-                                 "INNER JOIN syns as syn ON cam.syn_id=syn.id "
+                                 "INNER JOIN syns as syn ON cam.syn_id=syn.syn_id "
                                  "WHERE cam.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -688,9 +688,9 @@ end:
     if (SQL_Select_to_json_node ( synoptique, "cadrans",
                                  "SELECT cadran.*, dico.classe, dico.libelle FROM syns_cadrans AS cadran "
                                  "INNER JOIN dls AS dls ON cadran.dls_id=dls.dls_id "
-                                 "INNER JOIN syns AS syn ON dls.syn_id=syn.id "
+                                 "INNER JOIN syns AS syn ON dls.syn_id=syn.syn_id "
                                  "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
-                                 "WHERE syn.id=%d AND syn.access_level<=%d",
+                                 "WHERE syn.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref(synoptique);
@@ -701,7 +701,7 @@ end:
 /*-------------------------------------------------- Envoi les tableaux de la page -------------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "tableaux",
                                  "SELECT tableau.* FROM tableau "
-                                 "INNER JOIN syns as syn ON tableau.syn_id=syn.id "
+                                 "INNER JOIN syns as syn ON tableau.syn_id=syn.syn_id "
                                  "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -712,7 +712,7 @@ end:
     if (SQL_Select_to_json_node ( synoptique, "tableaux_map",
                                  "SELECT tableau_map.* FROM tableau_map "
                                  "INNER JOIN tableau ON tableau_map.tableau_id=tableau.id "
-                                 "INNER JOIN syns as syn ON tableau.syn_id=syn.id "
+                                 "INNER JOIN syns as syn ON tableau.syn_id=syn.syn_id "
                                  "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -765,7 +765,7 @@ end:
     if (SQL_Select_to_json_node ( synoptique, "horloges",
                                  "SELECT DISTINCT horloge.tech_id, dls.name as dls_name FROM mnemos_HORLOGE AS horloge "
                                  "INNER JOIN dls ON dls.tech_id=horloge.tech_id "
-                                 "INNER JOIN syns as syn ON dls.syn_id=syn.id "
+                                 "INNER JOIN syns as syn ON dls.syn_id=syn.syn_id "
                                  "WHERE dls.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);

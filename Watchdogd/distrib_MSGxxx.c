@@ -109,8 +109,8 @@
                              "parent_syn.page as syn_parent_page, syn.page as syn_page "
                              "FROM msgs "
                              "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
-                             "INNER JOIN syns as syn ON syn.id = dls.syn_id "
-                             "INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id "
+                             "INNER JOIN syns as syn ON syn.syn_id = dls.syn_id "
+                             "INNER JOIN syns as parent_syn ON parent_syn.syn_id = syn.parent_id "
                              "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme            /* Where */
                             );
 
@@ -158,10 +158,10 @@
     JsonNode *histo = Json_node_create ();
     if (!histo) return;
     SQL_Select_to_json_node ( histo, NULL,
-                             "SELECT msgs.*, syn.id as syn_id, syn.page as syn_page "
+                             "SELECT msgs.*, syn.syn_id as syn_id, syn.page as syn_page "
                              "FROM msgs "
                              "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
-                             "INNER JOIN syns as syn ON syn.id = dls.syn_id "
+                             "INNER JOIN syns as syn ON syn.syn_id = dls.syn_id "
                              "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
 
     Json_node_add_string ( histo, "date_fin", date_fin );

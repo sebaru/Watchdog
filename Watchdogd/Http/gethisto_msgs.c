@@ -44,7 +44,7 @@
 
     Http_print_request ( server, msg, path, client );
     gpointer syn_id_src = g_hash_table_lookup ( query, "syn_id" );
-    if (syn_id_src) g_snprintf( critere, sizeof(critere), "AND syn.id=%d", atoi(syn_id_src) );
+    if (syn_id_src) g_snprintf( critere, sizeof(critere), "AND syn.syn_id=%d", atoi(syn_id_src) );
     else bzero ( critere, sizeof(critere) );
 
 /************************************************ Préparation du buffer JSON **************************************************/
@@ -62,8 +62,8 @@
                                   " FROM histo_msgs as histo"
                                   " INNER JOIN msgs as msg ON msg.id = histo.id_msg"
                                   " INNER JOIN dls as dls ON dls.tech_id = msg.tech_id"
-                                  " INNER JOIN syns as syn ON syn.id = dls.syn_id"
-                                  " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
+                                  " INNER JOIN syns as syn ON syn.syn_id = dls.syn_id"
+                                  " INNER JOIN syns as parent_syn ON parent_syn.syn_id = syn.parent_id"
                                   " WHERE alive = 1 %s ORDER BY histo.date_create DESC", critere ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );

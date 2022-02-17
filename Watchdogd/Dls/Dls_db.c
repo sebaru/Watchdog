@@ -87,8 +87,8 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls_id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
                 "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne,debug,is_thread"
-                " FROM dls INNER JOIN syns as syn ON dls.syn_id = syn.id "
-                " INNER JOIN syns AS parent_syn ON parent_syn.id=syn.parent_id"
+                " FROM dls INNER JOIN syns as syn ON dls.syn_id = syn.syn_id "
+                " INNER JOIN syns AS parent_syn ON parent_syn.syn_id=syn.parent_id"
                 " %s "
                 " ORDER BY parent_syn.page,syn.page,dls.shortname",
                 (conditions ? conditions : " ")
@@ -112,7 +112,7 @@
 /******************************************************************************************************************************/
  gboolean Recuperer_plugins_dlsDB_by_syn( struct DB **db_retour, gint syn_id )
   { gchar chaine[80];
-    g_snprintf( chaine, sizeof(chaine), "WHERE syn.id=%d", syn_id );
+    g_snprintf( chaine, sizeof(chaine), "WHERE syn.syn_id=%d", syn_id );
     return( Recuperer_plugins_dlsDB_with_conditions ( db_retour, chaine ) );
   }
 /******************************************************************************************************************************/
@@ -173,8 +173,8 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls_id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
                 "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne,is_thread"
-                " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
-                " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
+                " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.syn_id "
+                " INNER JOIN %s AS parent_syn ON parent_syn.syn_id=syn.parent_id"
                 " WHERE dls.tech_id = '%s'",
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 tech_id                                                                                              /* Where */

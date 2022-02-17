@@ -69,27 +69,6 @@ CREATE TABLE IF NOT EXISTS `cameras` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `syns`
---
-
-CREATE TABLE IF NOT EXISTS `syns` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `date_create` DATETIME NOT NULL DEFAULT NOW(),
-  `parent_id` INT(11) NOT NULL,
-  `libelle` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
-  `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'syn_maison.png',
-  `page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
-  `access_level` INT(11) NOT NULL DEFAULT '0',
-  `mode_affichage` TINYINT(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES
-(1, 1, 'Accueil', 'Defaut Page', 0);
-
 --
 -- Structure de la table `tableau`
 --
@@ -100,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `tableau` (
  `syn_id` INT(11) NOT NULL,
  `date_create` DATETIME NOT NULL DEFAULT NOW(),
  PRIMARY KEY (`id`),
- FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+ FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
  ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -355,7 +334,7 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
   `posy` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -410,7 +389,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `angle` INT(11) NOT NULL DEFAULT '0',
   `groupe` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -454,8 +433,8 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   `angle` INT(11) NOT NULL DEFAULT '0',
   `groupe` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -474,7 +453,7 @@ CREATE TABLE IF NOT EXISTS `syns_liens` (
   `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -495,7 +474,7 @@ CREATE TABLE IF NOT EXISTS `syns_rectangles` (
   `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------

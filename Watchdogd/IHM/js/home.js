@@ -154,7 +154,7 @@
         { $.each ( Response.parent_syns, function (i, syn)
                     { $('#idNavSynoptique').prepend ( "<a class='nav-item'><img src='/img/"+syn.image+"' alt='"+syn.libelle+"' "+
                                                       "data-toggle='tooltip' data-placement='bottom' title='"+syn.libelle+"' "+
-                                                      "onclick='Charger_page_synoptique("+syn.id+")' "+
+                                                      "onclick='Charger_page_synoptique("+syn.syn_id+")' "+
                                                       "class='wtd-menu'></a>" );
                       $('#idNavSynoptique').prepend ( "<span class='navbar-text text-secondary'>></span>" );
                     }
@@ -164,7 +164,7 @@
        $.each ( Synoptique.child_syns, function (i, syn)
                  { bodymain.append ( Creer_card ( syn ) );
                    if (Synoptique.syn_vars)
-                    { Set_syn_vars ( syn.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.id } )[0] ); }
+                    { Set_syn_vars ( syn.syn_id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.syn_id } )[0] ); }
                  }
               );
        /*Set_syn_vars ( Synoptique.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );*/

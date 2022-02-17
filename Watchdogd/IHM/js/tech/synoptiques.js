@@ -53,7 +53,7 @@
                                                     return(0);
                                                   } ),
              function ( i, syn )
-              { $('#idModalSynEditPPage').append("<option value='"+syn.id+"'>"+syn.page+"</option>"); } );
+              { $('#idModalSynEditPPage').append("<option value='"+syn.syn_id+"'>"+syn.page+"</option>"); } );
     if (syn_id>0) $('#idModalSynEditPPage').val ( syn_id );
     $('#idModalSynEditPage').val("");
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page(null)");
@@ -76,7 +76,7 @@
                                                     return(0);
                                                   } ),
              function ( i, syn )
-              { $('#idModalSynEditPPage').append("<option value='"+syn.id+"'>"+syn.page+"</option>"); } );
+              { $('#idModalSynEditPPage').append("<option value='"+syn.syn_id+"'>"+syn.page+"</option>"); } );
     $('#idModalSynEditPPage').val ( selection.pid );
     if (syn_id==1) $('#idModalSynEditPPage').attr("disabled", true );
               else $('#idModalSynEditPPage').attr("disabled", false );
