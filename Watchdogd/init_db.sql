@@ -90,36 +90,6 @@ CREATE TABLE IF NOT EXISTS `syns` (
 INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES
 (1, 1, 'Accueil', 'Defaut Page', 0);
 
--- --------------------------------------------------------
-
---
--- Structure de la table `dls`
---
-
-CREATE TABLE IF NOT EXISTS `dls` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `is_thread` tinyint(1) NOT NULL DEFAULT '0',
-  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
-  `package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT "custom",
-  `syn_id` INT(11) NOT NULL DEFAULT '0',
-  `name` text COLLATE utf8_unicode_ci NOT NULL,
-  `shortname` text COLLATE utf8_unicode_ci NOT NULL,
-  `actif` tinyint(1) NOT NULL DEFAULT '0',
-  `compil_date` DATETIME NOT NULL DEFAULT NOW(),
-  `compil_status` INT(11) NOT NULL DEFAULT '0',
-  `nbr_compil` INT(11) NOT NULL DEFAULT '0',
-  `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "/* Default ! */",
-  `errorlog` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "No Error",
-  `nbr_ligne` INT(11) NOT NULL DEFAULT '0',
-  `debug` TINYINT(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `dls` (`id`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES
-(1, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);
-
--- --------------------------------------------------------
-
 --
 -- Structure de la table `tableau`
 --

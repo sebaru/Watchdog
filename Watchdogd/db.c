@@ -603,6 +603,29 @@ encore:
                    "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");
 
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `dls` ("
+                   "`dls_id` INT(11) NOT NULL AUTO_INCREMENT,"
+                   "`is_thread` tinyint(1) NOT NULL DEFAULT '0',"
+                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                   "`package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'custom',"
+                   "`syn_id` INT(11) NOT NULL DEFAULT '0',"
+                   "`name` text COLLATE utf8_unicode_ci NOT NULL,"
+                   "`shortname` text COLLATE utf8_unicode_ci NOT NULL,"
+                   "`actif` tinyint(1) NOT NULL DEFAULT '0',"
+                   "`compil_date` DATETIME NOT NULL DEFAULT NOW(),"
+                   "`compil_status` INT(11) NOT NULL DEFAULT '0',"
+                   "`nbr_compil` INT(11) NOT NULL DEFAULT '0',"
+                   "`sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '/* Default ! */',"
+                   "`errorlog` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No Error',"
+                   "`nbr_ligne` INT(11) NOT NULL DEFAULT '0',"
+                   "`debug` TINYINT(1) NOT NULL DEFAULT '0',"
+                   "PRIMARY KEY (`id`),"
+                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+
+    SQL_Write_new ("INSERT IGNORE INTO `dls` (`id`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES "
+                   "(1, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);");
+
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Memory error. Don't update schema.", __func__ );
@@ -2609,8 +2632,10 @@ encore:
        SQL_Write_new ("ALTER TABLE mnemos_AO       CHANGE `id`     `id_mnemos_AO` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mappings        CHANGE `id_map` `id_mappings` INT(11) NOT NULL AUTO_INCREMENT" );
      }
+
+    if (database_version < 6093)
+     { SQL_Write_new ("ALTER TABLE dls             CHANGE `id`     `dls_id` INT(11) NOT NULL AUTO_INCREMENT" ); }
 /* a prévoir:
-       SQL_Write_new ("ALTER TABLE dls             CHANGE `id`     `id_dls` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE syn             CHANGE `id`     `id_syn` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_BI       CHANGE `id`     `id_mnemos_BI` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_MONO     CHANGE `id`     `id_mnemos_MONO` INT(11) NOT NULL AUTO_INCREMENT" );
@@ -2626,7 +2651,7 @@ encore:
 */
 
 fin:
-    database_version = 6092;
+    database_version = 6093;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
@@ -2648,7 +2673,7 @@ fin:
 
     g_snprintf( requete, sizeof(requete),
        "CREATE OR REPLACE VIEW dictionnaire AS "
-       "SELECT id,'DLS' AS classe, -1 AS classe_int,tech_id,shortname as acronyme,name as libelle, 'none' as unite FROM dls UNION "
+       "SELECT dls_id,'DLS' AS classe, -1 AS classe_int,tech_id,shortname as acronyme,name as libelle, 'none' as unite FROM dls UNION "
        "SELECT id,'SYNOPTIQUE' AS classe, -1 AS classe_int,page as tech_id, NULL as acronyme,libelle, 'none' as unite FROM syns UNION "
        "SELECT id_mnemos_AI,'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_AI UNION "
        "SELECT id_mnemos_DI,'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DI UNION "

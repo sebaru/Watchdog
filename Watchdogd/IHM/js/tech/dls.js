@@ -80,7 +80,7 @@
          name      : $('#idModalDlsEditDescription').val(),
          tech_id   : $('#idModalDlsEditTechID').val().toUpperCase(),
        };
-    if (dls_id>0) json_request.id = dls_id;                                                             /* Ajout ou édition ? */
+    if (dls_id>0) json_request.dls_id = dls_id;                                                         /* Ajout ou édition ? */
 
     Send_to_API ( "POST", "/api/dls/set", JSON.stringify(json_request), function(Response)
      { $('#idTableDLS').DataTable().ajax.reload(null, false);
@@ -138,7 +138,7 @@
     Dls_Set_controle_techid ( tech_id );
     $('#idModalDlsEditShortname').val(selection.shortname);
     $('#idModalDlsEditDescription').val(selection.name);
-    $('#idModalDlsEditValider').attr( "onclick", "Dls_Set("+selection.id+")" );
+    $('#idModalDlsEditValider').attr( "onclick", "Dls_Set("+selection.dls_id+")" );
     Send_to_API ( "GET", "/api/syn/list", null, function (Response)
      { $('#idModalDlsEditPage').empty();
        $.each ( Response.synoptiques, function ( i, item )
@@ -152,12 +152,12 @@
   { $('#idTableDLS').DataTable(
        { pageLength : 50,
          fixedHeader: true,
-         rowId: "id",
+         rowId: "dls_id",
          ajax: {	url : "/api/dls/list",	type : "GET", dataSrc: "plugins",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "id", "title":"#ID", "className": "align-middle  text-center" },
+          [ { "data": "dls_id", "title":"#ID", "className": "align-middle  text-center" },
             { "data": "page", "title":"Page", "className": "align-middle  text-center" },
             { "data": null, "title":"Started", "className": "align-middle  text-center",
               "render": function (item)

@@ -318,7 +318,7 @@ end:
      { return; }
 
     SQL_Write_new( "UPDATE syns_visuels AS visu "
-                   "INNER JOIN dls ON dls.id=visu.dls_id "
+                   "INNER JOIN dls ON dls.dls_id=visu.dls_id "
                    "INNER JOIN syns AS s ON dls.syn_id = s.id SET "
                    "visu.posx='%d', visu.posy='%d', visu.groupe='%d',"
                    "visu.angle='%d', visu.scale='%f', visu.gestion='%d' "
@@ -344,7 +344,7 @@ end:
      { return; }
 
     SQL_Write_new( "UPDATE syns_cadrans "
-                   "INNER JOIN dls ON syns_cadrans.dls_id=dls.id "
+                   "INNER JOIN dls ON syns_cadrans.dls_id=dls.dls_id "
                    "INNER JOIN syns ON syns.id=dls.syn_id "
                    "SET posx='%d', posy='%d', groupe='%d', angle='%d', scale='%f' "
                    "WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
@@ -687,7 +687,7 @@ end:
 /*-------------------------------------------------- Envoi les cadrans de la page --------------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "cadrans",
                                  "SELECT cadran.*, dico.classe, dico.libelle FROM syns_cadrans AS cadran "
-                                 "INNER JOIN dls AS dls ON cadran.dls_id=dls.id "
+                                 "INNER JOIN dls AS dls ON cadran.dls_id=dls.dls_id "
                                  "INNER JOIN syns AS syn ON dls.syn_id=syn.id "
                                  "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
                                  "WHERE syn.id=%d AND syn.access_level<=%d",
@@ -730,7 +730,7 @@ end:
                                     "  IF(m.color IS NULL, v.color, m.color) AS color "
                                     "FROM syns_visuels AS v "
                                     "LEFT JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
-                                    "LEFT JOIN dls ON dls.id=v.dls_id "
+                                    "LEFT JOIN dls ON dls.dls_id=v.dls_id "
                                     "LEFT JOIN icone AS i ON i.forme=m.forme "
                                     "LEFT JOIN syns AS s ON dls.syn_id=s.id "
                                     "WHERE (s.id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d' "
@@ -746,7 +746,7 @@ end:
                                     "SELECT v.*,m.*,i.*,dls.tech_id AS dls_tech_id, dls.shortname AS dls_shortname, dls_owner.shortname AS dls_owner_shortname "
                                     "FROM syns_visuels AS v "
                                     "INNER JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
-                                    "INNER JOIN dls ON dls.id=v.dls_id "
+                                    "INNER JOIN dls ON dls.dls_id=v.dls_id "
                                     "INNER JOIN icone AS i ON i.forme=m.forme "
                                     "INNER JOIN syns AS s ON dls.syn_id=s.id "
                                     "INNER JOIN dls AS dls_owner ON dls_owner.tech_id=m.tech_id "

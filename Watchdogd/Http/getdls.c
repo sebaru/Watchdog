@@ -570,7 +570,7 @@
      }
 
     if (SQL_Select_to_json_node ( RootNode, "plugins",
-                                 "SELECT d.id, d.tech_id, d.package, d.syn_id, d.name, d.shortname, d.actif, d.compil_status, "
+                                 "SELECT d.dls_id, d.tech_id, d.package, d.syn_id, d.name, d.shortname, d.actif, d.compil_status, "
                                  "d.nbr_compil, d.nbr_ligne, d.compil_date, d.debug, ps.page as ppage, s.page as page "
                                  "FROM dls AS d "
                                  "INNER JOIN syns as s ON d.syn_id=s.id "
@@ -650,15 +650,15 @@
     gchar *shortname = Normaliser_chaine ( Json_get_string ( request, "shortname" ) );
     gchar *name      = Normaliser_chaine ( Json_get_string ( request, "name" ) );
 
-    if (Json_has_member ( request, "id" ) )
+    if (Json_has_member ( request, "dls_id" ) )
      { JsonNode *old = Json_node_create();
        if (old)
-        { SQL_Select_to_json_node ( old, NULL, "SELECT tech_id FROM dls WHERE id='%d'", Json_get_int ( request, "id" ) );
+        { SQL_Select_to_json_node ( old, NULL, "SELECT tech_id FROM dls WHERE dls_id='%d'", Json_get_int ( request, "dls_id" ) );
 
           if ( !Json_has_member ( old, "tech_id" ) )
            { soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found" ); }
-          else if (SQL_Write_new ( "UPDATE dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s' WHERE id='%d'",
-                              Json_get_int ( request, "syn_id" ), tech_id, shortname, name, Json_get_int ( request, "id" ) ))
+          else if (SQL_Write_new ( "UPDATE dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s' WHERE dls_id='%d'",
+                              Json_get_int ( request, "syn_id" ), tech_id, shortname, name, Json_get_int ( request, "dls_id" ) ))
            { soup_message_set_status (msg, SOUP_STATUS_OK);
              if ( strcmp ( Json_get_string ( old, "tech_id" ), tech_id ) )          /* Si modification de tech_id -> recompil */
               { SQL_Write_new ( "UPDATE dls SET `sourcecode` = REPLACE(`sourcecode`, '%s:', '%s:')",
