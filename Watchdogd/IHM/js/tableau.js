@@ -18,8 +18,8 @@
  var Tableau_ID;
 
 /********************************************* Appelé au chargement de la page ************************************************/
- function Charger_un_tableau ( id, period )
-  { Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+id, function(Response)
+ function Charger_un_tableau ( tableau_id, period )
+  { Send_to_API ( "GET", "/api/tableau/map/list", "tableau_id="+tableau_id, function(Response)
      { $('#idTableauTitle').text(Response.titre);
        Charger_plusieurs_courbes ( "idTableauCanvas", Response.tableau_map, period );
        $('#toplevel').slideDown("slow");

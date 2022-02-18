@@ -674,6 +674,15 @@ encore:
                    "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`dls_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
 
+
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `tableau` ("
+                   "`tableau_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
+                   "`titre` VARCHAR(128) UNIQUE NOT NULL,"
+                   "`syn_id` INT(11) NOT NULL,"
+                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `msgs` ("
                    "`msg_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`deletable` tinyint(1) NOT NULL DEFAULT '1',"
@@ -743,13 +752,14 @@ encore:
        SQL_Write_new ("ALTER TABLE syns            CHANGE `id`     `syn_id` INT(11) NOT NULL AUTO_INCREMENT" );
      }
 
-    /*if (database_version < 6095)*/
+    if (database_version < 6096)
      { SQL_Write_new ("ALTER TABLE mnemos_DO       CHANGE `mnemos_DO_id`     `mnemo_DO_id` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_DI       CHANGE `mnemos_DI_id`     `mnemo_DI_id` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_AI       CHANGE `mnemos_AI_id`     `mnemo_AI_id` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_AO       CHANGE `mnemos_AO_id`     `mnemo_AO_id` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE msgs            CHANGE `id`     `msg_id` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE histo_msgs      CHANGE `id_msg` `msg_id` INT(11) NOT NULL" );
+       SQL_Write_new ("ALTER TABLE tableau         CHANGE `id`     `tableau_id` INT(11) NOT NULL AUTO_INCREMENT" );
      }
 /* a prévoir:
        SQL_Write_new ("ALTER TABLE mnemos_BI       CHANGE `id`     `id_mnemos_BI` INT(11) NOT NULL AUTO_INCREMENT" );
@@ -760,13 +770,12 @@ encore:
        SQL_Write_new ("ALTER TABLE mnemos_Tempos   CHANGE `id`     `id_mnemos_Tempo` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_R        CHANGE `id`     `id_mnemos_R` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_WATCHDOG CHANGE `id`     `id_mnemos_WATCHDOG` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE tableau         CHANGE `id`     `id_tableau` INT(11) NOT NULL AUTO_INCREMENT" );
        "SELECT id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_VISUEL UNION "
        "SELECT id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
 */
 
 fin:
-    database_version = 6095;
+    database_version = 6096;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
@@ -803,7 +812,7 @@ fin:
        "SELECT id,'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_R UNION "
        "SELECT id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_VISUEL UNION "
        "SELECT id,'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
-       "SELECT id,'TABLEAU' AS classe, -1 AS classe_int, NULL AS tech_id, NULL AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
+       "SELECT tableau_id,'TABLEAU' AS classe, -1 AS classe_int, NULL AS tech_id, NULL AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
        "SELECT msg_id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
         MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
         MNEMO_TEMPO, MNEMO_REGISTRE, MNEMO_WATCHDOG, MNEMO_MSG

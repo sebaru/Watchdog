@@ -711,7 +711,7 @@ end:
 /*-------------------------------------------------- Envoi les tableaux_map de la page ---------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "tableaux_map",
                                  "SELECT tableau_map.* FROM tableau_map "
-                                 "INNER JOIN tableau ON tableau_map.tableau_id=tableau.id "
+                                 "INNER JOIN tableau ON tableau_map.tableau_id=tableau.tableau_id "
                                  "INNER JOIN syns as syn ON tableau.syn_id=syn.syn_id "
                                  "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)

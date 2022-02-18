@@ -70,21 +70,6 @@ CREATE TABLE IF NOT EXISTS `cameras` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
 --
--- Structure de la table `tableau`
---
-
-CREATE TABLE IF NOT EXISTS `tableau` (
- `id` INT NOT NULL AUTO_INCREMENT,
- `titre` VARCHAR(128) UNIQUE NOT NULL,
- `syn_id` INT(11) NOT NULL,
- `date_create` DATETIME NOT NULL DEFAULT NOW(),
- PRIMARY KEY (`id`),
- FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
- ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `courbes`
 --
 
