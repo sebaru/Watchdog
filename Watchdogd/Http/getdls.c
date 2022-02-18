@@ -383,7 +383,7 @@
      }
 
     if (SQL_Select_to_json_node ( RootNode, NULL,
-                                 "SELECT d.*, s.page FROM dls AS d INNER JOIN syns AS s ON d.syn_id=s.id "
+                                 "SELECT d.*, s.page FROM dls AS d INNER JOIN syns AS s ON d.syn_id=syn_id "
                                  "WHERE tech_id='%s' AND s.access_level<='%d'", tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
@@ -573,8 +573,8 @@
                                  "SELECT d.dls_id, d.tech_id, d.package, d.syn_id, d.name, d.shortname, d.actif, d.compil_status, "
                                  "d.nbr_compil, d.nbr_ligne, d.compil_date, d.debug, ps.page as ppage, s.page as page "
                                  "FROM dls AS d "
-                                 "INNER JOIN syns as s ON d.syn_id=s.id "
-                                 "INNER JOIN syns as ps ON s.parent_id = ps.id "
+                                 "INNER JOIN syns as s ON d.syn_id=s.syn_id "
+                                 "INNER JOIN syns as ps ON s.parent_id = ps.syn_id "
                                  "WHERE s.access_level<'%d' ORDER BY d.tech_id", session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
