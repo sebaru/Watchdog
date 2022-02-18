@@ -69,72 +69,6 @@ CREATE TABLE IF NOT EXISTS `cameras` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `syns`
---
-
-CREATE TABLE IF NOT EXISTS `syns` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `date_create` DATETIME NOT NULL DEFAULT NOW(),
-  `parent_id` INT(11) NOT NULL,
-  `libelle` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
-  `image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'syn_maison.png',
-  `page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
-  `access_level` INT(11) NOT NULL DEFAULT '0',
-  `mode_affichage` TINYINT(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES
-(1, 1, 'Accueil', 'Defaut Page', 0);
-
--- --------------------------------------------------------
-
---
--- Structure de la table `dls`
---
-
-CREATE TABLE IF NOT EXISTS `dls` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `is_thread` tinyint(1) NOT NULL DEFAULT '0',
-  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
-  `package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT "custom",
-  `syn_id` INT(11) NOT NULL DEFAULT '0',
-  `name` text COLLATE utf8_unicode_ci NOT NULL,
-  `shortname` text COLLATE utf8_unicode_ci NOT NULL,
-  `actif` tinyint(1) NOT NULL DEFAULT '0',
-  `compil_date` DATETIME NOT NULL DEFAULT NOW(),
-  `compil_status` INT(11) NOT NULL DEFAULT '0',
-  `nbr_compil` INT(11) NOT NULL DEFAULT '0',
-  `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "/* Default ! */",
-  `errorlog` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "No Error",
-  `nbr_ligne` INT(11) NOT NULL DEFAULT '0',
-  `debug` TINYINT(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `dls` (`id`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES
-(1, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);
-
--- --------------------------------------------------------
-
---
--- Structure de la table `tableau`
---
-
-CREATE TABLE IF NOT EXISTS `tableau` (
- `id` INT NOT NULL AUTO_INCREMENT,
- `titre` VARCHAR(128) UNIQUE NOT NULL,
- `syn_id` INT(11) NOT NULL,
- `date_create` DATETIME NOT NULL DEFAULT NOW(),
- PRIMARY KEY (`id`),
- FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
- ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
 --
 -- Structure de la table `courbes`
 --
@@ -202,35 +136,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_WATCHDOG` (
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
-  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `mnemos_AI`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_AI` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `deletable` tinyint(1) NOT NULL DEFAULT '1',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
-  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `type` INT(11) NOT NULL DEFAULT '0',
-  `min` float NOT NULL DEFAULT '0',
-  `max` float NOT NULL DEFAULT '0',
-  `valeur` float NOT NULL DEFAULT '0',
-  `unite` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `map_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `map_tag` VARCHAR(160) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun',
-  `archivage` INT(11) NOT NULL DEFAULT '2',
-  PRIMARY KEY (`id`),
-  UNIQUE (`tech_id`,`acronyme`),
-  UNIQUE (`map_tech_id`,`map_tag`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
@@ -383,26 +288,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_R` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `mnemos_VISUEL`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_VISUEL` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',
-  `mode`  VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray',
-  `libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL,
-  `access_level` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE (`tech_id`, `acronyme`),
-  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `syns_camerasup`
 --
 
@@ -414,7 +299,7 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
   `posy` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -469,33 +354,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `angle` INT(11) NOT NULL DEFAULT '0',
   `groupe` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_visuels`
---
-
-CREATE TABLE IF NOT EXISTS `syns_visuels` (
-  `visuel_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `mnemo_id` INT(11) NOT NULL,
-  `dls_id` INT(11) NOT NULL,
-  `rafraich` INT(11) NOT NULL DEFAULT '0',
-  `posx` INT(11) NOT NULL DEFAULT '0',
-  `posy` INT(11) NOT NULL DEFAULT '0',
-  `larg` INT(11) NOT NULL DEFAULT '0',
-  `haut` INT(11) NOT NULL DEFAULT '0',
-  `angle` INT(11) NOT NULL DEFAULT '0',
-  `scale` FLOAT NOT NULL DEFAULT '1.0',
-  `dialog` INT(11) NOT NULL DEFAULT '0',
-  `gestion` INT(11) NOT NULL DEFAULT '0',
-  `groupe` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`visuel_id`),
-  UNIQUE (`dls_id`, `mnemo_id`),
-  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_VISUEL` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -513,8 +372,8 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   `angle` INT(11) NOT NULL DEFAULT '0',
   `groupe` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -533,7 +392,7 @@ CREATE TABLE IF NOT EXISTS `syns_liens` (
   `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -554,7 +413,7 @@ CREATE TABLE IF NOT EXISTS `syns_rectangles` (
   `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -570,52 +429,6 @@ CREATE TABLE IF NOT EXISTS `thread_classe` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-
--- --------------------------------------------------------
-
---
--- Structure de la table `msgs`
---
-
-CREATE TABLE IF NOT EXISTS `msgs` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `deletable` tinyint(1) NOT NULL DEFAULT '1',
-  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
-  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
-  `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
-  `typologie` INT(11) NOT NULL DEFAULT '0',
-  `rate_limit` INT(11) NOT NULL DEFAULT '0',
-  `sms_notification` INT(11) NOT NULL DEFAULT '0',
-  `audio_profil` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',
-  `audio_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `etat` tinyint(1) NOT NULL DEFAULT '0',
-  `groupe` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE(`tech_id`,`acronyme`),
-  FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `histo_msgs`
---
-
-CREATE TABLE IF NOT EXISTS `histo_msgs` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `id_msg` INT(11) NOT NULL DEFAULT '0',
-  `alive` TINYINT(1) NULL DEFAULT NULL,
-  `nom_ack` VARCHAR(97) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `date_create` DATETIME(2) NULL,
-  `date_fixe` DATETIME(2) NULL,
-  `date_fin` DATETIME(2) NULL,
-  `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE (`id_msg`,`alive`),
-  KEY `date_create` (`date_create`),
-  KEY `alive` (`alive`),
-  FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 

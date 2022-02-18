@@ -106,16 +106,13 @@
          ajax: {	url : "/api/mnemos/list",	type : "GET", data: { "classe": "DI", "tech_id": tech_id }, dataSrc: "DI",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
-         rowId: "id",
+         rowId: "mnemo_DI_id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
              { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },
-             { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
-             { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
-             { "data": "map_tag",    "title":"map_tag",   "className": "align-middle " },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -128,7 +125,7 @@
          ajax: {	url : "/api/mnemos/list",	type : "GET", data: { "classe": "AI", "tech_id": tech_id }, dataSrc: "AI",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
-         rowId: "id",
+         rowId: "mnemo_AI_id",
          columns:
            [ { "data": null, "title":"Acronyme", "className": "align-middle text-center",
                "render": function (item)
@@ -161,17 +158,13 @@
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
 
-         rowId: "id",
+         rowId: "mnemo_DO_id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
              { "data": null, "title":"Libellé",    "className": "align-middle ",
                "render": function (item)
                  { return(htmlEncode(item.libelle)); }
              },
-             { "data": "map_thread", "title":"map_thread", "className": "align-middle " },
-             { "data": "map_tech_id","title":"map_tech_id","className": "align-middle " },
-             { "data": "map_tag",    "title":"map_tag",    "className": "align-middle " },
-             { "data": "dst_param1", "title":"dst_param1", "className": "align-middle " },
            ],
          /*order: [ [0, "desc"] ],*/
          responsive: true,
@@ -308,7 +301,7 @@
          ajax: {	url : "/api/mnemos/list",	type : "GET", data: { "classe": "MSG", "tech_id": tech_id }, dataSrc: "MSG",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
-         rowId: "id",
+         rowId: "msg_id",
          columns:
            [ { "data": "acronyme",   "title":"Acronyme",   "className": "align-middle text-center" },
              { "data": null, "title":"Libellé",    "className": "align-middle ",
@@ -411,7 +404,5 @@
        }
      );
 
-
     $('#idTabEntreeTor').tab('show');
-
   }

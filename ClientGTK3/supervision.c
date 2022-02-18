@@ -46,6 +46,7 @@
   { struct PAGE_NOTEBOOK *page = user_data;
     struct TYPE_INFO_SUPERVISION *infos = page->infos;
 
+    g_source_remove( infos->timer_id );
     printf("%s: close 2 page=%p!\n", __func__, page );
     json_node_unref( infos->syn );
     Trame_detruire_trame( infos->Trame );
@@ -68,7 +69,6 @@
   { struct TYPE_INFO_SUPERVISION *infos = page->infos;
 
     printf("%s: close 1 page=%p!\n", __func__, page );
-    g_source_remove( infos->timer_id );
     if ( soup_websocket_connection_get_state ( infos->ws_motifs ) == SOUP_WEBSOCKET_STATE_OPEN )
      { soup_websocket_connection_close ( infos->ws_motifs, 0, "Thanks, Bye !" ); }
     else Detruire_page_supervision_2 ( infos->ws_motifs, page );
@@ -124,7 +124,7 @@
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
 
-    Json_add_int    ( builder, "syn_id",   infos->syn_id );
+    Json_add_int    ( builder, "syn_id",   Json_get_int ( infos->syn, "syn_id" ) );
     Envoi_json_au_serveur ( page->client, "POST", builder, "/api/syn/ack", NULL );
   }
 /******************************************************************************************************************************/
@@ -146,8 +146,10 @@
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { JsonBuilder *builder = Json_create ();
     if (!builder) return;
-    Json_add_string ( builder, "tech_id",  Json_get_string ( trame_motif->visuel, "clic_tech_id" ) );
-    Json_add_string ( builder, "acronyme", Json_get_string ( trame_motif->visuel, "clic_acronyme" ) );
+    Json_add_string ( builder, "tech_id",  Json_get_string ( trame_motif->visuel, "tech_id" ) );
+    gchar chaine[128];
+    g_snprintf( chaine, sizeof(chaine), "%s_CLIC", Json_get_string ( trame_motif->visuel, "acronyme" ) );
+    Json_add_string ( builder, "acronyme", chaine );
     printf("%s: envoi syn_clic '%s':'%s'\n", __func__,
            Json_get_string ( trame_motif->visuel, "clic_tech_id" ), Json_get_string ( trame_motif->visuel, "clic_acronyme" ) );
     Envoi_json_au_serveur ( trame_motif->page->client, "POST", builder, "/api/syn/clic", NULL );
@@ -196,20 +198,7 @@
            }
         }
        else if ( ((GdkEventButton *)event)->button == 1)                          /* Release sur le motif qui a été appuyé ?? */
-        { switch( Json_get_int ( trame_motif->visuel, "dialog" ) )
-           { case ACTION_SANS:      printf("action sans !!\n");
-                                    break;
-             case ACTION_IMMEDIATE: printf("action immediate !!\n");
-                                    Envoyer_action_immediate( trame_motif );
-                                    break;
-/*             case ACTION_CONFIRME: printf("action programme !!\n");
-                                    Envoyer_action_programme( trame_motif );
-                                    break;*/
-/*             case ACTION_DIFFERE:
-             case ACTION_REPETE:
-                                    break;*/
-             default: printf("Clic_sur_motif_supervision: type dialog inconnu\n");
-           }
+        { Envoyer_action_immediate( trame_motif );
         }
      }
   }
@@ -334,7 +323,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Updater_un_syn_vars( struct TRAME_ITEM_PASS *trame_pass, JsonNode *syn_vars )
-  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
+  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "syn_id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
     if ( Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)  /**********************  Vignette Activite *************************/
      { Trame_set_svg ( trame_pass->item_1, "kaki", 0, TRUE ); }
     else if (Json_get_bool ( syn_vars, "bit_alarme" ) == TRUE)
@@ -382,7 +371,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Updater_etiquette( struct TYPE_INFO_SUPERVISION *infos, JsonNode *syn_vars )
-  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
+  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "syn_id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
     if ( Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)  /**********************  Vignette Activite *************************/
      { Trame_set_svg ( infos->Trame->Vignette_activite, "kaki", 0, TRUE ); }
     else if (Json_get_bool ( syn_vars, "bit_alarme" ) == TRUE)
@@ -434,8 +423,8 @@
     if (!page) return;
     struct TYPE_INFO_SUPERVISION *infos = page->infos;
 
-    printf ("%s pour syn_id=%d\n", __func__, Json_get_int ( element, "id" ) );
-    if ( Json_get_int ( element, "id" ) == Json_get_int ( infos->syn, "id" ) ) { Updater_etiquette ( infos, element ); }
+    printf ("%s pour syn_id=%d\n", __func__, Json_get_int ( element, "syn_id" ) );
+    if ( Json_get_int ( element, "syn_id" ) == Json_get_int ( infos->syn, "syn_id" ) ) { Updater_etiquette ( infos, element ); }
 
     pthread_mutex_lock ( &infos->Trame->lock );
     GList *objet = infos->Trame->trame_items;
@@ -443,7 +432,7 @@
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
         { case TYPE_PASSERELLE:
                 { struct TRAME_ITEM_PASS *trame_pass = objet->data;
-                  if ( Json_get_int ( trame_pass->pass, "syn_cible_id" ) == Json_get_int ( element, "id" ))
+                  if ( Json_get_int ( trame_pass->pass, "syn_cible_id" ) == Json_get_int ( element, "syn_id" ))
                    { Updater_un_syn_vars( trame_pass, element );
                    }
                 }
@@ -549,9 +538,8 @@
     page->type   = TYPE_PAGE_SUPERVISION;
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
     infos->syn = Json_get_from_string ( buffer_brut );
-    infos->syn_id = Json_get_int ( infos->syn, "id" );
     infos->timer_id = g_timeout_add( 500, Timer, page );
-    printf("%s: ---- chargement id %d \n", __func__, infos->syn_id );
+    printf("%s: ---- chargement id %d \n", __func__, Json_get_int ( infos->syn, "syn_id" ) );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;
@@ -649,7 +637,7 @@
        Json_node_add_string ( visuel, "acronyme", "" );
        Json_node_add_string ( visuel, "ihm_affichage", "complexe" );
        gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), "SYN_%05d", infos->syn_id );
+       g_snprintf( chaine, sizeof(chaine), "SYN_%05d", Json_get_int ( infos->syn, "syn_id" ) );
        Json_node_add_string ( visuel, "libelle", chaine );
        Json_node_add_int ( visuel, "id", -1 );
        Json_node_add_int ( visuel, "angle", 0 );

@@ -54,7 +54,7 @@
  function Show_Modal_Dls_Del ( tech_id )
   { table = $('#idTableDLS').DataTable();
     selection = table.ajax.json().plugins.filter( function(item) { return item.tech_id==tech_id } )[0];
-    if (selection.id==1)
+    if (selection.dls_id==1)
      { Show_Error ( "La suppression du DLS originel est interdite !" ); return; }
 
     Show_modal_del ( "Détruire le module ?",
@@ -80,7 +80,7 @@
          name      : $('#idModalDlsEditDescription').val(),
          tech_id   : $('#idModalDlsEditTechID').val().toUpperCase(),
        };
-    if (dls_id>0) json_request.id = dls_id;                                                             /* Ajout ou édition ? */
+    if (dls_id>0) json_request.dls_id = dls_id;                                                         /* Ajout ou édition ? */
 
     Send_to_API ( "POST", "/api/dls/set", JSON.stringify(json_request), function(Response)
      { $('#idTableDLS').DataTable().ajax.reload(null, false);
@@ -124,7 +124,7 @@
     Send_to_API ( "GET", "/api/syn/list", null, function (Response)
      { $('#idModalDlsEditPage').empty();
        $.each ( Response.synoptiques, function ( i, item )
-        { $('#idModalDlsEditPage').append("<option value='"+item.id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
+        { $('#idModalDlsEditPage').append("<option value='"+item.syn_id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
      }, null );
     $('#idModalDlsEdit').modal("show");
   }
@@ -138,11 +138,11 @@
     Dls_Set_controle_techid ( tech_id );
     $('#idModalDlsEditShortname').val(selection.shortname);
     $('#idModalDlsEditDescription').val(selection.name);
-    $('#idModalDlsEditValider').attr( "onclick", "Dls_Set("+selection.id+")" );
+    $('#idModalDlsEditValider').attr( "onclick", "Dls_Set("+selection.dls_id+")" );
     Send_to_API ( "GET", "/api/syn/list", null, function (Response)
      { $('#idModalDlsEditPage').empty();
        $.each ( Response.synoptiques, function ( i, item )
-        { $('#idModalDlsEditPage').append("<option value='"+item.id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
+        { $('#idModalDlsEditPage').append("<option value='"+item.syn_id+"'>"+item.page+" - "+htmlEncode(item.libelle)+"</option>"); } );
        $('#idModalDlsEditPage').val(selection.syn_id);
      }, null );
     $('#idModalDlsEdit').modal("show");
@@ -152,12 +152,12 @@
   { $('#idTableDLS').DataTable(
        { pageLength : 50,
          fixedHeader: true,
-         rowId: "id",
+         rowId: "dls_id",
          ajax: {	url : "/api/dls/list",	type : "GET", dataSrc: "plugins",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ /*{ "data": "ppage", "title":"PPage", "className": "align-middle  text-center" },*/
+          [ { "data": "dls_id", "title":"#ID", "className": "align-middle  text-center" },
             { "data": "page", "title":"Page", "className": "align-middle  text-center" },
             { "data": null, "title":"Started", "className": "align-middle  text-center",
               "render": function (item)

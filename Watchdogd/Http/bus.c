@@ -32,7 +32,7 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
+
 /******************************************************************************************************************************/
 /* Http_Traiter_request_body_completion_bus: le payload est arrivé, il faut traiter le fichier                                */
 /* Entrées: la connexion Websocket                                                                                            */

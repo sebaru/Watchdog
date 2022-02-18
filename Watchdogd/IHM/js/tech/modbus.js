@@ -3,6 +3,8 @@
  function MODBUS_Refresh ( )
   { $('#idTableMODBUS').DataTable().ajax.reload(null, false);
     $('#idTableMODBUS_DI').DataTable().ajax.reload(null, false);
+    $('#idTableMODBUS_DO').DataTable().ajax.reload(null, false);
+    $('#idTableMODBUS_AI').DataTable().ajax.reload(null, false);
   }
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function MODBUS_Disable ( id )
@@ -111,7 +113,8 @@
      { $('#idMODALMap').modal("hide");
        COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
                     $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
-                  ).then ( () => { MODBUS_Refresh(); } );
+                  );
+       MODBUS_Refresh();;
      });
     $('#idMODALMap').modal("show");
   }
@@ -126,9 +129,40 @@
      { $('#idMODALMap').modal("hide");
        COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
                     $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
-                  ).then ( () => { MODBUS_Refresh(); } );
+                  );
+       MODBUS_Refresh();
      });
     $('#idMODALMap').modal("show");
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function MODBUS_Map_AI ( id )
+  { table = $('#idTableMODBUS_AI').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    $('#idMODALMapTitre').text( "Mapper "+selection.thread_tech_id+":"+selection.thread_acronyme );
+    $('#idMODALMapRechercherTechID').off("input").on("input", function () { Common_Updater_Choix_TechID ( "idMODALMap", "AI" ); } );
+    Common_Updater_Choix_TechID ( "idMODALMap", "AI", selection.tech_id, selection.acronyme );
+    $('#idMODALMapValider').off("click").on( "click", function ()
+     { $('#idMODALMap').modal("hide");
+       COMMON_Map ( selection.thread_tech_id, selection.thread_acronyme,
+                    $('#idMODALMapSelectTechID').val(),  $('#idMODALMapSelectAcronyme').val()
+                  );
+       MODBUS_Refresh();
+     });
+    $('#idMODALMap').modal("show");
+  }
+/********************************************* Afichage du modal d'edition synoptique *****************************************/
+ function MODBUS_Edit_AI ( id )
+  { table = $('#idTableMODBUS_AI').DataTable();
+    selection = table.ajax.json().config.filter( function(item) { return item.id==id } )[0];
+    $('#idMODBUSEditAI').text( "Configurer "+selection.thread_tech_id+":"+selection.thread_acronyme );
+    $('#idMODBUSEditAITypeBorne').val ( selection.type_borne );
+    $('#idMODBUSEditAIMin').val ( selection.min );
+    $('#idMODBUSEditAIMax').val ( selection.max );
+    $('#idMODBUSEditAIValider').off("click").on( "click", function ()
+     { $('#idMODBUSEditAI').modal("hide");
+       /*Send_to_API().then ( () => { MODBUS_Refresh(); } );*/
+     });
+    $('#idMODBUSEditAI').modal("show");
   }
 /********************************************* Appelé au chargement de la page ************************************************/
  function Load_page ()
@@ -194,12 +228,14 @@
                 { return( item.thread_acronyme ); }
             },
             { "data": null, "title":"Mapped on", "className": "align-middle text-center",
-              "render": function (item)
-                { if(item.tech_id)
-                   { return ( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) +":" + item.acronyme
-                              + ", " + item.libelle );
+              "render": function (item)                { if(item.tech_id)
+                   { return ( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) +":" + item.acronyme );
                    } else return( "--" );
                 }
+            },
+            { "data": null, "title":"Description", "className": "align-middle text-center",
+              "render": function (item)
+                { if(item.tech_id) { return ( item.libelle ); } else return( "--" ); }
             },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
@@ -231,12 +267,14 @@
                 { return( item.thread_acronyme ); }
             },
             { "data": null, "title":"Mapped on", "className": "align-middle text-center",
-              "render": function (item)
-                { if(item.tech_id)
-                   { return ( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) +":" + item.acronyme
-                              + ", " + item.libelle );
+              "render": function (item)                { if(item.tech_id)
+                   { return ( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) +":" + item.acronyme );
                    } else return( "--" );
                 }
+            },
+            { "data": null, "title":"Description", "className": "align-middle text-center",
+              "render": function (item)
+                { if(item.tech_id) { return ( item.libelle ); } else return( "--" ); }
             },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
@@ -250,48 +288,59 @@
          responsive: true,
        }
      );
-/*
 
     $('#idTableMODBUS_AI').DataTable(
        { pageLength : 50,
          fixedHeader: true,
          rowId: "id", paging: false,
-         ajax: {	url : "/api/map/list",	type : "GET", dataSrc: "mappings", data: { "thread": "MODBUS", "classe": "AI" },
+         ajax: {	url : "/api/process/config", type : "GET", data: { name: "modbus", classe: "AI" }, dataSrc: "config",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
          columns:
-          [ { "data": "map_tech_id", "title":"WAGO TechID", "className": "align-middle text-center" },
-            { "data": "map_tag", "title":"WAGO I/O", "className": "align-middle text-center" },
-             { "data": null, "title":"Map", "className": "align-middle text-center",
+          [ { "data": null, "title":"WAGO TechID", "className": "align-middle text-center",
               "render": function (item)
-                { return( "<->" ); }
+                { return( Lien ( "/tech/dls_source/"+item.thread_tech_id, "Voir la source", item.thread_tech_id ) ); }
             },
-            { "data": null, "title":"BIT Tech_id", "className": "align-middle text-center",
+            { "data": null, "title":"WAGO I/O", "className": "align-middle text-center",
               "render": function (item)
-                { return( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) ); }
+                { return( item.thread_acronyme ); }
             },
-            { "data": null, "title":"BIT Acronyme", "className": "align-middle text-center",
-              "render": function (item)
-                { return( Lien ( "/tech/courbe/"+item.tech_id+"/"+item.acronyme+"/HOUR", "Voir le graphe", item.acronyme ) ); }
+            { "data": null, "title":"Mapped on", "className": "align-middle text-center",
+              "render": function (item)                { if(item.tech_id)
+                   { return ( Lien ( "/tech/dls_source/"+item.tech_id, "Voir la source", item.tech_id ) +":" + item.acronyme );
+                   } else return( "--" );
+                }
             },
-            { "data": "libelle", "title":"BIT Libelle", "className": "align-middle text-center" },
-            { "data": null, "title":"Echange vocaux", "className": "align-left text-center",
+            { "data": null, "title":"Description", "className": "align-middle text-center",
               "render": function (item)
-                { return( "Question : "+item.map_question_vocale+"<br>Réponse:"+item.map_reponse_vocale ); }
+                { if(item.tech_id) { return ( item.libelle ); } else return( "--" ); }
+            },
+            { "data": null, "title":"Type Borne", "className": "align-middle text-center",
+              "render": function (item)
+                { return( "type_borne = " + item.type_borne ); }
+            },
+            { "data": "min", "title":"min", "className": "align-middle text-center" },
+            { "data": "max", "title":"max", "className": "align-middle text-center" },
+            { "data": null, "title":"Unité", "className": "align-middle text-center",
+              "render": function (item)
+                { return( htmlEncode ( item.unite ) ); }
             },
             { "data": null, "title":"Actions", "orderable": false, "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  boutons += Bouton_actions_add ( "outline-primary", "Editer cet objet", "MODBUS_Edit_AI", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer cet objet", "Show_Modal_Map_Del_AI", item.id, "trash", null );
+                  boutons += Bouton_actions_add ( "primary", "Editer cet objet", "MODBUS_Edit_AI", item.id, "pen", null );
+                  boutons += Bouton_actions_add ( "primary", "Mapper cet objet", "MODBUS_Map_AI", item.id, "directions", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },
             },
           ],
-
+         /*order: [ [0, "desc"] ],*/
          responsive: true,
        }
      );
+
+/*
+
 
     $('#idTableMODBUS_AO').DataTable(
        { pageLength : 50,

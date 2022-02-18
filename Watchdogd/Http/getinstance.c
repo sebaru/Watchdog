@@ -31,7 +31,6 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
 
 /******************************************************************************************************************************/
 /* Http_Traiter_instance_list: Fourni une list JSON des instances Watchdog dans le domaine                                    */
@@ -51,7 +50,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -107,7 +106,7 @@
                     Json_get_bool ( request, "log_zmq" ), Json_get_bool ( request, "log_trad" ), description, instance );
 
     Json_node_add_string ( request, "zmq_tag", "SET_LOG" );
-    Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", instance, request );
+    /*Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", instance, request );*/
 
     g_free(description);
     g_free(instance);
@@ -130,7 +129,7 @@
     if (!Http_check_session( msg, session, 6 )) return;
 
     if ( !Config.instance_is_master )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Instance is not master. Ignoring.", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Instance is not master. Ignoring.", __func__ );
        return;
      }
 

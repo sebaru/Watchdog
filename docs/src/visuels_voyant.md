@@ -44,6 +44,34 @@
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/eclair_black.png)
 
 ---
+## `forme`='voyant_local_arret'
+
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_white.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_lightblue.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_blue.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_darkgreen.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_gray.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_green.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_orange.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_red.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_yellow.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_arret_black.png)
+
+---
+## `forme`='voyant_local_marche'
+
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_white.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_lightblue.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_blue.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_darkgreen.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_gray.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_green.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_orange.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_red.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_yellow.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_local_marche_black.png)
+
+---
 ## `forme`='voyant_moteur'
 
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_moteur_white.png)
@@ -56,4 +84,18 @@
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_moteur_red.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_moteur_yellow.png)
 ![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_moteur_black.png)
+
+---
+## `forme`='voyant_systeme'
+
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_white.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_lightblue.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_blue.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_darkgreen.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_gray.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_green.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_orange.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_red.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_yellow.png)
+![imgvisuel](https://svn.abls-habitat.fr/repo/Watchdog/prod/Watchdogd/IHM/img/voyant_systeme_black.png)
 

@@ -31,7 +31,7 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
+
 /******************************************************************************************************************************/
 /* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableau                                                   */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -58,8 +58,8 @@
     if ( syn_id_string )
      { if ( SQL_Select_to_json_node ( RootNode, "tableaux",
                                      "SELECT tableau.*,syns.page FROM tableau "
-                                     "INNER JOIN syns ON tableau.syn_id = syns.id "
-                                     "WHERE syn_id=%d AND access_level<=%d", atoi(syn_id_string), session->access_level ) == FALSE )
+                                     "INNER JOIN syns ON tableau.syn_id = syns.syn_id "
+                                     "WHERE syns.syn_id=%d AND access_level<=%d", atoi(syn_id_string), session->access_level ) == FALSE )
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref(RootNode);
          return;
@@ -68,7 +68,7 @@
     else
      { if ( SQL_Select_to_json_node ( RootNode, "tableaux",
                                      "SELECT tableau.*,syns.page FROM tableau "
-                                     "INNER JOIN syns ON tableau.syn_id = syns.id "
+                                     "INNER JOIN syns ON tableau.syn_id = syns.syn_id "
                                      "WHERE access_level<=%d", session->access_level ) == FALSE )
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
           json_node_unref(RootNode);
@@ -101,18 +101,18 @@
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
-    if ( ! (Json_has_member ( request, "id" ) ) )
+    if ( ! (Json_has_member ( request, "tableau_id" ) ) )
      { json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    gint tableau_id = Json_get_int ( request, "id" );
+    gint tableau_id = Json_get_int ( request, "tableau_id" );
     json_node_unref(request);
 
     g_snprintf( chaine, sizeof(chaine), "DELETE tableau FROM tableau "
-                                        "INNER JOIN syns ON tableau.syn_id = syns.id "
-                                        "WHERE tableau.id=%d AND syns.access_level<='%d'",
+                                        "INNER JOIN syns ON tableau.syn_id = syns.syn_id "
+                                        "WHERE tableau.tableau_id=%d AND syns.access_level<='%d'",
                 tableau_id, session->access_level );
     if (SQL_Write (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
@@ -151,12 +151,12 @@
     gint syn_id  = Json_get_int ( request, "syn_id" );
     gchar *titre = Normaliser_chaine ( Json_get_string( request, "titre" ) );
 
-    if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
+    if ( Json_has_member ( request, "tableau_id" ) )                                                                       /* Edition */
      { g_snprintf( requete, sizeof(requete),
-                  "UPDATE tableau INNER JOIN syns ON tableau.syn_id = syns.id "
-                  "SET titre='%s', syn_id='%d' WHERE tableau.id='%d' AND access_level<='%d'",
-                   titre, syn_id, Json_get_int(request,"id"), session->access_level );
-       Audit_log ( session, "tableau '%s'(%d) modifié", titre, Json_get_int(request,"id") );
+                  "UPDATE tableau INNER JOIN syns ON tableau.syn_id = syns.syn_id "
+                  "SET titre='%s', syn_id='%d' WHERE tableau.tableau_id='%d' AND access_level<='%d'",
+                   titre, syn_id, Json_get_int(request,"tableau_id"), session->access_level );
+       Audit_log ( session, "tableau '%s'(%d) modifié", titre, Json_get_int(request,"tableau_id") );
      }
     else
      { g_snprintf( requete, sizeof(requete),
@@ -195,15 +195,15 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
     if ( SQL_Select_to_json_node ( RootNode, NULL,
                                   "SELECT tableau.*,syns.page FROM tableau "
-                                  "INNER JOIN syns ON tableau.syn_id = syns.id "
-                                  "WHERE tableau.id=%d AND access_level<=%d", tableau_id, session->access_level ) == FALSE )
+                                  "INNER JOIN syns ON tableau.syn_id = syns.syn_id "
+                                  "WHERE tableau.tableau_id=%d AND access_level<=%d", tableau_id, session->access_level ) == FALSE )
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
        json_node_unref ( RootNode );
        return;
@@ -211,10 +211,10 @@
 
     if (SQL_Select_to_json_node ( RootNode, "tableau_map",
                                  "SELECT tm.*,dico.libelle,dico.unite FROM tableau_map AS tm "
-                                 "INNER JOIN tableau AS t ON t.id=tm.tableau_id "
-                                 "INNER JOIN syns ON t.syn_id = syns.id "
+                                 "INNER JOIN tableau AS t ON t.tableau_id=tm.tableau_id "
+                                 "INNER JOIN syns ON t.syn_id = syns.syn_id "
                                  "LEFT JOIN dictionnaire AS dico ON tm.tech_id=dico.tech_id AND tm.acronyme=dico.acronyme "
-                                 "WHERE syns.access_level<=%d AND t.id='%d'", session->access_level, tableau_id ) == FALSE)
+                                 "WHERE syns.access_level<=%d AND t.tableau_id='%d'", session->access_level, tableau_id ) == FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
        json_node_unref ( RootNode );
        return;
@@ -251,13 +251,13 @@
        return;
      }
 
-    gint tableau_id = Json_get_int ( request, "id" );
+    gint tableau_id = Json_get_int ( request, "tableau_id" );
     json_node_unref(request);
 
     g_snprintf( chaine, sizeof(chaine), "DELETE tm FROM tableau_map AS tm "
-                                        "INNER JOIN tableau AS t ON t.id=tm.tableau_id "
-                                        "INNER JOIN syns ON t.syn_id = syns.id "
-                                        "WHERE tm.id=%d AND syns.access_level<='%d'", tableau_id, session->access_level );
+                                        "INNER JOIN tableau AS t ON t.tableau_id=tm.tableau_id "
+                                        "INNER JOIN syns ON t.syn_id = syns.syn_id "
+                                        "WHERE tm.tableau_id=%d AND syns.access_level<='%d'", tableau_id, session->access_level );
     if (SQL_Write (chaine)==FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
        return;
@@ -297,15 +297,15 @@
     gchar *acronyme = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
     gchar *color    = Normaliser_chaine ( Json_get_string( request, "color" ) );
 
-    if ( Json_has_member ( request, "id" ) )                                                                       /* Edition */
-     { gint id = Json_get_int(request,"id");
+    if ( Json_has_member ( request, "tableau_id" ) )                                                               /* Edition */
+     { gint tableau_id = Json_get_int(request,"tableau_id");
        g_snprintf( requete, sizeof(requete),
                   "UPDATE tableau_map AS tm "
                   "INNER JOIN tableau AS t ON t.id=tm.tableau_id "
                   "INNER JOIN syns ON t.syn_id = syns.id "
-                  " SET tech_id='%s', acronyme='%s', color='%s' WHERE tm.id='%d' AND syns.access_level<='%d'",
-                   tech_id, acronyme, color, id, session->access_level );
-       Audit_log ( session, "tableau_map '%d' changed to '%s:%s", id, tech_id, acronyme );
+                  " SET tech_id='%s', acronyme='%s', color='%s' WHERE tm.tableau_id='%d' AND syns.access_level<='%d'",
+                   tech_id, acronyme, color, tableau_id, session->access_level );
+       Audit_log ( session, "tableau_map '%d' changed to '%s:%s", tableau_id, tech_id, acronyme );
        if (SQL_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Update Error" );
      }

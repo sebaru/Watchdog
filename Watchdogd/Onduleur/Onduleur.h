@@ -38,6 +38,25 @@
   { UPSCONN_t upsconn;                                                                               /* Connexion UPS à l'ups */
     gboolean started;                                                                                      /* Est-il actif ?? */
     time_t date_next_connexion;
+/************************************************************ Analog Input ****************************************************/
+    JsonNode *Load;
+    JsonNode *Realpower;
+    JsonNode *Battery_charge;
+    JsonNode *Input_voltage;
+    JsonNode *Battery_runtime;
+    JsonNode *Battery_voltage;
+    JsonNode *Input_hz;
+    JsonNode *Output_current;
+    JsonNode *Output_hz;
+    JsonNode *Output_voltage;
+/*********************************************************** Digital Input ****************************************************/
+    JsonNode *Outlet_1_status;
+    JsonNode *Outlet_2_status;
+    JsonNode *Ups_online;
+    JsonNode *Ups_charging;
+    JsonNode *Ups_on_batt;
+    JsonNode *Ups_replace_batt;
+    JsonNode *Ups_alarm;
   };
 
 /************************************************* Déclaration des prototypes *************************************************/

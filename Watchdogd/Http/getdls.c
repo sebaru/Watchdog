@@ -32,7 +32,7 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
+
 /******************************************************************************************************************************/
 /* Http_dls_do_plugin: Produit un enregistrement json pour un plugin dls                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -48,7 +48,7 @@
           else { g_snprintf(date, sizeof(date), "Erreur"); }
 
     JsonNode *element = Json_node_create();
-    Json_node_add_int    ( element, "id",        dls->id );
+    Json_node_add_int    ( element, "dls_id",    dls->id );
     Json_node_add_string ( element, "tech_id",   dls->tech_id );
     Json_node_add_string ( element, "shortname", dls->shortname );
     Json_node_add_string ( element, "name" ,     dls->nom );
@@ -103,7 +103,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *dls_status = Json_node_create ();
     if (dls_status == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -376,14 +376,14 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        g_free(tech_id);
        return;
      }
 
     if (SQL_Select_to_json_node ( RootNode, NULL,
-                                 "SELECT d.*, s.page FROM dls AS d INNER JOIN syns AS s ON d.syn_id=s.id "
+                                 "SELECT d.*, s.page FROM dls AS d INNER JOIN syns AS s ON d.syn_id=syn_id "
                                  "WHERE tech_id='%s' AND s.access_level<='%d'", tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
@@ -564,17 +564,17 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
     if (SQL_Select_to_json_node ( RootNode, "plugins",
-                                 "SELECT d.id, d.tech_id, d.package, d.syn_id, d.name, d.shortname, d.actif, d.compil_status, "
+                                 "SELECT d.dls_id, d.tech_id, d.package, d.syn_id, d.name, d.shortname, d.actif, d.compil_status, "
                                  "d.nbr_compil, d.nbr_ligne, d.compil_date, d.debug, ps.page as ppage, s.page as page "
                                  "FROM dls AS d "
-                                 "INNER JOIN syns as s ON d.syn_id=s.id "
-                                 "INNER JOIN syns as ps ON s.parent_id = ps.id "
+                                 "INNER JOIN syns as s ON d.syn_id=s.syn_id "
+                                 "INNER JOIN syns as ps ON s.parent_id = ps.syn_id "
                                  "WHERE s.access_level<'%d' ORDER BY d.tech_id", session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
@@ -650,15 +650,15 @@
     gchar *shortname = Normaliser_chaine ( Json_get_string ( request, "shortname" ) );
     gchar *name      = Normaliser_chaine ( Json_get_string ( request, "name" ) );
 
-    if (Json_has_member ( request, "id" ) )
+    if (Json_has_member ( request, "dls_id" ) )
      { JsonNode *old = Json_node_create();
        if (old)
-        { SQL_Select_to_json_node ( old, NULL, "SELECT tech_id FROM dls WHERE id='%d'", Json_get_int ( request, "id" ) );
+        { SQL_Select_to_json_node ( old, NULL, "SELECT tech_id FROM dls WHERE dls_id='%d'", Json_get_int ( request, "dls_id" ) );
 
           if ( !Json_has_member ( old, "tech_id" ) )
            { soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found" ); }
-          else if (SQL_Write_new ( "UPDATE dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s' WHERE id='%d'",
-                              Json_get_int ( request, "syn_id" ), tech_id, shortname, name, Json_get_int ( request, "id" ) ))
+          else if (SQL_Write_new ( "UPDATE dls SET syn_id='%d', tech_id='%s', shortname='%s', name='%s' WHERE dls_id='%d'",
+                              Json_get_int ( request, "syn_id" ), tech_id, shortname, name, Json_get_int ( request, "dls_id" ) ))
            { soup_message_set_status (msg, SOUP_STATUS_OK);
              if ( strcmp ( Json_get_string ( old, "tech_id" ), tech_id ) )          /* Si modification de tech_id -> recompil */
               { SQL_Write_new ( "UPDATE dls SET `sourcecode` = REPLACE(`sourcecode`, '%s:', '%s:')",

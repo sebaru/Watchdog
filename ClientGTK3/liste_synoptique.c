@@ -28,7 +28,7 @@
  #include <gtk/gtk.h>
 
  enum
-  {  COLONNE_ID,
+  {  COLONNE_SYN_ID,
      COLONNE_ACCESS_LEVEL,
      COLONNE_PPAGE,
      COLONNE_PAGE,
@@ -51,7 +51,7 @@
     gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
 
     gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
-                         COLONNE_ID, Json_get_int( element, "id" ),
+                         COLONNE_SYN_ID, Json_get_int( element, "syn_id" ),
                          COLONNE_ACCESS_LEVEL, Json_get_int( element, "access_level" ),
                          COLONNE_PPAGE, Json_get_string( element, "ppage" ),
                          COLONNE_PAGE, Json_get_string( element, "page" ),
@@ -73,7 +73,7 @@
     gint status_code;
     gboolean valide;
     gsize taille;
-    gint id;
+    gint syn_id;
     printf("%s\n", __func__ );
     g_object_get ( msg, "status-code", &status_code, "reason-phrase", &reason_phrase, NULL );
     if (status_code != 200)
@@ -92,8 +92,8 @@
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-       if ( id == Json_get_int(response, "id" ) ) break;
+     { gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &syn_id, -1 );
+       if ( syn_id == Json_get_int(response, "syn_id" ) ) break;
        valide = gtk_tree_model_iter_next( store, &iter );
      }
 
@@ -190,7 +190,7 @@
           Json_add_string ( builder, "page", gtk_entry_get_text( GTK_ENTRY(Entry_page) ) );
           Json_add_string ( builder, "ppage", gtk_entry_get_text( GTK_ENTRY(Entry_ppage) ) );
           Json_add_int    ( builder, "access_level", gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_access_level) ) );
-          if (syn) { Json_add_int ( builder, "id", Json_get_int( syn, "id" ) ); }
+          if (syn) { Json_add_int ( builder, "syn_id", Json_get_int( syn, "syn_id" ) ); }
           Envoi_json_au_serveur( client, "POST", builder, "/api/syn/edit", Synoptique_edited_CB );
         }
      }
@@ -242,7 +242,7 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                   /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &id, -1 );                                                   /* Recup du id */
 
     gchar chaine[64];
     g_snprintf ( chaine, sizeof(chaine), "/api/syn/get?syn_id=%d", id  );
@@ -278,14 +278,14 @@
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( response_brute, &taille ) );
 
     gboolean valide;
-    gint id;
+    gint syn_id;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(client->Liste_synoptique) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-       if ( id == Json_get_int(response, "id" ) ) break;
+     { gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &syn_id, -1 );
+       if ( syn_id == Json_get_int(response, "syn_id" ) ) break;
        valide = gtk_tree_model_iter_next( store, &iter );
      }
 
@@ -312,7 +312,7 @@
      { gchar chaine[80];
        gint id;
        gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &id, -1 );                                                /* Recup du id */
        g_snprintf(chaine, sizeof(chaine), "syn/del/%d", id );
        JsonBuilder *builder = Json_create ();
        if (builder)
@@ -388,7 +388,7 @@
     while ( lignes )
      { gint id;
        gtk_tree_model_get_iter( store, &iter, lignes->data );                              /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &id, -1 );                                                /* Recup du id */
        gchar chaine[64];
        g_snprintf( chaine, sizeof(chaine), "/api/syn/show?syn_id=%d", id  );
        Envoi_json_au_serveur ( page->client, "GET", NULL, chaine, Creer_page_atelier_CB );
@@ -544,9 +544,9 @@
     renderer = gtk_cell_renderer_text_new();                                                 /* Colonne de l'id du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( "SynId", renderer,
-                                                         "text", COLONNE_ID,
+                                                         "text", COLONNE_SYN_ID,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ID);                                         /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_SYN_ID);                                         /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (client->Liste_synoptique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                                 /* Colonne de l'id du synoptique */

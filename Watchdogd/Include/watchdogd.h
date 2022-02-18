@@ -29,25 +29,26 @@
  #define _WATCHDOGD_H_
 
  #include <glib.h>
- #include <pthread.h>
  #include <string.h>
- #include <errno.h>
  #include <openssl/ssl.h>
  #include <libsoup/soup.h>
  #include <uuid/uuid.h>
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
  #include "Json.h"
+ #include "Process.h"
  #include "Db.h"
  #include "config.h"
  #include "Dls.h"
+ #include "Http.h"
  #include "Config.h"
  #include "Archive.h"
  #include "Message_DB.h"
  #include "Histo_DB.h"
  #include "Synoptiques_DB.h"
- #include "Mnemonique_DB.h"
  #include "Proto_traductionDLS.h"
+ #include "Zmq.h"
+ #include "Mnemonique_DB.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */
 
@@ -56,49 +57,6 @@
  #define EXIT_INACTIF      1                                                                 /* Un fils est mort d'inactivité */
 
  #define VERROU_SERVEUR              "watchdogd.lock"
- #define FICHIER_EXPORT              "export.wdg"
-
- struct SUBPROCESS
-  { pthread_t TID;                                                                                   /* Identifiant du thread */
-    struct PROCESS *lib;
-    JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
-    gboolean comm_status;                                                       /* Report local du status de la communication */
-    gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
-    void *zmq_from_bus;                                                                       /* handle d"ecoute du BUS local */
-    void *zmq_to_master;                                                                           /* handle d"envoiau master */
-    gchar zmq_buffer[1024];                                                     /* Buffer de reception des messages du master */
-    void *vars;                                                               /* Pointeur vers les variables de run du module */
-  };
-
- struct PROCESS
-  { pthread_t TID;                                                                                   /* Identifiant du thread */
-    pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    gchar uuid[37];                                                                            /* Unique Identifier du thread */
-    void *dl_handle;                                                                     /* handle de gestion de la librairie */
-    time_t start_time;
-    gchar name[32];                                                                    /* Prompt auquel va répondre le thread */
-    gchar description[64];                                                             /* Designation de l'activité du thread */
-    gchar version[32];
-    gchar nom_fichier[128];                                                                 /* Nom de fichier de la librairie */
-    gint  database_version;                                            /* Version du schema de base de données pour ce thread */
-    JsonNode *config;
-
-    gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
-    gboolean Thread_reload;                                                           /* TRUE si le thread doit gerer le USR1 */
-
-    void (*Run_process)( struct PROCESS *lib );                                  /* Fonction principale de gestion du thread */
-    void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
-                                                                                 /* Fonction de gestion des commandes d'admin */
-    void *(*Admin_config)( struct PROCESS *lib, gpointer msg, JsonNode *RootNode );
-
-    GSList *modules;                                                                           /* Liste des modules du thread */
-    gboolean comm_status;                                                       /* Report local du status de la communication */
-    gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
-    void *zmq_from_bus;                                                                       /* handle d"ecoute du BUS local */
-    void *zmq_to_master;                                                                           /* handle d"envoiau master */
-    gchar zmq_buffer[1024];                                                     /* Buffer de reception des messages du master */
-  };
 
  struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */
   { pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
@@ -138,7 +96,12 @@
     struct COM_DB com_db;                                                      /* Interfaçage avec le code de gestion des BDD */
     struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
+    struct COM_HTTP com_http;                                                                       /* Zone mémoire pour HTTP */
     struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
+
+    JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
+    GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
+    GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
 
     GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
     GSList *Dls_data_MONO;                                                                           /* Liste des monostables */
@@ -156,11 +119,9 @@
   };
 
 /************************************************ Définitions des prototypes **************************************************/
- extern void Charger_config_bit_interne( void );                                                          /* Dans Watchdogd.c */
- extern gint Activer_ecoute ( void );                                                                        /* Dans ecoute.c */
+ extern void MSRV_Remap( void );                                                                          /* Dans Watchdogd.c */
 
- extern struct PARTAGE *_init ( void );                                                                         /* Dans shm.c */
- extern struct PARTAGE *Shm_init ( void );
+ extern struct PARTAGE *Shm_init ( void );                                                                      /* Dans shm.c */
  extern gboolean Shm_stop ( struct PARTAGE *partage );
 
  extern void Stopper_fils ( void );                                                                         /* Dans process.c */
@@ -192,14 +153,7 @@
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 
- extern JsonNode *Http_Msg_to_Json ( SoupMessage *msg );                                                       /* Dans http.c */
- extern JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg );
- extern gint Http_Msg_status_code ( SoupMessage *msg );
- extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
-
- extern void New_uuid ( gchar *target );                                                                       /* Dans uuid.c */
-/*-------------------------------------------------- autres dépendances ------------------------------------------------------*/
- #include "Zmq.h"
-
+ extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
+ extern void UUID_Load ( gchar *thread, gchar *target );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

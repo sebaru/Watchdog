@@ -3,20 +3,21 @@
 #* Projet WatchDog version 3.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Dls TraductionDLS Smsg Modbus Audio Onduleur TeleinfoEDF Http Radio Dmx Imsgs Meteo Phidget Gpiod
+SUBDIRS = Include Dls Http TraductionDLS Smsg Modbus Audio Onduleur TeleinfoEDF Radio Dmx Imsgs Meteo Phidget Gpiod
 
 bin_SCRIPTS = Wtd_set_volume.sh Wtd_play_google.sh
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c Archive.c archiveDB.c Erreur.c \
                     zmq.c shm.c json.c Config.c Mnemo_Registre.c Mnemo_DI.c Mnemo_DO.c \
                     db.c Mnemonique.c Mnemo_AI.c Mnemo_CI.c Mnemo_CH.c Message.c \
-		    Mnemo_Horloges.c Mnemo_MONO.c Mnemo_BI.c Mnemo_AO.c Mnemo_WATCHDOG.c \
-		    Mnemo_Tempo.c Histo_msgs.c distrib_Events.c \
-                    distrib_MSGxxx.c distrib_Ixxx.c mail.c http.c uuid.c \
+                    Mnemo_Horloges.c Mnemo_MONO.c Mnemo_BI.c Mnemo_AO.c Mnemo_WATCHDOG.c \
+                    Mnemo_Tempo.c Histo_msgs.c distrib_Events.c \
+                    distrib_MSGxxx.c distrib_Ixxx.c mail.c uuid.c \
                     Synoptiques.c Syn_visuels.c Syn_comment.c Syn_cadran.c
-
+                    
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
-		    TraductionDLS/libtradDLS.la
+                    Http/libwatchdog-http.la \
+                    TraductionDLS/libtradDLS.la
 
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
 Watchdogd_LDFLAGS = -rdynamic -lpopt -ldl -lzmq \

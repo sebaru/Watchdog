@@ -1085,10 +1085,23 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void New_alias_dependance_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle )
-  { GList *ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(libelle) );
-    if ( ! Get_alias_par_acronyme ( tech_id, acronyme ) )                                               /* Si pas déjà défini */
-     { struct ALIAS *alias_dep = New_alias ( tech_id, acronyme, MNEMO_ENTREE, ss_options );
+  { if ( ! Get_alias_par_acronyme ( tech_id, acronyme ) )                                               /* Si pas déjà défini */
+     { GList *ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(libelle) );
+       struct ALIAS *alias_dep = New_alias ( tech_id, acronyme, MNEMO_ENTREE, ss_options );
        if (alias_dep) alias_dep->used = 1;                         /* Par défaut, on considère qu'une dependance est utilisée */
+     }
+  }
+/******************************************************************************************************************************/
+/* New_alias_dependance_VISUEL: Creer un nouvel Alias de depandences                                                          */
+/* Entrées: le tech_id/acronyme de l'alias et ses options au format JSON                                                      */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void New_alias_dependance_VISUEL ( gchar *tech_id, gchar *acronyme, gchar *forme, gchar *libelle )
+  { if ( ! Get_alias_par_acronyme ( tech_id, acronyme ) )                                               /* Si pas déjà défini */
+     { GList *ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(libelle) );
+       ss_options = New_option_chaine ( ss_options, T_FORME, g_strdup(forme) );
+       struct ALIAS *alias_dep = New_alias ( tech_id, acronyme, MNEMO_VISUEL, ss_options );
+       if (alias_dep) alias_dep->used = 1;                         /* &Par défaut, on considère qu'une dependance est utilisée */
      }
   }
 /******************************************************************************************************************************/
@@ -1159,14 +1172,26 @@
            { Mnemo_auto_create_WATCHDOG ( TRUE, Dls_plugin.tech_id, alias->acronyme, libelle );
              break;
            }
-          case MNEMO_MOTIF:
+          case MNEMO_VISUEL:
            { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
              gchar *couleur = Get_option_chaine( alias->options, T_COLOR, "black" );
              gchar *mode    = Get_option_chaine( alias->options, T_MODE, "default" );
              if (forme)
-              { Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
-                                                                                                  /* Création du visuel */
-                Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+              { gchar ss_acronyme[64];
+				if (!strcasecmp(forme, "bloc_maintenance") )                               /* Création des bits de dependance */
+                 { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_SERVICE", acronyme );
+                   New_alias_dependance_VISUEL ( tech_id, ss_acronyme, "bouton", "  SERVICE  " );
+                   g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_MAINTENANCE", acronyme );
+                   New_alias_dependance_VISUEL ( tech_id, ss_acronyme, "bouton", "MAINTENANCE" );
+                   g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLEF", acronyme );
+                   New_alias_dependance_VISUEL ( tech_id, ss_acronyme, "clef_a_molette_2", "Clef de Maintenance" );
+                 }
+                else                                              /* Pour tous les visuels "classiques", on créé un bit _CLIC */
+                 { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
+                   New_alias_dependance_DI ( tech_id, ss_acronyme, "Clic sur le visuel depuis l'IHM" );
+                   Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
+                   Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
+                 }
               }
              break;
            }
@@ -1189,26 +1214,6 @@
         }
      }
 
-    if (classe != MNEMO_MOTIF) return(alias);
-
-    gchar *forme_src = Get_option_chaine ( options, T_FORME, NULL );
-    gchar ss_acronyme[64];
-    if (!forme_src) return(alias);
-
-    gchar *forme = Normaliser_chaine ( forme_src );
-    if (!forme) return(alias);
-
-    if (!strcasecmp(forme, "bloc_maintenance") )                                           /* Création des bits de dependance */
-     { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC_SERVICE", acronyme );
-       New_alias_dependance_DI ( tech_id, ss_acronyme, "Passage en SERVICE depuis l'IHM" );
-       g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC_MAINTENANCE", acronyme );
-       New_alias_dependance_DI ( tech_id, ss_acronyme, "Passage en MAINTENANCE depuis l'IHM" );
-     }
-    else                                                          /* Pour tous les visuels "classiques", on créé un bit _CLIC */
-     { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
-       New_alias_dependance_DI ( tech_id, ss_acronyme, "Clic sur l'icone depuis l'IHM" );
-     }
-    g_free(forme);
     return(alias);
   }
 /******************************************************************************************************************************/
@@ -1243,7 +1248,7 @@
        json_node_unref ( result );
      }
     else if ( Json_has_member ( result, "classe" ) && !strcmp ( Json_get_string ( result, "classe" ), "VISUEL" ) )
-     { alias = New_alias ( tech_id, acronyme, MNEMO_MOTIF, options );
+     { alias = New_alias ( tech_id, acronyme, MNEMO_VISUEL, options );
        json_node_unref ( result );
      }
     else
@@ -1525,7 +1530,7 @@
        while(liste)
         { alias = (struct ALIAS *)liste->data;
           if ( alias->used == FALSE &&
-                ( ! ( alias->classe == MNEMO_MOTIF &&                              /* Pas de warning pour les comments unused */
+                ( ! ( alias->classe == MNEMO_VISUEL &&                              /* Pas de warning pour les comments unused */
                       !strcasecmp ( Get_option_chaine ( alias->options, T_FORME, "" ), "comment" )
                     )
                 )
@@ -1549,13 +1554,13 @@
              else if (alias->classe == MNEMO_CPT_IMP)    { Liste_CI = Add_csv ( Liste_CI, alias->acronyme ); }
              else if (alias->classe == MNEMO_CPTH)       { Liste_CH = Add_csv ( Liste_CH, alias->acronyme ); }
              else if (alias->classe == MNEMO_MSG)        { Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme ); }
-             else if (alias->classe == MNEMO_MOTIF)
+             else if (alias->classe == MNEMO_VISUEL)
               { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
                 if (forme) { Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme ); }
               }
            }
 /***************************************************** Création des visuels externes ******************************************/
-          else if (alias->classe == MNEMO_MOTIF)                                   /* Création du LINK vers le visuel externe */
+          else if (alias->classe == MNEMO_VISUEL)                                   /* Création du LINK vers le visuel externe */
            { Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
               /* a virer ? Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme );*/
            }

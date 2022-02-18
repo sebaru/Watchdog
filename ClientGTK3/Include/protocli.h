@@ -61,7 +61,6 @@
  struct TYPE_INFO_SUPERVISION
   { SoupWebsocketConnection *ws_motifs;
     guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
-    guint syn_id;                                                                /* Numéro du synoptique associé a cette page */
     gboolean timer_hidden;                                            /* Pour savoir si les motifs doivent etre allumé ou non */
     JsonNode *syn;                                                                       /* Id du synoptique en cours de visu */
     GtkWidget *Dialog_horloge;                                                  /* Boite de dialogue d'affichage des horloges */
@@ -139,15 +138,7 @@
  extern void Mettre_echelle_selection_1_1 ( struct PAGE_NOTEBOOK *page );
  extern void Mettre_echelle_selection_1_Y ( struct PAGE_NOTEBOOK *page );
  extern void Mettre_echelle_selection_X_1 ( struct PAGE_NOTEBOOK *page );
-                                                                                                   /* Dans atelier_agrandir.c */
- extern void Agrandir_bd ( GooCanvasItem *widget, GooCanvasItem *target,
-                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Agrandir_bg ( GooCanvasItem *widget, GooCanvasItem *target,
-                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Agrandir_hd ( GooCanvasItem *widget, GooCanvasItem *target,
-                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Agrandir_hg ( GooCanvasItem *widget, GooCanvasItem *target,
-                           GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
+
  extern void Afficher_un_motif (JsonArray *array, guint index, JsonNode *element, gpointer user_data);/* Dans atelier_motif.c */
  extern void Updater_un_visuel( struct TRAME_ITEM_MOTIF *trame_motif, JsonNode *motif );
                                                                                                     /* Dans atelier_comment.c */

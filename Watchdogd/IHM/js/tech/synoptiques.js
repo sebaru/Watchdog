@@ -44,7 +44,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Syn_Add ( syn_id )
   { table = $('#idTableSyn').DataTable();
-    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
+    selection = table.ajax.json().synoptiques.filter( function(item) { return item.syn_id==syn_id } )[0];
     $('#idModalSynEditTitre').text ( "Ajouter un synoptique" );
     $('#idModalSynEditPPage').empty();
     $.each ( table.ajax.json().synoptiques.sort( function(a, b)
@@ -53,7 +53,7 @@
                                                     return(0);
                                                   } ),
              function ( i, syn )
-              { $('#idModalSynEditPPage').append("<option value='"+syn.id+"'>"+syn.page+"</option>"); } );
+              { $('#idModalSynEditPPage').append("<option value='"+syn.syn_id+"'>"+syn.page+"</option>"); } );
     if (syn_id>0) $('#idModalSynEditPPage').val ( syn_id );
     $('#idModalSynEditPage').val("");
     $('#idModalSynEditPage').attr("oninput", "Synoptique_set_controle_page(null)");
@@ -67,7 +67,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Syn_Edit ( syn_id )
   { table = $('#idTableSyn').DataTable();
-    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
+    selection = table.ajax.json().synoptiques.filter( function(item) { return item.syn_id==syn_id } )[0];
     $('#idModalSynEditTitre').text ( "Modifier le synoptique " + selection.page );
     $('#idModalSynEditPPage').empty();
     $.each ( table.ajax.json().synoptiques.sort( function(a, b)
@@ -76,7 +76,7 @@
                                                     return(0);
                                                   } ),
              function ( i, syn )
-              { $('#idModalSynEditPPage').append("<option value='"+syn.id+"'>"+syn.page+"</option>"); } );
+              { $('#idModalSynEditPPage').append("<option value='"+syn.syn_id+"'>"+syn.page+"</option>"); } );
     $('#idModalSynEditPPage').val ( selection.pid );
     if (syn_id==1) $('#idModalSynEditPPage').attr("disabled", true );
               else $('#idModalSynEditPPage').attr("disabled", false );
@@ -87,7 +87,7 @@
     $('#idModalSynEditLibelle').val( selection.libelle );
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") )
                                    .val( selection.access_level );
-    $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.id+"')" );
+    $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.syn_id+"')" );
     $('#idModalSynEdit').modal("show");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
@@ -100,7 +100,7 @@
 /********************************************* Afichage du modal d'edition synoptique *****************************************/
  function Show_Modal_Syn_Del ( syn_id )
   { table = $('#idTableSyn').DataTable();
-    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
+    selection = table.ajax.json().synoptiques.filter( function(item) { return item.syn_id==syn_id } )[0];
     Show_modal_del ( "Détruire le synoptique ?",
                      "Etes-vous sur de vouloir supprimer le synoptique suivant et toutes ses dépendances (DLS, mnémoniques, ...) ?",
                      selection.page+" - "+selection.libelle,
@@ -119,7 +119,7 @@
 
  function Show_modal_edit_image ( syn_id )
   { table = $('#idTableSyn').DataTable();
-    selection = table.ajax.json().synoptiques.filter( function(item) { return item.id==syn_id } )[0];
+    selection = table.ajax.json().synoptiques.filter( function(item) { return item.syn_id==syn_id } )[0];
     $('#idSynEditImageTitre').text ( "Modifier l'image pour " + htmlEncode(selection.libelle) );
 
     images = [ "syn_maison.png", "syn_communication.png", "syn_reseau.png",
@@ -153,13 +153,13 @@
          ajax: {	url : "/api/syn/list",	type : "GET", dataSrc: "synoptiques",
                  error: function ( xhr, status, error ) { Show_Error(xhr.statusText); }
                },
-         rowId: "id",
+         rowId: "syn_id",
          columns:
-          [ { "data": "id", "title": "#", "className": "align-middle text-center" },
+          [ { "data": "syn_id", "title": "#", "className": "align-middle text-center" },
             { "data": null, "title":"Aperçu", "className": "align-middle text-center",
               "render": function (item)
                 { target = "/img/"+item.image;
-                  return( "<img src='"+target+"' class='wtd-synoptique-preview' loading=lazy alt='No Image !' onclick='Show_modal_edit_image("+item.id+")' />" ); }
+                  return( "<img src='"+target+"' class='wtd-synoptique-preview' loading=lazy alt='No Image !' onclick='Show_modal_edit_image("+item.syn_id+")' />" ); }
             },
             { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",
               "render": function (item)
@@ -186,11 +186,11 @@
             { "data": null, "title":"Actions", "orderable": false, "className":"align-middle text-center",
               "render": function (item)
                 { boutons = Bouton_actions_start ();
-                  /*boutons += Bouton_actions_add ( "outline-primary", "Ouvrir l'atelier", "Redirect", '/tech/atelier/'+item.id, "image", null );*/
-                  boutons += Bouton_actions_add ( "outline-primary", "Configurer", "Show_Modal_Syn_Edit", item.id, "pen", null );
-                  boutons += Bouton_actions_add ( "outline-success", "Ajouter un synoptique fils", "Show_Modal_Syn_Add", item.id, "plus", null );
-                  boutons += Bouton_actions_add ( "outline-primary", "Voir les tableaux", "Redirect", '/tech/tableau?syn_id='+item.id, "chart-line", null );
-                  boutons += Bouton_actions_add ( "danger", "Supprimer le synoptique", "Show_Modal_Syn_Del", item.id, "trash", null );
+                  /*boutons += Bouton_actions_add ( "outline-primary", "Ouvrir l'atelier", "Redirect", '/tech/atelier/'+item.syn_id, "image", null );*/
+                  boutons += Bouton_actions_add ( "outline-primary", "Configurer", "Show_Modal_Syn_Edit", item.syn_id, "pen", null );
+                  boutons += Bouton_actions_add ( "outline-success", "Ajouter un synoptique fils", "Show_Modal_Syn_Add", item.syn_id, "plus", null );
+                  boutons += Bouton_actions_add ( "outline-primary", "Voir les tableaux", "Redirect", '/tech/tableau?syn_id='+item.syn_id, "chart-line", null );
+                  boutons += Bouton_actions_add ( "danger", "Supprimer le synoptique", "Show_Modal_Syn_Del", item.syn_id, "trash", null );
                   boutons += Bouton_actions_end ();
                   return(boutons);
                 },

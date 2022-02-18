@@ -78,7 +78,7 @@
                     classe, lib->version, lib->database_version, lib->description, lib->uuid );
 
     lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    lib->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    lib->zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
               "%s: UUID %s: Process is UP '%s' (%s) de classe '%s' (debug = %d)", __func__,
@@ -122,7 +122,7 @@
 /******************************************************************************************************************************/
  void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
-     { Zmq_Send_WATCHDOG_to_master_new ( module, Json_get_string ( module->config, "thread_tech_id" ), "IO_COMM", 900 );
+     { Zmq_Send_WATCHDOG_to_master_new ( module, Json_get_string ( module->config, "thread_tech_id" ), "IO_COMM", (etat ? 900 : 0) );
        module->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
        module->comm_status = etat;
      }
@@ -152,7 +152,7 @@
      }
 
     module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    module->zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+    module->zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
@@ -286,7 +286,7 @@
        return(FALSE);
      }
     pthread_join( lib->TID, NULL );                                                                    /* Attente fin du fils */
-    lib->TID = NULL;
+    lib->TID = 0;
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UUID %s: Process %s stopped",
               __func__, lib->uuid, lib->nom_fichier );
     return(TRUE);
@@ -430,8 +430,7 @@
     while( (fichier = readdir( repertoire )) )                                      /* Pour chacun des fichiers du répertoire */
      { if (    ! strncmp( fichier->d_name, "libwatchdog-server-", 19 )                      /* Chargement unitaire d'une librairie */
            &&  ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
-        { gchar chaine[64];
-          struct PROCESS *lib = g_try_malloc0( sizeof ( struct PROCESS ) );
+        { struct PROCESS *lib = g_try_malloc0( sizeof ( struct PROCESS ) );
           if (!lib) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: MemoryAlloc failed", __func__ );
                       continue;
                     }
@@ -439,14 +438,7 @@
           g_snprintf( lib->name, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
           g_snprintf( lib->nom_fichier,  sizeof(lib->nom_fichier), "%s/libwatchdog-server-%s.so", Config.librairie_dir, lib->name );
 
-          g_snprintf( chaine, sizeof(chaine), "%s.uuid", lib->name );                      /* Récupère l'UUID sur le FS local */
-          gint fd = open ( chaine, O_RDONLY );
-          if (fd>0) { read ( fd, lib->uuid, 36 ); }
-          else { New_uuid ( lib->uuid );
-                 fd = creat ( chaine, S_IRUSR | S_IWUSR );
-                 write ( fd, lib->uuid, 36 );
-               }
-          close(fd);
+          UUID_Load ( lib->name, lib->uuid );                                              /* Récupère l'UUID sur le FS local */
 
           SQL_Write_new ( "INSERT INTO processes SET instance='%s', uuid='%s', name='%s', database_version=0, enable=0, debug=0 "
                           "ON DUPLICATE KEY UPDATE instance=VALUES(instance)", g_get_host_name(), lib->uuid, lib->name );

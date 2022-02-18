@@ -247,6 +247,9 @@
 
     CopyUnicodeString(sms.SMSC.Number, PhoneSMSC.Number);                                       /* Set SMSC number in message */
 
+    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+              "%s: %s: Try to send to %s (%s)", __func__, thread_tech_id, telephone, libelle );
+
     vars->gammu_send_status = ERR_TIMEOUT;
     error = GSM_SendSMS(vars->gammu_machine, &sms);                                                        /* Send message */
     if (error != ERR_NONE)
@@ -430,29 +433,12 @@
     json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
-/* Sms_Envoyer_commande_dls_data : Envoi un message json au client en parametre data                                         */
-/* Entrée : Le tableau, l'index, l'element json et le destinataire                                                            */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Sms_Envoyer_commande_dls_data ( JsonArray *array, guint index, JsonNode *element, void *user_data )
-  { struct SUBPROCESS *module = user_data;
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    gchar *tech_id = Json_get_string ( element, "tech_id" );
-    gchar *acro    = Json_get_string ( element, "acronyme" );
-    gchar *libelle = Json_get_string ( element, "libelle" );
-    gchar *map_tag = Json_get_string ( element, "map_tag" );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Match found -> '%s' '%s:%s' - %s", __func__,
-              thread_tech_id, map_tag, tech_id, acro, libelle );
-    Zmq_Send_CDE_to_master_new ( module, thread_tech_id, acro );
-  }
-/******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
 /* Entrée: le message text à traiter                                                                                          */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Traiter_commande_sms ( struct SUBPROCESS *module, gchar *from, gchar *texte )
   { struct SMS_VARS *vars = module->vars;
-    gchar chaine[160];
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     if ( Smsg_is_allow_cde ( module, from ) == FALSE )
@@ -488,26 +474,52 @@
      }
     SQL_Select_to_json_node ( RootNode, "results",
                               "SELECT * FROM mnemos_DI AS m "
-                              "INNER JOIN mappings_text AS map ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
-                              "WHERE map.tag LIKE '%%%s%%'", texte );
+                              "INNER JOIN mappings AS map ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
+                              "WHERE map.thread_tech_id='_COMMAND_TEXT' AND map.thread_acronyme LIKE '%%%s%%'", texte );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { g_snprintf(chaine, sizeof(chaine), "'%s' not found.", texte );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Error searching Database for '%s'", __func__, thread_tech_id, texte );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, texte );
+       Envoyer_smsg_gsm_text ( module, "Error searching Database .. Sorry .." );
+       goto end;
      }
+
+    gint nbr_results = Json_get_int ( RootNode, "nbr_results" );
+    if ( nbr_results == 0 )
+     { Envoyer_smsg_gsm_text ( module, "Je n'ai pas trouvé, désolé." ); }
     else
-     { gint nbr_results = Json_get_int ( RootNode, "nbr_results" );
-       if ( nbr_results == 0 )
-        { g_snprintf(chaine, sizeof(chaine), "'%s' not found.", texte ); }                 /* Envoi de l'erreur si pas trouvé */
-       else if ( nbr_results > 1 )                                           /* Si trop d'enregistrement, demande de préciser */
-        { g_snprintf(chaine, sizeof(chaine), "Trop de résultats pour '%s'.", texte ); }    /* Envoi de l'erreur si pas trouvé */
-       else
-        { Json_node_foreach_array_element ( RootNode, "results", Sms_Envoyer_commande_dls_data, module );
-          g_snprintf(chaine, sizeof(chaine), "'%s': fait.", texte );
+     { if ( nbr_results > 1 )                                               /* Si trop d'enregistrements, demande de préciser */
+        { Envoyer_smsg_gsm_text ( module, "Aîe, plusieurs choix sont possibles ... :" ); }
+
+       GList *Results = json_array_get_elements ( Json_get_array ( RootNode, "results" ) );
+       if ( nbr_results > 1 )
+        { GList *results = Results;
+          while(results)
+           { JsonNode *element = results->data;
+             gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+             gchar *tech_id         = Json_get_string ( element, "tech_id" );
+             gchar *acronyme        = Json_get_string ( element, "acronyme" );
+             gchar *libelle         = Json_get_string ( element, "libelle" );
+             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+                       thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+             Envoyer_smsg_gsm_text ( module, thread_acronyme );                                 /* Envoi des différents choix */
+             results = g_list_next(results);
+           }
         }
-      }
+       else if ( nbr_results == 1)
+        { JsonNode *element = Results->data;
+          gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+          gchar *tech_id         = Json_get_string ( element, "tech_id" );
+          gchar *acronyme        = Json_get_string ( element, "acronyme" );
+          gchar *libelle         = Json_get_string ( element, "libelle" );
+          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+                    thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+          Zmq_Send_CDE_to_master_new ( module, tech_id, acronyme );
+          Envoyer_smsg_gsm_text ( module, "Fait." );
+        }
+       g_list_free(Results);
+     }
+end:
     json_node_unref( RootNode );
-    Envoyer_smsg_gsm_text ( module, chaine );
   }
 /******************************************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                                               */
@@ -597,7 +609,7 @@
                Json_get_bool ( request, "alive" ) == TRUE &&
                Json_get_int  ( request, "sms_notification" ) != MESSAGE_SMS_NONE )
            { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending msg '%s:%s' (%s)", __func__, thread_tech_id,
-                       Json_get_string ( request, "thread_tech_id" ), Json_get_string ( request, "acronyme" ),
+                       Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                        Json_get_string ( request, "libelle" ) );
 
 /*************************************************** Envoi en mode GSM ********************************************************/
@@ -612,7 +624,7 @@
      }
     Smsg_disconnect(module);
 
-    SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE uuid='%s'", module->lib->name, vars->nbr_sms,  module->lib->uuid );
+    SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE uuid='%s'", module->lib->name, vars->nbr_sms, module->lib->uuid );
 
     SubProcess_end(module);
   }

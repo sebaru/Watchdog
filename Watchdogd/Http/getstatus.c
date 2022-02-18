@@ -31,7 +31,7 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
- extern struct HTTP_CONFIG Cfg_http;
+
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getstatus: Traite une requete sur l'URI status                                                        */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -54,7 +54,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
 	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -88,7 +88,7 @@
     Json_node_add_int  ( RootNode, "length_msg", num );
 
     SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM db_status");
-    Json_node_add_int    ( RootNode, "nbr_sessions", g_slist_length(Cfg_http.liste_http_clients) );
+    Json_node_add_int    ( RootNode, "nbr_sessions", g_slist_length(Partage->com_http.liste_http_clients) );
 
     Json_node_add_string ( RootNode, "db_username", Config.db_username );
     Json_node_add_string ( RootNode, "db_hostname", Config.db_hostname );

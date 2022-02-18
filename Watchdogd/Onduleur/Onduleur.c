@@ -80,16 +80,16 @@
        vars->started = FALSE;
      }
 
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "LOAD", 0.0, FALSE );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "REALPOWER", 0.0, FALSE );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BATTERY_CHARGE", 0.0, FALSE );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "INPUT_VOLTAGE", 0.0, FALSE );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BATTERY_RUNTIME", 0.0, FALSE );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BATTERY_VOLTAGE", 0.0, FALSE );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "INPUT_HZ", 0.0, FALSE );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "OUTPUT_CURRENT", 0.0, FALSE );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "OUTPUT_HZ", 0.0, FALSE );
-    Zmq_Send_AI_to_master_new ( module, thread_tech_id, "OUTPUT_VOLTAGE", 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Load, 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Realpower, 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Battery_charge, 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Input_voltage, 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Battery_runtime, 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Battery_voltage, 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Input_hz, 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Output_current, 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Output_hz, 0.0, FALSE );
+    Zmq_Send_AI_to_master ( module, vars->Output_voltage, 0.0, FALSE );
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s disconnected (host='%s')", __func__, thread_tech_id, host );
     SubProcess_send_comm_to_master_new ( module, FALSE );
@@ -274,55 +274,54 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static gboolean Interroger_ups( struct SUBPROCESS *module )
-  { gchar *reponse;
-
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+  { struct UPS_VARS *vars = module->vars;
+    gchar *reponse;
 
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "LOAD", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Load, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "REALPOWER", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Realpower, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BATTERY_CHARGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Battery_charge, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "INPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Input_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BATTERY_RUNTIME", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Battery_runtime, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "BATTERY_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Battery_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "INPUT_HZ", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Input_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "OUTPUT_CURRENT", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Output_current, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "OUTPUT_HZ", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Output_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master_new ( module, thread_tech_id, "OUTPUT_VOLTAGE", atof(reponse+1), TRUE ); }
+     { Zmq_Send_AI_to_master ( module, vars->Output_voltage, atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { Zmq_Send_DI_to_master_new ( module, thread_tech_id, "OUTLET_1_STATUS", !strcmp(reponse, "\"on\"") ); }
+     { Zmq_Send_DI_to_master ( module, vars->Outlet_1_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { Zmq_Send_DI_to_master_new ( module, thread_tech_id, "OUTLET_2_STATUS", !strcmp(reponse, "\"on\"") ); }
+     { Zmq_Send_DI_to_master ( module, vars->Outlet_2_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { Zmq_Send_DI_to_master_new ( module, thread_tech_id, "UPS_ONLINE",       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
-       Zmq_Send_DI_to_master_new ( module, thread_tech_id, "UPS_CHARGING",     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
-       Zmq_Send_DI_to_master_new ( module, thread_tech_id, "UPS_ON_BATT",      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
-       Zmq_Send_DI_to_master_new ( module, thread_tech_id, "UPS_REPLACE_BATT", (g_strrstr(reponse, "RB")?TRUE:FALSE) );
-       Zmq_Send_DI_to_master_new ( module, thread_tech_id, "UPS_ALARM",        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
+     { Zmq_Send_DI_to_master ( module, vars->Ups_online,       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master ( module, vars->Ups_charging,     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
+       Zmq_Send_DI_to_master ( module, vars->Ups_on_batt,      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master ( module, vars->Ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
+       Zmq_Send_DI_to_master ( module, vars->Ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
-    Zmq_Send_DI_to_master_new ( module, thread_tech_id, "IO_COMM", TRUE );
+
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -341,24 +340,24 @@
        SubProcess_end ( module );
      }
 
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "OUTLET_1_STATUS", "Statut de la prise n°1" );
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "OUTLET_2_STATUS", "Statut de la prise n°2" );
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "UPS_ONLINE", "UPS Online" );
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "UPS_CHARGING", "UPS en charge" );
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "UPS_ON_BATT",  "UPS sur batterie" );
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "UPS_ALARM",  "UPS en alarme !" );
+    vars->Outlet_1_status = Mnemo_create_subprocess_DI ( module, "OUTLET_1_STATUS", "Statut de la prise n°1" );
+    vars->Outlet_2_status = Mnemo_create_subprocess_DI ( module, "OUTLET_2_STATUS", "Statut de la prise n°2" );
+    vars->Ups_online      = Mnemo_create_subprocess_DI ( module, "UPS_ONLINE", "UPS Online" );
+    vars->Ups_charging    = Mnemo_create_subprocess_DI ( module, "UPS_CHARGING", "UPS en charge" );
+    vars->Ups_on_batt     = Mnemo_create_subprocess_DI ( module, "UPS_ON_BATT",  "UPS sur batterie" );
+    vars->Ups_replace_batt= Mnemo_create_subprocess_DI ( module, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
+    vars->Ups_alarm       = Mnemo_create_subprocess_DI ( module, "UPS_ALARM",  "UPS en alarme !" );
 
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "LOAD", "Charge onduleur", "%" );
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "REALPOWER", "Charge onduleur", "W" );
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "BATTERY_CHARGE", "Charge batterie", "%" );
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "INPUT_VOLTAGE", "Tension d'entrée", "V" );
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "BATTERY_RUNTIME", "Durée de batterie restante", "s" );
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "BATTERY_VOLTAGE", "Tension batterie", "V" );
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "INPUT_HZ", "Fréquence d'entrée", "HZ" );
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "OUTPUT_CURRENT", "Courant de sortie", "A" );
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "OUTPUT_HZ", "Fréquence de sortie", "HZ" );
-    Mnemo_auto_create_AI ( FALSE, thread_tech_id, "OUTPUT_VOLTAGE", "Tension de sortie", "V" );
+    vars->Load            = Mnemo_create_subprocess_AI ( module, "LOAD", "Charge onduleur", "%", ARCHIVE_1_MIN );
+    vars->Realpower       = Mnemo_create_subprocess_AI ( module, "REALPOWER", "Charge onduleur", "W", ARCHIVE_1_MIN );
+    vars->Battery_charge  = Mnemo_create_subprocess_AI ( module, "BATTERY_CHARGE", "Charge batterie", "%", ARCHIVE_1_MIN );
+    vars->Input_voltage   = Mnemo_create_subprocess_AI ( module, "INPUT_VOLTAGE", "Tension d'entrée", "V", ARCHIVE_1_MIN );
+    vars->Battery_runtime = Mnemo_create_subprocess_AI ( module, "BATTERY_RUNTIME", "Durée de batterie restante", "s", ARCHIVE_1_MIN );
+    vars->Battery_voltage = Mnemo_create_subprocess_AI ( module, "BATTERY_VOLTAGE", "Tension batterie", "V", ARCHIVE_1_MIN );
+    vars->Input_hz        = Mnemo_create_subprocess_AI ( module, "INPUT_HZ", "Fréquence d'entrée", "HZ", ARCHIVE_1_MIN );
+    vars->Output_current  = Mnemo_create_subprocess_AI ( module, "OUTPUT_CURRENT", "Courant de sortie", "A", ARCHIVE_1_MIN );
+    vars->Output_hz       = Mnemo_create_subprocess_AI ( module, "OUTPUT_HZ", "Fréquence de sortie", "HZ", ARCHIVE_1_MIN );
+    vars->Output_voltage  = Mnemo_create_subprocess_AI ( module, "OUTPUT_VOLTAGE", "Tension de sortie", "V", ARCHIVE_1_MIN );
 
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "LOAD_ON", "Active la sortie ondulée" );
@@ -429,6 +428,26 @@
           json_node_unref (request);
         }
      }
+
+    json_node_unref ( vars->Load );
+    json_node_unref ( vars->Realpower );
+    json_node_unref ( vars->Battery_charge );
+    json_node_unref ( vars->Input_voltage );
+    json_node_unref ( vars->Battery_runtime );
+    json_node_unref ( vars->Battery_voltage );
+    json_node_unref ( vars->Input_hz );
+    json_node_unref ( vars->Output_current );
+    json_node_unref ( vars->Output_hz );
+    json_node_unref ( vars->Output_voltage );
+
+    json_node_unref ( vars->Outlet_1_status ),
+    json_node_unref ( vars->Outlet_2_status );
+    json_node_unref ( vars->Ups_online );
+    json_node_unref ( vars->Ups_charging );
+    json_node_unref ( vars->Ups_on_batt );
+    json_node_unref ( vars->Ups_replace_batt );
+    json_node_unref ( vars->Ups_alarm );
+
     SubProcess_end(module);
   }
 /******************************************************************************************************************************/

@@ -104,9 +104,9 @@ Watchdogd/Audio/Makefile \
 Watchdogd/Modbus/Makefile \
 Watchdogd/Imsgs/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
-Watchdogd/Http/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
+Watchdogd/Http/Makefile \
 Watchdogd/Radio/Makefile \
 Watchdogd/Dmx/Makefile \
 Watchdogd/Meteo/Makefile \

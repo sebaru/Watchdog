@@ -133,7 +133,7 @@
      }
 /*---------------------------- On recherche tous les tech_id des thread de DigitalInput --------------------------------------*/
     g_snprintf( chaine, sizeof(chaine), "SELECT DISTINCT(thread_tech_id) FROM mappings "
-                                        "WHERE tech_id='%s'", dls->tech_id );
+                                        "WHERE tech_id='%s' AND thread_tech_id NOT LIKE '_%%'", dls->tech_id );
     if (!Lancer_requete_SQL ( db, chaine ))
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: DB request failed", __func__ );
        return;
@@ -507,31 +507,31 @@
 /******************************************************************************************************************************/
  static void Dls_recalculer_arbre_syn_for_childs ( JsonArray *ids, guint index, JsonNode *element, gpointer data )
   { struct DLS_SYN *dls_syn_parent = data;
-    gint id;
-    if (!dls_syn_parent) id = 1;
-    else id = Json_get_int ( element, "id" );
+    gint syn_id;
+    if (!dls_syn_parent) syn_id = 1;
+    else syn_id = Json_get_int ( element, "syn_id" );
 
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Starting for syn id '%d'", __func__, id );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Starting for syn_id '%d'", __func__, syn_id );
     struct DLS_SYN *dls_syn = g_try_malloc0( sizeof(struct DLS_SYN) );
     if (!dls_syn)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for id '%s'", __func__, id );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for syn_id '%s'", __func__, syn_id );
        return;
      }
-    dls_syn->syn_id = id;
+    dls_syn->syn_id = syn_id;
 
     Dls_foreach_plugins ( dls_syn, Dls_Add_plugin_to_dls_syn );
 
     JsonNode *syn_enfants = Json_node_create ();
     if (!syn_enfants)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for id '%s'", __func__, id );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for syn_id '%s'", __func__, syn_id );
        g_free(dls_syn);
        return;
      }
 
     SQL_Select_to_json_node ( syn_enfants, "enfants",
-                              "SELECT id FROM syns "
-                              "WHERE parent_id='%d' AND id!=1",                        /* Pas de bouclage sur le synoptique 1 */
-                              id );
+                              "SELECT syn_id FROM syns "
+                              "WHERE parent_id='%d' AND syn_id!=1",                    /* Pas de bouclage sur le synoptique 1 */
+                              syn_id );
 
     Json_node_foreach_array_element ( syn_enfants, "enfants", Dls_recalculer_arbre_syn_for_childs, dls_syn );
     if (dls_syn_parent)

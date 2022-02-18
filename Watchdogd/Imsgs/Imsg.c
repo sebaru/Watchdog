@@ -132,18 +132,20 @@
   { struct SUBPROCESS *module = userdata;
     struct IMSGS_VARS *vars = module->vars;
 
+    gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
+
     const gchar *from = xmpp_stanza_get_attribute ( stanza, "from" );
     gchar *message    = xmpp_message_get_body ( stanza );
     if (!from || !message)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: Error : from or message = NULL", __func__ );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': Error : from or message = NULL", __func__, thread_tech_id );
        return(1);
      }
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: From '%s' -> '%s'", __func__, from, message );
+    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': From '%s' -> '%s'", __func__, thread_tech_id, from, message );
 
     if (Imsgs_recipient_is_allow_command ( module, from ) == FALSE)
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                "%s : unknown sender '%s' or not allow to send command. Dropping message...", __func__, from );
+                "%s: '%s': unknown sender '%s' or not allow to send command. Dropping message...", __func__, thread_tech_id, from );
        goto end;
      }
 
@@ -154,16 +156,16 @@
 
     JsonNode *RootNode = Json_node_create();
     if ( RootNode == NULL )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s : Memory Error for '%s'", __func__, from );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for '%s'", __func__, thread_tech_id, from );
        goto end;
      }
     SQL_Select_to_json_node ( RootNode, "results",
                               "SELECT * FROM mnemos_DI AS m "
-                              "INNER JOIN mappings_text AS map ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
-                              "WHERE map.tag LIKE '%%%s%%'", message );
+                              "INNER JOIN mappings AS map ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
+                              "WHERE map.thread_tech_id='_COMMAND_TEXT' AND map.thread_acronyme LIKE '%%%s%%'", message );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, message );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, message );
        Imsgs_Envoi_message_to( module, from, "Error searching Database .. Sorry .." );
        goto end;
      }
@@ -176,25 +178,32 @@
         { Imsgs_Envoi_message_to( module, from, "Aîe, plusieurs choix sont possibles ... :" ); }
 
        GList *Results = json_array_get_elements ( Json_get_array ( RootNode, "results" ) );
-       GList *results = Results;
-       while(results)
-        { JsonNode *element = results->data;
-          gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
-          gchar *acronyme = Json_get_string ( element, "acronyme" );
-          gchar *libelle  = Json_get_string ( element, "libelle" );
-          gchar *tag      = Json_get_string ( element, "tag" );
-          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: Match found from '%s' -> '%s' '%s:%s' - %s", __func__,
-                    from, tag, thread_tech_id, acronyme, libelle );
-          Imsgs_Envoi_message_to ( module, from, tag );                                     /* Envoi des différents choix */
-          results = g_list_next(results);
+       if ( nbr_results > 1 )
+        { GList *results = Results;
+          while(results)
+           { JsonNode *element = results->data;
+             gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+             gchar *tech_id         = Json_get_string ( element, "tech_id" );
+             gchar *acronyme        = Json_get_string ( element, "acronyme" );
+             gchar *libelle         = Json_get_string ( element, "libelle" );
+             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+                       thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+             Imsgs_Envoi_message_to ( module, from, thread_acronyme );                              /* Envoi des différents choix */
+             results = g_list_next(results);
+           }
         }
-       if ( nbr_results == 1)
+       else if ( nbr_results == 1)
         { JsonNode *element = Results->data;
-          gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
-          gchar *acronyme = Json_get_string ( element, "acronyme" );
-          Zmq_Send_CDE_to_master_new ( module, thread_tech_id, acronyme );
+          gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+          gchar *tech_id         = Json_get_string ( element, "tech_id" );
+          gchar *acronyme        = Json_get_string ( element, "acronyme" );
+          gchar *libelle         = Json_get_string ( element, "libelle" );
+          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+                    thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+          Zmq_Send_CDE_to_master_new ( module, tech_id, acronyme );
+          Imsgs_Envoi_message_to ( module, from, "Fait." );                                     /* Envoi des différents choix */
         }
-       g_list_free(results);
+       g_list_free(Results);
      }
 end:
     json_node_unref( RootNode );
