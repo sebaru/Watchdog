@@ -285,8 +285,8 @@ end:
     if (SQL_Select_to_json_node ( RootNode, NULL,
                                  "SELECT s.*, ps.page AS ppage "
                                  "FROM syns AS s "
-                                 "INNER JOIN syns AS ps ON s.parent_id = ps.id "
-                                 "WHERE s.id=%d AND s.access_level<=%d ORDER BY s.page", syn_id, session->access_level ) == FALSE)
+                                 "INNER JOIN syns AS ps ON s.parent_id = ps.syn_id "
+                                 "WHERE s.syn_id=%d AND s.access_level<=%d ORDER BY s.page", syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );
        return;
@@ -319,7 +319,7 @@ end:
 
     SQL_Write_new( "UPDATE syns_visuels AS visu "
                    "INNER JOIN dls ON dls.dls_id=visu.dls_id "
-                   "INNER JOIN syns AS s ON dls.syn_id = s.id SET "
+                   "INNER JOIN syns AS s ON dls.syn_id = s.syn_id SET "
                    "visu.posx='%d', visu.posy='%d', visu.groupe='%d',"
                    "visu.angle='%d', visu.scale='%f', visu.gestion='%d' "
                    " WHERE visu.visuel_id='%d' AND s.access_level<'%d'",
@@ -733,7 +733,7 @@ end:
                                     "LEFT JOIN dls ON dls.dls_id=v.dls_id "
                                     "LEFT JOIN icone AS i ON i.forme=m.forme "
                                     "LEFT JOIN syns AS s ON dls.syn_id=s.syn_id "
-                                    "WHERE (s.id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d' "
+                                    "WHERE (s.syn_id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d' "
                                     "ORDER BY layer",
                                      syn_id, session->access_level, session->access_level, syn_id) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
@@ -750,7 +750,7 @@ end:
                                     "INNER JOIN icone AS i ON i.forme=m.forme "
                                     "INNER JOIN syns AS s ON dls.syn_id=s.syn_id "
                                     "INNER JOIN dls AS dls_owner ON dls_owner.tech_id=m.tech_id "
-                                    "WHERE s.id='%d' AND s.access_level<=%d AND m.access_level<=%d "
+                                    "WHERE s.syn_id='%d' AND s.access_level<=%d AND m.access_level<=%d "
                                     "ORDER BY layer",
                                     syn_id, session->access_level, session->access_level) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
