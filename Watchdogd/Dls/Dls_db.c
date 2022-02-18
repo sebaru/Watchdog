@@ -143,7 +143,7 @@
        g_snprintf( dls->syn_parent_page, sizeof(dls->syn_parent_page), "%s", db->row[6] );
        g_snprintf( dls->syn_page, sizeof(dls->syn_page), "%s", db->row[7] );
        g_snprintf( dls->compil_date, sizeof(dls->compil_date), "%s", db->row[8] );
-       dls->id            = atoi(db->row[0]);
+       dls->dls_id        = atoi(db->row[0]);
        dls->on            = atoi(db->row[3]);
        dls->syn_id        = atoi(db->row[5]);
        dls->compil_status = atoi(db->row[9]);

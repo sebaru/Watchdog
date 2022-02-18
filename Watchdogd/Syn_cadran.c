@@ -71,7 +71,7 @@
                 "ON DUPLICATE KEY UPDATE forme=VALUES(forme), "
                 "minimum=VALUES(minimum), maximum=VALUES(maximum), nb_decimal=VALUES(nb_decimal), "
                 "seuil_ntb=VALUES(seuil_ntb), seuil_nb=VALUES(seuil_nb), seuil_nh=VALUES(seuil_nh), seuil_nth=VALUES(seuil_nth)",
-                plugin->id, tech_id, acro, forme, min, max, seuil_ntb, seuil_nb, seuil_nh, seuil_nth, nb_decimal );
+                plugin->dls_id, tech_id, acro, forme, min, max, seuil_ntb, seuil_nb, seuil_nh, seuil_nth, nb_decimal );
 
     g_free(forme);
     g_free(acro);

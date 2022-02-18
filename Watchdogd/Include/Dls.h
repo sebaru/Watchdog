@@ -77,7 +77,7 @@
     gchar syn_parent_page[NBR_CARAC_TECHID];
     gchar syn_page[NBR_CARAC_TECHID];
     guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
-    guint id;
+    guint dls_id;
     gboolean on;
     gchar compil_date[32];                                                                    /* Date de derniere compilation */
     guint compil_status;                                                                    /* Statut de derniere compilation */
