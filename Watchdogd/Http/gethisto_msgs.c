@@ -60,7 +60,7 @@
                                   "parent_syn.page as syn_parent_page, syn.page as syn_page,"
                                   "dls.shortname as dls_shortname, msg.tech_id, msg.acronyme"
                                   " FROM histo_msgs as histo"
-                                  " INNER JOIN msgs as msg ON msg.id = histo.id_msg"
+                                  " INNER JOIN msgs as msg ON msg.msg_id = histo.msg_id"
                                   " INNER JOIN dls as dls ON dls.tech_id = msg.tech_id"
                                   " INNER JOIN syns as syn ON syn.syn_id = dls.syn_id"
                                   " INNER JOIN syns as parent_syn ON parent_syn.syn_id = syn.parent_id"

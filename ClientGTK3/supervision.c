@@ -124,7 +124,7 @@
     JsonBuilder *builder = Json_create ();
     if (builder == NULL) return;
 
-    Json_add_int    ( builder, "syn_id",   Json_get_int ( infos->syn, "id" ) );
+    Json_add_int    ( builder, "syn_id",   Json_get_int ( infos->syn, "syn_id" ) );
     Envoi_json_au_serveur ( page->client, "POST", builder, "/api/syn/ack", NULL );
   }
 /******************************************************************************************************************************/
@@ -323,7 +323,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Updater_un_syn_vars( struct TRAME_ITEM_PASS *trame_pass, JsonNode *syn_vars )
-  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
+  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "syn_id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
     if ( Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)  /**********************  Vignette Activite *************************/
      { Trame_set_svg ( trame_pass->item_1, "kaki", 0, TRUE ); }
     else if (Json_get_bool ( syn_vars, "bit_alarme" ) == TRUE)
@@ -371,7 +371,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Updater_etiquette( struct TYPE_INFO_SUPERVISION *infos, JsonNode *syn_vars )
-  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
+  { printf ("%s: set syn_vars for %d with comm=%d\n", __func__, Json_get_int ( syn_vars, "syn_id" ), Json_get_bool ( syn_vars, "bit_comm" ) );
     if ( Json_get_bool ( syn_vars, "bit_comm" ) == FALSE)  /**********************  Vignette Activite *************************/
      { Trame_set_svg ( infos->Trame->Vignette_activite, "kaki", 0, TRUE ); }
     else if (Json_get_bool ( syn_vars, "bit_alarme" ) == TRUE)
@@ -423,8 +423,8 @@
     if (!page) return;
     struct TYPE_INFO_SUPERVISION *infos = page->infos;
 
-    printf ("%s pour syn_id=%d\n", __func__, Json_get_int ( element, "id" ) );
-    if ( Json_get_int ( element, "id" ) == Json_get_int ( infos->syn, "id" ) ) { Updater_etiquette ( infos, element ); }
+    printf ("%s pour syn_id=%d\n", __func__, Json_get_int ( element, "syn_id" ) );
+    if ( Json_get_int ( element, "syn_id" ) == Json_get_int ( infos->syn, "syn_id" ) ) { Updater_etiquette ( infos, element ); }
 
     pthread_mutex_lock ( &infos->Trame->lock );
     GList *objet = infos->Trame->trame_items;
@@ -432,7 +432,7 @@
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
         { case TYPE_PASSERELLE:
                 { struct TRAME_ITEM_PASS *trame_pass = objet->data;
-                  if ( Json_get_int ( trame_pass->pass, "syn_cible_id" ) == Json_get_int ( element, "id" ))
+                  if ( Json_get_int ( trame_pass->pass, "syn_cible_id" ) == Json_get_int ( element, "syn_id" ))
                    { Updater_un_syn_vars( trame_pass, element );
                    }
                 }
@@ -539,7 +539,7 @@
     client->Liste_pages  = g_slist_append( client->Liste_pages, page );
     infos->syn = Json_get_from_string ( buffer_brut );
     infos->timer_id = g_timeout_add( 500, Timer, page );
-    printf("%s: ---- chargement id %d \n", __func__, Json_get_int ( infos->syn, "id" ) );
+    printf("%s: ---- chargement id %d \n", __func__, Json_get_int ( infos->syn, "syn_id" ) );
 
     hboite = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 6 );
     page->child = hboite;
@@ -637,7 +637,7 @@
        Json_node_add_string ( visuel, "acronyme", "" );
        Json_node_add_string ( visuel, "ihm_affichage", "complexe" );
        gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), "SYN_%05d", Json_get_int ( infos->syn, "id" ) );
+       g_snprintf( chaine, sizeof(chaine), "SYN_%05d", Json_get_int ( infos->syn, "syn_id" ) );
        Json_node_add_string ( visuel, "libelle", chaine );
        Json_node_add_int ( visuel, "id", -1 );
        Json_node_add_int ( visuel, "angle", 0 );

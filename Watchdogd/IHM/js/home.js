@@ -4,7 +4,7 @@
 /********************************************* Affichage des vignettes ********************************************************/
  function Msg_acquitter ( id )
   { table = $('#idTableMessages').DataTable();
-    selection = table.ajax.json().enregs.filter( function(item) { return (item.id==id) } )[0];
+    selection = table.ajax.json().enregs.filter( function(item) { return (item.msg_id==msg_id) } )[0];
     var json_request = JSON.stringify(
        { tech_id  : selection.tech_id,
          acronyme : selection.acronyme,
@@ -28,6 +28,7 @@
  function Set_syn_vars ( syn_id, syn_vars )
   { var vignette = $('#idVignette_'+syn_id);
 
+    if (!syn_vars) return;
     if (syn_vars.bit_comm == false)
      { $('#idImgSyn_'+syn_id).addClass("wtd-img-grayscale");
        Changer_img_src ( "idVignetteComm_"+syn_id, "/img/syn_communication.png", true );
@@ -38,31 +39,31 @@
      }
 
     if (syn_vars.bit_danger == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg", true );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_red.svg", true );
      }
     else if (syn_vars.bit_alerte == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg", true );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_red.svg", true );
      }
     else if (syn_vars.bit_alarme == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg", true );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_red.svg", true );
      }
     else if (syn_vars.bit_defaut == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg", true );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_yellow.svg", true );
      }
     else if (syn_vars.bit_derangement == true)
      { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg", true );
      }
     else if (syn_vars.bit_alerte_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_rouge.svg", false );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_red.svg", false );
      }
     else if (syn_vars.bit_alarme_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_rouge.svg",false );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_red.svg",false );
      }
     else if (syn_vars.bit_defaut_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_jaune.svg",false );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_yellow.svg",false );
      }
     else if (syn_vars.bit_danger_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_rouge.svg",false );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_red.svg",false );
      }
     else if (syn_vars.bit_derangement_fixe == true)
      { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg", false );
@@ -71,10 +72,10 @@
      { vignette.removeClass("wtd-cligno").fadeTo(0);
      }
     else if (syn_vars.bit_veille_partielle == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_jaune.svg", false );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_yellow.svg", false );
      }
     else if (syn_vars.bit_veille_partielle == false)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_blanc.svg",false );
+     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_white.svg",false );
      }
     else
      { vignette.removeClass("wtd-cligno").fadeTo(0);
@@ -91,7 +92,7 @@
           ajax: { url: "/api/histo/alive?syn_id="+syn_id, type : "GET", dataSrc: "enregs",
                   error: function ( xhr, status, error ) { /*Show_Error(xhr.statusText);*/ }
                 },
-          rowId: "id",
+          rowId: "msg_id",
           createdRow: function( row, item, dataIndex )
            {      if (item.typologie==0) { classe="text-white"; } /* etat */
              else if (item.typologie==1) { classe="text-warning" } /* alerte */
@@ -110,10 +111,10 @@
                  {      if (item.typologie==0) { cligno = false; img = "info.svg"; } /* etat */
                    else if (item.typologie==1) { cligno = true;  img = "bouclier_orange.svg"; } /* alerte */
                    else if (item.typologie==2) { cligno = true;  img = "pignon_orange.svg"; } /* defaut */
-                   else if (item.typologie==3) { cligno = true;  img = "pignon_rouge.svg"; } /* alarme */
-                   else if (item.typologie==4) { cligno = false; img = "bouclier_vert.svg"; } /* veille */
+                   else if (item.typologie==3) { cligno = true;  img = "pignon_red.svg"; } /* alarme */
+                   else if (item.typologie==4) { cligno = false; img = "bouclier_green.svg"; } /* veille */
                    else if (item.typologie==5) { cligno = false; img = "info.svg"; } /* attente */
-                   else if (item.typologie==6) { cligno = true;  img = "croix_rouge_rouge.svg"; } /* danger */
+                   else if (item.typologie==6) { cligno = true;  img = "croix_rouge_red.svg"; } /* danger */
                    else if (item.typologie==7) { cligno = true;  img = "croix_rouge_orange.svg"; } /* derangement */
                    else img = "info.svg";
                    if (cligno==true) classe="wtd-cligno"; else classe="";
@@ -130,7 +131,7 @@
                "render": function (item)
                  { if (item.typologie==0) return("-");                                                      /* Si INFO, pas de ACK */
                    if (item.nom_ack!=null) return(item.nom_ack);
-                   return( Bouton ( "primary", "Acquitter le message", "Msg_acquitter", item.id, "Acquitter" ) );
+                   return( Bouton ( "primary", "Acquitter le message", "Msg_acquitter", item.msg_id, "Acquitter" ) );
                  }
              },
            ],
@@ -150,7 +151,7 @@
 
        $('#idNavSynoptique').empty();
        $('#idNavSynoptique').prepend( "<a class='nav-link rounded d-none d-sm-inline' href='#'> <span>"+Synoptique.libelle+"</span></a>" );
-       if (Synoptique.id != 1)
+       if (Synoptique.syn_id != 1)
         { $.each ( Response.parent_syns, function (i, syn)
                     { $('#idNavSynoptique').prepend ( "<a class='nav-item'><img src='/img/"+syn.image+"' alt='"+syn.libelle+"' "+
                                                       "data-toggle='tooltip' data-placement='bottom' title='"+syn.libelle+"' "+
@@ -164,7 +165,7 @@
        $.each ( Synoptique.child_syns, function (i, syn)
                  { bodymain.append ( Creer_card ( syn ) );
                    if (Synoptique.syn_vars)
-                    { Set_syn_vars ( syn.syn_id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==syn.syn_id } )[0] ); }
+                    { Set_syn_vars ( syn.syn_id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.syn_id==syn.syn_id } )[0] ); }
                  }
               );
        /*Set_syn_vars ( Synoptique.id, Synoptique.syn_vars.filter ( function(ssitem) { return ssitem.id==Response.id } )[0] );*/
@@ -356,11 +357,11 @@
        if (Synoptique.nbr_tableaux>0)
         { tableaux.prepend("<hr>");
           $.each ( Synoptique.tableaux, function (i, tableau)
-           { var id = "idTableau-"+tableau.id;
+           { var id = "idTableau-"+tableau.tableau_id;
              tableaux.append( $("<div></div>").append("<canvas id='"+id+"'></canvas>").addClass("col wtd-courbe m-1") );
-             maps = Synoptique.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.id) } );
+             maps = Synoptique.tableaux_map.filter ( function (item) { return(item.tableau_id==tableau.tableau_id) } );
              Charger_plusieurs_courbes ( id, maps, "HOUR" );
-             $('#'+id).on("click", function () { Charger_page_tableau(tableau.id); } );
+             $('#'+id).on("click", function () { Charger_page_tableau(tableau.tableau_id); } );
            });
         }
 
@@ -390,16 +391,16 @@
   { var card = $('<div></div>').addClass("row bg-transparent mb-3")
                .append( $('<div></div>').addClass("col text-center mb-1")
                         .append( $('<div></div>').addClass("d-inline-block wtd-img-container")
-                                 .append($('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.id+".jpg"
+                                 .append($('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.syn_id+".jpg"
                                                                                            : "/img/"+Response.image) )
-                                                   .attr("onclick", "Charger_page_synoptique("+Response.id+")")
-                                                   .attr("id", "idImgSyn_"+Response.id)
+                                                   .attr("onclick", "Charger_page_synoptique("+Response.syn_id+")")
+                                                   .attr("id", "idImgSyn_"+Response.syn_id)
                                                    .addClass("wtd-synoptique") )
-                                 .append($('<img>').attr("id", "idVignetteComm_"+Response.id)
-                                                   /*.attr("src","/img/pignon_vert.svg")*/
+                                 .append($('<img>').attr("id", "idVignetteComm_"+Response.syn_id)
+                                                   /*.attr("src","/img/pignon_green.svg")*/
                                                    .addClass("wtd-vignette wtd-img-superpose-bas-droite").slideUp()
                                         )
-                                 .append($('<img>').attr("id", "idVignette_"+Response.id)
+                                 .append($('<img>').attr("id", "idVignette_"+Response.syn_id)
                                                    /*.attr("src","")*/
                                                    .addClass("wtd-vignette wtd-img-superpose-haut-droite").slideUp()
                                         )

@@ -674,6 +674,38 @@ encore:
                    "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`dls_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
 
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `msgs` ("
+                   "`msg_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`deletable` tinyint(1) NOT NULL DEFAULT '1',"
+                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No libelle',"
+                   "`typologie` INT(11) NOT NULL DEFAULT '0',"
+                   "`rate_limit` INT(11) NOT NULL DEFAULT '0',"
+                   "`sms_notification` INT(11) NOT NULL DEFAULT '0',"
+                   "`audio_profil` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',"
+                   "`audio_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                   "`etat` tinyint(1) NOT NULL DEFAULT '0',"
+                   "`groupe` INT(11) NOT NULL DEFAULT '0',"
+                   "UNIQUE(`tech_id`,`acronyme`),"
+                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
+
+
+    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `histo_msgs` ("
+                   "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
+                   "`msg_id` INT(11) NOT NULL DEFAULT '0',"
+                   "`alive` TINYINT(1) NULL DEFAULT NULL,"
+                   "`nom_ack` VARCHAR(97) COLLATE utf8_unicode_ci DEFAULT NULL,"
+                   "`date_create` DATETIME(2) NULL,"
+                   "`date_fixe` DATETIME(2) NULL,"
+                   "`date_fin` DATETIME(2) NULL,"
+                   "`libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL,"
+                   "UNIQUE (`msg_id`,`alive`),"
+                   "KEY `date_create` (`date_create`),"
+                   "KEY `alive` (`alive`),"
+                   "FOREIGN KEY (`msg_id`) REFERENCES `msgs` (`msg_id`) ON DELETE CASCADE ON UPDATE CASCADE"
+                   ") ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
 
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
@@ -710,6 +742,15 @@ encore:
      { SQL_Write_new ("ALTER TABLE dls             CHANGE `id`     `dls_id` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE syns            CHANGE `id`     `syn_id` INT(11) NOT NULL AUTO_INCREMENT" );
      }
+
+    /*if (database_version < 6095)*/
+     { SQL_Write_new ("ALTER TABLE mnemos_DO       CHANGE `mnemos_DO_id`     `mnemo_DO_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE mnemos_DI       CHANGE `mnemos_DI_id`     `mnemo_DI_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE mnemos_AI       CHANGE `mnemos_AI_id`     `mnemo_AI_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE mnemos_AO       CHANGE `mnemos_AO_id`     `mnemo_AO_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE msgs            CHANGE `id`     `msg_id` INT(11) NOT NULL AUTO_INCREMENT" );
+       SQL_Write_new ("ALTER TABLE histo_msgs      CHANGE `id_msg` `msg_id` INT(11) NOT NULL" );
+     }
 /* a prévoir:
        SQL_Write_new ("ALTER TABLE mnemos_BI       CHANGE `id`     `id_mnemos_BI` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_MONO     CHANGE `id`     `id_mnemos_MONO` INT(11) NOT NULL AUTO_INCREMENT" );
@@ -725,7 +766,7 @@ encore:
 */
 
 fin:
-    database_version = 6094;
+    database_version = 6095;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
@@ -749,10 +790,10 @@ fin:
        "CREATE OR REPLACE VIEW dictionnaire AS "
        "SELECT dls_id,'DLS' AS classe, -1 AS classe_int,tech_id,shortname as acronyme,name as libelle, 'none' as unite FROM dls UNION "
        "SELECT syn_id,'SYNOPTIQUE' AS classe, -1 AS classe_int,page as tech_id, NULL as acronyme,libelle, 'none' as unite FROM syns UNION "
-       "SELECT mnemos_AI_id,'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_AI UNION "
-       "SELECT mnemos_DI_id,'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DI UNION "
-       "SELECT mnemos_DO_id,'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DO UNION "
-       "SELECT mnemos_AO_id,'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_AO UNION "
+       "SELECT mnemo_AI_id,'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_AI UNION "
+       "SELECT mnemo_DI_id,'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DI UNION "
+       "SELECT mnemo_DO_id,'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DO UNION "
+       "SELECT mnemo_AO_id,'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_AO UNION "
        "SELECT id,'BI' AS classe, 0 AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_BI UNION "
        "SELECT id,'MONO' AS classe, 1 AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_MONO UNION "
        "SELECT id,'CH' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_CH UNION "
@@ -763,7 +804,7 @@ fin:
        "SELECT id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_VISUEL UNION "
        "SELECT id,'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
        "SELECT id,'TABLEAU' AS classe, -1 AS classe_int, NULL AS tech_id, NULL AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
-       "SELECT id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
+       "SELECT msg_id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
         MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
         MNEMO_TEMPO, MNEMO_REGISTRE, MNEMO_WATCHDOG, MNEMO_MSG
       );

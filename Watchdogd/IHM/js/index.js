@@ -8,7 +8,7 @@
      { Send_to_API ( "GET", "/api/ping", null, function ()
         { if (WTDWebSocket && WTDWebSocket.readyState != 1)
            { console.log("Ping : websocket status = " + WTDWebSocket.readyState );
-             Charger_page_synoptique (Synoptique.id);
+             Charger_page_synoptique (Synoptique.syn_id);
              Load_websocket();
            }
           Ping();
@@ -43,13 +43,13 @@
        if (!Synoptique) return;
 
             if (Response.zmq_tag == "DLS_HISTO" && Messages_loaded==true)
-        { if (Response.syn_id == Synoptique.id)                                     /* S'agit-il d'un message de notre page ? */
+        { if (Response.syn_id == Synoptique.syn_id)                                 /* S'agit-il d'un message de notre page ? */
            { $('#idTableMessages').DataTable().ajax.reload( null, false ); }
         }
        else if (Response.zmq_tag == "DLS_CADRAN")
         { Changer_etat_cadran ( Response ); }
        else if (Response.zmq_tag == "SET_SYN_VARS")
-        { $.each ( Response.syn_vars, function (i, item) { Set_syn_vars ( item.id, item ); } ); }
+        { $.each ( Response.syn_vars, function (i, item) { Set_syn_vars ( item.syn_id, item ); } ); }
        else if (Response.zmq_tag == "DLS_VISUEL")
         { Changer_etat_visuel ( Response ); }
        else if (Response.zmq_tag == "pulse")

@@ -430,8 +430,7 @@
     while( (fichier = readdir( repertoire )) )                                      /* Pour chacun des fichiers du répertoire */
      { if (    ! strncmp( fichier->d_name, "libwatchdog-server-", 19 )                      /* Chargement unitaire d'une librairie */
            &&  ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
-        { gchar chaine[64];
-          struct PROCESS *lib = g_try_malloc0( sizeof ( struct PROCESS ) );
+        { struct PROCESS *lib = g_try_malloc0( sizeof ( struct PROCESS ) );
           if (!lib) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: MemoryAlloc failed", __func__ );
                       continue;
                     }

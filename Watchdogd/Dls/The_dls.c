@@ -1593,7 +1593,7 @@ end:
  void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *dls_syn )
   { JsonArray *array = user_data;
     JsonNode *element = Json_node_create ();
-    Json_node_add_int  ( element, "id", dls_syn->syn_id );
+    Json_node_add_int  ( element, "syn_id", dls_syn->syn_id );
     Json_node_add_bool ( element, "bit_comm", dls_syn->bit_comm );
     Json_node_add_bool ( element, "bit_defaut", dls_syn->bit_defaut );
     Json_node_add_bool ( element, "bit_defaut_fixe", dls_syn->bit_defaut_fixe );

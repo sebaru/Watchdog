@@ -277,7 +277,7 @@
        Json_node_add_string ( visuel, "acronyme", "" );
        Json_node_add_string ( visuel, "ihm_affichage", "complexe" );
        gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), "SYN_%05d", Json_get_int ( infos->syn, "id" ) );
+       g_snprintf( chaine, sizeof(chaine), "SYN_%05d", Json_get_int ( infos->syn, "syn_id" ) );
        Json_node_add_string ( visuel, "libelle", chaine );
        Json_node_add_int ( visuel, "id", -1 );
        Json_node_add_int ( visuel, "angle", 0 );

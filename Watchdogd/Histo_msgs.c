@@ -54,7 +54,7 @@
        return(FALSE);
      }
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s as histo INNER JOIN msgs as msg ON msg.id = histo.id_msg"
+                "UPDATE %s as histo INNER JOIN msgs as msg ON msg.id = histo.msg_id"
                 " SET nom_ack='%s',date_fixe='%s'"
                 " WHERE histo.alive=1 and msg.tech_id='%s' AND msg.acronyme='%s'",
                 NOM_TABLE_HISTO_MSGS, nom_ack, date_fixe, tech_id, acronyme );
@@ -84,7 +84,7 @@
        return(FALSE);
      }
 
-    SQL_Write_new ( "INSERT INTO %s(alive,id_msg,date_create,libelle)"
+    SQL_Write_new ( "INSERT INTO %s(alive,msg_id,date_create,libelle)"
                     " VALUES ('%d','%d','%s','%s') ON DUPLICATE KEY UPDATE date_create=VALUES(`date_create`)",
                     NOM_TABLE_HISTO_MSGS, TRUE, Json_get_int ( histo, "id" ), Json_get_string( histo, "date_create" ), libelle );
     g_free(libelle);
@@ -99,7 +99,7 @@
  gboolean Retirer_histo_msgsDB ( JsonNode *histo )
   {
     return( SQL_Write_new ( "UPDATE histo_msgs AS histo "
-                            "INNER JOIN msgs ON msgs.id = histo.id_msg "
+                            "INNER JOIN msgs ON msgs.id = histo.msg_id "
                             "SET histo.alive=NULL,histo.date_fin='%s' "
                             "WHERE histo.alive=1 AND msgs.tech_id='%s' AND msgs.acronyme='%s' ",
                             Json_get_string ( histo, "date_fin" ),
@@ -119,9 +119,9 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, histo.libelle, msg.typologie, dls.syn_id,"
                 "parent_syn.page, syn.page, histo.nom_ack, histo.date_create,"
-                "histo.date_fixe, histo.date_fin, dls.shortname, msg.id, msg.tech_id, msg.acronyme"
+                "histo.date_fixe, histo.date_fin, dls.shortname, msg.msg_id, msg.tech_id, msg.acronyme"
                 " FROM %s as histo"
-                " INNER JOIN %s as msg ON msg.id = histo.id_msg"
+                " INNER JOIN %s as msg ON msg.msg_id = histo.msg_id"
                 " INNER JOIN %s as dls ON dls.tech_id = msg.tech_id"
                 " INNER JOIN %s as syn ON syn.id = dls.syn_id"
                 " INNER JOIN %s as parent_syn ON parent_syn.id = syn.parent_id"

@@ -48,7 +48,7 @@
           else { g_snprintf(date, sizeof(date), "Erreur"); }
 
     JsonNode *element = Json_node_create();
-    Json_node_add_int    ( element, "id",        dls->id );
+    Json_node_add_int    ( element, "dls_id",    dls->id );
     Json_node_add_string ( element, "tech_id",   dls->tech_id );
     Json_node_add_string ( element, "shortname", dls->shortname );
     Json_node_add_string ( element, "name" ,     dls->nom );

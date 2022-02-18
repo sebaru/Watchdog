@@ -87,7 +87,7 @@
     $('#idModalSynEditLibelle').val( selection.libelle );
     $('#idModalSynEditAccessLevel').attr("max", localStorage.getItem("access_level") )
                                    .val( selection.access_level );
-    $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.id+"')" );
+    $('#idModalSynEditValider').attr( "onclick", "Synoptique_set('"+selection.syn_id+"')" );
     $('#idModalSynEdit').modal("show");
   }
 /************************************ Envoi les infos de modifications synoptique *********************************************/
