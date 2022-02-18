@@ -99,7 +99,7 @@
  gboolean Retirer_histo_msgsDB ( JsonNode *histo )
   {
     return( SQL_Write_new ( "UPDATE histo_msgs AS histo "
-                            "INNER JOIN msgs ON msgs.id = histo.msg_id "
+                            "INNER JOIN msgs ON msgs.msg_id = histo.msg_id "
                             "SET histo.alive=NULL,histo.date_fin='%s' "
                             "WHERE histo.alive=1 AND msgs.tech_id='%s' AND msgs.acronyme='%s' ",
                             Json_get_string ( histo, "date_fin" ),
