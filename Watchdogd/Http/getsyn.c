@@ -732,7 +732,7 @@ end:
                                     "LEFT JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
                                     "LEFT JOIN dls ON dls.dls_id=v.dls_id "
                                     "LEFT JOIN icone AS i ON i.forme=m.forme "
-                                    "LEFT JOIN syns AS s ON dls.syn_id=s.id "
+                                    "LEFT JOIN syns AS s ON dls.syn_id=s.syn_id "
                                     "WHERE (s.id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d' "
                                     "ORDER BY layer",
                                      syn_id, session->access_level, session->access_level, syn_id) == FALSE)
@@ -748,7 +748,7 @@ end:
                                     "INNER JOIN mnemos_VISUEL AS m ON v.mnemo_id = m.id "
                                     "INNER JOIN dls ON dls.dls_id=v.dls_id "
                                     "INNER JOIN icone AS i ON i.forme=m.forme "
-                                    "INNER JOIN syns AS s ON dls.syn_id=s.id "
+                                    "INNER JOIN syns AS s ON dls.syn_id=s.syn_id "
                                     "INNER JOIN dls AS dls_owner ON dls_owner.tech_id=m.tech_id "
                                     "WHERE s.id='%d' AND s.access_level<=%d AND m.access_level<=%d "
                                     "ORDER BY layer",
