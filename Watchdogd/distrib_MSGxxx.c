@@ -114,7 +114,6 @@
                              "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme            /* Where */
                             );
 
-
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
     strftime( chaine, sizeof(chaine), "%F %T", temps );

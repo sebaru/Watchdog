@@ -86,7 +86,7 @@
 
     SQL_Write_new ( "INSERT INTO %s(alive,msg_id,date_create,libelle)"
                     " VALUES ('%d','%d','%s','%s') ON DUPLICATE KEY UPDATE date_create=VALUES(`date_create`)",
-                    NOM_TABLE_HISTO_MSGS, TRUE, Json_get_int ( histo, "id" ), Json_get_string( histo, "date_create" ), libelle );
+                    NOM_TABLE_HISTO_MSGS, TRUE, Json_get_int ( histo, "msg_id" ), Json_get_string( histo, "date_create" ), libelle );
     g_free(libelle);
     /* Json_node_add_bool ( histo, "sql_last_id", Recuperer_last_ID_SQL ( db ); */
     return(TRUE);
