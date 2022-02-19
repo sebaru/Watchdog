@@ -171,6 +171,7 @@
     Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
     Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", histo );
     Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", histo );
+    Http_ws_send_to_all( histo );
     json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
