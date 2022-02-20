@@ -36,6 +36,7 @@
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     SoupServer *socket;
+    SoupServer *local_socket;
     GMainLoop *loop;
     GMainContext *loop_context;
     GSList *liste_http_clients;

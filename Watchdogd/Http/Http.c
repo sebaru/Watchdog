@@ -383,14 +383,8 @@
   { gchar requete[256], *name;
 
     if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    if (!Config.installed)
-     {	Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Redirecting to /tech/install", __func__ );
-       soup_message_set_redirect (msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/tech/install" );
-		     return;
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       return;
      }
 
     Http_print_request ( server, msg, path, client );
@@ -624,7 +618,7 @@
  void Http_Start_API ( void )
   { GError *error = NULL;
 
-    SoupServer *socket = Partage->com_http.socket = soup_server_new( "server-header", "Watchdogd API Server", NULL);
+    SoupServer *socket = Partage->com_http.socket = soup_server_new( "server-header", "Watchdogd Ex-API Server", NULL);
     if (!socket)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
        return;
@@ -717,7 +711,6 @@
                                                              Http_traiter_instance_reload_icons, NULL, NULL );
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/api/log/get",        Http_traiter_log_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/install",        Http_traiter_install, NULL, NULL );
     soup_server_add_handler ( socket, "/api/bus",            Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
     soup_server_add_handler ( socket, "/api/search",         Http_traiter_search, NULL, NULL );
@@ -749,6 +742,57 @@
 
     Partage->com_http.loop = g_main_loop_new (NULL, TRUE);
     Http_Load_sessions ();
+
+
+/********************************************* New API ************************************************************************/
+    socket = Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API Server", NULL);
+    if (!socket)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
+       return;
+     }
+
+    if ( stat ( HTTP_DEFAUT_FILE_CERT, &sbuf ) == -1 ||                                           /* Test présence du fichier */
+         stat ( HTTP_DEFAUT_FILE_KEY, &sbuf ) == -1 )                                             /* Test présence du fichier */
+     { gchar chaine[256];
+       Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: unable to load '%s' and '%s' (error '%s'). Generating new ones.", __func__,
+                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, strerror(errno) );
+       g_snprintf( chaine, sizeof(chaine),
+                   "openssl req -subj '/C=FR/ST=FRANCE/O=ABLS-HABITAT/OU=PRODUCTION/CN=Abls-Habitat Agent on %s' -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -out '%s' -keyout '%s'",
+                   g_get_host_name(), HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
+       system( chaine );
+     }
+
+    if (soup_server_set_ssl_cert_file ( socket, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error ))
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: SSL Loaded with '%s' and '%s'", __func__,
+                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
+                  __func__, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
+       g_error_free(error);
+       return;
+     }
+
+    if (Config.instance_is_master==TRUE)
+     {/* soup_server_add_handler ( socket, "/inputs", Http_traiter_inputs, NULL, NULL );
+       soup_server_add_handler ( socket, "/outputs", Http_traiter_inputs, NULL, NULL );
+    */ }
+    soup_server_add_handler ( socket, "/install", Http_traiter_install, NULL, NULL );
+
+    /*static gchar *protocols[] = { "live-io", NULL };
+    soup_server_add_websocket_handler ( socket, "/websocket" , NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
+*/
+    if (!soup_server_listen_all (socket, 5559, SOUP_SERVER_LISTEN_HTTPS, &error))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer Listen Failed '%s' !", __func__, error->message );
+       g_error_free(error);
+       soup_server_disconnect(socket);
+       Partage->com_http.local_socket = NULL;
+       return;
+     }
+    Info_new( Config.log, Config.log_msrv, LOG_INFO,
+              "%s: HTTP SoupServer SSL Listen OK on port %d !", __func__, 5559 );
+
   }
 
 /******************************************************************************************************************************/
@@ -791,6 +835,7 @@
 /******************************************************************************************************************************/
  void Http_Stop_API ( void )
   { soup_server_disconnect ( Partage->com_http.socket );                                        /* Arret du serveur WebSocket */
+    soup_server_disconnect ( Partage->com_http.local_socket );                                        /* Arret du serveur WebSocket */
     g_main_loop_unref( Partage->com_http.loop );
     Http_Save_and_close_sessions();
   }
