@@ -833,6 +833,13 @@ end:
        else
         { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
 
+/************************************************* Test Connexion to Global API ***********************************************/
+       JsonNode *API = Http_Get_from_global_API ( "status", NULL );
+       if (API)
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connected with API %s", __func__, Json_get_string ( API, "version" ) );
+          json_node_unref ( API );
+        }
+
        if (Config.instance_is_master)
         { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
            { Info_new( Config.log, Config.log_msrv, LOG_ERR,

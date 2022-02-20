@@ -82,6 +82,76 @@
     return(phrase);
   }
 /******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ gboolean Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode )
+  { gchar query[256];
+    gboolean success = FALSE;
+
+    g_snprintf( query, sizeof(query), "%s/%s", Json_get_string ( Config.config, "api_url"), URI );
+/********************************************************* Envoi de la requete ************************************************/
+    SoupSession *connexion = soup_session_new();
+    SoupMessage *soup_msg  = soup_message_new ( "POST", query );
+    if (!soup_msg)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
+       return(FALSE);
+     }
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+             "%s: Sending to API %s: %s", __func__, query, buf );
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+    /* Async soup_session_queue_message (client->connexion, msg, callback, client);*/
+    soup_session_send_message (connexion, soup_msg); /* SYNC */
+
+    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
+    gint   status_code   = Http_Msg_status_code(soup_msg);
+
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    if (status_code!=200)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
+    else { success = TRUE; }
+    g_object_unref( soup_msg );
+    soup_session_abort ( connexion );
+    return(success);
+ }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres )
+  { gchar query[256];
+    JsonNode *result = NULL;
+
+    if (!parametres) g_snprintf( query, sizeof(query), "%s/%s", Json_get_string ( Config.config, "api_url"), URI );
+                else g_snprintf( query, sizeof(query), "%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
+/********************************************************* Envoi de la requete ************************************************/
+    SoupSession *connexion = soup_session_new();
+    SoupMessage *soup_msg  = soup_message_new ( "GET", query );
+    if (!soup_msg)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Reading from API %s", __func__, query );
+       return(NULL);
+     }
+
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
+    soup_session_send_message (connexion, soup_msg);
+
+    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
+    gint   status_code   = Http_Msg_status_code(soup_msg);
+
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    if (status_code!=200)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase ); }
+    else
+     { result = Http_Response_Msg_to_Json ( soup_msg ); }
+    g_object_unref( soup_msg );
+    soup_session_abort ( connexion );
+    return(result);
+ }
+/******************************************************************************************************************************/
 /* Http_destroy_session: Libère une session en paramètre                                                                      */
 /* Entrées: la session                                                                                                        */
 /* Sortie: néant                                                                                                              */
