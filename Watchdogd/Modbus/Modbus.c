@@ -1119,8 +1119,10 @@
                  { if ( vars->DO && vars->DO[num] &&
                         !strcasecmp ( Json_get_string(vars->DO[num], "tech_id"), tech_id ) &&
                         !strcasecmp ( Json_get_string(vars->DO[num], "acronyme"), acronyme ) )
-                    { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': SET_DO %s:%s=%d", __func__,
-                                thread_tech_id, tech_id, acronyme, etat );
+                    { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': SET_DO '%s:%s'/'%s:%s'=%d", __func__,
+                                thread_tech_id,
+                                Json_get_string ( vars->DO[num], "thread_tech_id" ), Json_get_string ( vars->DO[num], "thread_acronyme" ),
+                                tech_id, acronyme, etat );
                       Json_node_add_bool ( vars->DO[num], "etat", etat );
                       break;
                     }
