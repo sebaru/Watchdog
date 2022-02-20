@@ -46,6 +46,12 @@
 	   gint num;
 
     memset ( &Config, 0, sizeof(struct CONFIG) );
+
+    Config.config = Json_read_from_file ( "/etc/fr-abls-habitat-agent.conf" );
+    if (!Config.config) Config.config = Json_node_create();
+    if (!Json_has_member ( Config.config, "domain_uuid"   )) Json_node_add_string ( Config.config, "domain_uuid",   "default" );
+    if (!Json_has_member ( Config.config, "domain_secret" )) Json_node_add_string ( Config.config, "domain_secret", "default" );
+
     g_snprintf( Config.master_host,   sizeof(Config.master_host),   "localhost" );
     g_snprintf( Config.run_as,        sizeof(Config.run_as),        "%s", g_get_user_name() );
     g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", DEFAUT_PROCESS_DIR   );

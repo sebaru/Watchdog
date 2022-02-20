@@ -926,6 +926,7 @@ end:
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
+    if (Config.config) json_node_unref ( Config.config );
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Stopped", __func__ );

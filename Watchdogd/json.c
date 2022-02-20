@@ -25,6 +25,12 @@
  * Boston, MA  02110-1301  USA
  */
 
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <string.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+
  #include <glib.h>
 
  #include "watchdogd.h"
@@ -216,5 +222,33 @@
   { JsonObject *object = json_node_get_object (query);
     if (!object) { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Object is null for '%s'", __func__, chaine );  return(FALSE); }
     return( json_object_has_member ( object, chaine ) && !json_object_get_null_member ( object, chaine ) );
+  }
+/******************************************************************************************************************************/
+/* Json_read_from_file: Recupere un ficher et le lit au format Json                                                           */
+/* Entrée: le nom de fichier                                                                                                  */
+/* Sortie: le buffer JsonNode                                                                                                 */
+/******************************************************************************************************************************/
+ JsonNode *Json_read_from_file ( gchar *filename )
+  { struct stat stat_buf;
+    if (stat ( filename, &stat_buf)==-1) return(NULL);
+
+    gchar *content = g_try_malloc0 ( stat_buf.st_size+1 );
+    if (!content) return(NULL);
+
+    gint fd = open ( filename, O_RDONLY );
+    if (!fd)
+     { g_free(content);
+       return(NULL);
+     }
+
+    if (read ( fd, content, stat_buf.st_size ) != stat_buf.st_size)
+     { g_free(content);
+       return(NULL);
+     }
+    close(fd);
+
+    JsonNode *node = Json_get_from_string ( content );
+    g_free(content);
+    return(node);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
