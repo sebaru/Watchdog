@@ -38,7 +38,6 @@
          GList *gliste;
          struct OPTION *option;
          struct ACTION *action;
-         struct COMPARATEUR *comparateur;
          struct ALIAS *t_alias;
          struct ELEMENT *t_element;
        };
@@ -75,18 +74,17 @@
 %token <val>    T_CADRAN T_MIN T_MAX T_SEUIL_NTB T_SEUIL_NB T_SEUIL_NH T_SEUIL_NTH T_DECIMAL
 
 %token <chaine> T_CHAINE
-%token <t_element> ID
+%token <chaine> ID
 %token <val>    ENTIER
 %token <valf>   T_VALF
 
 %type  <val>         barre
 %type  <gliste>      liste_options options
 %type  <option>      une_option
-%type  <t_element>   unite facteur expr expr_2 suffixe unSwitch listeCase une_instr listeInstr
+%type  <t_element>   unite facteur expr expr_2
+%type  <chaine>      unSwitch listeCase une_instr listeInstr
 %type  <action>      action une_action
-%type  <chaine>      calcul_expr calcul_expr2 calcul_expr3
 %type  <t_alias>     un_alias calcul_alias_result
-%type  <comparateur> comparateur
 
 %%
 fichier: ligne_source_dls;
@@ -158,19 +156,21 @@ listeInstr:     une_instr listeInstr
 
 une_instr:      T_MOINS expr DONNE action PVIRGULE
                 {{ int taille;
-                   if ($2 && $4)
-                    { taille = strlen($2)+strlen($4->alors)+100;
+                   if ($2 && $2->is_bool == FALSE)
+                    { Emettre_erreur_new( "Boolean is left mandatory" ); }
+                   else if ($2 && $4)
+                    { taille = strlen($2->alors)+strlen($4->alors)+100;
                       if ($4->sinon)
                        { taille += (strlen($4->sinon) + 10);
                          $$ = New_chaine( taille );
                          g_snprintf( $$, taille,
                                      "vars->num_ligne = %d; /* une_instr-------------*/\nif(%s)\n { %s }\nelse\n { %s }\n\n",
-                                     DlsScanner_get_lineno(), $2, $4->alors, $4->sinon );
+                                     DlsScanner_get_lineno(), $2->alors, $4->alors, $4->sinon );
                        }
                       else
                        { $$ = New_chaine( taille );
                          g_snprintf( $$, taille, "vars->num_ligne = %d;/* une_instr-------------*/\nif(%s)\n { %s }\n\n",
-                                     DlsScanner_get_lineno(), $2, $4->alors );
+                                     DlsScanner_get_lineno(), $2->alors, $4->alors );
                        }
                     } else $$=NULL;
                    if ($4)
@@ -178,12 +178,14 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                       g_free($4->alors);
                       g_free($4);
                     }
-                   if ($2) g_free($2);
+                   Del_element($2);
                 }}
                 | T_MOINS expr T_DIFFERE options DONNE action PVIRGULE
                 {{ int taille;
-                   if ($2 && $6)
-                    { taille = strlen($2)+strlen($6->alors)+1024;
+                   if ($2 && $2->is_bool == FALSE)
+                    { Emettre_erreur_new( "Boolean is left mandatory" ); }
+                   else if ($2 && $6)
+                    { taille = strlen($2->alors)+strlen($6->alors)+1024;
                       if ($6->sinon) taille += strlen($6->sinon);
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
@@ -212,7 +214,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                                   "       }\n"
                                   "    }\n"
                                   " }\n\n",
-                                  DlsScanner_get_lineno(), $2,
+                                  DlsScanner_get_lineno(), $2->alors,
                                   Get_option_entier($4, T_DAA, 0), $6->alors,
                                   Get_option_entier($4, T_DAD, 0),($6->sinon ? $6->sinon : "") );
                      } else $$=NULL;
@@ -220,19 +222,21 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    if ($6 && $6->alors) g_free($6->alors);
                    if ($6) g_free($6);
                    Liberer_options($4);
-                   if ($2) g_free($2);
+                   Del_element($2);
                 }}
                 | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
                 {{ int taille;
-                   if ($2 && $5)
-                    { taille = strlen($2)+strlen($5)+100;
+                   if ($2 && $2->is_bool == FALSE)
+                    { Emettre_erreur_new( "Boolean is left mandatory" ); }
+                   else if ($2 && $5)
+                    { taille = strlen($2->alors)+strlen($5)+100;
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
                                   "/* Ligne %d une_instr if----------*/\nif(%s)\n { %s }\n\n",
-                                     DlsScanner_get_lineno(), $2, $5 );
+                                     DlsScanner_get_lineno(), $2->alors, $5 );
                     } else $$=NULL;
                    if ($5) g_free($5);
-                   if ($2) g_free($2);
+                   Del_element($2);
                 }}
                 | unSwitch {{ $$=$1; }}
                 ;
@@ -289,19 +293,19 @@ unSwitch:       T_SWITCH listeCase
 
 listeCase:      T_PIPE T_MOINS expr DONNE action PVIRGULE listeCase
                 {{ int taille;
-                   if ($3 && $5 && $7)
-                    { taille = strlen($3)+strlen($5->alors)+strlen($7)+100;
+                   if ($3 && $3->is_bool == FALSE)
+                    { Emettre_erreur_new( "Boolean is left mandatory" ); }
+                   else if ($3 && $5 && $7)
+                    { taille = strlen($3->alors)+strlen($5->alors)+strlen($7)+100;
                       if ($5->sinon) taille+=strlen($5->sinon);
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
                                   "/* Ligne %d (CASE INSIDE)----------*/\n"
                                   "if(%s)\n { %s }\nelse\n { %s\n%s }\n",
-                                  DlsScanner_get_lineno(), $3, $5->alors, ($5->sinon ? $5->sinon : ""), $7 );
+                                  DlsScanner_get_lineno(), $3->alors, $5->alors, ($5->sinon ? $5->sinon : ""), $7 );
                     } else $$=NULL;
-                   if ($5 && $5->sinon) g_free($5->sinon);
-                   if ($5 && $5->alors) g_free($5->alors);
-                   if ($5) g_free($5);
-                   if ($3) g_free($3);
+                   Del_element($3);
+                   Del_action($5);
                    if ($7) g_free($7);
                 }}
                 | T_PIPE T_MOINS DONNE action PVIRGULE
@@ -313,152 +317,13 @@ listeCase:      T_PIPE T_MOINS expr DONNE action PVIRGULE listeCase
                                   "/* Ligne %d (CASE INSIDE DEFAULT)--*/\n"
                                  "  %s", DlsScanner_get_lineno(), $4->alors );
                     } else $$=NULL;
-                   if ($4 && $4->sinon) g_free($4->sinon);
-                   if ($4 && $4->alors) g_free($4->alors);
-                   if ($4) g_free($4);
+                   Del_action($4);
                 }}
-                | {{ $$=strdup(""); }}
+                | {{ $$=NULL; }}
                 ;
 /****************************************************** Partie CALCUL *********************************************************/
-calcul_expr:    calcul_expr T_PLUS calcul_expr2
-                {{ int taille;
-                   if ($1 && $3)
-                    { taille = strlen($1) + strlen($3) + 4;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "(%s+%s)", $1, $3 );
-                    } else $$ = NULL;
-                   if ($1) g_free($1);
-                   if ($3) g_free($3);
-                }}
-                | calcul_expr T_MOINS calcul_expr2
-                {{ int taille;
-                   if ($1 && $3)
-                    { taille = strlen($1) + strlen($3) + 4;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "(%s-%s)", $1, $3 );
-                    } else $$ = NULL;
-                   if ($1) g_free($1);
-                   if ($3) g_free($3);
-                }}
-                | calcul_expr2
-                ;
-calcul_expr2:   calcul_expr2 T_FOIS calcul_expr3
-                {{ int taille;
-                   if ($1 && $3)
-                    { taille = strlen($1) + strlen($3) + 4;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "(%s*%s)", $1, $3 );
-                    } else $$ = NULL;
-                   if ($1) g_free($1);
-                   if ($3) g_free($3);
-                }}
-                | calcul_expr2 BARRE calcul_expr3
-                {{ int taille;
-                   if ($1 && $3)
-                    { taille = strlen($1) + 2*strlen($3) + 40;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "((gdouble)%s==0.0 ? 1.0 : ((gdouble)%s/%s))", $3, $1, $3 );
-                    } else $$ = NULL;
-                   if ($1) g_free($1);
-                   if ($3) g_free($3);
-                }}
-                | calcul_expr3
-                ;
-calcul_expr3:   T_POUV calcul_expr T_PFERM {{ $$=$2; }}
-                | T_VALF
-                {{ int taille;
-                   taille = 15;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "%f", $1 );
-                }}
-                | ENTIER
-                {{ int taille;
-                   taille = 15;
-                   $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "%d", $1 );
-                }}
-                | T_PID liste_options
-                {{ $$ = NULL;
-                }}
-                | ID suffixe
-                {{ char *tech_id, *acro;
-                   struct ALIAS *alias;
-                   int taille;
-                   if ($2) { tech_id = $1; acro = $2; }
-                      else { tech_id = NULL; acro = $1; }
-                   alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
-                   if (!alias)
-                    { alias = New_external_alias(tech_id,acro,NULL); }           /* Si dependance externe, on va chercher */
 
-                   if (alias)
-                    { switch(alias->classe)               /* On traite que ce qui peut passer en "condition" */
-                       { case MNEMO_REGISTRE:
-                          { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_REGISTRE(\"%s\",\"%s\",&_%s_%s)",
-                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                            break;
-                          }
-                         case MNEMO_ENTREE_ANA:
-                          { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
-                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                            break;
-                          }
-                         case MNEMO_SORTIE_ANA:
-                          { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)",
-                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                            break;
-                          }
-                         case MNEMO_CPTH:
-                          { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)",
-                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                            break;
-                          }
-                         case MNEMO_CPT_IMP:
-                          { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)",
-                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                            break;
-                          }
-                         case MNEMO_MONOSTABLE:
-                          { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_MONO(\"%s\",\"%s\",&_%s_%s)",
-                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                            break;
-                          }
-                         case MNEMO_BISTABLE:
-                          { taille = 256;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "Dls_data_get_BI(\"%s\",\"%s\",&_%s_%s)",
-                                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-                            break;
-                          }
-                         default:
-                          { Emettre_erreur_new( "'%s:%s' ne peut s'utiliser dans un calcul", alias->tech_id, alias->acronyme );
-                            $$=New_chaine(2);
-                            g_snprintf( $$, 2, "0" );
-                          }
-                       }
-                    }
-                   else
-                    { Emettre_erreur_new( "'%s' is not defined", $1 );
-                      $$=New_chaine(2);
-                      g_snprintf( $$, 2, "0" );
-                    }
-                   if ($2) g_free($2);                                                   /* Libération du prefixe s'il existe */
-                   g_free($1);                                                         /* On n'a plus besoin de l'identifiant */
-                }}
-                ;
-
-calcul_alias_result: ID
+calcul_alias_result: un_alias
                 {{ struct ALIAS *alias;
                    alias = Get_alias_par_acronyme(NULL,$1);                                            /* On recupere l'alias */
                    if (alias)
@@ -483,62 +348,91 @@ calcul_alias_result: ID
                 ;
 /******************************************************* Partie LOGIQUE *******************************************************/
 expr:           facteur T_PLUS facteur
-                {{ int taille;
-                   /*if ($1 && $3)
-                    { taille = strlen($1)+strlen($3)+7;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "(%s || %s)", $1, $3 );
-                    } else $$ = NULL;
-                   if ($1) g_free($1);
-                   if ($3) g_free($3);*/
+                {{ if ($2 && $3)
+                    { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
+                       { Emettre_erreur_new( "Boolean mandatory in AND" ); }
+                      else
+                       { gint taille = $1->taille_alors + $3->taille_alors + 6;
+                         $$ = New_element( TRUE, taille, 0 );
+                         if ($$)
+                          { g_snprintf( $$->alors, taille, "(%s || %s)", $1->alors, $3->alors ); }
+                       }
+                    } else $$=NULL;
+                   Del_element($1);
+                   Del_element($3);
                 }}
                 | facteur T_MOINS facteur
-                {{ int taille;
-                   /*if ($1 && $3)
-                    { taille = strlen($1)+strlen($3)+7;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "(%s || %s)", $1, $3 );
-                    } else $$ = NULL;
-                   if ($1) g_free($1);
-                   if ($3) g_free($3);*/
+                {{ if ($2 && $3)
+                    { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
+                       { Emettre_erreur_new( "Boolean not allowed within -" ); }
+                      else
+                       { gint taille = $1->taille_alors + $3->taille_alors + 3;
+                         $$ = New_element( TRUE, taille, 0 );
+                         if ($$)
+                          { g_snprintf( $$->alors, taille, "(%s-%s)", $1->alors, $3->alors ); }
+                       }
+                    } else $$=NULL;
+                   Del_element($1);
+                   Del_element($3);
                 }}
                 | facteur
                 ;
 facteur:        expr_2 ET expr_2
-                {{
+                {{ if ($2 && $3)
+                    { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
+                       { Emettre_erreur_new( "Boolean mandatory in AND" ); }
+                      else
+                       { gint taille = $1->taille_alors + $3->taille_alors + 6;
+                         $$ = New_element( TRUE, taille, 0 );
+                         if ($$)
+                          { g_snprintf( $$->alors, taille, "(%s && %s)", $1->alors, $3->alors ); }
+                       }
+                    } else $$=NULL;
+                   Del_element($1);
+                   Del_element($3);
                 }}
                 | expr_2 T_FOIS expr_2
-                {{
+                {{ if ($2 && $3)
+                    { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
+                       { Emettre_erreur_new( "Boolean not allowed within *" ); }
+                      else
+                       { gint taille = $1->taille_alors + $3->taille_alors + 3;
+                         $$ = New_element( TRUE, taille, 0 );
+                         if ($$)
+                          { g_snprintf( $$->alors, taille, "(%s*%s)", $1->alors, $3->alors ); }
+                       }
+                    } else $$=NULL;
+                   Del_element($1);
+                   Del_element($3);
                 }}
                 | expr_2 BARRE expr_2
                 {{ if ($2 && $3)
-                    { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
-                       { Emettre_erreur_new( "Boolean not allowed within division" ); }
+                    { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
+                       { Emettre_erreur_new( "Boolean not allowed within /" ); }
                       else
-                       { taille = $1->taille_alors + $3->taille_alors + 3;
+                       { gint taille = $1->taille_alors + $3->taille_alors + 36;
                          $$ = New_element( TRUE, taille, 0 );
                          if ($$)
-                          { g_snprintf( $$->alors, taille, "(%s/%s)", $1->alors, $3->alors ); }
+                          { g_snprintf( $$->alors, taille, "(%s==0.0 ? 1.0 : (%s/%s))", $3->alors, $1->alors, $3->alors ); }
                        }
                     } else $$=NULL;
-                   if ($1) g_free($1);
-                   if ($3) g_free($3);
+                   Del_element($1);
+                   Del_element($3);
                 }}
                 | expr_2
                 ;
 
 
 expr_2:         unite ordre unite
-                {{ int taille;
-                   $$ = New_condition_comparateur ( $1, $2, $3 );
-                   if ($1) g_free($1);
-                   if ($3) g_free($3);
+                {{ $$ = New_condition_comparateur ( $1, $2, $3 );
+                   Del_element($1);
+                   Del_element($3);
                 }}
                 | unite
                 ;
 
-unite:          barre ID suffixe liste_options
-                {{ $$ = New_condition_simple ( $1, $2, $3, $4 ); }}
+unite:          barre un_alias liste_options
+                {{ $$ = New_condition_simple ( $1, $2, $3 ); }}
                 | T_VALF   {{ $$ = New_element_valf ( $1 );   }}
                 | ENTIER   {{ $$ = New_element_entier ( $1 ); }}
                  | HEURE T_POUV modulateur ENTIER HEURE ENTIER T_PFERM
@@ -617,11 +511,8 @@ unite:          barre ID suffixe liste_options
                 }}
 /************************************** Partie Logique : gestion des comparaisons *********************************************/
 
-                ;
 
-suffixe:          T_DPOINTS ID {{ $$=$2; }}
-                | {{ $$=NULL; }}
-                ;
+
 /************************************************* Gestion des actions ********************************************************/
 action:         action VIRGULE une_action
                 {{ int taille;
@@ -654,30 +545,13 @@ une_action:     T_NOP
                   {{ $$=New_action_PID($2);
                      Liberer_options($2);
                   }}
-                | barre ID suffixe liste_options
+                | barre un_alias liste_options
                 {{ struct ALIAS *alias;                                                   /* Definition des actions via alias */
-                   gchar *tech_id, *acro;
-                   int taille;
-                   if ($3) { tech_id = $2; acro = $3; }
-                      else { tech_id = NULL; acro = $2; }
-
-                   alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
-                   if (!alias)
-                    { alias = New_external_alias(tech_id,acro, NULL); }          /* Si dependance externe, on va chercher */
-
-                   if (!alias)
-                    { if ($3) Emettre_erreur_new( "'%s:%s' is not defined", $2, $3 );
-                         else Emettre_erreur_new( "'%s' is not defined", $2 );
-
-                      $$=New_action();
-                      taille = 2;
-                      $$->alors = New_chaine( taille );
-                      g_snprintf( $$->alors, taille, " " );
-                      $$->sinon = NULL;
-                    }
+                   alias = $2;                                       /* On recupere l'alias */
+                   if (!alias) { $$ = NULL; }
                    else                                                           /* L'alias existe, vérifions ses parametres */
                     { GList *options, *options_g, *options_d;
-                      options_g = g_list_copy( $4 );
+                      options_g = g_list_copy( $3 );
                       options_d = g_list_copy( alias->options );
                       options = g_list_concat( options_g, options_d );                  /* Concaténation des listes d'options */
                       if ($1 && (alias->classe==MNEMO_TEMPO ||
@@ -689,11 +563,7 @@ une_action:     T_NOP
                                  alias->classe==MNEMO_MONOSTABLE)
                          )
                        { Emettre_erreur_new( "'/%s' ne peut s'utiliser", alias->acronyme );
-                         $$=New_action();
-                         taille = 2;
-                         $$->alors = New_chaine( taille );
-                         g_snprintf( $$->alors, taille, " " );
-                         $$->sinon = NULL;
+                         $$ = NULL;
                        }
                       else switch(alias->classe)
                        { case MNEMO_TEMPO : $$=New_action_tempo( alias, options ); break;
@@ -708,50 +578,13 @@ une_action:     T_NOP
                          case MNEMO_VISUEL     : $$=New_action_visuel( alias, options );    break;
                          case MNEMO_WATCHDOG  : $$=New_action_WATCHDOG( alias, options ); break;
                          default: { Emettre_erreur_new( "'%s:%s' syntax error", alias->tech_id, alias->acronyme );
-                                    $$=New_action();
-                                    taille = 2;
-                                    $$->alors = New_chaine( taille );
-                                    g_snprintf( $$->alors, taille, " " );
-                                    $$->sinon = NULL;
+                                    $$=NULL;
                                   }
                        }
                       g_list_free(options);
                     }
-                   Liberer_options($4);                                                    /* On libére les options "locales" */
-                   if ($3) g_free($3);
-                   g_free($2);
+                   Liberer_options($3);                                                    /* On libére les options "locales" */
                 }}
-                ;
-
-comparateur:    ordre ID suffixe
-                {{ $$ = New_comparateur();
-                   $$->ordre = $1;
-                   $$->token_classe = ID;
-                   if ($3)
-                    { $$->has_tech_id = TRUE;
-                      g_snprintf ( $$->tech_id, sizeof($$->tech_id), "%s", $2 );
-                      g_snprintf ( $$->acronyme, sizeof($$->acronyme), "%s", $3 );
-                    }
-                   else
-                    { $$->has_tech_id = FALSE;
-                      g_snprintf ( $$->acronyme, sizeof($$->acronyme), "%s", $2 );
-                    }
-                   if ($3) g_free($3);
-                   g_free($2);
-                }}
-                | ordre ENTIER
-                {{ $$ = New_comparateur();
-                   $$->ordre = $1;
-                   $$->token_classe = T_VALF;
-                   $$->valf = 1.0*$2;
-                }}
-                | ordre T_VALF
-                {{ $$ = New_comparateur();
-                   $$->ordre = $1;
-                   $$->token_classe = T_VALF;
-                   $$->valf = $2;
-                }}
-                | {{ $$=NULL; }}
                 ;
 
 barre:          BARRE {{ $$=1; }}
@@ -1132,6 +965,8 @@ un_alias:       ID
                 }}
                 | ID T_DPOINTS ID
                 {{ $$ = Get_alias_par_acronyme ( $1, $3 );
+                   if (!$$)
+                    { $$ = New_external_alias( $1, $3, NULL ); }                          /* Si dependance externe, on va chercher */
                    if (!$$)
                     { Emettre_erreur_new( "'%s:%s' is not defined", $1, $3 ); }
                    g_free($1);

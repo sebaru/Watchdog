@@ -118,16 +118,6 @@
 /* Entrées: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
- struct COMPARATEUR *New_comparateur( void )
-  { struct COMPARATEUR *comparateur;
-    comparateur=(struct COMPARATEUR *)g_try_malloc0( sizeof(struct COMPARATEUR) );
-    return(comparateur);
-  }
-/******************************************************************************************************************************/
-/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
-/* Entrées: rien                                                                                                              */
-/* Sortie: NULL si probleme                                                                                                   */
-/******************************************************************************************************************************/
  struct OPTION *New_option( void )
   { struct OPTION *option = g_try_malloc0( sizeof(struct OPTION) );
     if (!option)
@@ -271,36 +261,12 @@
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_sortie_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur )
+ gchar *New_condition_sortie_ana( int barre, struct ALIAS *alias, GList *options )
   { gchar *result;
-    gint taille;
-
-    if (!comparateur)                                                    /* Vérification des bits obligatoirement comparables */
-     { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser qu'avec une comparaison", DlsScanner_get_lineno(), alias->acronyme );
-       result=New_chaine(2);
-       g_snprintf( result, 2, "0" );
-       return(result);
-     }
-
-    taille = 256;
+    gint taille = 256;
     result = New_chaine( taille ); /* 10 caractères max */
-    switch(comparateur->ordre)
-     { case T_EGAL:      g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)==%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case INF:         g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)<%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case SUP:         g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)>%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case INF_OU_EGAL: g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)<=%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case SUP_OU_EGAL: g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)>=%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-     }
+    g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(result);
   }
 /******************************************************************************************************************************/
@@ -384,14 +350,14 @@
 /* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- struct ELEMENT *New_condition_comparateur( struct ELEMENT *element_g, gint ordre, struct ELEMENT element_d )
+ struct ELEMENT *New_condition_comparateur( struct ELEMENT *element_g, gint ordre, struct ELEMENT *element_d )
   { if (!element_g) return(NULL);
     if (!element_d) return(NULL);
 
     if (element_g->is_bool == TRUE ) { Emettre_erreur_new( "Boolean cannot be compared" ); return(NULL); }
     if (element_d->is_bool == TRUE ) { Emettre_erreur_new( "Boolean cannot be compared" ); return(NULL); }
 
-    struct ELEMENT *result = New_element ( TRUE, element_g->taille_alors + element_d->taille_alors + 10 );
+    struct ELEMENT *result = New_element ( TRUE, element_g->taille_alors + element_d->taille_alors + 10, 0 );
     if (!result) return(NULL);
 
     g_snprintf( result->alors, result->taille_alors, "%s", element_g->alors );
@@ -433,22 +399,9 @@
 /* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_simple( gint barre, gchar *id, gchar *suffixe, GList *options )
-  { gchar *tech_id, *acro;
-    struct ALIAS *alias;
-    if (suffixe) { tech_id = id; acro = suffixe; }
-            else { tech_id = NULL; acro = id; }
+ struct ELEMENT *New_condition_simple( gint barre, struct ALIAS *alias, GList *options )
+  { if (!alias) return(NULL);
 
-    alias = Get_alias_par_acronyme(tech_id,acro);                                                      /* On recupere l'alias */
-    if (!alias)
-     { alias = New_external_alias(tech_id,acro,NULL); }                          /* Si dependance externe, on va chercher */
-    if (!alias)
-     { if (tech_id) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );                 /* si l'alias n'existe pas */
-               else Emettre_erreur_new( "'%s' is not defined", acro );                             /* si l'alias n'existe pas */
-       return(NULL);
-     }
-
-#warning a virer
     if ( alias->classe!=MNEMO_TEMPO &&
          alias->classe!=MNEMO_ENTREE &&
          alias->classe!=MNEMO_BISTABLE &&
@@ -457,19 +410,22 @@
          alias->classe!=MNEMO_WATCHDOG &&
          alias->classe!=MNEMO_ENTREE_ANA
        )
-     { Emettre_erreur_new( "'%s' ne peut s'utiliser seul (avec une comparaison ?)", acro );
+     { Emettre_erreur_new( "'%s' ne peut s'utiliser seul (avec une comparaison ?)", alias->acronyme );
        return(NULL);
      }
 
-     switch(alias->classe)                                                 /* On traite que ce qui peut passer en "condition" */
-      { case MNEMO_TEMPO :     return ( New_condition_tempo( barre, alias, options ) );
-        case MNEMO_ENTREE:     return ( New_condition_entree( barre, alias, options ) );
-        case MNEMO_BISTABLE:   return ( New_condition_bi( barre, alias, options ) );
-        case MNEMO_MONOSTABLE: return ( New_condition_mono( barre, alias, options ) );
-        case MNEMO_HORLOGE:    return ( New_condition_horloge( barre, alias, options ) );
-        case MNEMO_WATCHDOG:   return ( New_condition_WATCHDOG( barre, alias, options ) );
-        case MNEMO_ENTREE_ANA: return ( New_condition_simple_entree_ana( barre, alias, options ) );
-
+    switch(alias->classe)                                                 /* On traite que ce qui peut passer en "condition" */
+     { case MNEMO_TEMPO :     return ( New_condition_tempo( barre, alias, options ) );
+       case MNEMO_ENTREE:     return ( New_condition_entree( barre, alias, options ) );
+       case MNEMO_BISTABLE:   return ( New_condition_bi( barre, alias, options ) );
+       case MNEMO_MONOSTABLE: return ( New_condition_mono( barre, alias, options ) );
+       case MNEMO_HORLOGE:    return ( New_condition_horloge( barre, alias, options ) );
+       case MNEMO_WATCHDOG:   return ( New_condition_WATCHDOG( barre, alias, options ) );
+       case MNEMO_ENTREE_ANA: return ( New_condition_simple_entree_ana( barre, alias, options ) );
+       case MNEMO_REGISTRE:
+       case MNEMO_CPT_IMP:
+       case MNEMO_CPTH:
+#ifdef bouh
           g_snprintf ( partie_g, sizeof(partie_g),
                        "( Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
                        "  (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
@@ -495,13 +451,13 @@
                        alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
           break;
 
-
-
+        }
+#endif
         default:
-         { Emettre_erreur_new( "'%s' n'est pas une condition valide", acro );
-           return(NULL);
+         { Emettre_erreur_new( "'%s' n'est pas une condition valide", alias->acronyme );
          }
-      }
+     }
+    return(NULL);
   }
 /******************************************************************************************************************************/
 /* New_calcul_PID: Calcul un PID                                                                                              */
@@ -644,7 +600,7 @@
 /* Entrées: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
- struct ELEMENT *New_element( gboolean is_bool, gint taille_alors, taille_sinon )
+ struct ELEMENT *New_element( gboolean is_bool, gint taille_alors, gint taille_sinon )
   { struct ELEMENT *element = g_try_malloc0( sizeof(struct ELEMENT) );
     if (!element) { return(NULL); }
     element->is_bool = FALSE;
@@ -659,6 +615,28 @@
        if (!element->sinon) { g_free(element); return(NULL); }
      }
     return(element);
+  }
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ void Del_action( struct ACTION *action )
+  { if (!action) return;
+    if (action->alors) g_free(action->alors);
+    if (action->sinon) g_free(action->sinon);
+    g_free(action);
+  }
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ void Del_element( struct ELEMENT *element )
+  { if (!element) return;
+    if (element->alors) g_free(element->alors);
+    if (element->sinon) g_free(element->sinon);
+    g_free(element);
   }
 /******************************************************************************************************************************/
 /* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
@@ -687,7 +665,7 @@
     element->is_bool = FALSE;
     element->alors = g_try_malloc0 ( element->taille_alors );
     if (!element->alors) { g_free(element); return(NULL); }
-    g_snprintf ( element->alors, taille, "%f", valf );
+    g_snprintf ( element->alors, element->taille_alors, "%f", valf );
     return(element);
   }
 /******************************************************************************************************************************/
@@ -1178,7 +1156,7 @@
     return(alias);
   }
 /******************************************************************************************************************************/
-/* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
+/* New_alias: Allouecomp une certaine quantité de mémoire pour utiliser des alias                                                 */
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/

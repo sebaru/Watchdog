@@ -54,19 +54,12 @@
           };
   };
 
- struct COMPARATEUR
-  { gint ordre;
-    gint token_classe;
-    gboolean has_tech_id;
-    gchar tech_id[32];
-    gchar acronyme[64];
-    gdouble valf;
-  };
-
  struct ELEMENT
   { gboolean is_bool;
     gint taille_alors;
+    gint taille_sinon;
     gchar *alors;
+    gchar *sinon;
   };
 
  struct ALIAS
@@ -83,13 +76,17 @@
  extern void Emettre( char *chaine );
  extern void Emettre_erreur_new( gchar *format, ... );
  extern void Emettre_init_alias( void );
- extern struct COMPARATEUR *New_comparateur( void );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern gchar *New_calcul_PID ( GList *options );
- extern gchar *New_condition_comparateur( gchar *id, gchar *suffixe, GList *options_g, struct COMPARATEUR *comparateur );
- extern gchar *New_condition_simple( gint barre, gchar *id, gchar *suffixe, GList *options );
+ extern struct ELEMENT *New_element_entier( gint entier );
+ extern struct ELEMENT *New_element_valf( gdouble valf );
+ extern struct ELEMENT *New_element( gboolean is_bool, gint taille_alors, gint taille_sinon );
+ extern void Del_element( struct ELEMENT *element );
+ extern struct ELEMENT *New_condition_comparateur( struct ELEMENT *element_g, gint ordre, struct ELEMENT *element_d );
+ extern struct ELEMENT *New_condition_simple( gint barre, struct ALIAS *alias, GList *options );
  extern gint Get_option_entier( GList *liste_options, gint token, gint defaut );
  extern struct ACTION *New_action( void );
+ extern void Del_action( struct ACTION *action );
  extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );
  extern struct ACTION *New_action_digital_output( struct ALIAS *alias, GList *options );
