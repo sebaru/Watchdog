@@ -384,146 +384,27 @@
 /* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_comparateur( gchar *id, gchar *suffixe, GList *options_g, struct COMPARATEUR *comparateur )
-  { struct ALIAS *alias_g, *alias_d;
-    gchar *tech_id_g, *acro_g, *tech_id_d, *acro_d;
+ struct ELEMENT *New_condition_comparateur( struct ELEMENT *element_g, gint ordre, struct ELEMENT element_d )
+  { if (!element_g) return(NULL);
+    if (!element_d) return(NULL);
 
-    if (suffixe) { tech_id_g = id;   acro_g = suffixe; }
-            else { tech_id_g = NULL; acro_g = id; }
+    if (element_g->is_bool == TRUE ) { Emettre_erreur_new( "Boolean cannot be compared" ); return(NULL); }
+    if (element_d->is_bool == TRUE ) { Emettre_erreur_new( "Boolean cannot be compared" ); return(NULL); }
 
-    alias_g = Get_alias_par_acronyme(tech_id_g,acro_g);                                                /* On recupere l'alias */
-    if (!alias_g)
-     { alias_g = New_external_alias(tech_id_g,acro_g,NULL); }                    /* Si dependance externe, on va chercher */
+    struct ELEMENT *result = New_element ( TRUE, element_g->taille_alors + element_d->taille_alors + 10 );
+    if (!result) return(NULL);
 
-    if (!alias_g)
-     { if (tech_id_g) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_g, acro_g );/* si l'alias n'existe pas */
-                 else Emettre_erreur_new( "'%s' is not defined", acro_g );          /* si l'alias n'existe pas */
-       return(NULL);
+    g_snprintf( result->alors, result->taille_alors, "%s", element_g->alors );
+
+    switch(ordre)
+     { case INF:         g_strlcat ( result->alors, " < ", result->taille_alors ); break;
+       case SUP:         g_strlcat ( result->alors, " > ", result->taille_alors ); break;
+       case INF_OU_EGAL: g_strlcat ( result->alors, " <= ", result->taille_alors ); break;
+       case SUP_OU_EGAL: g_strlcat ( result->alors, " >= ", result->taille_alors ); break;
+       case T_EGAL     : g_strlcat ( result->alors, " == ", result->taille_alors ); break;
      }
-
-    if (alias_g->classe!=MNEMO_SORTIE_ANA &&                     /* Vérification des bits non comparables */
-        alias_g->classe!=MNEMO_ENTREE_ANA &&
-        alias_g->classe!=MNEMO_REGISTRE &&
-        alias_g->classe!=MNEMO_CPT_IMP &&
-        alias_g->classe!=MNEMO_CPTH
-       )
-     { Emettre_erreur_new( "'%s:%s' n'est pas comparable", alias_g->tech_id, alias_g->acronyme );
-       return(NULL);
-     }
-
-    if (comparateur->token_classe == ID )
-     { if (comparateur->has_tech_id) { tech_id_d = comparateur->tech_id; acro_d = comparateur->acronyme; }
-                                else { tech_id_d = NULL;                 acro_d = comparateur->acronyme; }
-
-       alias_d = Get_alias_par_acronyme(tech_id_d,acro_d);                                             /* On recupere l'alias */
-       if (!alias_d)
-        { alias_d = New_external_alias(tech_id_d,acro_d,NULL); }                 /* Si dependance externe, on va chercher */
-
-       if (!alias_d)
-        { if (tech_id_d) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_d, acro_d );        /* si l'alias n'existe pas */
-                    else Emettre_erreur_new( "'%s' is not defined", acro_d );                      /* si l'alias n'existe pas */
-          return(NULL);
-        }
-
-       if (alias_d->classe!=MNEMO_SORTIE_ANA &&                     /* Vérification des bits non comparables */
-           alias_d->classe!=MNEMO_ENTREE_ANA &&
-           alias_d->classe!=MNEMO_REGISTRE &&
-           alias_d->classe!=MNEMO_CPT_IMP &&
-           alias_d->classe!=MNEMO_CPTH
-          )
-        { Emettre_erreur_new( "'%s:%s' n'est pas comparable", alias_d->tech_id, alias_d->acronyme );
-          return(NULL);
-        }
-     }
-
-    gchar partie_g[512], partie_d[512];
-    switch(alias_g->classe)                                                /* On traite que ce qui peut passer en "condition" */
-     { case MNEMO_ENTREE_ANA :
-        { gint in_range = Get_option_entier ( options_g, T_IN_RANGE, 0 );
-          if (in_range==1)
-           { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_g->acronyme );
-             return(NULL);
-           }
-          g_snprintf ( partie_g, sizeof(partie_g),
-                       "( Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
-                       "  (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme,
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-       case MNEMO_REGISTRE :
-        { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_REGISTRE (\"%s\",\"%s\",&_%s_%s) ",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-       case MNEMO_CPT_IMP :
-        { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-       case MNEMO_CPTH :
-        { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-              default:
-        { Emettre_erreur_new( "'%s:%s' n'est pas implémenté en comparaison", alias_g->tech_id, alias_g->acronyme );
-          return(NULL);
-        }
-     }
-
-    switch(comparateur->ordre)
-     { case INF:         g_strlcat ( partie_g, " < ", sizeof(partie_g) ); break;
-       case SUP:         g_strlcat ( partie_g, " > ", sizeof(partie_g) ); break;
-       case INF_OU_EGAL: g_strlcat ( partie_g, " <= ", sizeof(partie_g) ); break;
-       case SUP_OU_EGAL: g_strlcat ( partie_g, " >= ", sizeof(partie_g) ); break;
-       case T_EGAL     : g_strlcat ( partie_g, " == ", sizeof(partie_g) ); break;
-     }
-
-    if (comparateur->token_classe == ID)
-     { switch(alias_d->classe)                              /* On traite que ce qui peut passer en "condition" */
-        { case MNEMO_ENTREE_ANA :
-           { gint in_range = Get_option_entier ( alias_d->options, T_IN_RANGE, 0 );
-             if (in_range==1)
-              { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_d->acronyme ); }
-             g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)) && "
-                          " Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) )",
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme,
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
-             break;
-           }
-          case MNEMO_REGISTRE :
-           { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_REGISTRE (\"%s\",\"%s\",&_%s_%s) ) )",
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
-             break;
-           }
-          case MNEMO_CPT_IMP :
-           { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ) )",
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
-             break;
-           }
-          case MNEMO_CPTH :
-           { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ) )",
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
-             break;
-           }
-          default:
-           { Emettre_erreur_new( "'%s:%s' n'est pas implémenté en comparaison", alias_g->tech_id, alias_g->acronyme );
-             return(NULL);
-           }
-        }
-     }
-    else if (comparateur->token_classe == T_VALF)
-     { g_snprintf( partie_d, sizeof(partie_d), "%f) )", comparateur->valf ); }
-
-    return( g_strconcat( partie_g, partie_d, NULL ) );
+    g_strlcat ( result->alors, element_d->alors, result->taille_alors );
+    return( result );
   }
 /******************************************************************************************************************************/
 /* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
@@ -567,6 +448,7 @@
        return(NULL);
      }
 
+#warning a virer
     if ( alias->classe!=MNEMO_TEMPO &&
          alias->classe!=MNEMO_ENTREE &&
          alias->classe!=MNEMO_BISTABLE &&
@@ -587,6 +469,34 @@
         case MNEMO_HORLOGE:    return ( New_condition_horloge( barre, alias, options ) );
         case MNEMO_WATCHDOG:   return ( New_condition_WATCHDOG( barre, alias, options ) );
         case MNEMO_ENTREE_ANA: return ( New_condition_simple_entree_ana( barre, alias, options ) );
+
+          g_snprintf ( partie_g, sizeof(partie_g),
+                       "( Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
+                       "  (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme,
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+       case MNEMO_REGISTRE :
+        { g_snprintf ( partie_g, sizeof(partie_g),
+                       "( (Dls_data_get_REGISTRE (\"%s\",\"%s\",&_%s_%s) ",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+       case MNEMO_CPT_IMP :
+        { g_snprintf ( partie_g, sizeof(partie_g),
+                       "( (Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+        }
+       case MNEMO_CPTH :
+        { g_snprintf ( partie_g, sizeof(partie_g),
+                       "( (Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ",
+                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
+          break;
+
+
+
         default:
          { Emettre_erreur_new( "'%s' n'est pas une condition valide", acro );
            return(NULL);
@@ -728,6 +638,57 @@
     action->alors = NULL;
     action->sinon = NULL;
     return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct ELEMENT *New_element( gboolean is_bool, gint taille_alors, taille_sinon )
+  { struct ELEMENT *element = g_try_malloc0( sizeof(struct ELEMENT) );
+    if (!element) { return(NULL); }
+    element->is_bool = FALSE;
+    element->taille_alors = taille_alors;
+    element->taille_sinon = taille_sinon;
+    if (taille_alors)
+     { element->alors = g_try_malloc0 ( taille_alors );
+       if (!element->alors) { g_free(element); return(NULL); }
+     }
+    if (taille_sinon)
+     { element->sinon = g_try_malloc0 ( taille_sinon );
+       if (!element->sinon) { g_free(element); return(NULL); }
+     }
+    return(element);
+  }
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct ELEMENT *New_element_entier( gint entier )
+  { struct ELEMENT *element = g_try_malloc0( sizeof(struct ELEMENT) );
+    if (!element) { return(NULL); }
+    element->taille_alors = 32;
+    element->is_bool = FALSE;
+    element->alors = g_try_malloc0 ( element->taille_alors );
+    if (!element->alors) { g_free(element); return(NULL); }
+    g_snprintf ( element->alors, element->taille_alors, "%d", entier );
+    return(element);
+  }
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct ELEMENT *New_element_valf( gdouble valf )
+  { struct ELEMENT *element = g_try_malloc0( sizeof(struct ELEMENT) );
+    if (!element) { return(NULL); }
+    element->taille_alors = 32;
+    element->is_bool = FALSE;
+    element->alors = g_try_malloc0 ( element->taille_alors );
+    if (!element->alors) { g_free(element); return(NULL); }
+    g_snprintf ( element->alors, taille, "%f", valf );
+    return(element);
   }
 /******************************************************************************************************************************/
 /* New_action_msg_by_alias: Prepare une struct action avec une commande de type MSG                                           */

@@ -40,6 +40,7 @@
          struct ACTION *action;
          struct COMPARATEUR *comparateur;
          struct ALIAS *t_alias;
+         struct ELEMENT *t_element;
        };
 
 %token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV T_MOINS T_POUV T_PFERM T_EGAL T_PLUS ET BARRE T_FOIS
@@ -64,7 +65,7 @@
 
 %token <val>    T_BI T_MONO T_ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE
 %token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_ANALOG_INPUT T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
-%type  <val>    alias_classe
+%type  <val>    alias_classe test
 
 %token <val>    T_ROUGE T_VERT T_BLEU T_JAUNE T_NOIR T_BLANC T_ORANGE T_GRIS T_KAKI T_CYAN
 %type  <chaine>  couleur
@@ -73,14 +74,15 @@
 
 %token <val>    T_CADRAN T_MIN T_MAX T_SEUIL_NTB T_SEUIL_NB T_SEUIL_NH T_SEUIL_NTH T_DECIMAL
 
-%token <chaine> ID T_CHAINE
+%token <chaine> T_CHAINE
+%token <t_element> ID
 %token <val>    ENTIER
 %token <valf>   T_VALF
 
 %type  <val>         barre
 %type  <gliste>      liste_options options
 %type  <option>      une_option
-%type  <chaine>      unite facteur expr suffixe unSwitch listeCase une_instr listeInstr
+%type  <t_element>   unite facteur expr expr_2 suffixe unSwitch listeCase une_instr listeInstr
 %type  <action>      action une_action
 %type  <chaine>      calcul_expr calcul_expr2 calcul_expr3
 %type  <t_alias>     un_alias calcul_alias_result
@@ -220,7 +222,22 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    Liberer_options($4);
                    if ($2) g_free($2);
                 }}
-                | T_MOINS expr T_MOINS T_POUV calcul_expr T_PFERM DONNE calcul_alias_result PVIRGULE
+                | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
+                {{ int taille;
+                   if ($2 && $5)
+                    { taille = strlen($2)+strlen($5)+100;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille,
+                                  "/* Ligne %d une_instr if----------*/\nif(%s)\n { %s }\n\n",
+                                     DlsScanner_get_lineno(), $2, $5 );
+                    } else $$=NULL;
+                   if ($5) g_free($5);
+                   if ($2) g_free($2);
+                }}
+                | unSwitch {{ $$=$1; }}
+                ;
+
+test:             T_MOINS expr T_MOINS T_POUV expr T_PFERM DONNE calcul_alias_result PVIRGULE
                 {{ int taille;
                    if ($2 && $5 && $8)
                     { taille = strlen($5);
@@ -248,20 +265,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                    if ($5) g_free($5);
                    /* $8 est un alias, et ne doit pas etre g_freer */
                 }}
-                | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
-                {{ int taille;
-                   if ($2 && $5)
-                    { taille = strlen($2)+strlen($5)+100;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille,
-                                  "/* Ligne %d une_instr if----------*/\nif(%s)\n { %s }\n\n",
-                                     DlsScanner_get_lineno(), $2, $5 );
-                    } else $$=NULL;
-                   if ($5) g_free($5);
-                   if ($2) g_free($2);
-                }}
-                | unSwitch {{ $$=$1; }}
-                ;
+
 
 /****************************************************** Partie SWITCH *********************************************************/
 unSwitch:       T_SWITCH listeCase
@@ -374,7 +378,7 @@ calcul_expr3:   T_POUV calcul_expr T_PFERM {{ $$=$2; }}
                    g_snprintf( $$, taille, "%d", $1 );
                 }}
                 | T_PID liste_options
-                {{ $$ = New_calcul_PID ( $2 );
+                {{ $$ = NULL;
                 }}
                 | ID suffixe
                 {{ char *tech_id, *acro;
@@ -478,110 +482,141 @@ calcul_alias_result: ID
                 }}
                 ;
 /******************************************************* Partie LOGIQUE *******************************************************/
-expr:           expr T_PLUS facteur
+expr:           facteur T_PLUS facteur
                 {{ int taille;
-                   if ($1 && $3)
+                   /*if ($1 && $3)
                     { taille = strlen($1)+strlen($3)+7;
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille, "(%s || %s)", $1, $3 );
                     } else $$ = NULL;
                    if ($1) g_free($1);
-                   if ($3) g_free($3);
+                   if ($3) g_free($3);*/
                 }}
-
-                | facteur
-                ;
-facteur:        facteur ET unite
+                | facteur T_MOINS facteur
                 {{ int taille;
-                   if ($1 && $3)
+                   /*if ($1 && $3)
                     { taille = strlen($1)+strlen($3)+7;
                       $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "(%s && %s)", $1, $3 );
+                      g_snprintf( $$, taille, "(%s || %s)", $1, $3 );
+                    } else $$ = NULL;
+                   if ($1) g_free($1);
+                   if ($3) g_free($3);*/
+                }}
+                | facteur
+                ;
+facteur:        expr_2 ET expr_2
+                {{
+                }}
+                | expr_2 T_FOIS expr_2
+                {{
+                }}
+                | expr_2 BARRE expr_2
+                {{ if ($2 && $3)
+                    { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
+                       { Emettre_erreur_new( "Boolean not allowed within division" ); }
+                      else
+                       { taille = $1->taille_alors + $3->taille_alors + 3;
+                         $$ = New_element( TRUE, taille, 0 );
+                         if ($$)
+                          { g_snprintf( $$->alors, taille, "(%s/%s)", $1->alors, $3->alors ); }
+                       }
                     } else $$=NULL;
                    if ($1) g_free($1);
                    if ($3) g_free($3);
                 }}
-                | unite {{ $$ = $1; }}
+                | expr_2
                 ;
 
-unite:          modulateur ENTIER HEURE ENTIER
+
+expr_2:         unite ordre unite
                 {{ int taille;
-                   taille = 20;
-                   $$ = New_chaine(taille);
+                   $$ = New_condition_comparateur ( $1, $2, $3 );
+                   if ($1) g_free($1);
+                   if ($3) g_free($3);
+                }}
+                | unite
+                ;
+
+unite:          barre ID suffixe liste_options
+                {{ $$ = New_condition_simple ( $1, $2, $3, $4 ); }}
+                | T_VALF   {{ $$ = New_element_valf ( $1 );   }}
+                | ENTIER   {{ $$ = New_element_entier ( $1 ); }}
+                 | HEURE T_POUV modulateur ENTIER HEURE ENTIER T_PFERM
+                {{ int taille;
                    if ($2>23) $2=23;
+                   if ($2<0)  $2=0;
                    if ($4>59) $4=59;
-                   switch ($1)
-                    { case 0    : g_snprintf( $$, taille, "Heure(%d,%d)", $2, $4 );
-                                  break;
-                      case APRES: g_snprintf( $$, taille, "Heure_apres(%d,%d)", $2, $4 );
-                                  break;
-                      case AVANT: g_snprintf( $$, taille, "Heure_avant(%d,%d)", $2, $4 );
-                                  break;
+                   if ($4<0)  $4=0;
+                   taille = 20;
+                   $$ = New_element( TRUE, taille, 0 );
+                   if ($$)
+                    { switch ($1)
+                       { case 0    : g_snprintf( $$->alors, taille, "Heure(%d,%d)", $2, $4 );
+                                     break;
+                         case APRES: g_snprintf( $$->alors, taille, "Heure_apres(%d,%d)", $2, $4 );
+                                     break;
+                         case AVANT: g_snprintf( $$->alors, taille, "Heure_avant(%d,%d)", $2, $4 );
+                                     break;
+                       }
                     }
                 }}
                 | jour_semaine
                 {{ int taille;
                    taille = 18;
-                   $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "Jour_semaine(%d)", $1 );
+                   $$ = New_element( TRUE, taille, 0 );
+                   if ($$) g_snprintf( $$->alors, taille, "Jour_semaine(%d)", $1 );
                 }}
                 | T_START
                 {{ int taille;
                    taille = 20;
-                   $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "(vars->resetted)" );
+                   $$ = New_element( TRUE, taille, 0 );
+                   if ($$) g_snprintf( $$->alors, taille, "(vars->resetted)" );
                 }}
                 | T_TRUE
                 {{ int taille;
                    taille = 5;
-                   $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "(1)" );
+                   $$ = New_element( TRUE, taille, 0 );
+                   if ($$) g_snprintf( $$->alors, taille, "TRUE" );
                 }}
                 | T_FALSE
                 {{ int taille;
                    taille = 5;
-                   $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "(0)" );
+                   $$ = New_element( TRUE, taille, 0 );
+                   if ($$) g_snprintf( $$->alors, taille, "FALSE" );
                 }}
                 | barre T_TOP_ALERTE
                 {{ int taille;
                    taille = 25;
-                   $$ = New_chaine(taille);
-                   if ($1) g_snprintf( $$, taille, "(!Dls_get_top_alerte())" );
-                   else    g_snprintf( $$, taille, "( Dls_get_top_alerte())" );
+                   $$ = New_element( TRUE, taille, 0 );
+                   if ($$)
+                    { if ($1) g_snprintf( $$->alors, taille, "(!Dls_get_top_alerte())" );
+                      else    g_snprintf( $$->alors, taille, "( Dls_get_top_alerte())" );
+                    }
                 }}
                 | barre T_TOP_ALERTE_FUGITIVE
                 {{ int taille;
                    taille = 35;
-                   $$ = New_chaine(taille);
-                   if ($1) g_snprintf( $$, taille, "(!Dls_get_top_alerte_fugitive())" );
-                   else    g_snprintf( $$, taille, "( Dls_get_top_alerte_fugitive())" );
+                   $$ = New_element( TRUE, taille, 0 );
+                   if ($$)
+                    { if ($1) g_snprintf( $$->alors, taille, "(!Dls_get_top_alerte_fugitive())" );
+                      else    g_snprintf( $$->alors, taille, "( Dls_get_top_alerte_fugitive())" );
+                    }
                 }}
                 | barre T_POUV expr T_PFERM
                 {{ int taille;
                    if ($3)
-                    { taille = strlen($3)+5;
-                      $$ = New_chaine( taille );
-                      if ($1) { g_snprintf( $$, taille, "!(%s)", $3 ); }
-                      else    { g_snprintf( $$, taille, "(%s)", $3 ); }
+                    { if ($3->is_bool == FALSE) Emettre_erreur_new( "'!' allow only with boolean" );
+                      else
+                       { taille = $3->taille_alors+3;
+                         $$ = New_element( TRUE, taille, 0 );
+                         if ($1) { g_snprintf( $$->alors, taille, "!(%s)", $3->alors ); }
+                         else    { g_snprintf( $$->alors, taille, "(%s)", $3->alors ); }
+                       }
                     } else $$=NULL;
                    if ($3) g_free($3);
                 }}
 /************************************** Partie Logique : gestion des comparaisons *********************************************/
-                | barre ID suffixe liste_options comparateur                                            /* Gestion des comparaisons */
-                {{ if ($5)
-                    { if ($1)
-                       { Emettre_erreur_new( "'/' interdit dans une comparaison" );
-                         $$ = NULL;
-                       }
-                      else $$ = New_condition_comparateur ( $2, $3, $4, $5 );
-                    }
-                   else
-                    { $$ = New_condition_simple ( $1, $2, $3, $4 ); }
-                   g_free($2);                                                         /* On n'a plus besoin de l'identifiant */
-                   if ($3) g_free($3);                                                   /* Libération du prefixe s'il existe */
-                   Liberer_options($4);
-                }}
+
                 ;
 
 suffixe:          T_DPOINTS ID {{ $$=$2; }}

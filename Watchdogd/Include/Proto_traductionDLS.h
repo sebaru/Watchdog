@@ -63,6 +63,12 @@
     gdouble valf;
   };
 
+ struct ELEMENT
+  { gboolean is_bool;
+    gint taille_alors;
+    gchar *alors;
+  };
+
  struct ALIAS
   { gchar *tech_id;
     gchar *acronyme;
