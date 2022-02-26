@@ -213,137 +213,126 @@
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;
-    result = New_chaine( taille ); /* 10 caractères max */
+ static struct ELEMENT *New_condition_bi( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( TRUE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
     if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_BI_up ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_BI_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_BI_down ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_BI_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( result, taille, "%sDls_data_get_BI ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_BI ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-    return(result);
+    return(element);
   }
 /******************************************************************************************************************************/
 /* New_condition_entree: Prepare la chaine de caractere associée à la condition, en respectant les options                    */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_entree( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;
-    result = New_chaine( taille ); /* 10 caractères max */
+ static struct ELEMENT *New_condition_entree( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( TRUE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
     if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_DI_up ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_DI_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_DI_down ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_DI_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( result, taille, "%sDls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-    return(result);
+    return(element);
   }
 /******************************************************************************************************************************/
 /* New_condition_sortie_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_sortie_ana( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille = 256;
-    result = New_chaine( taille ); /* 10 caractères max */
-    g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)",
+ static struct ELEMENT *New_condition_sortie_ana( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( FALSE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
+    g_snprintf( element->alors, element->taille_alors, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-    return(result);
+    return(element);
   }
 /******************************************************************************************************************************/
 /* New_condition_mono: Prepare la chaine de caractere associée à la condition, en respectant les options                      */
 /* Entrées: l'alias du monostable et sa liste d'options                                                                       */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;
-    result = New_chaine( taille ); /* 10 caractères max */
+ static struct ELEMENT *New_condition_mono( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( TRUE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
     if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_MONO_up ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_MONO_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_MONO_down ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_MONO_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( result, taille, "%sDls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-   return(result);
+   return(element);
  }
 /******************************************************************************************************************************/
 /* New_condition_tempo: Prepare la chaine de caractere associée à la condition, en respectant les options                     */
 /* Entrées: l'alias de la temporisatio et sa liste d'options                                                                  */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 128;
-    result = New_chaine( taille );
-    g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_%s_%s )",
+ static struct ELEMENT *New_condition_tempo( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( TRUE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
+    g_snprintf( element->alors, element->taille_alors, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_%s_%s )",
                 (barre==1 ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-    return(result);
+    return(element);
   }
 /******************************************************************************************************************************/
 /* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
 /* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;                                                                               /* Alias par nom uniquement ! */
-    result = New_chaine( taille ); /* 10 caractères max */
-    if ( !barre )
-         { g_snprintf( result, taille, "Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
-                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-    else { g_snprintf( result, taille, "!Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
-                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-   return(result);
+ static struct ELEMENT *New_condition_horloge( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( TRUE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
+    if (!barre)
+     { g_snprintf( element->alors, element->taille_alors, "Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+    else
+     { g_snprintf( element->alors, element->taille_alors, "!Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+   return(element);
  }
 /******************************************************************************************************************************/
 /* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
 /* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_WATCHDOG( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;                                                                               /* Alias par nom uniquement ! */
-    result = New_chaine( taille ); /* 10 caractères max */
-    if ( !barre )
-         { g_snprintf( result, taille, "Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
-                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-    else { g_snprintf( result, taille, "!Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
-                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-   return(result);
+ static struct ELEMENT *New_condition_WATCHDOG( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( TRUE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
+    if (!barre)
+     { g_snprintf( element->alors, element->taille_alors, "Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+    else
+     { g_snprintf( element->alors, element->taille_alors, "!Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+   return(element);
  }
 /******************************************************************************************************************************/
 /* New_condition_comparateur: Prepare la chaine de caractere associée à la condition de comparateur                           */
@@ -377,22 +366,68 @@
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_simple_entree_ana( int barre, struct ALIAS *alias, GList *options )
-  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
-    gchar *result;
+ static struct ELEMENT *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( FALSE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
 
+    gint in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
     if (in_range==1)
-     { taille = 256;
-       result = New_chaine( taille ); /* 10 caractères max */
-       if (barre) g_snprintf( result, taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+     { if (barre) g_snprintf( element->alors, element->taille_alors, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
                               alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-             else g_snprintf( result, taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+             else g_snprintf( element->alors, element->taille_alors, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
                               alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-       return(result);
+       return(element);
      }
-    Emettre_erreur_new( "'%s' ne peut s'utiliser qu'avec une comparaison, ou avec l'option (in_range)",
-                        DlsScanner_get_lineno(), alias->acronyme );
-    return(NULL);
+    if (barre) g_snprintf( element->alors, element->taille_alors, "!Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+          else g_snprintf( element->alors, element->taille_alors, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+    return(element);
+  }
+/******************************************************************************************************************************/
+/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ static struct ELEMENT *New_condition_registre( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( FALSE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
+
+    if (barre) g_snprintf( element->alors, element->taille_alors, "!Dls_data_get_REGISTRE(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+          else g_snprintf( element->alors, element->taille_alors, "Dls_data_get_REGISTRE(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+    return(element);
+  }
+/******************************************************************************************************************************/
+/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ static struct ELEMENT *New_condition_CI( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( FALSE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
+
+    if (barre) g_snprintf( element->alors, element->taille_alors, "!Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+          else g_snprintf( element->alors, element->taille_alors, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+    return(element);
+  }
+/******************************************************************************************************************************/
+/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ static struct ELEMENT *New_condition_CH( int barre, struct ALIAS *alias, GList *options )
+  { struct ELEMENT *element = New_element( FALSE, 256, 0 ); /* 10 caractères max */
+    if (!element) return(NULL);
+
+    if (barre) g_snprintf( element->alors, element->taille_alors, "!Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+          else g_snprintf( element->alors, element->taille_alors, "Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+    return(element);
   }
 /******************************************************************************************************************************/
 /* New_condition_comparateur: Prepare la chaine de caractere associée à la condition de comparateur                           */
@@ -421,41 +456,13 @@
        case MNEMO_MONOSTABLE: return ( New_condition_mono( barre, alias, options ) );
        case MNEMO_HORLOGE:    return ( New_condition_horloge( barre, alias, options ) );
        case MNEMO_WATCHDOG:   return ( New_condition_WATCHDOG( barre, alias, options ) );
-       case MNEMO_ENTREE_ANA: return ( New_condition_simple_entree_ana( barre, alias, options ) );
-       case MNEMO_REGISTRE:
-       case MNEMO_CPT_IMP:
-       case MNEMO_CPTH:
-#ifdef bouh
-          g_snprintf ( partie_g, sizeof(partie_g),
-                       "( Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
-                       "  (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme,
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-       case MNEMO_REGISTRE :
-        { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_REGISTRE (\"%s\",\"%s\",&_%s_%s) ",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-       case MNEMO_CPT_IMP :
-        { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-       case MNEMO_CPTH :
-        { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-
-        }
-#endif
-        default:
-         { Emettre_erreur_new( "'%s' n'est pas une condition valide", alias->acronyme );
-         }
+       case MNEMO_ENTREE_ANA: return ( New_condition_entree_ana( barre, alias, options ) );
+       case MNEMO_SORTIE_ANA: return ( New_condition_sortie_ana( barre, alias, options ) );
+       case MNEMO_REGISTRE:   return ( New_condition_registre( barre, alias, options ) );
+       case MNEMO_CPT_IMP:    return ( New_condition_CI( barre, alias, options ) );
+       case MNEMO_CPTH:       return ( New_condition_CH( barre, alias, options ) );
+       default:
+        { Emettre_erreur_new( "'%s' n'est pas une condition valide", alias->acronyme ); }
      }
     return(NULL);
   }
