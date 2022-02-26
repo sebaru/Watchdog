@@ -64,7 +64,7 @@
 
 %token <val>    T_BI T_MONO T_ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE
 %token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_ANALOG_INPUT T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
-%type  <val>    alias_classe test
+%type  <val>    alias_classe
 
 %token <val>    T_ROUGE T_VERT T_BLEU T_JAUNE T_NOIR T_BLANC T_ORANGE T_GRIS T_KAKI T_CYAN
 %type  <chaine>  couleur
@@ -84,7 +84,7 @@
 %type  <t_element>   unite facteur expr expr_2
 %type  <chaine>      unSwitch listeCase une_instr listeInstr
 %type  <action>      action une_action
-%type  <t_alias>     un_alias calcul_alias_result
+%type  <t_alias>     un_alias
 
 %%
 fichier: ligne_source_dls;
@@ -157,7 +157,26 @@ listeInstr:     une_instr listeInstr
 une_instr:      T_MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    if ($2 && $2->is_bool == FALSE)
-                    { Emettre_erreur_new( "Boolean is left mandatory" ); }
+                    { taille = $2->alors;
+                      taille+= strlen($4->tech_id);
+                      taille+= strlen($4->acronyme);
+                      taille+= 256;
+                      $$ = New_chaine( taille );
+                      if ($4 && $4->classe==MNEMO_SORTIE_ANA)
+                       { g_snprintf( $$, taille,
+                                     "vars->num_ligne = %d; /* une_instr-------------*/\n"
+                                     "if(%s)\n { Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
+                                     DlsScanner_get_lineno(), $2->alors, $4->tech_id, $4->acronyme, $4->tech_id, $4->acronyme, $5 );
+                       }
+                      else if ($4 && $4->classe==MNEMO_REGISTRE)
+                       { g_snprintf( $$, taille,
+                                     "vars->num_ligne = %d; /* une_instr-------------*/\n"
+                                     "if(%s)\n { Dls_data_set_REGISTRE ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
+                                     DlsScanner_get_lineno(), $2->alors, $4->tech_id, $4->acronyme, $4->tech_id, $4->acronyme, $5 );
+                       }
+                      else
+                       { Emettre_erreur_new( "Line mix boolean and float" ); }
+                    }
                    else if ($2 && $4)
                     { taille = strlen($2->alors)+strlen($4->alors)+100;
                       if ($4->sinon)
@@ -173,11 +192,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                                      DlsScanner_get_lineno(), $2->alors, $4->alors );
                        }
                     } else $$=NULL;
-                   if ($4)
-                    { if ($4->sinon) g_free($4->sinon);
-                      g_free($4->alors);
-                      g_free($4);
-                    }
+                   Del_action($4);
                    Del_element($2);
                 }}
                 | T_MOINS expr T_DIFFERE options DONNE action PVIRGULE
@@ -218,9 +233,7 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                                   Get_option_entier($4, T_DAA, 0), $6->alors,
                                   Get_option_entier($4, T_DAD, 0),($6->sinon ? $6->sinon : "") );
                      } else $$=NULL;
-                   if ($6 && $6->sinon) g_free($6->sinon);
-                   if ($6 && $6->alors) g_free($6->alors);
-                   if ($6) g_free($6);
+                   Del_action($6);
                    Liberer_options($4);
                    Del_element($2);
                 }}
@@ -240,36 +253,6 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                 }}
                 | unSwitch {{ $$=$1; }}
                 ;
-
-test:             T_MOINS expr T_MOINS T_POUV expr T_PFERM DONNE calcul_alias_result PVIRGULE
-                {{ int taille;
-                   if ($2 && $5 && $8)
-                    { taille = strlen($5);
-                      taille+= strlen($2);
-                      taille+= strlen($8->tech_id);
-                      taille+= strlen($8->acronyme);
-                      taille+= 256;
-                      $$ = New_chaine( taille );
-                      if ($8->classe==MNEMO_SORTIE_ANA)
-                       { g_snprintf( $$, taille,
-                                     "vars->num_ligne = %d; /* une_instr-------------*/\n"
-                                     "if(%s)\n { Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
-                                     DlsScanner_get_lineno(), $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
-                       }
-                      else if ($8->classe==MNEMO_REGISTRE)
-                       { g_snprintf( $$, taille,
-                                     "vars->num_ligne = %d; /* une_instr-------------*/\n"
-                                     "if(%s)\n { Dls_data_set_REGISTRE ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
-                                     DlsScanner_get_lineno(), $2, $8->tech_id, $8->acronyme, $8->tech_id, $8->acronyme, $5 );
-                       }
-                      else
-                       { Emettre_erreur_new( "'%s:%s' is unknown", $8->tech_id, $8->acronyme ); }
-                    } else $$=g_strdup("/* test ! */");
-                   if ($2) g_free($2);
-                   if ($5) g_free($5);
-                   /* $8 est un alias, et ne doit pas etre g_freer */
-                }}
-
 
 /****************************************************** Partie SWITCH *********************************************************/
 unSwitch:       T_SWITCH listeCase
@@ -320,31 +303,6 @@ listeCase:      T_PIPE T_MOINS expr DONNE action PVIRGULE listeCase
                    Del_action($4);
                 }}
                 | {{ $$=NULL; }}
-                ;
-/****************************************************** Partie CALCUL *********************************************************/
-
-calcul_alias_result: un_alias
-                {{ struct ALIAS *alias;
-                   alias = Get_alias_par_acronyme(NULL,$1);                                            /* On recupere l'alias */
-                   if (alias)
-                    { switch(alias->classe)                              /* On traite que ce qui peut passer en "condition" */
-                       { case MNEMO_REGISTRE:
-                         case MNEMO_SORTIE_ANA:
-                          { $$ = alias;
-                            break;
-                          }
-                         default:
-                          { Emettre_erreur_new( "'%s' ne peut s'utiliser dans un résultat de calcul", $1 );
-                            $$=NULL;
-                          }
-                       }
-                    }
-                   else
-                    { Emettre_erreur_new( "'%s' is not defined", $1 );
-                      $$=NULL;
-                    }
-                   g_free($1);                                     /* On n'a plus besoin de l'identifiant */
-                }}
                 ;
 /******************************************************* Partie LOGIQUE *******************************************************/
 expr:           facteur T_PLUS facteur
@@ -441,15 +399,14 @@ unite:          barre un_alias liste_options
                    if ($2<0)  $2=0;
                    if ($4>59) $4=59;
                    if ($4<0)  $4=0;
-                   taille = 20;
-                   $$ = New_element( TRUE, taille, 0 );
+                   $$ = New_element( TRUE, 20, 0 );
                    if ($$)
                     { switch ($1)
-                       { case 0    : g_snprintf( $$->alors, taille, "Heure(%d,%d)", $2, $4 );
+                       { case 0    : g_snprintf( $$->alors, $$->taille_alors, "Heure(%d,%d)", $2, $4 );
                                      break;
-                         case APRES: g_snprintf( $$->alors, taille, "Heure_apres(%d,%d)", $2, $4 );
+                         case APRES: g_snprintf( $$->alors, $$->taille_alors, "Heure_apres(%d,%d)", $2, $4 );
                                      break;
-                         case AVANT: g_snprintf( $$->alors, taille, "Heure_avant(%d,%d)", $2, $4 );
+                         case AVANT: g_snprintf( $$->alors, $$->taille_alors, "Heure_avant(%d,%d)", $2, $4 );
                                      break;
                        }
                     }
