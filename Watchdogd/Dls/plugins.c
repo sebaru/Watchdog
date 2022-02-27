@@ -426,13 +426,6 @@
         { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE, "resetted" ); }
      }
 
-    liste_bit = Partage->Dls_data_DO;                                            /* Decharge toutes les sorties TOR du module */
-    while(liste_bit)
-     { struct DLS_DO *dout = liste_bit->data;
-       liste_bit = g_slist_next(liste_bit);
-       if (!strcasecmp(dout->tech_id, plugin->tech_id))
-        { Dls_data_set_DO ( &plugin->vars, dout->tech_id, dout->acronyme, (gpointer *)&dout, FALSE ); }
-     }
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
 /******************************************************************************************************************************/

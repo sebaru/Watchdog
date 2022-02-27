@@ -807,7 +807,6 @@ printf("%s: New comment : %s\n", __func__, comment );
      }
     else if ( !strcasecmp ( forme, "bouton" ) )
      { gchar *mode = Json_get_string ( visuel, "mode" );
-       if (!strcasecmp ( mode, "disabled" )) Json_node_add_string ( visuel, "color", "grey" );
        trame_motif->pixbuf = Trame_Make_svg_bouton ( Json_get_string ( visuel, "color" ), Json_get_string ( visuel, "libelle" ) );
      }
     else if ( !strcasecmp ( forme, "comment" ) )

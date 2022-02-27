@@ -50,9 +50,46 @@
     struct passwd *pwd;
     gchar *db_schema;
 
+    if (msg->method == SOUP_METHOD_GET)
+     { SoupMessageHeaders *headers;
+       g_object_get ( G_OBJECT(msg), "response_headers", &headers, NULL );
+
+       gchar fichier[128];
+       g_snprintf ( fichier, sizeof(fichier), "%s/install.html", WTD_PKGDATADIR );
+
+       if (stat (fichier, &stat_buf)==-1)
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : File '%s' not found", __func__, fichier );
+          soup_message_set_status_full ( msg, SOUP_STATUS_NOT_FOUND, "File not found" );
+          return;
+        }
+
+       gint   taille_result = stat_buf.st_size;
+       gchar *result        = g_try_malloc ( taille_result );
+       if (!result)
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : File '%s' malloc error", __func__, fichier );
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
+          return;
+        }
+
+       gint fd = open ( fichier, O_RDONLY );
+       if (fd==-1)
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : File '%s' open error '%s'", __func__, fichier, strerror(errno) );
+          g_free(result);
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Open Error" );
+          return;
+        }
+       read ( fd, result, taille_result );
+       close(fd);
+
+       soup_message_headers_append ( headers, "cache-control", "private, max-age=86400" );
+       soup_message_set_response ( msg, "text/html; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result );
+       soup_message_set_status (msg, SOUP_STATUS_OK);
+       return;
+     }
+
     if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       return;
      }
 
     g_snprintf ( fichier, sizeof(fichier), "/etc/watchdogd.abls.conf" );

@@ -48,7 +48,7 @@
           else { g_snprintf(date, sizeof(date), "Erreur"); }
 
     JsonNode *element = Json_node_create();
-    Json_node_add_int    ( element, "dls_id",    dls->id );
+    Json_node_add_int    ( element, "dls_id",    dls->dls_id );
     Json_node_add_string ( element, "tech_id",   dls->tech_id );
     Json_node_add_string ( element, "shortname", dls->shortname );
     Json_node_add_string ( element, "name" ,     dls->nom );
@@ -383,7 +383,7 @@
      }
 
     if (SQL_Select_to_json_node ( RootNode, NULL,
-                                 "SELECT d.*, s.page FROM dls AS d INNER JOIN syns AS s ON d.syn_id=syn_id "
+                                 "SELECT d.*, s.page FROM dls AS d INNER JOIN syns AS s ON d.syn_id=s.syn_id "
                                  "WHERE tech_id='%s' AND s.access_level<='%d'", tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        json_node_unref ( RootNode );

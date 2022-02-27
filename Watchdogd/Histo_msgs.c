@@ -35,7 +35,6 @@
 
  #include "watchdogd.h"
 
-
 /******************************************************************************************************************************/
 /* Modifier_Ajouter_histo_msgsDB: Ajout ou modifier un enregistrement MSGS de la base de données                              */
 /* Entrée: un flag d'ajout et un enregistrement à modifier                                                                    */
@@ -54,7 +53,7 @@
        return(FALSE);
      }
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s as histo INNER JOIN msgs as msg ON msg.id = histo.msg_id"
+                "UPDATE %s as histo INNER JOIN msgs AS msg ON msg.msg_id = histo.msg_id"
                 " SET nom_ack='%s',date_fixe='%s'"
                 " WHERE histo.alive=1 and msg.tech_id='%s' AND msg.acronyme='%s'",
                 NOM_TABLE_HISTO_MSGS, nom_ack, date_fixe, tech_id, acronyme );
@@ -86,7 +85,7 @@
 
     SQL_Write_new ( "INSERT INTO %s(alive,msg_id,date_create,libelle)"
                     " VALUES ('%d','%d','%s','%s') ON DUPLICATE KEY UPDATE date_create=VALUES(`date_create`)",
-                    NOM_TABLE_HISTO_MSGS, TRUE, Json_get_int ( histo, "id" ), Json_get_string( histo, "date_create" ), libelle );
+                    NOM_TABLE_HISTO_MSGS, TRUE, Json_get_int ( histo, "msg_id" ), Json_get_string( histo, "date_create" ), libelle );
     g_free(libelle);
     /* Json_node_add_bool ( histo, "sql_last_id", Recuperer_last_ID_SQL ( db ); */
     return(TRUE);

@@ -49,12 +49,11 @@
 
 <div class="container-sm">
 <header>
-	<nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
+<nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
   <a class="navbar-brand" href="wiki.abls-habitat.fr"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-
 </nav>
 </header>
 
@@ -74,80 +73,80 @@
  </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Nommez votre habitat</label>
-						     <input id="idInstallDescription" type="text" class="form-control" placeholder="Ma Maison">
-     					</div>
-  					</div>
+         <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Nommez votre habitat</label>
+           <input id="idInstallDescription" type="text" class="form-control" placeholder="Ma Maison">
+         </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Database Hostname</label>
-						     <input id="idInstallDBHostname" type="text" class="form-control" value="localhost">
-     					</div>
-  					</div>
+         <div class="input-group">
+         <label class="col-5 col-sm-4 col-form-label text-right">Database Hostname</label>
+         <input id="idInstallDBHostname" type="text" class="form-control" value="localhost">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Database Port</label>
-						     <input id="idInstallDBPort" type="number" min="0" max="65535" class="form-control" value="3306">
-     					</div>
-  					</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <div class="input-group">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <label class="col-5 col-sm-4 col-form-label text-right">Database Port</label>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <input id="idInstallDBPort" type="number" min="0" max="65535" class="form-control" value="3306">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Database Name</label>
-						     <input id="idInstallDBDatabase" type="text" class="form-control" value="WatchdogDB">
-     					</div>
-  					</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <div class="input-group">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <label class="col-5 col-sm-4 col-form-label text-right">Database Name</label>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <input id="idInstallDBDatabase" type="text" class="form-control" value="WatchdogDB">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Database Username</label>
-						     <input id="idInstallDBUsername" type="text" class="form-control" value="watchdog">
-     					</div>
-  					</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <div class="input-group">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <label class="col-5 col-sm-4 col-form-label text-right">Database Username</label>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <input id="idInstallDBUsername" type="text" class="form-control" value="watchdog">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Database Password</label>
-						     <input id="idInstallDBPassword" type="password" class="form-control" placeholder="Database Password">
-     					</div>
-  					</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <div class="input-group">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <label class="col-5 col-sm-4 col-form-label text-right">Database Password</label>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <input id="idInstallDBPassword" type="password" class="form-control" placeholder="Database Password">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Run_As</label>
-						     <input id="idInstallRunAs" type="text" class="form-control" value="watchdog">
-     					</div>
-  					</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <div class="input-group">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <label class="col-5 col-sm-4 col-form-label text-right">Run_As</label>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <input id="idInstallRunAs" type="text" class="form-control" value="watchdog">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Use SubDirectory</label>
-						       <select id="idInstallUseSubdir" class="custom-select">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <div class="input-group">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <label class="col-5 col-sm-4 col-form-label text-right">Use SubDirectory</label>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         <select id="idInstallUseSubdir" class="custom-select">
                <option value="0" selected>Non</option>
                <option value="1">Oui</option>
              </select>
-     					</div>
-  					</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Instance Maitre</label>
-						       <select id="idInstallIsMaster" class="custom-select">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <div class="input-group">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <label class="col-5 col-sm-4 col-form-label text-right">Instance Maitre</label>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         <select id="idInstallIsMaster" class="custom-select">
                <option value="1" selected>Oui</option>
                <option value="0">Non</option>
              </select>
-     					</div>
-  					</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Master Host</label>
-						     <input id="idInstallMasterHost" type="text" class="form-control" placeholder="Hostname de l'instance Master si celle-ci est un slave">
-     					</div>
-  					</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <div class="input-group">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <label class="col-5 col-sm-4 col-form-label text-right">Master Host</label>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <input id="idInstallMasterHost" type="text" class="form-control" placeholder="Hostname de l'instance Master si celle-ci est un slave">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               </div>
 
 
 <!-- Footer -->

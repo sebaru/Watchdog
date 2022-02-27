@@ -120,7 +120,7 @@
                              "dls_id='%d', mnemo_id=(SELECT id FROM mnemos_VISUEL WHERE tech_id='%s' AND acronyme='%s'), "
                              "posx='150', posy='150', angle='0', scale='1' "
                              "ON DUPLICATE KEY UPDATE mnemo_id=mnemo_id",
-                             plugin->id, target_tech_id, target_acro );
+                             plugin->dls_id, target_tech_id, target_acro );
     g_free(target_tech_id);
     g_free(target_acro);
     return (retour);

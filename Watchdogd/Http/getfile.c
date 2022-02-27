@@ -106,8 +106,8 @@
     gboolean has_template;
 
     if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+      return;
      }
 
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
@@ -263,7 +263,7 @@
     SoupMessageHeaders *headers;
     g_object_get ( G_OBJECT(msg), "response_headers", &headers, NULL );
 
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
          if ( g_str_has_suffix (path, ".js") )
      { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result );
        soup_message_headers_append ( headers, "cache-control", "private, max-age=60" );
