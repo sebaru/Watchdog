@@ -39,10 +39,11 @@
       };
 
  struct ACTION
-  { gchar *alors;                                                          /* Chaine pointant sur le nom du tableau (B/M/E..) */
+  { gint taille_alors;
+    gchar *alors;                                                          /* Chaine pointant sur le nom du tableau (B/M/E..) */
+    gint taille_sinon;
     gchar *sinon;
   };
-
 
  struct OPTION
   { gint token;
@@ -54,12 +55,16 @@
           };
   };
 
- struct ELEMENT
+ struct CONDITION
   { gboolean is_bool;
-    gint taille_alors;
-    gint taille_sinon;
-    gchar *alors;
-    gchar *sinon;
+    gint taille;
+    gchar *chaine;
+  };
+
+ struct INSTRUCTION
+  { struct CONDITION *condition;
+    GList *options;
+    struct ACTION *actions;
   };
 
  struct ALIAS
@@ -78,15 +83,17 @@
  extern void Emettre_init_alias( void );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern gchar *New_calcul_PID ( GList *options );
- extern struct ELEMENT *New_element_entier( gint entier );
- extern struct ELEMENT *New_element_valf( gdouble valf );
- extern struct ELEMENT *New_element( gboolean is_bool, gint taille_alors, gint taille_sinon );
- extern void Del_element( struct ELEMENT *element );
- extern struct ELEMENT *New_condition_comparateur( struct ELEMENT *element_g, gint ordre, struct ELEMENT *element_d );
- extern struct ELEMENT *New_condition_simple( gint barre, struct ALIAS *alias, GList *options );
+ extern struct CONDITION *New_condition_entier( gint entier );
+ extern struct CONDITION *New_condition_valf( gdouble valf );
+ extern struct CONDITION *New_condition( gboolean is_bool, gint taille );
+ extern struct INSTRUCTION *New_instruction( struct CONDITION *condition, GList *options, struct ACTION *actions );
+ extern void Del_instruction( struct INSTRUCTION *instr );
+ extern void Del_condition( struct CONDITION *condition );
+ extern void Del_actions( struct ACTION *action );
+ extern struct CONDITION *New_condition_comparaison( struct CONDITION *condition_g, gint ordre, struct CONDITION *condition_d );
+ extern struct CONDITION *New_condition_alias( gint barre, struct ALIAS *alias, GList *options );
  extern gint Get_option_entier( GList *liste_options, gint token, gint defaut );
  extern struct ACTION *New_action( void );
- extern void Del_action( struct ACTION *action );
  extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );
  extern struct ACTION *New_action_digital_output( struct ALIAS *alias, GList *options );

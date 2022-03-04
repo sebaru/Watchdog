@@ -39,7 +39,8 @@
          struct OPTION *option;
          struct ACTION *action;
          struct ALIAS *t_alias;
-         struct ELEMENT *t_element;
+         struct CONDITION *t_condition;
+         struct INSTRUCTION *t_instruction;
        };
 
 %token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV T_MOINS T_POUV T_PFERM T_EGAL T_PLUS ET BARRE T_FOIS
@@ -81,24 +82,24 @@
 %type  <val>         barre
 %type  <gliste>      liste_options options
 %type  <option>      une_option
-%type  <t_element>   unite facteur expr expr_2
-%type  <chaine>      unSwitch listeCase une_instr listeInstr
-%type  <action>      action une_action
+%type  <t_condition>   unite facteur expr expr_2
+%type  <chaine>      listeCase listeInstr
+%type  <t_instruction> une_instr
+%type  <action>      liste_action une_action
 %type  <t_alias>     un_alias
 
 %%
 fichier: ligne_source_dls;
 
 ligne_source_dls:         listeDefinitions listeInstr {{ if($2) { Emettre( $2 ); g_free($2); } }}
-                        | listeDefinitions
-                        | listeInstr {{ if($1) { Emettre( $1 ); g_free($1); } }}
-                        |
+                       /* | listeDefinitions
+                        | listeInstr {{ if($1) { Emettre( $1 ); g_free($1); } }}*/
                         ;
 
 /*************************************************** Gestion des alias ********************************************************/
 listeDefinitions:
                   une_definition listeDefinitions
-                | une_definition
+                | {{ }}
                 ;
 
 une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
@@ -142,69 +143,30 @@ alias_classe:     T_BI             {{ $$=MNEMO_BISTABLE;       }}
 
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
-                {{ if ($1 && $2)
-                    { int taille = strlen($1) + strlen($2) + 1;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille, "%s%s", $1, $2 );
-                    } else $$ = NULL;
-                   if ($1) g_free($1);
-                   if ($2) g_free($2);
-                }}
-                | une_instr
-                {{ $$=$1; }}
-                ;
-
-une_instr:      T_MOINS expr DONNE action PVIRGULE
-                {{ int taille;
-                   if ($2 && $2->is_bool == FALSE)
-                    { taille = $2->alors;
-                      taille+= strlen($4->tech_id);
-                      taille+= strlen($4->acronyme);
-                      taille+= 256;
-                      $$ = New_chaine( taille );
-                      if ($4 && $4->classe==MNEMO_SORTIE_ANA)
-                       { g_snprintf( $$, taille,
-                                     "vars->num_ligne = %d; /* une_instr-------------*/\n"
-                                     "if(%s)\n { Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
-                                     DlsScanner_get_lineno(), $2->alors, $4->tech_id, $4->acronyme, $4->tech_id, $4->acronyme, $5 );
-                       }
-                      else if ($4 && $4->classe==MNEMO_REGISTRE)
-                       { g_snprintf( $$, taille,
-                                     "vars->num_ligne = %d; /* une_instr-------------*/\n"
-                                     "if(%s)\n { Dls_data_set_REGISTRE ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n }\n",
-                                     DlsScanner_get_lineno(), $2->alors, $4->tech_id, $4->acronyme, $4->tech_id, $4->acronyme, $5 );
-                       }
-                      else
-                       { Emettre_erreur_new( "Line mix boolean and float" ); }
+                {{ if ($1 && $1->condition->is_bool == FALSE && $2)
+                    { gint taille = $1->condition->taille + $1->actions->taille_alors + 256;
+                      $$ = New_chaine( taille + strlen($2) );
+                      g_snprintf( $$, taille,
+                                  "vars->num_ligne = %d; /* une_instr FLOAT-------*/\n"
+                                  " { gdouble local_result=%s;\n"
+                                  "   %s\n"
+                                  " }\n %s\n", DlsScanner_get_lineno(), $1->condition->chaine, $1->actions->alors, $2 );
                     }
-                   else if ($2 && $4)
-                    { taille = strlen($2->alors)+strlen($4->alors)+100;
-                      if ($4->sinon)
-                       { taille += (strlen($4->sinon) + 10);
-                         $$ = New_chaine( taille );
-                         g_snprintf( $$, taille,
-                                     "vars->num_ligne = %d; /* une_instr-------------*/\nif(%s)\n { %s }\nelse\n { %s }\n\n",
-                                     DlsScanner_get_lineno(), $2->alors, $4->alors, $4->sinon );
-                       }
-                      else
-                       { $$ = New_chaine( taille );
-                         g_snprintf( $$, taille, "vars->num_ligne = %d;/* une_instr-------------*/\nif(%s)\n { %s }\n\n",
-                                     DlsScanner_get_lineno(), $2->alors, $4->alors );
-                       }
-                    } else $$=NULL;
-                   Del_action($4);
-                   Del_element($2);
-                }}
-                | T_MOINS expr T_DIFFERE options DONNE action PVIRGULE
-                {{ int taille;
-                   if ($2 && $2->is_bool == FALSE)
-                    { Emettre_erreur_new( "Boolean is left mandatory" ); }
-                   else if ($2 && $6)
-                    { taille = strlen($2->alors)+strlen($6->alors)+1024;
-                      if ($6->sinon) taille += strlen($6->sinon);
+                   else if ($1 && $1->condition->is_bool == TRUE && $2)
+                    { gint taille = $1->condition->taille + $1->actions->taille_alors + $1->actions->taille_sinon + strlen($2)+256;
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
-                                  "vars->num_ligne = %d; /* une_instr différée----------*/\n"
+                                  "vars->num_ligne = %d; /* une_instr BOOL--------*/\n"
+                                  " if (%s)\n {\n %s\n }\n else\n {\n %s\n }\n %s\n",
+                                  DlsScanner_get_lineno(), $1->condition->chaine, $1->actions->alors, $1->actions->sinon, $2 );
+                    } else $$=NULL;
+/*else if ($2 && $6)
+                    { gchar *alors = Liste_action_to_string_alors ( $6 );
+                      gchar *sinon = Liste_action_to_string_sinon ( $6 );
+                      gint taille = strlen($2->alors)+strlen(alors)+strlen(sinon)+1024;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille,
+                                  "vars->num_ligne = %d; * une_instr différée----------*\n"
                                   " { static gboolean counting_on=FALSE;\n"
                                   "   static gboolean counting_off=FALSE;\n"
                                   "   static gint top;\n"
@@ -230,32 +192,17 @@ une_instr:      T_MOINS expr DONNE action PVIRGULE
                                   "    }\n"
                                   " }\n\n",
                                   DlsScanner_get_lineno(), $2->alors,
-                                  Get_option_entier($4, T_DAA, 0), $6->alors,
-                                  Get_option_entier($4, T_DAD, 0),($6->sinon ? $6->sinon : "") );
+                                  Get_option_entier($4, T_DAA, 0), alors,
+                                  Get_option_entier($4, T_DAD, 0), sinon );
+                       g_free(alors);
+                       g_free(sinon);
                      } else $$=NULL;
-                   Del_action($6);
-                   Liberer_options($4);
-                   Del_element($2);
+*/
+                   Del_instruction($1);
+                   if ($2) g_free($2);
                 }}
-                | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
-                {{ int taille;
-                   if ($2 && $2->is_bool == FALSE)
-                    { Emettre_erreur_new( "Boolean is left mandatory" ); }
-                   else if ($2 && $5)
-                    { taille = strlen($2->alors)+strlen($5)+100;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille,
-                                  "/* Ligne %d une_instr if----------*/\nif(%s)\n { %s }\n\n",
-                                     DlsScanner_get_lineno(), $2->alors, $5 );
-                    } else $$=NULL;
-                   if ($5) g_free($5);
-                   Del_element($2);
-                }}
-                | unSwitch {{ $$=$1; }}
-                ;
-
 /****************************************************** Partie SWITCH *********************************************************/
-unSwitch:       T_SWITCH listeCase
+                | T_SWITCH listeCase listeInstr
                 {{ gint taille;
                    if ($2)
                     { taille = strlen($2);
@@ -272,35 +219,52 @@ unSwitch:       T_SWITCH listeCase
                     } else $$=NULL;
                    if ($2) g_free($2);
                 }}
+                | {{ }}
                 ;
 
-listeCase:      T_PIPE T_MOINS expr DONNE action PVIRGULE listeCase
+une_instr:      T_MOINS expr DONNE liste_action PVIRGULE
+                {{ $$=New_instruction ( $2, NULL, $4 ); }}
+                | T_MOINS expr T_DIFFERE options DONNE liste_action PVIRGULE
+                {{ $$=New_instruction ( $2, $4, $6 ); }}
+/*                | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
                 {{ int taille;
-                   if ($3 && $3->is_bool == FALSE)
+                   if ($2 && $2->is_bool == FALSE)
                     { Emettre_erreur_new( "Boolean is left mandatory" ); }
-                   else if ($3 && $5 && $7)
-                    { taille = strlen($3->alors)+strlen($5->alors)+strlen($7)+100;
-                      if ($5->sinon) taille+=strlen($5->sinon);
+                   else if ($2 && $5)
+                    { taille = strlen($2->alors)+strlen($5)+100;
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille,
+                                  "* Ligne %d une_instr if----------*\nif(%s)\n { %s }\n\n",
+                                     DlsScanner_get_lineno(), $2->alors, $5 );
+                    } else $$=NULL;
+                   if ($5) g_free($5);
+                   Del_condition($2);
+                }}*/
+                ;
+
+listeCase:      T_PIPE une_instr listeCase
+                {{ if ($2 && $2->condition && $2->condition->is_bool == FALSE) { Emettre_erreur_new( "Boolean is left mandatory" ); }
+                   else if ($2 && $3)
+                    { gint taille = $2->actions->taille_alors+$2->actions->taille_sinon+$2->condition->taille+256 + strlen($3);
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
                                   "/* Ligne %d (CASE INSIDE)----------*/\n"
                                   "if(%s)\n { %s }\nelse\n { %s\n%s }\n",
-                                  DlsScanner_get_lineno(), $3->alors, $5->alors, ($5->sinon ? $5->sinon : ""), $7 );
+                                  DlsScanner_get_lineno(), $2->condition->chaine, $2->actions->alors,
+                                  ($2->actions->sinon ? $2->actions->sinon : ""), ($3 ? $3 : "") );
                     } else $$=NULL;
-                   Del_element($3);
-                   Del_action($5);
-                   if ($7) g_free($7);
+                   Del_instruction($2);
+                   if ($3) g_free($3);
                 }}
-                | T_PIPE T_MOINS DONNE action PVIRGULE
-                {{ int taille;
-                   if ($4)
-                    { taille = strlen($4->alors)+100;
+                | T_PIPE T_MOINS DONNE liste_action PVIRGULE
+                {{ if ($4)
+                    { gint taille = $4->taille_alors+100;
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
                                   "/* Ligne %d (CASE INSIDE DEFAULT)--*/\n"
-                                 "  %s", DlsScanner_get_lineno(), $4->alors );
+                                  "  %s", DlsScanner_get_lineno(), $4->alors );
                     } else $$=NULL;
-                   Del_action($4);
+                   Del_actions($4);
                 }}
                 | {{ $$=NULL; }}
                 ;
@@ -310,28 +274,28 @@ expr:           facteur T_PLUS facteur
                     { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
                        { Emettre_erreur_new( "Boolean mandatory in AND" ); }
                       else
-                       { gint taille = $1->taille_alors + $3->taille_alors + 6;
-                         $$ = New_element( TRUE, taille, 0 );
+                       { gint taille = $1->taille + $3->taille + 6;
+                         $$ = New_condition( TRUE, taille );
                          if ($$)
-                          { g_snprintf( $$->alors, taille, "(%s || %s)", $1->alors, $3->alors ); }
+                          { g_snprintf( $$->chaine, taille, "(%s || %s)", $1->chaine, $3->chaine ); }
                        }
                     } else $$=NULL;
-                   Del_element($1);
-                   Del_element($3);
+                   Del_condition($1);
+                   Del_condition($3);
                 }}
                 | facteur T_MOINS facteur
                 {{ if ($2 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
                        { Emettre_erreur_new( "Boolean not allowed within -" ); }
                       else
-                       { gint taille = $1->taille_alors + $3->taille_alors + 3;
-                         $$ = New_element( TRUE, taille, 0 );
+                       { gint taille = $1->taille + $3->taille + 3;
+                         $$ = New_condition( TRUE, taille );
                          if ($$)
-                          { g_snprintf( $$->alors, taille, "(%s-%s)", $1->alors, $3->alors ); }
+                          { g_snprintf( $$->chaine, taille, "(%s-%s)", $1->chaine, $3->chaine ); }
                        }
                     } else $$=NULL;
-                   Del_element($1);
-                   Del_element($3);
+                   Del_condition($1);
+                   Del_condition($3);
                 }}
                 | facteur
                 ;
@@ -340,73 +304,72 @@ facteur:        expr_2 ET expr_2
                     { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
                        { Emettre_erreur_new( "Boolean mandatory in AND" ); }
                       else
-                       { gint taille = $1->taille_alors + $3->taille_alors + 6;
-                         $$ = New_element( TRUE, taille, 0 );
+                       { gint taille = $1->taille + $3->taille + 6;
+                         $$ = New_condition( TRUE, taille );
                          if ($$)
-                          { g_snprintf( $$->alors, taille, "(%s && %s)", $1->alors, $3->alors ); }
+                          { g_snprintf( $$->chaine, taille, "(%s && %s)", $1->chaine, $3->chaine ); }
                        }
                     } else $$=NULL;
-                   Del_element($1);
-                   Del_element($3);
+                   Del_condition($1);
+                   Del_condition($3);
                 }}
                 | expr_2 T_FOIS expr_2
                 {{ if ($2 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
                        { Emettre_erreur_new( "Boolean not allowed within *" ); }
                       else
-                       { gint taille = $1->taille_alors + $3->taille_alors + 3;
-                         $$ = New_element( TRUE, taille, 0 );
+                       { gint taille = $1->taille + $3->taille + 3;
+                         $$ = New_condition( TRUE, taille );
                          if ($$)
-                          { g_snprintf( $$->alors, taille, "(%s*%s)", $1->alors, $3->alors ); }
+                          { g_snprintf( $$->chaine, taille, "(%s*%s)", $1->chaine, $3->chaine ); }
                        }
                     } else $$=NULL;
-                   Del_element($1);
-                   Del_element($3);
+                   Del_condition($1);
+                   Del_condition($3);
                 }}
                 | expr_2 BARRE expr_2
                 {{ if ($2 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
                        { Emettre_erreur_new( "Boolean not allowed within /" ); }
                       else
-                       { gint taille = $1->taille_alors + $3->taille_alors + 36;
-                         $$ = New_element( TRUE, taille, 0 );
+                       { gint taille = $1->taille + $3->taille + 36;
+                         $$ = New_condition( TRUE, taille );
                          if ($$)
-                          { g_snprintf( $$->alors, taille, "(%s==0.0 ? 1.0 : (%s/%s))", $3->alors, $1->alors, $3->alors ); }
+                          { g_snprintf( $$->chaine, taille, "(%s==0.0 ? 1.0 : (%s/%s))", $3->chaine, $1->chaine, $3->chaine ); }
                        }
                     } else $$=NULL;
-                   Del_element($1);
-                   Del_element($3);
+                   Del_condition($1);
+                   Del_condition($3);
                 }}
                 | expr_2
                 ;
 
 
 expr_2:         unite ordre unite
-                {{ $$ = New_condition_comparateur ( $1, $2, $3 );
-                   Del_element($1);
-                   Del_element($3);
+                {{ $$ = New_condition_comparaison ( $1, $2, $3 );
+                   Del_condition($1);
+                   Del_condition($3);
                 }}
                 | unite
                 ;
 
 unite:          barre un_alias liste_options
-                {{ $$ = New_condition_simple ( $1, $2, $3 ); }}
-                | T_VALF   {{ $$ = New_element_valf ( $1 );   }}
-                | ENTIER   {{ $$ = New_element_entier ( $1 ); }}
-                 | HEURE T_POUV modulateur ENTIER HEURE ENTIER T_PFERM
-                {{ int taille;
-                   if ($2>23) $2=23;
+                {{ $$ = New_condition_alias ( $1, $2, $3 ); }}
+                | T_VALF   {{ $$ = New_condition_valf ( $1 );   }}
+                | ENTIER   {{ $$ = New_condition_entier ( $1 ); }}
+                | HEURE T_POUV modulateur ENTIER T_DPOINTS ENTIER T_PFERM
+                {{ if ($2>23) $2=23;
                    if ($2<0)  $2=0;
                    if ($4>59) $4=59;
                    if ($4<0)  $4=0;
-                   $$ = New_element( TRUE, 20, 0 );
+                   $$ = New_condition( TRUE, 20 );
                    if ($$)
                     { switch ($1)
-                       { case 0    : g_snprintf( $$->alors, $$->taille_alors, "Heure(%d,%d)", $2, $4 );
+                       { case 0    : g_snprintf( $$->chaine, $$->taille, "Heure(%d,%d)", $2, $4 );
                                      break;
-                         case APRES: g_snprintf( $$->alors, $$->taille_alors, "Heure_apres(%d,%d)", $2, $4 );
+                         case APRES: g_snprintf( $$->chaine, $$->taille, "Heure_apres(%d,%d)", $2, $4 );
                                      break;
-                         case AVANT: g_snprintf( $$->alors, $$->taille_alors, "Heure_avant(%d,%d)", $2, $4 );
+                         case AVANT: g_snprintf( $$->chaine, $$->taille, "Heure_avant(%d,%d)", $2, $4 );
                                      break;
                        }
                     }
@@ -414,43 +377,43 @@ unite:          barre un_alias liste_options
                 | jour_semaine
                 {{ int taille;
                    taille = 18;
-                   $$ = New_element( TRUE, taille, 0 );
-                   if ($$) g_snprintf( $$->alors, taille, "Jour_semaine(%d)", $1 );
+                   $$ = New_condition( TRUE, taille );
+                   if ($$) g_snprintf( $$->chaine, taille, "Jour_semaine(%d)", $1 );
                 }}
                 | T_START
                 {{ int taille;
                    taille = 20;
-                   $$ = New_element( TRUE, taille, 0 );
-                   if ($$) g_snprintf( $$->alors, taille, "(vars->resetted)" );
+                   $$ = New_condition( TRUE, taille );
+                   if ($$) g_snprintf( $$->chaine, taille, "(vars->resetted)" );
                 }}
                 | T_TRUE
                 {{ int taille;
                    taille = 5;
-                   $$ = New_element( TRUE, taille, 0 );
-                   if ($$) g_snprintf( $$->alors, taille, "TRUE" );
+                   $$ = New_condition( TRUE, taille );
+                   if ($$) g_snprintf( $$->chaine, taille, "TRUE" );
                 }}
                 | T_FALSE
                 {{ int taille;
                    taille = 5;
-                   $$ = New_element( TRUE, taille, 0 );
-                   if ($$) g_snprintf( $$->alors, taille, "FALSE" );
+                   $$ = New_condition( TRUE, taille );
+                   if ($$) g_snprintf( $$->chaine, taille, "FALSE" );
                 }}
                 | barre T_TOP_ALERTE
                 {{ int taille;
                    taille = 25;
-                   $$ = New_element( TRUE, taille, 0 );
+                   $$ = New_condition( TRUE, taille );
                    if ($$)
-                    { if ($1) g_snprintf( $$->alors, taille, "(!Dls_get_top_alerte())" );
-                      else    g_snprintf( $$->alors, taille, "( Dls_get_top_alerte())" );
+                    { if ($1) g_snprintf( $$->chaine, taille, "(!Dls_get_top_alerte())" );
+                      else    g_snprintf( $$->chaine, taille, "( Dls_get_top_alerte())" );
                     }
                 }}
                 | barre T_TOP_ALERTE_FUGITIVE
                 {{ int taille;
                    taille = 35;
-                   $$ = New_element( TRUE, taille, 0 );
+                   $$ = New_condition( TRUE, taille );
                    if ($$)
-                    { if ($1) g_snprintf( $$->alors, taille, "(!Dls_get_top_alerte_fugitive())" );
-                      else    g_snprintf( $$->alors, taille, "( Dls_get_top_alerte_fugitive())" );
+                    { if ($1) g_snprintf( $$->chaine, taille, "(!Dls_get_top_alerte_fugitive())" );
+                      else    g_snprintf( $$->chaine, taille, "( Dls_get_top_alerte_fugitive())" );
                     }
                 }}
                 | barre T_POUV expr T_PFERM
@@ -458,10 +421,10 @@ unite:          barre un_alias liste_options
                    if ($3)
                     { if ($3->is_bool == FALSE) Emettre_erreur_new( "'!' allow only with boolean" );
                       else
-                       { taille = $3->taille_alors+3;
-                         $$ = New_element( TRUE, taille, 0 );
-                         if ($1) { g_snprintf( $$->alors, taille, "!(%s)", $3->alors ); }
-                         else    { g_snprintf( $$->alors, taille, "(%s)", $3->alors ); }
+                       { taille = $3->taille+3;
+                         $$ = New_condition( TRUE, taille );
+                         if ($1) { g_snprintf( $$->chaine, taille, "!(%s)", $3->chaine ); }
+                         else    { g_snprintf( $$->chaine, taille, "(%s)", $3->chaine ); }
                        }
                     } else $$=NULL;
                    if ($3) g_free($3);
@@ -471,27 +434,16 @@ unite:          barre un_alias liste_options
 
 
 /************************************************* Gestion des actions ********************************************************/
-action:         action VIRGULE une_action
-                {{ int taille;
-                   $$=New_action();
-                   taille = strlen($1->alors)+strlen($3->alors)+1;
-                   $$->alors = New_chaine( taille );
-                   g_snprintf( $$->alors, taille, "%s%s", $1->alors, $3->alors );
-                   taille = 1;
-                   if ($1->sinon) taille += strlen($1->sinon);
-                   if ($3->sinon) taille += strlen($3->sinon);
-                   if (taille>1)
-                    { $$->sinon = New_chaine( taille );
-                      if ($1->sinon && $3->sinon)
-                       { g_snprintf( $$->sinon, taille, "%s%s", $1->sinon, $3->sinon ); }
-                      else if ($1->sinon)
-                       { g_snprintf( $$->sinon, taille, "%s", $1->sinon ); }
-                      else
-                       { g_snprintf( $$->sinon, taille, "%s", $3->sinon ); }
-                    }
-                   g_free($1->alors); if ($1->sinon) { g_free($1->sinon); }
-                   g_free($3->alors); if ($3->sinon) { g_free($3->sinon); }
-                   g_free($1); g_free($3);
+liste_action:   liste_action VIRGULE une_action
+                {{ if ($1 && $3)
+                    { $$ = New_action();
+                      $$->alors = g_strconcat ( $1->alors, $3->alors, NULL );
+                      if ($$->alors) $$->taille_alors = strlen($$->alors);
+                      $$->sinon = g_strconcat ( $1->sinon, $3->sinon, NULL );
+                      if ($$->sinon) $$->taille_sinon = strlen($$->sinon);
+                    } else $$=NULL;
+                   Del_actions ($1);
+                   Del_actions ($3);
                 }}
                 | une_action {{ $$=$1; }}
                 ;
