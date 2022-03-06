@@ -72,7 +72,14 @@
        <div class="col form-group">
          <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">Domain ID</label>
-           <input id="idDomainID" type="text" class="form-control" placeholder="Domain ID">
+           <input id="idDOMAINID" type="text" class="form-control" placeholder="Domain ID">
+         </div>
+       </div>
+
+       <div class="col form-group">
+         <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">API URL</label>
+           <input id="idAPIURL" type="text" class="form-control" placeholder="https://api.abls-habitat.fr">
          </div>
        </div>
 
@@ -94,7 +101,8 @@
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  async function Installer ()
   { var json_request =
-     { domainID: $('#idDomainID').val(),
+     { domainID: $('#idDOMAINID').val(),
+       apiURL  : $('#idAPIURL').val(),
      };
     $('#idSpinner').show();
     $('#idAction').text("Please Wait !")
