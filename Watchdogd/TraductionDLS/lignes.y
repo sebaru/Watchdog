@@ -89,11 +89,7 @@
 %type  <t_alias>     un_alias
 
 %%
-fichier: ligne_source_dls;
-
-ligne_source_dls:         listeDefinitions listeInstr {{ if($2) { Emettre( $2 ); g_free($2); } }}
-                       /* | listeDefinitions
-                        | listeInstr {{ if($1) { Emettre( $1 ); g_free($1); } }}*/
+fichier: listeDefinitions listeInstr {{ if($2) { Emettre( $2 ); g_free($2); } }}
                         ;
 
 /*************************************************** Gestion des alias ********************************************************/
@@ -129,7 +125,7 @@ alias_classe:     T_BI             {{ $$=MNEMO_BISTABLE;       }}
                 | SORTIE           {{ $$=MNEMO_SORTIE;         }}
                 | T_MSG            {{ $$=MNEMO_MSG;            }}
                 | T_TEMPO          {{ $$=MNEMO_TEMPO;          }}
-                | T_VISUEL         {{ $$=MNEMO_VISUEL;          }}
+                | T_VISUEL         {{ $$=MNEMO_VISUEL;         }}
                 | T_CPT_H          {{ $$=MNEMO_CPTH;           }}
                 | T_CPT_IMP        {{ $$=MNEMO_CPT_IMP;        }}
                 | T_ANALOG_INPUT   {{ $$=MNEMO_ENTREE_ANA;     }}
@@ -209,17 +205,18 @@ listeInstr:     une_instr listeInstr
                       if (taille==0)
                        { Emettre_erreur_new( "Switch sans action" ); }
                       else
-                       { taille += 100;
+                       { taille += strlen($3) + 100;
                          $$ = New_chaine( taille );
                          g_snprintf( $$, taille, "/* Ligne %d (CASE BEGIN)------------*/\n"
                                                  "%s\n"
-                                                 "/* Ligne %d (CASE END)--------------*/\n",
-                                                 DlsScanner_get_lineno(), $2, DlsScanner_get_lineno() );
+                                                 "/* Ligne %d (CASE END)--------------*/\n %s\n",
+                                                 DlsScanner_get_lineno(), $2, DlsScanner_get_lineno(), ($3 ? $3 : "") );
                        }
                     } else $$=NULL;
                    if ($2) g_free($2);
+                   if ($3) g_free($3);
                 }}
-                | {{ }}
+                | {{ $$=NULL; }}
                 ;
 
 une_instr:      T_MOINS expr DONNE liste_action PVIRGULE
@@ -243,8 +240,9 @@ une_instr:      T_MOINS expr DONNE liste_action PVIRGULE
                 ;
 
 listeCase:      T_PIPE une_instr listeCase
-                {{ if ($2 && $2->condition && $2->condition->is_bool == FALSE) { Emettre_erreur_new( "Boolean is left mandatory" ); }
-                   else if ($2 && $3)
+                {{ if ($2 && $2->condition && $2->condition->is_bool == FALSE)
+                    { Emettre_erreur_new( "Boolean is left mandatory" ); $$=NULL; }
+                   else if ($2)
                     { gint taille = $2->actions->taille_alors+$2->actions->taille_sinon+$2->condition->taille+256 + strlen($3);
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
@@ -252,7 +250,7 @@ listeCase:      T_PIPE une_instr listeCase
                                   "if(%s)\n { %s }\nelse\n { %s\n%s }\n",
                                   DlsScanner_get_lineno(), $2->condition->chaine, $2->actions->alors,
                                   ($2->actions->sinon ? $2->actions->sinon : ""), ($3 ? $3 : "") );
-                    } else $$=NULL;
+                    }
                    Del_instruction($2);
                    if ($3) g_free($3);
                 }}
@@ -270,26 +268,27 @@ listeCase:      T_PIPE une_instr listeCase
                 ;
 /******************************************************* Partie LOGIQUE *******************************************************/
 expr:           facteur T_PLUS facteur
-                {{ if ($2 && $3)
-                    { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
-                       { Emettre_erreur_new( "Boolean mandatory in AND" ); }
+                {{ if ($1 && $3)
+                    { if ($1->is_bool != $3->is_bool)
+                       { Emettre_erreur_new( "Mixing Bool and Float is forbidden" ); $$=NULL; }
                       else
-                       { gint taille = $1->taille + $3->taille + 6;
-                         $$ = New_condition( TRUE, taille );
-                         if ($$)
-                          { g_snprintf( $$->chaine, taille, "(%s || %s)", $1->chaine, $3->chaine ); }
+                       { $$ = New_condition( $1->is_bool, $1->taille + $3->taille + 6 );
+                         if ($$ && $1->is_bool)
+                          { g_snprintf( $$->chaine, $$->taille, "(%s || %s)", $1->chaine, $3->chaine ); }
+                        else
+                          { g_snprintf( $$->chaine, $$->taille, "(%s+%s)", $1->chaine, $3->chaine ); }
                        }
                     } else $$=NULL;
                    Del_condition($1);
                    Del_condition($3);
                 }}
                 | facteur T_MOINS facteur
-                {{ if ($2 && $3)
+                {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
-                       { Emettre_erreur_new( "Boolean not allowed within -" ); }
+                       { Emettre_erreur_new( "Boolean not allowed within -" ); $$=NULL; }
                       else
                        { gint taille = $1->taille + $3->taille + 3;
-                         $$ = New_condition( TRUE, taille );
+                         $$ = New_condition( FALSE, taille );
                          if ($$)
                           { g_snprintf( $$->chaine, taille, "(%s-%s)", $1->chaine, $3->chaine ); }
                        }
@@ -300,40 +299,38 @@ expr:           facteur T_PLUS facteur
                 | facteur
                 ;
 facteur:        expr_2 ET expr_2
-                {{ if ($2 && $3)
+                {{ if ($1 && $3)
                     { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
-                       { Emettre_erreur_new( "Boolean mandatory in AND" ); }
+                       { Emettre_erreur_new( "Boolean mandatory in AND" ); $$=NULL; }
                       else
-                       { gint taille = $1->taille + $3->taille + 6;
-                         $$ = New_condition( TRUE, taille );
+                       { $$ = New_condition( TRUE, $1->taille + $3->taille + 6 );
                          if ($$)
-                          { g_snprintf( $$->chaine, taille, "(%s && %s)", $1->chaine, $3->chaine ); }
+                          { g_snprintf( $$->chaine, $$->taille, "(%s && %s)", $1->chaine, $3->chaine ); }
                        }
                     } else $$=NULL;
                    Del_condition($1);
                    Del_condition($3);
                 }}
                 | expr_2 T_FOIS expr_2
-                {{ if ($2 && $3)
+                {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
-                       { Emettre_erreur_new( "Boolean not allowed within *" ); }
+                       { Emettre_erreur_new( "Float mandatory in *" ); $$=NULL; }
                       else
-                       { gint taille = $1->taille + $3->taille + 3;
-                         $$ = New_condition( TRUE, taille );
+                       { $$ = New_condition( FALSE, $1->taille + $3->taille + 3 );
                          if ($$)
-                          { g_snprintf( $$->chaine, taille, "(%s*%s)", $1->chaine, $3->chaine ); }
+                          { g_snprintf( $$->chaine, $$->taille, "(%s*%s)", $1->chaine, $3->chaine ); }
                        }
                     } else $$=NULL;
                    Del_condition($1);
                    Del_condition($3);
                 }}
                 | expr_2 BARRE expr_2
-                {{ if ($2 && $3)
+                {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
-                       { Emettre_erreur_new( "Boolean not allowed within /" ); }
+                       { Emettre_erreur_new( "Boolean not allowed within /" ); $$=NULL; }
                       else
                        { gint taille = $1->taille + $3->taille + 36;
-                         $$ = New_condition( TRUE, taille );
+                         $$ = New_condition( FALSE, taille );
                          if ($$)
                           { g_snprintf( $$->chaine, taille, "(%s==0.0 ? 1.0 : (%s/%s))", $3->chaine, $1->chaine, $3->chaine ); }
                        }
@@ -354,7 +351,9 @@ expr_2:         unite ordre unite
                 ;
 
 unite:          barre un_alias liste_options
-                {{ $$ = New_condition_alias ( $1, $2, $3 ); }}
+                {{ $$ = New_condition_alias ( $1, $2, $3 );
+                   if($$==NULL) Liberer_options($3);
+                }}
                 | T_VALF   {{ $$ = New_condition_valf ( $1 );   }}
                 | ENTIER   {{ $$ = New_condition_entier ( $1 ); }}
                 | HEURE T_POUV modulateur ENTIER T_DPOINTS ENTIER T_PFERM
@@ -375,36 +374,26 @@ unite:          barre un_alias liste_options
                     }
                 }}
                 | jour_semaine
-                {{ int taille;
-                   taille = 18;
-                   $$ = New_condition( TRUE, taille );
-                   if ($$) g_snprintf( $$->chaine, taille, "Jour_semaine(%d)", $1 );
+                {{ $$ = New_condition( TRUE, 18 );
+                   if ($$) g_snprintf( $$->chaine, $$->taille, "Jour_semaine(%d)", $1 );
                 }}
                 | T_START
-                {{ int taille;
-                   taille = 20;
-                   $$ = New_condition( TRUE, taille );
-                   if ($$) g_snprintf( $$->chaine, taille, "(vars->resetted)" );
+                {{ $$ = New_condition( TRUE, 20 );
+                   if ($$) g_snprintf( $$->chaine, $$->taille, "(vars->resetted)" );
                 }}
                 | T_TRUE
-                {{ int taille;
-                   taille = 5;
-                   $$ = New_condition( TRUE, taille );
-                   if ($$) g_snprintf( $$->chaine, taille, "TRUE" );
+                {{ $$ = New_condition( TRUE, 5 );
+                   if ($$) g_snprintf( $$->chaine, $$->taille, "TRUE" );
                 }}
                 | T_FALSE
-                {{ int taille;
-                   taille = 5;
-                   $$ = New_condition( TRUE, taille );
-                   if ($$) g_snprintf( $$->chaine, taille, "FALSE" );
+                {{ $$ = New_condition( TRUE, 5 );
+                   if ($$) g_snprintf( $$->chaine, $$->taille, "FALSE" );
                 }}
                 | barre T_TOP_ALERTE
-                {{ int taille;
-                   taille = 25;
-                   $$ = New_condition( TRUE, taille );
+                {{ $$ = New_condition( TRUE, 25 );
                    if ($$)
-                    { if ($1) g_snprintf( $$->chaine, taille, "(!Dls_get_top_alerte())" );
-                      else    g_snprintf( $$->chaine, taille, "( Dls_get_top_alerte())" );
+                    { if ($1) g_snprintf( $$->chaine, $$->taille, "(!Dls_get_top_alerte())" );
+                      else    g_snprintf( $$->chaine, $$->taille, "( Dls_get_top_alerte())" );
                     }
                 }}
                 | barre T_TOP_ALERTE_FUGITIVE
@@ -417,17 +406,15 @@ unite:          barre un_alias liste_options
                     }
                 }}
                 | barre T_POUV expr T_PFERM
-                {{ int taille;
-                   if ($3)
-                    { if ($3->is_bool == FALSE) Emettre_erreur_new( "'!' allow only with boolean" );
+                {{ if ($3)
+                    { if ($1 && $3->is_bool == FALSE) Emettre_erreur_new( "'!' allow only with boolean" );
                       else
-                       { taille = $3->taille+3;
-                         $$ = New_condition( TRUE, taille );
-                         if ($1) { g_snprintf( $$->chaine, taille, "!(%s)", $3->chaine ); }
-                         else    { g_snprintf( $$->chaine, taille, "(%s)", $3->chaine ); }
+                       { $$ = New_condition( $3->is_bool, $3->taille+3 );
+                         if ($1) { g_snprintf( $$->chaine, $$->taille, "!(%s)", $3->chaine ); }
+                         else    { g_snprintf( $$->chaine, $$->taille, "(%s)", $3->chaine ); }
                        }
                     } else $$=NULL;
-                   if ($3) g_free($3);
+                   Del_condition($3);
                 }}
 /************************************** Partie Logique : gestion des comparaisons *********************************************/
 
@@ -445,7 +432,11 @@ liste_action:   liste_action VIRGULE une_action
                    Del_actions ($1);
                    Del_actions ($3);
                 }}
-                | une_action {{ $$=$1; }}
+                | une_action
+                {{ $$=$1;
+                   if ($$->alors) $$->taille_alors = strlen($$->alors);
+                   if ($$->sinon) $$->taille_sinon = strlen($$->sinon);
+                }}
                 ;
 
 une_action:     T_NOP

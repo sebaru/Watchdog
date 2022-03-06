@@ -611,11 +611,12 @@
   { struct CONDITION *condition = g_try_malloc0( sizeof(struct CONDITION) );
     if (!condition) { return(NULL); }
     condition->is_bool = FALSE;
-    condition->taille = taille;
+    condition->taille = taille+1;
     if (taille)
      { condition->chaine = g_try_malloc0 ( taille );
        if (!condition->chaine) { g_free(condition); return(NULL); }
      }
+    Info_new ( Config.log, TRUE, LOG_WARNING, "%s: %s (%d)", __func__, condition->chaine, taille );
     return(condition);
   }
 /******************************************************************************************************************************/
@@ -623,23 +624,15 @@
 /* Entrées: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
- void Del_action( struct ACTION *action )
-  { if (!action) return;
-    if (action->alors) g_free(action->alors);
-    if (action->sinon) g_free(action->sinon);
-    g_free(action);
-  }
-/******************************************************************************************************************************/
-/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
-/* Entrées: rien                                                                                                              */
-/* Sortie: NULL si probleme                                                                                                   */
-/******************************************************************************************************************************/
  struct INSTRUCTION *New_instruction( struct CONDITION *condition, GList *options, struct ACTION *actions )
-  { struct INSTRUCTION *instr = g_try_malloc0( sizeof(struct INSTRUCTION) );
+  { if (!condition) return(NULL);
+    if (!actions)   return(NULL);
+    struct INSTRUCTION *instr = g_try_malloc0( sizeof(struct INSTRUCTION) );
     if (!instr) return(NULL);
     instr->condition = condition;
     instr->options = options;
     instr->actions = actions;
+    Info_new ( Config.log, TRUE, LOG_WARNING, "%s: %s %s ", __func__, instr->condition->chaine, actions->alors );
     return (instr);
   }
 /******************************************************************************************************************************/
@@ -697,7 +690,7 @@
 /******************************************************************************************************************************/
  struct CONDITION *New_condition_valf( gdouble valf )
   { struct CONDITION *condition = g_try_malloc0( sizeof(struct CONDITION) );
-    if (!condition) { return(NULL); }
+    if (!condition) return(NULL);
     condition->taille = 32;
     condition->is_bool = FALSE;
     condition->chaine = g_try_malloc0 ( condition->taille );
@@ -1452,7 +1445,7 @@ gchar chaine[256];
        options = New_option_entier ( options, T_TYPE, MSG_DEFAUT );
        New_alias_permanent ( NULL, "MSG_COMM_HS", MNEMO_MSG, options );
 
-       DlsScanner_debug = Config.log_trad;
+       DlsScanner_debug = TRUE;/*Config.log_trad;*/
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
