@@ -834,9 +834,9 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Http_Stop_API ( void )
-  { soup_server_disconnect ( Partage->com_http.socket );                                        /* Arret du serveur WebSocket */
-    soup_server_disconnect ( Partage->com_http.local_socket );                                        /* Arret du serveur WebSocket */
-    g_main_loop_unref( Partage->com_http.loop );
+  { if (Partage->com_http.socket) soup_server_disconnect ( Partage->com_http.socket );          /* Arret du serveur WebSocket */
+    if (Partage->com_http.local_socket) soup_server_disconnect ( Partage->com_http.local_socket );
+    if (Partage->com_http.loop) g_main_loop_unref( Partage->com_http.loop );
     Http_Save_and_close_sessions();
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
