@@ -143,18 +143,19 @@ listeInstr:     une_instr listeInstr
                     { gint taille = $1->condition->taille + $1->actions->taille_alors + 256;
                       $$ = New_chaine( taille + strlen($2) );
                       g_snprintf( $$, taille,
-                                  "vars->num_ligne = %d; /* une_instr FLOAT-------*/\n"
+                                  "\nvars->num_ligne = %d; /* une_instr FLOAT-------*/\n"
                                   " { gdouble local_result=%s;\n"
                                   "   %s\n"
-                                  " }\n %s\n", DlsScanner_get_lineno(), $1->condition->chaine, $1->actions->alors, $2 );
+                                  " }\n %s\n", $1->line_number, $1->condition->chaine, $1->actions->alors, $2 );
                     }
                    else if ($1 && $1->condition->is_bool == TRUE && $2)
                     { gint taille = $1->condition->taille + $1->actions->taille_alors + $1->actions->taille_sinon + strlen($2)+256;
                       $$ = New_chaine( taille );
+                      gchar *sinon = ($1->actions->sinon ? $1->actions->sinon : "/* no sinon action */");
                       g_snprintf( $$, taille,
-                                  "vars->num_ligne = %d; /* une_instr BOOL--------*/\n"
+                                  "\nvars->num_ligne = %d; /* une_instr BOOL--------*/\n"
                                   " if (%s)\n {\n %s\n }\n else\n {\n %s\n }\n %s\n",
-                                  DlsScanner_get_lineno(), $1->condition->chaine, $1->actions->alors, $1->actions->sinon, $2 );
+                                  $1->line_number, $1->condition->chaine, $1->actions->alors, sinon, $2 );
                     } else $$=NULL;
 /*else if ($2 && $6)
                     { gchar *alors = Liste_action_to_string_alors ( $6 );
@@ -201,17 +202,13 @@ listeInstr:     une_instr listeInstr
                 | T_SWITCH listeCase listeInstr
                 {{ gint taille;
                    if ($2)
-                    { taille = strlen($2);
-                      if (taille==0)
-                       { Emettre_erreur_new( "Switch sans action" ); }
-                      else
-                       { taille += strlen($3) + 100;
-                         $$ = New_chaine( taille );
-                         g_snprintf( $$, taille, "/* Ligne %d (CASE BEGIN)------------*/\n"
-                                                 "%s\n"
-                                                 "/* Ligne %d (CASE END)--------------*/\n %s\n",
-                                                 DlsScanner_get_lineno(), $2, DlsScanner_get_lineno(), ($3 ? $3 : "") );
-                       }
+                    { taille = strlen($2) + 100;
+                      if ($3) taille += strlen($3);
+                      $$ = New_chaine( taille );
+                      g_snprintf( $$, taille, "/* Ligne %d (CASE BEGIN)------------*/\n"
+                                              "%s\n"
+                                              "/* Ligne %d (CASE END)--------------*/\n %s\n",
+                                              DlsScanner_get_lineno(), $2, DlsScanner_get_lineno(), ($3 ? $3 : "") );
                     } else $$=NULL;
                    if ($2) g_free($2);
                    if ($3) g_free($3);
@@ -223,34 +220,29 @@ une_instr:      T_MOINS expr DONNE liste_action PVIRGULE
                 {{ $$=New_instruction ( $2, NULL, $4 ); }}
                 | T_MOINS expr T_DIFFERE options DONNE liste_action PVIRGULE
                 {{ $$=New_instruction ( $2, $4, $6 ); }}
-/*                | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
-                {{ int taille;
-                   if ($2 && $2->is_bool == FALSE)
-                    { Emettre_erreur_new( "Boolean is left mandatory" ); }
-                   else if ($2 && $5)
-                    { taille = strlen($2->alors)+strlen($5)+100;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille,
-                                  "* Ligne %d une_instr if----------*\nif(%s)\n { %s }\n\n",
-                                     DlsScanner_get_lineno(), $2->alors, $5 );
+                | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
+                {{ if ($5)
+                    { struct ACTION *action = New_action();
+                      action->alors = $5;
+                      action->taille_alors = strlen($5);
+                      $$=New_instruction ( $2, NULL, action );
                     } else $$=NULL;
-                   if ($5) g_free($5);
-                   Del_condition($2);
-                }}*/
+                }}
                 ;
 
 listeCase:      T_PIPE une_instr listeCase
                 {{ if ($2 && $2->condition && $2->condition->is_bool == FALSE)
                     { Emettre_erreur_new( "Boolean is left mandatory" ); $$=NULL; }
                    else if ($2)
-                    { gint taille = $2->actions->taille_alors+$2->actions->taille_sinon+$2->condition->taille+256 + strlen($3);
+                    { gchar *suite = ($3 ? $3 : "/* no suite */");
+                      gint taille = $2->actions->taille_alors+$2->actions->taille_sinon+$2->condition->taille+256 + strlen(suite);
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
-                                  "/* Ligne %d (CASE INSIDE)----------*/\n"
+                                  "/* Ligne (CASE INSIDE)----------*/\n"
                                   "if(%s)\n { %s }\nelse\n { %s\n%s }\n",
-                                  DlsScanner_get_lineno(), $2->condition->chaine, $2->actions->alors,
-                                  ($2->actions->sinon ? $2->actions->sinon : ""), ($3 ? $3 : "") );
-                    }
+                                   $2->condition->chaine, $2->actions->alors,
+                                  ($2->actions->sinon ? $2->actions->sinon : "/* no action sinon */"), suite );
+                    } else $$=NULL;
                    Del_instruction($2);
                    if ($3) g_free($3);
                 }}
@@ -298,7 +290,7 @@ expr:           facteur T_PLUS facteur
                 }}
                 | facteur
                 ;
-facteur:        expr_2 ET expr_2
+facteur:        expr_2 ET facteur
                 {{ if ($1 && $3)
                     { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
                        { Emettre_erreur_new( "Boolean mandatory in AND" ); $$=NULL; }
@@ -311,7 +303,7 @@ facteur:        expr_2 ET expr_2
                    Del_condition($1);
                    Del_condition($3);
                 }}
-                | expr_2 T_FOIS expr_2
+                | expr_2 T_FOIS facteur
                 {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
                        { Emettre_erreur_new( "Float mandatory in *" ); $$=NULL; }
@@ -324,7 +316,7 @@ facteur:        expr_2 ET expr_2
                    Del_condition($1);
                    Del_condition($3);
                 }}
-                | expr_2 BARRE expr_2
+                | expr_2 BARRE facteur
                 {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
                        { Emettre_erreur_new( "Boolean not allowed within /" ); $$=NULL; }
@@ -434,13 +426,13 @@ liste_action:   liste_action VIRGULE une_action
                 }}
                 | une_action
                 {{ $$=$1;
-                   if ($$->alors) $$->taille_alors = strlen($$->alors);
-                   if ($$->sinon) $$->taille_sinon = strlen($$->sinon);
+                   if ($$ && $$->alors) $$->taille_alors = strlen($$->alors);
+                   if ($$ && $$->sinon) $$->taille_sinon = strlen($$->sinon);
                 }}
                 ;
 
 une_action:     T_NOP
-                  {{ $$=New_action(); $$->alors=g_strdup(""); }}
+                  {{ $$=New_action(); $$->alors=g_strdup("/*NOP*/"); }}
                 | T_PID liste_options
                   {{ $$=New_action_PID($2);
                      Liberer_options($2);

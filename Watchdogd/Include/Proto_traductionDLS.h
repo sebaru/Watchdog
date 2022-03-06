@@ -65,6 +65,7 @@
   { struct CONDITION *condition;
     GList *options;
     struct ACTION *actions;
+    gint line_number;
   };
 
  struct ALIAS

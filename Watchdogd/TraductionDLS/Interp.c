@@ -437,19 +437,7 @@
  struct CONDITION *New_condition_alias( gint barre, struct ALIAS *alias, GList *options )
   { if (!alias) return(NULL);
 
-    if ( alias->classe!=MNEMO_TEMPO &&
-         alias->classe!=MNEMO_ENTREE &&
-         alias->classe!=MNEMO_BISTABLE &&
-         alias->classe!=MNEMO_MONOSTABLE &&
-         alias->classe!=MNEMO_HORLOGE &&
-         alias->classe!=MNEMO_WATCHDOG &&
-         alias->classe!=MNEMO_ENTREE_ANA
-       )
-     { Emettre_erreur_new( "'%s' ne peut s'utiliser seul (avec une comparaison ?)", alias->acronyme );
-       return(NULL);
-     }
-
-    switch(alias->classe)                                                 /* On traite que ce qui peut passer en "condition" */
+    switch(alias->classe)                                                  /* On traite que ce qui peut passer en "condition" */
      { case MNEMO_TEMPO :     return ( New_condition_tempo( barre, alias, options ) );
        case MNEMO_ENTREE:     return ( New_condition_entree( barre, alias, options ) );
        case MNEMO_BISTABLE:   return ( New_condition_bi( barre, alias, options ) );
@@ -610,13 +598,12 @@
  struct CONDITION *New_condition( gboolean is_bool, gint taille )
   { struct CONDITION *condition = g_try_malloc0( sizeof(struct CONDITION) );
     if (!condition) { return(NULL); }
-    condition->is_bool = FALSE;
+    condition->is_bool = is_bool;
     condition->taille = taille+1;
     if (taille)
      { condition->chaine = g_try_malloc0 ( taille );
        if (!condition->chaine) { g_free(condition); return(NULL); }
      }
-    Info_new ( Config.log, TRUE, LOG_WARNING, "%s: %s (%d)", __func__, condition->chaine, taille );
     return(condition);
   }
 /******************************************************************************************************************************/
@@ -632,7 +619,7 @@
     instr->condition = condition;
     instr->options = options;
     instr->actions = actions;
-    Info_new ( Config.log, TRUE, LOG_WARNING, "%s: %s %s ", __func__, instr->condition->chaine, actions->alors );
+    instr->line_number = DlsScanner_get_lineno();
     return (instr);
   }
 /******************************************************************************************************************************/
