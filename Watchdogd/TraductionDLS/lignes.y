@@ -470,6 +470,7 @@ une_action:     T_NOP
                          case MNEMO_VISUEL    : $$=New_action_visuel( alias, options );    break;
                          case MNEMO_WATCHDOG  : $$=New_action_WATCHDOG( alias, options ); break;
                          case MNEMO_REGISTRE  : $$=New_action_REGISTRE( alias, options ); break;
+                         case MNEMO_SORTIE_ANA: $$=New_action_AO( alias, options ); break;
                          default: { Emettre_erreur_new( "'%s:%s' syntax error", alias->tech_id, alias->acronyme );
                                     $$=NULL;
                                   }

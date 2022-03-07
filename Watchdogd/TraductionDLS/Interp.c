@@ -877,11 +877,22 @@
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
-#ifdef bouh
-                          { g_snprintf( chaine, sizeof(chaine),
-                                        "Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, \n    %s );\n",
-                                        action->tech_id, action->acronyme, action->tech_id, action->acronyme, $2->alors );
-#endif
+/******************************************************************************************************************************/
+/* New_action_AO: Prepare une struct action avec une commande analog Output                                                   */
+/* Entrées: l'alias associé et ses options                                                                                    */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_AO( struct ALIAS *alias, GList *options )
+  { struct ACTION *action;
+
+    gint taille = 256;
+    action = New_action();
+    action->alors = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "   Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, local_result );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+    return(action);
+  }
 /******************************************************************************************************************************/
 /* New_action_visuel: Prepare une struct action avec une commande SI                                                           */
 /* Entrées: numero du motif                                                                                                   */
