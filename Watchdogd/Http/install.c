@@ -44,7 +44,7 @@
  void Http_traiter_install ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
   { gchar fichier[80], home[128], chaine[256], *welcome =
-          "#Welcome, your instance is now installed !\n"
+          "#Welcome, your Agent is now installed !\n"
           "#Sébastien Lefèvre - Abls-Habitat.fr\n";
     struct stat stat_buf;
     struct passwd *pwd;
@@ -92,7 +92,7 @@
        return;
      }
 
-    g_snprintf ( fichier, sizeof(fichier), "/etc/watchdogd.abls.conf" );
+    g_snprintf ( fichier, sizeof(fichier), "/etc/abls-habitat-agent.conf" );
     if (stat (fichier, &stat_buf)!=-1)                   /* Si pas d'erreur et fichier présent, c'est que c'est deja installé */
      { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Already Installed" );
        return;
@@ -104,27 +104,21 @@
      }
 
     JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
+    if (!request)
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Parsing Request Failed" );
+       return;
+     }
 
-    if ( ! (    Json_has_member ( request, "description" )
-             && Json_has_member ( request, "db_username" )
-             && Json_has_member ( request, "db_hostname" )
-             && Json_has_member ( request, "db_database" )
-             && Json_has_member ( request, "db_password" )
-             && Json_has_member ( request, "use_subdir" )
-             && Json_has_member ( request, "is_master" )
-             && Json_has_member ( request, "master_host" )
-             && Json_has_member ( request, "run_as" ) ) )
+    if ( ! ( Json_has_member ( request, "domainID" ) && Json_has_member ( request, "apiURL" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       json_node_unref(request);
        return;
      }
+    gchar *domainID = Json_get_string ( request, "domainID" );
+    gchar *apiURL   = Json_get_string ( request, "apiURL" );
 
-    if (!g_str_is_ascii (Json_get_string(request, "run_as")))
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Wrong Run_AS");
-       return;
-     }
+#ifdef bouh
 
-    gboolean is_master = Json_get_int(request,"is_master");
 /******************************************* Creation du user *****************************************************************/
     g_snprintf( chaine, sizeof(chaine), "useradd -m -c 'WatchdogServer' %s", Json_get_string(request, "run_as") );
     system(chaine);
@@ -203,34 +197,31 @@
     g_free(description);
 
     Libere_DB_SQL ( &db );
+#endif
 /******************************************* Création fichier de config *******************************************************/
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Creating config file '%s'", __func__, fichier );
 
     gint fd = creat ( fichier, S_IRUSR | S_IWUSR );
     if (fd==-1)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Create Error");
+       json_node_unref(request);
        return;
      }
     write (fd, welcome, strlen(welcome) );
 
-    g_snprintf(chaine, sizeof(chaine), "\n[GLOBAL]\n" );
-    write (fd, chaine, strlen(chaine) );
-    g_snprintf(chaine, sizeof(chaine), "run_as = %s\n", Json_get_string(request, "run_as") );
-    write (fd, chaine, strlen(chaine) );
-
-    g_snprintf(chaine, sizeof(chaine), "\n[DATABASE]\n" );
-    write (fd, chaine, strlen(chaine) );
-    g_snprintf(chaine, sizeof(chaine), "username = %s\n", Json_get_string(request, "db_username") );
-    write (fd, chaine, strlen(chaine) );
-    g_snprintf(chaine, sizeof(chaine), "hostname = %s\n", Json_get_string(request, "db_hostname") );
-    write (fd, chaine, strlen(chaine) );
-    g_snprintf(chaine, sizeof(chaine), "database = %s\n", Json_get_string(request, "db_database") );
-    write (fd, chaine, strlen(chaine) );
-    g_snprintf(chaine, sizeof(chaine), "password = %s\n", Json_get_string(request, "db_password") );
-    write (fd, chaine, strlen(chaine) );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode)
+     { Json_node_add_string( RootNode, "domainID", domainID );
+       Json_node_add_string( RootNode, "apiURL", apiURL );
+       gchar *result = Json_node_to_string ( RootNode );
+       json_node_unref(RootNode);
+       write (fd, result, strlen(result));
+       g_free(result);
+     }
+    else { Info_new( Config.log, TRUE, LOG_ERR, "%s: Writing config failed.", __func__ ); }
     close(fd);
-    json_node_unref(request);
 
+    json_node_unref(request);
     Partage->com_msrv.Thread_run = FALSE;                                                    /* On reboot toute la baraque !! */
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
