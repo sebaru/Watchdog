@@ -109,13 +109,17 @@
        return;
      }
 
-    if ( ! ( Json_has_member ( request, "domainID" ) && Json_has_member ( request, "apiURL" ) ) )
+    if ( ! ( Json_has_member ( request, "domain_uuid" ) && Json_has_member ( request, "domain_secret" )
+          && Json_has_member ( request, "api_url" )
+           )
+       )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        json_node_unref(request);
        return;
      }
-    gchar *domainID = Json_get_string ( request, "domainID" );
-    gchar *apiURL   = Json_get_string ( request, "apiURL" );
+    gchar *domain_uuid   = Json_get_string ( request, "domain_uuid" );
+    gchar *domain_secret = Json_get_string ( request, "domain_secret" );
+    gchar *api_url       = Json_get_string ( request, "api_url" );
 
 #ifdef bouh
 
@@ -211,8 +215,9 @@
 
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
-     { Json_node_add_string( RootNode, "domainID", domainID );
-       Json_node_add_string( RootNode, "apiURL", apiURL );
+     { Json_node_add_string( RootNode, "domain_uuid", domain_uuid );
+       Json_node_add_string( RootNode, "domain_secret", domain_secret );
+       Json_node_add_string( RootNode, "api_url", api_url );
        gchar *result = Json_node_to_string ( RootNode );
        json_node_unref(RootNode);
        write (fd, result, strlen(result));

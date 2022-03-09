@@ -87,7 +87,7 @@
  extern void Http_Start_API ( void );
  extern void Http_Send_web_socket ( void );
  extern void Http_Stop_API ( void );
- extern gboolean Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
+ extern gboolean Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres );
 
  extern void Http_traiter_status  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

@@ -785,11 +785,27 @@ end:
            }
         }
 
+       UUID_Load ( "MSRV", Config.instance_uuid );
+/************************************************* Test Connexion to Global API ***********************************************/
+       JsonNode *API = Http_Get_from_global_API ( "status", NULL );
+       if (API)
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connected with API %s", __func__, Json_get_string ( API, "version" ) );
+          json_node_unref ( API );
+        }
+
+       JsonNode *RootNode = Json_node_create();
+       if (RootNode)
+        { Json_node_add_int ( RootNode, "start_time", time(NULL) );
+          Http_Post_to_global_API ( "instance", "START", RootNode );
+          json_node_unref ( RootNode );
+        }
+
+
        SQL_Write_new ( "INSERT INTO instances SET instance='%s', version='%s', start_time=NOW() "
                        "ON DUPLICATE KEY UPDATE instance=VALUES(instance), version=VALUES(version), start_time=VALUES(start_time)",
                        g_get_host_name(), WTD_VERSION);
 
-       JsonNode *RootNode = Json_node_create ();
+       RootNode = Json_node_create ();
        SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM instances WHERE instance='%s'", g_get_host_name() );
        Config.log_db             = Json_get_bool ( RootNode, "log_db" );
        Config.log_zmq            = Json_get_bool ( RootNode, "log_zmq" );
@@ -803,7 +819,6 @@ end:
           chdir(Config.home);
         }
        json_node_unref ( RootNode );
-
 
        Print_config();
 /************************************* Création des zones de bits internes dynamiques *****************************************/
@@ -832,13 +847,6 @@ end:
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Context Failed (%s)", __func__, zmq_strerror(errno) ); }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
-
-/************************************************* Test Connexion to Global API ***********************************************/
-       JsonNode *API = Http_Get_from_global_API ( "status", NULL );
-       if (API)
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connected with API %s", __func__, Json_get_string ( API, "version" ) );
-          json_node_unref ( API );
-        }
 
        if (Config.instance_is_master)
         { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )

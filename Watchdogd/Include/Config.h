@@ -36,6 +36,7 @@
 
   struct CONFIG
   { JsonNode *config;                                                        /* imported from /etc/fr-abls-habitat-agent.conf */
+    gchar instance_uuid[37];                                                                     /* Instance unique du thread */
     gchar config_file[80];                                        /* Nom du fichier dont est issu les informations ci dessous */
     gchar run_as [ 40 ];                                                            /* Nom du user sur lequel tourne Watchdog */
 

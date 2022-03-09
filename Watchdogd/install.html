@@ -72,7 +72,14 @@
        <div class="col form-group">
          <div class="input-group">
            <label class="col-5 col-sm-4 col-form-label text-right">Domain ID</label>
-           <input id="idDOMAINID" type="text" class="form-control" placeholder="Domain ID">
+           <input id="idDOMAINUUID" type="text" class="form-control" placeholder="Domain UUID">
+         </div>
+       </div>
+
+       <div class="col form-group">
+         <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Domain Secret Key</label>
+           <input id="idDOMAINSECRET" type="password" class="form-control" placeholder="Domain's Secret Key">
          </div>
        </div>
 
@@ -101,12 +108,12 @@
 /********************************************* Chargement du synoptique 1 au démrrage *****************************************/
  async function Installer ()
   { var json_request =
-     { domainID: $('#idDOMAINID').val(),
-       apiURL  : $('#idAPIURL').val(),
+     { domain_uuid  : $('#idDOMAINUUID').val(),
+       domain_secret: $('#idDOMAINSECRET').val(),
+       api_url      : $('#idAPIURL').val(),
      };
     $('#idSpinner').show();
     $('#idAction').text("Please Wait !")
-
 
     fetch( "/install.html", { method: "POST", body: JSON.stringify(json_request) } )
     .then(function(res)   { return res.json(); },
