@@ -35,13 +35,14 @@
  struct COM_HTTP                                                                     /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
+    gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
     SoupServer *socket;
     SoupServer *local_socket;
     GMainLoop *loop;
     GMainContext *loop_context;
     GSList *liste_http_clients;
     gint num_session;
-
   };
 
  struct WS_CLIENT_SESSION
@@ -84,9 +85,7 @@
  extern struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupMessage *msg );
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level );
- extern void Http_Start_API ( void );
- extern void Http_Send_web_socket ( void );
- extern void Http_Stop_API ( void );
+ extern void Run_HTTP ( void );
  extern gboolean Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres );
 

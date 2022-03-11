@@ -614,12 +614,17 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
-/* Run_process: Thread principal                                                                                               */
-/* Entrée: une structure PROCESS                                                                                            */
+/* Run_process: Thread principal                                                                                              */
+/* Entrée: une structure PROCESS                                                                                              */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_Start_API ( void )
+ void Run_HTTP ( void )
   { GError *error = NULL;
+    static gint last_pulse = 0;
+
+    prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
+    Partage->com_http.Thread_run = TRUE;                                                                /* Le thread tourne ! */
+    Info_new( Config.log, Partage->com_http.Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
     SoupServer *socket = Partage->com_http.socket = soup_server_new( "server-header", "Watchdogd Ex-API Server", NULL);
     if (!socket)
@@ -796,50 +801,42 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO,
               "%s: HTTP SoupServer SSL Listen OK on port %d !", __func__, 5559 );
 
-  }
+    while(Partage->com_http.Thread_run == TRUE)
+     { sched_yield();
+       Http_Envoyer_les_cadrans ();
 
-/******************************************************************************************************************************/
-/* Http_Send_websocket: Envoie les informations aux clients connectés                                                         */
-/* Entrée: néant                                                                                                              */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_Send_web_socket ( void )
-  { static gint last_pulse = 0;
-    Http_Envoyer_les_cadrans ();
-
-    if ( Partage->top > last_pulse + 50 )
-     { last_pulse = Partage->top;
-       JsonNode *pulse = Json_node_create();
-       if (pulse)
-        { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
-          Http_ws_send_to_all ( pulse );
-          json_node_unref(pulse);
-        }
-       pthread_mutex_lock( &Partage->com_http.synchro );
-       GSList *liste = Partage->com_http.liste_http_clients;
-       while(liste)
-        { struct HTTP_CLIENT_SESSION *client = liste->data;
-          liste = g_slist_next ( liste );
-          if (client->last_request + 864000 < Partage->top )
-           { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, client );
-             Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
-             Http_destroy_session ( client );
+       if ( Partage->top > last_pulse + 50 )
+        { last_pulse = Partage->top;
+          JsonNode *pulse = Json_node_create();
+          if (pulse)
+           { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
+             Http_ws_send_to_all ( pulse );
+             json_node_unref(pulse);
            }
+          pthread_mutex_lock( &Partage->com_http.synchro );
+          GSList *liste = Partage->com_http.liste_http_clients;
+          while(liste)
+           { struct HTTP_CLIENT_SESSION *client = liste->data;
+             liste = g_slist_next ( liste );
+             if (client->last_request + 864000 < Partage->top )
+              { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, client );
+                Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
+                Http_destroy_session ( client );
+              }
+           }
+          pthread_mutex_unlock( &Partage->com_http.synchro );
         }
-       pthread_mutex_unlock( &Partage->com_http.synchro );
+
+       if (Partage->com_http.loop) g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
      }
 
-    if (Partage->com_http.loop) g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
-  }
-/******************************************************************************************************************************/
-/* Http_Stop_API: Arrete les service d'API de l'instance                                                                      */
-/* Entrée: néant                                                                                                              */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_Stop_API ( void )
-  { if (Partage->com_http.socket) soup_server_disconnect ( Partage->com_http.socket );          /* Arret du serveur WebSocket */
+    if (Partage->com_http.socket) soup_server_disconnect ( Partage->com_http.socket );          /* Arret du serveur WebSocket */
     if (Partage->com_http.local_socket) soup_server_disconnect ( Partage->com_http.local_socket );
     if (Partage->com_http.loop) g_main_loop_unref( Partage->com_http.loop );
     Http_Save_and_close_sessions();
+
+    Info_new( Config.log, Partage->com_http.Thread_debug, LOG_NOTICE, "%s: HTTP Down (%p)", __func__, pthread_self() );
+    Partage->com_http.TID = 0;                                                /* On indique au master que le thread est mort. */
+    pthread_exit(GINT_TO_POINTER(0));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

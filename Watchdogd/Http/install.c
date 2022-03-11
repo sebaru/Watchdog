@@ -92,7 +92,7 @@
        return;
      }
 
-    g_snprintf ( fichier, sizeof(fichier), "/etc/abls-habitat-agent.conf" );
+    g_snprintf ( fichier, sizeof(fichier), "/etc/fr-abls-habitat-agent.conf" );
     if (stat (fichier, &stat_buf)!=-1)                   /* Si pas d'erreur et fichier présent, c'est que c'est deja installé */
      { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Already Installed" );
        return;

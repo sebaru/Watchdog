@@ -1875,7 +1875,7 @@ end:
           GSList *liste = Partage->Dls_data_AI;
           while (liste)
            { struct DLS_AI *ai = liste->data;
-			 if ( ai->archivage == 1 )
+             if ( ai->archivage == 1 )
               { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->in_range ? ai->valeur : 0.0) );          /* Archivage si besoin */
                 ai->last_arch = Partage->top;
               }
@@ -1897,7 +1897,7 @@ end:
           GSList *liste = Partage->Dls_data_AI;
           while (liste)
            { struct DLS_AI *ai = liste->data;
-			 if ( ai->archivage == 2 )
+             if ( ai->archivage == 2 )
               { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->in_range ? ai->valeur : 0.0) );          /* Archivage si besoin */
                 ai->last_arch = Partage->top;
               }
@@ -1916,7 +1916,7 @@ end:
           GSList *liste = Partage->Dls_data_AI;
           while (liste)
            { struct DLS_AI *ai = liste->data;
-			 if ( (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||
+             if ( (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||
                   (ai->archivage == 4 && ai->last_arch + 864000 <= Partage->top)
                 )
               { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->in_range ? ai->valeur : 0.0) );          /* Archivage si besoin */
@@ -1944,7 +1944,7 @@ end:
        sched_yield();
      }
     Dls_arbre_dls_syn_erase();
-    Dls_Decharger_plugins();                                                                      /* Dechargement des modules DLS */
+    Dls_Decharger_plugins();                                                                  /* Dechargement des modules DLS */
     Zmq_Close(Partage->com_dls.zmq_to_master);
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
