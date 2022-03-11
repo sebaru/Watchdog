@@ -345,7 +345,7 @@ end:
 
     SQL_Write_new( "UPDATE syns_cadrans "
                    "INNER JOIN dls ON syns_cadrans.dls_id=dls.dls_id "
-                   "INNER JOIN syns ON syns.id=dls.syn_id "
+                   "INNER JOIN syns ON syns.syn_id=dls.syn_id "
                    "SET posx='%d', posy='%d', groupe='%d', angle='%d', scale='%f' "
                    "WHERE syns_cadrans.id='%d' AND syns.access_level<='%d'",
                    Json_get_int( element, "posx" ), Json_get_int( element, "posy" ),
