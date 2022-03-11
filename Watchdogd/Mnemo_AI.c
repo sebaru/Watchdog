@@ -141,7 +141,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT a.tech_id, a.acronyme, a.valeur, a.min, a.max, a.type, a.unite, a.archivage"
+                "SELECT a.tech_id, a.acronyme, a.valeur, a.min, a.max, a.type, a.unite, a.archivage, a.in_range"
                 " FROM mnemos_AI as a"
               );
     if (tech_id && acronyme)
@@ -157,11 +157,11 @@
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
      { ai = NULL;
-       Dls_data_set_AI ( db->row[0], db->row[1], (void *)&ai, atof(db->row[2]), FALSE );
+       Dls_data_set_AI ( db->row[0], db->row[1], (void *)&ai, atof(db->row[2]), (atoi(db->row[8]) ? TRUE : FALSE) );
        g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[6] );
        ai->archivage = atoi(db->row[7]);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s'=%f %s loaded", __func__,
-                 ai->tech_id, ai->acronyme, ai->valeur, ai->unite );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s'=%f %s loaded (in_range=%d)", __func__,
+                 ai->tech_id, ai->acronyme, ai->valeur, ai->unite, ai->in_range );
      }
     Libere_DB_SQL( &db );
   }
@@ -178,9 +178,9 @@
     liste = Partage->Dls_data_AI;
     while ( liste )
      { struct DLS_AI *ai = (struct DLS_AI *)liste->data;
-       SQL_Write_new( "UPDATE mnemos_AI as m SET valeur='%f' "
+       SQL_Write_new( "UPDATE mnemos_AI as m SET valeur='%f', in_range='%d' "
                       "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                      ai->valeur, ai->tech_id, ai->acronyme );
+                      ai->valeur, ai->in_range, ai->tech_id, ai->acronyme );
        liste = g_slist_next(liste);
        cpt++;
      }
@@ -197,7 +197,7 @@
     Json_node_add_string ( element, "acronyme",     bit->acronyme );
     Json_node_add_double ( element, "valeur",       bit->valeur );
     Json_node_add_string ( element, "unite",        bit->unite );
-    Json_node_add_int    ( element, "in_range",     bit->inrange );
+    Json_node_add_int    ( element, "in_range",     bit->in_range );
     Json_node_add_int    ( element, "last_arch",    bit->last_arch );
     Json_node_add_int    ( element, "archivage",    bit->archivage );
   }

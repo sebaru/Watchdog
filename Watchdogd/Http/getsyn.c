@@ -441,7 +441,7 @@ end:
        if (!ai)                                                  /* si AI pas trouvée, on remonte le nom du cadran en libellé */
         { cadran->in_range = FALSE; }
        else
-        { cadran->in_range = ai->inrange;
+        { cadran->in_range = ai->in_range;
           cadran->valeur   = ai->valeur;
           g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ai->unite );
         }

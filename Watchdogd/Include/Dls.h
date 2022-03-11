@@ -127,7 +127,7 @@
     gchar   unite[32];                                                                                        /* Km, h, ° ... */
     gdouble valeur;
     guint   last_arch;                                                                         /* Date de la derniere archive */
-    guint   inrange;
+    guint   in_range;
     guint   archivage;
    };
 
