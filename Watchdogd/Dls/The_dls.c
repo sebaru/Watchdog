@@ -1876,7 +1876,7 @@ end:
           while (liste)
            { struct DLS_AI *ai = liste->data;
 			 if ( ai->archivage == 1 )
-              { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->inrange ? ai->valeur : 0.0) );          /* Archivage si besoin */
+              { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->in_range ? ai->valeur : 0.0) );          /* Archivage si besoin */
                 ai->last_arch = Partage->top;
               }
              liste = g_slist_next(liste);
@@ -1898,7 +1898,7 @@ end:
           while (liste)
            { struct DLS_AI *ai = liste->data;
 			 if ( ai->archivage == 2 )
-              { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->inrange ? ai->valeur : 0.0) );          /* Archivage si besoin */
+              { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->in_range ? ai->valeur : 0.0) );          /* Archivage si besoin */
                 ai->last_arch = Partage->top;
               }
              liste = g_slist_next(liste);
@@ -1919,7 +1919,7 @@ end:
 			 if ( (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||
                   (ai->archivage == 4 && ai->last_arch + 864000 <= Partage->top)
                 )
-              { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->inrange ? ai->valeur : 0.0) );          /* Archivage si besoin */
+              { Ajouter_arch( ai->tech_id, ai->acronyme, (ai->in_range ? ai->valeur : 0.0) );          /* Archivage si besoin */
                 ai->last_arch = Partage->top;
               }
              liste = g_slist_next(liste);

@@ -86,7 +86,7 @@
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- gboolean Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode )
+ gboolean Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode )
   { gchar query[256];
     gboolean success = FALSE;
 
@@ -98,6 +98,9 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
        return(FALSE);
      }
+    Json_node_add_string ( RootNode, "domain_uuid", Config.instance_uuid );
+    Json_node_add_string ( RootNode, "api_tag", api_tag );
+    Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
     gchar *buf = Json_node_to_string ( RootNode );
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
@@ -834,9 +837,9 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Http_Stop_API ( void )
-  { soup_server_disconnect ( Partage->com_http.socket );                                        /* Arret du serveur WebSocket */
-    soup_server_disconnect ( Partage->com_http.local_socket );                                        /* Arret du serveur WebSocket */
-    g_main_loop_unref( Partage->com_http.loop );
+  { if (Partage->com_http.socket) soup_server_disconnect ( Partage->com_http.socket );          /* Arret du serveur WebSocket */
+    if (Partage->com_http.local_socket) soup_server_disconnect ( Partage->com_http.local_socket );
+    if (Partage->com_http.loop) g_main_loop_unref( Partage->com_http.loop );
     Http_Save_and_close_sessions();
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -585,6 +585,7 @@ encore:
                    "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
                    "`valeur` FLOAT NOT NULL DEFAULT '0',"
                    "`archivage` INT(11) NOT NULL DEFAULT '2',"
+                   "`in_range` TINYINT(1) NOT NULL DEFAULT '0',"
                    "UNIQUE (`tech_id`,`acronyme`),"
                    "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
@@ -761,6 +762,9 @@ encore:
        SQL_Write_new ("ALTER TABLE histo_msgs      CHANGE `id_msg` `msg_id` INT(11) NOT NULL" );
        SQL_Write_new ("ALTER TABLE tableau         CHANGE `id`     `tableau_id` INT(11) NOT NULL AUTO_INCREMENT" );
      }
+
+    if (database_version < 6097)
+     { SQL_Write_new ("ALTER TABLE mnemos_AI ADD `in_range` TINYINT(1) NOT NULL DEFAULT '0'"); }
 /* a prévoir:
        SQL_Write_new ("ALTER TABLE mnemos_BI       CHANGE `id`     `id_mnemos_BI` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_MONO     CHANGE `id`     `id_mnemos_MONO` INT(11) NOT NULL AUTO_INCREMENT" );
@@ -775,7 +779,7 @@ encore:
 */
 
 fin:
-    database_version = 6096;
+    database_version = 6097;
 
     g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
                                           "(SELECT COUNT(*) FROM syns) AS nbr_syns, "

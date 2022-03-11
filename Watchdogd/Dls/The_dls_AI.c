@@ -82,7 +82,7 @@
     if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
 
     ai->valeur  = valeur;
-    ai->inrange = in_range;
+    ai->in_range = in_range;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
@@ -91,6 +91,6 @@
  gboolean Dls_data_get_AI_inrange ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
   { struct DLS_AI *ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
     if (!ai) return(FALSE);
-    return( ai->inrange );
+    return( ai->in_range );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
