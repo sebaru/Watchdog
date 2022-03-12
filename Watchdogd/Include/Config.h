@@ -52,8 +52,9 @@
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
     gchar master_host[ TAILLE_DB_HOST+1 ];
     guint    log_level;                                                                       /* Niveau de debug du programme */
-    gboolean log_msrv;                                                                                /* TRUE si log_override */
-    gboolean log_arch;                                                                                /* TRUE si log_override */
+    gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
+    gboolean log_bus;                                                                                      /* TRUE si log_bus */
+    gboolean log_arch;                                                                                 /* TRUE si log_archive */
     gboolean log_db;                                                                              /* TRUE si log des acces DB */
     gboolean log_zmq;                                                                            /* TRUE si log des acces ZMQ */
     gboolean log_trad;                                                                    /* TRUE si log des compilations DLS */

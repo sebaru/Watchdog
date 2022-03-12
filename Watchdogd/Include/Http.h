@@ -239,6 +239,8 @@
                                     SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_install ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
+ extern void Http_traiter_memory ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                   SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_map ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data );
 
