@@ -66,6 +66,7 @@
     Json_node_add_string ( RootNode, "domain_uuid",     Json_get_string ( Config.config, "domain_uuid" ) );
     Json_node_add_string ( RootNode, "master_hostname", Json_get_string ( Config.config, "master_hostname" ) );
     Json_node_add_string ( RootNode, "run_as",          Json_get_string ( Config.config, "run_as" ) );
+    Json_node_add_string ( RootNode, "install_time",    Json_get_string ( Config.config, "install_time" ) );
 
     temps = localtime( (time_t *)&Partage->start_time );
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
