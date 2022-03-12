@@ -769,21 +769,6 @@ end:
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
 
-/************************************************** Check Database Access *****************************************************/
-       if (Config.installed)
-        { struct DB *db = Init_DB_SQL();
-          if (db)
-           { Libere_DB_SQL ( &db );
-             Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connection to DB OK.", __func__ );
-           }
-          else
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                       "%s: Connection to DB failed. Wait 5 sec and stopping.", __func__ );
-             sleep(5);
-             _exit(EXIT_FAILURE);
-           }
-        }
-
        UUID_Load ( "MSRV", Config.instance_uuid );
 /************************************************* Test Connexion to Global API ***********************************************/
        JsonNode *API = Http_Get_from_global_API ( "status", NULL );

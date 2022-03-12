@@ -94,18 +94,36 @@
 
     g_snprintf ( fichier, sizeof(fichier), "/etc/fr-abls-habitat-agent.conf" );
     if (stat (fichier, &stat_buf)!=-1)                   /* Si pas d'erreur et fichier présent, c'est que c'est deja installé */
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Already Installed" );
+     { JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_bool( RootNode, "success", FALSE );
+          Json_node_add_string( RootNode, "message", "Agent already installed" );
+          Http_Send_json_response ( msg, RootNode );
+        }
+       else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        return;
      }
 
     if (getuid()!=0)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Not Running As ROOT" );
+     { JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_bool( RootNode, "success", FALSE );
+          Json_node_add_string( RootNode, "message", "Agent is not Running as ROOT" );
+          Http_Send_json_response ( msg, RootNode );
+        }
+       else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        return;
      }
 
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Parsing Request Failed" );
+     { JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_bool( RootNode, "success", FALSE );
+          Json_node_add_string( RootNode, "message", "Parsing Request Failed" );
+          Http_Send_json_response ( msg, RootNode );
+        }
+       else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        return;
      }
 
@@ -113,7 +131,13 @@
           && Json_has_member ( request, "api_url" )
            )
        )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_bool( RootNode, "success", FALSE );
+          Json_node_add_string( RootNode, "message", "Mauvais parametres" );
+          Http_Send_json_response ( msg, RootNode );
+        }
+       else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        json_node_unref(request);
        return;
      }
