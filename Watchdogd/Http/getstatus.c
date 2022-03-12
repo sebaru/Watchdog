@@ -60,11 +60,12 @@
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_node_add_string ( RootNode, "version",            WTD_VERSION );
-    Json_node_add_string ( RootNode, "instance",           g_get_host_name() );
-    Json_node_add_bool   ( RootNode, "instance_is_master", Config.instance_is_master );
-    Json_node_add_string ( RootNode, "master_host",        (Config.instance_is_master ? "-" : Config.master_host) );
-    Json_node_add_string ( RootNode, "run_as",             Config.run_as );
+    Json_node_add_string ( RootNode, "version",         WTD_VERSION );
+    Json_node_add_string ( RootNode, "instance_name",   g_get_host_name() );
+    Json_node_add_bool   ( RootNode, "is_master",       Json_get_bool   ( Config.config, "is_master" ) );
+    Json_node_add_string ( RootNode, "domain_uuid",     Json_get_string ( Config.config, "domain_uuid" ) );
+    Json_node_add_string ( RootNode, "master_hostname", Json_get_string ( Config.config, "master_hostname" ) );
+    Json_node_add_string ( RootNode, "run_as",          Json_get_string ( Config.config, "run_as" ) );
 
     temps = localtime( (time_t *)&Partage->start_time );
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
@@ -101,9 +102,6 @@
     Json_node_add_string ( RootNode, "archdb_database", Partage->com_arch.archdb_database );
     Json_node_add_int    ( RootNode, "archdb_nbr_enreg", Partage->com_arch.taille_arch );
 
-    gchar *buf = Json_node_to_string (RootNode);
-/*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+    Http_Send_json_response ( msg, RootNode );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

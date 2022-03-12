@@ -402,9 +402,11 @@
 
 /***************************************** Socket pour une instance master ****************************************************/
     Partage->com_msrv.zmq_to_slave = Zmq_Bind ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
-    if (!Partage->com_msrv.zmq_to_slave) goto end;
     zmq_from_slave                 = Zmq_Bind ( ZMQ_PULL, "listen-to-slave", "tcp", "*", 5556 );
-    if (!zmq_from_slave) goto end;
+
+/***************************************** Active l'API ***********************************************************************/
+    if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single)                                                                             /* Si demarrage des thread */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
@@ -416,14 +418,12 @@
           if (!Demarrer_dls())                                                                            /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
 
-          if (!Demarrer_http())                                                                             /* Démarrage HTTP */
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
-
           Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
         }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
      }
+
 
 /***************************************** Charge le mapping des bits internes ************************************************/
     MSRV_Remap();
@@ -485,7 +485,6 @@
     if (!Config.installed) { sleep(2); }              /* Laisse le temps au thread HTTP de repondre OK au client avant reboot */
     Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
 
-end:
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Zmq_Close ( Partage->com_msrv.zmq_to_bus );
@@ -525,10 +524,11 @@ end:
 
 /***************************************** Socket de subscription au master ***************************************************/
     Partage->com_msrv.zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "tcp", Config.master_host, 5556 );
-    if (!Partage->com_msrv.zmq_to_master) goto end;
     zmq_from_master                 = Zmq_Connect ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
-    if (!zmq_from_master) goto end;
 
+/***************************************** Active l'API ***********************************************************************/
+    if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single)                                                                             /* Si demarrage des thread */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
@@ -604,7 +604,7 @@ end:
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_host, RootNode );
        json_node_unref ( RootNode );
      }
-end:
+
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
     Zmq_Close ( Partage->com_msrv.zmq_to_bus );

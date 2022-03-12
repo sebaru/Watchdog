@@ -800,6 +800,7 @@
     */ }
     soup_server_add_handler ( socket, "/install", Http_traiter_install, NULL, NULL );
     soup_server_add_handler ( socket, "/memory", Http_traiter_memory, NULL, NULL );
+    soup_server_add_handler ( socket, "/", Http_traiter_status, NULL, NULL );
 
     /*static gchar *protocols[] = { "live-io", NULL };
     soup_server_add_websocket_handler ( socket, "/websocket" , NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );

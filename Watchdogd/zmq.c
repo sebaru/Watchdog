@@ -170,8 +170,8 @@
 /* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
 /******************************************************************************************************************************/
  gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf )
-  { gint byte;
-    byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
+  { if (!zmq) return(-1);
+    gint byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     return(byte);
   }
 /******************************************************************************************************************************/
@@ -180,8 +180,8 @@
 /* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
 /******************************************************************************************************************************/
  JsonNode *Recv_zmq_with_json ( struct ZMQUEUE *zmq, const gchar *my_tech_id, gchar *buf, gint taille_buf )
-  { gint byte;
-    byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
+  { if (!zmq) return(NULL);
+    gint byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte<0) return(NULL);
     if (byte>=taille_buf)
      { Info_new( Config.log, Config.log_zmq, LOG_ERR, "%s: Received %d bytes. Message too long. Dropping.", __func__, byte );

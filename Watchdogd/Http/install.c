@@ -252,6 +252,14 @@
 
     json_node_unref(request);
     Partage->com_msrv.Thread_run = FALSE;                                                    /* On reboot toute la baraque !! */
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
+
+    RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+    Json_node_add_string ( RootNode, "status", "installed" );
+    Http_Send_json_response ( msg, RootNode );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

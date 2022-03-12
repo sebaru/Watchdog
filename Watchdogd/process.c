@@ -530,5 +530,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: ok, HTTP is down", __func__ );
 
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Fin stopper_fils", __func__ );
+    sleep(1);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
