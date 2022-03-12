@@ -82,6 +82,18 @@
     return(phrase);
   }
 /******************************************************************************************************************************/
+/* Http_Send_json_response: Envoie le json en paramètre en prenant le lead dessus                                             */
+/* Entrée: le messages, le buffer json                                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Http_Send_json_response ( SoupMessage *msg, JsonNode *RootNode )
+  { gchar *buf = Json_node_to_string ( RootNode );
+    json_node_unref ( RootNode );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+/******************************************************************************************************************************/
 /* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
