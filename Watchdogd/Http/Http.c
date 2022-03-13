@@ -110,7 +110,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
        return(FALSE);
      }
-    Json_node_add_string ( RootNode, "domain_uuid", Config.instance_uuid );
+    Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
     Json_node_add_string ( RootNode, "api_tag", api_tag );
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
