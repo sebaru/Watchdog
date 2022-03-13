@@ -136,6 +136,10 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          *******" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_uuid          %s", Json_get_string ( Config.config, "domain_uuid" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_secret        *******" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config api_url              %s", Json_get_string ( Config.config, "api_url" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
   }
 /******************************************************************************************************************************/
 /* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
