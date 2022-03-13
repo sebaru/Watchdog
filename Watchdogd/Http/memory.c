@@ -29,11 +29,11 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Zmq_Send_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
+/* Http_Post_to_local_BUS: Envoie un message a l'API local                                                                    */
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Bus_Send_json_node ( struct SUBPROCESS *module, JsonNode *RootNode )
+ gboolean Http_Post_to_local_BUS ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *RootNode )
   { gchar query[256];
     gboolean success = FALSE;
 
@@ -44,6 +44,7 @@
      }
 
     Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_node_add_string ( RootNode, "bus_tag", bus_tag );
 
     g_snprintf( query, sizeof(query), "https://%s:5559/memory", Json_get_string ( Config.config, "master_hostname") );
 /********************************************************* Envoi de la requete ************************************************/
@@ -76,13 +77,12 @@ end:
     return(success);
   }
 /******************************************************************************************************************************/
-/* Zmq_Send_DI_to_master: Envoie le bit DI au master selon le status                                                          */
-/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Http_Post_to_local_BUS_DI: Envoie le bit DI au master                                                                      */
+/* Entrée: la structure SUBPROCESS, le json associé, l'etat attentu                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Bus_Send_DI ( struct SUBPROCESS *module, JsonNode *di, gboolean etat )
+ void Http_Post_to_local_BUS_DI ( struct SUBPROCESS *module, JsonNode *di, gboolean etat )
   { if (!module) return;
-    Json_node_add_string ( di, "bus_tag", "SET_DI" );
     gboolean update = FALSE;
     if (!Json_has_member ( di, "etat" )) { Json_node_add_bool ( di, "first_send", TRUE ); update = TRUE; }
     else
@@ -92,17 +92,16 @@ end:
      }
     if (update)
      { Json_node_add_bool ( di, "etat", etat );
-       Bus_Send_json_node ( module, di );
+       Http_Post_to_local_BUS ( module, "SET_DI", di );
      }
   }
 /******************************************************************************************************************************/
-/* Zmq_Send_AI_to_master: Envoie le bit AI au master selon le status                                                          */
-/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Http_Post_to_local_BUS_AI: Envoie le bit AI au master                                                                      */
+/* Entrée: la structure SUBPROCESS, le json associé, l'etat attentu                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Bus_Send_AI_to_master ( struct SUBPROCESS *module, JsonNode *ai, gdouble valeur, gboolean in_range )
+ void Http_Post_to_local_BUS_AI ( struct SUBPROCESS *module, JsonNode *ai, gdouble valeur, gboolean in_range )
   { if (!module) return;
-    Json_node_add_string ( ai, "bus_tag", "SET_AI" );
     gboolean update = FALSE;
     if (!Json_has_member ( ai, "valeur" )) { Json_node_add_bool ( ai, "first_send", TRUE ); update = TRUE; }
     else
@@ -114,38 +113,36 @@ end:
     if (update)
      { Json_node_add_double ( ai, "valeur", valeur );
        Json_node_add_bool   ( ai, "in_range", in_range );
-       Bus_Send_json_node ( module, ai );
+       Http_Post_to_local_BUS ( module, "SET_AI", ai );
      }
   }
 /******************************************************************************************************************************/
-/* Zmq_Send_CDE_to_master_new: Envoie le bit CDE au master selon le status                                                    */
+/* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */
 /* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Bus_Send_CDE ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme )
+ void Http_Post_to_local_BUS_CDE ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme )
   { if (!module) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
-    Json_node_add_string ( body, "bus_tag", "SET_CDE" );
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
-    Bus_Send_json_node ( module, body );
+    Http_Post_to_local_BUS ( module, "SET_CDE", body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
-/* Zmq_Send_WATCHDOG_to_master_new: Envoie le bit WATCHDOG au master selon le status                                          */
+/* Http_Post_to_local_BUS_WATCHDOG: Envoie le bit WATCHDOG au master selon le status                                          */
 /* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Bus_Send_WATCHDOG ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gint consigne )
+ void Http_Post_to_local_BUS_WATCHDOG ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gint consigne )
   { if (!module) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
-    Json_node_add_string ( body, "bus_tag", "SET_WATCHDOG" );
     Json_node_add_string ( body, "tech_id",  tech_id ); /* target */
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_int    ( body, "consigne", consigne );
-    Bus_Send_json_node ( module, body );
+    Http_Post_to_local_BUS ( module, "SET_WATCHDOG", body );
     json_node_unref(body);
   }
 /******************************************************************************************************************************/
@@ -153,8 +150,8 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- static void Http_memory_post ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                SoupClientContext *client, gpointer user_data )
+ static void Http_traiter_memory_post ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                        SoupClientContext *client, gpointer user_data )
   { JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request)
      { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Parsing Request Failed" );
@@ -288,7 +285,7 @@ end:
      }
 
     json_node_unref(request);
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_memory: Traite la gestion des bits memoire                                                                    */
@@ -297,7 +294,7 @@ end:
 /******************************************************************************************************************************/
  void Http_traiter_memory ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                             SoupClientContext *client, gpointer user_data )
-  {      if (msg->method == SOUP_METHOD_POST) return (Http_memory_post(server, msg, path, query, client, user_data));
+  {      if (msg->method == SOUP_METHOD_POST) return (Http_traiter_memory_post(server, msg, path, query, client, user_data));
     /*else if (msg->method == SOUP_METHOD_GET)  return (Http_memory_get (server, msg, path, query, client, user_data));*/
     soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }

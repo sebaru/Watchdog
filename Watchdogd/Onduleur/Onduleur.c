@@ -80,16 +80,16 @@
        vars->started = FALSE;
      }
 
-    Zmq_Send_AI_to_master ( module, vars->Load, 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module, vars->Realpower, 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module, vars->Battery_charge, 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module, vars->Input_voltage, 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module, vars->Battery_runtime, 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module, vars->Battery_voltage, 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module, vars->Input_hz, 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module, vars->Output_current, 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module, vars->Output_hz, 0.0, FALSE );
-    Zmq_Send_AI_to_master ( module, vars->Output_voltage, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Load, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Realpower, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Battery_charge, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Input_voltage, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Battery_runtime, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Battery_voltage, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Input_hz, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Output_current, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Output_hz, 0.0, FALSE );
+    Http_Post_to_local_BUS_AI ( module, vars->Output_voltage, 0.0, FALSE );
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s disconnected (host='%s')", __func__, thread_tech_id, host );
     SubProcess_send_comm_to_master_new ( module, FALSE );
@@ -278,34 +278,34 @@
     gchar *reponse;
 
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Load, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Load, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Realpower, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Realpower, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Battery_charge, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Battery_charge, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Input_voltage, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Input_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Battery_runtime, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Battery_runtime, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Battery_voltage, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Battery_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Input_hz, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Input_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Output_current, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Output_current, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Output_hz, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Output_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { Zmq_Send_AI_to_master ( module, vars->Output_voltage, atof(reponse+1), TRUE ); }
+     { Http_Post_to_local_BUS_AI ( module, vars->Output_voltage, atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
