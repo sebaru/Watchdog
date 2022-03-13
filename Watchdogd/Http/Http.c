@@ -98,9 +98,9 @@
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- gboolean Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode )
-  { gchar query[256];
-    gboolean success = FALSE;
+ JsonNode *Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode )
+  { JsonNode *result = NULL;
+    gchar query[256];
 
     g_snprintf( query, sizeof(query), "%s/%s", Json_get_string ( Config.config, "api_url"), URI );
 /********************************************************* Envoi de la requete ************************************************/
@@ -110,6 +110,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
        return(FALSE);
      }
+    if (!RootNode) RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
     Json_node_add_string ( RootNode, "instance_uuid", Json_get_string ( Config.config, "instance_uuid" ) );
     Json_node_add_string ( RootNode, "api_tag", api_tag );
@@ -124,14 +125,13 @@
 
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
-
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
     if (status_code!=200)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
-    else { success = TRUE; }
+    else { result = Http_Response_Msg_to_Json ( soup_msg ); }
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
-    return(success);
+    return(result);
  }
 /******************************************************************************************************************************/
 /* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */

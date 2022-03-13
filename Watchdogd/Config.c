@@ -39,7 +39,7 @@
 /* Entrée: le nom de fichier à lire                                                                                           */
 /* Sortie: La structure mémoire est à jour                                                                                    */
 /******************************************************************************************************************************/
- gboolean Lire_config ( void )
+ void Lire_config ( void )
   { GError *error = NULL;
     gchar *chaine;
     GKeyFile *gkf;
@@ -48,7 +48,8 @@
     memset ( &Config, 0, sizeof(struct CONFIG) );
 
     Config.config = Json_read_from_file ( "/etc/fr-abls-habitat-agent.conf" );
-    if (!Config.config) Config.config = Json_node_create();
+    if (!Config.config) { Config.config = Json_node_create(); }
+    else Config.installed = TRUE;
     if (!Json_has_member ( Config.config, "domain_uuid"   )) Json_node_add_string ( Config.config, "domain_uuid",   "default" );
     if (!Json_has_member ( Config.config, "domain_secret" )) Json_node_add_string ( Config.config, "domain_secret", "default" );
     if (!Json_has_member ( Config.config, "api_url" ))       Json_node_add_string ( Config.config, "api_url", "https://api.abls-habitat.fr" );

@@ -86,7 +86,7 @@
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level );
  extern void Run_HTTP ( void );
- extern gboolean Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode );
+ extern JsonNode *Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres );
 
  extern void Http_traiter_status  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

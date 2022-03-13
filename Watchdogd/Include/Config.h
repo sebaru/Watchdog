@@ -70,7 +70,7 @@
  #define DEFAUT_PROCESS_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
 
 /******************************************* Prototypes de fonctions **************************************/
- extern gboolean Lire_config ( void );
+ extern void Lire_config ( void );
  extern void Print_config ( void );
  extern gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
  extern gboolean Modifier_configDB_int ( gchar *nom_thread, gchar *nom, gint valeur );

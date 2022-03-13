@@ -731,7 +731,7 @@
 
     umask(022);                                                                              /* Masque de creation de fichier */
 
-    Config.installed = Lire_config();                               /* Lecture sur le fichier /etc/fr-abls-habitat.agent.conf */
+    Lire_config();                                                  /* Lecture sur le fichier /etc/fr-abls-habitat.agent.conf */
     Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s", WTD_VERSION );
 
@@ -754,22 +754,31 @@
        sleep(5);
        exit(-1);
      }
+/************************************************* Tell Global API thread is UP ***********************************************/
+    JsonNode *RootNode = Json_node_create();
+    if (RootNode)
+     { Json_node_add_int    ( RootNode, "start_time", time(NULL) );
+       Json_node_add_string ( RootNode, "hostname", g_get_host_name() );
+       Json_node_add_string ( RootNode, "version", WTD_VERSION );
+       Http_Post_to_global_API ( "instance", "START", RootNode );
+       json_node_unref ( RootNode );
+     }
 /************************************************* Get instance parameters ****************************************************/
-    gchar *parametres = g_strconcat ( "domain_uuid=",   Json_get_string ( Config.config, "domain_uuid" ), "&"
-                                      "instance_uuid=", Json_get_string ( Config.config, "instance_uuid" ), NULL );
-    JsonNode *api_result = Http_Get_from_global_API ( "instance", parametres );
-    g_free(parametres);
+    JsonNode *api_result = Http_Post_to_global_API ( "instance", "GET_CONFIG", NULL );
     if (api_result)
      { gchar *run_as = Json_get_string ( api_result, "run_as" );
-       if (run_as) g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
-              else g_snprintf( Config.run_as, sizeof(Config.run_as), "watchdog" );
+       if (run_as && strlen(run_as))
+            g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
+       else g_snprintf( Config.run_as, sizeof(Config.run_as), "watchdog" );
 
        Config.log_db             = Json_get_bool ( api_result, "log_db" );
        Config.log_bus            = Json_get_bool ( api_result, "log_bus" );
        Config.log_zmq            = Json_get_bool ( api_result, "log_zmq" );
        Config.log_trad           = Json_get_bool ( api_result, "log_trad" );
        Config.log_msrv           = Json_get_bool ( api_result, "log_msrv" );
-       Config.instance_is_master = Json_get_bool ( api_result, "is_master" );
+       if (Json_has_member ( api_result, "is_master") )
+            Config.instance_is_master = Json_get_bool ( api_result, "is_master" );
+       else Config.instance_is_master = TRUE;
        Config.use_subdir         = Json_get_bool ( api_result, "use_subdir" );
        gchar *master_hostname    = Json_get_string ( api_result, "master_hostname" );
        if (master_hostname) g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "%s", master_hostname );
@@ -824,16 +833,6 @@
        pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
-
-/************************************************* Tell Global API thread is UP ***********************************************/
-       JsonNode *RootNode = Json_node_create();
-       if (RootNode)
-        { Json_node_add_int    ( RootNode, "start_time", time(NULL) );
-          Json_node_add_string ( RootNode, "hostname", g_get_host_name() );
-          Json_node_add_string ( RootNode, "version", WTD_VERSION );
-          Http_Post_to_global_API ( "instance", "START", RootNode );
-          json_node_unref ( RootNode );
-        }
 
 /************************************* Création des zones de bits internes dynamiques *****************************************/
        Partage->Dls_data_DI       = NULL;
