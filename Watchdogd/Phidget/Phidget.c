@@ -136,7 +136,7 @@
      { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR,
 		         "%s: %s: Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;", __func__, thread_tech_id,
                  canal->map_tech_id, canal->map_acronyme, description, code );
-       Zmq_Send_AI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, 0.0, FALSE );
+       /*Http_Post_to_local_BUS_AI ( canal->module, canal->map_tech_id, canal->map_acronyme, 0.0, FALSE );*/
      }
     else if ( !strcmp ( canal->classe, "DigitalInput" ) )
      { Info_new( Config.log, canal->module->lib->Thread_debug, LOG_ERR,
@@ -221,7 +221,7 @@
     gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( Config.log, canal->module->lib->Thread_debug, LOG_INFO,
               "%s: %s: '%s':'%s' = %d", __func__, thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
-    Zmq_Send_DI_to_master_new ( canal->module, canal->map_tech_id, canal->map_acronyme, (valeur !=0 ? TRUE : FALSE) );
+    /*Http_Post_to_local_BUS_DI( canal->module, canal->map_tech_id, canal->map_acronyme, (valeur !=0 ? TRUE : FALSE) );*/
   }
 /******************************************************************************************************************************/
 /* Phidget_AnalogAttach: Appelé quand un canal analogique est en cours d'attachement                                          */
