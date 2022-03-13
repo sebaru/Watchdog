@@ -242,6 +242,13 @@
      { Json_node_add_string( RootNode, "domain_uuid", domain_uuid );
        Json_node_add_string( RootNode, "domain_secret", domain_secret );
        Json_node_add_string( RootNode, "api_url", api_url );
+       time_t t = time(NULL);
+       struct tm *temps = localtime( &t );
+       if (temps)
+        { gchar date[64];
+          strftime( date, sizeof(date), "%F %T", temps );
+          Json_node_add_string( RootNode, "install_time", date );
+        }
        gchar *result = Json_node_to_string ( RootNode );
        json_node_unref(RootNode);
        write (fd, result, strlen(result));
@@ -252,6 +259,14 @@
 
     json_node_unref(request);
     Partage->com_msrv.Thread_run = FALSE;                                                    /* On reboot toute la baraque !! */
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
+
+    RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+    Json_node_add_string ( RootNode, "status", "installed" );
+    Http_Send_json_response ( msg, RootNode );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

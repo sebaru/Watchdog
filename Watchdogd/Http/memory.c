@@ -153,14 +153,9 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_memory ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                            SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_POST)
-     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-       return;
-     }
-
-    JsonNode *request = Http_Msg_to_Json ( msg );
+ static void Http_memory_post ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                SoupClientContext *client, gpointer user_data )
+  { JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request)
      { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Parsing Request Failed" );
        return;
@@ -294,5 +289,16 @@ end:
 
     json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_memory: Traite la gestion des bits memoire                                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : HTTP Response code                                                                                                */
+/******************************************************************************************************************************/
+ void Http_traiter_memory ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                            SoupClientContext *client, gpointer user_data )
+  {      if (msg->method == SOUP_METHOD_POST) return (Http_memory_post(server, msg, path, query, client, user_data));
+    /*else if (msg->method == SOUP_METHOD_GET)  return (Http_memory_get (server, msg, path, query, client, user_data));*/
+    soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

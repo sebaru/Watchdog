@@ -1092,19 +1092,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* New_alias_dependance_VISUEL: Creer un nouvel Alias de depandences                                                          */
-/* Entrées: le tech_id/acronyme de l'alias et ses options au format JSON                                                      */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void New_alias_dependance_VISUEL ( gchar *tech_id, gchar *acronyme, gchar *forme, gchar *libelle )
-  { if ( ! Get_alias_par_acronyme ( tech_id, acronyme ) )                                               /* Si pas déjà défini */
-     { GList *ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(libelle) );
-       ss_options = New_option_chaine ( ss_options, T_FORME, g_strdup(forme) );
-       struct ALIAS *alias_dep = New_alias ( tech_id, acronyme, MNEMO_VISUEL, ss_options );
-       if (alias_dep) alias_dep->used = 1;                         /* &Par défaut, on considère qu'une dependance est utilisée */
-     }
-  }
-/******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
 /* Entrées: le tech_id/Acronyme de l'alias                                                                                    */
 /* Sortie: la structure, ou FALSE si erreur                                                                                   */
@@ -1178,20 +1165,10 @@
              gchar *mode    = Get_option_chaine( alias->options, T_MODE, "default" );
              if (forme)
               { gchar ss_acronyme[64];
-				if (!strcasecmp(forme, "bloc_maintenance") )                               /* Création des bits de dependance */
-                 { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_SERVICE", acronyme );
-                   New_alias_dependance_VISUEL ( tech_id, ss_acronyme, "bouton", "  SERVICE  " );
-                   g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_MAINTENANCE", acronyme );
-                   New_alias_dependance_VISUEL ( tech_id, ss_acronyme, "bouton", "MAINTENANCE" );
-                   g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLEF", acronyme );
-                   New_alias_dependance_VISUEL ( tech_id, ss_acronyme, "clef_a_molette_2", "Clef de Maintenance" );
-                 }
-                else                                              /* Pour tous les visuels "classiques", on créé un bit _CLIC */
-                 { g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
-                   New_alias_dependance_DI ( tech_id, ss_acronyme, "Clic sur le visuel depuis l'IHM" );
-                   Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
-                   Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
-                 }
+                g_snprintf( ss_acronyme, sizeof(ss_acronyme), "%s_CLIC", acronyme );
+                New_alias_dependance_DI ( tech_id, ss_acronyme, "Clic sur le visuel depuis l'IHM" );
+                Mnemo_auto_create_VISUEL ( &Dls_plugin, alias->acronyme, libelle, forme, mode, couleur );
+                Synoptique_auto_create_VISUEL ( &Dls_plugin, alias->tech_id, alias->acronyme );
               }
              break;
            }
