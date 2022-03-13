@@ -52,5 +52,6 @@
  extern JsonNode *Json_get_object_as_node ( JsonNode *query, gchar *chaine );
  extern gboolean Json_has_member ( JsonNode *query, gchar *chaine );
  extern JsonNode *Json_read_from_file ( gchar *filename );
+ extern gboolean Json_write_to_file ( gchar *filename, JsonNode *RootNode );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

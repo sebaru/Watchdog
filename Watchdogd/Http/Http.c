@@ -138,7 +138,7 @@
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
  JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres )
-  { gchar query[256];
+  { gchar query[512];
     JsonNode *result = NULL;
 
     if (!parametres) g_snprintf( query, sizeof(query), "%s/%s", Json_get_string ( Config.config, "api_url"), URI );
@@ -159,7 +159,7 @@
 
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error getting %s: %s\n", __func__, query, reason_phrase ); }
     else
      { result = Http_Response_Msg_to_Json ( soup_msg ); }
     g_object_unref( soup_msg );

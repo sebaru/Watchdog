@@ -727,10 +727,45 @@
 
     umask(022);                                                                              /* Masque de creation de fichier */
 
-    Config.installed = Lire_config();                                      /* Lecture sur le fichier /etc/watchdogd.abls.conf */
+    Config.installed = Lire_config();                               /* Lecture sur le fichier /etc/fr-abls-habitat.agent.conf */
     Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start v%s", WTD_VERSION );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s", WTD_VERSION );
 
+    if (!Json_has_member ( Config.config, "instance_uuid" ))
+     { gchar instance_uuid[37];
+       UUID_New ( instance_uuid );
+       Json_node_add_string ( Config.config, "instance_uuid", instance_uuid );
+       Json_write_to_file ( "/etc/fr-abls-habitat-agent.conf", Config.config );
+     }
+
+/************************************************* Test Connexion to Global API ***********************************************/
+    JsonNode *API = Http_Get_from_global_API ( "status", NULL );
+    if (API)
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connected with API %s", __func__, Json_get_string ( API, "version" ) );
+       json_node_unref ( API );
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connection to Global API FAILED. Sleep 5s and stopping.", __func__ );
+       sleep(5);
+       exit(-1);
+     }
+/************************************************* Get instance parameters ****************************************************/
+    gchar *parametres = g_strconcat ( "domain_uuid=",   Json_get_string ( Config.config, "domain_uuid" ), "&"
+                                      "instance_uuid=", Json_get_string ( Config.config, "instance_uuid" ), NULL );
+    JsonNode *api_result = Http_Get_from_global_API ( "config", parametres );
+    g_free(parametres);
+    if (api_result)
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connected with API %s", __func__, Json_get_string ( API, "version" ) );
+       json_node_unref ( api_result );
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Cannot get API config for this instance. Sleep 5s and stopping.", __func__ );
+       sleep(5);
+       exit(-1);
+     }
+
+
+/******************************************************* Drop privileges ******************************************************/
     if (Config.installed) { Drop_privileges(); }
 
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
@@ -769,14 +804,7 @@
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
 
-       UUID_Load ( "MSRV", Config.instance_uuid );
-/************************************************* Test Connexion to Global API ***********************************************/
-       JsonNode *API = Http_Get_from_global_API ( "status", NULL );
-       if (API)
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connected with API %s", __func__, Json_get_string ( API, "version" ) );
-          json_node_unref ( API );
-        }
-
+/************************************************* Tell Global API thread is UP ***********************************************/
        JsonNode *RootNode = Json_node_create();
        if (RootNode)
         { Json_node_add_int ( RootNode, "start_time", time(NULL) );

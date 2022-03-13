@@ -226,14 +226,6 @@
 #endif
 /******************************************* Création fichier de config *******************************************************/
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Creating config file '%s'", __func__, fichier );
-
-    gint fd = creat ( fichier, S_IRUSR | S_IWUSR );
-    if (fd==-1)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Create Error");
-       json_node_unref(request);
-       return;
-     }
-
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string( RootNode, "domain_uuid", domain_uuid );
@@ -248,13 +240,10 @@
           strftime( date, sizeof(date), "%F %T", temps );
           Json_node_add_string( RootNode, "install_time", date );
         }
-       gchar *result = Json_node_to_string ( RootNode );
+       Json_write_to_file ( "/etc/fr-abls-habitat-agent.conf", RootNode );
        json_node_unref(RootNode);
-       write (fd, result, strlen(result));
-       g_free(result);
      }
-    else { Info_new( Config.log, TRUE, LOG_ERR, "%s: Writing config failed.", __func__ ); }
-    close(fd);
+    else { Info_new( Config.log, TRUE, LOG_ERR, "%s: Writing config failed: Memory Error.", __func__ ); }
 
     json_node_unref(request);
     Partage->com_msrv.Thread_run = FALSE;                                                    /* On reboot toute la baraque !! */
