@@ -799,7 +799,7 @@
        soup_server_add_handler ( socket, "/outputs", Http_traiter_inputs, NULL, NULL );
     */ }
     soup_server_add_handler ( socket, "/install", Http_traiter_install, NULL, NULL );
-    soup_server_add_handler ( socket, "/memory", Http_traiter_memory, NULL, NULL );
+    soup_server_add_handler ( socket, "/bus", Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/", Http_traiter_status, NULL, NULL );
 
     /*static gchar *protocols[] = { "live-io", NULL };

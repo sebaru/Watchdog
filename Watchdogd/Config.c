@@ -139,6 +139,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_uuid          %s", Json_get_string ( Config.config, "domain_uuid" ) );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_secret        *******" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config api_url              %s", Json_get_string ( Config.config, "api_url" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Json_get_string ( Config.config, "master_hostname" ) );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
   }
 /******************************************************************************************************************************/
