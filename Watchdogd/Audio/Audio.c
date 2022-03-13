@@ -71,7 +71,7 @@
     fd_cible = open ( fichier, O_RDONLY, 0 );
     if (fd_cible < 0 && Config.instance_is_master == FALSE)
      { gchar chaine[80];
-       g_snprintf(chaine, sizeof(chaine), "wget https://%s:5560/audio/%s.wav -O %s", Config.master_host, texte, fichier );
+       g_snprintf(chaine, sizeof(chaine), "wget https://%s:5560/audio/%s.wav -O %s", Config.master_hostname, texte, fichier );
        Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
                  "%s: '%s' not found trying down from master '%s'", __func__, fichier, chaine );
        system(chaine);

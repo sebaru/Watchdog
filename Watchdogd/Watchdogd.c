@@ -468,7 +468,7 @@
           JsonNode *RootNode = Json_node_create();
           if (RootNode)
            { Json_node_add_string ( RootNode, "zmq_tag", "PING" );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), Config.master_host, RootNode );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), Config.master_hostname, RootNode );
              json_node_unref(RootNode);
            }
           Dls_data_set_WATCHDOG ( NULL, g_get_host_name(), "IO_COMM", &bit_io_comm, 900 );
@@ -523,8 +523,8 @@
     zmq_from_bus                 = Zmq_Bind ( ZMQ_PULL, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket de subscription au master ***************************************************/
-    Partage->com_msrv.zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "tcp", Config.master_host, 5556 );
-    zmq_from_master                 = Zmq_Connect ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
+    Partage->com_msrv.zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "tcp", Config.master_hostname, 5556 );
+    zmq_from_master                 = Zmq_Connect ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_hostname, 5555 );
 
 /***************************************** Active l'API ***********************************************************************/
     if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
@@ -545,7 +545,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_START" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_host, RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, RootNode );
        json_node_unref ( RootNode );
      }
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
@@ -576,7 +576,7 @@
              Json_node_add_string ( body, "tech_id",  g_get_host_name() );
              Json_node_add_string ( body, "acronyme", "IO_COMM" );
              Json_node_add_int    ( body, "consigne", 900 );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_host, body );
+             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, body );
              json_node_unref(body);
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
@@ -596,12 +596,12 @@
     RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_STOP" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_host, RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, RootNode );
        Json_node_add_string ( RootNode, "zmq_tag", "SET_WATCHDOG" );
        Json_node_add_string ( RootNode, "tech_id",  g_get_host_name() );
        Json_node_add_string ( RootNode, "acronyme", "IO_COMM" );
        Json_node_add_int    ( RootNode, "consigne", 0 );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_host, RootNode );
+       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, RootNode );
        json_node_unref ( RootNode );
      }
 
@@ -707,7 +707,11 @@
           exit(EXIT_ERREUR);
         }
      }
-    g_snprintf(Config.home, sizeof(Config.home), "%s", pwd->pw_dir );
+    if ( Config.use_subdir )
+         { g_snprintf(Config.home, sizeof(Config.home), "%s/.watchdog", pwd->pw_dir ); }
+    else { g_snprintf(Config.home, sizeof(Config.home), "%s", pwd->pw_dir ); }
+    mkdir (Config.home, 0);
+
     if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Chdir %s failed\n", __func__, Config.home ); exit(EXIT_ERREUR); }
     else
@@ -731,7 +735,8 @@
     Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s", WTD_VERSION );
 
-    if (!Json_has_member ( Config.config, "instance_uuid" ))
+/********************************************************* Create instance UUID ***********************************************/
+    if (!Json_has_member ( Config.config, "instance_uuid" ))    /* si jamais lancé, on ajoute un instance_uuid dans la config */
      { gchar instance_uuid[37];
        UUID_New ( instance_uuid );
        Json_node_add_string ( Config.config, "instance_uuid", instance_uuid );
@@ -752,23 +757,39 @@
 /************************************************* Get instance parameters ****************************************************/
     gchar *parametres = g_strconcat ( "domain_uuid=",   Json_get_string ( Config.config, "domain_uuid" ), "&"
                                       "instance_uuid=", Json_get_string ( Config.config, "instance_uuid" ), NULL );
-    JsonNode *api_result = Http_Get_from_global_API ( "config", parametres );
+    JsonNode *api_result = Http_Get_from_global_API ( "instance", parametres );
     g_free(parametres);
     if (api_result)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connected with API %s", __func__, Json_get_string ( API, "version" ) );
+     { gchar *run_as = Json_get_string ( api_result, "run_as" );
+       if (run_as) g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
+              else g_snprintf( Config.run_as, sizeof(Config.run_as), "watchdog" );
+
+       Config.log_db             = Json_get_bool ( api_result, "log_db" );
+       Config.log_bus            = Json_get_bool ( api_result, "log_bus" );
+       Config.log_zmq            = Json_get_bool ( api_result, "log_zmq" );
+       Config.log_trad           = Json_get_bool ( api_result, "log_trad" );
+       Config.log_msrv           = Json_get_bool ( api_result, "log_msrv" );
+       Config.instance_is_master = Json_get_bool ( api_result, "is_master" );
+       Config.use_subdir         = Json_get_bool ( api_result, "use_subdir" );
+       gchar *master_hostname    = Json_get_string ( api_result, "master_hostname" );
+       if (master_hostname) g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "%s", master_hostname );
+                       else g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "nomasterhost" );
+
+       Info_change_log_level ( Config.log, Json_get_int ( api_result, "log_level" ) );
        json_node_unref ( api_result );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API config loaded.", __func__ );
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Cannot get API config for this instance. Sleep 5s and stopping.", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Cannot get API config. Sleep 5s and stopping.", __func__ );
        sleep(5);
        exit(-1);
      }
-
 
 /******************************************************* Drop privileges ******************************************************/
     if (Config.installed) { Drop_privileges(); }
 
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
+    Print_config();
                                                                                       /* Verification de l'unicité du process */
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
     if (fd_lock<0)
@@ -807,32 +828,13 @@
 /************************************************* Tell Global API thread is UP ***********************************************/
        JsonNode *RootNode = Json_node_create();
        if (RootNode)
-        { Json_node_add_int ( RootNode, "start_time", time(NULL) );
+        { Json_node_add_int    ( RootNode, "start_time", time(NULL) );
+          Json_node_add_string ( RootNode, "hostname", g_get_host_name() );
+          Json_node_add_string ( RootNode, "version", WTD_VERSION );
           Http_Post_to_global_API ( "instance", "START", RootNode );
           json_node_unref ( RootNode );
         }
 
-
-       SQL_Write_new ( "INSERT INTO instances SET instance='%s', version='%s', start_time=NOW() "
-                       "ON DUPLICATE KEY UPDATE instance=VALUES(instance), version=VALUES(version), start_time=VALUES(start_time)",
-                       g_get_host_name(), WTD_VERSION);
-
-       RootNode = Json_node_create ();
-       SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM instances WHERE instance='%s'", g_get_host_name() );
-       Config.log_db             = Json_get_bool ( RootNode, "log_db" );
-       Config.log_zmq            = Json_get_bool ( RootNode, "log_zmq" );
-       Config.log_trad           = Json_get_bool ( RootNode, "log_trad" );
-       Config.log_msrv           = Json_get_bool ( RootNode, "log_msrv" );
-       Config.instance_is_master = Json_get_bool ( RootNode, "is_master" );
-       g_snprintf( Config.master_host, sizeof(Config.master_host), "%s", Json_get_string ( RootNode, "master_host" ) );
-       Info_change_log_level ( Config.log, Json_get_int ( RootNode, "log_level" ) );
-       if ( Json_get_bool ( RootNode, "use_subdir" ) )
-        { g_strlcat (Config.home, "/.watchdog", sizeof(Config.home));
-          chdir(Config.home);
-        }
-       json_node_unref ( RootNode );
-
-       Print_config();
 /************************************* Création des zones de bits internes dynamiques *****************************************/
        Partage->Dls_data_DI       = NULL;
        Partage->Dls_data_DO       = NULL;

@@ -53,7 +53,7 @@
     if (!Json_has_member ( Config.config, "domain_secret" )) Json_node_add_string ( Config.config, "domain_secret", "default" );
     if (!Json_has_member ( Config.config, "api_url" ))       Json_node_add_string ( Config.config, "api_url", "https://api.abls-habitat.fr" );
 
-    g_snprintf( Config.master_host,   sizeof(Config.master_host),   "localhost" );
+    g_snprintf( Config.master_hostname,   sizeof(Config.master_hostname),   "localhost" );
     g_snprintf( Config.run_as,        sizeof(Config.run_as),        "%s", g_get_user_name() );
     g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", DEFAUT_PROCESS_DIR   );
 
@@ -122,13 +122,13 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config run_as               %s", Config.run_as );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_zmq              %d", Config.log_zmq );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_bus              %d", Config.log_bus );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_trad             %d", Config.log_trad );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config debug                %d", Config.log_msrv );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_msrv             %d", Config.log_msrv );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master host          %s", Config.master_host );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master hostname      %s", Config.master_hostname );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db hostname          %s", Config.db_hostname );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );

@@ -42,17 +42,17 @@ CREATE TABLE IF NOT EXISTS `processes` (
 
 CREATE TABLE IF NOT EXISTS `instances` (
   `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
-  `instance` VARCHAR(64) UNIQUE NOT NULL,
+  `instance_uuid` VARCHAR(37) UNIQUE NOT NULL,
+  `hostname` VARCHAR(64) UNIQUE NOT NULL,
   `is_master` TINYINT(1) NOT NULL DEFAULT 0,
   `log_msrv` TINYINT(1) NOT NULL DEFAULT 0,
   `log_db` TINYINT(1) NOT NULL DEFAULT 0,
-  `log_zmq` TINYINT(1) NOT NULL DEFAULT 0,
+  `log_bus` TINYINT(1) NOT NULL DEFAULT 0,
   `log_trad` TINYINT(1) NOT NULL DEFAULT 0,
   `use_subdir` TINYINT(1) NOT NULL DEFAULT 0,
-  `master_host` VARCHAR(64) NOT NULL DEFAULT '',
+  `master_hostname` VARCHAR(64) NOT NULL DEFAULT '',
   `log_level` INT(11) NOT NULL DEFAULT 6,
   `start_time` DATETIME DEFAULT NOW(),
-  `database_version` INT(11) NOT NULL DEFAULT 0,
   `description` VARCHAR(128) NOT NULL DEFAULT '',
   `version` VARCHAR(128) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;

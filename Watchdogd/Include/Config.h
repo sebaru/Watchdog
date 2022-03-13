@@ -49,7 +49,7 @@
     gchar home [ TAILLE_HOME+1 ];                                                              /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
-    gchar master_host[ TAILLE_DB_HOST+1 ];
+    gchar master_hostname[ 32 ];
     guint    log_level;                                                                       /* Niveau de debug du programme */
     gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
     gboolean log_bus;                                                                                      /* TRUE si log_bus */
@@ -57,6 +57,7 @@
     gboolean log_db;                                                                              /* TRUE si log des acces DB */
     gboolean log_zmq;                                                                            /* TRUE si log des acces ZMQ */
     gboolean log_trad;                                                                    /* TRUE si log des compilations DLS */
+    gboolean use_subdir;                                                                   /* TRUE si home = .watchdog subdir */
     gboolean single;                                                                                /* Demarrage des thread ? */
     struct LOG *log;                                                                             /* Pour l'affichage des logs */
   };
