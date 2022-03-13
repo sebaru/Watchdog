@@ -43,9 +43,7 @@
 /******************************************************************************************************************************/
  void Http_traiter_install ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { gchar fichier[80], home[128], chaine[256], *welcome =
-          "#Welcome, your Agent is now installed !\n"
-          "#Sébastien Lefèvre - Abls-Habitat.fr\n";
+  { gchar fichier[80], home[128], chaine[256];
     struct stat stat_buf;
     struct passwd *pwd;
     gchar *db_schema;
@@ -235,13 +233,14 @@
        json_node_unref(request);
        return;
      }
-    write (fd, welcome, strlen(welcome) );
 
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string( RootNode, "domain_uuid", domain_uuid );
        Json_node_add_string( RootNode, "domain_secret", domain_secret );
        Json_node_add_string( RootNode, "api_url", api_url );
+       Json_node_add_string( RootNode, "product", "agent" );
+       Json_node_add_string( RootNode, "vendor", "abls-habitat.fr" );
        time_t t = time(NULL);
        struct tm *temps = localtime( &t );
        if (temps)
