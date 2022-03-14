@@ -740,7 +740,7 @@
      { gchar instance_uuid[37];
        UUID_New ( instance_uuid );
        Json_node_add_string ( Config.config, "instance_uuid", instance_uuid );
-       Json_write_to_file ( "/etc/fr-abls-habitat-agent.conf", Config.config );
+       Json_write_to_file ( "/etc/abls-habitat-agent.conf", Config.config );
      }
 
 /************************************************* Test Connexion to Global API ***********************************************/

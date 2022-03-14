@@ -90,7 +90,7 @@
        return;
      }
 
-    g_snprintf ( fichier, sizeof(fichier), "/etc/fr-abls-habitat-agent.conf" );
+    g_snprintf ( fichier, sizeof(fichier), "/etc/abls-habitat-agent.conf" );
     if (stat (fichier, &stat_buf)!=-1)                   /* Si pas d'erreur et fichier présent, c'est que c'est deja installé */
      { JsonNode *RootNode = Json_node_create ();
        if (RootNode)
@@ -240,7 +240,7 @@
           strftime( date, sizeof(date), "%F %T", temps );
           Json_node_add_string( RootNode, "install_time", date );
         }
-       Json_write_to_file ( "/etc/fr-abls-habitat-agent.conf", RootNode );
+       Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );
        json_node_unref(RootNode);
      }
     else { Info_new( Config.log, TRUE, LOG_ERR, "%s: Writing config failed: Memory Error.", __func__ ); }
