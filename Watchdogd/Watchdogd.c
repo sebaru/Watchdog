@@ -760,7 +760,9 @@
      { Json_node_add_int    ( RootNode, "start_time", time(NULL) );
        Json_node_add_string ( RootNode, "hostname", g_get_host_name() );
        Json_node_add_string ( RootNode, "version", WTD_VERSION );
-       Http_Post_to_global_API ( "instance", "START", RootNode );
+       Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
+       JsonNode *api_result = Http_Post_to_global_API ( "instance", "START", RootNode );
+       if (api_result) json_node_unref ( api_result );
        json_node_unref ( RootNode );
      }
 /************************************************* Get instance parameters ****************************************************/

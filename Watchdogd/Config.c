@@ -74,7 +74,7 @@
     if (!g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error))
      { printf("Unable to parse config file %s, error %s\n", Config.config_file, error->message );
        g_error_free( error );
-       return(FALSE);
+       return;
      }
 /******************************************************* Partie GLOBAL ********************************************************/
     printf("Using config file %s.\n", Config.config_file );
@@ -110,7 +110,6 @@
 /******************************************************** Partie LOG **********************************************************/
     Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
     g_key_file_free(gkf);
-    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Print_config: Affichage (enfin log) la config actuelle en parametre                                                        */
@@ -129,7 +128,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master hostname      %s", Config.master_hostname );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Config.master_hostname );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db hostname          %s", Config.db_hostname );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
@@ -140,7 +139,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_uuid          %s", Json_get_string ( Config.config, "domain_uuid" ) );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_secret        *******" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config api_url              %s", Json_get_string ( Config.config, "api_url" ) );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Json_get_string ( Config.config, "master_hostname" ) );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
   }
 /******************************************************************************************************************************/
