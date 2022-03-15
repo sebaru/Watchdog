@@ -50,9 +50,9 @@ CREATE TABLE IF NOT EXISTS `instances` (
   `log_bus` TINYINT(1) NOT NULL DEFAULT 0,
   `log_trad` TINYINT(1) NOT NULL DEFAULT 0,
   `use_subdir` TINYINT(1) NOT NULL DEFAULT 0,
-  `master_hostname` VARCHAR(64) NOT NULL DEFAULT '',
   `log_level` INT(11) NOT NULL DEFAULT 6,
   `start_time` DATETIME DEFAULT NOW(),
+  `install_time` DATETIME DEFAULT NOW(),
   `description` VARCHAR(128) NOT NULL DEFAULT '',
   `version` VARCHAR(128) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;

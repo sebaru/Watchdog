@@ -46,7 +46,7 @@
     Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_string ( RootNode, "bus_tag", bus_tag );
 
-    g_snprintf( query, sizeof(query), "https://%s:5559/bus", Json_get_string ( Config.config, "master_hostname") );
+    g_snprintf( query, sizeof(query), "https://%s:5559/bus", Config.master_hostname );
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     g_object_set ( G_OBJECT(connexion), "ssl-strict", FALSE, NULL );

@@ -763,6 +763,8 @@
        Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
        JsonNode *api_result = Http_Post_to_global_API ( "instance", "START", RootNode );
        if (api_result) json_node_unref ( api_result );
+       else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for INSTANCE START failed.", __func__ );
+
        json_node_unref ( RootNode );
      }
 /************************************************* Get instance parameters ****************************************************/

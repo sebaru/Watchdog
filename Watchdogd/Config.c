@@ -53,6 +53,7 @@
     if (!Json_has_member ( Config.config, "domain_uuid"   )) Json_node_add_string ( Config.config, "domain_uuid",   "default" );
     if (!Json_has_member ( Config.config, "domain_secret" )) Json_node_add_string ( Config.config, "domain_secret", "default" );
     if (!Json_has_member ( Config.config, "api_url" ))       Json_node_add_string ( Config.config, "api_url", "https://api.abls-habitat.fr" );
+    if (!Json_has_member ( Config.config, "install_time"  )) Json_node_add_string ( Config.config, "install_time", "1980-10-22 02:50:00" );
 
     g_snprintf( Config.master_hostname,   sizeof(Config.master_hostname),   "localhost" );
     g_snprintf( Config.run_as,        sizeof(Config.run_as),        "%s", g_get_user_name() );
