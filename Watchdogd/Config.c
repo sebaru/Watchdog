@@ -120,6 +120,16 @@
   {
     if (!Config.log) return;
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db hostname          %s", Config.db_hostname );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          *******" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_uuid          %s", Json_get_string ( Config.config, "domain_uuid" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_secret        *******" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config api_url              %s", Json_get_string ( Config.config, "api_url" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config run_as               %s", Config.run_as );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
@@ -131,16 +141,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Config.master_hostname );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db hostname          %s", Config.db_hostname );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          *******" );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_uuid          %s", Json_get_string ( Config.config, "domain_uuid" ) );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_secret        *******" );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config api_url              %s", Json_get_string ( Config.config, "api_url" ) );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
   }
 /******************************************************************************************************************************/
 /* Ajouter_configDB: Ajout ou edition d'un message                                                                            */

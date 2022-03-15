@@ -154,7 +154,7 @@
     return(json_object_get_string_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
-/* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
+/* Json_get_double: Recupere le double dont le nom est en parametre                                                           */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
@@ -164,7 +164,7 @@
     return(json_object_get_double_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
-/* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
+/* Json_get_bool: Recupere le booleen dont le nom est en parametre                                                            */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
