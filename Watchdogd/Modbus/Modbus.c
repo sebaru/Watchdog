@@ -854,7 +854,7 @@
             for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
              { if (vars->DI[cpt])                                                                   /* Si l'entrée est mappée */
                 { gint new_etat = (vars->response.data[ cpt_byte ] & cpt_poid);
-                  Zmq_Send_DI_to_master ( module, vars->DI[cpt], new_etat );
+                  Http_Post_to_local_BUS_DI ( module, vars->DI[cpt], new_etat );
                 }
                cpt_poid = cpt_poid << 1;
                if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
@@ -886,7 +886,7 @@
                       }
                      default : new_valeur=0.0; new_in_range=FALSE;
                    }
-                  Zmq_Send_AI_to_master ( module, vars->AI[cpt], new_valeur, new_in_range );
+                  Http_Post_to_local_BUS_AI ( module, vars->AI[cpt], new_valeur, new_in_range );
                 }
              }
             vars->mode = MODBUS_SET_DO;

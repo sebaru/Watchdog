@@ -41,7 +41,6 @@
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     void *zmq_from_bus;                                                                       /* handle d"ecoute du BUS local */
-    void *zmq_to_master;                                                                           /* handle d"envoiau master */
     gchar zmq_buffer[1024];                                                     /* Buffer de reception des messages du master */
     void *vars;                                                               /* Pointeur vers les variables de run du module */
   };

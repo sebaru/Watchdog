@@ -731,7 +731,7 @@
 
     umask(022);                                                                              /* Masque de creation de fichier */
 
-    Lire_config();                                                  /* Lecture sur le fichier /etc/fr-abls-habitat.agent.conf */
+    Lire_config();                                                     /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
     Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s", WTD_VERSION );
 

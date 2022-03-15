@@ -513,7 +513,7 @@
           gchar *libelle         = Json_get_string ( element, "libelle" );
           Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
                     thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
-          Zmq_Send_CDE_to_master_new ( module, tech_id, acronyme );
+          Http_Post_to_local_BUS_CDE ( module, tech_id, acronyme );
           Envoyer_smsg_gsm_text ( module, "Fait." );
         }
        g_list_free(Results);

@@ -126,17 +126,17 @@
     Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
               "%s: day %02d -> temp_min=%02d, temp_max=%02d", __func__, day, temp_min, temp_max );
 
-    Zmq_Send_AI_to_master ( module, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Proba_pluie[day],      1.0*Json_get_int ( element, "probarain" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Proba_gel[day],        1.0*Json_get_int ( element, "probafrost" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Proba_brouillard[day], 1.0*Json_get_int ( element, "probafog" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Proba_vent_70[day],    1.0*Json_get_int ( element, "probawind70" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Proba_vent_100[day],   1.0*Json_get_int ( element, "probawind100" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Proba_vent_orage[day], 1.0*Json_get_int ( element, "gustx" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Vent_10m[day],         1.0*Json_get_int ( element, "wind10m" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Direction_vent[day],   1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
-    Zmq_Send_AI_to_master ( module, vars->Rafale_vent[day],      1.0*Json_get_int ( element, "gust10m" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Proba_pluie[day],      1.0*Json_get_int ( element, "probarain" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Proba_gel[day],        1.0*Json_get_int ( element, "probafrost" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Proba_brouillard[day], 1.0*Json_get_int ( element, "probafog" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Proba_vent_70[day],    1.0*Json_get_int ( element, "probawind70" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Proba_vent_100[day],   1.0*Json_get_int ( element, "probawind100" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Proba_vent_orage[day], 1.0*Json_get_int ( element, "gustx" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Vent_10m[day],         1.0*Json_get_int ( element, "wind10m" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Direction_vent[day],   1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
+    Http_Post_to_local_BUS_AI ( module, vars->Rafale_vent[day],      1.0*Json_get_int ( element, "gust10m" ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */

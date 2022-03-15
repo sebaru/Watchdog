@@ -122,7 +122,7 @@
 /******************************************************************************************************************************/
  void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
-     { Zmq_Send_WATCHDOG_to_master_new ( module, Json_get_string ( module->config, "thread_tech_id" ), "IO_COMM", (etat ? 900 : 0) );
+     { Http_Post_to_local_BUS_WATCHDOG ( module, Json_get_string ( module->config, "thread_tech_id" ), "IO_COMM", (etat ? 900 : 0) );
        module->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
        module->comm_status = etat;
      }
@@ -152,7 +152,6 @@
      }
 
     module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    module->zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
@@ -172,7 +171,6 @@
   { SubProcess_send_comm_to_master_new ( module, FALSE );
     if (module->vars) g_free(module->vars);
     Zmq_Close ( module->zmq_from_bus );
-    Zmq_Close ( module->zmq_to_master );
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is DOWN",
               __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id") );
     pthread_exit(0);
