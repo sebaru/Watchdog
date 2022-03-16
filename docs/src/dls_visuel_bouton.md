@@ -11,7 +11,7 @@ Par exemple, voici la définition complète d'un visuel **bouton**:
 Cette déclaration permet de creer un bouton "Cliquez moi !", de couleur **bleu**, et clignotant.
 
 Afin de capter l'évènement de clic de la part de l'utilisateur,
-a chaque bouton est automatique accroché un bit **DI** nommé par la concaténation de son acronyme et de **_CLIC**.
+a chaque bouton est automatiquement accroché un bit **DI** nommé par la concaténation de son acronyme et de **_CLIC**.
 
 Exemple:
 

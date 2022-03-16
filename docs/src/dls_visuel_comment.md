@@ -29,6 +29,14 @@ Si le `mode` n'est pas renseigné, celui-ci sera considéré comme **annotation*
 
 Toutes les [couleurs](dls_visuels.md#les-couleurs) traditionnelles sont reconnues.
 
+Quelques exemples pilotant un commentaire :
+
+    /* Nous sommes dans le D.L.S "TECH_ID" */
+    #define COMMENT <-> _I(forme="comment", libelle="mon commentaire");
+    - condition_1 -> COMMENT(color="red");   /* le libelle est rouge si la condition 1 est active */
+    -/condition_1 -> COMMENT(color="green"); /* le libelle est vert si la condition 1 est fausse */
+    - condition_2 -> COMMENT(color="yellow");  /* le libelle est jaune si la condition 2 est active */
+
 ##Attribut de clignotement
 
 Un commentaire, peut éventuellement etre clignotant, si l'option `cligno` est renseignée dans ses options.
