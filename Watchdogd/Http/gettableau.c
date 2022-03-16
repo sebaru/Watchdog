@@ -301,8 +301,8 @@
      { gint tableau_id = Json_get_int(request,"tableau_id");
        g_snprintf( requete, sizeof(requete),
                   "UPDATE tableau_map AS tm "
-                  "INNER JOIN tableau AS t ON t.id=tm.tableau_id "
-                  "INNER JOIN syns ON t.syn_id = syns.id "
+                  "INNER JOIN tableau AS t ON t.tableau_id=tm.tableau_id "
+                  "INNER JOIN syns ON t.syn_id = syns.syn_id "
                   " SET tech_id='%s', acronyme='%s', color='%s' WHERE tm.tableau_id='%d' AND syns.access_level<='%d'",
                    tech_id, acronyme, color, tableau_id, session->access_level );
        Audit_log ( session, "tableau_map '%d' changed to '%s:%s", tableau_id, tech_id, acronyme );
