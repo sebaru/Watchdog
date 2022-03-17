@@ -38,7 +38,7 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Http_traiter_tableau_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                   SoupClientContext *client, gpointer user_data )
+                                  SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_GET)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -154,7 +154,7 @@
     if ( Json_has_member ( request, "tableau_id" ) )                                                                       /* Edition */
      { g_snprintf( requete, sizeof(requete),
                   "UPDATE tableau INNER JOIN syns ON tableau.syn_id = syns.syn_id "
-                  "SET titre='%s', syn_id='%d' WHERE tableau.tableau_id='%d' AND access_level<='%d'",
+                  "SET titre='%s', tableau.syn_id='%d' WHERE tableau.tableau_id='%d' AND access_level<='%d'",
                    titre, syn_id, Json_get_int(request,"tableau_id"), session->access_level );
        Audit_log ( session, "tableau '%s'(%d) modifié", titre, Json_get_int(request,"tableau_id") );
      }
