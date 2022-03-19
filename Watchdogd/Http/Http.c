@@ -795,13 +795,12 @@
        return;
      }
 
-    if (Config.instance_is_master==TRUE)
-     {/* soup_server_add_handler ( socket, "/inputs", Http_traiter_inputs, NULL, NULL );
-       soup_server_add_handler ( socket, "/outputs", Http_traiter_inputs, NULL, NULL );
-    */ }
-    soup_server_add_handler ( socket, "/install", Http_traiter_install, NULL, NULL );
-    soup_server_add_handler ( socket, "/bus", Http_traiter_bus, NULL, NULL );
-    soup_server_add_handler ( socket, "/", Http_traiter_status, NULL, NULL );
+    if (Config.installed == FALSE)
+     { soup_server_add_handler ( socket, "/install", Http_traiter_install, NULL, NULL );
+       soup_server_add_handler ( socket, "/", Http_traiter_install, NULL, NULL );
+     }
+    else soup_server_add_handler ( socket, "/", Http_traiter_status, NULL, NULL );
+    if (Config.instance_is_master) soup_server_add_handler ( socket, "/bus", Http_traiter_bus, NULL, NULL );
 
     /*static gchar *protocols[] = { "live-io", NULL };
     soup_server_add_websocket_handler ( socket, "/websocket" , NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
