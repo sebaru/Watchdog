@@ -53,7 +53,7 @@
 /******************************************************************************************************************************/
  char *New_chaine( int longueur )
   { char *chaine;
-    chaine = g_try_malloc0( longueur );
+    chaine = g_try_malloc0( longueur+1 );
     if (!chaine) { return(NULL); }
     return(chaine);
   }
@@ -112,16 +112,6 @@
     else if (nbr_erreur==15)
      { write( Id_log, too_many, strlen(too_many)+1 ); }
     nbr_erreur++;
-  }
-/******************************************************************************************************************************/
-/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
-/* Entrées: rien                                                                                                              */
-/* Sortie: NULL si probleme                                                                                                   */
-/******************************************************************************************************************************/
- struct COMPARATEUR *New_comparateur( void )
-  { struct COMPARATEUR *comparateur;
-    comparateur=(struct COMPARATEUR *)g_try_malloc0( sizeof(struct COMPARATEUR) );
-    return(comparateur);
   }
 /******************************************************************************************************************************/
 /* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
@@ -223,375 +213,246 @@
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;
-    result = New_chaine( taille ); /* 10 caractères max */
+ static struct CONDITION *New_condition_bi( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( TRUE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
     if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_BI_up ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_BI_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_BI_down ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_BI_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( result, taille, "%sDls_data_get_BI ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_BI ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-    return(result);
+    return(condition);
   }
 /******************************************************************************************************************************/
 /* New_condition_entree: Prepare la chaine de caractere associée à la condition, en respectant les options                    */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_entree( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;
-    result = New_chaine( taille ); /* 10 caractères max */
+ static struct CONDITION *New_condition_entree( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( TRUE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
     if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_DI_up ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_DI_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_DI_down ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_DI_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( result, taille, "%sDls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-    return(result);
+    return(condition);
   }
 /******************************************************************************************************************************/
 /* New_condition_sortie_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_sortie_ana( int barre, struct ALIAS *alias, GList *options, struct COMPARATEUR *comparateur )
-  { gchar *result;
-    gint taille;
-
-    if (!comparateur)                                                    /* Vérification des bits obligatoirement comparables */
-     { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser qu'avec une comparaison", DlsScanner_get_lineno(), alias->acronyme );
-       result=New_chaine(2);
-       g_snprintf( result, 2, "0" );
-       return(result);
-     }
-
-    taille = 256;
-    result = New_chaine( taille ); /* 10 caractères max */
-    switch(comparateur->ordre)
-     { case T_EGAL:      g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)==%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case INF:         g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)<%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case SUP:         g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)>%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case INF_OU_EGAL: g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)<=%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-       case SUP_OU_EGAL: g_snprintf( result, taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)>=%f",
-                                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, comparateur->valf );
-                         break;
-     }
-    return(result);
+ static struct CONDITION *New_condition_sortie_ana( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( FALSE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
+    g_snprintf( condition->chaine, condition->taille, "Dls_data_get_AO(\"%s\",\"%s\",&_%s_%s)",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+    return(condition);
   }
 /******************************************************************************************************************************/
 /* New_condition_mono: Prepare la chaine de caractere associée à la condition, en respectant les options                      */
 /* Entrées: l'alias du monostable et sa liste d'options                                                                       */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;
-    result = New_chaine( taille ); /* 10 caractères max */
+ static struct CONDITION *New_condition_mono( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( TRUE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
     if (Get_option_entier( options, T_EDGE_UP, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_MONO_up ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_MONO_up ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else if (Get_option_entier( options, T_EDGE_DOWN, 0) == 1)
-     { g_snprintf( result, taille, "%sDls_data_get_MONO_down ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_MONO_down ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
-     { g_snprintf( result, taille, "%sDls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
+     { g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_MONO ( \"%s\", \"%s\", &_%s_%s )",
                    (barre ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
-   return(result);
+   return(condition);
  }
 /******************************************************************************************************************************/
 /* New_condition_tempo: Prepare la chaine de caractere associée à la condition, en respectant les options                     */
 /* Entrées: l'alias de la temporisatio et sa liste d'options                                                                  */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 128;
-    result = New_chaine( taille );
-    g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_%s_%s )",
+ static struct CONDITION *New_condition_tempo( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( TRUE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
+    g_snprintf( condition->chaine, condition->taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_%s_%s )",
                 (barre==1 ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-    return(result);
+    return(condition);
   }
 /******************************************************************************************************************************/
 /* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
 /* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;                                                                               /* Alias par nom uniquement ! */
-    result = New_chaine( taille ); /* 10 caractères max */
-    if ( !barre )
-         { g_snprintf( result, taille, "Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
-                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-    else { g_snprintf( result, taille, "!Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
-                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-   return(result);
+ static struct CONDITION *New_condition_horloge( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( TRUE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
+    if (!barre)
+     { g_snprintf( condition->chaine, condition->taille, "Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+    else
+     { g_snprintf( condition->chaine, condition->taille, "!Dls_data_get_DI ( \"%s\", \"%s\", &_%s_%s )",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+   return(condition);
  }
 /******************************************************************************************************************************/
 /* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
 /* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_WATCHDOG( int barre, struct ALIAS *alias, GList *options )
-  { gchar *result;
-    gint taille;
-    taille = 256;                                                                               /* Alias par nom uniquement ! */
-    result = New_chaine( taille ); /* 10 caractères max */
-    if ( !barre )
-         { g_snprintf( result, taille, "Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
-                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-    else { g_snprintf( result, taille, "!Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
-                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-         }
-   return(result);
+ static struct CONDITION *New_condition_WATCHDOG( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( TRUE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
+    if (!barre)
+     { g_snprintf( condition->chaine, condition->taille, "Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+    else
+     { g_snprintf( condition->chaine, condition->taille, "!Dls_data_get_WATCHDOG ( \"%s\", \"%s\", &_%s_%s )",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+     }
+   return(condition);
  }
 /******************************************************************************************************************************/
 /* New_condition_comparateur: Prepare la chaine de caractere associée à la condition de comparateur                           */
 /* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_comparateur( gchar *id, gchar *suffixe, GList *options_g, struct COMPARATEUR *comparateur )
-  { struct ALIAS *alias_g, *alias_d;
-    gchar *tech_id_g, *acro_g, *tech_id_d, *acro_d;
+ struct CONDITION *New_condition_comparaison( struct CONDITION *condition_g, gint ordre, struct CONDITION *condition_d )
+  { if (!condition_g) return(NULL);
+    if (!condition_d) return(NULL);
 
-    if (suffixe) { tech_id_g = id;   acro_g = suffixe; }
-            else { tech_id_g = NULL; acro_g = id; }
+    if (condition_g->is_bool == TRUE ) { Emettre_erreur_new( "Boolean cannot be compared" ); return(NULL); }
+    if (condition_d->is_bool == TRUE ) { Emettre_erreur_new( "Boolean cannot be compared" ); return(NULL); }
 
-    alias_g = Get_alias_par_acronyme(tech_id_g,acro_g);                                                /* On recupere l'alias */
-    if (!alias_g)
-     { alias_g = New_external_alias(tech_id_g,acro_g,NULL); }                    /* Si dependance externe, on va chercher */
+    struct CONDITION *result = New_condition ( TRUE, condition_g->taille + condition_d->taille + 10 );
+    if (!result) return(NULL);
 
-    if (!alias_g)
-     { if (tech_id_g) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_g, acro_g );/* si l'alias n'existe pas */
-                 else Emettre_erreur_new( "'%s' is not defined", acro_g );          /* si l'alias n'existe pas */
-       return(NULL);
+    g_snprintf( result->chaine, result->taille, "%s", condition_g->chaine );
+
+    switch(ordre)
+     { case INF:         g_strlcat ( result->chaine, " < ", result->taille ); break;
+       case SUP:         g_strlcat ( result->chaine, " > ", result->taille ); break;
+       case INF_OU_EGAL: g_strlcat ( result->chaine, " <= ", result->taille ); break;
+       case SUP_OU_EGAL: g_strlcat ( result->chaine, " >= ", result->taille ); break;
+       case T_EGAL     : g_strlcat ( result->chaine, " == ", result->taille ); break;
      }
-
-    if (alias_g->classe!=MNEMO_SORTIE_ANA &&                     /* Vérification des bits non comparables */
-        alias_g->classe!=MNEMO_ENTREE_ANA &&
-        alias_g->classe!=MNEMO_REGISTRE &&
-        alias_g->classe!=MNEMO_CPT_IMP &&
-        alias_g->classe!=MNEMO_CPTH
-       )
-     { Emettre_erreur_new( "'%s:%s' n'est pas comparable", alias_g->tech_id, alias_g->acronyme );
-       return(NULL);
-     }
-
-    if (comparateur->token_classe == ID )
-     { if (comparateur->has_tech_id) { tech_id_d = comparateur->tech_id; acro_d = comparateur->acronyme; }
-                                else { tech_id_d = NULL;                 acro_d = comparateur->acronyme; }
-
-       alias_d = Get_alias_par_acronyme(tech_id_d,acro_d);                                             /* On recupere l'alias */
-       if (!alias_d)
-        { alias_d = New_external_alias(tech_id_d,acro_d,NULL); }                 /* Si dependance externe, on va chercher */
-
-       if (!alias_d)
-        { if (tech_id_d) Emettre_erreur_new( "'%s:%s' is not defined", tech_id_d, acro_d );        /* si l'alias n'existe pas */
-                    else Emettre_erreur_new( "'%s' is not defined", acro_d );                      /* si l'alias n'existe pas */
-          return(NULL);
-        }
-
-       if (alias_d->classe!=MNEMO_SORTIE_ANA &&                     /* Vérification des bits non comparables */
-           alias_d->classe!=MNEMO_ENTREE_ANA &&
-           alias_d->classe!=MNEMO_REGISTRE &&
-           alias_d->classe!=MNEMO_CPT_IMP &&
-           alias_d->classe!=MNEMO_CPTH
-          )
-        { Emettre_erreur_new( "'%s:%s' n'est pas comparable", alias_d->tech_id, alias_d->acronyme );
-          return(NULL);
-        }
-     }
-
-    gchar partie_g[512], partie_d[512];
-    switch(alias_g->classe)                                                /* On traite que ce qui peut passer en "condition" */
-     { case MNEMO_ENTREE_ANA :
-        { gint in_range = Get_option_entier ( options_g, T_IN_RANGE, 0 );
-          if (in_range==1)
-           { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_g->acronyme );
-             return(NULL);
-           }
-          g_snprintf ( partie_g, sizeof(partie_g),
-                       "( Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) && "
-                       "  (Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme,
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-       case MNEMO_REGISTRE :
-        { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_REGISTRE (\"%s\",\"%s\",&_%s_%s) ",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-       case MNEMO_CPT_IMP :
-        { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-       case MNEMO_CPTH :
-        { g_snprintf ( partie_g, sizeof(partie_g),
-                       "( (Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ",
-                       alias_g->tech_id, alias_g->acronyme, alias_g->tech_id, alias_g->acronyme );
-          break;
-        }
-              default:
-        { Emettre_erreur_new( "'%s:%s' n'est pas implémenté en comparaison", alias_g->tech_id, alias_g->acronyme );
-          return(NULL);
-        }
-     }
-
-    switch(comparateur->ordre)
-     { case INF:         g_strlcat ( partie_g, " < ", sizeof(partie_g) ); break;
-       case SUP:         g_strlcat ( partie_g, " > ", sizeof(partie_g) ); break;
-       case INF_OU_EGAL: g_strlcat ( partie_g, " <= ", sizeof(partie_g) ); break;
-       case SUP_OU_EGAL: g_strlcat ( partie_g, " >= ", sizeof(partie_g) ); break;
-       case T_EGAL     : g_strlcat ( partie_g, " == ", sizeof(partie_g) ); break;
-     }
-
-    if (comparateur->token_classe == ID)
-     { switch(alias_d->classe)                              /* On traite que ce qui peut passer en "condition" */
-        { case MNEMO_ENTREE_ANA :
-           { gint in_range = Get_option_entier ( alias_d->options, T_IN_RANGE, 0 );
-             if (in_range==1)
-              { Emettre_erreur_new( "'%s'(in_range) ne peut s'utiliser dans une comparaison", alias_d->acronyme ); }
-             g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)) && "
-                          " Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s) )",
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme,
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
-             break;
-           }
-          case MNEMO_REGISTRE :
-           { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_REGISTRE (\"%s\",\"%s\",&_%s_%s) ) )",
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
-             break;
-           }
-          case MNEMO_CPT_IMP :
-           { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_CI (\"%s\",\"%s\",&_%s_%s) ) )",
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
-             break;
-           }
-          case MNEMO_CPTH :
-           { g_snprintf ( partie_d, sizeof(partie_d),
-                          "Dls_data_get_CH (\"%s\",\"%s\",&_%s_%s) ) )",
-                          alias_d->tech_id, alias_d->acronyme, alias_d->tech_id, alias_d->acronyme );
-             break;
-           }
-          default:
-           { Emettre_erreur_new( "'%s:%s' n'est pas implémenté en comparaison", alias_g->tech_id, alias_g->acronyme );
-             return(NULL);
-           }
-        }
-     }
-    else if (comparateur->token_classe == T_VALF)
-     { g_snprintf( partie_d, sizeof(partie_d), "%f) )", comparateur->valf ); }
-
-    return( g_strconcat( partie_g, partie_d, NULL ) );
+    g_strlcat ( result->chaine, condition_d->chaine, result->taille );
+    return( result );
   }
 /******************************************************************************************************************************/
 /* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_simple_entree_ana( int barre, struct ALIAS *alias, GList *options )
-  { gint taille, in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
-    gchar *result;
+ static struct CONDITION *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( FALSE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
 
+    gint in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
     if (in_range==1)
-     { taille = 256;
-       result = New_chaine( taille ); /* 10 caractères max */
-       if (barre) g_snprintf( result, taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+     { if (barre) g_snprintf( condition->chaine, condition->taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
                               alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-             else g_snprintf( result, taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
+             else g_snprintf( condition->chaine, condition->taille, "Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
                               alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-       return(result);
+       return(condition);
      }
-    Emettre_erreur_new( "'%s' ne peut s'utiliser qu'avec une comparaison, ou avec l'option (in_range)",
-                        DlsScanner_get_lineno(), alias->acronyme );
-    return(NULL);
+    if (barre) g_snprintf( condition->chaine, condition->taille, "!Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+          else g_snprintf( condition->chaine, condition->taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+    return(condition);
+  }
+/******************************************************************************************************************************/
+/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ static struct CONDITION *New_condition_registre( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( FALSE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
+
+    if (barre) g_snprintf( condition->chaine, condition->taille, "!Dls_data_get_REGISTRE(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+          else g_snprintf( condition->chaine, condition->taille, "Dls_data_get_REGISTRE(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+    return(condition);
+  }
+/******************************************************************************************************************************/
+/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ static struct CONDITION *New_condition_CI( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( FALSE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
+
+    if (barre) g_snprintf( condition->chaine, condition->taille, "!Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+          else g_snprintf( condition->chaine, condition->taille, "Dls_data_get_CI(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+    return(condition);
+  }
+/******************************************************************************************************************************/
+/* New_condition_entree_ana: Prepare la chaine de caractere associée à la condition, en respectant les options                */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ static struct CONDITION *New_condition_CH( int barre, struct ALIAS *alias, GList *options )
+  { struct CONDITION *condition = New_condition( FALSE, 256 ); /* 10 caractères max */
+    if (!condition) return(NULL);
+
+    if (barre) g_snprintf( condition->chaine, condition->taille, "!Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+          else g_snprintf( condition->chaine, condition->taille, "Dls_data_get_CH(\"%s\",\"%s\",&_%s_%s)",
+                           alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+    return(condition);
   }
 /******************************************************************************************************************************/
 /* New_condition_comparateur: Prepare la chaine de caractere associée à la condition de comparateur                           */
 /* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_simple( gint barre, gchar *id, gchar *suffixe, GList *options )
-  { gchar *tech_id, *acro;
-    struct ALIAS *alias;
-    if (suffixe) { tech_id = id; acro = suffixe; }
-            else { tech_id = NULL; acro = id; }
+ struct CONDITION *New_condition_alias( gint barre, struct ALIAS *alias, GList *options )
+  { if (!alias) return(NULL);
 
-    alias = Get_alias_par_acronyme(tech_id,acro);                                                      /* On recupere l'alias */
-    if (!alias)
-     { alias = New_external_alias(tech_id,acro,NULL); }                          /* Si dependance externe, on va chercher */
-    if (!alias)
-     { if (tech_id) Emettre_erreur_new( "'%s:%s' is not defined", tech_id, acro );                 /* si l'alias n'existe pas */
-               else Emettre_erreur_new( "'%s' is not defined", acro );                             /* si l'alias n'existe pas */
-       return(NULL);
+    switch(alias->classe)                                                  /* On traite que ce qui peut passer en "condition" */
+     { case MNEMO_TEMPO :     return ( New_condition_tempo( barre, alias, options ) );
+       case MNEMO_ENTREE:     return ( New_condition_entree( barre, alias, options ) );
+       case MNEMO_BISTABLE:   return ( New_condition_bi( barre, alias, options ) );
+       case MNEMO_MONOSTABLE: return ( New_condition_mono( barre, alias, options ) );
+       case MNEMO_HORLOGE:    return ( New_condition_horloge( barre, alias, options ) );
+       case MNEMO_WATCHDOG:   return ( New_condition_WATCHDOG( barre, alias, options ) );
+       case MNEMO_ENTREE_ANA: return ( New_condition_entree_ana( barre, alias, options ) );
+       case MNEMO_SORTIE_ANA: return ( New_condition_sortie_ana( barre, alias, options ) );
+       case MNEMO_REGISTRE:   return ( New_condition_registre( barre, alias, options ) );
+       case MNEMO_CPT_IMP:    return ( New_condition_CI( barre, alias, options ) );
+       case MNEMO_CPTH:       return ( New_condition_CH( barre, alias, options ) );
+       default:
+        { Emettre_erreur_new( "'%s' n'est pas une condition valide", alias->acronyme ); }
      }
-
-    if ( alias->classe!=MNEMO_TEMPO &&
-         alias->classe!=MNEMO_ENTREE &&
-         alias->classe!=MNEMO_BISTABLE &&
-         alias->classe!=MNEMO_MONOSTABLE &&
-         alias->classe!=MNEMO_HORLOGE &&
-         alias->classe!=MNEMO_WATCHDOG &&
-         alias->classe!=MNEMO_ENTREE_ANA
-       )
-     { Emettre_erreur_new( "'%s' ne peut s'utiliser seul (avec une comparaison ?)", acro );
-       return(NULL);
-     }
-
-     switch(alias->classe)                                                 /* On traite que ce qui peut passer en "condition" */
-      { case MNEMO_TEMPO :     return ( New_condition_tempo( barre, alias, options ) );
-        case MNEMO_ENTREE:     return ( New_condition_entree( barre, alias, options ) );
-        case MNEMO_BISTABLE:   return ( New_condition_bi( barre, alias, options ) );
-        case MNEMO_MONOSTABLE: return ( New_condition_mono( barre, alias, options ) );
-        case MNEMO_HORLOGE:    return ( New_condition_horloge( barre, alias, options ) );
-        case MNEMO_WATCHDOG:   return ( New_condition_WATCHDOG( barre, alias, options ) );
-        case MNEMO_ENTREE_ANA: return ( New_condition_simple_entree_ana( barre, alias, options ) );
-        default:
-         { Emettre_erreur_new( "'%s' n'est pas une condition valide", acro );
-           return(NULL);
-         }
-      }
+    return(NULL);
   }
 /******************************************************************************************************************************/
 /* New_calcul_PID: Calcul un PID                                                                                              */
@@ -730,7 +591,102 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_msg_by_alias: Prepare une struct action avec une commande de type MSG                                           */
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct CONDITION *New_condition( gboolean is_bool, gint taille )
+  { struct CONDITION *condition = g_try_malloc0( sizeof(struct CONDITION) );
+    if (!condition) { return(NULL); }
+    condition->is_bool = is_bool;
+    condition->taille = taille+1;
+    if (taille)
+     { condition->chaine = g_try_malloc0 ( taille );
+       if (!condition->chaine) { g_free(condition); return(NULL); }
+     }
+    return(condition);
+  }
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct INSTRUCTION *New_instruction( struct CONDITION *condition, GList *options, struct ACTION *actions )
+  { if (!condition) return(NULL);
+    if (!actions)   return(NULL);
+    struct INSTRUCTION *instr = g_try_malloc0( sizeof(struct INSTRUCTION) );
+    if (!instr) return(NULL);
+    instr->condition = condition;
+    instr->options = options;
+    instr->actions = actions;
+    instr->line_number = DlsScanner_get_lineno();
+    return (instr);
+  }
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ void Del_instruction( struct INSTRUCTION *instr )
+  { if (!instr) return;
+    Del_condition (instr->condition);
+    Del_actions (instr->actions);
+    Liberer_options ( instr->options );
+    g_free(instr);
+  }
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ void Del_condition( struct CONDITION *condition )
+  { if (!condition) return;
+    if (condition->chaine) g_free(condition->chaine);
+    g_free(condition);
+  }
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ void Del_actions( struct ACTION *actions )
+  { if (!actions) return;
+    if (actions->alors) g_free(actions->alors);
+    if (actions->sinon) g_free(actions->sinon);
+    g_free(actions);
+  }
+/******************************************************************************************************************************/
+/* New_condition_entier: Alloue une certaine quantité de mémoire pour les actions DLS                                         */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct CONDITION *New_condition_entier( gint entier )
+  { struct CONDITION *condition = g_try_malloc0( sizeof(struct CONDITION) );
+    if (!condition) { return(NULL); }
+    condition->taille = 32;
+    condition->is_bool = FALSE;
+    condition->chaine = g_try_malloc0 ( condition->taille );
+    if (!condition->chaine) { g_free(condition); return(NULL); }
+    g_snprintf ( condition->chaine, condition->taille, "%d", entier );
+    return(condition);
+  }
+/******************************************************************************************************************************/
+/* New_condition_valf: Alloue une certaine quantité de mémoire pour les actions DLS                                           */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ struct CONDITION *New_condition_valf( gdouble valf )
+  { struct CONDITION *condition = g_try_malloc0( sizeof(struct CONDITION) );
+    if (!condition) return(NULL);
+    condition->taille = 32;
+    condition->is_bool = FALSE;
+    condition->chaine = g_try_malloc0 ( condition->taille );
+    if (!condition->chaine) { g_free(condition); return(NULL); }
+    g_snprintf ( condition->chaine, condition->taille, "%f", valf );
+    return(condition);
+  }
+/******************************************************************************************************************************/
+/* New_action_msg: Prepare une struct action avec une commande de type MSG                                                    */
 /* Entrées: L'alias decouvert                                                                                                 */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
@@ -903,6 +859,38 @@
 
     g_snprintf( action->alors, taille, "   Dls_data_set_WATCHDOG ( vars, \"%s\", \"%s\", &_%s_%s, %d );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, consigne );
+    return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_registre: Prepare une struct action avec une commande registre                                                  */
+/* Entrées: l'alias associé et ses options                                                                                    */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_REGISTRE( struct ALIAS *alias, GList *options )
+  { struct ACTION *action;
+
+    gint taille = 256;
+    action = New_action();
+    action->alors = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "   Dls_data_set_REGISTRE ( vars, \"%s\", \"%s\", &_%s_%s, local_result );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+    return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_AO: Prepare une struct action avec une commande analog Output                                                   */
+/* Entrées: l'alias associé et ses options                                                                                    */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_AO( struct ALIAS *alias, GList *options )
+  { struct ACTION *action;
+
+    gint taille = 256;
+    action = New_action();
+    action->alors = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "   Dls_data_set_AO ( vars, \"%s\", \"%s\", &_%s_%s, local_result );\n",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
 /******************************************************************************************************************************/
@@ -1194,7 +1182,7 @@
     return(alias);
   }
 /******************************************************************************************************************************/
-/* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
+/* New_alias: Allouecomp une certaine quantité de mémoire pour utiliser des alias                                                 */
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
@@ -1434,7 +1422,7 @@
        options = New_option_entier ( options, T_TYPE, MSG_DEFAUT );
        New_alias_permanent ( NULL, "MSG_COMM_HS", MNEMO_MSG, options );
 
-       DlsScanner_debug = Config.log_trad;
+       DlsScanner_debug = TRUE;/*Config.log_trad;*/
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
