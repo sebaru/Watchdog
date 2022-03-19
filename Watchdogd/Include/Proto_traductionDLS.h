@@ -39,10 +39,11 @@
       };
 
  struct ACTION
-  { gchar *alors;                                                          /* Chaine pointant sur le nom du tableau (B/M/E..) */
+  { gint taille_alors;
+    gchar *alors;                                                          /* Chaine pointant sur le nom du tableau (B/M/E..) */
+    gint taille_sinon;
     gchar *sinon;
   };
-
 
  struct OPTION
   { gint token;
@@ -54,13 +55,17 @@
           };
   };
 
- struct COMPARATEUR
-  { gint ordre;
-    gint token_classe;
-    gboolean has_tech_id;
-    gchar tech_id[32];
-    gchar acronyme[64];
-    gdouble valf;
+ struct CONDITION
+  { gboolean is_bool;
+    gint taille;
+    gchar *chaine;
+  };
+
+ struct INSTRUCTION
+  { struct CONDITION *condition;
+    GList *options;
+    struct ACTION *actions;
+    gint line_number;
   };
 
  struct ALIAS
@@ -77,11 +82,17 @@
  extern void Emettre( char *chaine );
  extern void Emettre_erreur_new( gchar *format, ... );
  extern void Emettre_init_alias( void );
- extern struct COMPARATEUR *New_comparateur( void );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern gchar *New_calcul_PID ( GList *options );
- extern gchar *New_condition_comparateur( gchar *id, gchar *suffixe, GList *options_g, struct COMPARATEUR *comparateur );
- extern gchar *New_condition_simple( gint barre, gchar *id, gchar *suffixe, GList *options );
+ extern struct CONDITION *New_condition_entier( gint entier );
+ extern struct CONDITION *New_condition_valf( gdouble valf );
+ extern struct CONDITION *New_condition( gboolean is_bool, gint taille );
+ extern struct INSTRUCTION *New_instruction( struct CONDITION *condition, GList *options, struct ACTION *actions );
+ extern void Del_instruction( struct INSTRUCTION *instr );
+ extern void Del_condition( struct CONDITION *condition );
+ extern void Del_actions( struct ACTION *action );
+ extern struct CONDITION *New_condition_comparaison( struct CONDITION *condition_g, gint ordre, struct CONDITION *condition_d );
+ extern struct CONDITION *New_condition_alias( gint barre, struct ALIAS *alias, GList *options );
  extern gint Get_option_entier( GList *liste_options, gint token, gint defaut );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
@@ -96,6 +107,8 @@
  extern struct ACTION *New_action_cpt_h( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options );
+ extern struct ACTION *New_action_REGISTRE( struct ALIAS *alias, GList *options );
+ extern struct ACTION *New_action_AO( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_PID ( GList *options );
  extern struct ALIAS *New_alias( gchar *tech_id, gchar *acronyme, gint bit, GList *options );
  extern struct ALIAS *New_external_alias( gchar *tech_id, gchar *acronyme, GList *options );
