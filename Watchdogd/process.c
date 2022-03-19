@@ -484,7 +484,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: pthread_create failed", __func__ );
        return(FALSE);
      }
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: thread dls (%p) seems to be running", __func__, Partage->com_http.TID );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: thread http (%p) seems to be running", __func__, Partage->com_http.TID );
     return(TRUE);
   }
 /******************************************************************************************************************************/

@@ -48,8 +48,13 @@
     memset ( &Config, 0, sizeof(struct CONFIG) );
 
     Config.config = Json_read_from_file ( "/etc/abls-habitat-agent.conf" );
-    if (!Config.config) { Config.config = Json_node_create(); }
-    else Config.installed = TRUE;
+    if (!Config.config)
+     { Config.config = Json_node_create();
+       Config.installed = FALSE;
+       return;
+     }
+    Config.installed = TRUE;
+
     if (!Json_has_member ( Config.config, "domain_uuid"   )) Json_node_add_string ( Config.config, "domain_uuid",   "default" );
     if (!Json_has_member ( Config.config, "domain_secret" )) Json_node_add_string ( Config.config, "domain_secret", "default" );
     if (!Json_has_member ( Config.config, "api_url" ))       Json_node_add_string ( Config.config, "api_url", "https://api.abls-habitat.fr" );

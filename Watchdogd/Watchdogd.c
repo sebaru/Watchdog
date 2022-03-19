@@ -689,11 +689,42 @@
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                 "%s: From '%s' (%d) To '%s' (%d).\n", __func__, old->pw_name, old->pw_uid, pwd->pw_name, pwd->pw_uid );
 
-       if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                                           /* On drop les privilèges */
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot Initgroups for user '%s' (%s)\n",
+       /* if headless */
+       gid_t *grp_list = NULL;
+       gint nbr_group = 0;
+       struct group *grp;
+       grp = getgrnam("audio");
+       if (grp)
+        { nbr_group++;
+          grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
+          grp_list[nbr_group-1] = grp->gr_gid;
+        }
+
+       grp = getgrnam("dialout");
+       if (grp)
+        { nbr_group++;
+          grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
+          grp_list[nbr_group-1] = grp->gr_gid;
+        }
+
+       grp = getgrnam("gpio");
+       if (grp)
+        { nbr_group++;
+          grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
+          grp_list[nbr_group-1] = grp->gr_gid;
+        }
+
+       if (setgroups ( nbr_group, grp_list )==-1)
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot SetGroups for user '%s' (%s)\n",
                     __func__, Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
+
+/*       if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                                           /* On drop les privilèges */
+/*        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot Initgroups for user '%s' (%s)\n",
+                    __func__, Config.run_as, strerror(errno) );
+          exit(EXIT_ERREUR);
+        }*/
 
        if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
         { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREgid for user '%s' (%s)\n",
@@ -728,6 +759,7 @@
     gchar strpid[12];
     gint fd_lock;
     pthread_t TID;
+    gint error_code = EXIT_OK;
 
     umask(022);                                                                              /* Masque de creation de fichier */
 
@@ -735,12 +767,25 @@
     Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s", WTD_VERSION );
 
-/********************************************************* Create instance UUID ***********************************************/
-    if (!Json_has_member ( Config.config, "instance_uuid" ))    /* si jamais lancé, on ajoute un instance_uuid dans la config */
-     { gchar instance_uuid[37];
-       UUID_New ( instance_uuid );
-       Json_node_add_string ( Config.config, "instance_uuid", instance_uuid );
-       Json_write_to_file ( "/etc/abls-habitat-agent.conf", Config.config );
+    Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
+    if (!Partage)
+     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" );
+       error_code = EXIT_FAILURE;
+       goto first_stage_end;
+     }
+
+    if ( Config.installed == FALSE )
+     { Partage->com_msrv.Thread_run = TRUE;                                          /* On dit au maitre que le thread tourne */
+       if (!Demarrer_http())                                                                                /* Démarrage HTTP */
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ );
+          sleep(5);
+          error_code = EXIT_FAILURE;
+          goto second_stage_end;
+        }
+       while(Partage->com_msrv.Thread_run == TRUE) sleep(1);                              /* On tourne tant que l'on a besoin */
+       Stopper_fils();
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Agent %s Installed", WTD_VERSION );
+       goto second_stage_end;
      }
 
 /************************************************* Test Connexion to Global API ***********************************************/
@@ -752,7 +797,8 @@
     else
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connection to Global API FAILED. Sleep 5s and stopping.", __func__ );
        sleep(5);
-       exit(-1);
+       error_code = EXIT_FAILURE;
+       goto second_stage_end;
      }
 /************************************************* Tell Global API thread is UP ***********************************************/
     JsonNode *RootNode = Json_node_create();
@@ -774,6 +820,7 @@
        if (run_as && strlen(run_as))
             g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
        else g_snprintf( Config.run_as, sizeof(Config.run_as), "watchdog" );
+/*    g_snprintf( chaine, sizeof(chaine), "useradd -m -c 'WatchdogServer' %s", Json_get_string(request, "run_as") );*/
 
        Config.log_db             = Json_get_bool ( api_result, "log_db" );
        Config.log_bus            = Json_get_bool ( api_result, "log_bus" );
@@ -795,173 +842,177 @@
     else
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Cannot get API config. Sleep 5s and stopping.", __func__ );
        sleep(5);
-       exit(-1);
+       error_code = EXIT_FAILURE;
+       goto second_stage_end;
      }
 
 /******************************************************* Drop privileges ******************************************************/
-    if (Config.installed) { Drop_privileges(); }
+    Drop_privileges();
 
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
     Print_config();
                                                                                       /* Verification de l'unicité du process */
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
     if (fd_lock<0)
-     { printf( "Lock file creation failed: %s/%s\n", Config.home, VERROU_SERVEUR );
-       exit(EXIT_ERREUR);
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Lock file creation failed: %s/%s.", __func__, Config.home, VERROU_SERVEUR );
+       error_code = EXIT_FAILURE;
+       goto second_stage_end;
      }
     if (flock( fd_lock, LOCK_EX | LOCK_NB )<0)                                         /* Creation d'un verrou sur le fichier */
-     { printf( "Cannot lock %s/%s. Probably another daemon is running : %s\n",
-                Config.home, VERROU_SERVEUR, strerror(errno) );
-       close(fd_lock);
-       exit(EXIT_ERREUR);
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Cannot lock %s/%s. Probably another daemon is running : %s.", __func__,
+                 Config.home, VERROU_SERVEUR, strerror(errno) );
+       error_code = EXIT_FAILURE;
+       goto third_stage_end;
      }
     fcntl(fd_lock, F_SETFD, FD_CLOEXEC );                                                           /* Set close on exec flag */
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );                                /* Enregistrement du pid au cas ou */
     if (write( fd_lock, strpid, strlen(strpid) )<0)
-     { printf( "Cannot write PID on %s/%s (%s)\n", Config.home, VERROU_SERVEUR, strerror(errno) ); }
-
-    Partage = NULL;                                                                                         /* Initialisation */
-    Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
-    if (!Partage)
-     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" ); }
-    else
-     { pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
-       memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
-       time ( &Partage->start_time );
-       pthread_mutexattr_init( &attr );
-       pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
-       pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
-       pthread_mutex_init( &Partage->com_http.synchro, &attr );
-       pthread_mutex_init( &Partage->com_dls.synchro, &attr );
-       pthread_mutex_init( &Partage->com_dls.synchro_traduction, &attr );
-       pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );
-       pthread_mutex_init( &Partage->com_arch.synchro, &attr );
-       pthread_mutex_init( &Partage->com_db.synchro, &attr );
-
-/************************************* Création des zones de bits internes dynamiques *****************************************/
-       Partage->Dls_data_DI       = NULL;
-       Partage->Dls_data_DO       = NULL;
-       Partage->Dls_data_AI       = NULL;
-       Partage->Dls_data_AO       = NULL;
-       Partage->Dls_data_MONO     = NULL;
-       Partage->Dls_data_BI       = NULL;
-       Partage->Dls_data_REGISTRE = NULL;
-       Partage->Dls_data_MSG      = NULL;
-       Partage->Dls_data_CH       = NULL;
-       Partage->Dls_data_CI       = NULL;
-       Partage->Dls_data_TEMPO    = NULL;
-       Partage->Dls_data_VISUEL   = NULL;
-       Partage->Dls_data_WATCHDOG = NULL;
-
-       sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
-       pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
-
-       Update_database_schema();                                                    /* Update du schéma de Database si besoin */
-       Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
-
-       Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */
-       if (!Partage->zmq_ctx)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Context Failed (%s)", __func__, zmq_strerror(errno) ); }
-       else
-        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
-
-       if (Config.instance_is_master)
-        { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                      "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
-           }
-        }
-       else
-        { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_slave, NULL ) )
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                      "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
-           }
-        }
-                                                         /********** Mise en place de la gestion des signaux ******************/
-       sig.sa_handler = Traitement_signaux;                                         /* Gestionnaire de traitement des signaux */
-       sig.sa_flags = SA_RESTART;                         /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-       sigaction( SIGALRM, &sig, NULL );                                                             /* Reinitialisation soft */
-       sigaction( SIGUSR1, &sig, NULL );                                                   /* Reinitialisation DLS uniquement */
-       sigaction( SIGUSR2, &sig, NULL );                                                   /* Reinitialisation DLS uniquement */
-       sigaction( SIGINT,  &sig, NULL );                                                             /* Reinitialisation soft */
-       sigaction( SIGTERM, &sig, NULL );
-       sigaction( SIGABRT, &sig, NULL );
-       sigaction( SIGPIPE, &sig, NULL );                                               /* Pour prevenir un segfault du client */
-       sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
-       sigdelset ( &sig.sa_mask, SIGALRM );
-       sigdelset ( &sig.sa_mask, SIGUSR1 );
-       sigdelset ( &sig.sa_mask, SIGUSR2 );
-       sigdelset ( &sig.sa_mask, SIGINT  );
-       sigdelset ( &sig.sa_mask, SIGTERM );
-       sigdelset ( &sig.sa_mask, SIGABRT );
-       sigdelset ( &sig.sa_mask, SIGPIPE );
-       pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
-
-       timer.it_value.tv_sec = timer.it_interval.tv_sec = 0;                                    /* Tous les 100 millisecondes */
-       timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;                                 /* = 10 fois par secondes */
-       setitimer( ITIMER_REAL, &timer, NULL );                                                             /* Active le timer */
-
-       pthread_join( TID, NULL );                                                       /* Attente fin de la boucle pere MSRV */
-       zmq_ctx_term( Partage->zmq_ctx );
-       zmq_ctx_destroy( Partage->zmq_ctx );
-/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MONO", __func__ );
-       g_slist_foreach (Partage->Dls_data_MONO, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_MONO);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique BI", __func__ );
-       g_slist_foreach (Partage->Dls_data_BI, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_BI);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DI", __func__ );
-       g_slist_foreach (Partage->Dls_data_DI, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_DI);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DO", __func__ );
-       g_slist_foreach (Partage->Dls_data_DO, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_DO);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AI", __func__ );
-       g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_AI);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique R", __func__ );
-       g_slist_foreach (Partage->Dls_data_REGISTRE, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_REGISTRE);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AO", __func__ );
-       g_slist_foreach (Partage->Dls_data_AO, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_AO);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MSG", __func__ );
-       g_slist_foreach (Partage->Dls_data_MSG, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_MSG);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique TEMPO", __func__ );
-       g_slist_foreach (Partage->Dls_data_TEMPO, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_TEMPO);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CH", __func__ );
-       g_slist_foreach (Partage->Dls_data_CH, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_CH);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CI", __func__ );
-       g_slist_foreach (Partage->Dls_data_CI, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_CI);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique VISUEL", __func__ );
-       g_slist_foreach (Partage->Dls_data_VISUEL, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_VISUEL);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique WATCHDOG", __func__ );
-       g_slist_foreach (Partage->Dls_data_WATCHDOG, (GFunc) g_free, NULL );
-       g_slist_free (Partage->Dls_data_WATCHDOG);
-
-       pthread_mutex_destroy( &Partage->com_msrv.synchro );
-       pthread_mutex_destroy( &Partage->com_dls.synchro );
-       pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
-       pthread_mutex_destroy( &Partage->com_dls.synchro_data );
-       pthread_mutex_destroy( &Partage->com_arch.synchro );
-       pthread_mutex_destroy( &Partage->com_db.synchro );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Cannot write PID on %s/%s (%s).", __func__,
+                 Config.home, VERROU_SERVEUR, strerror(errno) );
+       error_code = EXIT_FAILURE;
+       goto third_stage_end;
      }
+
+    pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
+    memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
+    time ( &Partage->start_time );
+    pthread_mutexattr_init( &attr );
+    pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
+    pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
+    pthread_mutex_init( &Partage->com_http.synchro, &attr );
+    pthread_mutex_init( &Partage->com_dls.synchro, &attr );
+    pthread_mutex_init( &Partage->com_dls.synchro_traduction, &attr );
+    pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );
+    pthread_mutex_init( &Partage->com_arch.synchro, &attr );
+    pthread_mutex_init( &Partage->com_db.synchro, &attr );
+
+/********************************** Création des zones de bits internes dynamiques *****************************************/
+    Partage->Dls_data_DI       = NULL;
+    Partage->Dls_data_DO       = NULL;
+    Partage->Dls_data_AI       = NULL;
+    Partage->Dls_data_AO       = NULL;
+    Partage->Dls_data_MONO     = NULL;
+    Partage->Dls_data_BI       = NULL;
+    Partage->Dls_data_REGISTRE = NULL;
+    Partage->Dls_data_MSG      = NULL;
+    Partage->Dls_data_CH       = NULL;
+    Partage->Dls_data_CI       = NULL;
+    Partage->Dls_data_TEMPO    = NULL;
+    Partage->Dls_data_VISUEL   = NULL;
+    Partage->Dls_data_WATCHDOG = NULL;
 
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
+
+    Update_database_schema();                                                       /* Update du schéma de Database si besoin */
+    Charger_config_bit_interne ();                            /* Chargement des configurations des bits internes depuis la DB */
+
+    Partage->zmq_ctx = zmq_ctx_new ();                                             /* Initialisation du context d'echange ZMQ */
+    if (!Partage->zmq_ctx)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Context Failed (%s)", __func__, zmq_strerror(errno) ); }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
+
+    if (Config.instance_is_master)
+     { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                   "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
+        }
+     }
+    else
+     { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_slave, NULL ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                   "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
+        }
+     }
+                                                         /********** Mise en place de la gestion des signaux ******************/
+    sig.sa_handler = Traitement_signaux;                                            /* Gestionnaire de traitement des signaux */
+    sig.sa_flags = SA_RESTART;                            /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+    sigaction( SIGALRM, &sig, NULL );                                                                /* Reinitialisation soft */
+    sigaction( SIGUSR1, &sig, NULL );                                                      /* Reinitialisation DLS uniquement */
+    sigaction( SIGUSR2, &sig, NULL );                                                      /* Reinitialisation DLS uniquement */
+    sigaction( SIGINT,  &sig, NULL );                                                                /* Reinitialisation soft */
+    sigaction( SIGTERM, &sig, NULL );
+    sigaction( SIGABRT, &sig, NULL );
+    sigaction( SIGPIPE, &sig, NULL );                                                  /* Pour prevenir un segfault du client */
+    sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
+    sigdelset ( &sig.sa_mask, SIGALRM );
+    sigdelset ( &sig.sa_mask, SIGUSR1 );
+    sigdelset ( &sig.sa_mask, SIGUSR2 );
+    sigdelset ( &sig.sa_mask, SIGINT  );
+    sigdelset ( &sig.sa_mask, SIGTERM );
+    sigdelset ( &sig.sa_mask, SIGABRT );
+    sigdelset ( &sig.sa_mask, SIGPIPE );
+    pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
+
+    timer.it_value.tv_sec = timer.it_interval.tv_sec = 0;                                       /* Tous les 100 millisecondes */
+    timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;                                    /* = 10 fois par secondes */
+    setitimer( ITIMER_REAL, &timer, NULL );                                                                /* Active le timer */
+
+    pthread_join( TID, NULL );                                                          /* Attente fin de la boucle pere MSRV */
+    zmq_ctx_term( Partage->zmq_ctx );
+    zmq_ctx_destroy( Partage->zmq_ctx );
+/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
+
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MONO", __func__ );
+    g_slist_foreach (Partage->Dls_data_MONO, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_MONO);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique BI", __func__ );
+    g_slist_foreach (Partage->Dls_data_BI, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_BI);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DI", __func__ );
+    g_slist_foreach (Partage->Dls_data_DI, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_DI);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DO", __func__ );
+    g_slist_foreach (Partage->Dls_data_DO, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_DO);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AI", __func__ );
+    g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_AI);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique R", __func__ );
+    g_slist_foreach (Partage->Dls_data_REGISTRE, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_REGISTRE);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AO", __func__ );
+    g_slist_foreach (Partage->Dls_data_AO, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_AO);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MSG", __func__ );
+    g_slist_foreach (Partage->Dls_data_MSG, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_MSG);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique TEMPO", __func__ );
+    g_slist_foreach (Partage->Dls_data_TEMPO, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_TEMPO);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CH", __func__ );
+    g_slist_foreach (Partage->Dls_data_CH, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_CH);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CI", __func__ );
+    g_slist_foreach (Partage->Dls_data_CI, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_CI);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique VISUEL", __func__ );
+    g_slist_foreach (Partage->Dls_data_VISUEL, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_VISUEL);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique WATCHDOG", __func__ );
+    g_slist_foreach (Partage->Dls_data_WATCHDOG, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_WATCHDOG);
+
+    pthread_mutex_destroy( &Partage->com_msrv.synchro );
+    pthread_mutex_destroy( &Partage->com_dls.synchro );
+    pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
+    pthread_mutex_destroy( &Partage->com_dls.synchro_data );
+    pthread_mutex_destroy( &Partage->com_arch.synchro );
+    pthread_mutex_destroy( &Partage->com_db.synchro );
+
+    sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
+    pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
+
+third_stage_end:
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
-    if (Config.config) json_node_unref ( Config.config );
+second_stage_end:
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
+first_stage_end:
+    if (Config.config) json_node_unref ( Config.config );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Stopped", __func__ );
-    return(EXIT_OK);
+    return(error_code);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

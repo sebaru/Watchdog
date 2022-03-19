@@ -58,7 +58,7 @@
     if (!log) return(NULL);
 
     g_snprintf( log->entete,  sizeof(log->entete), "%s", entete  );
-    log->log_level = debug;
+    log->log_level = (debug ? debug : LOG_INFO);
     on_exit( Info_stop, log );
 
     openlog( log->entete, LOG_CONS | LOG_PID, LOG_USER );
