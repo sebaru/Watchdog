@@ -150,51 +150,48 @@ listeInstr:     une_instr listeInstr
                     }
                    else if ($1 && $1->condition->is_bool == TRUE && $2)
                     { gint taille = $1->condition->taille + $1->actions->taille_alors + $1->actions->taille_sinon + strlen($2)+256;
-                      $$ = New_chaine( taille );
                       gchar *sinon = ($1->actions->sinon ? $1->actions->sinon : "/* no sinon action */");
-                      g_snprintf( $$, taille,
-                                  "\nvars->num_ligne = %d; /* une_instr BOOL--------*/\n"
-                                  " if (%s)\n {\n %s\n }\n else\n {\n %s\n }\n %s\n",
-                                  $1->line_number, $1->condition->chaine, $1->actions->alors, sinon, $2 );
+                      if ($1->options)
+                       { taille +=1024;
+                         $$ = New_chaine( taille );
+                         g_snprintf( $$, taille,
+                                     "vars->num_ligne = %d; * une_instr différée----------*\n"
+                                     " { static gboolean counting_on=FALSE;\n"
+                                     "   static gboolean counting_off=FALSE;\n"
+                                     "   static gint top;\n"
+                                     "   if(%s)\n"
+                                     "    { counting_off=FALSE;\n"
+                                     "      if (counting_on==FALSE)\n"
+                                     "       { counting_on=TRUE; top = Dls_get_top(); }\n"
+                                     "      else\n"
+                                     "       { if ( Dls_get_top() - top >= %d )\n"
+                                     "          { %s\n"
+                                     "          }\n"
+                                     "       }\n"
+                                     "    }\n"
+                                     "   else\n"
+                                     "    { counting_on = FALSE;\n"
+                                     "      if (counting_off==FALSE)\n"
+                                     "       { counting_off=TRUE; top = Dls_get_top(); }\n"
+                                     "      else\n"
+                                     "       { if ( Dls_get_top() - top >= %d )\n"
+                                     "          { %s\n"
+                                     "          }\n"
+                                     "       }\n"
+                                     "    }\n"
+                                     " }\n\n",
+                                     $1->line_number, $1->condition->chaine,
+                                     Get_option_entier($1->options, T_DAA, 0), $1->actions->alors,
+                                     Get_option_entier($1->options, T_DAD, 0), sinon );
+                       }
+                     else
+                      { $$ = New_chaine( taille );
+                        g_snprintf( $$, taille,
+                                    "\nvars->num_ligne = %d; /* une_instr BOOL--------*/\n"
+                                    " if (%s)\n {\n %s\n }\n else\n {\n %s\n }\n %s\n",
+                                    $1->line_number, $1->condition->chaine, $1->actions->alors, sinon, $2 );
+                      }
                     } else $$=NULL;
-/*else if ($2 && $6)
-                    { gchar *alors = Liste_action_to_string_alors ( $6 );
-                      gchar *sinon = Liste_action_to_string_sinon ( $6 );
-                      gint taille = strlen($2->alors)+strlen(alors)+strlen(sinon)+1024;
-                      $$ = New_chaine( taille );
-                      g_snprintf( $$, taille,
-                                  "vars->num_ligne = %d; * une_instr différée----------*\n"
-                                  " { static gboolean counting_on=FALSE;\n"
-                                  "   static gboolean counting_off=FALSE;\n"
-                                  "   static gint top;\n"
-                                  "   if(%s)\n"
-                                  "    { counting_off=FALSE;\n"
-                                  "      if (counting_on==FALSE)\n"
-                                  "       { counting_on=TRUE; top = Dls_get_top(); }\n"
-                                  "      else\n"
-                                  "       { if ( Dls_get_top() - top >= %d )\n"
-                                  "          { %s\n"
-                                  "          }\n"
-                                  "       }\n"
-                                  "    }\n"
-                                  "   else\n"
-                                  "    { counting_on = FALSE;\n"
-                                  "      if (counting_off==FALSE)\n"
-                                  "       { counting_off=TRUE; top = Dls_get_top(); }\n"
-                                  "      else\n"
-                                  "       { if ( Dls_get_top() - top >= %d )\n"
-                                  "          { %s\n"
-                                  "          }\n"
-                                  "       }\n"
-                                  "    }\n"
-                                  " }\n\n",
-                                  DlsScanner_get_lineno(), $2->alors,
-                                  Get_option_entier($4, T_DAA, 0), alors,
-                                  Get_option_entier($4, T_DAD, 0), sinon );
-                       g_free(alors);
-                       g_free(sinon);
-                     } else $$=NULL;
-*/
                    Del_instruction($1);
                    if ($2) g_free($2);
                 }}
