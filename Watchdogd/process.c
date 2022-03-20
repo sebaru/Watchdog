@@ -178,8 +178,8 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     module->Master_websocket = soup_session_websocket_connect_finish ( module->Master_session, res, &error );
     if (!module->Master_websocket)                                                                   /* No limit on incoming packet ! */
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: WebSocket error.", __func__,
-                 module->lib->uuid, thread_tech_id );
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: WebSocket error: %s.", __func__,
+                 module->lib->uuid, thread_tech_id, error->message );
        g_error_free (error);
        return;
      }
