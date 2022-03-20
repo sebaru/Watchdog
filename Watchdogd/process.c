@@ -128,6 +128,67 @@
      }
   }
 /******************************************************************************************************************************/
+/* Http_ws_on_master_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master          */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void SubProcess_ws_on_master_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
+  { struct SUBPROCESS *module = user_data;
+    Info_new( Config.log, Config.log_bus, LOG_INFO, "%s: WebSocket Message received !", __func__ );
+    gsize taille;
+
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!response)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
+       return;
+     }
+
+    if (!Json_has_member ( response, "bus_tag" ))
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'bus_tag') !", __func__ );
+       json_node_unref(response);
+       return;
+     }
+
+    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, Json_get_string ( response, "bus_tag" ) );
+    if (module->lib->Run_subprocess_message)                                             /* on passe le message au subprocess */
+     { module->lib->Run_subprocess_message ( module, Json_get_string ( response, "bus_tag" ), response ); }
+    json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Http_ws_on_master_closed: Traite une deconnexion du master                                                                 */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void SubProcess_ws_on_master_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
+  { struct SUBPROCESS *module = user_data;
+    g_object_unref(module->Master_websocket);
+  }
+ static void SubProcess_ws_on_master_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
+  { struct SUBPROCESS *module = user_data;
+    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
+  }
+/******************************************************************************************************************************/
+/* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
+/* Entrée: les variables traditionnelles de libsous                                                                           */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void SubProcess_ws_on_master_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
+  { struct SUBPROCESS *module = user_data;
+    GError *error = NULL;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    module->Master_websocket = soup_session_websocket_connect_finish ( module->Master_session, res, &error );
+    if (!module->Master_websocket)                                                                   /* No limit on incoming packet ! */
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: WebSocket error.", __func__,
+                 module->lib->uuid, thread_tech_id );
+       g_error_free (error);
+       return;
+     }
+    /*g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );*/
+    g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(SubProcess_ws_on_master_message_CB), module );
+    g_signal_connect ( module->Master_websocket, "closed",  G_CALLBACK(SubProcess_ws_on_master_close_CB), module );
+    g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(SubProcess_ws_on_master_error_CB), module );
+  }
+/******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
 /* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
 /* Sortie: néant                                                                                                              */
@@ -152,6 +213,11 @@
      }
 
     module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    module->Master_session = soup_session_new();
+    g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );
+    static gchar *protocols[] = { "live-slaves", NULL };
+    soup_session_websocket_connect_async ( module->Master_session, soup_message_new ( "GET", chaine ),
+                                            NULL, protocols, g_cancellable_new(), SubProcess_ws_on_master_connected, module );
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
@@ -170,6 +236,8 @@
  void SubProcess_end ( struct SUBPROCESS *module )
   { SubProcess_send_comm_to_master_new ( module, FALSE );
     if (module->vars) g_free(module->vars);
+    soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
+    soup_session_abort ( module->Master_session );
     Zmq_Close ( module->zmq_from_bus );
     Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is DOWN",
               __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id") );
@@ -312,9 +380,9 @@
      }
 
     lib->Run_subprocess = dlsym( lib->dl_handle, "Run_subprocess" );                              /* Recherche de la fonction */
+    lib->Run_subprocess_message = dlsym( lib->dl_handle, "Run_subprocess_message" );/* Reception d'un message depuis le master */
     lib->Admin_config   = dlsym( lib->dl_handle, "Admin_config" );                                /* Recherche de la fonction */
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: %s loaded",
-              __func__, lib->uuid, lib->nom_fichier );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: %s loaded", __func__, lib->uuid, lib->nom_fichier );
 
     pthread_mutexattr_init( &attr );                                                          /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );

@@ -42,6 +42,7 @@
     GMainLoop *loop;
     GMainContext *loop_context;
     GSList *liste_http_clients;
+    GSList *Slaves;                                                               /* Liste des slaves connectés au l'instance */
     gint num_session;
   };
 
@@ -63,6 +64,11 @@
     GSList *Liste_bit_cadrans;
     time_t last_request;
     GSList *liste_ws_clients;
+  };
+
+ struct HTTP_WS_SESSION
+  { SoupWebsocketConnection *connexion;
+    SoupClientContext *context;
   };
 
 /******************************************************************************************************************************/
@@ -247,6 +253,9 @@
  extern void Http_Post_to_local_BUS_AI ( struct SUBPROCESS *module, JsonNode *ai, gdouble valeur, gboolean in_range );
  extern void Http_Post_to_local_BUS_CDE ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme );
  extern void Http_Post_to_local_BUS_WATCHDOG ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gint consigne );
+
+ extern void Http_traiter_open_websocket_slaves_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
+                                                     SoupClientContext *client, gpointer user_data);
 
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION * session, gint min_access_level );

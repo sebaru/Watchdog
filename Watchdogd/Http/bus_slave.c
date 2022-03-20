@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/bus.c       Gestion des request BUS pour le thread HTTP de watchdog                                         */
+/* Watchdogd/Http/bus_slave.c       Gestion des request BUS depuis le slave                                                   */
 /* Projet WatchDog version 4.0       Gestion d'habitat                                                    12.03.2022 09:08:22 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * bus.c
+ * bus_slave.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre

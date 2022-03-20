@@ -6,8 +6,8 @@
 SUBDIRS=
 
 noinst_LTLIBRARIES           = libwatchdog-http.la
-libwatchdog_http_la_SOURCES  = Http.c install.c getstatus.c bus.c audit_log.c bus.c \
-                               websocket.c gethisto_msgs.c getprocess.c getdls.c getsyn.c gettableau.c \
+libwatchdog_http_la_SOURCES  = Http.c install.c getstatus.c audit_log.c bus_master.c bus_slave.c \
+                               gethisto_msgs.c getprocess.c getdls.c getsyn.c gettableau.c \
                                getarchive.c getusers.c getmnemos.c getinstance.c getfile.c getmap.c gethorloge.c
 
 

@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/ws.c        Gestion des echanges des elements visuels de watchdog                                           */
+/* Watchdogd/Http/bus_master.c        Gestion des request BUS depuis le master                                                */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    06.05.2020 09:53:41 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * ws.c
+ * bus_master.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -24,10 +24,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- #include <sys/time.h>
+
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
- #include "Http.h"
 
 /******************************************************************************************************************************/
 /* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
@@ -207,6 +206,85 @@
     g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_closed), client );
     g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_error), client );
     /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
+    g_object_ref(connexion);
+  }
+
+
+
+/******************************************************************************************************************************/
+/* Http_ws_on_slave_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket slave                         */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_ws_on_slave_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
+  { struct HTTP_WS_SESSION *slave = user_data;
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Message received !", __func__ );
+    gsize taille;
+
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!response)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
+       return;
+     }
+
+    if (!Json_has_member ( response, "bus_tag" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'bus_tag') !", __func__ );
+       json_node_unref(response);
+       return;
+     }
+
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, Json_get_string ( response, "bus_tag" ) );
+
+    json_node_unref(response);
+  }
+/******************************************************************************************************************************/
+/* Http_ws_destroy_slave_session: Supprime une session slave                                                                  */
+/* Entrée: la WS                                                                                                              */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_ws_destroy_slave_session ( struct HTTP_WS_SESSION *slave )
+  { pthread_mutex_lock( &Partage->com_http.synchro );
+    Partage->com_http.Slaves = g_slist_remove ( Partage->com_http.Slaves, slave );
+    pthread_mutex_unlock( &Partage->com_http.synchro );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Session closed !", __func__ );
+    g_object_unref(slave->connexion);
+    g_free(slave);
+  }
+/******************************************************************************************************************************/
+/* Http_ws_on_slave_closed: Traite une deconnexion slave                                                                      */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_ws_on_slave_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
+  { struct HTTP_WS_SESSION *slave = user_data;
+    Http_ws_destroy_slave_session ( slave );
+  }
+ static void Http_ws_on_slave_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
+  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_open_websocket_slaves_CB: Traite une requete websocket depuis les slaves                                      */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_traiter_open_websocket_slaves_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
+                                              SoupClientContext *context, gpointer user_data)
+  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Opened %p state %d!", __func__, connexion,
+              soup_websocket_connection_get_state (connexion) );
+    struct HTTP_WS_SESSION *slave = g_try_malloc0( sizeof(struct HTTP_WS_SESSION) );
+    if(!slave)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: WebSocket Memory error. Closing !", __func__ );
+       return;
+     }
+    slave->connexion = connexion;
+    slave->context   = context;
+    g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_on_slave_message), slave );
+    g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_slave_closed), slave );
+    g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_slave_error), slave );
+    /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
+    pthread_mutex_lock( &Partage->com_http.synchro );
+    Partage->com_http.Slaves = g_slist_prepend ( Partage->com_http.Slaves, slave );
+    pthread_mutex_unlock( &Partage->com_http.synchro );
     g_object_ref(connexion);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

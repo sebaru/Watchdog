@@ -111,6 +111,14 @@
     vars->last_view = Partage->top;
   }
 /******************************************************************************************************************************/
+/* Run_subprocess_message: Prend en charge un message recu du master                                                          */
+/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Run_subprocess_message ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message )
+  { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: recu bus_tag '%s' from master", __func__, bus_tag );
+  }
+/******************************************************************************************************************************/
 /* Run_subprocess: Prend en charge un des sous process du thread                                                              */
 /* Entrée: la structure SUBPROCESS associée                                                                                   */
 /* Sortie: Niet                                                                                                               */

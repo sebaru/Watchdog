@@ -800,11 +800,15 @@
        soup_server_add_handler ( socket, "/", Http_traiter_install, NULL, NULL );
      }
     else soup_server_add_handler ( socket, "/", Http_traiter_status, NULL, NULL );
-    if (Config.instance_is_master) soup_server_add_handler ( socket, "/bus", Http_traiter_bus, NULL, NULL );
+    soup_server_add_handler ( socket, "/status", Http_traiter_status, NULL, NULL );
 
-    /*static gchar *protocols[] = { "live-io", NULL };
-    soup_server_add_websocket_handler ( socket, "/websocket" , NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
-*/
+    if (Config.instance_is_master)
+     { soup_server_add_handler ( socket, "/bus", Http_traiter_bus, NULL, NULL );
+
+       static gchar *protocols[] = { "live-slaves", NULL };
+       soup_server_add_websocket_handler ( socket, "/bus" , NULL, protocols, Http_traiter_open_websocket_slaves_CB, NULL, NULL );
+     }
+
     if (!soup_server_listen_all (socket, 5559, SOUP_SERVER_LISTEN_HTTPS, &error))
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer Listen Failed '%s' !", __func__, error->message );
        g_error_free(error);
