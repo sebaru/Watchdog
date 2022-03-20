@@ -45,6 +45,7 @@ INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) 
 ('voyant',       'voyant_local_arret',  'png',  'by_color'      , 100),
 ('voyant',       'voyant_systeme',      'png',  'by_color'      , 100),
 ('hydraulique',  '2d_vanne_auto',       'png',  'by_color'      , 100),
+('hydraulique',  '2d_vanne_manu',       'png',  'by_color'      , 100),
 ('hydraulique',  'goutte_eau',          'png',  'by_color'      , 100),
 ('voyant',       'clef',                'png',  'by_color'      , 100),
 ('voyant',       'croix',               'png',  'by_color'      , 100),
