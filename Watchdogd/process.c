@@ -217,7 +217,7 @@
     module->Master_session = soup_session_new();
     g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );
     static gchar *protocols[] = { "live-slaves", NULL };
-    g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/bus", Json_get_string ( Config.config, "master_hostname" ) );
+    g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/bus", Config.master_hostname );
     soup_session_websocket_connect_async ( module->Master_session, soup_message_new ( "GET", chaine ),
                                             NULL, protocols, g_cancellable_new(), SubProcess_ws_on_master_connected, module );
 
