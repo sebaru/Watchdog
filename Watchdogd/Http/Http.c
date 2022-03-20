@@ -821,6 +821,7 @@
 
     while(Partage->com_http.Thread_run == TRUE)
      { sched_yield();
+       usleep(1000);
        Http_Envoyer_les_cadrans ();
 
        if ( Partage->top > last_pulse + 50 )

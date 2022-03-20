@@ -82,11 +82,15 @@
 %type  <val>         barre
 %type  <gliste>      liste_options options
 %type  <option>      une_option
-%type  <t_condition>   unite facteur expr expr_2
+%type  <t_condition>   unite expr
 %type  <chaine>      listeCase listeInstr
 %type  <t_instruction> une_instr
 %type  <action>      liste_action une_action
 %type  <t_alias>     un_alias
+
+%left T_PLUS T_MOINS
+%left ET BARRE T_FOIS
+%left INF SUP INF_OU_EGAL SUP_OU_EGAL T_EGAL
 
 %%
 fichier: listeDefinitions listeInstr {{ if($2) { Emettre( $2 ); g_free($2); } }}
@@ -256,7 +260,7 @@ listeCase:      T_PIPE une_instr listeCase
                 | {{ $$=NULL; }}
                 ;
 /******************************************************* Partie LOGIQUE *******************************************************/
-expr:           facteur T_PLUS facteur
+expr:           expr T_PLUS expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool != $3->is_bool)
                        { Emettre_erreur_new( "Mixing Bool and Float is forbidden" ); $$=NULL; }
@@ -271,7 +275,7 @@ expr:           facteur T_PLUS facteur
                    Del_condition($1);
                    Del_condition($3);
                 }}
-                | facteur T_MOINS facteur
+                | expr T_MOINS expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
                        { Emettre_erreur_new( "Boolean not allowed within -" ); $$=NULL; }
@@ -285,9 +289,7 @@ expr:           facteur T_PLUS facteur
                    Del_condition($1);
                    Del_condition($3);
                 }}
-                | facteur
-                ;
-facteur:        expr_2 ET facteur
+                | expr ET expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
                        { Emettre_erreur_new( "Boolean mandatory in AND" ); $$=NULL; }
@@ -300,7 +302,7 @@ facteur:        expr_2 ET facteur
                    Del_condition($1);
                    Del_condition($3);
                 }}
-                | expr_2 T_FOIS facteur
+                | expr T_FOIS expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
                        { Emettre_erreur_new( "Float mandatory in *" ); $$=NULL; }
@@ -313,7 +315,7 @@ facteur:        expr_2 ET facteur
                    Del_condition($1);
                    Del_condition($3);
                 }}
-                | expr_2 BARRE facteur
+                | expr BARRE expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
                        { Emettre_erreur_new( "Boolean not allowed within /" ); $$=NULL; }
@@ -327,11 +329,18 @@ facteur:        expr_2 ET facteur
                    Del_condition($1);
                    Del_condition($3);
                 }}
-                | expr_2
-                ;
-
-
-expr_2:         unite ordre unite
+                | barre T_POUV expr T_PFERM
+                {{ if ($3)
+                    { if ($1 && $3->is_bool == FALSE) Emettre_erreur_new( "'!' allow only with boolean" );
+                      else
+                       { $$ = New_condition( $3->is_bool, $3->taille+3 );
+                         if ($1) { g_snprintf( $$->chaine, $$->taille, "!(%s)", $3->chaine ); }
+                         else    { g_snprintf( $$->chaine, $$->taille, "(%s)", $3->chaine ); }
+                       }
+                    } else $$=NULL;
+                   Del_condition($3);
+                }}
+                | expr ordre expr %prec T_FOIS
                 {{ $$ = New_condition_comparaison ( $1, $2, $3 );
                    Del_condition($1);
                    Del_condition($3);
@@ -394,21 +403,7 @@ unite:          barre un_alias liste_options
                       else    g_snprintf( $$->chaine, taille, "( Dls_get_top_alerte_fugitive())" );
                     }
                 }}
-                | barre T_POUV expr T_PFERM
-                {{ if ($3)
-                    { if ($1 && $3->is_bool == FALSE) Emettre_erreur_new( "'!' allow only with boolean" );
-                      else
-                       { $$ = New_condition( $3->is_bool, $3->taille+3 );
-                         if ($1) { g_snprintf( $$->chaine, $$->taille, "!(%s)", $3->chaine ); }
-                         else    { g_snprintf( $$->chaine, $$->taille, "(%s)", $3->chaine ); }
-                       }
-                    } else $$=NULL;
-                   Del_condition($3);
-                }}
-/************************************** Partie Logique : gestion des comparaisons *********************************************/
-
-
-
+                ;
 /************************************************* Gestion des actions ********************************************************/
 liste_action:   liste_action VIRGULE une_action
                 {{ if ($1 && $3)
