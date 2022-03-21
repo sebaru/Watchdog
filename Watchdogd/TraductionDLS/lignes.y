@@ -60,8 +60,8 @@
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE T_NOP
 %type  <val>    ordre
 
-%token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
-%type  <val>    modulateur jour_semaine
+%token <val>    T_HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
+%type  <val>    jour_semaine
 
 %token <val>    T_BI T_MONO T_ENTREE SORTIE T_ANALOG_OUTPUT T_TEMPO T_HORLOGE
 %token <val>    T_MSG T_VISUEL T_CPT_H T_CPT_IMP T_ANALOG_INPUT T_START T_REGISTRE T_DIGITAL_OUTPUT T_WATCHDOG
@@ -147,10 +147,11 @@ listeInstr:     une_instr listeInstr
                     { gint taille = $1->condition->taille + $1->actions->taille_alors + 256;
                       $$ = New_chaine( taille + strlen($2) );
                       g_snprintf( $$, taille,
-                                  "\nvars->num_ligne = %d; /* une_instr FLOAT-------*/\n"
+                                  "/* -----------------une_instr FLOAT-------*/\n"
+                                  "vars->num_ligne = %d;\n"
                                   " { gdouble local_result=%s;\n"
                                   "   %s\n"
-                                  " }\n %s\n", $1->line_number, $1->condition->chaine, $1->actions->alors, $2 );
+                                  " }\n %s", $1->line_number, $1->condition->chaine, $1->actions->alors, $2 );
                     }
                    else if ($1 && $1->condition->is_bool == TRUE && $2)
                     { gint taille = $1->condition->taille + $1->actions->taille_alors + $1->actions->taille_sinon + strlen($2)+256;
@@ -159,7 +160,8 @@ listeInstr:     une_instr listeInstr
                        { taille +=1024;
                          $$ = New_chaine( taille );
                          g_snprintf( $$, taille,
-                                     "vars->num_ligne = %d; * une_instr différée----------*\n"
+                                     " /* --------------------une_instr différée----------*\n"
+                                     "vars->num_ligne = %d;\n"
                                      " { static gboolean counting_on=FALSE;\n"
                                      "   static gboolean counting_off=FALSE;\n"
                                      "   static gint top;\n"
@@ -183,16 +185,17 @@ listeInstr:     une_instr listeInstr
                                      "          }\n"
                                      "       }\n"
                                      "    }\n"
-                                     " }\n\n",
+                                     " }\n\n %s",
                                      $1->line_number, $1->condition->chaine,
                                      Get_option_entier($1->options, T_DAA, 0), $1->actions->alors,
-                                     Get_option_entier($1->options, T_DAD, 0), sinon );
+                                     Get_option_entier($1->options, T_DAD, 0), sinon, $2 );
                        }
                      else
                       { $$ = New_chaine( taille );
                         g_snprintf( $$, taille,
-                                    "\nvars->num_ligne = %d; /* une_instr BOOL--------*/\n"
-                                    " if (%s)\n {\n %s\n }\n else\n {\n %s\n }\n %s\n",
+                                    "/* ------------- une_instr BOOL--------*/\n"
+                                    "vars->num_ligne = %d;\n"
+                                    " if (%s)\n {\n %s\n }\n else\n {\n %s\n }\n %s",
                                     $1->line_number, $1->condition->chaine, $1->actions->alors, sinon, $2 );
                       }
                     } else $$=NULL;
@@ -354,14 +357,31 @@ unite:          barre un_alias liste_options
                 }}
                 | T_VALF   {{ $$ = New_condition_valf ( $1 );   }}
                 | ENTIER   {{ $$ = New_condition_entier ( $1 ); }}
-                | HEURE T_POUV modulateur ENTIER T_DPOINTS ENTIER T_PFERM
+                | T_HEURE ordre ENTIER T_DPOINTS ENTIER
                 {{ if ($2>23) $2=23;
                    if ($2<0)  $2=0;
                    if ($4>59) $4=59;
                    if ($4<0)  $4=0;
                    $$ = New_condition( TRUE, 20 );
                    if ($$)
-                    { switch ($1)
+                    { switch ($2)
+                       { case T_EGAL     : g_snprintf( $$->chaine, $$->taille, "Heure(%d,%d)", $3, $5 );
+                                           break;
+                         case SUP_OU_EGAL: g_snprintf( $$->chaine, $$->taille, "Heure_apres(%d,%d)", $3, $5 );
+                                           break;
+                         case INF_OU_EGAL: g_snprintf( $$->chaine, $$->taille, "Heure_avant(%d,%d)", $3, $5 );
+                                           break;
+                       }
+                    }
+                }}
+                /*| T_HEURE T_POUV modulateur ENTIER T_DPOINTS ENTIER T_PFERM
+                {{ if ($2>23) $2=23;
+                   if ($2<0)  $2=0;
+                   if ($4>59) $4=59;
+                   if ($4<0)  $4=0;
+                   $$ = New_condition( TRUE, 20 );
+                   if ($$)
+                    { switch ($3)
                        { case 0    : g_snprintf( $$->chaine, $$->taille, "Heure(%d,%d)", $2, $4 );
                                      break;
                          case APRES: g_snprintf( $$->chaine, $$->taille, "Heure_apres(%d,%d)", $2, $4 );
@@ -370,7 +390,7 @@ unite:          barre un_alias liste_options
                                      break;
                        }
                     }
-                }}
+                }}*/
                 | jour_semaine
                 {{ $$ = New_condition( TRUE, 18 );
                    if ($$) g_snprintf( $$->chaine, $$->taille, "Jour_semaine(%d)", $1 );
@@ -475,10 +495,6 @@ une_action:     T_NOP
 
 barre:          BARRE {{ $$=1; }}
                 |     {{ $$=0; }}
-                ;
-modulateur:     APRES        {{ $$=APRES;  }}
-                | AVANT      {{ $$=AVANT;  }}
-                |            {{ $$=0;      }}
                 ;
 jour_semaine:   LUNDI        {{ $$=1; }}
                 | MARDI      {{ $$=2; }}
@@ -852,7 +868,7 @@ un_alias:       ID
                 | ID T_DPOINTS ID
                 {{ $$ = Get_alias_par_acronyme ( $1, $3 );
                    if (!$$)
-                    { $$ = New_external_alias( $1, $3, NULL ); }                          /* Si dependance externe, on va chercher */
+                    { $$ = New_external_alias( $1, $3, NULL ); }                     /* Si dependance externe, on va chercher */
                    if (!$$)
                     { Emettre_erreur_new( "'%s:%s' is not defined", $1, $3 ); }
                    g_free($1);

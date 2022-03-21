@@ -86,9 +86,7 @@ newline       [\n\r]+
 "_NOP"                     { DlsScanner_lval.val = T_NOP;           return T_NOP;           }
 
  /***************************************** Methodes speciales ********************************************/
-"_HEURE"                   { DlsScanner_lval.val = HEURE;       return HEURE;       }
-"_APRES"                   { DlsScanner_lval.val = APRES;       return APRES;       }
-"_AVANT"                   { DlsScanner_lval.val = AVANT;       return AVANT;       }
+"_HEURE"                   { DlsScanner_lval.val = T_HEURE;     return T_HEURE;     }
 "_LUNDI"                   { DlsScanner_lval.val = LUNDI;       return LUNDI;       }
 "_MARDI"                   { DlsScanner_lval.val = MARDI;       return MARDI;       }
 "_MERCREDI"                { DlsScanner_lval.val = MERCREDI;    return MERCREDI;    }
