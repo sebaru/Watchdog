@@ -79,14 +79,14 @@
 %token <val>    ENTIER
 %token <valf>   T_VALF
 
-%type  <val>         barre
-%type  <gliste>      liste_options options
-%type  <option>      une_option
+%type  <val>           barre
+%type  <gliste>        liste_options options
+%type  <option>        une_option
 %type  <t_condition>   unite expr
-%type  <chaine>      listeCase listeInstr
+%type  <chaine>        listeCase listeInstr
 %type  <t_instruction> une_instr
-%type  <action>      liste_action une_action
-%type  <t_alias>     un_alias
+%type  <action>        liste_action une_action
+%type  <t_alias>       un_alias
 
 %left T_PLUS T_MOINS
 %left ET BARRE T_FOIS
@@ -103,7 +103,7 @@ listeDefinitions:
                 ;
 
 une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
-                {{ if ( Get_alias_par_acronyme(NULL, $2) )                                                   /* Deja defini ? */
+                {{ if ( Get_local_alias(NULL, $2) )                                                          /* Deja defini ? */
                         { Emettre_erreur_new( "'%s' is already defined", $2 );
                           Liberer_options($5);
                         }
@@ -112,7 +112,7 @@ une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
                 }}
                 | T_LINK ID T_DPOINTS ID liste_options PVIRGULE
                 {{ if ($2 && $4)
-                    { if ( Get_alias_par_acronyme($2, $4) )                                                  /* Deja defini ? */
+                    { if ( Get_local_alias($2, $4) )                                                         /* Deja defini ? */
                        { Emettre_erreur_new( "'%s:%s' is already defined", $2, $3 );
                          Liberer_options($5);
                        }
@@ -374,23 +374,6 @@ unite:          barre un_alias liste_options
                        }
                     }
                 }}
-                /*| T_HEURE T_POUV modulateur ENTIER T_DPOINTS ENTIER T_PFERM
-                {{ if ($2>23) $2=23;
-                   if ($2<0)  $2=0;
-                   if ($4>59) $4=59;
-                   if ($4<0)  $4=0;
-                   $$ = New_condition( TRUE, 20 );
-                   if ($$)
-                    { switch ($3)
-                       { case 0    : g_snprintf( $$->chaine, $$->taille, "Heure(%d,%d)", $2, $4 );
-                                     break;
-                         case APRES: g_snprintf( $$->chaine, $$->taille, "Heure_apres(%d,%d)", $2, $4 );
-                                     break;
-                         case AVANT: g_snprintf( $$->chaine, $$->taille, "Heure_avant(%d,%d)", $2, $4 );
-                                     break;
-                       }
-                    }
-                }}*/
                 | jour_semaine
                 {{ $$ = New_condition( TRUE, 18 );
                    if ($$) g_snprintf( $$->chaine, $$->taille, "Jour_semaine(%d)", $1 );
@@ -792,7 +775,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ID;
-                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
                     { Emettre_erreur_new( "'%s' is not defined", $3 ); }
                 }}
@@ -800,7 +783,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ID;
-                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
                     { Emettre_erreur_new( "'%s' is not defined", $3 ); }
                 }}
@@ -808,7 +791,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ID;
-                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
                     { Emettre_erreur_new( "'%s' is not defined", $3 ); }
                 }}
@@ -816,7 +799,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ID;
-                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
                     { Emettre_erreur_new( "'%s' is not defined", $3 ); }
                 }}
@@ -824,7 +807,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ID;
-                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
                     { Emettre_erreur_new( "'%s' is not defined", $3 ); }
                 }}
@@ -832,7 +815,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->token = $1;
                    $$->token_classe = ID;
-                   $$->val_as_alias = Get_alias_par_acronyme ( NULL, $3 );
+                   $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
                     { Emettre_erreur_new( "'%s' is not defined", $3 ); }
                 }}
@@ -860,13 +843,15 @@ type_msg:         T_INFO        {{ $$=MSG_ETAT;        }}
                 ;
 
 un_alias:       ID
-                {{ $$ = Get_alias_par_acronyme ( NULL, $1 );
+                {{ $$ = Get_local_alias ( NULL, $1 );
+                   if (!$$)
+                    { $$ = New_external_alias( NULL, $1, NULL ); }                   /* Si dependance externe, on va chercher */
                    if (!$$)
                     { Emettre_erreur_new( "'%s' is not defined", $1 ); }
                    g_free($1);
                 }}
                 | ID T_DPOINTS ID
-                {{ $$ = Get_alias_par_acronyme ( $1, $3 );
+                {{ $$ = Get_local_alias ( $1, $3 );
                    if (!$$)
                     { $$ = New_external_alias( $1, $3, NULL ); }                     /* Si dependance externe, on va chercher */
                    if (!$$)

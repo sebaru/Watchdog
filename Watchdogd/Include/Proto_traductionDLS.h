@@ -110,9 +110,9 @@
  extern struct ACTION *New_action_REGISTRE( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_AO( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_PID ( GList *options );
- extern struct ALIAS *New_alias( gchar *tech_id, gchar *acronyme, gint bit, GList *options );
+ extern struct ALIAS *New_alias( gchar *tech_id, gchar *acronyme, gint classe, GList *options );
  extern struct ALIAS *New_external_alias( gchar *tech_id, gchar *acronyme, GList *options );
- extern struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme );
+ extern struct ALIAS *Get_local_alias( gchar *tech_id, gchar *acronyme );
  extern struct OPTION *New_option( void );
  /*extern int Get_option_entier( GList *liste_options, gint type );*/
  extern void Liberer_options ( GList *options );

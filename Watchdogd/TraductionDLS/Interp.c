@@ -1073,7 +1073,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void New_alias_dependance_DI ( gchar *tech_id, gchar *acronyme, gchar *libelle )
-  { if ( ! Get_alias_par_acronyme ( tech_id, acronyme ) )                                               /* Si pas déjà défini */
+  { if ( ! Get_local_alias ( tech_id, acronyme ) )                                                      /* Si pas déjà défini */
      { GList *ss_options = New_option_chaine ( NULL, T_LIBELLE, g_strdup(libelle) );
        struct ALIAS *alias_dep = New_alias ( tech_id, acronyme, MNEMO_ENTREE, ss_options );
        if (alias_dep) alias_dep->used = 1;                         /* Par défaut, on considère qu'une dependance est utilisée */
@@ -1199,11 +1199,6 @@
  struct ALIAS *New_external_alias( gchar *tech_id, gchar *acronyme, GList *options )
   { struct ALIAS *alias=NULL;
 
-    if ( tech_id && !strcmp( tech_id, Dls_plugin.tech_id) )
-     { Emettre_erreur_new( "Un LINK ne peut pas etre local (tech_id '%s' interdit)", tech_id );
-       return(NULL);
-     }
-
     if (!tech_id) tech_id=Dls_plugin.tech_id;     /* Cas d'usage : bit créé par un thread, n'ayant pas été defini dans le DLS */
 
     JsonNode *result = Rechercher_DICO ( tech_id, acronyme );
@@ -1233,11 +1228,11 @@
     return(alias);
   }
 /******************************************************************************************************************************/
-/* Get_alias: Recherche un alias donné en paramètre                                                                           */
+/* Get_local_alias: Recherche un alias donné en paramètre                                                                           */
 /* Entrées: le nom de l'alias                                                                                                 */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
- struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme )
+ struct ALIAS *Get_local_alias( gchar *tech_id, gchar *acronyme )
   { struct ALIAS *alias;
     GSList *liste;
     liste = Alias;
@@ -1246,14 +1241,13 @@
 
     while(liste)
      { alias = (struct ALIAS *)liste->data;
-       /*Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: checking tid %s.", __func__, alias->tech_id );*/
        if (!strcmp(alias->acronyme, acronyme) &&
             ( !strcmp(alias->tech_id,tech_id) || !strcmp(alias->tech_id,"SYS") )
           )
         { alias->used++; return(alias); }                                          /* Si deja present, on fait ++ sur le used */
        liste = liste->next;
      }
-    return(NULL);
+    return (NULL);
   }
 /******************************************************************************************************************************/
 /* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                                             */
