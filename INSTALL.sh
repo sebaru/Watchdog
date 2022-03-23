@@ -8,18 +8,6 @@ if [ "$(whoami)" != "root" ]
    exit 1
 fi
 
-read -p "Install for (S)ystemMode or (U)serMode (s/u) ?" -n1 USERMODE
-echo
-
-if [ "$USERMODE" = "u" ]
- then
-   USERMODE="Y"; echo "Installing in user mode in 4 seconds";
- else
-   USERMODE="N"; echo "Installing in system mode in 4 seconds";
-fi
-
-sleep 4
-
 if [ "$SOCLE" = "fedora" ]
  then
   echo "Installing Fedora dependencies"
@@ -80,23 +68,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y libphidget22 libphidget22-dev
 fi
 
-  if [ "$USERMODE" = "N" ]
-   then
-    if [ "$SOCLE" = "fedora" ]
-     then dnf -y install mariadb-server
-    fi
-    if [ "$SOCLE" = "debian" ]
-     then apt -y install mariadb-server
-          mysql_install_db
-    fi
-    systemctl restart mariadb
-
-    NEWPASSWORD=`openssl rand -base64 32`
-    /usr/bin/mysqladmin -u root create WatchdogDB
-    echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; " | mysql -u root WatchdogDB
-  fi
-
-svn co https://svn.abls-habitat.fr/repo/Watchdog/prod watchdogabls
+git clone https://github.com/sebaru/Watchdog.git watchdogabls
 cd watchdogabls
 echo "Compiling and installing"
 ./autogen.sh
@@ -105,13 +77,6 @@ cd ..
 rm -rf watchdogabls
 systemctl daemon-reload
 
-  if [ "$USERMODE" = "N" ]
-    then
-      echo "La base de données 'WatchdogDB' a été crée, ainsi que l'utilisateur 'watchdog'."
-      echo "Son mot de passe est "$NEWPASSWORD
-      systemctl enable Watchdogd --now
-    else
-      echo "Pour lancer Watchdog, tapez 'systemctl --user enable Watchdogd-user --now'"
-  fi
+#      echo "Pour lancer Watchdog, tapez 'systemctl --user enable Watchdogd-user --now'"
 
-  echo "Le point d'accès pour poursuivre l'installation est https://localhost:5560/install"
+  echo "Le point d'accès pour poursuivre l'installation est https://localhost:5559/install"
