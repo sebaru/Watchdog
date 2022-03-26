@@ -6,7 +6,7 @@
    </div>
 
  <div class="row m-2">
-   <h3><img src="/img/phidget_hub5000.jpg" style="width:80px" alt="Phidget HB5000">Mapping des I/O Phidget</h3>
+   <h3><img src="https://static.abls-habitat.fr/img/phidget_hub5000.jpg" style="width:80px" alt="Phidget HB5000">Mapping des I/O Phidget</h3>
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="Redirect('/tech/phidget')" class="btn btn-primary"><i class="fas fa-list"></i> Liste des Hub Phidget</button>
@@ -19,16 +19,16 @@
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
                   <img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
-                       src="/img/Entree.png" />Entrées TOR</a></li>
+                       src="https://static.abls-habitat.fr/img/Entree.png" />Entrées TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabEntreeAna">
                   <img style="width: 30px" data-toggle="tooltip" title="Entrées ANA"
-                       src="/img/Entree_Analogique.png" />Entrées ANA</a></li>
+                       src="https://static.abls-habitat.fr/img/Entree_Analogique.png" />Entrées ANA</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieTor">
                   <img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
-                       src="/img/Sortie.png" />Sorties TOR</a></li>
+                       src="https://static.abls-habitat.fr/img/Sortie.png" />Sorties TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieAna">
                   <img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
-                       src="/img/Sortie_Analogique.png" />Sorties ANA</a></li>
+                       src="https://static.abls-habitat.fr/img/Sortie_Analogique.png" />Sorties ANA</a></li>
           </ul>
 
 <div class="tab-content">
@@ -43,8 +43,8 @@
  </div>
     <table id="idTablePhidgetMapDI" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
-				  </thead>
-			   <tbody>
+      </thead>
+      <tbody>
       </tbody>
     </table>
 </div>
@@ -60,8 +60,8 @@
 
     <table id="idTablePhidgetMapDO" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
-				  </thead>
-			   <tbody>
+      </thead>
+      <tbody>
       </tbody>
     </table>
 </div>
@@ -76,8 +76,8 @@
 
     <table id="idTablePhidgetMapAI" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
-				  </thead>
-			   <tbody>
+      </thead>
+      <tbody>
       </tbody>
     </table>
 </div>
@@ -90,8 +90,8 @@
  </div>
     <table id="idTablePhidgetMapAO" class="table table-striped table-bordered table-hover w-100">
       <thead class="thead-dark">
-				  </thead>
-			   <tbody>
+      </thead>
+      <tbody>
       </tbody>
     </table>
 </div>
@@ -113,48 +113,48 @@
       <div class="modal-body">
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
-						     <select id="idModalEditDIHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
+           <select id="idModalEditDIHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
-						     <input id="idModalEditDIPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
+           <input id="idModalEditDIPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Classe du Capteur</label>
-						     <select id="idModalEditDICapteur" class="custom-select border-info" placeholder="Classe du capteur">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Classe du Capteur</label>
+           <select id="idModalEditDICapteur" class="custom-select border-info" placeholder="Classe du capteur">
              <option value="DIGITAL-INPUT">Digital Input</option>
            </select>
-     					</div>
-  					</div>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalEditDIRechercherTechID" oninput="PhidgetMap_Update_Choix_Tech_ID('idModalEditDI', 'DI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idModalEditDIRechercherTechID" oninput="PhidgetMap_Update_Choix_Tech_ID('idModalEditDI', 'DI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditDISelectTechID" required onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditDI', 'DI')" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idModalEditDISelectTechID" required onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditDI', 'DI')" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditDISelectAcronyme" required class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idModalEditDISelectAcronyme" required class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
       </div>
       <div class="modal-footer">
@@ -178,48 +178,48 @@
       <div class="modal-body">
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
-						     <select id="idModalEditDOHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
+           <select id="idModalEditDOHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
-						     <input id="idModalEditDOPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
+           <input id="idModalEditDOPort" type="number" required min=0 max=6 class="form-control" placeholder="numéro">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Classe</label>
-						     <select id="idModalEditDOCapteur" class="custom-select border-info" placeholder="Classe du capteur">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Classe</label>
+           <select id="idModalEditDOCapteur" class="custom-select border-info" placeholder="Classe du capteur">
              <option value="REL2001_0">REL2001 - Digital Output</option>
            </select>
-     					</div>
-  					</div>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalEditDORechercherTechID" oninput="PhidgetMap_Update_Choix_Tech_ID('idModalEditDO', 'DO')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idModalEditDORechercherTechID" oninput="PhidgetMap_Update_Choix_Tech_ID('idModalEditDO', 'DO')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditDOSelectTechID" required onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditDO', 'DO')" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idModalEditDOSelectTechID" required onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditDO', 'DO')" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditDOSelectAcronyme" required class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idModalEditDOSelectAcronyme" required class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
       </div>
       <div class="modal-footer">
@@ -243,23 +243,23 @@
       <div class="modal-body">
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
-						     <select id="idModalEditAIHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Phidget Hub</label>
+           <select id="idModalEditAIHub" class="custom-select border-info" placeholder="Nom du Hub associé"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
-						     <input id="idModalEditAIPort" type="number" required min=0 max=6 class="form-control" placeholder="Numéro du port">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">N° de port du HUB</label>
+           <input id="idModalEditAIPort" type="number" required min=0 max=6 class="form-control" placeholder="Numéro du port">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Classe du Capteur</label>
-						     <select id="idModalEditAICapteur" class="custom-select border-info" placeholder="Classe du capteur">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Classe du Capteur</label>
+           <select id="idModalEditAICapteur" class="custom-select border-info" placeholder="Classe du capteur">
              <option value="AC-CURRENT-10A">AC Current 0-10 A</option>
              <option value="AC-CURRENT-25A">AC Current 0-25 A</option>
              <option value="AC-CURRENT-50A">AC Current 0-50 A</option>
@@ -270,79 +270,79 @@
              <option value="TMP1200_0-PT100-3920">TMP1200 - PT100 (3920ppm)</option>
              <option value="TEMP_1124_0">TEMP 1124_0</option>
            </select>
-     					</div>
-  					</div>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
-						     <input id="idModalEditAIUnite" type="text" required class="form-control" placeholder="Unité de mesure">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
+           <input id="idModalEditAIUnite" type="text" required class="form-control" placeholder="Unité de mesure">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Valeur minimale</label>
-						     <input id="idModalEditAIMin" type="number" required class="form-control" placeholder="Valeur minimale">
-						     <div class="input-group-append">
-							     <span id="idModalEditAIMinUnite" class="input-group-text"></span>
-						     </div>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Valeur minimale</label>
+           <input id="idModalEditAIMin" type="number" required class="form-control" placeholder="Valeur minimale">
+           <div class="input-group-append">
+            <span id="idModalEditAIMinUnite" class="input-group-text"></span>
+           </div>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Valeur maximale</label>
-						     <input id="idModalEditAIMax" type="number" required class="form-control" placeholder="Valeur maximale">
-						     <div class="input-group-append">
-							     <span id="idModalEditAIMaxUnite" class="input-group-text"></span>
-						     </div>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Valeur maximale</label>
+           <input id="idModalEditAIMax" type="number" required class="form-control" placeholder="Valeur maximale">
+           <div class="input-group-append">
+            <span id="idModalEditAIMaxUnite" class="input-group-text"></span>
+           </div>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Intervalle d'acquisition</label>
-						     <input id="idModalEditAIIntervalle" type="number" required min=0 max=60000 class="form-control" placeholder="Fréquence d'acquisition">
-						     <div class="input-group-append">
-							     <span class="input-group-text">ms</span>
-						     </div>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Intervalle d'acquisition</label>
+           <input id="idModalEditAIIntervalle" type="number" required min=0 max=60000 class="form-control" placeholder="Fréquence d'acquisition">
+           <div class="input-group-append">
+            <span class="input-group-text">ms</span>
+           </div>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalEditAIRechercherTechID" oninput="PhidgetMap_Update_Choix_Tech_ID('idModalEditAI', 'AI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idModalEditAIRechercherTechID" oninput="PhidgetMap_Update_Choix_Tech_ID('idModalEditAI', 'AI')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditAISelectTechID" onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditAI', 'AI')" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idModalEditAISelectTechID" onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditAI', 'AI')" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditAISelectAcronyme" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idModalEditAISelectAcronyme" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Question Vocale</label>
-						     <input id="idModalEditAIMapQuestionVoc" type="text" class="form-control" placeholder="Question vocale associée">
-     					</div>
-   					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Question Vocale</label>
+           <input id="idModalEditAIMapQuestionVoc" type="text" class="form-control" placeholder="Question vocale associée">
+          </div>
+        </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Réponse Vocale</label>
-						     <input id="idModalEditAIMapReponseVoc" type="text" class="form-control" placeholder="Réponse vocale associée">
-     					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Réponse Vocale</label>
+           <input id="idModalEditAIMapReponseVoc" type="text" class="form-control" placeholder="Réponse vocale associée">
+          </div>
           <small>$1 est la valeur dynamique du bit interne</small>
       </div>
 
@@ -366,85 +366,85 @@
       <div class="modal-body">
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget Tech_ID</label>
-						     <input id="idModalEditAOPhidgetTechID" type="text" class="form-control" placeholder="Module WAGO">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Phidget Tech_ID</label>
+           <input id="idModalEditAOPhidgetTechID" type="text" class="form-control" placeholder="Module WAGO">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Phidget AO</label>
-						     <input id="idModalEditAOPhidgetTag" type="number" required min=0 max=128 class="form-control" placeholder="AOxx">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Phidget AO</label>
+           <input id="idModalEditAOPhidgetTag" type="number" required min=0 max=128 class="form-control" placeholder="AOxx">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Type de Borne</label>
-						     <select id="idModalEditAOType" class="custom-select border-info">
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Type de Borne</label>
+           <select id="idModalEditAOType" class="custom-select border-info">
              <option value="0">a definir</option>
              <option value="1">a definir</option>
            </select>
-     					</div>
-  					</div>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
-						     <input id="idModalEditAOUnite" type="text" class="form-control" placeholder="°C, km/h, ...">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Unité</label>
+           <input id="idModalEditAOUnite" type="text" class="form-control" placeholder="°C, km/h, ...">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Min</label>
-						     <input id="idModalEditAOMin" type="number" class="form-control" placeholder="Valeur Min">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Min</label>
+           <input id="idModalEditAOMin" type="number" class="form-control" placeholder="Valeur Min">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Max</label>
-						     <input id="idModalEditAOMax" type="number" class="form-control" placeholder="Valeur Max">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Max</label>
+           <input id="idModalEditAOMax" type="number" class="form-control" placeholder="Valeur Max">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
-						     <input id="idModalEditAORechercherTechID" oninput="PhidgetMap_Update_Choix_Tech_ID('idModalEditAO', 'AO')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Rechercher une Target</label>
+           <input id="idModalEditAORechercherTechID" oninput="PhidgetMap_Update_Choix_Tech_ID('idModalEditAO', 'AO')" type="text" class="col-9 form-control" placeholder="Rechercher un Tech_id">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
-						     <select id="idModalEditAOSelectTechID" onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditAO', 'AO')" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target TechID</label>
+           <select id="idModalEditAOSelectTechID" onchange="PhidgetMap_Update_Choix_Acronyme('idModalEditAO', 'AO')" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
-						     <select id="idModalEditAOSelectAcronyme" class="col-9 custom-select border-info"></select>
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Target Acronyme</label>
+           <select id="idModalEditAOSelectAcronyme" class="col-9 custom-select border-info"></select>
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Question Vocale</label>
-						     <input id="idModalEditMapQuestionVoc" type="text" class="form-control" placeholder="Question vocale associée">
-     					</div>
-  					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Question Vocale</label>
+           <input id="idModalEditMapQuestionVoc" type="text" class="form-control" placeholder="Question vocale associée">
+          </div>
+       </div>
 
        <div class="col form-group">
-					     <div class="input-group">
-						     <label class="col-5 col-sm-4 col-form-label text-right">Réponse Vocale</label>
-						     <input id="idModalEditMapReponseVoc" type="text" class="form-control" placeholder="Réponse vocale associée">
-     					</div>
+          <div class="input-group">
+           <label class="col-5 col-sm-4 col-form-label text-right">Réponse Vocale</label>
+           <input id="idModalEditMapReponseVoc" type="text" class="form-control" placeholder="Réponse vocale associée">
+          </div>
           <small>$1 est la valeur dynamique du bit interne</small>
-  					</div>
+       </div>
 
       </div>
       <div class="modal-footer">

@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <div class="col-auto"><h3><img src="/img/wago_750342.webp" style="width:80px" alt="Wago 750-342">Liste des Modules WAGO sur Modbus</h3></div>
+   <div class="col-auto"><h3><img src="https://static.abls-habitat.fr/img/wago_750342.webp" style="width:80px" alt="Wago 750-342">Liste des Modules WAGO sur Modbus</h3></div>
    <div class ="ml-auto btn-group align-items-center">
         <button type="button" onclick="MODBUS_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une connexion</button>
         <button type="button" onclick="MODBUS_Refresh()" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
@@ -19,17 +19,17 @@
 
 <hr>
 
-<div class="col-auto"><h3><img src="/img/wago_750342.webp" style="width:80px" alt="Wago 750-342">Configuration des I/O WAGO</h3></div>
+<div class="col-auto"><h3><img src="https://static.abls-habitat.fr/img/wago_750342.webp" style="width:80px" alt="Wago 750-342">Configuration des I/O WAGO</h3></div>
 
 <ul class="nav nav-tabs" role="tablist">
   <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
-        <img style="width: 30px" data-toggle="tooltip" title="Entrées TOR" src="/img/Entree.png" />Entrées TOR</a></li>
+        <img style="width: 30px" data-toggle="tooltip" title="Entrées TOR" src="https://static.abls-habitat.fr/img/Entree.png" />Entrées TOR</a></li>
   <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabEntreeAna">
-        <img style="width: 30px" data-toggle="tooltip" title="Entrées ANA" src="/img/Entree_Analogique.png" />Entrées ANA</a></li>
+        <img style="width: 30px" data-toggle="tooltip" title="Entrées ANA" src="https://static.abls-habitat.fr/img/Entree_Analogique.png" />Entrées ANA</a></li>
   <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieTor">
-        <img style="width: 30px" data-toggle="tooltip" title="Sorties TOR" src="/img/Sortie.png" />Sorties TOR</a></li>
+        <img style="width: 30px" data-toggle="tooltip" title="Sorties TOR" src="https://static.abls-habitat.fr/img/Sortie.png" />Sorties TOR</a></li>
   <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieAna">
-        <img style="width: 30px" data-toggle="tooltip" title="Sorties ANA" src="/img/Sortie_Analogique.png" />Sorties ANA</a></li>
+        <img style="width: 30px" data-toggle="tooltip" title="Sorties ANA" src="https://static.abls-habitat.fr/img/Sortie_Analogique.png" />Sorties ANA</a></li>
 </ul>
 
 <div class="tab-content">

@@ -7,11 +7,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="google" content="notranslate">
         <meta name="robots" content="noindex, nofollow">
-        <link rel="icon" href="/img/logo.svg">
+        <link rel="icon" href="https://static.abls-habitat.fr/img/logo.svg">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/fh-3.1.7/r-2.2.5/datatables.min.css"/>
         <style>
-        body { background-image: url('/img/fond_home.jpg');
+        body { background-image: url('https://static.abls-habitat.fr/img/fond_home.jpg');
                background-position: center;
                background-size: cover;
                background-repeat: no-repeat;
@@ -206,7 +206,7 @@
   <a class="nav-item"><img id="idMasterVignetteSecuPers" class="wtd-menu mr-1" src=""></a>-->
   <ul class="navbar-nav">
     <a class="nav-item" href="#" onclick="Charger_page_synoptique('1')">
-      <img onclick="Charger_page_synoptique('1')" src="/img/syn_maison.png" alt="Accueil"
+      <img onclick="Charger_page_synoptique('1')" src="https://static.abls-habitat.fr/img/syn_maison.png" alt="Accueil"
            class="wtd-menu" data-toggle='tooltip' data-placement='bottom' title="Aller à l'accueil">
     </a>
   </ul>
@@ -218,7 +218,7 @@
 
   <div class="collapse navbar-collapse" id="navbar-toggled">
     <ul class="navbar-nav ml-auto">
-      <a class="nav-item rounded mr-1" href="/tech/dashboard"><img src="/img/menu_parametres.png" alt="Parametres" class="wtd-menu"></a>
+      <a class="nav-item rounded mr-1" href="/tech/dashboard"><img src="https://static.abls-habitat.fr/img/menu_parametres.png" alt="Parametres" class="wtd-menu"></a>
       <li class="nav-item dropdown">
         <a class="nav-link rounded align-items-middle dropdown-toggle" href="#" id="navbarUSER" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-user text-white"></i> <span id="idUsername">-</span>

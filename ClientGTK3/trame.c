@@ -767,7 +767,7 @@ printf("%s: New comment : %s\n", __func__, comment );
     struct stat result;
     if (stat ( fichier, &result ) == -1)
      { g_snprintf ( commande, sizeof(commande),
-                    "wget --no-check-certificate https://%s:5560/img/%s -O %s", client->hostname, fichier, fichier );
+                    "wget --no-check-certificate https://static.abls-habitat.fr/img/%s -O %s", fichier, fichier );
        printf("%s: download %s\n", __func__, fichier );
        system(commande); /* Download de l'icone */
      }
@@ -891,7 +891,7 @@ printf("%s: New comment : %s\n", __func__, comment );
        g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
                          G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
      }
-     
+
     trame_motif->images = g_list_append( trame_motif->images, trame_motif->pixbuf );   /* Et ajout dans la liste */
     trame_motif->image  = trame_motif->images;                                     /* Synchro sur image numero 1 */
     trame_motif->nbr_images++;

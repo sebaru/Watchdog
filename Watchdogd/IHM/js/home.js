@@ -31,7 +31,7 @@
     if (!syn_vars) return;
     if (syn_vars.bit_comm == false)
      { $('#idImgSyn_'+syn_id).addClass("wtd-img-grayscale");
-       Changer_img_src ( "idVignetteComm_"+syn_id, "/img/syn_communication.png", true );
+       Changer_img_src ( "idVignetteComm_"+syn_id, "https://static.abls-habitat.fr/img/syn_communication.png", true );
      }
     else
      { $('#idImgSyn_'+syn_id).removeClass("wtd-img-grayscale");
@@ -39,43 +39,43 @@
      }
 
     if (syn_vars.bit_danger == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_red.svg", true );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/croix_rouge_red.svg", true );
      }
     else if (syn_vars.bit_alerte == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_red.svg", true );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/bouclier_red.svg", true );
      }
     else if (syn_vars.bit_alarme == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_red.svg", true );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/pignon_red.svg", true );
      }
     else if (syn_vars.bit_defaut == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_yellow.svg", true );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/pignon_yellow.svg", true );
      }
     else if (syn_vars.bit_derangement == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg", true );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/croix_rouge_orange.svg", true );
      }
     else if (syn_vars.bit_alerte_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_red.svg", false );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/bouclier_red.svg", false );
      }
     else if (syn_vars.bit_alarme_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_red.svg",false );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/pignon_red.svg",false );
      }
     else if (syn_vars.bit_defaut_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/pignon_yellow.svg",false );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/pignon_yellow.svg",false );
      }
     else if (syn_vars.bit_danger_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_red.svg",false );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/croix_rouge_red.svg",false );
      }
     else if (syn_vars.bit_derangement_fixe == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/croix_rouge_orange.svg", false );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/croix_rouge_orange.svg", false );
      }
     else if (syn_vars.bit_veille_totale == true)
      { vignette.removeClass("wtd-cligno").fadeTo(0);
      }
     else if (syn_vars.bit_veille_partielle == true)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_yellow.svg", false );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/bouclier_yellow.svg", false );
      }
     else if (syn_vars.bit_veille_partielle == false)
-     { Changer_img_src ( "idVignette_"+syn_id, "/img/bouclier_white.svg",false );
+     { Changer_img_src ( "idVignette_"+syn_id, "https://static.abls-habitat.fr/img/bouclier_white.svg",false );
      }
     else
      { vignette.removeClass("wtd-cligno").fadeTo(0);
@@ -118,7 +118,7 @@
                    else if (item.typologie==7) { cligno = true;  img = "croix_rouge_orange.svg"; } /* derangement */
                    else img = "info.svg";
                    if (cligno==true) classe="wtd-cligno"; else classe="";
-                   return("<img class='wtd-vignette "+classe+"' src='/img/"+img+"'>");
+                   return("<img class='wtd-vignette "+classe+"' src='https://static.abls-habitat.fr/img/"+img+"'>");
                  }
              },
              { "data": "date_create", "title":"Apparition", "className": "align-middle text-center bg-dark d-none d-sm-table-cell" },
@@ -153,7 +153,7 @@
        $('#idNavSynoptique').prepend( "<a class='nav-link rounded d-none d-sm-inline' href='#'> <span>"+Synoptique.libelle+"</span></a>" );
        if (Synoptique.syn_id != 1)
         { $.each ( Response.parent_syns, function (i, syn)
-                    { $('#idNavSynoptique').prepend ( "<a class='nav-item'><img src='/img/"+syn.image+"' alt='"+syn.libelle+"' "+
+                    { $('#idNavSynoptique').prepend ( "<a class='nav-item'><img src='https://static.abls-habitat.fr/img/"+syn.image+"' alt='"+syn.libelle+"' "+
                                                       "data-toggle='tooltip' data-placement='bottom' title='"+syn.libelle+"' "+
                                                       "onclick='Charger_page_synoptique("+syn.syn_id+")' "+
                                                       "class='wtd-menu'></a>" );
@@ -189,7 +189,7 @@
                     { if (visuel.forme == null)
                        { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
-                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.icone+".gif" )
+                         new_svg.append ( "image" ).attr("href", "https://static.abls-habitat.fr/img/"+visuel.icone+".gif" )
                                           .on( "load", function ()
                                             { console.log("loaded");
                                     var dimensions = this.getBBox();
@@ -288,7 +288,7 @@
                       else if (visuel.ihm_affichage=="by_mode")
                        { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
-                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.forme+"_"+visuel.mode+"."+visuel.extension )
+                         new_svg.append ( "image" ).attr("href", "https://static.abls-habitat.fr/img/"+visuel.forme+"_"+visuel.mode+"."+visuel.extension )
                                 .on( "load", function ()
                                   { console.log("loaded");
                                     var dimensions = this.getBBox();
@@ -303,7 +303,7 @@
                       else if (visuel.ihm_affichage=="by_color")
                        { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
-                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.forme+"_"+visuel.color+"."+visuel.extension )
+                         new_svg.append ( "image" ).attr("href", "https://static.abls-habitat.fr/img/"+visuel.forme+"_"+visuel.color+"."+visuel.extension )
                                 .on( "load", function ()
                                   { console.log("loaded");
                                     var dimensions = this.getBBox();
@@ -318,7 +318,7 @@
                       else if (visuel.ihm_affichage=="by_mode_color")
                        { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
-                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.forme+"_"+visuel.mode+"_"+visuel.color+"."+visuel.extension )
+                         new_svg.append ( "image" ).attr("href", "https://static.abls-habitat.fr/img/"+visuel.forme+"_"+visuel.mode+"_"+visuel.color+"."+visuel.extension )
                                 .on( "load", function ()
                                   { console.log("loaded");
                                     var dimensions = this.getBBox();
@@ -333,7 +333,7 @@
                       else if (visuel.ihm_affichage=="static")
                        { var new_svg = svg.append ("g").attr("id", "wtd-visu-"+visuel.tech_id+"-"+visuel.acronyme);
                          new_svg.node().setAttribute( "transform-origin", visuel.posx+" "+visuel.posy );
-                         new_svg.append ( "image" ).attr("href", "/img/"+visuel.forme+"."+visuel.extension )
+                         new_svg.append ( "image" ).attr("href", "https://static.abls-habitat.fr/img/"+visuel.forme+"."+visuel.extension )
                                 .on( "load", function ()
                                   { console.log("loaded");
                                     var dimensions = this.getBBox();
@@ -392,12 +392,12 @@
                .append( $('<div></div>').addClass("col text-center mb-1")
                         .append( $('<div></div>').addClass("d-inline-block wtd-img-container")
                                  .append($('<img>').attr("src", (Response.image=="custom" ? "/upload/syn_"+Response.syn_id+".jpg"
-                                                                                           : "/img/"+Response.image) )
+                                                                                           : "https://static.abls-habitat.fr/img/"+Response.image) )
                                                    .attr("onclick", "Charger_page_synoptique("+Response.syn_id+")")
                                                    .attr("id", "idImgSyn_"+Response.syn_id)
                                                    .addClass("wtd-synoptique") )
                                  .append($('<img>').attr("id", "idVignetteComm_"+Response.syn_id)
-                                                   /*.attr("src","/img/pignon_green.svg")*/
+                                                   /*.attr("src","https://static.abls-habitat.fr/img/pignon_green.svg")*/
                                                    .addClass("wtd-vignette wtd-img-superpose-bas-droite").slideUp()
                                         )
                                  .append($('<img>').attr("id", "idVignette_"+Response.syn_id)
@@ -443,32 +443,32 @@ console.log("Changer_etat_visuel " + visuel.ihm_affichage );
          if (Response.ihm_affichage=="static")
      { contenu = $('<img>').addClass("wtd-visuel p-2")
                            .attr ( "id", id+"-img" )
-                           .attr("src", "/img/"+Response.forme+"."+Response.extension)
+                           .attr("src", "https://static.abls-habitat.fr/img/"+Response.forme+"."+Response.extension)
                            .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else if (Response.ihm_affichage=="by_mode")
      { contenu = $('<img>').addClass("wtd-visuel")
                            .attr ( "id", id+"-img" )
-                           .attr("src", "/img/"+Response.forme+"_"+Response.mode+"."+Response.extension)
+                           .attr("src", "https://static.abls-habitat.fr/img/"+Response.forme+"_"+Response.mode+"."+Response.extension)
                            .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
-       if (Response.mode=="hors_comm") contenu.attr("src", "/img/hors_comm.png");
-       else contenu.attr("src", "/img/"+Response.forme+"_"+Response.mode+"."+Response.extension);
+       if (Response.mode=="hors_comm") contenu.attr("src", "https://static.abls-habitat.fr/img/hors_comm.png");
+       else contenu.attr("src", "https://static.abls-habitat.fr/img/"+Response.forme+"_"+Response.mode+"."+Response.extension);
      }
     else if (Response.ihm_affichage=="by_color")
      { contenu = $('<img>').addClass("wtd-visuel")
                            .attr ( "id", id+"-img" )
-                           .attr("src", "/img/"+Response.forme+"_"+Response.color+"."+Response.extension)
+                           .attr("src", "https://static.abls-habitat.fr/img/"+Response.forme+"_"+Response.color+"."+Response.extension)
                            .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
-       if (Response.mode=="hors_comm") contenu.attr("src", "/img/hors_comm.png");
-       else contenu.attr("src", "/img/"+Response.forme+"_"+Response.color+"."+Response.extension);
+       if (Response.mode=="hors_comm") contenu.attr("src", "https://static.abls-habitat.fr/img/hors_comm.png");
+       else contenu.attr("src", "https://static.abls-habitat.fr/img/"+Response.forme+"_"+Response.color+"."+Response.extension);
      }
     else if (Response.ihm_affichage=="by_mode_color")
      { contenu = $('<img>').addClass("wtd-visuel")
                            .attr ( "id", id+"-img" )
                            .click( function () { Envoyer_clic_visuel( Response.tech_id, Response.acronyme+"_CLIC" ); } );
-       if (Response.mode=="hors_comm") contenu.attr("src", "/img/hors_comm.png");
-       else contenu.attr("src", "/img/"+Response.forme+"_"+Response.mode+"_"+Response.color+"."+Response.extension);
+       if (Response.mode=="hors_comm") contenu.attr("src", "https://static.abls-habitat.fr/img/hors_comm.png");
+       else contenu.attr("src", "https://static.abls-habitat.fr/img/"+Response.forme+"_"+Response.mode+"_"+Response.color+"."+Response.extension);
      }
     else
      {  }

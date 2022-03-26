@@ -137,7 +137,7 @@
     liste.empty();
     images.forEach ( function (element)
                       { liste.append( $("<img>").addClass("wtd-synoptique-preview m-1")
-                             .attr("name", element).attr("src", "/img/"+element)
+                             .attr("name", element).attr("src", "https://static.abls-habitat.fr/img/"+element)
                              .click ( function () { Valide_edit_image(syn_id, element); } ) );
                       } );
     $('#idSynEditImage').modal("show");
@@ -158,7 +158,7 @@
           [ { "data": "syn_id", "title": "#", "className": "align-middle text-center" },
             { "data": null, "title":"Aperçu", "className": "align-middle text-center",
               "render": function (item)
-                { target = "/img/"+item.image;
+                { target = "https://static.abls-habitat.fr/img/"+item.image;
                   return( "<img src='"+target+"' class='wtd-synoptique-preview' loading=lazy alt='No Image !' onclick='Show_modal_edit_image("+item.syn_id+")' />" ); }
             },
             { "data": null, "title":"<i class='fas fa-star'></i> Level", "className": "align-middle text-center",

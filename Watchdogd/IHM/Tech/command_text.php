@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <h3><img src="/img/commande_texte.png" style="width:80px" alt="Commandes textuelles">Mapping des Commandes Textuelles</h3>
+   <h3><img src="https://static.abls-habitat.fr/img/commande_texte.png" style="width:80px" alt="Commandes textuelles">Mapping des Commandes Textuelles</h3>
  </div>
 
 <hr>

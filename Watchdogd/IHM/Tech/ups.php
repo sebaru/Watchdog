@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <div class="col-auto"><h3><img src="/img/onduleur.jpg" style="width:80px" alt="Onduleur 5PX">Liste des Onduleurs</h3></div>
+   <div class="col-auto"><h3><img src="https://static.abls-habitat.fr/img/onduleur.jpg" style="width:80px" alt="Onduleur 5PX">Liste des Onduleurs</h3></div>
 
    <div class ="ml-auto btn-group align-items-center">
         <button type="button" onclick="UPS_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une connexion</button>
