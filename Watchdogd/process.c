@@ -162,6 +162,7 @@
  static void SubProcess_ws_on_master_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
   { struct SUBPROCESS *module = user_data;
     g_object_unref(module->Master_websocket);
+    module->Master_websocket = NULL;
   }
  static void SubProcess_ws_on_master_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
   { struct SUBPROCESS *module = user_data;
@@ -214,6 +215,7 @@
 
     module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 
+/******************************************************* Ecoute du Master *****************************************************/
     module->Master_session = soup_session_new();
     g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );
     static gchar *protocols[] = { "live-slaves", NULL };
