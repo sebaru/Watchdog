@@ -806,7 +806,7 @@
      { soup_server_add_handler ( socket, "/bus", Http_traiter_bus, NULL, NULL );
 
        static gchar *protocols[] = { "live-bus", NULL };
-       soup_server_add_websocket_handler ( socket, "/ws_bus" , NULL, protocols, Http_traiter_open_websocket_slaves_CB, NULL, NULL );
+       soup_server_add_websocket_handler ( socket, "/ws_bus" , NULL, protocols, Http_traiter_open_websocket_for_slaves_CB, NULL, NULL );
      }
 
     if (!soup_server_listen_all (socket, 5559, SOUP_SERVER_LISTEN_HTTPS, &error))

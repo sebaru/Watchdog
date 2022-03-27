@@ -187,6 +187,8 @@
     g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(SubProcess_ws_on_master_message_CB), module );
     g_signal_connect ( module->Master_websocket, "closed",  G_CALLBACK(SubProcess_ws_on_master_close_CB), module );
     g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(SubProcess_ws_on_master_error_CB), module );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': WebSocket to Master connected", __func__, thread_tech_id );
+
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */

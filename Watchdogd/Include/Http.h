@@ -254,8 +254,8 @@
  extern void Http_Post_to_local_BUS_CDE ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme );
  extern void Http_Post_to_local_BUS_WATCHDOG ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gint consigne );
 
- extern void Http_traiter_open_websocket_slaves_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
-                                                     SoupClientContext *client, gpointer user_data);
+ extern void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
+                                                         SoupClientContext *client, gpointer user_data);
 
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION * session, gint min_access_level );

@@ -267,8 +267,8 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_traiter_open_websocket_slaves_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
-                                              SoupClientContext *context, gpointer user_data)
+ void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
+                                                  SoupClientContext *context, gpointer user_data)
   { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Opened %p state %d!", __func__, connexion,
               soup_websocket_connection_get_state (connexion) );
     struct HTTP_WS_SESSION *slave = g_try_malloc0( sizeof(struct HTTP_WS_SESSION) );
@@ -286,5 +286,6 @@
     Partage->com_http.Slaves = g_slist_prepend ( Partage->com_http.Slaves, slave );
     pthread_mutex_unlock( &Partage->com_http.synchro );
     g_object_ref(connexion);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Listening", __func__ );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
