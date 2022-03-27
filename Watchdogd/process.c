@@ -150,8 +150,8 @@
      }
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, Json_get_string ( response, "bus_tag" ) );
-    if (module->lib->Run_subprocess_message)                                             /* on passe le message au subprocess */
-     { module->lib->Run_subprocess_message ( module, Json_get_string ( response, "bus_tag" ), response ); }
+    if (module->Run_subprocess_message)                                             /* on passe le message au subprocess */
+     { module->Run_subprocess_message ( module, Json_get_string ( response, "bus_tag" ), response ); }
     Json_node_unref(response);
   }
 /******************************************************************************************************************************/
@@ -179,8 +179,7 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     module->Master_websocket = soup_session_websocket_connect_finish ( module->Master_session, res, &error );
     if (!module->Master_websocket)                                                                   /* No limit on incoming packet ! */
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: WebSocket error: %s.", __func__,
-                 module->lib->uuid, thread_tech_id, error->message );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': WebSocket error: %s.", __func__, thread_tech_id, error->message );
        g_error_free (error);
        return;
      }
@@ -196,10 +195,10 @@
 /******************************************************************************************************************************/
  void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars )
   { gchar chaine[128];
-
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    g_snprintf( chaine, sizeof(chaine), "W-%s-%s", module->lib->name, thread_tech_id );            /* Positionne le nom noyau */
+    if (module->lib) g_snprintf( chaine, sizeof(chaine), "W-%s-%s", module->lib->name, thread_tech_id );            /* Positionne le nom noyau */
+    else g_snprintf( chaine, sizeof(chaine), "W-%s", thread_tech_id );                             /* Positionne le nom noyau */
     gchar *upper_name = g_ascii_strup ( chaine, -1 );
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
     g_free(upper_name);
@@ -213,7 +212,7 @@
         }
      }
 
-    module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    if (module->lib) module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 
 /******************************************************* Ecoute du Master *****************************************************/
     module->Master_session = soup_session_new();
@@ -229,8 +228,12 @@
      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, thread_tech_id, description ); }
 
     Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is UP",
-              __func__, module->lib->uuid, thread_tech_id );
+    if (module->lib)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is UP",
+                 __func__, module->lib->uuid, thread_tech_id );
+     }
+    else
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Subprocess '%s' is UP", __func__, thread_tech_id ); }
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
@@ -243,8 +246,14 @@
     soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
     soup_session_abort ( module->Master_session );
     Zmq_Close ( module->zmq_from_bus );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is DOWN",
-              __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id") );
+    if (module->lib)
+     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is DOWN",
+                 __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id") );
+     }
+    else
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s' is DOWN",
+                 __func__, Json_get_string ( module->config, "thread_tech_id") );
+     }
     pthread_exit(0);
   }
 /******************************************************************************************************************************/
@@ -384,7 +393,6 @@
      }
 
     lib->Run_subprocess = dlsym( lib->dl_handle, "Run_subprocess" );                              /* Recherche de la fonction */
-    lib->Run_subprocess_message = dlsym( lib->dl_handle, "Run_subprocess_message" );/* Reception d'un message depuis le master */
     lib->Admin_config   = dlsym( lib->dl_handle, "Admin_config" );                                /* Recherche de la fonction */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: UUID %s: %s loaded", __func__, lib->uuid, lib->nom_fichier );
 
@@ -480,6 +488,120 @@
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UUID %s: process %s unloaded", __func__, lib->uuid, lib->nom_fichier );
        g_free( lib );
      }
+
+    liste = Partage->com_msrv.Subprocess;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    while(liste)
+     { struct SUBPROCESS *module = liste->data;
+       module->Thread_run = FALSE;                                                       /* On demande au thread de s'arreter */
+       liste = liste->next;
+     }
+
+    liste = Partage->com_msrv.Subprocess;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    while(liste)
+     { struct SUBPROCESS *module = liste->data;
+       pthread_join( module->TID, NULL );                                                              /* Attente fin du fils */
+       liste = liste->next;
+     }
+
+    while(Partage->com_msrv.Subprocess)                                                     /* Liberation mémoire des modules */
+     { struct SUBPROCESS *module = Partage->com_msrv.Subprocess->data;
+       if (module->dl_handle) dlclose( module->dl_handle );
+       Partage->com_msrv.Subprocess = g_slist_remove( Partage->com_msrv.Subprocess, module );
+                                                                             /* Destruction de l'entete associé dans la GList */
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': process unloaded", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
+       Json_node_unref ( module->config );
+       g_free( module );
+     }
+  }
+/******************************************************************************************************************************/
+/* Process_Create_one_subprocess: Création d'un sous process                                                                  */
+/* Entrée: La structure JSON de issue de la requete Global API de Load subProcess                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Process_Create_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+  { if (!Json_has_member ( element, "thread_tech_id" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_tech_id' in Json", __func__ ); return; }
+
+    if (!Json_has_member ( element, "thread_name" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_name' in Json", __func__ ); return; }
+
+    gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
+    gchar *thread_name    = Json_get_string ( element, "thread_name" );
+
+    struct SUBPROCESS *module = g_try_malloc0( sizeof(struct SUBPROCESS) );
+    if (!module)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Not Enought Memory", __func__, thread_tech_id );
+       return;
+     }
+    module->Thread_run = TRUE;
+    gchar nom_fichier[128];
+    g_snprintf( nom_fichier,  sizeof(nom_fichier), "%s/libwatchdog-server-%s.so", Config.librairie_dir, thread_name );
+
+    module->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW );
+    if (!module->dl_handle)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: '%s': Process '%s' loading failed (%s)",
+                 __func__, thread_tech_id, nom_fichier, dlerror() );
+       g_free(module);
+       return;
+     }
+
+    module->Run_subprocess = dlsym( module->dl_handle, "Run_subprocess" );                        /* Recherche de la fonction */
+    if (!module->Run_subprocess)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: '%s': Process %s rejected (Run_process not found)",
+                 __func__, thread_tech_id, nom_fichier );
+       dlclose( module->dl_handle );
+       g_free(module);
+       return;
+     }
+
+    module->Run_subprocess_message = dlsym( module->dl_handle, "Run_subprocess_message" );/* Reception d'un message depuis le master */
+
+    JsonNode *RootNode = Json_node_create();
+    Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( RootNode, "thread_name",    thread_name );
+    if(RootNode)
+     { module->config = Http_Post_to_global_API ( "subprocess", "GET_CONFIG", RootNode );
+       Json_node_unref(RootNode);
+       if (module->config)
+        { module->Thread_debug = Json_get_bool ( RootNode, "debug" ); }
+       else
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': GET_CONFIG from API Failed. Unloading.", __func__, thread_tech_id );
+          dlclose( module->dl_handle );
+          g_free(module);
+          return;
+        }
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Process: Memory Error. Unloading.", __func__, thread_tech_id );
+       dlclose( module->dl_handle );
+       g_free(module);
+       return;
+     }
+
+    pthread_attr_t attr;                                                       /* Attribut de mutex pour parametrer le module */
+    if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': pthread_attr_init failed. Unloading.", __func__, thread_tech_id );
+       dlclose( module->dl_handle );
+       g_free(module);
+       return;
+     }
+
+    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )                       /* On le laisse joinable au boot */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': pthread_setdetachstate failed. Unloading.", __func__, thread_tech_id );
+       dlclose( module->dl_handle );
+       g_free(module);
+       return;
+     }
+
+    if ( pthread_create( &module->TID, &attr, (void *)module->Run_subprocess, module ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': pthread_create failed. Unloading.", __func__, thread_tech_id );
+       dlclose( module->dl_handle );
+       g_free(module);
+       return;
+     }
+    pthread_attr_destroy(&attr);                                                                        /* Libération mémoire */
+    Partage->com_msrv.Subprocess = g_slist_append ( Partage->com_msrv.Subprocess, module );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': loaded", __func__, thread_tech_id );
   }
 /******************************************************************************************************************************/
 /* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                                             */
@@ -523,7 +645,7 @@
 
     JsonNode *result = Http_Post_to_global_API ( "subprocess", "LOAD", NULL );
     if (result)
-     {
+     { Json_node_foreach_array_element ( result, "subprocesses", Process_Create_one_subprocess, NULL );/* Chargement des modules */
      }
     Json_node_unref(result);
   }

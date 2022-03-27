@@ -78,6 +78,7 @@
      };
 
     GSList *Librairies;                                                        /* Liste des librairies chargées pour Watchdog */
+    GSList *Subprocess;                                                        /* Liste des librairies chargées pour Watchdog */
     gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
   };
 

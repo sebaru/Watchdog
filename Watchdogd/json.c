@@ -229,7 +229,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Json_node_unref( JsonNode *RootNode )
-  { if (RootNode) Json_node_unref ( RootNode ); }
+  { if (RootNode) json_node_unref ( RootNode ); }
 /******************************************************************************************************************************/
 /* Json_read_from_file: Recupere un ficher et le lit au format Json                                                           */
 /* Entrée: le nom de fichier                                                                                                  */

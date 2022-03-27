@@ -36,6 +36,9 @@
 
  struct SUBPROCESS
   { pthread_t TID;                                                                                   /* Identifiant du thread */
+    void *dl_handle;                                                                     /* handle de gestion de la librairie */
+    gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
     struct PROCESS *lib;
     JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */
@@ -45,6 +48,9 @@
     void *zmq_from_bus;                                                                       /* handle d"ecoute du BUS local */
     gchar zmq_buffer[1024];                                                     /* Buffer de reception des messages du master */
     void *vars;                                                               /* Pointeur vers les variables de run du module */
+    void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
+                                                                                          /* Traitement des message du master */
+    void (*Run_subprocess_message)( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message );
   };
 
  struct PROCESS
@@ -66,8 +72,6 @@
 
     void (*Run_process)( struct PROCESS *lib );                                   /* Fonction principale de gestion du thread */
     void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
-                                                                                          /* Traitement des message du master */
-    void (*Run_subprocess_message)( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message );
                                                                                  /* Fonction de gestion des commandes d'admin */
     void *(*Admin_config)( struct PROCESS *lib, gpointer msg, JsonNode *RootNode );
 
