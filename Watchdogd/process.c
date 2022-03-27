@@ -217,10 +217,10 @@
 /******************************************************* Ecoute du Master *****************************************************/
     module->Master_session = soup_session_new();
     g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );
-    static gchar *protocols[] = { "live-slaves", NULL };
-    g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/bus", Config.master_hostname );
+    static gchar *protocols[] = { "live-bus", NULL };
+    g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
     soup_session_websocket_connect_async ( module->Master_session, soup_message_new ( "GET", chaine ),
-                                            NULL, protocols, g_cancellable_new(), SubProcess_ws_on_master_connected, module );
+                                           NULL, protocols, g_cancellable_new(), SubProcess_ws_on_master_connected, module );
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
