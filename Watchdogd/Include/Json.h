@@ -32,6 +32,7 @@
 
 /************************************************ Définitions des prototypes **************************************************/
  extern JsonNode *Json_node_create ( void );
+ extern void Json_node_unref( JsonNode *RootNode );
  extern void Json_node_add_string ( JsonNode *RootNode, gchar *name, gchar *chaine );
  extern void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur );
  extern void Json_node_add_int ( JsonNode *RootNode, gchar *name, gint64 valeur );

@@ -134,7 +134,7 @@
            }
           else
            { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: zmq_tag '%s' not for this thread", __func__, tech_id, zmq_tag ); }
-          json_node_unref(request);
+          Json_node_unref(request);
         }
      }
     Stopper_radio( module );

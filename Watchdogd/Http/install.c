@@ -136,7 +136,7 @@
           Http_Send_json_response ( msg, RootNode );
         }
        else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
     gchar *domain_uuid   = Json_get_string ( request, "domain_uuid" );
@@ -235,11 +235,11 @@
           Json_node_add_string( RootNode, "install_time", date );
         }
        Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );
-       json_node_unref(RootNode);
+       Json_node_unref(RootNode);
      }
     else { Info_new( Config.log, TRUE, LOG_ERR, "%s: Writing config failed: Memory Error.", __func__ ); }
 
-    json_node_unref(request);
+    Json_node_unref(request);
     Partage->com_msrv.Thread_run = FALSE;                                                    /* On reboot toute la baraque !! */
 
     RootNode = Json_node_create ();

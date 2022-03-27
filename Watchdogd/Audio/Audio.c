@@ -216,7 +216,7 @@
            { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s : Test de diffusion", __func__ );
              Jouer_google_speech( module, "Ceci est un test de diffusion audio" );
            }
-          json_node_unref ( request );
+          Json_node_unref ( request );
         }
      }
 

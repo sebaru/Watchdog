@@ -91,7 +91,7 @@
 
     if (!Json_has_member ( response, "zmq_tag" ))
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'zmq_tag') !", __func__ );
-       json_node_unref(response);
+       Json_node_unref(response);
        return;
      }
 
@@ -120,7 +120,7 @@
 
     if (!client->http_session)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Not authorized !", __func__ ); }
-    json_node_unref(response);
+    Json_node_unref(response);
   }
 /******************************************************************************************************************************/
 /* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
@@ -147,7 +147,7 @@
                    Http_ws_send_to_client ( client, RootNode );
                    clients = g_slist_next(clients);
                  }
-                json_node_unref( RootNode );
+                Json_node_unref( RootNode );
               }
              cadran->last_update = Partage->top;
            }
@@ -229,13 +229,13 @@
 
     if (!Json_has_member ( response, "bus_tag" ))
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'bus_tag') !", __func__ );
-       json_node_unref(response);
+       Json_node_unref(response);
        return;
      }
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, Json_get_string ( response, "bus_tag" ) );
 
-    json_node_unref(response);
+    Json_node_unref(response);
   }
 /******************************************************************************************************************************/
 /* Http_ws_destroy_slave_session: Supprime une session slave                                                                  */

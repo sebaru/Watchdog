@@ -66,12 +66,12 @@
                                   " INNER JOIN syns as parent_syn ON parent_syn.syn_id = syn.parent_id"
                                   " WHERE alive = 1 %s ORDER BY histo.date_create DESC", critere ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        return;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -121,11 +121,11 @@
           Json_node_add_string ( RootNode, "nom_ack", session->username );
           Json_node_add_string ( RootNode, "date_fixe", date_fixe );
           Http_ws_send_to_all ( RootNode );
-          json_node_unref(RootNode);
+          Json_node_unref(RootNode);
           soup_message_set_status (msg, SOUP_STATUS_OK);
         }
      }
     else soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

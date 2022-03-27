@@ -85,7 +85,7 @@
     jabberid = Normaliser_chaine ( hostonly );
     if (!jabberid)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation jabberid impossible", __func__ );
-       json_node_unref(RootNode);
+       Json_node_unref(RootNode);
        return(FALSE);
      }
 
@@ -95,7 +95,7 @@
     g_free(jabberid);
     gboolean retour = FALSE;
     if (Json_has_member ( RootNode, "allow_cde" ) && Json_get_bool ( RootNode, "allow_cde" ) == TRUE) retour = TRUE;
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
     return( retour );
   }
 /******************************************************************************************************************************/
@@ -121,7 +121,7 @@
        recipients = g_list_next(recipients);
      }
     g_list_free(recipients);
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
   }
 /******************************************************************************************************************************/
 /* Imsgs_handle_message_CB : CB appellé lorsque l'on recoit un message xmpp                                                   */
@@ -206,7 +206,7 @@
        g_list_free(Results);
      }
 end:
-    json_node_unref( RootNode );
+    Json_node_unref( RootNode );
     xmpp_free(vars->ctx, message);
     return(1);
   }
@@ -389,7 +389,7 @@ reconnect:
           else
            { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': zmq_tag '%s' not for this thread", __func__,
                        jabber_id, zmq_tag ); }
-          json_node_unref(request);
+          Json_node_unref(request);
         }
      }                                                                                         /* Fin du while partage->arret */
 

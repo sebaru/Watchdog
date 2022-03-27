@@ -153,7 +153,7 @@
        JsonNode *request;
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { /*gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );*/
-          json_node_unref(request);
+          Json_node_unref(request);
         }
 
 /************************************************* Traitement opérationnel ****************************************************/
@@ -236,14 +236,14 @@
      }
     close(vars->fd);                                                                          /* Fermeture de la connexion FD */
 
-    json_node_unref ( vars->Adco );
-    json_node_unref ( vars->Isous );
-    json_node_unref ( vars->Base );
-    json_node_unref ( vars->Hchc );
-    json_node_unref ( vars->Hchp );
-    json_node_unref ( vars->Iinst );
-    json_node_unref ( vars->Imax );
-    json_node_unref ( vars->Papp );
+    Json_node_unref ( vars->Adco );
+    Json_node_unref ( vars->Isous );
+    Json_node_unref ( vars->Base );
+    Json_node_unref ( vars->Hchc );
+    Json_node_unref ( vars->Hchp );
+    Json_node_unref ( vars->Iinst );
+    Json_node_unref ( vars->Imax );
+    Json_node_unref ( vars->Papp );
 
     SubProcess_end(module);
   }

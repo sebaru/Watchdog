@@ -425,28 +425,28 @@
                  }
               }
            }
-          json_node_unref (request);
+          Json_node_unref (request);
         }
      }
 
-    json_node_unref ( vars->Load );
-    json_node_unref ( vars->Realpower );
-    json_node_unref ( vars->Battery_charge );
-    json_node_unref ( vars->Input_voltage );
-    json_node_unref ( vars->Battery_runtime );
-    json_node_unref ( vars->Battery_voltage );
-    json_node_unref ( vars->Input_hz );
-    json_node_unref ( vars->Output_current );
-    json_node_unref ( vars->Output_hz );
-    json_node_unref ( vars->Output_voltage );
+    Json_node_unref ( vars->Load );
+    Json_node_unref ( vars->Realpower );
+    Json_node_unref ( vars->Battery_charge );
+    Json_node_unref ( vars->Input_voltage );
+    Json_node_unref ( vars->Battery_runtime );
+    Json_node_unref ( vars->Battery_voltage );
+    Json_node_unref ( vars->Input_hz );
+    Json_node_unref ( vars->Output_current );
+    Json_node_unref ( vars->Output_hz );
+    Json_node_unref ( vars->Output_voltage );
 
-    json_node_unref ( vars->Outlet_1_status ),
-    json_node_unref ( vars->Outlet_2_status );
-    json_node_unref ( vars->Ups_online );
-    json_node_unref ( vars->Ups_charging );
-    json_node_unref ( vars->Ups_on_batt );
-    json_node_unref ( vars->Ups_replace_batt );
-    json_node_unref ( vars->Ups_alarm );
+    Json_node_unref ( vars->Outlet_1_status ),
+    Json_node_unref ( vars->Outlet_2_status );
+    Json_node_unref ( vars->Ups_online );
+    Json_node_unref ( vars->Ups_charging );
+    Json_node_unref ( vars->Ups_on_batt );
+    Json_node_unref ( vars->Ups_replace_batt );
+    Json_node_unref ( vars->Ups_alarm );
 
     SubProcess_end(module);
   }

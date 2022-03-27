@@ -57,12 +57,12 @@
 
     if (SQL_Select_to_json_node ( RootNode, "tech_ids", "SELECT DISTINCT tech_id FROM dictionnaire" )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        return;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -133,12 +133,12 @@
 
     if (SQL_Select_to_json_node ( RootNode, classe, chaine )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        return;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -166,7 +166,7 @@
 
     if ( ! (request && Json_has_member ( request, "classe" ) && Json_has_member ( request, "tech_id" ) &&
                        Json_has_member ( request, "acronyme" ) ) )
-     { if (request) json_node_unref(request);
+     { if (request) Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -251,7 +251,7 @@
 	      else soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais arguments" );
      }
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_mnemos_validate: Valide la presence ou non d'un tech_id/acronyme dans le dico                                 */
@@ -274,7 +274,7 @@
             Json_has_member ( request, "classe" )
            )
        )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -288,7 +288,7 @@
     if (RootNode == NULL)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
@@ -300,10 +300,10 @@
                               "AND classe='%s' ORDER BY acronyme",
                               tech_id, acronyme, (classe ? classe : "")
                             );
-    json_node_unref(request);
+    Json_node_unref(request);
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );

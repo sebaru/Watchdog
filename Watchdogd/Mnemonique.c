@@ -83,7 +83,7 @@
     if (!retour)
      { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Erreur de recherche de '%s:%s' dans le dictionnaire", __func__,
                  tech_id, acronyme );
-       json_node_unref(result);
+       Json_node_unref(result);
        result = NULL;
      }
     return(result);

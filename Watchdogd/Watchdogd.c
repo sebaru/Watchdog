@@ -133,7 +133,7 @@
        Partage->Maps_to_thread = NULL;
      }
     if (Partage->Maps_root)
-     { json_node_unref ( Partage->Maps_root );
+     { Json_node_unref ( Partage->Maps_root );
        Partage->Maps_root = NULL;
      }
 
@@ -347,7 +347,7 @@
            { Dls_AO_to_json( RootNode, ao );
              Json_node_add_string ( RootNode, "zmq_tag", "SET_AO" );
              Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", RootNode );
-             json_node_unref(RootNode);
+             Json_node_unref(RootNode);
            }
           liste = g_slist_next(liste);
         }
@@ -445,7 +445,7 @@
        request = Recv_zmq_with_json( zmq_from_slave, g_get_host_name(), (gchar *)&buffer, sizeof(buffer) );
        if (request)
         { Handle_zmq_for_master( request );
-          json_node_unref ( request );
+          Json_node_unref ( request );
         }
 
        request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
@@ -455,7 +455,7 @@
            { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                        /* on envoi aux threads */
              Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                       /* on envoi aux slaves */
            }
-          json_node_unref ( request );
+          Json_node_unref ( request );
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
@@ -469,7 +469,7 @@
           if (RootNode)
            { Json_node_add_string ( RootNode, "zmq_tag", "PING" );
              Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), Config.master_hostname, RootNode );
-             json_node_unref(RootNode);
+             Json_node_unref(RootNode);
            }
           Dls_data_set_WATCHDOG ( NULL, g_get_host_name(), "IO_COMM", &bit_io_comm, 900 );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
@@ -494,7 +494,7 @@
 
     if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
     if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
-    if (Partage->Maps_root) json_node_unref ( Partage->Maps_root );
+    if (Partage->Maps_root) Json_node_unref ( Partage->Maps_root );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
   }
@@ -546,7 +546,7 @@
     if (RootNode)
      { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_START" );
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, RootNode );
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
      }
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
      { gchar buffer[2048];
@@ -557,7 +557,7 @@
        if (request)
         { if (!Handle_zmq_for_slave( request ))                    /* Gère d'abord le message avant de l'envoyer au bus local */
            { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) ); }        /* Sinon on envoi aux threads */
-          json_node_unref ( request );
+          Json_node_unref ( request );
         }
                                                 /* Si reception depuis un thread, report vers le master et les autres threads */
        if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
@@ -577,7 +577,7 @@
              Json_node_add_string ( body, "acronyme", "IO_COMM" );
              Json_node_add_int    ( body, "consigne", 900 );
              Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, body );
-             json_node_unref(body);
+             Json_node_unref(body);
            }
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
@@ -602,7 +602,7 @@
        Json_node_add_string ( RootNode, "acronyme", "IO_COMM" );
        Json_node_add_int    ( RootNode, "consigne", 0 );
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, RootNode );
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
      }
 
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
@@ -792,7 +792,7 @@
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
     if (API)
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connected with API %s", __func__, Json_get_string ( API, "version" ) );
-       json_node_unref ( API );
+       Json_node_unref ( API );
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connection to Global API FAILED. Sleep 5s and stopping.", __func__ );
@@ -808,10 +808,11 @@
        Json_node_add_string ( RootNode, "version", WTD_VERSION );
        Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
        JsonNode *api_result = Http_Post_to_global_API ( "instance", "START", RootNode );
-       if (api_result) json_node_unref ( api_result );
+       Json_node_unref ( RootNode );
+
+       if (api_result) Json_node_unref ( api_result );
        else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for INSTANCE START failed.", __func__ );
 
-       json_node_unref ( RootNode );
      }
 /************************************************* Get instance parameters ****************************************************/
     JsonNode *api_result = Http_Post_to_global_API ( "instance", "GET_CONFIG", NULL );
@@ -836,7 +837,7 @@
                        else g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "nomasterhost" );
 
        Info_change_log_level ( Config.log, Json_get_int ( api_result, "log_level" ) );
-       json_node_unref ( api_result );
+       Json_node_unref ( api_result );
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API config loaded.", __func__ );
      }
     else
@@ -1011,7 +1012,7 @@ second_stage_end:
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
 first_stage_end:
-    if (Config.config) json_node_unref ( Config.config );
+    if (Config.config) Json_node_unref ( Config.config );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Stopped", __func__ );
     return(error_code);
   }

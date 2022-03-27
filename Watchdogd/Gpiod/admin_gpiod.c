@@ -55,7 +55,7 @@
      { /*Json_node_add_string ( RootNode, "tech_id", Cfg.tech_id );*/
      }
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -79,7 +79,7 @@
             Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" )
            ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
@@ -88,7 +88,7 @@
     gint mode_activelow = Json_get_int( request, "mode_activelow" );
     gchar *tech_id      = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
     gchar *acronyme     = Normaliser_chaine ( Json_get_string ( request, "acronyme" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
 
     SQL_Write_new ( "UPDATE gpiod_io SET tech_id=NULL, acronyme=NULL "
                     "WHERE tech_id='%s', acronyme='%s'", tech_id, acronyme );

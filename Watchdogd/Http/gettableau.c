@@ -61,7 +61,7 @@
                                      "INNER JOIN syns ON tableau.syn_id = syns.syn_id "
                                      "WHERE syns.syn_id=%d AND access_level<=%d", atoi(syn_id_string), session->access_level ) == FALSE )
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(RootNode);
+          Json_node_unref(RootNode);
          return;
         }
      }
@@ -71,13 +71,13 @@
                                      "INNER JOIN syns ON tableau.syn_id = syns.syn_id "
                                      "WHERE access_level<=%d", session->access_level ) == FALSE )
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(RootNode);
+          Json_node_unref(RootNode);
          return;
         }
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -102,13 +102,13 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tableau_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gint tableau_id = Json_get_int ( request, "tableau_id" );
-    json_node_unref(request);
+    Json_node_unref(request);
 
     g_snprintf( chaine, sizeof(chaine), "DELETE tableau FROM tableau "
                                         "INNER JOIN syns ON tableau.syn_id = syns.syn_id "
@@ -143,7 +143,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "titre" ) && Json_has_member ( request, "syn_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -168,7 +168,7 @@
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
 
     g_free(titre);
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_tableau: Fourni une list JSON des elements d'un tableau                                                   */
@@ -205,7 +205,7 @@
                                   "INNER JOIN syns ON tableau.syn_id = syns.syn_id "
                                   "WHERE tableau.tableau_id=%d AND access_level<=%d", tableau_id, session->access_level ) == FALSE )
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        return;
      }
 
@@ -216,12 +216,12 @@
                                  "LEFT JOIN dictionnaire AS dico ON tm.tech_id=dico.tech_id AND tm.acronyme=dico.acronyme "
                                  "WHERE syns.access_level<=%d AND t.tableau_id='%d'", session->access_level, tableau_id ) == FALSE)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        return;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -246,13 +246,13 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gint tableau_id = Json_get_int ( request, "tableau_id" );
-    json_node_unref(request);
+    Json_node_unref(request);
 
     g_snprintf( chaine, sizeof(chaine), "DELETE tm FROM tableau_map AS tm "
                                         "INNER JOIN tableau AS t ON t.tableau_id=tm.tableau_id "
@@ -288,7 +288,7 @@
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
             Json_has_member ( request, "color") ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -324,6 +324,6 @@
     g_free(tech_id);
     g_free(acronyme);
     g_free(color);
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

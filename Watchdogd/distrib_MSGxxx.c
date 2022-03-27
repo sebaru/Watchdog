@@ -136,7 +136,7 @@
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", histo );
        Http_ws_send_to_all( histo );
      }
-    json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
+    Json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
@@ -171,7 +171,7 @@
     Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", histo );
     Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", histo );
     Http_ws_send_to_all( histo );
-    json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
+    Json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */

@@ -1218,7 +1218,7 @@ end:
   { JsonNode *RootNode = Json_get_from_string ( json_parametre );
     if (RootNode)
      { Zmq_Send_json_node ( Partage->com_dls.zmq_to_master, "DLS", target_tech_id, RootNode );
-       json_node_unref(RootNode);
+       Json_node_unref(RootNode);
      }
   }
 /******************************************************************************************************************************/
@@ -1704,7 +1704,7 @@ end:
        Dls_syn_vars_to_json ( array, dls_syn );
        Json_node_add_string ( RootNode, "zmq_tag", "SET_SYN_VARS" );
        Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
-       json_node_unref (RootNode);
+       Json_node_unref (RootNode);
      }
  }
 /******************************************************************************************************************************/
@@ -1911,7 +1911,7 @@ end:
           if (result)
            { SQL_Select_to_json_node ( result, NULL, "SELECT SUM(nbr_ligne) AS nbr_ligne_total FROM dls" );
              Dls_data_set_AI ( "SYS", "NBR_LIGNE_DLS", &dls_nbr_ligne_dls, Json_get_int( result, "nbr_ligne_total" )*1.0, TRUE );
-             json_node_unref(result);
+             Json_node_unref(result);
            }
           GSList *liste = Partage->Dls_data_AI;
           while (liste)

@@ -95,7 +95,7 @@
     SQL_Write_new ( "UPDATE processes SET started = NULL, start_time = NULL, version = NULL WHERE uuid='%s'", lib->uuid );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: Process is DOWN '%s' %s", __func__,
               lib->uuid, lib->name, lib->version );
-    if (lib->config) json_node_unref (lib->config);
+    if (lib->config) Json_node_unref (lib->config);
     lib->Thread_run = FALSE;                                                                    /* Le thread ne tourne plus ! */
     pthread_exit(GINT_TO_POINTER(0));
   }
@@ -145,14 +145,14 @@
 
     if (!Json_has_member ( response, "bus_tag" ))
      { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'bus_tag') !", __func__ );
-       json_node_unref(response);
+       Json_node_unref(response);
        return;
      }
 
     Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, Json_get_string ( response, "bus_tag" ) );
     if (module->lib->Run_subprocess_message)                                             /* on passe le message au subprocess */
      { module->lib->Run_subprocess_message ( module, Json_get_string ( response, "bus_tag" ), response ); }
-    json_node_unref(response);
+    Json_node_unref(response);
   }
 /******************************************************************************************************************************/
 /* Http_ws_on_master_closed: Traite une deconnexion du master                                                                 */
@@ -401,7 +401,7 @@
        else { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                        "%s: UUID %s: Process '%s' is not enabled : Loaded but not started", __func__, lib->uuid, lib->name );
             }
-       json_node_unref(RootNode);
+       Json_node_unref(RootNode);
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: UUID %s: Process '%s': Memory Error", __func__, lib->uuid, lib->name ); }
     return(TRUE);
@@ -520,6 +520,12 @@
     closedir( repertoire );                                                 /* Fermeture du rÃ©pertoire a la fin du traitement */
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %d Process loaded", __func__, g_slist_length( Partage->com_msrv.Librairies ) );
+
+    JsonNode *result = Http_Post_to_global_API ( "subprocess", "LOAD", NULL );
+    if (result)
+     {
+     }
+    Json_node_unref(result);
   }
 /******************************************************************************************************************************/
 /* Demarrer_dls: Thread un process DLS                                                                                        */

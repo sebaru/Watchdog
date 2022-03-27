@@ -52,13 +52,13 @@
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
     gchar *tech_id  = Normaliser_chaine ( Json_get_string( request, "tech_id" ) );
     gchar *acronyme = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
-    json_node_unref( request );
+    Json_node_unref( request );
     Envoyer_commande_dls_data ( tech_id, acronyme );
     Audit_log ( session, "Clic utilisateur sur %s:%s", tech_id, acronyme );
     g_free(tech_id);
@@ -97,12 +97,12 @@
                                  "INNER JOIN syns AS psyn ON psyn.syn_id=syn.parent_id "
                                  "WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        return;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -128,13 +128,13 @@
 
 
     if ( ! (Json_has_member ( request, "syn_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gint syn_id = Json_get_int ( request, "syn_id" );
-    json_node_unref(request);
+    Json_node_unref(request);
 
     if (syn_id==1)
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Syn 1 can not be deleted");
@@ -215,14 +215,14 @@
                  Json_has_member ( request, "parent_id" ) && Json_has_member ( request, "access_level" ) &&
                  Json_has_member ( request, "image" )
                 ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gint access_level  = Json_get_int ( request, "access_level" );
     if (access_level>session->access_level)
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -250,7 +250,7 @@
     g_free(image);
 
 end:
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -288,12 +288,12 @@ end:
                                  "INNER JOIN syns AS ps ON s.parent_id = ps.syn_id "
                                  "WHERE s.syn_id=%d AND s.access_level<=%d ORDER BY s.page", syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        return;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -426,7 +426,7 @@ end:
     if ( Json_has_member ( request, "passerelles" ) )
      { Json_node_foreach_array_element ( request, "passerelle", Http_syn_save_une_passerelle, session ); }
 
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Formater_cadran: Formate la structure dédiée cadran pour envoi au client                                                   */
@@ -574,7 +574,7 @@ end:
     if ( !(Json_has_member ( result, "access_level" ) && Json_has_member ( result, "libelle" )) )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Syn '%d' unknown", __func__, syn_id );
        soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Syn not found");
-       json_node_unref ( result );
+       Json_node_unref ( result );
        return;
      }
 
@@ -582,10 +582,10 @@ end:
      { Audit_log ( session, "Access to synoptique '%s' (id '%d') forbidden",
                    Json_get_string ( result, "libelle" ), syn_id );
        soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Access Denied");
-       json_node_unref ( result );
+       Json_node_unref ( result );
        return;
      }
-    json_node_unref ( result );
+    Json_node_unref ( result );
 /*---------------------------------------------- Envoi les données -----------------------------------------------------------*/
     JsonNode *synoptique = Json_node_create();
     if (!synoptique)
@@ -607,7 +607,7 @@ end:
                                  "SELECT * FROM syns WHERE syn_id='%d' AND access_level<='%d'",
                                   syn_id, session->access_level) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(synoptique);
+       Json_node_unref(synoptique);
        return;
      }
     gint full_syn = Json_get_int ( synoptique, "mode_affichage" );
@@ -617,7 +617,7 @@ end:
                                  "WHERE s2.syn_id='%d' AND s.syn_id!=1 AND s.access_level<='%d'",
                                  syn_id, session->access_level) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(synoptique);
+       Json_node_unref(synoptique);
        return;
      }
 /*-------------------------------------------------- Envoi les syn_vars ------------------------------------------------------*/
@@ -632,7 +632,7 @@ end:
                                     "WHERE pass.syn_id=%d AND syn.access_level<=%d",
                                      syn_id, session->access_level ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(synoptique);
+          Json_node_unref(synoptique);
           return;
         }
      }
@@ -644,7 +644,7 @@ end:
                                      "WHERE lien.syn_id=%d AND syn.access_level<=%d",
                                      syn_id, session->access_level ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(synoptique);
+          Json_node_unref(synoptique);
           return;
         }
      }
@@ -656,7 +656,7 @@ end:
                                     "WHERE rectangle.syn_id=%d AND syn.access_level<=%d",
                                     syn_id, session->access_level ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(synoptique);
+          Json_node_unref(synoptique);
           return;
         }
      }
@@ -668,7 +668,7 @@ end:
                                     "WHERE comment.syn_id=%d AND syn.access_level<=%d",
                                     syn_id, session->access_level ) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(synoptique);
+          Json_node_unref(synoptique);
           return;
         }
      }
@@ -680,7 +680,7 @@ end:
                                  "WHERE cam.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(synoptique);
+       Json_node_unref(synoptique);
        return;
      }
 
@@ -693,7 +693,7 @@ end:
                                  "WHERE syn.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(synoptique);
+       Json_node_unref(synoptique);
        return;
      }
 
@@ -705,7 +705,7 @@ end:
                                  "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(synoptique);
+       Json_node_unref(synoptique);
        return;
      }
 /*-------------------------------------------------- Envoi les tableaux_map de la page ---------------------------------------*/
@@ -716,7 +716,7 @@ end:
                                  "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(synoptique);
+       Json_node_unref(synoptique);
        return;
      }
 
@@ -737,7 +737,7 @@ end:
                                     "ORDER BY layer",
                                      syn_id, session->access_level, session->access_level, syn_id) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(synoptique);
+          Json_node_unref(synoptique);
           return;
         }
      }
@@ -754,7 +754,7 @@ end:
                                     "ORDER BY layer",
                                     syn_id, session->access_level, session->access_level) == FALSE)
         { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-          json_node_unref(synoptique);
+          Json_node_unref(synoptique);
           return;
         }
      }
@@ -769,12 +769,12 @@ end:
                                  "WHERE dls.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref(synoptique);
+       Json_node_unref(synoptique);
        return;
      }
 
     gchar *buf = Json_node_to_string ( synoptique );
-    json_node_unref(synoptique);
+    Json_node_unref(synoptique);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -800,6 +800,6 @@ end:
 
     Dls_acquitter_synoptique(syn_id);
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

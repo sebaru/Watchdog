@@ -129,7 +129,7 @@ end:
     Json_node_add_string ( body, "tech_id",  tech_id );
     Json_node_add_string ( body, "acronyme", acronyme );
     Http_Post_to_local_BUS ( module, "SET_CDE", body );
-    json_node_unref(body);
+    Json_node_unref(body);
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_WATCHDOG: Envoie le bit WATCHDOG au master selon le status                                          */
@@ -144,7 +144,7 @@ end:
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_int    ( body, "consigne", consigne );
     Http_Post_to_local_BUS ( module, "SET_WATCHDOG", body );
-    json_node_unref(body);
+    Json_node_unref(body);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_install: Traite l'installation du système                                                                     */
@@ -164,14 +164,14 @@ end:
            )
        )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
     gchar *domain_uuid    = Json_get_string ( request, "domain_uuid" );
     if ( strcasecmp( domain_uuid, Json_get_string ( Config.config, "domain_uuid" )  ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Wrong Domain UUID. Dropping.");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
@@ -182,7 +182,7 @@ end:
               Json_has_member ( request, "consigne" ) ) )
         { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_WATCHDOG: wrong parameters from '%s'", __func__, thread_tech_id );
           soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-          json_node_unref(request);
+          Json_node_unref(request);
           return;
         }
 
@@ -202,7 +202,7 @@ end:
           )
         { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_AI: wrong parameters from '%s'", __func__, thread_tech_id );
           soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-          json_node_unref(request);
+          Json_node_unref(request);
           return;
         }
 
@@ -239,7 +239,7 @@ end:
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
         { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_CDE: wrong parameters from '%s'", __func__, thread_tech_id );
           soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-          json_node_unref(request);
+          Json_node_unref(request);
           return;
         }
        Info_new( Config.log, Config.log_bus, LOG_INFO,
@@ -255,7 +255,7 @@ end:
           )
         { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_DI: wrong parameters from '%s'", __func__, thread_tech_id );
           soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-          json_node_unref(request);
+          Json_node_unref(request);
           return;
         }
 
@@ -285,7 +285,7 @@ end:
         }
      }
 
-    json_node_unref(request);
+    Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/

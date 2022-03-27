@@ -102,7 +102,7 @@
     if (RootNode)
      { SQL_Select_to_json_node ( RootNode, "bis", "SELECT m.tech_id, m.acronyme, m.etat, m.groupe FROM mnemos_BI as m" );
        Json_node_foreach_array_element ( RootNode, "bis", Charger_confDB_un_BI, &cpt );
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
      } else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Memory Error", __func__ );
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d BI loaded", __func__, cpt );

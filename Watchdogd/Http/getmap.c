@@ -63,7 +63,7 @@
     g_free(thread_tech_id);
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -89,7 +89,7 @@
                        thread_tech_id, thread_acronyme );
        g_free(thread_tech_id);
        g_free(thread_acronyme);
-       json_node_unref(request);
+       Json_node_unref(request);
        soup_message_set_status (msg, SOUP_STATUS_OK);
        return;
      }
@@ -99,7 +99,7 @@
            )
        )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
@@ -125,7 +125,7 @@
     MSRV_Remap();
     Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */
 
-    json_node_unref(request);
+    Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/

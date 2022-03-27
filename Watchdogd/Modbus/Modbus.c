@@ -160,11 +160,11 @@
     vars->request = FALSE;
     vars->nbr_deconnect++;
     vars->date_retente = Partage->top + MODBUS_RETRY;
-    if (vars->DI_root) { json_node_unref(vars->DI_root); vars->DI_root = NULL; }
+    if (vars->DI_root) { Json_node_unref(vars->DI_root); vars->DI_root = NULL; }
     if (vars->DI)      { g_free(vars->DI); vars->DI = NULL; }
-    if (vars->AI_root) { json_node_unref(vars->AI_root); vars->AI_root = NULL; }
+    if (vars->AI_root) { Json_node_unref(vars->AI_root); vars->AI_root = NULL; }
     if (vars->AI)      { g_free(vars->AI); vars->AI = NULL; }
-    if (vars->DO_root) { json_node_unref(vars->DO_root); vars->DO_root = NULL; }
+    if (vars->DO_root) { Json_node_unref(vars->DO_root); vars->DO_root = NULL; }
     if (vars->DO)      { g_free(vars->DO); vars->DO = NULL; }
     vars->nbr_entree_tor = 0;
     vars->nbr_entree_ana = 0;
@@ -1129,7 +1129,7 @@
                  }
               }
            }
-          json_node_unref(request);
+          Json_node_unref(request);
         }
 
 /********************************************************* Toutes les secondes ************************************************/

@@ -60,7 +60,7 @@
     SQL_Select_to_json_node ( RootNode, "logs", chaine );
 
     gchar *buf = Json_node_to_string (RootNode);
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );

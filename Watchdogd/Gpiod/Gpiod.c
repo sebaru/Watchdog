@@ -119,11 +119,11 @@
     gint gpiod_id = Json_get_int ( module->config, "id" );
     if (SQL_Select_to_json_node ( RootNode, "gpios",
                                   "SELECT * FROM %d_IO WHERE gpiod_id='%d' ORDER BY num", module->lib->name, gpiod_id ) == FALSE)
-     { json_node_unref(RootNode);
+     { Json_node_unref(RootNode);
        return(FALSE);
      }
     Json_node_foreach_array_element ( RootNode, "gpios", Charger_un_gpio, module );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -225,7 +225,7 @@
                  }
               }
            }
-          json_node_unref (request);
+          Json_node_unref (request);
         }
      }
 

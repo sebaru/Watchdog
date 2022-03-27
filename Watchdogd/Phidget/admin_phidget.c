@@ -102,7 +102,7 @@
            )
        )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
@@ -213,6 +213,6 @@ end:
     g_free(thread_tech_id);
     g_free(acronyme);
     g_free(capteur);
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

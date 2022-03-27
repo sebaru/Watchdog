@@ -727,7 +727,7 @@ encore:
     if (Json_has_member ( RootNode, "database_version" ) )
          { database_version = Json_get_int ( RootNode, "database_version" ); }
     else { database_version = 0; }
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 
     Info_new( Config.log, Config.log_db, LOG_NOTICE,
              "%s: Actual Database_Version detected = %05d. Please wait while upgrading.", __func__, database_version );

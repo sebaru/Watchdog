@@ -113,7 +113,7 @@
     Dls_foreach_plugins ( plugins, Http_dls_do_plugin );
 
     gchar *buf = Json_node_to_string ( dls_status );
-    json_node_unref ( dls_status );
+    Json_node_unref ( dls_status );
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -341,7 +341,7 @@
     g_free(tech_id);
     g_free(classe);
     gchar *buf = Json_node_to_string ( dls_run );
-    json_node_unref( dls_run );
+    Json_node_unref( dls_run );
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -386,14 +386,14 @@
                                  "SELECT d.*, s.page FROM dls AS d INNER JOIN syns AS s ON d.syn_id=s.syn_id "
                                  "WHERE tech_id='%s' AND s.access_level<='%d'", tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        g_free(tech_id);
        return;
      }
 
     g_free(tech_id);
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -416,13 +416,13 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gchar *target = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
     if (!target)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Normalize Error");
        return;
@@ -453,13 +453,13 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gchar *target = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
     if (!target)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Normalize Error");
        return;
@@ -491,13 +491,13 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gchar *target = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
     if (!target)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Normalize Error");
        return;
@@ -528,13 +528,13 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gchar *target = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
     if (!target)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Normalize Error");
        return;
@@ -577,12 +577,12 @@
                                  "INNER JOIN syns as ps ON s.parent_id = ps.syn_id "
                                  "WHERE s.access_level<'%d' ORDER BY d.tech_id", session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        return;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -605,13 +605,13 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gchar *target = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
 
     Audit_log ( session, "DLS '%s' supprimé", target );
     if (SQL_Write_new ( "DELETE FROM dls WHERE tech_id='%s'", target )==FALSE)
@@ -641,7 +641,7 @@
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "shortname" ) &&
             Json_has_member ( request, "name" ) && Json_has_member ( request, "syn_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -669,7 +669,7 @@
              Audit_log ( session, "DLS '%s' changed to %d, %s, %s", tech_id, Json_get_int ( request, "syn_id" ), shortname, name );
            }
           else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Update Error" );
-          json_node_unref( old );
+          Json_node_unref( old );
         }
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
      }
@@ -683,7 +683,7 @@
        else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Add Error" );
      }
 
-    json_node_unref(request);
+    Json_node_unref(request);
     g_free(name);
     g_free(shortname);
     g_free(tech_id);
@@ -707,7 +707,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -720,7 +720,7 @@
 
     JsonNode *RootNode = Json_node_create ();
     if (!RootNode)
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Json Memory Error");
        return;
      }
@@ -754,9 +754,9 @@
             soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Unknown Error" );
      }
     Audit_log ( session, "DLS '%s' compilé", Json_get_string ( request, "tech_id" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
     gchar *buf = Json_node_to_string (RootNode);
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
@@ -780,7 +780,7 @@
             Json_has_member ( request, "classe" ) && Json_has_member ( request, "valeur" )
            )
        )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -824,7 +824,7 @@
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Wrong Class" );
-    json_node_unref(request);
+    Json_node_unref(request);
     g_free(tech_id);
     g_free(acronyme);
     g_free(classe);
@@ -847,14 +847,14 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     Dls_acquitter_plugin ( Json_get_string ( request, "tech_id" ) );
     Audit_log ( session, "DLS '%s' acquitté", Json_get_string ( request, "tech_id" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

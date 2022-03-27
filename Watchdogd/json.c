@@ -214,7 +214,7 @@
     return(json_object_get_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
-/* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */
+/* Json_has_member: Test la presence d'un membre dans le noeud                                                                */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
@@ -223,6 +223,13 @@
     if (!object) { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Object is null for '%s'", __func__, chaine );  return(FALSE); }
     return( json_object_has_member ( object, chaine ) && !json_object_get_null_member ( object, chaine ) );
   }
+/******************************************************************************************************************************/
+/* Json_node_unref: Libère un noeud Joson                                                                                     */
+/* Entrée: le noeud json                                                                                                      */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_node_unref( JsonNode *RootNode )
+  { if (RootNode) Json_node_unref ( RootNode ); }
 /******************************************************************************************************************************/
 /* Json_read_from_file: Recupere un ficher et le lit au format Json                                                           */
 /* Entrée: le nom de fichier                                                                                                  */

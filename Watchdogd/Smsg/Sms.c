@@ -91,7 +91,7 @@
     g_free(phone);
 
     retour = (Json_get_int ( RootNode, "nbr_recipient" ) == 1 ? TRUE : FALSE);
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -298,7 +298,7 @@
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
     Json_node_add_string( RootNode, "message", libelle );
     gchar *body = Json_node_to_string( RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 
     gchar *method = "POST";
     g_snprintf( query, sizeof(query), "https://eu.api.ovh.com/1.0/sms/%s/jobs", Json_get_string ( module->config, "ovh_service_name" ) );
@@ -404,7 +404,7 @@
        recipients = g_list_next(recipients);
      }
     g_list_free(recipients);
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -417,7 +417,7 @@
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_int    ( RootNode, "sms_notification", MESSAGE_SMS_OVH_ONLY );
     Smsg_send_to_all_authorized_recipients( module, RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -430,7 +430,7 @@
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_int    ( RootNode, "sms_notification", MESSAGE_SMS_GSM_ONLY );
     Smsg_send_to_all_authorized_recipients( module, RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
@@ -519,7 +519,7 @@
        g_list_free(Results);
      }
 end:
-    json_node_unref( RootNode );
+    Json_node_unref( RootNode );
   }
 /******************************************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                                               */
@@ -619,7 +619,7 @@ end:
           else if ( !strcasecmp ( zmq_tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
           else
            { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: zmq_tag '%s' not for this thread", __func__, thread_tech_id, zmq_tag ); }
-          json_node_unref(request);
+          Json_node_unref(request);
         }
      }
     Smsg_disconnect(module);

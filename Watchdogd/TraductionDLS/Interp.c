@@ -977,7 +977,7 @@
     if (option_chaine) Json_node_add_string ( RootNode, "target", option_chaine );
 
     gchar *json_buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
     gchar *normalized_buf = Normaliser_chaine_for_dls ( json_buf );
     g_free(json_buf);
 
@@ -1205,20 +1205,20 @@
     if (!result) { return(NULL); }
     else if ( Json_has_member ( result, "classe_int" ) && Json_get_int ( result, "classe_int" ) != -1 )
      { alias = New_alias ( tech_id, acronyme, Json_get_int ( result, "classe_int" ), options );
-       json_node_unref ( result );
+       Json_node_unref ( result );
      }
     else if ( Json_has_member ( result, "classe" ) && !strcmp ( Json_get_string ( result, "classe" ), "VISUEL" ) )
      { alias = New_alias ( tech_id, acronyme, MNEMO_VISUEL, options );
-       json_node_unref ( result );
+       Json_node_unref ( result );
      }
     else
-     { json_node_unref ( result );
+     { Json_node_unref ( result );
        result = Rechercher_DICO ( "SYS", acronyme );
        if (!result) { return(NULL); }
 
        if ( Json_has_member ( result, "classe_int" ) && Json_get_int ( result, "classe_int" ) != -1 )
         { alias = New_alias ( "SYS", acronyme, Json_get_int ( result, "classe_int" ), options ); }
-       else { json_node_unref(result); return(NULL); }                             /* Si pas trouvé en externe, retourne NULL */
+       else { Json_node_unref(result); return(NULL); }                             /* Si pas trouvé en externe, retourne NULL */
      }
 
     if (alias)                                                                 /* Si trouvé, on considère que le bit est used */

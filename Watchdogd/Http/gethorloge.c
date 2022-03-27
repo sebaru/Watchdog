@@ -73,14 +73,14 @@
                                  "WHERE h.tech_id='%s' AND access_level<=%d",
                                   tech_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        g_free(tech_id);
        return;
      }
     g_free(tech_id);
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -123,12 +123,12 @@
                                  "WHERE h.id=%d AND access_level<=%d",
                                  horloge_id, session->access_level )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        return;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -153,13 +153,13 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gint tick_id = Json_get_int ( request, "id" );
-    json_node_unref(request);
+    Json_node_unref(request);
 
     g_snprintf( chaine, sizeof(chaine), "DELETE FROM mnemos_HORLOGE_ticks WHERE id=%d/* AND access_level<='%d'*/",
                 tick_id, session->access_level );
@@ -195,7 +195,7 @@
                                            "SET date_modif=NOW()" );
      }
     else if ( ! (Json_has_member ( request, "horloge_id" ) ) )                                      /* Ajout dans une horloge */
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -252,6 +252,6 @@
 
     if (SQL_Write (chaine)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
     else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

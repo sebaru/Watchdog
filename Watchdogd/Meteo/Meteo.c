@@ -105,7 +105,7 @@
           Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
                    "%s: %s ->  sunset at %02d:%02d", __func__, city_name, heure, minute );
         }
-       json_node_unref ( response );
+       Json_node_unref ( response );
        SubProcess_send_comm_to_master_new ( module, TRUE );
      }
     g_object_unref( soup_msg );
@@ -167,7 +167,7 @@
     else
      { JsonNode *response = Http_Response_Msg_to_Json ( soup_msg );
        Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module );
-       json_node_unref ( response );
+       Json_node_unref ( response );
      }
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
@@ -229,22 +229,22 @@
        while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
         { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
           if ( !strcasecmp( zmq_tag, "test" ) ) vars->last_request = Partage->top - METEO_POLLING;
-          json_node_unref(request);
+          Json_node_unref(request);
         }
      }
 
     for (gint cpt=0; cpt<14; cpt++)
-     { json_node_unref ( vars->Temp_min[cpt] );
-       json_node_unref ( vars->Temp_max[cpt] );
-       json_node_unref ( vars->Proba_pluie[cpt] );
-       json_node_unref ( vars->Proba_gel[cpt] );
-       json_node_unref ( vars->Proba_brouillard[cpt] );
-       json_node_unref ( vars->Proba_vent_70[cpt] );
-       json_node_unref ( vars->Proba_vent_100[cpt] );
-       json_node_unref ( vars->Proba_vent_orage[cpt] );
-       json_node_unref ( vars->Vent_10m[cpt] );
-       json_node_unref ( vars->Direction_vent[cpt] );
-       json_node_unref ( vars->Rafale_vent[cpt] );
+     { Json_node_unref ( vars->Temp_min[cpt] );
+       Json_node_unref ( vars->Temp_max[cpt] );
+       Json_node_unref ( vars->Proba_pluie[cpt] );
+       Json_node_unref ( vars->Proba_gel[cpt] );
+       Json_node_unref ( vars->Proba_brouillard[cpt] );
+       Json_node_unref ( vars->Proba_vent_70[cpt] );
+       Json_node_unref ( vars->Proba_vent_100[cpt] );
+       Json_node_unref ( vars->Proba_vent_orage[cpt] );
+       Json_node_unref ( vars->Vent_10m[cpt] );
+       Json_node_unref ( vars->Direction_vent[cpt] );
+       Json_node_unref ( vars->Rafale_vent[cpt] );
      }
 
     SubProcess_end(module);

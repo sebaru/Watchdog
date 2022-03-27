@@ -88,7 +88,7 @@
 /******************************************************************************************************************************/
  void Http_Send_json_response ( SoupMessage *msg, JsonNode *RootNode )
   { gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -228,7 +228,7 @@
     Partage->com_http.num_session = 0;
     if (Json_has_member ( RootNode, "sessions" ))
      { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
 /* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
@@ -362,7 +362,7 @@
     Json_node_add_bool   ( RootNode, "Thread_run", Partage->com_msrv.Thread_run );
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -411,7 +411,7 @@
             Json_has_member ( request, "useragent" ) && Json_has_member ( request, "appareil" )
            )
        )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -419,7 +419,7 @@
     name = Normaliser_chaine ( Json_get_string ( request, "username" ) );                    /* Formatage correct des chaines */
     if (!name)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
-       json_node_unref(request);
+       Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -449,7 +449,7 @@
        Libere_DB_SQL( &db );
        Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "%s: User '%s' not found in DB", __func__, Json_get_string ( request, "username" ) );
-       json_node_unref(request);
+       Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
@@ -463,7 +463,7 @@
                  __func__, db->row[0] );
        Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       json_node_unref(request);
+       Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
@@ -473,7 +473,7 @@
                  __func__, db->row[0], db->row[1] );
        Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       json_node_unref(request);
+       Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
@@ -483,7 +483,7 @@
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
        Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Session creation Error", __func__ );
-       json_node_unref(request);
+       Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -540,7 +540,7 @@
     Json_node_add_string ( RootNode, "wtd_session", session->wtd_session );
     Json_node_add_string ( RootNode, "message", "Welcome back Home !" );
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -594,7 +594,7 @@
 
     if (SQL_Select_to_json_node ( RootNode, NULL, "SELECT COUNT(*) AS recordsTotal FROM dictionnaire LIMIT %d", length )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        g_free(search);
        return;
      }
@@ -604,7 +604,7 @@
                                   "LIMIT %d OFFSET %d",
                                   search, search, search, length, start )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        g_free(search);
        return;
      }
@@ -614,14 +614,14 @@
                                   "LIMIT %d OFFSET %d",
                                   search, search, search, length, start )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        g_free(search);
        return;
      }
     g_free(search);
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -830,7 +830,7 @@
           if (pulse)
            { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
              Http_ws_send_to_all ( pulse );
-             json_node_unref(pulse);
+             Json_node_unref(pulse);
            }
           pthread_mutex_lock( &Partage->com_http.synchro );
           GSList *liste = Partage->com_http.liste_http_clients;

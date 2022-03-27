@@ -62,7 +62,7 @@
     else SQL_Select_to_json_node ( RootNode, "Process", "SELECT * FROM processes ORDER BY instance, name" ); /* Contenu du Status */
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -120,7 +120,7 @@
 
     Json_node_foreach_array_element ( RootNode, "config", Http_process_add_comm, NULL );
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -141,7 +141,7 @@
      }
 
     if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -154,11 +154,11 @@
        SQL_Write_new ( "DELETE FROM %s WHERE tech_id='%s'", Json_get_string( RootNode, "name" ), thread_tech_id );
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: subprocess '%s/%s' deleted.", __func__, uuid, thread_tech_id );
        g_free(thread_tech_id);
-       json_node_unref(RootNode);
+       Json_node_unref(RootNode);
      }
     g_free(uuid);
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -177,14 +177,14 @@
      }
 
     if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "thread_tech_id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Memory Error");
        return;
      }
@@ -199,7 +199,7 @@
        if ( ! strcasecmp( Json_get_string ( RootNode, "name" ), lib->name ) ) break;
        liste = g_slist_next(liste);
      }
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 
     if (liste && !lib->Admin_config)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -214,7 +214,7 @@
     else soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Process not found" );
 
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_process_status: Donne la config d'un process                                                                  */
@@ -246,7 +246,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "debug" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -256,7 +256,7 @@
 
     gchar *uuid = Normaliser_chaine ( uuid_src );
     if (!uuid)
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -270,11 +270,11 @@
        Json_node_add_string ( RootNode, "uuid", uuid );
        Json_node_add_bool   ( RootNode, "debug", debug );
        /*Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );*/
-       json_node_unref(RootNode);
+       Json_node_unref(RootNode);
      }
     g_free(uuid);
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -295,7 +295,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "status" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -305,7 +305,7 @@
 
     gchar *uuid = Normaliser_chaine ( uuid_src );
     if (!uuid)
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -318,11 +318,11 @@
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS_RELOAD" );
        Json_node_add_string ( RootNode, "uuid", uuid );
        /*Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );*/
-       json_node_unref(RootNode);
+       Json_node_unref(RootNode);
      }
     g_free(uuid);
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -343,7 +343,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "zmq_tag" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -417,7 +417,7 @@
      }
 end:
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -438,7 +438,7 @@ end:
     if (!request) return;
 
     if ( ! Json_has_member ( request, "uuid" ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -446,7 +446,7 @@ end:
     gchar *uuid_src = Json_get_string ( request,"uuid" );
     gchar *uuid     = Normaliser_chaine ( uuid_src );
     if (!uuid)
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -458,11 +458,11 @@ end:
                  uuid, Json_get_string ( RootNode, "instance" ), Json_get_string ( RootNode, "name" ) );
        Json_node_add_string ( RootNode, "zmq_tag", "PROCESS_RELOAD" );
        /*Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );*/
-       json_node_unref(RootNode);
+       Json_node_unref(RootNode);
      }
     g_free(uuid);
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

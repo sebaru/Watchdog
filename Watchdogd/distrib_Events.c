@@ -57,7 +57,7 @@
        Json_node_add_string ( RootNode, "zmq_tag", "SET_DO" );
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", RootNode );
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", RootNode );
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
 
@@ -78,7 +78,7 @@ suite_AO:
        Json_node_add_string ( RootNode, "zmq_tag", "SET_AO" );
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", RootNode );
        Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", RootNode );
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
   }

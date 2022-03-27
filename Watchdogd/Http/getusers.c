@@ -94,7 +94,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "username" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -181,7 +181,7 @@
          { soup_message_set_status ( msg, SOUP_STATUS_OK ); }
     else { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_mnemos_set: Modifie la config d'un mnemonique                                                                 */
@@ -204,21 +204,21 @@
 
     if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "email" ) &&
             Json_has_member ( request, "password" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gchar *salt = Http_user_generate_salt ();
     if (!salt)
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Salt Error");
        return;
      }
 
     gchar *hash = Http_user_generate_hash ( salt, Json_get_string ( request, "password" ) );
     if (!hash)
-     { json_node_unref(request);
+     { Json_node_unref(request);
        g_free(salt);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Hash Error");
        return;
@@ -239,7 +239,7 @@
     g_free(username);
     g_free(email);
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_mnemos_set: Modifie la config d'un mnemonique                                                                 */
@@ -259,7 +259,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "username" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -274,7 +274,7 @@
     else { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
     g_free(username);
 /*************************************************** Envoi au client **********************************************************/
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_users_kill: Kill une session utilisateur                                                                      */
@@ -295,7 +295,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "id" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -318,7 +318,7 @@
        liste = g_slist_next ( liste );
      }
 
-    json_node_unref (request);
+    Json_node_unref (request);
     if (!liste) soup_message_set_status_full (msg, SOUP_STATUS_NO_CONTENT, "Session not found" );
   }
 /******************************************************************************************************************************/
@@ -350,7 +350,7 @@
                              session->access_level, session->access_level, session->username );
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -399,7 +399,7 @@
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -422,12 +422,12 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "username" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
@@ -443,7 +443,7 @@
     g_free(username);
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );

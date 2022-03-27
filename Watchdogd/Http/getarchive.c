@@ -67,7 +67,7 @@
     Libere_DB_SQL ( &db );
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -99,7 +99,7 @@
     Json_node_add_int ( RootNode, "nbr_archive_deleted", nbr );
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -139,7 +139,7 @@
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -163,19 +163,19 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "table_name" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     if (!g_str_has_prefix ( Json_get_string( request, "table_name" ), "histo_bit_" ))
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvaise cible");
        return;
      }
 
     gchar *table_name  = Normaliser_chaine ( Json_get_string( request, "table_name" ) );
-    json_node_unref(request);
+    Json_node_unref(request);
 
     g_snprintf( requete, sizeof(requete), "DROP TABLE %s", table_name );
     if (SQL_Arch_Write (requete)) { soup_message_set_status (msg, SOUP_STATUS_OK); }
@@ -237,7 +237,7 @@
        Modifier_configDB_int ( "archive", "retention", Partage->com_arch.retention );
      }
 
-    json_node_unref(request);
+    Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -272,7 +272,7 @@
     Json_node_add_int    ( RootNode, "retention",   Partage->com_arch.retention);
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -305,7 +305,7 @@
                             "AND table_name like 'histo_bit_%%'", Partage->com_arch.archdb_database );
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -331,7 +331,7 @@
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "period" ) && Json_has_member ( request, "courbes" ) ) )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -348,7 +348,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (!RootNode)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
@@ -356,7 +356,7 @@
     requete = g_try_malloc(taille_requete);
     if (!requete)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
@@ -393,16 +393,16 @@
     if (SQL_Arch_to_json_node ( RootNode, "valeurs", requete ) == FALSE)
      { g_free(requete);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error");
-       json_node_unref(request);
-       json_node_unref(RootNode);
+       Json_node_unref(request);
+       Json_node_unref(RootNode);
        return;
      }
 
     g_free(requete);
-    json_node_unref(request);
+    Json_node_unref(request);
 
     gchar *buf = Json_node_to_string (RootNode);
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
