@@ -112,8 +112,9 @@
           g_snprintf( description, sizeof(description), "%s", buffer + strlen(name) + 10 );
           description [ strlen(description) - 1 ] = 0; /* supprime les " du début/fin */
           Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Reading GET UPSDESC %s", __func__, thread_tech_id, description );
-          SQL_Write_new ( "UPDATE %s SET description='%s' WHERE thread_tech_id='%s'",
-                          module->lib->name, description, thread_tech_id );
+#warning a modifier en envoie API
+          /*SQL_Write_new ( "UPDATE %s SET description='%s' WHERE thread_tech_id='%s'",
+                          module->lib->name, description, thread_tech_id );*/
         }
      }
 /**************************************************** USERNAME ****************************************************************/
@@ -399,7 +400,7 @@
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "START_QUICK_BAT", "Active un test de décharge léger" );
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
 
-    while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
+    while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { usleep(100000);
        sched_yield();
 
