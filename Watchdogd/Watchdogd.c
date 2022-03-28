@@ -112,10 +112,14 @@
  static gint MSRV_Comparer_clef_local ( JsonNode *node1, JsonNode *node2 )
   { gchar *tech_id_1 = Json_get_string ( node1, "tech_id" );
     gchar *tech_id_2 = Json_get_string ( node2, "tech_id" );
+    if (!tech_id_1) return(-1);
+    if (!tech_id_2) return(-1);
     gint result = strcasecmp ( tech_id_1, tech_id_2 );
     if (result) return(result);
     gchar *acronyme_1 = Json_get_string ( node1, "acronyme" );
     gchar *acronyme_2 = Json_get_string ( node2, "acronyme" );
+    if (!acronyme_1) return(-1);
+    if (!acronyme_2) return(-1);
     return( strcasecmp ( acronyme_1, acronyme_2 ) );
   }
 /******************************************************************************************************************************/

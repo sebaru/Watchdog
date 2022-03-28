@@ -292,13 +292,15 @@ end:
        while (liste)
         { struct DLS_DO *dout = liste->data;
           JsonNode *element = Json_node_create();
-          Json_node_add_string( element, "tech_id", dout->tech_id );
+          Json_node_add_string( element, "tech_id",  dout->tech_id );
           Json_node_add_string( element, "acronyme", dout->acronyme );
           JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, element );
           if (map)
            { gchar *local_thread_tech_id  = Json_get_string ( map, "thread_tech_id" );
              if (!strcasecmp ( local_thread_tech_id, thread_tech_id ) )
-              { Json_node_add_bool ( element, "etat", dout->etat );
+              { Json_node_add_string ( element, "thread_tech_id",  thread_tech_id );
+                Json_node_add_string ( element, "thread_acronyme", Json_get_string ( map, "thread_acronyme" ) );
+                Json_node_add_bool   ( element, "etat", dout->etat );
                 Json_array_add_element ( output_array, element );
               }
              else Json_node_unref ( element );
