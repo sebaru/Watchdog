@@ -51,6 +51,7 @@
     void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
                                                                                           /* Traitement des message du master */
     void (*Run_subprocess_message)( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message );
+    void (*Run_subprocess_do_init)( JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
   };
 
  struct PROCESS

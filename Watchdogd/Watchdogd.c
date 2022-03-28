@@ -578,11 +578,11 @@
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
-       if (Partage->com_msrv.last_master_ping + 1200 < Partage->top)
+       /*if (Partage->com_msrv.last_master_ping + 1200 < Partage->top)
         { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Master is not responding. Restart Slave in 10s.", __func__ );
           Partage->com_msrv.Thread_run = FALSE;
           sleep(10);
-        }
+        }*/
        usleep(1000);
        sched_yield();
      }

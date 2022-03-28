@@ -33,14 +33,14 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Http_Post_to_local_BUS ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *RootNode )
+ JsonNode *Http_Post_to_local_BUS ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *RootNode )
   { gchar query[256];
-    gboolean success = FALSE;
+    JsonNode *retour = NULL;
 
-    if (!module) return(FALSE);
+    if (!module) return(NULL);
     if (!RootNode)
      { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: RootNode is null. Cannot send empty json", __func__ );
-       return(FALSE);
+       return(NULL);
      }
 
     Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
@@ -71,11 +71,11 @@
     Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
     if (status_code!=200)
      { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
-    else { success = TRUE; }
+    else { retour = Http_Response_Msg_to_Json ( soup_msg ); }
     g_object_unref( soup_msg );
 end:
     soup_session_abort ( connexion );
-    return(success);
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_DI: Envoie le bit DI au master                                                                      */
@@ -177,6 +177,7 @@ end:
 
     gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
     gchar *bus_tag = Json_get_string ( request, "bus_tag" );
+/************************************ Positionne un watchdog ******************************************************************/
     if ( !strcasecmp( bus_tag, "SET_WATCHDOG") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
               Json_has_member ( request, "consigne" ) ) )
@@ -283,6 +284,30 @@ end:
                           thread_tech_id, thread_acronyme, tech_id, acronyme, libelle );
           g_free(libelle);
         }
+     }
+/************************************ Réaction sur GET_DO *********************************************************************/
+    else if ( !strcasecmp( bus_tag, "GET_DO") )
+     { JsonNode *Response = Json_node_create();
+       JsonArray *output_array = Json_node_add_array ( Response, "douts" );
+       GSList *liste = Partage->Dls_data_DO;
+       while (liste)
+        { struct DLS_DO *dout = liste->data;
+          JsonNode *element = Json_node_create();
+          Json_node_add_string( element, "tech_id", dout->tech_id );
+          Json_node_add_string( element, "acronyme", dout->acronyme );
+          JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, element );
+          if (map)
+           { gchar *local_thread_tech_id  = Json_get_string ( map, "thread_tech_id" );
+             if (!strcasecmp ( local_thread_tech_id, thread_tech_id ) )
+              { Json_node_add_bool ( element, "etat", dout->etat );
+                Json_array_add_element ( output_array, element );
+              }
+             else Json_node_unref ( element );
+             Json_node_unref ( map );
+           } else Json_node_unref ( element );
+          liste = g_slist_next ( liste );
+        }
+       Http_Send_json_response ( msg, Response );
      }
 
     Json_node_unref(request);

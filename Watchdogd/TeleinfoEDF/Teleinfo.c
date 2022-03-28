@@ -97,6 +97,21 @@
   { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: recu bus_tag '%s' from master", __func__, bus_tag );
   }
 /******************************************************************************************************************************/
+/* Run_subprocess_do_init: Prend la reponse du master pour positionner les outputs à l'init du subprocess                     */
+/* Entrée: les parametres d'une JsonArrayFonction                                                                             */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Run_subprocess_do_init ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+  { struct SUBPROCESS *module = user_data;
+    if (!Json_has_member ( element, "thread_tech_id" )) return;
+    gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
+    gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+    gboolean etat          = Json_get_bool   ( element, "etat" );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO,
+              "%s: setting '%s:%s' to %d", __func__, thread_tech_id, thread_acronyme, etat );
+    /**/
+  }
+/******************************************************************************************************************************/
 /* Run_subprocess: Prend en charge un des sous process du thread                                                              */
 /* Entrée: la structure SUBPROCESS associée                                                                                   */
 /* Sortie: Niet                                                                                                               */

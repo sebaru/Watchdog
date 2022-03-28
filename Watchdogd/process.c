@@ -239,6 +239,13 @@
      }
     else
      { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Subprocess '%s' is UP", __func__, thread_tech_id ); }
+
+/******************************************************* Récupère les Outputs *************************************************/
+    JsonNode *result = Http_Post_to_local_BUS ( module, "GET_DO", NULL );
+    if (result && Json_has_member ( result, "douts" ) && module->Run_subprocess_do_init )
+     { Json_node_foreach_array_element ( result, "douts", module->Run_subprocess_do_init, module ); }
+    Json_node_unref ( result );
+
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
@@ -560,6 +567,7 @@
      }
 
     module->Run_subprocess_message = dlsym( module->dl_handle, "Run_subprocess_message" );/* Reception d'un message depuis le master */
+    module->Run_subprocess_do_init = dlsym( module->dl_handle, "Run_subprocess_do_init" );/* Reception de l'init output */
 
     JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
