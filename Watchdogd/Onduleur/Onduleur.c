@@ -40,31 +40,6 @@
  #include "Onduleur.h"
 
 /******************************************************************************************************************************/
-/* Creer_DB: Creer la table associée au Process                                                                               */
-/* Entrée: le pointeur sur le PROCESS                                                                                         */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Ups_Creer_DB ( struct PROCESS *lib )
-  { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-             "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
-
-    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `ups` ("
-                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`enable` TINYINT(1) NOT NULL DEFAULT '0',"
-                    "`host` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                    "`name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                    "`admin_username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                    "`admin_password` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
-
-    Process_set_database_version ( lib, 1 );
-  }
-/******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du ups                                                                                         */
 /* Entrée: un id                                                                                                              */
 /* Sortie: néant                                                                                                              */
@@ -91,7 +66,7 @@
     Http_Post_to_local_BUS_AI ( module, vars->Output_hz, 0.0, FALSE );
     Http_Post_to_local_BUS_AI ( module, vars->Output_voltage, 0.0, FALSE );
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s disconnected (host='%s')", __func__, thread_tech_id, host );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s disconnected (host='%s')", __func__, thread_tech_id, host );
     SubProcess_send_comm_to_master_new ( module, FALSE );
   }
 /******************************************************************************************************************************/
@@ -111,24 +86,24 @@
     gchar *admin_password = Json_get_string ( module->config, "admin_password" );
 
     if ( (connexion = upscli_connect( &vars->upsconn, host, UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: %s: connexion refused by ups (host '%s' -> %s)", __func__, thread_tech_id, host,
                  (char *)upscli_strerror(&vars->upsconn) );
        return(FALSE);
      }
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE,
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
               "%s: %s connected (host='%s')", __func__, thread_tech_id, host );
 /********************************************************* UPSDESC ************************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", name );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: %s: Sending GET UPSDESC failed (%s)", __func__, thread_tech_id,
                 (char *)upscli_strerror(&vars->upsconn) );
      }
     else
      { if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+        { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                    "%s: %s: Reading GET UPSDESC failed (%s)", __func__, thread_tech_id,
                    (char *)upscli_strerror(&vars->upsconn) );
         }
@@ -136,7 +111,7 @@
         { gchar description[128];
           g_snprintf( description, sizeof(description), "%s", buffer + strlen(name) + 10 );
           description [ strlen(description) - 1 ] = 0; /* supprime les " du début/fin */
-          Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: Reading GET UPSDESC %s", __func__, thread_tech_id, description );
+          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Reading GET UPSDESC %s", __func__, thread_tech_id, description );
           SQL_Write_new ( "UPDATE %s SET description='%s' WHERE thread_tech_id='%s'",
                           module->lib->name, description, thread_tech_id );
         }
@@ -144,18 +119,18 @@
 /**************************************************** USERNAME ****************************************************************/
     g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", admin_username );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: %s: Sending USERNAME failed %s", __func__, thread_tech_id,
                 (char *)upscli_strerror(&vars->upsconn) );
      }
     else
      { if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+        { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                    "%s: %s: Reading USERNAME failed %s", __func__, thread_tech_id,
                    (char *)upscli_strerror(&vars->upsconn) );
         }
        else
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+        { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
                    "%s: %s: Reading USERNAME %s", __func__, thread_tech_id, buffer );
         }
      }
@@ -163,25 +138,25 @@
 /******************************************************* PASSWORD *************************************************************/
     g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", admin_password );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: %s: Sending PASSWORD failed %s", __func__, thread_tech_id,
                 (char *)upscli_strerror(&vars->upsconn) );
      }
     else
      { if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+        { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                    "%s: %s: Reading PASSWORD failed %s", __func__, thread_tech_id,
                    (char *)upscli_strerror(&vars->upsconn) );
         }
        else
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+        { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
                    "%s: %s: Reading PASSWORD %s", __func__, thread_tech_id, buffer );
         }
      }
 
     vars->date_next_connexion = 0;
     vars->started = TRUE;
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s up and running (host='%s')", __func__, thread_tech_id, host );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s up and running (host='%s')", __func__, thread_tech_id, host );
     SubProcess_send_comm_to_master_new ( module, TRUE );
     return(TRUE);
   }
@@ -200,9 +175,9 @@
     gchar *name    = Json_get_string ( module->config, "name" );
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", name, nom_cmd );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, thread_tech_id, buffer );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, thread_tech_id, buffer );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                  "%s: %s: Sending INSTCMD failed with error '%s' for '%s'", __func__, thread_tech_id,
                  (char *)upscli_strerror(&vars->upsconn), buffer );
        Deconnecter_UPS ( module );
@@ -210,13 +185,13 @@
      }
 
     if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: %s: Reading INSTCMD result failed (%s) error %s", __func__, thread_tech_id,
                  nom_cmd, (char *)upscli_strerror(&vars->upsconn) );
        Deconnecter_UPS ( module );
        return;
      }
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s' OK", __func__, thread_tech_id, nom_cmd );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s' OK", __func__, thread_tech_id, nom_cmd );
   }
 /******************************************************************************************************************************/
 /* Onduleur_get_var: Recupere une valeur de la variable en parametre                                                          */
@@ -233,7 +208,7 @@
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", name, nom_var );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: %s: Sending GET VAR failed (%s) error=%s", __func__, thread_tech_id,
                 buffer, (char *)upscli_strerror(&vars->upsconn) );
        Deconnecter_UPS ( module );
@@ -241,18 +216,18 @@
      }
 
     retour_read = upscli_readline( &vars->upsconn, buffer, sizeof(buffer) );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
              "%s: %s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", __func__, thread_tech_id,
               nom_var, retour_read, upscli_upserror(&vars->upsconn), buffer );
     if ( retour_read == -1 )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: %s: Reading GET VAR result failed (%s) error=%s", __func__, thread_tech_id,
                  nom_var, (char *)upscli_strerror(&vars->upsconn) );
        return(NULL);
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+     { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
                 "%s: %s: Reading GET VAR %s OK = %s", __func__, thread_tech_id, nom_var, buffer );
        return(buffer + 6 + strlen(name) + strlen(nom_var));
      }
@@ -261,7 +236,7 @@
      { return(NULL);                                                         /* Variable not supported... is not an error ... */
      }
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+    Info_new( Config.log, module->Thread_debug, LOG_WARNING,
              "%s: %s: Reading GET VAR %s Failed : error %s (buffer %s)", __func__, thread_tech_id,
               nom_var, (char *)upscli_strerror(&vars->upsconn), buffer );
     Deconnecter_UPS ( module );
@@ -325,6 +300,61 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Run_subprocess_message: Prend en charge un message recu du master                                                          */
+/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Run_subprocess_message ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message )
+  { gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': recu bus_tag '%s' from master", __func__, thread_tech_id, bus_tag );
+    pthread_mutex_lock ( &module->synchro );
+    if ( !strcasecmp( bus_tag, "SET_DO" ) )
+     { gchar *tech_id  = Json_get_string ( message, "thread_tech_id" );
+       gchar *acronyme = Json_get_string ( message, "thread_acronyme" );
+            if (!tech_id)
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque tech_id", __func__, thread_tech_id ); }
+       else if (!acronyme)
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque acronyme", __func__, thread_tech_id ); }
+       else if (!Json_has_member ( message, "etat" ))
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque etat", __func__, thread_tech_id ); }
+       else if (strcasecmp (tech_id, thread_tech_id))
+        { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': Pas pour nous", __func__, thread_tech_id ); }
+       else
+        { gboolean etat = Json_get_bool ( message, "etat" );
+          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Recu SET_DO from bus: %s:%s=%d",
+                    __func__, thread_tech_id, tech_id, acronyme, etat );
+
+          if (etat)
+           { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
+             if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( module, "load.on" );
+             if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( module, "outlet.1.load.off" );
+             if (!strcasecmp(acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( module, "outlet.1.load.on" );
+             if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( module, "outlet.2.load.off" );
+             if (!strcasecmp(acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( module, "outlet.2.load.on" );
+             if (!strcasecmp(acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( module, "test.battery.start.deep" );
+             if (!strcasecmp(acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( module, "test.battery.start.quick" );
+             if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( module, "test.battery.stop" );
+           }
+        }
+     }
+    pthread_mutex_unlock ( &module->synchro );
+  }
+/******************************************************************************************************************************/
+/* Run_subprocess_do_init: Prend la reponse du master pour positionner les outputs à l'init du subprocess                     */
+/* Entrée: les parametres d'une JsonArrayFonction                                                                             */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Run_subprocess_do_init ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+  { struct SUBPROCESS *module = user_data;
+    if (!Json_has_member ( element, "thread_tech_id" )) return;
+    gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
+    gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
+    gboolean etat          = Json_get_bool   ( element, "etat" );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO,
+              "%s: '%s': setting '%s:%s' to %d", __func__, thread_tech_id, thread_acronyme, etat );
+    /**/
+  }
+/******************************************************************************************************************************/
 /* Run_subprocess: Prend en charge un des sous process du thread                                                              */
 /* Entrée: la structure SUBPROCESS associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
@@ -336,7 +366,7 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (Json_get_bool ( module->config, "enable" ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, thread_tech_id );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, thread_tech_id );
        SubProcess_end ( module );
      }
 
@@ -375,16 +405,17 @@
 
        SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /********************************************* Début de l'interrogation du ups ************************************************/
+       pthread_mutex_lock ( &module->synchro );
        if ( Partage->top >= vars->date_next_connexion )                               /* Si attente retente, on change de ups */
         { if ( ! vars->started )                                                                 /* Communication OK ou non ? */
            { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: %s: Module DOWN", __func__, thread_tech_id );
+              { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: %s: Module DOWN", __func__, thread_tech_id );
                 Deconnecter_UPS ( module );                                               /* Sur erreur, on deconnecte le ups */
                 vars->date_next_connexion = Partage->top + UPS_RETRY;
               }
            }
           else
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: Interrogation ups", __func__, thread_tech_id );
+           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Interrogation ups", __func__, thread_tech_id );
              if ( Interroger_ups ( module ) == FALSE )
               { Deconnecter_UPS ( module );
                 vars->date_next_connexion = Partage->top + UPS_RETRY;                            /* On retente dans longtemps */
@@ -392,41 +423,7 @@
              else vars->date_next_connexion = Partage->top + UPS_POLLING;                    /* Update toutes les xx secondes */
           }
         }
-/******************************************************************************************************************************/
-       JsonNode *request;
-       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
-        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if ( !strcasecmp( zmq_tag, "SET_DO" ) )
-           { gchar *tech_id  = Json_get_string ( request, "tech_id" );
-             gchar *acronyme = Json_get_string ( request, "acronyme" );
-             if (strcasecmp (tech_id, thread_tech_id))
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Pas pour nous", __func__, thread_tech_id ); }
-             else if (!tech_id)
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque tech_id", __func__, thread_tech_id ); }
-             else if (!acronyme)
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque acronyme", __func__, thread_tech_id ); }
-             else if (!Json_has_member ( request, "etat" ))
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque etat", __func__, thread_tech_id ); }
-             else
-              { gboolean etat = Json_get_bool ( request, "etat" );
-                Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Recu SET_DO from bus: %s:%s=%d",
-                          __func__, thread_tech_id, tech_id, acronyme, etat );
-
-                if (etat)
-                 { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
-                   if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( module, "load.on" );
-                   if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( module, "outlet.1.load.off" );
-                   if (!strcasecmp(acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( module, "outlet.1.load.on" );
-                   if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( module, "outlet.2.load.off" );
-                   if (!strcasecmp(acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( module, "outlet.2.load.on" );
-                   if (!strcasecmp(acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( module, "test.battery.start.deep" );
-                   if (!strcasecmp(acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( module, "test.battery.start.quick" );
-                   if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( module, "test.battery.stop" );
-                 }
-              }
-           }
-          Json_node_unref (request);
-        }
+       pthread_mutex_unlock ( &module->synchro );
      }
 
     Json_node_unref ( vars->Load );
@@ -449,32 +446,5 @@
     Json_node_unref ( vars->Ups_alarm );
 
     SubProcess_end(module);
-  }
-/******************************************************************************************************************************/
-/* Run_process: Run du Process                                                                                                */
-/* Entrée: la structure PROCESS associée                                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_process ( struct PROCESS *lib )
-  {
-reload:
-    Ups_Creer_DB ( lib );                                                                     /* Création de la DB du thread */
-    Thread_init ( "ups", "I/O", lib, WTD_VERSION, "Manage UPS Module" );
-
-    lib->config = Json_node_create();
-    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
-
-    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
-    while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
-    Process_Unload_all_subprocess ( lib );
-
-    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
-       lib->Thread_reload = FALSE;
-       goto reload;
-     }
-
-    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

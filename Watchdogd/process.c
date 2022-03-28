@@ -518,6 +518,7 @@
     while(Partage->com_msrv.Subprocess)                                                     /* Liberation mémoire des modules */
      { struct SUBPROCESS *module = Partage->com_msrv.Subprocess->data;
        if (module->dl_handle) dlclose( module->dl_handle );
+       pthread_mutex_destroy( &module->synchro );
        Partage->com_msrv.Subprocess = g_slist_remove( Partage->com_msrv.Subprocess, module );
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': process unloaded", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
@@ -605,6 +606,11 @@
        g_free(module);
        return;
      }
+
+    pthread_mutexattr_t param;                                                                /* Creation du mutex de synchro */
+    pthread_mutexattr_init( &param );                                                         /* Creation du mutex de synchro */
+    pthread_mutexattr_setpshared( &param, PTHREAD_PROCESS_SHARED );
+    pthread_mutex_init( &module->synchro, &param );
 
     if ( pthread_create( &module->TID, &attr, (void *)module->Run_subprocess, module ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': pthread_create failed. Unloading.", __func__, thread_tech_id );

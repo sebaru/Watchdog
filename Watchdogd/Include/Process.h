@@ -36,6 +36,7 @@
 
  struct SUBPROCESS
   { pthread_t TID;                                                                                   /* Identifiant du thread */
+    pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */

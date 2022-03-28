@@ -94,7 +94,8 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_subprocess_message ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message )
-  { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: recu bus_tag '%s' from master", __func__, bus_tag );
+  { gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': recu bus_tag '%s' from master", __func__, thread_tech_id, bus_tag );
   }
 /******************************************************************************************************************************/
 /* Run_subprocess_do_init: Prend la reponse du master pour positionner les outputs à l'init du subprocess                     */
@@ -108,8 +109,10 @@
     gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
     gboolean etat          = Json_get_bool   ( element, "etat" );
     Info_new( Config.log, module->Thread_debug, LOG_INFO,
-              "%s: setting '%s:%s' to %d", __func__, thread_tech_id, thread_acronyme, etat );
+              "%s: '%s': setting '%s:%s' to %d", __func__, thread_tech_id, thread_acronyme, etat );
+    pthread_mutex_lock ( &module->synchro );
     /**/
+    pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
 /* Run_subprocess: Prend en charge un des sous process du thread                                                              */
