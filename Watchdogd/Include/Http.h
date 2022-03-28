@@ -91,6 +91,7 @@
  extern struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupMessage *msg );
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level );
+ extern void Http_Formater_cadran( struct HTTP_CADRAN *cadran );
  extern void Run_HTTP ( void );
  extern JsonNode *Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres );
@@ -263,7 +264,8 @@
  extern void Http_Send_json_response ( SoupMessage *msg, JsonNode *RootNode );
  extern void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client );
  extern void Http_ws_send_to_all ( JsonNode *node );
- extern void Http_Formater_cadran( struct HTTP_CADRAN *cadran );
+ extern void Http_ws_send_json_to_slave ( struct HTTP_WS_SESSION *slave, JsonNode *node );
+ extern void Http_Send_ping_to_slaves ( void );
  extern void Audit_log ( struct HTTP_CLIENT_SESSION *session, gchar *format, ... );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

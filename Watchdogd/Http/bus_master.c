@@ -158,6 +158,35 @@
     pthread_mutex_unlock( &Partage->com_http.synchro );
   }
 /******************************************************************************************************************************/
+/* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
+/* Entrée: des infos sur le paquet à envoyer                                                                                  */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_ws_send_json_to_slave ( struct HTTP_WS_SESSION *slave, JsonNode *RootNode )
+  { gchar *buffer = Json_node_to_string ( RootNode );
+    GBytes *gbytes = g_bytes_new_take ( buffer, strlen(buffer) );
+    soup_websocket_connection_send_message ( slave->connexion, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
+    g_bytes_unref( gbytes );
+  }
+/******************************************************************************************************************************/
+/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_Send_ping_to_slaves ( void )
+  { pthread_mutex_lock( &Partage->com_http.synchro );
+    GSList *liste = Partage->com_http.Slaves;
+    JsonNode *RootNode=Json_node_create();
+    Json_node_add_string ( RootNode, "bus_tag", "PING" );
+    while ( liste )
+     { struct HTTP_WS_SESSION *slave = liste->data;
+       Http_ws_send_json_to_slave ( slave, RootNode );
+       liste = g_slist_next( liste );
+     }
+    Json_node_unref ( RootNode );
+    pthread_mutex_unlock( &Partage->com_http.synchro );
+  }
+/******************************************************************************************************************************/
 /* Http_ws_destroy_session: Supprime une session WS                                                                           */
 /* Entrée: la WS                                                                                                              */
 /* Sortie: Niet                                                                                                               */

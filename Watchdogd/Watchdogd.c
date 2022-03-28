@@ -465,12 +465,7 @@
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
         { static gpointer bit_io_comm = NULL;
-          JsonNode *RootNode = Json_node_create();
-          if (RootNode)
-           { Json_node_add_string ( RootNode, "zmq_tag", "PING" );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), Config.master_hostname, RootNode );
-             Json_node_unref(RootNode);
-           }
+          Http_Send_ping_to_slaves();
           Dls_data_set_WATCHDOG ( NULL, g_get_host_name(), "IO_COMM", &bit_io_comm, 900 );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
