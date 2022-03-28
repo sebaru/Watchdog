@@ -164,10 +164,12 @@
   { struct SUBPROCESS *module = user_data;
     g_object_unref(module->Master_websocket);
     module->Master_websocket = NULL;
+    Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: WebSocket Close. Reboot Needed!", __func__ );
+    /* Partage->com_msrv.Thread_run = FALSE; */
   }
  static void SubProcess_ws_on_master_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
   { struct SUBPROCESS *module = user_data;
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
   }
 /******************************************************************************************************************************/
 /* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
