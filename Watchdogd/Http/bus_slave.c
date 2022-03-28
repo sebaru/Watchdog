@@ -36,12 +36,10 @@
  JsonNode *Http_Post_to_local_BUS ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *RootNode )
   { gchar query[256];
     JsonNode *retour = NULL;
+    gboolean free_root_node = FALSE;
 
     if (!module) return(NULL);
-    if (!RootNode)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: RootNode is null. Cannot send empty json", __func__ );
-       return(NULL);
-     }
+    if (!RootNode) RootNode = Json_node_create();
 
     Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_string ( RootNode, "bus_tag", bus_tag );
@@ -75,6 +73,7 @@
     g_object_unref( soup_msg );
 end:
     soup_session_abort ( connexion );
+    if (free_root_node) Json_node_unref ( RootNode );
     return(retour);
   }
 /******************************************************************************************************************************/
