@@ -139,19 +139,20 @@
 
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
        return;
      }
 
     if (!Json_has_member ( response, "bus_tag" ))
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'bus_tag') !", __func__ );
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'bus_tag') !", __func__ );
        Json_node_unref(response);
        return;
      }
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, Json_get_string ( response, "bus_tag" ) );
+    gchar *bus_tag = Json_get_string ( response, "bus_tag" );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, bus_tag );
     if (module->Run_subprocess_message)                                             /* on passe le message au subprocess */
-     { module->Run_subprocess_message ( module, Json_get_string ( response, "bus_tag" ), response ); }
+     { module->Run_subprocess_message ( module, bus_tag, response ); }
     Json_node_unref(response);
   }
 /******************************************************************************************************************************/
