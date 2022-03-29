@@ -309,7 +309,7 @@ end:
           Json_node_add_string( element, "tech_id",  dout->tech_id );
           Json_node_add_string( element, "acronyme", dout->acronyme );
           JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, element );
-          if (map)
+          if (map && Json_has_member ( map, "thread_tech_id" ) && Json_has_member ( map, "thread_acronyme" ) )
            { gchar *local_thread_tech_id  = Json_get_string ( map, "thread_tech_id" );
              if (!strcasecmp ( local_thread_tech_id, thread_tech_id ) )
               { Json_node_add_string ( element, "thread_tech_id",  thread_tech_id );
@@ -324,7 +324,11 @@ end:
         }
        Http_Send_json_response ( msg, Response );
      }
-
+    else
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       Json_node_unref(request);
+       return;
+     }
     Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
