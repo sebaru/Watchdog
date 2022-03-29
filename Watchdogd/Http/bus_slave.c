@@ -225,7 +225,7 @@ end:
        gchar *acronyme        = thread_acronyme;
 
        JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
-       if (map)
+       if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
         { tech_id  = Json_get_string ( map, "tech_id" );
           acronyme = Json_get_string ( map, "acronyme" );
         }
@@ -278,7 +278,7 @@ end:
        gchar *acronyme        = thread_acronyme;
 
        JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
-       if (map)
+       if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
         { tech_id  = Json_get_string ( map, "tech_id" );
           acronyme = Json_get_string ( map, "acronyme" );
         }
