@@ -158,24 +158,38 @@ end:
        return;
      }
 
-    if ( ! ( Json_has_member ( request, "bus_tag" ) && Json_has_member ( request, "domain_uuid" ) &&
-             Json_has_member ( request, "thread_tech_id" )
-           )
-       )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+    if ( !Json_has_member ( request, "bus_tag" ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "bus_tag missing");
+       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s': bus_tag missing", __func__ );
        Json_node_unref(request);
        return;
      }
-
-    gchar *domain_uuid    = Json_get_string ( request, "domain_uuid" );
-    if ( strcasecmp( domain_uuid, Json_get_string ( Config.config, "domain_uuid" )  ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Wrong Domain UUID. Dropping.");
-       Json_node_unref(request);
-       return;
-     }
-
-    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
     gchar *bus_tag = Json_get_string ( request, "bus_tag" );
+
+    if ( !Json_has_member ( request, "thread_tech_id" ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing");
+       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for bus_tag %s", __func__, bus_tag );
+       Json_node_unref(request);
+       return;
+     }
+    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+
+
+    if ( !Json_has_member ( request, "domain_uuid" ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "domain_uuid missing");
+       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: domain_uuid missing for thread_tech_id %s", __func__, thread_tech_id );
+       Json_node_unref(request);
+       return;
+     }
+    gchar *domain_uuid    = Json_get_string ( request, "domain_uuid" );
+
+    if ( strcasecmp( domain_uuid, Json_get_string ( Config.config, "domain_uuid" )  ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Wrong Domain UUID.");
+       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: domain_uuid mismatch", __func__ );
+       Json_node_unref(request);
+       return;
+     }
+
 /************************************ Positionne un watchdog ******************************************************************/
     if ( !strcasecmp( bus_tag, "SET_WATCHDOG") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
