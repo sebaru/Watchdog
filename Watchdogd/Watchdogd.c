@@ -99,10 +99,14 @@
  static gint MSRV_Comparer_clef_thread ( JsonNode *node1, JsonNode *node2 )
   { gchar *ttech_id_1 = Json_get_string ( node1, "thread_tech_id" );
     gchar *ttech_id_2 = Json_get_string ( node2, "thread_tech_id" );
+    if (!ttech_id_1) return(-1);
+    if (!ttech_id_2) return(-1);
     gint result = strcasecmp ( ttech_id_1, ttech_id_2 );
     if (result) return(result);
     gchar *tacronyme_1 = Json_get_string ( node1, "thread_acronyme" );
     gchar *tacronyme_2 = Json_get_string ( node2, "thread_acronyme" );
+    if (!tacronyme_1) return(-1);
+    if (!tacronyme_2) return(-1);
     return( strcasecmp ( tacronyme_1, tacronyme_2 ) );
   }
 /******************************************************************************************************************************/
