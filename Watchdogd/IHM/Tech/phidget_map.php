@@ -19,13 +19,13 @@
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
                   <img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
-                       src="https://static.abls-habitat.fr/img/Entree.png" />Entrées TOR</a></li>
+                       src="https://static.abls-habitat.fr/img/entree.png" />Entrées TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabEntreeAna">
                   <img style="width: 30px" data-toggle="tooltip" title="Entrées ANA"
-                       src="https://static.abls-habitat.fr/img/Entree_Analogique.png" />Entrées ANA</a></li>
+                       src="https://static.abls-habitat.fr/img/entree_Analogique.png" />Entrées ANA</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieTor">
                   <img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
-                       src="https://static.abls-habitat.fr/img/Sortie.png" />Sorties TOR</a></li>
+                       src="https://static.abls-habitat.fr/img/sortie.png" />Sorties TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieAna">
                   <img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
                        src="https://static.abls-habitat.fr/img/Sortie_Analogique.png" />Sorties ANA</a></li>
