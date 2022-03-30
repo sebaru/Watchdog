@@ -117,29 +117,14 @@ end:
      }
   }
 /******************************************************************************************************************************/
-/* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */
-/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_Post_to_local_BUS_CDE ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme )
-  { if (!module) return;
-    JsonNode *body = Json_node_create ();
-    if(!body) return;
-    Json_node_add_string ( body, "tech_id",  tech_id );
-    Json_node_add_string ( body, "acronyme", acronyme );
-    Http_Post_to_local_BUS ( module, "SET_CDE", body );
-    Json_node_unref(body);
-  }
-/******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_WATCHDOG: Envoie le bit WATCHDOG au master selon le status                                          */
 /* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_WATCHDOG ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gint consigne )
+ void Http_Post_to_local_BUS_WATCHDOG ( struct SUBPROCESS *module, gchar *acronyme, gint consigne )
   { if (!module) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
-    Json_node_add_string ( body, "tech_id",  tech_id ); /* target */
     Json_node_add_string ( body, "acronyme", acronyme );
     Json_node_add_int    ( body, "consigne", consigne );
     Http_Post_to_local_BUS ( module, "SET_WATCHDOG", body );
@@ -192,8 +177,7 @@ end:
 
 /************************************ Positionne un watchdog ******************************************************************/
     if ( !strcasecmp( bus_tag, "SET_WATCHDOG") )
-     { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
-              Json_has_member ( request, "consigne" ) ) )
+     { if (! (Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "consigne" ) ) )
         { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_WATCHDOG: wrong parameters from '%s'", __func__, thread_tech_id );
           soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
           Json_node_unref(request);
@@ -201,10 +185,9 @@ end:
         }
 
        Info_new( Config.log, Config.log_bus, LOG_INFO,
-                 "%s: SET_WATCHDOG from '%s': '%s:%s'=%d", __func__, thread_tech_id,
-                 Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
-                 Json_get_int ( request, "consigne" ) );
-       Dls_data_set_WATCHDOG ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
+                 "%s: SET_WATCHDOG for: '%s:%s'=%d", __func__, thread_tech_id,
+                 Json_get_string ( request, "acronyme" ), Json_get_int ( request, "consigne" ) );
+       Dls_data_set_WATCHDOG ( NULL, thread_tech_id, Json_get_string ( request, "acronyme" ), NULL,
                                Json_get_int ( request, "consigne" ) );
      }
 /************************************ Positionne une valeur d'une Entrée Analogique *******************************************/
@@ -306,15 +289,13 @@ end:
        while (liste)
         { struct DLS_DO *dout = liste->data;
           JsonNode *element = Json_node_create();
-          Json_node_add_string( element, "tech_id",  dout->tech_id );
-          Json_node_add_string( element, "acronyme", dout->acronyme );
+          Dls_DO_to_json ( element, dout );
           JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, element );
           if (map && Json_has_member ( map, "thread_tech_id" ) && Json_has_member ( map, "thread_acronyme" ) )
            { gchar *local_thread_tech_id  = Json_get_string ( map, "thread_tech_id" );
              if (!strcasecmp ( local_thread_tech_id, thread_tech_id ) )
               { Json_node_add_string ( element, "thread_tech_id",  thread_tech_id );
                 Json_node_add_string ( element, "thread_acronyme", Json_get_string ( map, "thread_acronyme" ) );
-                Json_node_add_bool   ( element, "etat", dout->etat );
                 Json_array_add_element ( output_array, element );
               }
              else Json_node_unref ( element );

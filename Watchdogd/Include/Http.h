@@ -253,7 +253,7 @@
  extern void Http_Post_to_local_BUS_DI ( struct SUBPROCESS *module, JsonNode *di, gboolean etat );
  extern void Http_Post_to_local_BUS_AI ( struct SUBPROCESS *module, JsonNode *ai, gdouble valeur, gboolean in_range );
  extern void Http_Post_to_local_BUS_CDE ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme );
- extern void Http_Post_to_local_BUS_WATCHDOG ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme, gint consigne );
+ extern void Http_Post_to_local_BUS_WATCHDOG ( struct SUBPROCESS *module, gchar *acronyme, gint consigne );
 
  extern void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
                                                          SoupClientContext *client, gpointer user_data);

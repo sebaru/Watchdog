@@ -122,7 +122,7 @@
 /******************************************************************************************************************************/
  void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
-     { Http_Post_to_local_BUS_WATCHDOG ( module, Json_get_string ( module->config, "thread_tech_id" ), "IO_COMM", (etat ? 900 : 0) );
+     { Http_Post_to_local_BUS_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
        module->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
        module->comm_status = etat;
      }

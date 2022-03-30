@@ -248,47 +248,7 @@
                                Json_get_int ( request, "consigne" ) );
        return(TRUE);                                                                                                /* Traité */
      }
-/************************************ Positionne une valeur d'une Entrée Analogique *******************************************/
-    else if ( !strcasecmp( zmq_tag, "SET_AI") )
-     { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-              Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
-              Json_has_member ( request, "libelle" ) && Json_has_member ( request, "unite" )
-             )
-          )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_AI: wrong parameters from '%s'", __func__, zmq_src_tech_id );
-          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
-        }
 
-       gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
-       gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-       gchar *tech_id         = thread_tech_id;
-       gchar *acronyme        = thread_acronyme;
-
-       JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
-       if (map)
-        { tech_id  = Json_get_string ( map, "tech_id" );
-          acronyme = Json_get_string ( map, "acronyme" );
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: SET_AI from '%s' to '%s': '%s:%s/'%s:%s'=%f %s (range=%d)", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-                 Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
-       struct DLS_AI *ai = NULL;
-       Dls_data_set_AI ( tech_id, acronyme, (gpointer)&ai,
-                         Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-       if (Json_get_bool ( request, "first_send" ) == TRUE )
-        { g_snprintf ( ai->libelle, sizeof(ai->libelle), "%s", Json_get_string ( request, "libelle" ) );
-          g_snprintf ( ai->unite,   sizeof(ai->unite),   "%s", Json_get_string ( request, "unite" ) );
-          ai->archivage = Json_get_int ( request, "archivage" );
-          gchar *libelle = Normaliser_chaine ( ai->libelle );
-          SQL_Write_new ( "INSERT INTO mappings SET classe='AI', "
-                          "thread_tech_id = '%s', thread_acronyme = '%s', tech_id = '%s', acronyme = '%s', libelle='%s' "
-                          "ON DUPLICATE KEY UPDATE classe=VALUE(classe), libelle=VALUE(libelle) ",
-                          thread_tech_id, thread_acronyme, tech_id, acronyme, libelle );
-          g_free(libelle);
-        }
-       return(TRUE);                                                                                                /* Traité */
-     }
 /************************************ Réaction sur SET_CDE ********************************************************************/
     else if ( !strcasecmp( zmq_tag, "SET_CDE") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
@@ -302,43 +262,7 @@
        Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
        return(TRUE);                                                                                                /* Traité */
      }
-/************************************ Réaction sur SET_DI *********************************************************************/
-    else if ( !strcasecmp( zmq_tag, "SET_DI") )
-     { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-              Json_has_member ( request, "etat" )&& Json_has_member ( request, "libelle" )
-             )
-          )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_DI: wrong parameters from '%s'", __func__, zmq_src_tech_id );
-          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
-        }
 
-       gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
-       gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-       gchar *tech_id         = thread_tech_id;
-       gchar *acronyme        = thread_acronyme;
-
-       JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
-       if (map)
-        { tech_id  = Json_get_string ( map, "tech_id" );
-          acronyme = Json_get_string ( map, "acronyme" );
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: SET_DI from '%s' to '%s': '%s:%s/'%s:%s'=%d", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-                 Json_get_bool ( request, "etat" ) );
-       struct DLS_DI *di = NULL;
-       Dls_data_set_DI ( NULL, tech_id, acronyme, (gpointer)&di, Json_get_bool ( request, "etat" ) );
-       if (Json_get_bool ( request, "first_send" ) == TRUE )
-        { g_snprintf ( di->libelle, sizeof(di->libelle), "%s", Json_get_string ( request, "libelle" ) );
-          gchar *libelle = Normaliser_chaine ( di->libelle );
-          SQL_Write_new ( "INSERT INTO mappings SET classe='DI', "
-                          "thread_tech_id = '%s', thread_acronyme = '%s', tech_id = '%s', acronyme = '%s', libelle='%s' "
-                          "ON DUPLICATE KEY UPDATE classe=VALUE(classe), libelle=VALUE(libelle) ",
-                          thread_tech_id, thread_acronyme, tech_id, acronyme, libelle );
-          g_free(libelle);
-        }
-       return(TRUE);                                                                                                /* Traité */
-     }
     else if ( !strcasecmp( zmq_tag, "SET_SYN_VARS") )
      { Http_ws_send_to_all( request );
        return(TRUE);                                                                                                /* Traité */
