@@ -97,7 +97,9 @@
 /* Entrée: néant                                                                                                              */
 /******************************************************************************************************************************/
  static gint MSRV_Comparer_clef_thread ( JsonNode *node1, JsonNode *node2 )
-  { gchar *ttech_id_1 = Json_get_string ( node1, "thread_tech_id" );
+  { if (!node1) return(-1);
+    if (!node2) return(1);
+    gchar *ttech_id_1 = Json_get_string ( node1, "thread_tech_id" );
     gchar *ttech_id_2 = Json_get_string ( node2, "thread_tech_id" );
     if (!ttech_id_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ttech_id1 is NULL", __func__ ); return(-1); }
     if (!ttech_id_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ttech_id2 is NULL", __func__ ); return(-1); }
@@ -114,7 +116,9 @@
 /* Entrée: néant                                                                                                              */
 /******************************************************************************************************************************/
  static gint MSRV_Comparer_clef_local ( JsonNode *node1, JsonNode *node2 )
-  { gchar *tech_id_1 = Json_get_string ( node1, "tech_id" );
+  { if (!node1) return(-1);
+    if (!node2) return(1);
+    gchar *tech_id_1 = Json_get_string ( node1, "tech_id" );
     gchar *tech_id_2 = Json_get_string ( node2, "tech_id" );
     if (!tech_id_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tech_id1 is NULL", __func__ ); return(-1); }
     if (!tech_id_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tech_id2 is NULL", __func__ ); return(-1); }
