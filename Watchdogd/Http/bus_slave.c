@@ -117,6 +117,20 @@ end:
      }
   }
 /******************************************************************************************************************************/
+/* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */
+/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Http_Post_to_local_BUS_CDE ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme )
+  { if (!module) return;
+    JsonNode *body = Json_node_create ();
+    if(!body) return;
+    Json_node_add_string ( body, "tech_id",  tech_id );
+    Json_node_add_string ( body, "acronyme", acronyme );
+    Http_Post_to_local_BUS ( module, "SET_CDE", body );
+    Json_node_unref(body);
+  }
+/******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_WATCHDOG: Envoie le bit WATCHDOG au master selon le status                                          */
 /* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
@@ -299,7 +313,6 @@ end:
                 Json_array_add_element ( output_array, element );
               }
              else Json_node_unref ( element );
-             Json_node_unref ( map );
            } else Json_node_unref ( element );
           liste = g_slist_next ( liste );
         }
