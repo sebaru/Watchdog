@@ -150,7 +150,7 @@
  gboolean MSRV_Map_from_thread ( JsonNode *key )
   { JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, key );
     if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
-     { Json_node_add_string ( key, "tech_id",  Json_get_string ( map, "thread" ) );
+     { Json_node_add_string ( key, "tech_id",  Json_get_string ( map, "tech_id" ) );
        Json_node_add_string ( key, "acronyme", Json_get_string ( map, "acronyme" ) );
        return(TRUE);
      }
