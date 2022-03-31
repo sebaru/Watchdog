@@ -254,22 +254,20 @@
     JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
     Json_node_add_string ( RootNode, "thread_name",    thread_name );
-    if(RootNode)
-     { module->config = Http_Post_to_global_API ( "subprocess", "GET_CONFIG", RootNode );
-       Json_node_unref(RootNode);
-       if (module->config)
-        { module->Thread_debug = Json_get_bool ( RootNode, "debug" );
-          module->Thread_run   = Json_get_bool ( RootNode, "enable" );
-        }
-       else
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': GET_CONFIG from API Failed. Unloading.", __func__, thread_tech_id );
-          dlclose( module->dl_handle );
-          g_free(module);
-          return;
-        }
+    if(!RootNode)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Process: Memory Error. Unloading.", __func__, thread_tech_id );
+       dlclose( module->dl_handle );
+       g_free(module);
+       return;
+     }
+    module->config = Http_Post_to_global_API ( "subprocess", "GET_CONFIG", RootNode );
+    Json_node_unref(RootNode);
+    if (module->config)
+     { module->Thread_debug = Json_get_bool ( module->config, "debug" );
+       module->Thread_run   = Json_get_bool ( module->config, "enable" );
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Process: Memory Error. Unloading.", __func__, thread_tech_id );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': GET_CONFIG from API Failed. Unloading.", __func__, thread_tech_id );
        dlclose( module->dl_handle );
        g_free(module);
        return;
@@ -304,7 +302,7 @@
     pthread_attr_destroy(&attr);                                                                        /* Libération mémoire */
     Partage->com_msrv.Subprocess = g_slist_append ( Partage->com_msrv.Subprocess, module );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': process of class '%s' loaded with enable=%d",
-              __func__, thread_tech_id, thread_name, mudule->Thread_run );
+              __func__, thread_tech_id, thread_name, module->Thread_run );
   }
 /******************************************************************************************************************************/
 /* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                                             */
