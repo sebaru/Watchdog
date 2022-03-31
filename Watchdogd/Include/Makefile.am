@@ -5,12 +5,12 @@
 #**********************************************************************************************************/
 noinst_HEADERS    = Db.h Message_DB.h Histo_DB.h Erreur.h \
                     Config.h Http.h \
-                    Zmq.h Json.h Process.h \
+                    Json.h Process.h \
                     Synoptiques_DB.h  \
                     Mnemonique_DB.h \
                     Proto_traductionDLS.h \
                     watchdogd.h Dls.h \
                     Archive.h
 
-include_HEADERS   = Module_dls.h 
+include_HEADERS   = Module_dls.h
 

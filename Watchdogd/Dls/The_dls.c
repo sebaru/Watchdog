@@ -1217,7 +1217,7 @@ end:
                          gchar *target_tech_id, gchar *json_parametre )
   { JsonNode *RootNode = Json_get_from_string ( json_parametre );
     if (RootNode)
-     { Zmq_Send_json_node ( Partage->com_dls.zmq_to_master, "DLS", target_tech_id, RootNode );
+     { Http_Send_to_slaves ( target_tech_id, RootNode );
        Json_node_unref(RootNode);
      }
   }
@@ -1703,7 +1703,10 @@ end:
        JsonArray *array   = Json_node_add_array ( RootNode, "syn_vars" );
        Dls_syn_vars_to_json ( array, dls_syn );
        Json_node_add_string ( RootNode, "zmq_tag", "SET_SYN_VARS" );
-       Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
+       #warning a migrer sur la new interface
+#ifdef bouh
+Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
+#endif
        Json_node_unref (RootNode);
      }
  }
@@ -1805,7 +1808,6 @@ end:
      { sleep(1); wait--; }        /* attente 20 secondes pour initialisation des bit internes et collection des infos modules */
 
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Starting", __func__ );
-    Partage->com_dls.zmq_to_master = Zmq_Connect ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = last_top_10min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
@@ -1945,7 +1947,6 @@ end:
      }
     Dls_arbre_dls_syn_erase();
     Dls_Decharger_plugins();                                                                  /* Dechargement des modules DLS */
-    Zmq_Close(Partage->com_dls.zmq_to_master);
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

@@ -47,7 +47,6 @@
  #include "Histo_DB.h"
  #include "Synoptiques_DB.h"
  #include "Proto_traductionDLS.h"
- #include "Zmq.h"
  #include "Mnemonique_DB.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */
@@ -131,18 +130,7 @@
  extern gboolean Demarrer_arch ( void );
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );
- extern gboolean Process_start ( struct PROCESS *lib );
- extern gboolean Process_stop ( struct PROCESS *lib );
- extern gboolean Process_reload_by_uuid ( gchar *uuid );
- extern gboolean Process_set_debug ( gchar *uuid, gboolean debug );
- extern void Process_set_database_version ( struct PROCESS *lib, gint version );
- extern void Thread_init ( gchar *pr_name, gchar *classe, struct PROCESS *lib, gchar *version, gchar *description );
- extern void Thread_end ( struct PROCESS *lib );
- extern JsonNode *Thread_Listen_to_master ( struct PROCESS *lib );
- extern JsonNode *SubProcess_Listen_to_master_new ( struct SUBPROCESS *module );
  extern void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat );
- extern void Process_Load_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
- extern void Process_Unload_all_subprocess ( struct PROCESS *lib );
  extern void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars );
  extern void SubProcess_end ( struct SUBPROCESS *module );
 

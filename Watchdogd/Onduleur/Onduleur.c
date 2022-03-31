@@ -301,59 +301,43 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Run_subprocess_message: Prend en charge un message recu du master                                                          */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Modbus_SET_DO: Met a jour une sortie TOR en fonction du jsonnode en parametre                                              */
+/* Entrée: le module et le buffer Josn                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess_message ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message )
-  { gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': recu bus_tag '%s' from master", __func__, thread_tech_id, bus_tag );
-    pthread_mutex_lock ( &module->synchro );
-    if ( !strcasecmp( bus_tag, "SET_DO" ) )
-     { gchar *tech_id  = Json_get_string ( message, "thread_tech_id" );
-       gchar *acronyme = Json_get_string ( message, "thread_acronyme" );
-            if (!tech_id)
-        { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque tech_id", __func__, thread_tech_id ); }
-       else if (!acronyme)
-        { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque acronyme", __func__, thread_tech_id ); }
-       else if (!Json_has_member ( message, "etat" ))
-        { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque etat", __func__, thread_tech_id ); }
-       else if (strcasecmp (tech_id, thread_tech_id))
-        { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': Pas pour nous", __func__, thread_tech_id ); }
-       else
-        { gboolean etat = Json_get_bool ( message, "etat" );
-          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Recu SET_DO from bus: %s:%s=%d",
-                    __func__, thread_tech_id, tech_id, acronyme, etat );
+ static void Ups_SET_DO ( struct SUBPROCESS *module, JsonNode *msg )
+  { gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *msg_thread_tech_id  = Json_get_string ( msg, "thread_tech_id" );
+    gchar *msg_thread_acronyme = Json_get_string ( msg, "thread_acronyme" );
+    gchar *msg_tech_id         = Json_get_string ( msg, "tech_id" );
+    gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
-          if (etat)
-           { if (!strcasecmp(acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
-             if (!strcasecmp(acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( module, "load.on" );
-             if (!strcasecmp(acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( module, "outlet.1.load.off" );
-             if (!strcasecmp(acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( module, "outlet.1.load.on" );
-             if (!strcasecmp(acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( module, "outlet.2.load.off" );
-             if (!strcasecmp(acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( module, "outlet.2.load.on" );
-             if (!strcasecmp(acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( module, "test.battery.start.deep" );
-             if (!strcasecmp(acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( module, "test.battery.start.quick" );
-             if (!strcasecmp(acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( module, "test.battery.stop" );
-           }
+    if (!msg_thread_tech_id)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque msg_thread_tech_id", __func__, thread_tech_id ); }
+    else if (!msg_thread_acronyme)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque msg_thread_acronyme", __func__, thread_tech_id ); }
+    else if (strcasecmp (msg_thread_tech_id, thread_tech_id))
+     { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': Pas pour nous", __func__, thread_tech_id ); }
+    else if (!Json_has_member ( msg, "etat" ))
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque etat", __func__, thread_tech_id ); }
+    else
+     { gboolean etat = Json_get_bool ( msg, "etat" );
+       pthread_mutex_lock ( &module->synchro );
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': SET_DO '%s:%s'/'%s:%s'=%d", __func__,
+                 thread_tech_id, msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
+       if (etat)
+        { if (!strcasecmp(msg_thread_acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
+          if (!strcasecmp(msg_thread_acronyme, "LOAD_ON"))         Onduleur_set_instcmd ( module, "load.on" );
+          if (!strcasecmp(msg_thread_acronyme, "OUTLET_1_OFF"))    Onduleur_set_instcmd ( module, "outlet.1.load.off" );
+          if (!strcasecmp(msg_thread_acronyme, "OUTLET_1_ON"))     Onduleur_set_instcmd ( module, "outlet.1.load.on" );
+          if (!strcasecmp(msg_thread_acronyme, "OUTLET_2_OFF"))    Onduleur_set_instcmd ( module, "outlet.2.load.off" );
+          if (!strcasecmp(msg_thread_acronyme, "OUTLET_2_ON"))     Onduleur_set_instcmd ( module, "outlet.2.load.on" );
+          if (!strcasecmp(msg_thread_acronyme, "START_DEEP_BAT"))  Onduleur_set_instcmd ( module, "test.battery.start.deep" );
+          if (!strcasecmp(msg_thread_acronyme, "START_QUICK_BAT")) Onduleur_set_instcmd ( module, "test.battery.start.quick" );
+          if (!strcasecmp(msg_thread_acronyme, "STOP_TEST_BAT"))   Onduleur_set_instcmd ( module, "test.battery.stop" );
         }
+       pthread_mutex_unlock ( &module->synchro );
      }
-    pthread_mutex_unlock ( &module->synchro );
-  }
-/******************************************************************************************************************************/
-/* Run_subprocess_do_init: Prend la reponse du master pour positionner les outputs à l'init du subprocess                     */
-/* Entrée: les parametres d'une JsonArrayFonction                                                                             */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_subprocess_do_init ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
-    if (!Json_has_member ( element, "thread_tech_id" )) return;
-    gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
-    gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
-    gboolean etat          = Json_get_bool   ( element, "etat" );
-    Info_new( Config.log, module->Thread_debug, LOG_INFO,
-              "%s: '%s': setting '%s:%s' to %d", __func__, thread_tech_id, thread_acronyme, etat );
-    /**/
   }
 /******************************************************************************************************************************/
 /* Run_subprocess: Prend en charge un des sous process du thread                                                              */
@@ -405,8 +389,17 @@
        sched_yield();
 
        SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+/****************************************************** Ecoute du master ******************************************************/
+       while ( module->Master_messages )
+        { pthread_mutex_lock ( &module->synchro );
+          JsonNode *request = module->Master_messages->data;
+          module->Master_messages = g_slist_remove ( module->Master_messages, request );
+          pthread_mutex_unlock ( &module->synchro );
+          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
+          if ( !strcasecmp (bus_tag, "SET_DO") ) Ups_SET_DO ( module, request );
+          Json_node_unref ( request );
+        }
 /********************************************* Début de l'interrogation du ups ************************************************/
-       pthread_mutex_lock ( &module->synchro );
        if ( Partage->top >= vars->date_next_connexion )                               /* Si attente retente, on change de ups */
         { if ( ! vars->started )                                                                 /* Communication OK ou non ? */
            { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
@@ -424,7 +417,6 @@
              else vars->date_next_connexion = Partage->top + UPS_POLLING;                    /* Update toutes les xx secondes */
           }
         }
-       pthread_mutex_unlock ( &module->synchro );
      }
 
     Json_node_unref ( vars->Load );

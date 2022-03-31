@@ -201,125 +201,12 @@
     Updater_confDB_BI();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
-/* Handle_zmq_common: Analyse et reagi à un message ZMQ a destination du MSRV ou du SLAVE                                     */
-/* Entrée: le message                                                                                                         */
-/* Sortie: FALSE si n'a pas été pris en charge                                                                                */
-/******************************************************************************************************************************/
- static gboolean Handle_zmq_common ( JsonNode *request, gchar *zmq_tag, gchar *zmq_src_tech_id, gchar *zmq_dst_tech_id )
-  {     if ( !strcasecmp( zmq_tag, "PROCESS_RELOAD") &&
-              Json_has_member ( request, "uuid" )
-            )
-     { return ( Process_reload_by_uuid ( Json_get_string ( request, "uuid" ) ) ); }
-    else if ( !strcasecmp( zmq_tag, "PROCESS_DEBUG") &&
-              Json_has_member ( request, "uuid" ) && Json_has_member ( request, "debug" )
-            )
-     { return ( Process_set_debug ( Json_get_string ( request, "uuid" ), Json_get_bool ( request, "debug" ) ) ); }
-
-    if ( strcasecmp ( zmq_dst_tech_id, g_get_host_name() ) ) return(FALSE);                               /* Si pas pour nous */
-
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                                     */
-/* Entrée: le message                                                                                                         */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static gboolean Handle_zmq_for_master ( JsonNode *request )
-  { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-    gchar *zmq_src_tech_id = Json_get_string ( request, "zmq_src_tech_id" );
-    gchar *zmq_dst_tech_id = Json_get_string ( request, "zmq_dst_tech_id" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: receive '%s' from '%s' to '%s'",
-              __func__, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id );
-
-         if ( !strcasecmp( zmq_tag, "SET_WATCHDOG") )
-     { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
-              Json_has_member ( request, "consigne" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_WATCHDOG: wrong parameters from '%s'", __func__, zmq_src_tech_id );
-          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
-        }
-
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: SET_WATCHDOG from '%s' to '%s': '%s:%s'=%d", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id,
-                 Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
-                 Json_get_int ( request, "consigne" ) );
-       Dls_data_set_WATCHDOG ( NULL, Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ), NULL,
-                               Json_get_int ( request, "consigne" ) );
-       return(TRUE);                                                                                                /* Traité */
-     }
-
-/************************************ Réaction sur SET_CDE ********************************************************************/
-    else if ( !strcasecmp( zmq_tag, "SET_CDE") )
-     { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_CDE: wrong parameters from '%s'", __func__, zmq_src_tech_id );
-          return(TRUE);                                                              /* Traité en erreur, mais traité qd meme */
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: SET_CDE from '%s' to '%s': '%s:%s'=1", __func__,
-                 zmq_src_tech_id, zmq_dst_tech_id,
-                 Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
-       Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
-       return(TRUE);                                                                                                /* Traité */
-     }
-
-    else if ( !strcasecmp( zmq_tag, "SET_SYN_VARS") )
-     { Http_ws_send_to_all( request );
-       return(TRUE);                                                                                                /* Traité */
-     }
-    else if ( !strcasecmp( zmq_tag, "SLAVE_STOP") )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' stopped !", __func__, zmq_src_tech_id );
-       return(TRUE);                                                                                                /* Traité */
-     }
-    else if ( !strcasecmp( zmq_tag, "SLAVE_START") )
-     { struct DLS_AO *ao;
-       GSList *liste;
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: SLAVE '%s' started. Sending AO !", __func__, zmq_src_tech_id );
-       liste = Partage->Dls_data_AO;
-       while (liste)
-        { ao = (struct DLS_AO *)Partage->com_msrv.Liste_AO->data;            /* Recuperation du numero de a */
-          JsonNode *RootNode = Json_node_create ();
-          if (RootNode)
-           { Dls_AO_to_json( RootNode, ao );
-             Json_node_add_string ( RootNode, "zmq_tag", "SET_AO" );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", RootNode );
-             Json_node_unref(RootNode);
-           }
-          liste = g_slist_next(liste);
-        }
-       return(TRUE);                                                                                                /* Traité */
-     }
-
-    return ( Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) );
-  }
-/******************************************************************************************************************************/
-/* Handle_zmq_message_for_master: Analyse et reagi à un message ZMQ a destination du MSRV                                     */
-/* Entrée: le message                                                                                                         */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static gboolean Handle_zmq_for_slave ( JsonNode *request )
-  { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-    gchar *zmq_src_tech_id   = Json_get_string ( request, "zmq_src_tech_id" );
-    gchar *zmq_dst_tech_id   = Json_get_string ( request, "zmq_dst_tech_id" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: receive '%s' from '%s' to '%s'",
-              __func__, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id );
-
-         if ( !strcasecmp( zmq_tag, "PING") )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from '%s'", __func__, zmq_src_tech_id );
-       Partage->com_msrv.last_master_ping = Partage->top;
-       return(TRUE);                                                                                                /* Traité */
-     }
-    return ( Handle_zmq_common ( request, zmq_tag, zmq_src_tech_id, zmq_dst_tech_id ) );
-  }
-/******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void *Boucle_pere_master ( void )
   { gint cpt_5_minutes, cpt_1_minute;
-    struct ZMQUEUE *zmq_from_slave, *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
@@ -331,14 +218,6 @@
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB SQL Error.", __func__ ); }
     else Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB Loaded.", __func__ );
     if (requete) g_free(requete);
-
-/************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_from_bus                 = Zmq_Bind ( ZMQ_PULL, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
-
-/***************************************** Socket pour une instance master ****************************************************/
-    Partage->com_msrv.zmq_to_slave = Zmq_Bind ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
-    zmq_from_slave                 = Zmq_Bind ( ZMQ_PULL, "listen-to-slave", "tcp", "*", 5556 );
 
 /***************************************** Active l'API ***********************************************************************/
     if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
@@ -371,28 +250,9 @@
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
-     { gchar buffer[2048];
-       JsonNode *request;
-
-       Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */
+     { Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
-
-       request = Recv_zmq_with_json( zmq_from_slave, g_get_host_name(), (gchar *)&buffer, sizeof(buffer) );
-       if (request)
-        { Handle_zmq_for_master( request );
-          Json_node_unref ( request );
-        }
-
-       request = Recv_zmq_with_json( zmq_from_bus, NULL, (gchar *)&buffer, sizeof(buffer) );
-       if (request)
-        { gint taille = strlen(buffer);
-          if (!Handle_zmq_for_master( request ))                   /* Gère d'abord le message avant de l'envoyer au bus local */
-           { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, taille );                        /* on envoi aux threads */
-             Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_slave, buffer, taille );                       /* on envoi aux slaves */
-           }
-          Json_node_unref ( request );
-        }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { Save_dls_data_to_DB();
@@ -418,10 +278,6 @@
 
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
-    Zmq_Close ( Partage->com_msrv.zmq_to_bus );
-    Zmq_Close ( zmq_from_bus );
-    Zmq_Close ( Partage->com_msrv.zmq_to_slave );
-    Zmq_Close ( zmq_from_slave );
 
     if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
     if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
@@ -435,8 +291,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void *Boucle_pere_slave ( void )
-  { struct ZMQUEUE *zmq_from_master, *zmq_from_bus;
-    gint cpt_5_minutes = 0, cpt_1_minute = 0;
+  { gint cpt_5_minutes = 0, cpt_1_minute = 0;
     gchar chaine[128];
 
     prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
@@ -448,14 +303,6 @@
 
     g_snprintf(chaine, sizeof(chaine), "Statut de la communication avec le slave %s", g_get_host_name() );
     Mnemo_auto_create_WATCHDOG ( FALSE, g_get_host_name(), "IO_COMM", chaine );
-
-/************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_to_bus = Zmq_Bind ( ZMQ_PUB, "pub-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    zmq_from_bus                 = Zmq_Bind ( ZMQ_PULL, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
-
-/***************************************** Socket de subscription au master ***************************************************/
-    Partage->com_msrv.zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "tcp", Config.master_hostname, 5556 );
-    zmq_from_master                 = Zmq_Connect ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_hostname, 5555 );
 
 /***************************************** Active l'API ***********************************************************************/
     if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
@@ -473,35 +320,15 @@
 /***************************************** Debut de la boucle sans fin ********************************************************/
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode)
-     { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_START" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, RootNode );
-       Json_node_unref ( RootNode );
-     }
+/*    Http_Post_to_local_BUS ( module, "SLAVE_START", NULL );*/
+
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
-     { gchar buffer[2048];
-       JsonNode *request;
-       gint byte;
-
-       request = Recv_zmq_with_json( zmq_from_master, NULL, (gchar *)&buffer, sizeof(buffer) );
-       if (request)
-        { if (!Handle_zmq_for_slave( request ))                    /* Gère d'abord le message avant de l'envoyer au bus local */
-           { Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, strlen(buffer) ); }        /* Sinon on envoi aux threads */
-          Json_node_unref ( request );
-        }
-                                                /* Si reception depuis un thread, report vers le master et les autres threads */
-       if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
-        { /*Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_bus, buffer, byte );*/
-          Zmq_Send_as_raw ( Partage->com_msrv.zmq_to_master, buffer, byte );
-        }
-
-       if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
+     { if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { JsonNode *body = Json_node_create ();
+        { /*JsonNode *body = Json_node_create ();
           if(body)
            { Json_node_add_string ( body, "zmq_tag", "SET_WATCHDOG" );
              Json_node_add_string ( body, "tech_id",  g_get_host_name() );
@@ -509,7 +336,7 @@
              Json_node_add_int    ( body, "consigne", 900 );
              Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, body );
              Json_node_unref(body);
-           }
+           }*/
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
@@ -524,24 +351,10 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    RootNode = Json_node_create ();
-    if (RootNode)
-     { Json_node_add_string ( RootNode, "zmq_tag", "SLAVE_STOP" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, RootNode );
-       Json_node_add_string ( RootNode, "zmq_tag", "SET_WATCHDOG" );
-       Json_node_add_string ( RootNode, "tech_id",  g_get_host_name() );
-       Json_node_add_string ( RootNode, "acronyme", "IO_COMM" );
-       Json_node_add_int    ( RootNode, "consigne", 0 );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, RootNode );
-       Json_node_unref ( RootNode );
-     }
+/*    Http_Post_to_local_BUS ( module, "SLAVE_STOP", NULL );*/
 
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
-    Zmq_Close ( Partage->com_msrv.zmq_to_bus );
-    Zmq_Close ( zmq_from_bus );
-    Zmq_Close ( Partage->com_msrv.zmq_to_master );
-    Zmq_Close ( zmq_from_master );
 
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
@@ -756,7 +569,6 @@
 
        Config.log_db             = Json_get_bool ( api_result, "log_db" );
        Config.log_bus            = Json_get_bool ( api_result, "log_bus" );
-       Config.log_zmq            = Json_get_bool ( api_result, "log_zmq" );
        Config.log_trad           = Json_get_bool ( api_result, "log_trad" );
        Config.log_msrv           = Json_get_bool ( api_result, "log_msrv" );
        if (Json_has_member ( api_result, "is_master") )
@@ -839,12 +651,6 @@
     Update_database_schema();                                                       /* Update du schéma de Database si besoin */
     Charger_config_bit_interne ();                            /* Chargement des configurations des bits internes depuis la DB */
 
-    Partage->zmq_ctx = zmq_ctx_new ();                                             /* Initialisation du context d'echange ZMQ */
-    if (!Partage->zmq_ctx)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Context Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
-
     if (Config.instance_is_master)
      { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -882,8 +688,6 @@
     setitimer( ITIMER_REAL, &timer, NULL );                                                                /* Active le timer */
 
     pthread_join( TID, NULL );                                                          /* Attente fin de la boucle pere MSRV */
-    zmq_ctx_term( Partage->zmq_ctx );
-    zmq_ctx_destroy( Partage->zmq_ctx );
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MONO", __func__ );

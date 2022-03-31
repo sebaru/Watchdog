@@ -115,7 +115,7 @@
     struct TRAME_MODBUS_REPONSE response;
     JsonNode *AI_root, **AI;                                                           /* Tableau dynamique de mapping des DI */
     JsonNode *DI_root, **DI;                                                           /* Tableau dynamique de mapping des DI */
-    JsonNode *DO_root, **DO;                                                           /* Tableau dynamique de mapping des DO */
+    JsonNode **DO;                                                                                /* Tableau dynamique des DO */
     gpointer *MSG_AI_OUT_OF_RANGE;                                             /* Tableau dynamique d'accès aux bits internes */
     gpointer bit_comm;                                                                       /* Bit interne d'etat de la comm */
   };

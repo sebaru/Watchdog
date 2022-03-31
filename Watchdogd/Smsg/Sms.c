@@ -35,32 +35,6 @@
  #include "Sms.h"
 
 /******************************************************************************************************************************/
-/* Smsg_Creer_DB : Creation de la database du process                                                                         */
-/* Entrée: le pointeur sur la structure PROCESS                                                                               */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Smsg_Creer_DB ( struct PROCESS *lib )
-  {
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-             "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
-
-    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`ovh_service_name` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`ovh_application_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`ovh_application_secret` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`ovh_consumer_key` VARCHAR(33) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`nbr_sms` int(11) NOT NULL DEFAULT 0,"
-                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-
-    Process_set_database_version ( lib, 1 );
-  }
-/******************************************************************************************************************************/
 /* Smsg_is_allow_cde : Renvoi TRUE si le telephone en parametre peut set ou reset un bit interne                              */
 /* Entrée: le nom du destinataire                                                                                             */
 /* Sortie : booléen, TRUE/FALSE                                                                                               */
@@ -71,14 +45,14 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     phone = Normaliser_chaine ( tel );
     if (!phone)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                  "%s: %s: Normalisation phone impossible", __func__ , thread_tech_id);
        return(FALSE);
      }
 
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                  "%s: %s: Memory error", __func__, thread_tech_id );
        g_free(phone);
        return(FALSE);
@@ -117,13 +91,13 @@
     if (GSM_IsConnected(vars->gammu_machine))
      { error = GSM_TerminateConnection(vars->gammu_machine);                                  /* Terminate connection */
        if (error != ERR_NONE)
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                    "%s: %s: TerminateConnection Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
         }
      }
     GSM_FreeStateMachine(vars->gammu_machine);                                                 /* Free up used memory */
     vars->gammu_machine = NULL;
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Disconnected", __func__, thread_tech_id );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Disconnected", __func__, thread_tech_id );
     SubProcess_send_comm_to_master_new ( module, FALSE );
   }
 /******************************************************************************************************************************/
@@ -136,17 +110,17 @@
     GSM_Error error;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Trying to connect", __func__, thread_tech_id );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Trying to connect", __func__, thread_tech_id );
 
     GSM_InitLocales(NULL);
     if ( (vars->gammu_machine = GSM_AllocStateMachine()) == NULL )                         /* Allocates state machine */
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: AllocStateMachine Error", __func__, thread_tech_id );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: AllocStateMachine Error", __func__, thread_tech_id );
        return(FALSE);
      }
 
     error = GSM_FindGammuRC(&vars->gammu_cfg, NULL);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                  "%s: %s: FindGammuRC Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
@@ -154,7 +128,7 @@
 
     error = GSM_ReadConfig(vars->gammu_cfg, GSM_GetConfig(vars->gammu_machine, 0), 0);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                 "%s: %s: ReadConfig Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
@@ -165,7 +139,7 @@
 
     error = GSM_InitConnection(vars->gammu_machine, 1);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                  "%s: %s: InitConnection Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
@@ -175,7 +149,7 @@
     gchar constructeur[64];
     error = GSM_GetManufacturer(vars->gammu_machine, constructeur);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                  "%s: %s: GSM_GetManufacturer Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
@@ -184,13 +158,13 @@
     gchar model[64];
     error = GSM_GetModel(vars->gammu_machine, model);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                  "%s: %s: GSM_GetModel Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
      }
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
+    Info_new( Config.log, module->Thread_debug, LOG_INFO,
               "%s: %s: Connection OK with '%s/%s'", __func__, thread_tech_id, constructeur, model );
     SubProcess_send_comm_to_master_new ( module, TRUE );
     return(TRUE);
@@ -210,12 +184,12 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (module->comm_status == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: COMM is FALSE", __func__, thread_tech_id );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: COMM is FALSE", __func__, thread_tech_id );
        return(FALSE);
      }
 
     if (!telephone)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: telephone is NULL", __func__, thread_tech_id );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: telephone is NULL", __func__, thread_tech_id );
        return(FALSE);
      }
 
@@ -239,7 +213,7 @@
     PhoneSMSC.Location = 1;                                                                    /* We need to know SMSC number */
     error = GSM_GetSMSC(vars->gammu_machine, &PhoneSMSC);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                 "%s: %s: GetSMSC Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
@@ -247,13 +221,13 @@
 
     CopyUnicodeString(sms.SMSC.Number, PhoneSMSC.Number);                                       /* Set SMSC number in message */
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
               "%s: %s: Try to send to %s (%s)", __func__, thread_tech_id, telephone, libelle );
 
     vars->gammu_send_status = ERR_TIMEOUT;
     error = GSM_SendSMS(vars->gammu_machine, &sms);                                                        /* Send message */
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                  "%s: %s: SendSMS Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
@@ -262,12 +236,12 @@
     while ( vars->gammu_send_status == ERR_TIMEOUT ) { GSM_ReadDevice(vars->gammu_machine, TRUE); }
 
     if (vars->gammu_send_status == ERR_NONE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE,
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
                  "%s: %s: Envoi SMS Ok to %s (%s)", __func__, thread_tech_id, telephone, libelle );
        vars->nbr_sms++;
        return(TRUE);
      }
-    Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+    Info_new( Config.log, module->Thread_debug, LOG_WARNING,
              "%s: %s: Envoi SMS Nok to %s (%s) -> error '%s'", __func__, thread_tech_id, telephone, libelle, GSM_ErrorString(error) );
     return(FALSE);
   }
@@ -329,7 +303,7 @@
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( method, query );
-    Info_new ( Config.log, module->lib->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
+    Info_new ( Config.log, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, body, strlen(body) );
     SoupMessageHeaders *headers;
     g_object_get ( G_OBJECT(soup_msg), "request_headers", &headers, NULL );
@@ -344,14 +318,14 @@
     gint status_code;
 
     g_object_get ( soup_msg, "status-code", &status_code, "reason-phrase", &reason_phrase, "response-body-data", &response_brute, NULL );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: Status %d, reason %s", __func__, thread_tech_id, status_code, reason_phrase );
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Status %d, reason %s", __func__, thread_tech_id, status_code, reason_phrase );
     if (status_code!=200)
      { gsize taille;
        gchar *error = g_bytes_get_data ( response_brute, &taille );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Error: %s\n", __func__, thread_tech_id, error );
+       Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Error: %s\n", __func__, thread_tech_id, error );
        g_free(error);
      }
-    else Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: '%s' sent to '%s'", __func__, thread_tech_id, libelle, telephone );
+    else Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: '%s' sent to '%s'", __func__, thread_tech_id, libelle, telephone );
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
   }
@@ -366,13 +340,13 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (vars->sending_is_disabled == TRUE)                                   /* Si envoi désactivé, on sort de suite de la fonction */
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending is disabled. Dropping message", __func__, thread_tech_id );
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending is disabled. Dropping message", __func__, thread_tech_id );
        return;
      }
 
     JsonNode *RootNode = Json_node_create ();
     if (!RootNode)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: %s: Memory Error", __func__, thread_tech_id );
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: %s: Memory Error", __func__, thread_tech_id );
        return;
      }
 
@@ -389,7 +363,7 @@
        switch (sms_notification)
         { case MESSAGE_SMS_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
-                { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+                { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                             "%s: %s: Error sending with GSM. Falling back to OVH", __func__, thread_tech_id );
                   Envoi_sms_ovh( module, msg, user_phone );
                 }
@@ -442,13 +416,13 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     if ( Smsg_is_allow_cde ( module, from ) == FALSE )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE,
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
                 "%s: %s: unknown sender %s. Dropping message %s...", __func__, thread_tech_id, from, texte );
        return;
      }
 
     if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Ping Received from '%s'. Sending Pong", __func__, thread_tech_id, from );
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Ping Received from '%s'. Sending Pong", __func__, thread_tech_id, from );
        Envoyer_smsg_gsm_text ( module, "Pong !" );
        return;
      }
@@ -456,20 +430,20 @@
     if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
      { vars->sending_is_disabled = TRUE;
        Envoyer_smsg_gsm_text ( module, "Sending SMS is off !" );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is DISABLED by '%s'", __func__, thread_tech_id, from );
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is DISABLED by '%s'", __func__, thread_tech_id, from );
        return;
      }
 
     if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
      { Envoyer_smsg_gsm_text ( module, "Sending SMS is on !" );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is ENABLED by '%s'", __func__, thread_tech_id, from );
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is ENABLED by '%s'", __func__, thread_tech_id, from );
        vars->sending_is_disabled = FALSE;
        return;
      }
 
     JsonNode *RootNode = Json_node_create();
     if ( RootNode == NULL )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Memory Error for '%s'", __func__, thread_tech_id, from );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Memory Error for '%s'", __func__, thread_tech_id, from );
        return;
      }
     SQL_Select_to_json_node ( RootNode, "results",
@@ -478,7 +452,7 @@
                               "WHERE map.thread_tech_id='_COMMAND_TEXT' AND map.thread_acronyme LIKE '%%%s%%'", texte );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, texte );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, texte );
        Envoyer_smsg_gsm_text ( module, "Error searching Database .. Sorry .." );
        goto end;
      }
@@ -499,7 +473,7 @@
              gchar *tech_id         = Json_get_string ( element, "tech_id" );
              gchar *acronyme        = Json_get_string ( element, "acronyme" );
              gchar *libelle         = Json_get_string ( element, "libelle" );
-             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+             Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
                        thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
              Envoyer_smsg_gsm_text ( module, thread_acronyme );                                 /* Envoi des différents choix */
              results = g_list_next(results);
@@ -511,7 +485,7 @@
           gchar *tech_id         = Json_get_string ( element, "tech_id" );
           gchar *acronyme        = Json_get_string ( element, "acronyme" );
           gchar *libelle         = Json_get_string ( element, "libelle" );
-          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+          Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
                     thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
           Http_Post_to_local_BUS_CDE ( module, tech_id, acronyme );
           Envoyer_smsg_gsm_text ( module, "Fait." );
@@ -548,25 +522,35 @@ end:
           g_snprintf( texte, sizeof(texte), "%s", DecodeUnicodeConsole(sms.SMS[i].Text) );
           sms.SMS[0].Folder = 0;/* https://github.com/gammu/gammu/blob/ed2fec4a382e7ac4b5dfc92f5b10811f76f4817e/gammu/message.c */
           if (sms.SMS[i].State == SMS_UnRead)                                /* Pour tout nouveau message, nous le processons */
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE,
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
                       "%s: %s: Recu '%s' from '%s' Location %d/%d Folder %d !", __func__,
                        thread_tech_id, texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder );
              Traiter_commande_sms ( module, from, texte );
            }
           error = GSM_DeleteSMS( vars->gammu_machine, &sms.SMS[i] );
           if (error != ERR_NONE)
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                       "%s: %s: Delete '%s' from '%s' Location %d/%d Folder %d Failed ('%s')!", __func__,
                        thread_tech_id, texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder, GSM_ErrorString(error) );
            }
          }
       }
      else if (error != ERR_EMPTY)
-      { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+      { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                   "%s: %s: Error Reading SMS: '%s' !", __func__, thread_tech_id, GSM_ErrorString(error) );
       }
     if ( (error == ERR_NONE) || (error == ERR_EMPTY) ) { return(TRUE); }
     return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Run_subprocess_message: Prend en charge un message recu du master                                                          */
+/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Run_subprocess_message ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message )
+  { gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': recu bus_tag '%s' from master", __func__, thread_tech_id, bus_tag );
+
   }
 /******************************************************************************************************************************/
 /* Run_subprocess: Prend en charge un des sous process du thread                                                              */
@@ -580,20 +564,41 @@ end:
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
-    vars->sending_is_disabled = FALSE;                                                /* A l'init, l'envoi de SMS est autorisé */
+    vars->sending_is_disabled = FALSE;                                               /* A l'init, l'envoi de SMS est autorisé */
     gint next_try = 0;
 
-    while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
+    while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { usleep(100000);
        sched_yield();
 
        SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+/****************************************************** Ecoute du master ******************************************************/
+       while ( module->Master_messages )
+        { pthread_mutex_lock ( &module->synchro );
+          JsonNode *message = module->Master_messages->data;
+          module->Master_messages = g_slist_remove ( module->Master_messages, message );
+          pthread_mutex_unlock ( &module->synchro );
+          gchar *bus_tag = Json_get_string ( message, "bus_tag" );
+          if ( !strcasecmp( bus_tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
+               Json_get_int ( message, "sms_notification" ) != MESSAGE_SMS_NONE )
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending msg '%s:%s' (%s)", __func__, thread_tech_id,
+                       Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
+                       Json_get_string ( message, "libelle" ) );
 
+/*************************************************** Envoi en mode GSM ********************************************************/
+             Smsg_send_to_all_authorized_recipients( module, message );
+           }
+/*    else if ( !strcasecmp ( zmq_tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
+    else if ( !strcasecmp ( zmq_tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );*/
+          else
+           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: bus_tag '%s' not for this thread", __func__, thread_tech_id, bus_tag ); }
+          Json_node_unref(message);
+        }
 /****************************************************** Tentative de connexion ************************************************/
        if (module->comm_status == FALSE && Partage->top >= next_try )
         { if (Smsg_connect(module)==FALSE)
            { next_try = Partage->top + 300;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Connect failed, trying in 30s", __func__, thread_tech_id );
+             Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Connect failed, trying in 30s", __func__, thread_tech_id );
            }
         }
 
@@ -601,58 +606,12 @@ end:
        if (module->comm_status == TRUE)
         { if (Lire_sms_gsm(module)==FALSE) { Smsg_disconnect(module); }
         }
-/********************************************************* Envoi de SMS *******************************************************/
-       JsonNode *request;
-       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
-        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
-               Json_get_bool ( request, "alive" ) == TRUE &&
-               Json_get_int  ( request, "sms_notification" ) != MESSAGE_SMS_NONE )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Sending msg '%s:%s' (%s)", __func__, thread_tech_id,
-                       Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
-                       Json_get_string ( request, "libelle" ) );
-
-/*************************************************** Envoi en mode GSM ********************************************************/
-             Smsg_send_to_all_authorized_recipients( module, request );
-           }
-          else if ( !strcasecmp ( zmq_tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
-          else if ( !strcasecmp ( zmq_tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
-          else
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: zmq_tag '%s' not for this thread", __func__, thread_tech_id, zmq_tag ); }
-          Json_node_unref(request);
-        }
      }
     Smsg_disconnect(module);
 
-    SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE uuid='%s'", module->lib->name, vars->nbr_sms, module->lib->uuid );
+    #warning a migrer vers global APi
+     /*SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE uuid='%s'", module->name, vars->nbr_sms, module->uuid ); */
 
     SubProcess_end(module);
-  }
-/******************************************************************************************************************************/
-/* Run_process: Run du Process                                                                                                */
-/* Entrée: la structure PROCESS associée                                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_process ( struct PROCESS *lib )
-  {
-reload:
-    Smsg_Creer_DB ( lib );                                                                     /* Création de la DB du thread */
-    Thread_init ( "smsg", "USER", lib, WTD_VERSION, "Manage SMS system (libgammu)" );
-
-    lib->config = Json_node_create();
-    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
-
-    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
-    while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
-    Process_Unload_all_subprocess ( lib );
-
-    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
-       lib->Thread_reload = FALSE;
-       goto reload;
-     }
-
-    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -42,29 +42,6 @@
  #include "Dmx.h"
 
 /******************************************************************************************************************************/
-/* Smsg_Creer_DB : Creation de la database du process                                                                         */
-/* Entrée: le pointeur sur la structure PROCESS                                                                               */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dmx_Creer_DB ( struct PROCESS *lib )
-  {
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-             "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
-
-    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`device` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT' "
-                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-
-    Process_set_database_version ( lib, 1 );
-  }
-
-/******************************************************************************************************************************/
 /* Dmx_do_mapping : mappe les entrees/sorties Wago avec la zone de mémoire interne dynamique                                  */
 /* Entrée : la structure referencant le module                                                                                */
 /* Sortie : rien                                                                                                              */
@@ -78,14 +55,14 @@
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     gint cpt = 0;
     g_snprintf( critere, sizeof(critere),"%s:AO%%", tech_id );
-    if ( ! Recuperer_mnemos_AO_by_text ( &db, module->lib->name, critere ) )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+    if ( ! Recuperer_mnemos_AO_by_text ( &db, "dmx", critere ) )
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( Recuperer_mnemos_AO_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *map_text = db->row[2], *libelle = db->row[3];
        gchar *min = db->row[4], *max = db->row[5], *type=db->row[6], *valeur = db->row[7];
        gchar debut[80];
        gint num;
-       Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: Match found '%s' '%s:%s' - %s", __func__, tech_id, 
+       Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Match found '%s' '%s:%s' - %s", __func__, tech_id,
                  map_text, tech_id, acro, libelle );
        if ( sscanf ( map_text, "%[^:]:AO%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (1<=num && num<=DMX_CHANNEL)
@@ -95,18 +72,18 @@
              vars->Canal[num-1].max    = atof(max);
              vars->Canal[num-1].type   = atoi(type);
              vars->Canal[num-1].valeur = 0.0;                        /*atof(valeur); a l'init, on considère le canal à zero */
-             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO,
+             Info_new( Config.log, module->Thread_debug, LOG_INFO,
                        "%s: AO Canal %d : '%s:%s'=%s ('%s') loaded", __func__, num, tech_id, acro, valeur, libelle );
              cpt++;
            }
-          else Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
+          else Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          map_text, num, DMX_CHANNEL );
         }
-       else Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, map_text );
+       else Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, map_text );
      }
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %d AO loaded", __func__, cpt );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %d AO loaded", __func__, cpt );
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: DMX '%s' : mapping done", __func__, tech_id );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: DMX '%s' : mapping done", __func__, tech_id );
   }
 /******************************************************************************************************************************/
 /* Dmx_init: Initialisation de la ligne DMX                                                                                   */
@@ -117,17 +94,17 @@
   { struct DMX_VARS *vars = module->vars;
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
     gchar *device  = Json_get_string ( module->config, "device" );
-    
+
     vars->fd = open( device, O_RDWR | O_NOCTTY /*| O_NONBLOCK*/ );
     if (vars->fd<0)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Impossible d'ouvrir le device '%s', retour=%d (%s)", __func__,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Impossible d'ouvrir le device '%s', retour=%d (%s)", __func__,
                  tech_id, device, vars->fd, strerror(errno) );
        return(FALSE);
      }
 
     vars->taille_trame_dmx = sizeof(struct TRAME_DMX);
     memset ( &vars->Trame_dmx, 0, sizeof(struct TRAME_DMX) );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Ouverture port dmx okay %s",
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Ouverture port dmx okay %s",
               __func__, tech_id, device );
     SubProcess_send_comm_to_master_new ( module, TRUE );
     Dmx_do_mapping( module );
@@ -142,7 +119,7 @@
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
     if ( vars->fd != -1 )
      { close(vars->fd);
-       Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE,
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
 		         "%s: %s: Fermeture device '%s' dmx okay", __func__, tech_id, Json_get_string ( module->config, "device" ) );
 	   vars->fd = -1;
      }
@@ -165,7 +142,7 @@
     for (gint cpt=0; cpt<DMX_CHANNEL; cpt++) { vars->Trame_dmx.channel[cpt] = (guchar)vars->Canal[cpt].valeur; }
     vars->Trame_dmx.end_delimiter = 0xE7; /* End delimiter */
     if ( write( vars->fd, &vars->Trame_dmx, sizeof(struct TRAME_DMX) ) != sizeof(struct TRAME_DMX) )/* Ecriture de la trame */
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: Write Trame Error '%s'", __func__, tech_id, strerror(errno) );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Write Trame Error '%s'", __func__, tech_id, strerror(errno) );
        Dmx_close(module);
        return(FALSE);
      }
@@ -183,32 +160,35 @@
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
-    while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
+    while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { usleep(1000);
        sched_yield();
 
        SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
-/********************************************************* Ecoute du master ***************************************************/
-       JsonNode *request;
-       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
-        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if ( !strcasecmp( zmq_tag, "SET_AO" ) &&
+/****************************************************** Ecoute du master ******************************************************/
+       while ( module->Master_messages )
+        { pthread_mutex_lock ( &module->synchro );
+          JsonNode *request = module->Master_messages->data;
+          module->Master_messages = g_slist_remove ( module->Master_messages, request );
+          pthread_mutex_unlock ( &module->synchro );
+          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
+          if ( !strcasecmp( bus_tag, "SET_AO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
                Json_get_int  ( request, "type_sms" ) != MESSAGE_SMS_NONE )
            { gchar *tech_id  = Json_get_string ( request, "tech_id" );
              gchar *acronyme = Json_get_string ( request, "acronyme" );
              gint   valeur   = Json_get_int    ( request, "valeur" );
              if (!tech_id)
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
+              { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", __func__ ); }
              else if (!acronyme)
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
+              { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", __func__ ); }
              else if (!valeur)
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: requete mal formée manque valeur", __func__ ); }
+              { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: requete mal formée manque valeur", __func__ ); }
              else
               { for (gint num=0; num<DMX_CHANNEL; num++)
                  { if (!strcasecmp( vars->Canal[num].tech_id, tech_id) &&
                        !strcasecmp( vars->Canal[num].acronyme, acronyme))
-                    { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: Setting %s:%s=%f (Canal %d)", __func__,
+                    { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Setting %s:%s=%f (Canal %d)", __func__,
                                 tech_id, acronyme, valeur, num );
                       vars->Canal[num].valeur = valeur;
                       break;
@@ -224,7 +204,7 @@
 /************************************************* Traitement opérationnel ****************************************************/
        if (module->comm_status == FALSE && vars->date_next_retry <= Partage->top )
         { vars->date_next_retry = 0;
-          Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, tech_id );
+          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, tech_id );
           if ( Dmx_init(module) == FALSE )
            { vars->date_next_retry = Partage->top + DMX_RETRY_DELAI; }
           else
@@ -237,13 +217,13 @@
           gint retour;
           retour = fstat( vars->fd, &buf );
           if (retour == -1)
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                       "%s: %s: Fstat Error (%s), closing and re-trying in %ds", __func__, tech_id,
                        strerror(errno), DMX_RETRY_DELAI/10 );
              closing = TRUE;
            }
           else if ( buf.st_nlink < 1 )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                       "%s: %s: USB device disappeared. Closing and re-trying in %ds", __func__, tech_id, DMX_RETRY_DELAI/10 );
              closing = TRUE;
            }
@@ -256,32 +236,5 @@
     Dmx_close(module);
 
     SubProcess_end(module);
-  }
-/******************************************************************************************************************************/
-/* Run_process: Run du Process                                                                                                */
-/* Entrée: la structure PROCESS associée                                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_process ( struct PROCESS *lib )
-  {
-reload:
-    Dmx_Creer_DB ( lib );                                                                      /* Création de la DB du thread */
-    Thread_init ( "dmx", "I/O", lib, WTD_VERSION, "Manage Dmx System" );
-
-    lib->config = Json_node_create();
-    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
-
-    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
-    while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
-    Process_Unload_all_subprocess ( lib );
-
-    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
-       lib->Thread_reload = FALSE;
-       goto reload;
-     }
-
-    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

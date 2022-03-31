@@ -97,23 +97,7 @@
   { gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': recu bus_tag '%s' from master", __func__, thread_tech_id, bus_tag );
   }
-/******************************************************************************************************************************/
-/* Run_subprocess_do_init: Prend la reponse du master pour positionner les outputs à l'init du subprocess                     */
-/* Entrée: les parametres d'une JsonArrayFonction                                                                             */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_subprocess_do_init ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
-    if (!Json_has_member ( element, "thread_tech_id" )) return;
-    gchar *thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
-    gchar *thread_acronyme = Json_get_string ( element, "thread_acronyme" );
-    gboolean etat          = Json_get_bool   ( element, "etat" );
-    Info_new( Config.log, module->Thread_debug, LOG_INFO,
-              "%s: '%s': setting '%s:%s' to %d", __func__, thread_tech_id, thread_acronyme, etat );
-    pthread_mutex_lock ( &module->synchro );
-    /**/
-    pthread_mutex_unlock ( &module->synchro );
-  }
+
 /******************************************************************************************************************************/
 /* Run_subprocess: Prend en charge un des sous process du thread                                                              */
 /* Entrée: la structure SUBPROCESS associée                                                                                   */
@@ -145,6 +129,16 @@
        sched_yield();
 
        SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+/****************************************************** Ecoute du master ******************************************************/
+       while ( module->Master_messages )
+        { pthread_mutex_lock ( &module->synchro );
+          JsonNode *message = module->Master_messages->data;
+          module->Master_messages = g_slist_remove ( module->Master_messages, message );
+          pthread_mutex_unlock ( &module->synchro );
+          gchar *bus_tag = Json_get_string ( message, "bus_tag" );
+          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: bus_tag '%s' not for this thread", __func__, thread_tech_id, bus_tag );
+          Json_node_unref(message);
+        }
 /************************************************* Traitement opérationnel ****************************************************/
        if (vars->mode == TINFO_WAIT_BEFORE_RETRY)
         { if ( vars->date_next_retry <= Partage->top )

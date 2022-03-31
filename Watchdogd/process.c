@@ -45,78 +45,7 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
-/* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Process_set_database_version ( struct PROCESS *lib, gint version )
-  { lib->database_version = version;
-    SQL_Write_new ( "UPDATE processes SET database_version='%d' WHERE uuid='%s'", lib->database_version, lib->uuid );
-  }
-/******************************************************************************************************************************/
-/* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
-/* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Thread_init ( gchar *name, gchar *classe, struct PROCESS *lib, gchar *version, gchar *description )
-  { gchar chaine[128];
-
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-
-    g_snprintf( chaine, sizeof(chaine), "W-%s", name );                           /* Positionne le nom du thread niveau noyau */
-    gchar *upper_name = g_ascii_strup ( chaine, -1 );
-    prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
-    g_free(upper_name);
-
-    lib->Thread_run = TRUE;                                                                             /* Le thread tourne ! */
-    time ( &lib->start_time );                                                                           /* Date de demarrage */
-    g_snprintf( lib->description, sizeof(lib->description), description );
-    g_snprintf( lib->version,     sizeof(lib->version),     version );
-
-    SQL_Write_new ( "UPDATE processes SET started=1, start_time=NOW(), classe='%s', version='%s', database_version='%d', "
-                    "description='%s' WHERE uuid='%s'",
-                    classe, lib->version, lib->database_version, lib->description, lib->uuid );
-
-    lib->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-    lib->zmq_to_master = Zmq_Connect ( ZMQ_PUSH, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
-
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-              "%s: UUID %s: Process is UP '%s' (%s) de classe '%s' (debug = %d)", __func__,
-              lib->uuid, lib->name, lib->version, classe, lib->Thread_debug );
-  }
-/******************************************************************************************************************************/
-/* Thread_end: appelé par chaque thread, lors de son arret                                                                    */
-/* Entrée: Le nom du thread                                                                                                   */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Thread_end ( struct PROCESS *lib )
-  { Zmq_Close ( lib->zmq_from_bus );
-    Zmq_Close ( lib->zmq_to_master );
-    SQL_Write_new ( "UPDATE processes SET started = NULL, start_time = NULL, version = NULL WHERE uuid='%s'", lib->uuid );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s: Process is DOWN '%s' %s", __func__,
-              lib->uuid, lib->name, lib->version );
-    if (lib->config) Json_node_unref (lib->config);
-    lib->Thread_run = FALSE;                                                                    /* Le thread ne tourne plus ! */
-    pthread_exit(GINT_TO_POINTER(0));
-  }
-/******************************************************************************************************************************/
-/* Thread_Listen_to_master: appelé par chaque thread pour écouter les messages ZMQ du master                                  */
-/* Entrée: La structure afférente                                                                                             */
-/* Sortie: JSonNode * sir il y a un message, sinon NULL                                                                       */
-/******************************************************************************************************************************/
- JsonNode *Thread_Listen_to_master ( struct PROCESS *lib )
-  { return ( Recv_zmq_with_json( lib->zmq_from_bus, lib->name, (gchar *)&lib->zmq_buffer, sizeof(lib->zmq_buffer) ) ); }
-/******************************************************************************************************************************/
-/* Thread_Listen_to_master: appelé par chaque thread pour écouter les messages ZMQ du master                                  */
-/* Entrée: La structure afférente                                                                                             */
-/* Sortie: JSonNode * sir il y a un message, sinon NULL                                                                       */
-/******************************************************************************************************************************/
- JsonNode *SubProcess_Listen_to_master_new ( struct SUBPROCESS *module )
-  { return ( Recv_zmq_with_json( module->zmq_from_bus, Json_get_string ( module->config, "thread_tech_id" ),
-             (gchar *)&module->zmq_buffer, sizeof(module->zmq_buffer) ) );
-  }
-/******************************************************************************************************************************/
-/* Thread_send_comm_to_master: appelé par chaque thread pour envoyer le statut de la comm au master                           */
+/* SubProcess_send_comm_to_master_new: Envoi le statut de la comm au master                                                   */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
@@ -151,9 +80,10 @@
 
     gchar *bus_tag = Json_get_string ( response, "bus_tag" );
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, bus_tag );
-    if (module->Run_subprocess_message)                                             /* on passe le message au subprocess */
-     { module->Run_subprocess_message ( module, bus_tag, response ); }
-    Json_node_unref(response);
+
+    pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au subprocess */
+    module->Master_messages = g_slist_append ( module->Master_messages, response );
+    pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
 /* Http_ws_on_master_closed: Traite une deconnexion du master                                                                 */
@@ -202,8 +132,7 @@
   { gchar chaine[128];
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    if (module->lib) g_snprintf( chaine, sizeof(chaine), "W-%s-%s", module->lib->name, thread_tech_id );            /* Positionne le nom noyau */
-    else g_snprintf( chaine, sizeof(chaine), "W-%s", thread_tech_id );                             /* Positionne le nom noyau */
+    g_snprintf( chaine, sizeof(chaine), "W-%s", thread_tech_id );                                  /* Positionne le nom noyau */
     gchar *upper_name = g_ascii_strup ( chaine, -1 );
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
     g_free(upper_name);
@@ -211,13 +140,10 @@
     if (sizeof_vars)
      { module->vars = g_try_malloc0 ( sizeof_vars );
        if (!module->vars)
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: Memory error.", __func__,
-                    module->lib->uuid, thread_tech_id );
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory error for vars.", __func__, thread_tech_id );
           SubProcess_end ( module );                            /* Pas besoin de return : SubProcess_end fait un pthread_exit */
         }
      }
-
-    if (module->lib) module->zmq_from_bus  = Zmq_Connect ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 
 /******************************************************* Ecoute du Master *****************************************************/
     module->Master_session = soup_session_new();
@@ -230,22 +156,10 @@
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
     if (Dls_auto_create_plugin( thread_tech_id, description ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, thread_tech_id, description ); }
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, thread_tech_id, description ); }
 
     Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
-    if (module->lib)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is UP",
-                 __func__, module->lib->uuid, thread_tech_id );
-     }
-    else
-     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Subprocess '%s' is UP", __func__, thread_tech_id ); }
-
-/******************************************************* Récupère les Outputs *************************************************/
-    JsonNode *result = Http_Post_to_local_BUS ( module, "GET_DO", NULL );
-    if (result && Json_has_member ( result, "douts" ) && module->Run_subprocess_do_init )
-     { Json_node_foreach_array_element ( result, "douts", module->Run_subprocess_do_init, module ); }
-    Json_node_unref ( result );
-
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Subprocess '%s' is UP", __func__, thread_tech_id );
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
@@ -257,73 +171,11 @@
     if (module->vars) g_free(module->vars);
     soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
     soup_session_abort ( module->Master_session );
-    Zmq_Close ( module->zmq_from_bus );
-    if (module->lib)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s is DOWN",
-                 __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id") );
-     }
-    else
-     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s' is DOWN",
-                 __func__, Json_get_string ( module->config, "thread_tech_id") );
-     }
+    g_slist_foreach ( module->Master_messages, (GFunc) Json_node_unref, NULL );
+    g_slist_free ( module->Master_messages );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s' is DOWN",
+              __func__, Json_get_string ( module->config, "thread_tech_id") );
     pthread_exit(0);
-  }
-/******************************************************************************************************************************/
-/* Process_Load_one_subprocess: Demarre u nmodule du thread en parametre                                                      */
-/* Entrée: la structure librairie du thread et la configuration du module, dans 'element' au format json                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Process_Load_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct PROCESS *lib = user_data;
-    pthread_attr_t attr;
-
-    struct SUBPROCESS *module = g_try_malloc0( sizeof(struct SUBPROCESS) );
-    if (!module)
-     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: Not Enought Memory",
-                 __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
-       return;
-     }
-    module->lib    = lib;
-    module->config = element;
-
-    if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
-     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: pthread_attr_init failed",
-                 __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
-       return;
-     }
-
-    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )                       /* On le laisse joinable au boot */
-     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: pthread_setdetachstate failed",
-                 __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
-       return;
-     }
-
-    if ( pthread_create( &module->TID, &attr, (void *)lib->Run_subprocess, module ) )
-     { Info_new( Config.log, lib->Thread_debug, LOG_ERR, "%s: UUID %s/%s: pthread_create failed (%s)",
-                 __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
-       return;
-     }
-    pthread_attr_destroy(&attr);                                                                        /* Libération mémoire */
-    lib->modules = g_slist_append ( lib->modules, module );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s: loaded",
-              __func__, module->lib->uuid, Json_get_string ( element, "thread_tech_id" ) );
-  }
-/******************************************************************************************************************************/
-/* Process_Unload_one_subprocess: Demarre u nmodule du thread en parametre                                                    */
-/* Entrée: la structure librairie du thread et la configuration du module, dans 'element' au format json                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Process_Unload_all_subprocess ( struct PROCESS *lib )
-  { while(lib->modules)
-     { struct SUBPROCESS *module = lib->modules->data;
-       lib->modules = g_slist_remove ( lib->modules, module );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: UUID %s/%s: Wait for sub-process end",
-                 __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id" ) );
-       pthread_join( module->TID, NULL );                                                              /* Attente fin du fils */
-       Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: UUID %s/%s: unloaded",
-                 __func__, module->lib->uuid, Json_get_string ( module->config, "thread_tech_id" ) );
-       g_free(module);
-     }
   }
 /******************************************************************************************************************************/
 /* Process_start: Demarre le thread en paremetre                                                                              */
@@ -427,48 +279,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Process_reload_by_uuid: Restart le process en parametre                                                                    */
-/* Entrée: L'uuid du thread                                                                                                   */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gboolean Process_reload_by_uuid ( gchar *uuid )
-  { gboolean found = FALSE;
-    GSList *liste = Partage->com_msrv.Librairies;                                        /* Parcours de toutes les librairies */
-    while(liste)
-     { struct PROCESS *lib = liste->data;
-       if ( ! strcasecmp( uuid, lib->uuid ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                   "%s: UUID %s: Reloading '%s' -> Library found. Reloading.", __func__, lib->uuid, lib->name );
-          Process_stop(lib);
-          if (lib->dl_handle) dlclose( lib->dl_handle );
-          Process_dlopen ( lib );
-          found = TRUE;
-        }
-       liste = g_slist_next(liste);
-     }
-    return(found);
-  }
-/******************************************************************************************************************************/
-/* Process_reload_by_uuid: Restart le process en paremetre                                                                    */
-/* Entrée: Le nom du thread                                                                                                   */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gboolean Process_set_debug ( gchar *uuid, gboolean debug )
-  { gboolean found = FALSE;
-    GSList *liste = Partage->com_msrv.Librairies;                                        /* Parcours de toutes les librairies */
-    while(liste)
-     { struct PROCESS *lib = liste->data;
-       if ( ! strcasecmp( uuid, lib->uuid ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                   "%s: UUID %s: Setting '%s' debug %s.", __func__, lib->uuid, lib->name, (debug ? "ON" : "OFF") );
-          lib->Thread_debug = debug;
-          found = TRUE;
-        }
-       liste = g_slist_next(liste);
-     }
-    return(found);
-  }
-/******************************************************************************************************************************/
 /* Decharger_librairies: Decharge toutes les librairies                                                                       */
 /* EntrÃée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
@@ -566,9 +376,6 @@
        g_free(module);
        return;
      }
-
-    module->Run_subprocess_message = dlsym( module->dl_handle, "Run_subprocess_message" );/* Reception d'un message depuis le master */
-    module->Run_subprocess_do_init = dlsym( module->dl_handle, "Run_subprocess_do_init" );/* Reception de l'init output */
 
     JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );

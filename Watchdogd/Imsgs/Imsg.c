@@ -31,28 +31,6 @@
  #include "Imsg.h"
 
 /******************************************************************************************************************************/
-/* Imsgs_Creer_DB : Creation de la table du thread                                                                            */
-/* Entrée: le pointeur sur la PROCESS                                                                                         */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Imsgs_Creer_DB ( struct PROCESS *lib )
-  { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-             "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
-
-    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                    "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`jabberid` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`password` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-
-    Process_set_database_version ( lib, 1 );
-  }
-/******************************************************************************************************************************/
 /* Imsgs_Envoi_message_to : Envoi un message a un contact xmpp                                                                */
 /* Entrée: le nom du destinataire et le message                                                                               */
 /* Sortie: Néant                                                                                                              */
@@ -106,7 +84,7 @@
  void Imsgs_Envoi_message_to_all_available ( struct SUBPROCESS *module, gchar *message )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: Memory Error", __func__ );
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: Memory Error", __func__ );
        return;
      }
 /********************************************* Chargement des informations en bases *******************************************/
@@ -137,14 +115,14 @@
     const gchar *from = xmpp_stanza_get_attribute ( stanza, "from" );
     gchar *message    = xmpp_message_get_body ( stanza );
     if (!from || !message)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: '%s': Error : from or message = NULL", __func__, thread_tech_id );
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': Error : from or message = NULL", __func__, thread_tech_id );
        return(1);
      }
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': From '%s' -> '%s'", __func__, thread_tech_id, from, message );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': From '%s' -> '%s'", __func__, thread_tech_id, from, message );
 
     if (Imsgs_recipient_is_allow_command ( module, from ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: '%s': unknown sender '%s' or not allow to send command. Dropping message...", __func__, thread_tech_id, from );
        goto end;
      }
@@ -156,7 +134,7 @@
 
     JsonNode *RootNode = Json_node_create();
     if ( RootNode == NULL )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for '%s'", __func__, thread_tech_id, from );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for '%s'", __func__, thread_tech_id, from );
        goto end;
      }
     SQL_Select_to_json_node ( RootNode, "results",
@@ -165,7 +143,7 @@
                               "WHERE map.thread_tech_id='_COMMAND_TEXT' AND map.thread_acronyme LIKE '%%%s%%'", message );
 
     if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, message );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, message );
        Imsgs_Envoi_message_to( module, from, "Error searching Database .. Sorry .." );
        goto end;
      }
@@ -186,7 +164,7 @@
              gchar *tech_id         = Json_get_string ( element, "tech_id" );
              gchar *acronyme        = Json_get_string ( element, "acronyme" );
              gchar *libelle         = Json_get_string ( element, "libelle" );
-             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+             Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
                        thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
              Imsgs_Envoi_message_to ( module, from, thread_acronyme );                              /* Envoi des différents choix */
              results = g_list_next(results);
@@ -198,7 +176,7 @@
           gchar *tech_id         = Json_get_string ( element, "tech_id" );
           gchar *acronyme        = Json_get_string ( element, "acronyme" );
           gchar *libelle         = Json_get_string ( element, "libelle" );
-          Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+          Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
                     thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
           Http_Post_to_local_BUS_CDE ( module, tech_id, acronyme );
           Imsgs_Envoi_message_to ( module, from, "Fait." );                                     /* Envoi des différents choix */
@@ -229,8 +207,8 @@ end:
      }
 
     if (SQL_Write_new ( "UPDATE users SET imsg_available='%d' WHERE xmpp='%s'", available, jabberid ) == FALSE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING, "%s: Requete failed", __func__ ); }
-    else { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: Requete failed", __func__ ); }
+    else { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
                     "%s : jabber_id %s -> Availability updated to %d.", __func__, jabber_id, available );
          }
   }
@@ -258,7 +236,7 @@ end:
 
     gchar *buf; size_t buflen;
     xmpp_stanza_to_text ( pres, &buf, &buflen );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
     xmpp_free(vars->ctx, buf);
 
     xmpp_send(vars->conn, pres);
@@ -292,7 +270,7 @@ end:
      }
     gchar *buf; size_t buflen;
     xmpp_stanza_to_text ( stanza, &buf, &buflen );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
     xmpp_free(vars->ctx, buf);
 
     return(1);
@@ -307,7 +285,7 @@ end:
     struct IMSGS_VARS *vars = module->vars;
     if (status == XMPP_CONN_CONNECT)
      {
-       Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Account connected and %s secure",
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Account connected and %s secure",
                  __func__, Json_get_string ( module->config, "jabberid" ), (xmpp_conn_is_secured (conn) ? "IS" : "IS NOT") );
        xmpp_handler_add ( vars->conn, Imsgs_handle_message_CB,  NULL, "message",  NULL, module );
        xmpp_handler_add ( vars->conn, Imsgs_handle_presence_CB, NULL, "presence", NULL, module );
@@ -317,7 +295,7 @@ end:
        Imsgs_Envoi_message_to_all_available ( module, "Instance démarrée. A l'écoute !" );
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Account disconnected",
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Account disconnected",
                  __func__, Json_get_string ( module->config, "jabberid" ) );
        vars->signed_off = TRUE;
      }
@@ -335,7 +313,7 @@ end:
     gchar *jabber_id = Json_get_string ( module->config, "jabberid" );
 
     if ( ! (thread_tech_id && jabber_id) )
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: No thread_tech_id Or Jabber_id. Stopping.", __func__ );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: No thread_tech_id Or Jabber_id. Stopping.", __func__ );
        goto end;
      }
 
@@ -343,11 +321,11 @@ reconnect:
     vars->signed_off = FALSE;
     vars->ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_INFO));
     if (!vars->ctx)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Ctx Init failed", __func__ ); goto end; }
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: Ctx Init failed", __func__ ); goto end; }
 
     vars->conn = xmpp_conn_new(vars->ctx);
     if (!vars->conn)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: Connection New failed", __func__ ); goto end; }
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: Connection New failed", __func__ ); goto end; }
 
     xmpp_conn_set_keepalive(vars->conn, 60, 1);
     xmpp_conn_set_jid (vars->conn, jabber_id );
@@ -355,29 +333,33 @@ reconnect:
 
     gint retour = xmpp_connect_client ( vars->conn, NULL, 0, Imsgs_connexion_CB, module );
     if ( retour != XMPP_EOK)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                   "%s: '%s': Connexion failed with error %d", __func__, jabber_id, retour );
        vars->signed_off = TRUE;
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: '%s': Connexion in progress.", __func__, jabber_id );
+     { Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Connexion in progress.", __func__, jabber_id );
        SubProcess_send_comm_to_master_new ( module, TRUE );
      }
 
-    while(module->lib->Thread_run == TRUE && vars->signed_off == FALSE && module->lib->Thread_reload == FALSE)/* On tourne tant que necessaire */
+    while(module->Thread_run == TRUE && vars->signed_off == FALSE)                           /* On tourne tant que necessaire */
      { /*g_usleep(200000);*/
        sched_yield();
 
        xmpp_run_once ( vars->ctx, 500 ); /* En milliseconde */
 
        SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
-/********************************************************* Envoi de SMS *******************************************************/
-       JsonNode *request;
-       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
-        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) &&
+/****************************************************** Ecoute du master ******************************************************/
+       while ( module->Master_messages )
+        { pthread_mutex_lock ( &module->synchro );
+          JsonNode *request = module->Master_messages->data;
+          module->Master_messages = g_slist_remove ( module->Master_messages, request );
+          pthread_mutex_unlock ( &module->synchro );
+          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
+
+          if ( !strcasecmp( bus_tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: '%s': Sending msg '%s:%s' (%s)", __func__,
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Sending msg '%s:%s' (%s)", __func__,
                        jabber_id,
                        Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
                        Json_get_string ( request, "libelle" ) );
@@ -385,10 +367,10 @@ reconnect:
              g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( request, "dls_shortname" ), Json_get_string ( request, "libelle" ) );
              Imsgs_Envoi_message_to_all_available ( module, chaine );
            }
-          else if ( !strcasecmp( zmq_tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
+          else if ( !strcasecmp( bus_tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
           else
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': zmq_tag '%s' not for this thread", __func__,
-                       jabber_id, zmq_tag ); }
+           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': bus_tag '%s' not for this thread", __func__,
+                       jabber_id, bus_tag ); }
           Json_node_unref(request);
         }
      }                                                                                         /* Fin du while partage->arret */
@@ -396,53 +378,24 @@ reconnect:
 end:
     if (vars->conn)
      { xmpp_disconnect(vars->conn);
-       Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Disconnect OK", __func__, jabber_id );
+       Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': Disconnect OK", __func__, jabber_id );
        xmpp_conn_release(vars->conn);
-       Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Connection Release OK", __func__, jabber_id );
+       Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': Connection Release OK", __func__, jabber_id );
      }
     if (vars->ctx)
      { xmpp_ctx_free(vars->ctx);
-       Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': Ctx Free OK", __func__, jabber_id );
+       Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': Ctx Free OK", __func__, jabber_id );
      }
-    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: '%s': XMPPshutdown OK", __func__, jabber_id );
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': XMPPshutdown OK", __func__, jabber_id );
     SubProcess_send_comm_to_master_new ( module, FALSE );
 
-    if (module->lib->Thread_run == TRUE && vars->signed_off == TRUE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s': Account signed off. Why ?? Reconnect in 2s!", __func__, jabber_id );
+    if (module->Thread_run == TRUE && vars->signed_off == TRUE)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Account signed off. Why ?? Reconnect in 2s!", __func__, jabber_id );
        vars->signed_off = FALSE;
        sleep(2);
        goto reconnect;
      }
 
     SubProcess_end(module);
-  }
-/******************************************************************************************************************************/
-/* Run_process: Run du Process                                                                                                */
-/* Entrée: la structure PROCESS associée                                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_process ( struct PROCESS *lib )
-  {
-reload:
-    Imsgs_Creer_DB ( lib );                                                                    /* Création de la DB du thread */
-    Thread_init ( "imsgs", "USER", lib, WTD_VERSION, "Manage Instant Messaging system (libstrophe)" );
-
-    lib->config = Json_node_create();
-    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
-
-    xmpp_initialize();
-    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
-    while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
-    Process_Unload_all_subprocess ( lib );
-    xmpp_shutdown();
-
-    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
-       lib->Thread_reload = FALSE;
-       goto reload;
-     }
-
-    Thread_end ( lib );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

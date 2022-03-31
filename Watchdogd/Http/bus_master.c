@@ -187,6 +187,22 @@
     pthread_mutex_unlock( &Partage->com_http.synchro );
   }
 /******************************************************************************************************************************/
+/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Http_Send_to_slaves ( gchar *target_tech_id, JsonNode *RootNode )
+  { pthread_mutex_lock( &Partage->com_http.synchro );
+    GSList *liste = Partage->com_http.Slaves;
+    while ( liste )
+     { struct HTTP_WS_SESSION *slave = liste->data;
+       Http_ws_send_json_to_slave ( slave, RootNode );
+       liste = g_slist_next( liste );
+     }
+    Json_node_unref ( RootNode );
+    pthread_mutex_unlock( &Partage->com_http.synchro );
+  }
+/******************************************************************************************************************************/
 /* Http_ws_destroy_session: Supprime une session WS                                                                           */
 /* Entrée: la WS                                                                                                              */
 /* Sortie: Niet                                                                                                               */

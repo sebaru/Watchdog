@@ -40,19 +40,14 @@
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
-    struct PROCESS *lib;
     JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     SoupSession *Master_session;
     SoupWebsocketConnection *Master_websocket;
-    void *zmq_from_bus;                                                                       /* handle d"ecoute du BUS local */
-    gchar zmq_buffer[1024];                                                     /* Buffer de reception des messages du master */
+    GSList *Master_messages;
     void *vars;                                                               /* Pointeur vers les variables de run du module */
     void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
-                                                                                          /* Traitement des message du master */
-    void (*Run_subprocess_message)( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message );
-    void (*Run_subprocess_do_init)( JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
   };
 
  struct PROCESS

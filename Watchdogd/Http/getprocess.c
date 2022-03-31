@@ -400,7 +400,7 @@
      }
     else if ( !strcasecmp( zmq_tag, "SET_LOG") )
      { if ( !( Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
-               Json_has_member ( request, "log_zmq" ) && Json_has_member ( request, "log_level" ) &&
+               Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_msrv" )
              )
           )
@@ -408,12 +408,12 @@
           goto end;
         }
        Config.log_db   = Json_get_bool ( request, "log_db" );
-       Config.log_zmq  = Json_get_bool ( request, "log_zmq" );
+       Config.log_bus  = Json_get_bool ( request, "log_bus" );
        Config.log_trad = Json_get_bool ( request, "log_trad" );
        Config.log_msrv = Json_get_bool ( request, "log_msrv" );
        Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: log_msrv=%d, db=%d, zmq=%d, trad=%d, log_level=%d", __func__,
-                 Config.log_msrv, Config.log_db, Config.log_zmq, Config.log_trad, Json_get_int ( request, "log_level" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: log_msrv=%d, db=%d, bus=%d, trad=%d, log_level=%d", __func__,
+                 Config.log_msrv, Config.log_db, Config.log_bus, Config.log_trad, Json_get_int ( request, "log_level" ) );
      }
 end:
 /*************************************************** Envoi au client **********************************************************/
@@ -456,7 +456,7 @@ end:
      { SQL_Select_to_json_node ( RootNode, NULL, "SELECT uuid, instance, name FROM processes WHERE uuid='%s'", uuid );
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Reloading start for UUID %s: %s:%s", __func__,
                  uuid, Json_get_string ( RootNode, "instance" ), Json_get_string ( RootNode, "name" ) );
-       Json_node_add_string ( RootNode, "zmq_tag", "PROCESS_RELOAD" );
+       Json_node_add_string ( RootNode, "api_tag", "PROCESS_RELOAD" );
        /*Zmq_Send_json_node( Cfg_http.lib->zmq_to_master, "HTTP", "*", RootNode );*/
        Json_node_unref(RootNode);
      }
