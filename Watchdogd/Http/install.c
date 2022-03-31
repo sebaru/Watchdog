@@ -30,8 +30,6 @@
  #include <string.h>
  #include <unistd.h>
  #include <fcntl.h>
- #include <pwd.h>
- #include <grp.h>
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
@@ -43,10 +41,8 @@
 /******************************************************************************************************************************/
  void Http_traiter_install ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { gchar fichier[80], home[128], chaine[256];
+  { gchar fichier[80];
     struct stat stat_buf;
-    struct passwd *pwd;
-    gchar *db_schema;
 
     if (msg->method == SOUP_METHOD_GET)
      { SoupMessageHeaders *headers;
@@ -142,8 +138,8 @@
     gchar *domain_uuid   = Json_get_string ( request, "domain_uuid" );
     gchar *domain_secret = Json_get_string ( request, "domain_secret" );
     gchar *api_url       = Json_get_string ( request, "api_url" );
-    if (strlen(api_url)==0) api_url = "https://api.abls-habitat.fr";
-
+    if ( g_str_has_prefix ( api_url, "https://" ) ) api_url+=8;
+    if (strlen(api_url)==0) api_url = "api.abls-habitat.fr";
 /******************************************* Création fichier de config *******************************************************/
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Creating config file '%s'", __func__, fichier );
     JsonNode *RootNode = Json_node_create ();

@@ -228,6 +228,91 @@
     Updater_confDB_BI();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
+/* SubProcess_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_ws_on_API_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
+  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Message received !", __func__ );
+    gsize taille;
+
+    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!response)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
+       return;
+     }
+
+    if (!Json_has_member ( response, "api_tag" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'api_tag') !", __func__ );
+       Json_node_unref(response);
+       return;
+     }
+
+    gchar *api_tag = Json_get_string ( response, "bus_tag" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive api_tag '%s'  !", __func__, api_tag );
+
+    /*pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au subprocess */
+    /*module->Master_messages = g_slist_append ( module->Master_messages, response );
+    pthread_mutex_unlock ( &module->synchro );*/
+  }
+
+/******************************************************************************************************************************/
+/* MSRV_ws_on_master_close_CB: Traite une deconnexion sur la websocket MSRV                                                   */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void MSRV_ws_on_API_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
+  { g_object_unref(Partage->com_msrv.API_websocket);
+    Partage->com_msrv.API_websocket = NULL;
+    Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: WebSocket Close. Reboot Needed!", __func__ );
+    /* Partage->com_msrv.Thread_run = FALSE; */
+  }
+ static void MSRV_ws_on_API_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
+  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
+  }
+/******************************************************************************************************************************/
+/* MSRV_ws_on_API_connected: Termine la creation de la connexion websocket API MSRV et raccorde le signal handler             */
+/* Entrée: les variables traditionnelles de libsous                                                                           */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_ws_on_API_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
+  { GError *error = NULL;
+    Partage->com_msrv.API_websocket = soup_session_websocket_connect_finish ( Partage->com_msrv.API_session, res, &error );
+    if (!Partage->com_msrv.API_websocket)                                                    /* No limit on incoming packet ! */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: WebSocket error: %s.", __func__, error->message );
+       g_error_free (error);
+       return;
+     }
+    /*g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );*/
+    g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(MSRV_ws_on_API_message_CB), NULL );
+    g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(MSRV_ws_on_API_close_CB), NULL );
+    g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(MSRV_ws_on_API_error_CB), NULL );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket to Master connected", __func__ );
+  }
+/******************************************************************************************************************************/
+/* MSRV_ws_init: appelé pour démarrer le websocket vers l'API                                                                 */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_ws_init ( void )
+  { Partage->com_msrv.API_session = soup_session_new();
+    g_object_set ( G_OBJECT(Partage->com_msrv.API_session), "ssl-strict", TRUE, NULL );
+    static gchar *protocols[] = { "live-api", NULL };
+    gchar chaine[256];
+    g_snprintf(chaine, sizeof(chaine), "wss://%s/ws_api", Json_get_string ( Config.config, "api_url" ) );
+    soup_session_websocket_connect_async ( Partage->com_msrv.API_session, soup_message_new ( "GET", chaine ),
+                                           NULL, protocols, g_cancellable_new(), MSRV_ws_on_API_connected, NULL );
+  }
+/******************************************************************************************************************************/
+/* MSRV_ws_init: appelé pour démarrer le websocket vers l'API                                                                 */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_ws_end ( void )
+  { soup_websocket_connection_close ( Partage->com_msrv.API_websocket, 0, "Thanks, Bye !" );
+    soup_session_abort ( Partage->com_msrv.API_session );
+  }
+/******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
@@ -266,6 +351,8 @@
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
      }
 
+/***************************************** WebSocket Connect to API ************************************************************/
+    MSRV_ws_init();
 
 /***************************************** Charge le mapping des bits internes ************************************************/
     MSRV_Remap();
@@ -303,6 +390,7 @@
     if (!Config.installed) { sleep(2); }              /* Laisse le temps au thread HTTP de repondre OK au client avant reboot */
     Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
 
+    MSRV_ws_end();
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
 
@@ -344,6 +432,9 @@
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
      }
 
+/***************************************** WebSocket Connect to API ************************************************************/
+    MSRV_ws_init();
+
 /***************************************** Debut de la boucle sans fin ********************************************************/
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
@@ -380,6 +471,7 @@
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
 /*    Http_Post_to_local_BUS ( module, "SLAVE_STOP", NULL );*/
 
+    MSRV_ws_end();
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
 

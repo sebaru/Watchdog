@@ -57,7 +57,7 @@
      }
   }
 /******************************************************************************************************************************/
-/* Http_ws_on_master_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master          */
+/* SubProcess_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/

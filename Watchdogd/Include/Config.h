@@ -56,7 +56,6 @@
     gboolean log_arch;                                                                                 /* TRUE si log_archive */
     gboolean log_db;                                                                              /* TRUE si log des acces DB */
     gboolean log_trad;                                                                    /* TRUE si log des compilations DLS */
-    gboolean use_subdir;                                                                   /* TRUE si home = .watchdog subdir */
     gboolean single;                                                                                /* Demarrage des thread ? */
     struct LOG *log;                                                                             /* Pour l'affichage des logs */
   };

@@ -102,7 +102,7 @@
   { JsonNode *result = NULL;
     gchar query[256];
 
-    g_snprintf( query, sizeof(query), "%s/%s", Json_get_string ( Config.config, "api_url"), URI );
+    g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
@@ -142,8 +142,8 @@
   { gchar query[512];
     JsonNode *result = NULL;
 
-    if (!parametres) g_snprintf( query, sizeof(query), "%s/%s", Json_get_string ( Config.config, "api_url"), URI );
-                else g_snprintf( query, sizeof(query), "%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
+    if (!parametres) g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
+                else g_snprintf( query, sizeof(query), "https://%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
