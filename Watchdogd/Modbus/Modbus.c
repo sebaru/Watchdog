@@ -761,6 +761,7 @@
        gchar chaine[16];
        g_snprintf( chaine, sizeof(chaine), "DO%03d", num );
        Json_node_add_string ( vars->DO[num], "thread_acronyme", chaine );
+       Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
      }
     Modbus_Get_DO_from_master ( module );
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
@@ -1039,11 +1040,6 @@
 
     gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
     gint   max_request_par_sec = Json_get_int    ( module->config, "max_request_par_sec" );
-
-    if (Json_get_bool ( module->config, "enable" ) == FALSE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, thread_tech_id );
-       SubProcess_end ( module );
-     }
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { usleep(vars->delai);
