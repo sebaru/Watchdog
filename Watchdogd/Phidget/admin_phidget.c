@@ -27,7 +27,7 @@
 
  #include "watchdogd.h"
  #include "Phidget.h"
-
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Admin_config : fonction appelé par le thread http lors d'une requete POST sur config PROCESS                               */
 /* Entrée : la librairie, et le Json recu                                                                                     */
@@ -216,3 +216,4 @@ end:
     Json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
+#endif

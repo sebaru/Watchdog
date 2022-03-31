@@ -28,7 +28,7 @@
  #include <glib.h>
  #include "watchdogd.h"
  #include "Gpiod.h"
-
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Admin_json_gpiod_status : fonction appelée pour vérifier le status de la librairie                                         */
 /* Entrée : un JSon Builder                                                                                                   */
@@ -117,3 +117,4 @@
     else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
+#endif

@@ -182,6 +182,7 @@
        return;
      }
 
+#ifdef bouh
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
      { Json_node_unref(request);
@@ -212,7 +213,7 @@
        lib->Admin_config ( lib, msg, request );
      }
     else soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Process not found" );
-
+#endif
 /*************************************************** Envoi au client **********************************************************/
     Json_node_unref(request);
   }

@@ -27,6 +27,8 @@
 
  #include "watchdogd.h"
  #include "Radio.h"
+
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Admin_config : fonction appelé par le thread http lors d'une requete POST sur config PROCESS                               */
 /* Entrée : la librairie, et le Json recu                                                                                     */
@@ -62,3 +64,4 @@
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
+#endif
