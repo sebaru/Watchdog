@@ -19,7 +19,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y json-glib-devel gammu-devel
   dnf install -y mpg123 sox libusb-devel libgpiod-devel
   dnf install -y librsvg2-devel
-  dnf install -y git
+  dnf install -y git systemd-devel
 
   git clone https://github.com/strophe/libstrophe.git
   cd libstrophe
@@ -62,7 +62,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y sox libsox-fmt-all python3-pip mpg123
   apt install -y libjson-glib-dev libgpiod-dev
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
-  apt install -y libsoup2.4-dev librsvg2-dev alsa-utils
+  apt install -y libsoup2.4-dev librsvg2-dev alsa-utils systemd-dev
   pip3 install gTTS-token gTTS --upgrade
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
   apt install -y libphidget22 libphidget22-dev

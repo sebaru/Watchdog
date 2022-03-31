@@ -40,6 +40,7 @@
  #include <popt.h>
  #include <pthread.h>
  #include <pwd.h>
+ #include <systemd/sd-login.h>
 
  #include "watchdogd.h"
 
@@ -437,13 +438,13 @@
 /* Entrée: néant                                                                                                              */
 /* Sortie: EXIT si erreur                                                                                                     */
 /******************************************************************************************************************************/
- static void Drop_privileges( void )
+ static gboolean Drop_privileges( void )
   { struct passwd *pwd;
 
     if (getuid())
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
                 "%s: Error, running user is not 'root' Could not drop privileges.", __func__, getuid(), strerror(errno) );
-       exit(EXIT_ERREUR);
+       return(FALSE);
      }
 
     if (Config.headless)
@@ -457,18 +458,27 @@
        if (!pwd)
         { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
                    "%s: Creation of user 'watchdog' failed (%s). Stopping.", __func__, strerror(errno) );
-          exit(EXIT_ERREUR);
+          return(FALSE);
         }
      }
     else /* When not headless */
-     { pwd = NULL;
+     { gchar *session;
+       uid_t active_session;
+       if (sd_seat_get_active(	"seat0",	&session,	&active_session) < 0)
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
+                    "%s: seat_get_active failed (%s). Waiting 5s.", __func__, strerror (errno) );
+          return(FALSE);
+        }
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                "%s: session found = '%s' for user '%d'", __func__, session, active_session );
+       pwd = getpwuid ( active_session );
        if (!pwd)
         { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
                    "%s: Error when searching seat user. Stopping.", __func__ );
-          exit(EXIT_ERREUR);
+          return(FALSE);
         }
      }
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Target User '%s' (uid %d) found.\n", __func__, pwd->pw_name, pwd->pw_uid);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Target User '%s' (uid %d) found.\n", __func__, pwd->pw_name, pwd->pw_uid );
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
              "%s: Dropping from root to '%s' (%d).\n", __func__, pwd->pw_name, pwd->pw_uid );
@@ -502,19 +512,19 @@
     if (setgroups ( nbr_group, grp_list )==-1)
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot SetGroups for user '%s' (%s)\n",
                  __func__, pwd->pw_name, strerror(errno) );
-       exit(EXIT_ERREUR);
+       return(FALSE);
      }
 
     if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                  /* On drop les privilèges */
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREgid for user '%s' (%s)\n",
                  __func__, pwd->pw_name, strerror(errno) );
-       exit(EXIT_ERREUR);
+       return(FALSE);
      }
 
     if (setreuid ( pwd->pw_uid, pwd->pw_uid )==-1)                                                  /* On drop les privilèges */
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREuid for user '%s' (%s)\n",
                  __func__, pwd->pw_name, strerror(errno) );
-       exit(EXIT_ERREUR);
+       return(FALSE);
      }
 
     if ( Config.headless )
@@ -533,6 +543,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Chdir %s failed\n", __func__, Config.home ); exit(EXIT_ERREUR); }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Chdir %s successfull. PID=%d\n", __func__, Config.home, getpid() ); }
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                                              */
@@ -626,7 +637,7 @@
      }
 
 /******************************************************* Drop privileges ******************************************************/
-    Drop_privileges();
+    if (!Drop_privileges()) { sleep(5); goto second_stage_end; }
 
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
     Print_config();
