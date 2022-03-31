@@ -131,6 +131,32 @@
     return( strcasecmp ( acronyme_1, acronyme_2 ) );
   }
 /******************************************************************************************************************************/
+/* MSRV_Map_to_thread: Met à jour à buffer json en mappant l'equivalent thread d'un bit interne local                         */
+/* Entrée: FALSE si pas trouvé                                                                                                */
+/******************************************************************************************************************************/
+ gboolean MSRV_Map_to_thread ( JsonNode *key )
+  { JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, key );
+    if (map && Json_has_member ( map, "thread_tech_id" ) && Json_has_member ( map, "thread_acronyme" ) )
+     { Json_node_add_string ( key, "thread_tech_id",  Json_get_string ( map, "thread_tech_id" ) );
+       Json_node_add_string ( key, "thread_acronyme", Json_get_string ( map, "thread_acronyme" ) );
+       return(TRUE);
+     }
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* MSRV_Map_to_thread: Met à jour à buffer json en mappant l'equivalent thread d'un bit interne local                         */
+/* Entrée: FALSE si pas trouvé                                                                                                */
+/******************************************************************************************************************************/
+ gboolean MSRV_Map_from_thread ( JsonNode *key )
+  { JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, key );
+    if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
+     { Json_node_add_string ( key, "tech_id",  Json_get_string ( map, "thread" ) );
+       Json_node_add_string ( key, "acronyme", Json_get_string ( map, "acronyme" ) );
+       return(TRUE);
+     }
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
 /* MSRV_Remap: Charge les données de mapping en mémoire                                                                       */
 /* Entrée: néant                                                                                                              */
 /******************************************************************************************************************************/

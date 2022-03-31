@@ -221,10 +221,9 @@ end:
        gchar *tech_id         = thread_tech_id;
        gchar *acronyme        = thread_acronyme;
 
-       JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
-       if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
-        { tech_id  = Json_get_string ( map, "tech_id" );
-          acronyme = Json_get_string ( map, "acronyme" );
+       if (MSRV_Map_from_thread ( request ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) )
+        { tech_id  = Json_get_string ( request, "tech_id" );
+          acronyme = Json_get_string ( request, "acronyme" );
         }
        Info_new( Config.log, Config.log_bus, LOG_INFO,
                  "%s: SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d)", __func__,
@@ -274,10 +273,9 @@ end:
        gchar *tech_id         = thread_tech_id;
        gchar *acronyme        = thread_acronyme;
 
-       JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, request );
-       if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
-        { tech_id  = Json_get_string ( map, "tech_id" );
-          acronyme = Json_get_string ( map, "acronyme" );
+       if (MSRV_Map_from_thread ( request ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) )
+        { tech_id  = Json_get_string ( request, "tech_id" );
+          acronyme = Json_get_string ( request, "acronyme" );
         }
        Info_new( Config.log, Config.log_bus, LOG_INFO,
                  "%s: SET_DI from '%s': '%s:%s/'%s:%s'=%d", __func__,
@@ -304,14 +302,9 @@ end:
         { struct DLS_DO *dout = liste->data;
           JsonNode *element = Json_node_create();
           Dls_DO_to_json ( element, dout );
-          JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, element );
-          if (map && Json_has_member ( map, "thread_tech_id" ) && Json_has_member ( map, "thread_acronyme" ) )
-           { gchar *local_thread_tech_id  = Json_get_string ( map, "thread_tech_id" );
-             if (!strcasecmp ( local_thread_tech_id, thread_tech_id ) )
-              { Json_node_add_string ( element, "thread_tech_id",  thread_tech_id );
-                Json_node_add_string ( element, "thread_acronyme", Json_get_string ( map, "thread_acronyme" ) );
-                Json_array_add_element ( output_array, element );
-              }
+          if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
+           { if (!strcasecmp ( Json_get_string ( element, "thread_tech_id" ), thread_tech_id ) )
+              {  Json_array_add_element ( output_array, element ); }
              else Json_node_unref ( element );
            } else Json_node_unref ( element );
           liste = g_slist_next ( liste );

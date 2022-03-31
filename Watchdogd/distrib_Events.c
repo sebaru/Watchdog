@@ -52,13 +52,16 @@
               dout->tech_id, dout->acronyme, reste );
 
     RootNode = Json_node_create ();
-    if (RootNode)
-     { Dls_DO_to_json ( RootNode, dout );
-       Json_node_add_string ( RootNode, "bus_tag", "SET_DO" );
-       Http_Send_to_slaves ( NULL, RootNode );
-       Json_node_unref ( RootNode );
+    if (!RootNode)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       goto suite_AO;
      }
-    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
+    Dls_DO_to_json ( RootNode, dout );
+    Json_node_add_string ( RootNode, "bus_tag", "SET_DO" );
+    if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( NULL, RootNode );
+
+    Json_node_unref ( RootNode );
+
 
 suite_AO:
     if (!Partage->com_msrv.Liste_AO) return;                                                      /* Si pas de a, on se barre */

@@ -143,6 +143,9 @@
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 
+ extern gboolean MSRV_Map_to_thread ( JsonNode *key );
+ extern gboolean MSRV_Map_from_thread ( JsonNode *key );
+
  extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
  extern void UUID_Load ( gchar *thread, gchar *target );
  #endif
