@@ -585,7 +585,7 @@ encore:
                    "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
                    "`valeur` FLOAT NOT NULL DEFAULT '0',"
                    "`archivage` INT(11) NOT NULL DEFAULT '2',"
-                   "`in_range` TINYINT(1) NOT NULL DEFAULT '0',"
+                   "`in_range` BOOLEAN NOT NULL DEFAULT '0',"
                    "UNIQUE (`tech_id`,`acronyme`),"
                    "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
@@ -612,7 +612,7 @@ encore:
                    "`image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'syn_maison.png',"
                    "`page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
                    "`access_level` INT(11) NOT NULL DEFAULT '0',"
-                   "`mode_affichage` TINYINT(1) NOT NULL DEFAULT '0',"
+                   "`mode_affichage` BOOLEAN NOT NULL DEFAULT '0',"
                    "FOREIGN KEY (`parent_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
@@ -635,7 +635,7 @@ encore:
                    "`sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '/* Default ! */',"
                    "`errorlog` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No Error',"
                    "`nbr_ligne` INT(11) NOT NULL DEFAULT '0',"
-                   "`debug` TINYINT(1) NOT NULL DEFAULT '0',"
+                   "`debug` BOOLEAN NOT NULL DEFAULT '0',"
                    "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
@@ -705,7 +705,7 @@ encore:
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `histo_msgs` ("
                    "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`msg_id` INT(11) NOT NULL DEFAULT '0',"
-                   "`alive` TINYINT(1) NULL DEFAULT NULL,"
+                   "`alive` BOOLEAN NULL DEFAULT NULL,"
                    "`nom_ack` VARCHAR(97) COLLATE utf8_unicode_ci DEFAULT NULL,"
                    "`date_create` DATETIME(2) NULL,"
                    "`date_fixe` DATETIME(2) NULL,"
@@ -764,7 +764,7 @@ encore:
      }
 
     if (database_version < 6097)
-     { SQL_Write_new ("ALTER TABLE mnemos_AI ADD `in_range` TINYINT(1) NOT NULL DEFAULT '0'"); }
+     { SQL_Write_new ("ALTER TABLE mnemos_AI ADD `in_range` BOOLEAN NOT NULL DEFAULT '0'"); }
 /* a prévoir:
        SQL_Write_new ("ALTER TABLE mnemos_BI       CHANGE `id`     `id_mnemos_BI` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_MONO     CHANGE `id`     `id_mnemos_MONO` INT(11) NOT NULL AUTO_INCREMENT" );

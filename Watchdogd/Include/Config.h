@@ -37,7 +37,7 @@
   struct CONFIG
   { JsonNode *config;                                                           /* imported from /etc/abls-habitat-agent.conf */
     gchar config_file[80];                                        /* Nom du fichier dont est issu les informations ci dessous */
-    gchar run_as [ 40 ];                                                            /* Nom du user sur lequel tourne Watchdog */
+    gboolean headless;                                                                          /* Headless instance or not ? */
 
     gint  db_port;
     gchar db_hostname[ TAILLE_DB_HOST+1 ];                                                /* Nom du host de la base de donnes */

@@ -438,80 +438,96 @@
 /* Sortie: EXIT si erreur                                                                                                     */
 /******************************************************************************************************************************/
  static void Drop_privileges( void )
-  { struct passwd *pwd, *old;
+  { struct passwd *pwd;
 
-    pwd = getpwnam ( Config.run_as );
-    if (!pwd)
+    if (getuid())
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
-                "%s: Error, target user '%s' not found in /etc/passwd (%s).. Could not set run_as user\n", __func__, Config.run_as, strerror(errno) );
-       exit(EXIT_ERREUR);
-     }
-    else Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: User '%s' (uid %d) found.\n", __func__, Config.run_as, pwd->pw_uid);
-
-    old = getpwuid ( getuid() );
-    if (!old)
-     { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
-                "%s: Error, actual user '%d' not found in /etc/passwd (%s).. Could not set run_as user\n", __func__, getuid(), strerror(errno) );
+                "%s: Error, running user is not 'root' Could not drop privileges.", __func__, getuid(), strerror(errno) );
        exit(EXIT_ERREUR);
      }
 
-    if (old->pw_uid != pwd->pw_uid)                                                      /* Besoin de changer d'utilisateur ? */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                "%s: From '%s' (%d) To '%s' (%d).\n", __func__, old->pw_name, old->pw_uid, pwd->pw_name, pwd->pw_uid );
-
-       /* if headless */
-       gid_t *grp_list = NULL;
-       gint nbr_group = 0;
-       struct group *grp;
-       grp = getgrnam("audio");
-       if (grp)
-        { nbr_group++;
-          grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
-          grp_list[nbr_group-1] = grp->gr_gid;
+    if (Config.headless)
+     { pwd = getpwnam ( "watchdog" );
+       if (!pwd)
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
+                    "%s: 'watchdog' user not found while Headless, creating.", __func__ );
+          system("useradd -m -c 'WatchdogServer' watchdog" );
         }
-
-       grp = getgrnam("dialout");
-       if (grp)
-        { nbr_group++;
-          grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
-          grp_list[nbr_group-1] = grp->gr_gid;
-        }
-
-       grp = getgrnam("gpio");
-       if (grp)
-        { nbr_group++;
-          grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
-          grp_list[nbr_group-1] = grp->gr_gid;
-        }
-
-       if (setgroups ( nbr_group, grp_list )==-1)
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot SetGroups for user '%s' (%s)\n",
-                    __func__, Config.run_as, strerror(errno) );
-          exit(EXIT_ERREUR);
-        }
-
-/*       if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                                           /* On drop les privilèges */
-/*        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot Initgroups for user '%s' (%s)\n",
-                    __func__, Config.run_as, strerror(errno) );
-          exit(EXIT_ERREUR);
-        }*/
-
-       if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREgid for user '%s' (%s)\n",
-                    __func__, Config.run_as, strerror(errno) );
-          exit(EXIT_ERREUR);
-        }
-
-       if (setreuid ( pwd->pw_uid, pwd->pw_uid )==-1)                                                              /* On drop les privilèges */
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREuid for user '%s' (%s)\n",
-                    __func__, Config.run_as, strerror(errno) );
+       pwd = getpwnam ( "watchdog" );
+       if (!pwd)
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
+                   "%s: Creation of user 'watchdog' failed (%s). Stopping.", __func__, strerror(errno) );
           exit(EXIT_ERREUR);
         }
      }
-    if ( Config.use_subdir )
-         { g_snprintf(Config.home, sizeof(Config.home), "%s/.watchdog", pwd->pw_dir ); }
-    else { g_snprintf(Config.home, sizeof(Config.home), "%s", pwd->pw_dir ); }
+    else /* When not headless */
+     { pwd = NULL;
+       if (!pwd)
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
+                   "%s: Error when searching seat user. Stopping.", __func__ );
+          exit(EXIT_ERREUR);
+        }
+     }
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Target User '%s' (uid %d) found.\n", __func__, pwd->pw_name, pwd->pw_uid);
+
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+             "%s: Dropping from root to '%s' (%d).\n", __func__, pwd->pw_name, pwd->pw_uid );
+
+    /* setting groups */
+    gid_t *grp_list = NULL;
+    gint nbr_group = 0;
+    struct group *grp;
+
+    grp = getgrnam("audio");
+    if (grp)
+     { nbr_group++;
+       grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
+       grp_list[nbr_group-1] = grp->gr_gid;
+     }
+
+    grp = getgrnam("dialout");
+    if (grp)
+     { nbr_group++;
+       grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
+       grp_list[nbr_group-1] = grp->gr_gid;
+     }
+
+    grp = getgrnam("gpio");
+    if (grp)
+     { nbr_group++;
+       grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
+       grp_list[nbr_group-1] = grp->gr_gid;
+     }
+
+    if (setgroups ( nbr_group, grp_list )==-1)
+     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot SetGroups for user '%s' (%s)\n",
+                 __func__, pwd->pw_name, strerror(errno) );
+       exit(EXIT_ERREUR);
+     }
+
+    if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                  /* On drop les privilèges */
+     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREgid for user '%s' (%s)\n",
+                 __func__, pwd->pw_name, strerror(errno) );
+       exit(EXIT_ERREUR);
+     }
+
+    if (setreuid ( pwd->pw_uid, pwd->pw_uid )==-1)                                                  /* On drop les privilèges */
+     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREuid for user '%s' (%s)\n",
+                 __func__, pwd->pw_name, strerror(errno) );
+       exit(EXIT_ERREUR);
+     }
+
+    if ( Config.headless )
+         { g_snprintf(Config.home, sizeof(Config.home), "%s", pwd->pw_dir ); }
+    else { g_snprintf(Config.home, sizeof(Config.home), "%s/.watchdog", pwd->pw_dir ); }
     mkdir (Config.home, 0);
+
+    if (Config.instance_is_master)
+     { gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), "%s/Dls", Config.home );
+       mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Created Dls '%s' directory'", __func__, chaine );
+     }
 
     if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Chdir %s failed\n", __func__, Config.home ); exit(EXIT_ERREUR); }
@@ -544,7 +560,7 @@
        goto first_stage_end;
      }
 
-    if ( Config.installed == FALSE )
+    if ( Config.installed == FALSE )                                                    /* Si le fichier de conf n'existe pas */
      { Partage->com_msrv.Thread_run = TRUE;                                          /* On dit au maitre que le thread tourne */
        if (!Demarrer_http())                                                                                /* Démarrage HTTP */
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ );
@@ -577,6 +593,7 @@
        Json_node_add_string ( RootNode, "hostname", g_get_host_name() );
        Json_node_add_string ( RootNode, "version", WTD_VERSION );
        Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
+
        JsonNode *api_result = Http_Post_to_global_API ( "instance", "START", RootNode );
        Json_node_unref ( RootNode );
 
@@ -587,20 +604,12 @@
 /************************************************* Get instance parameters ****************************************************/
     JsonNode *api_result = Http_Post_to_global_API ( "instance", "GET_CONFIG", NULL );
     if (api_result)
-     { gchar *run_as = Json_get_string ( api_result, "run_as" );
-       if (run_as && strlen(run_as))
-            g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
-       else g_snprintf( Config.run_as, sizeof(Config.run_as), "watchdog" );
-/*    g_snprintf( chaine, sizeof(chaine), "useradd -m -c 'WatchdogServer' %s", Json_get_string(request, "run_as") );*/
-
+     { Config.headless           = Json_get_bool ( api_result, "headless" );
        Config.log_db             = Json_get_bool ( api_result, "log_db" );
        Config.log_bus            = Json_get_bool ( api_result, "log_bus" );
        Config.log_trad           = Json_get_bool ( api_result, "log_trad" );
        Config.log_msrv           = Json_get_bool ( api_result, "log_msrv" );
-       if (Json_has_member ( api_result, "is_master") )
-            Config.instance_is_master = Json_get_bool ( api_result, "is_master" );
-       else Config.instance_is_master = TRUE;
-       Config.use_subdir         = Json_get_bool ( api_result, "use_subdir" );
+       Config.instance_is_master = Json_get_bool ( api_result, "is_master" );
        gchar *master_hostname    = Json_get_string ( api_result, "master_hostname" );
        if (master_hostname) g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "%s", master_hostname );
                        else g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "nomasterhost" );

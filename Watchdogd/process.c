@@ -195,7 +195,7 @@
     liste = Partage->com_msrv.Subprocess;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct SUBPROCESS *module = liste->data;
-       pthread_join( module->TID, NULL );                                                              /* Attente fin du fils */
+       if (module->TID) pthread_join( module->TID, NULL );                                             /* Attente fin du fils */
        liste = liste->next;
      }
 

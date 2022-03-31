@@ -61,7 +61,6 @@
     if (!Json_has_member ( Config.config, "install_time"  )) Json_node_add_string ( Config.config, "install_time", "1980-10-22 02:50:00" );
 
     g_snprintf( Config.master_hostname,   sizeof(Config.master_hostname),   "localhost" );
-    g_snprintf( Config.run_as,        sizeof(Config.run_as),        "%s", g_get_user_name() );
     g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", DEFAUT_PROCESS_DIR   );
 
     Config.instance_is_master = TRUE;
@@ -84,10 +83,6 @@
      }
 /******************************************************* Partie GLOBAL ********************************************************/
     printf("Using config file %s.\n", Config.config_file );
-
-    chaine = g_key_file_get_string ( gkf, "GLOBAL", "run_as", NULL );
-    if (chaine)
-     { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", chaine ); g_free(chaine); }
 
     chaine = g_key_file_get_string ( gkf, "GLOBAL", "library_dir", NULL );
     if (chaine)
@@ -135,7 +130,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_secret        *******" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config api_url              %s", Json_get_string ( Config.config, "api_url" ) );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config run_as               %s", Config.run_as );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config headless             %d", Config.headless );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_bus              %d", Config.log_bus );
