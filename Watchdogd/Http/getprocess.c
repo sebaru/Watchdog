@@ -374,12 +374,16 @@
        if (pid<0)
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: EXECUTE: erreur Fork target '%s'", __func__, target ); }
        else if (!pid)
-        { gchar **argv = g_strsplit ( target, " ", 0 );
+        { gchar chaine[256];
+          g_snprintf ( chaine, sizeof(chaine), "systemd-run --user %s", target );
+          gchar **argv = g_strsplit ( chaine, " ", 0 );
           if (argv && argv[0])
-           { execvp ( argv[0], argv );
+           { g_snprintf ( chaine, sizeof(chaine), "/run/user/%d", getuid() );
+             setenv ( "XDG_RUNTIME_DIR", chaine, TRUE );
+             execvp ( argv[0], argv );
              Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: execve error '%s'", __func__, strerror(errno) );
            }
-          else Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: split error target '%s'", __func__, target );
+          else Info_new( Config.log, Config.log_trad, LOG_ERR, "%s_Fils: EXECUTE: split error target", __func__ );
           exit(0);
         }
      }
