@@ -199,7 +199,6 @@
        Http_ws_send_json_to_slave ( slave, RootNode );
        liste = g_slist_next( liste );
      }
-    Json_node_unref ( RootNode );
     pthread_mutex_unlock( &Partage->com_http.synchro );
   }
 /******************************************************************************************************************************/
