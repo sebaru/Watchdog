@@ -66,7 +66,7 @@
     tcflush(fd, TCIOFLUSH);
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Ouverture port teleinfo okay %s", __func__, port );
 
-    SubProcess_send_comm_to_master_new ( module, TRUE );
+    SubProcess_send_comm_to_master ( module, TRUE );
     return(fd);
   }
 /******************************************************************************************************************************/
@@ -128,7 +128,7 @@
      { usleep(1);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -177,7 +177,7 @@
                 Processer_trame( module );
                 nbr_octet_lu = 0;
                 memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
-                SubProcess_send_comm_to_master_new ( module, TRUE );
+                SubProcess_send_comm_to_master ( module, TRUE );
               }
              else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)                        /* Encore en dessous de la limite ? */
               { /* Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
@@ -213,7 +213,7 @@
            { close(vars->fd);
              vars->mode = TINFO_WAIT_BEFORE_RETRY;
              vars->date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             SubProcess_send_comm_to_master_new ( module, FALSE );
+             SubProcess_send_comm_to_master ( module, FALSE );
            }
         }
      }

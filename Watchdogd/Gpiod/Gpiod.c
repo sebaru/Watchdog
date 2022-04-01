@@ -140,7 +140,7 @@
        usleep(vars->delai);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 
        if (Partage->top>=last_top+10)                                                                /* Toutes les 1 secondes */
         { nbr_tour_par_sec = nbr_tour;

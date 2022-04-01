@@ -25,6 +25,8 @@
  * Boston, MA  02110-1301  USA
  */
 
+ #define _GNU_SOURCE
+ #include <sys/resource.h>
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -45,16 +47,27 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* SubProcess_send_comm_to_master_new: Envoi le statut de la comm au master                                                   */
+/* SubProcess_send_comm_to_master: Envoi le statut de la comm au master                                                   */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
- void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat )
+ void SubProcess_send_comm_to_master ( struct SUBPROCESS *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { Http_Post_to_local_BUS_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
        module->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
        module->comm_status = etat;
      }
+  }
+/******************************************************************************************************************************/
+/* SubProcess_send_comm_to_master: Envoi le statut de la comm au master                                                   */
+/* Entrée: La structure afférente                                                                                             */
+/* Sortie: aucune                                                                                                             */
+/******************************************************************************************************************************/
+ void SubProcess_loop ( struct SUBPROCESS *module )
+  { struct rusage conso;
+    SubProcess_send_comm_to_master ( module, module->comm_status );
+    if (getrusage ( RUSAGE_THREAD, &conso ))
+     { Http_Post_to_local_BUS_AI ( module, module->maxrss, conso.ru_maxrss, TRUE ); }
   }
 /******************************************************************************************************************************/
 /* SubProcess_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */
@@ -158,6 +171,7 @@
     if (Dls_auto_create_plugin( thread_tech_id, description ) == FALSE)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, thread_tech_id, description ); }
 
+    module->maxrss = Mnemo_create_subprocess_AI ( module, "MAXRSS", "Memory Usage", "kb", ARCHIVE_1_MIN );
     Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Subprocess '%s' is UP", __func__, thread_tech_id );
   }
@@ -167,8 +181,9 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void SubProcess_end ( struct SUBPROCESS *module )
-  { SubProcess_send_comm_to_master_new ( module, FALSE );
+  { SubProcess_send_comm_to_master ( module, FALSE );
     if (module->vars) g_free(module->vars);
+    Json_node_unref ( module->maxrss );
     soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
     soup_session_abort ( module->Master_session );
     g_slist_foreach ( module->Master_messages, (GFunc) Json_node_unref, NULL );

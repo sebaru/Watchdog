@@ -132,13 +132,13 @@
     Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_NONE", "Profil audio: All Hps disabled" );
 
     gboolean retour = Jouer_google_speech( module, "Instance démarrée !" );
-    SubProcess_send_comm_to_master_new ( module, retour );
+    SubProcess_send_comm_to_master ( module, retour );
     vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { usleep(100000);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /******************************************************************************************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -175,11 +175,11 @@
 
                 if (strlen(audio_libelle))                  /* Si audio_libelle, le jouer, sinon jouer le libelle tout court) */
                  { gboolean retour = Jouer_google_speech( module, audio_libelle );
-                   SubProcess_send_comm_to_master_new ( module, retour );
+                   SubProcess_send_comm_to_master ( module, retour );
                  }
                 else
                  { gboolean retour = Jouer_google_speech( module, libelle );
-                   SubProcess_send_comm_to_master_new ( module, retour );
+                   SubProcess_send_comm_to_master ( module, retour );
                  }
                 Envoyer_commande_dls_data( "AUDIO", "P_NONE" );                              /* Bit de fin d'emission message */
               }

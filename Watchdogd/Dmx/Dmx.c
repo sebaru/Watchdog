@@ -106,7 +106,7 @@
     memset ( &vars->Trame_dmx, 0, sizeof(struct TRAME_DMX) );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Ouverture port dmx okay %s",
               __func__, tech_id, device );
-    SubProcess_send_comm_to_master_new ( module, TRUE );
+    SubProcess_send_comm_to_master ( module, TRUE );
     Dmx_do_mapping( module );
     return(TRUE);
   }
@@ -123,7 +123,7 @@
 		         "%s: %s: Fermeture device '%s' dmx okay", __func__, tech_id, Json_get_string ( module->config, "device" ) );
 	   vars->fd = -1;
      }
-    SubProcess_send_comm_to_master_new ( module, FALSE );
+    SubProcess_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
 /* Envoyer_trame_dmx_request: envoie une trame DMX au token USB                                                               */
@@ -164,7 +164,7 @@
      { usleep(1000);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );

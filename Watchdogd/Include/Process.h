@@ -46,9 +46,22 @@
     SoupSession *Master_session;
     SoupWebsocketConnection *Master_websocket;
     GSList *Master_messages;
+    JsonNode *maxrss;                                                                                 /* AI pour memory Usage */
     void *vars;                                                               /* Pointeur vers les variables de run du module */
     void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
   };
+
+/************************************************ Définitions des prototypes **************************************************/
+ extern void Stopper_fils ( void );                                                                         /* Dans process.c */
+ extern gboolean Demarrer_dls ( void );
+ extern gboolean Demarrer_http ( void );
+ extern gboolean Demarrer_arch ( void );
+ extern void Charger_librairies ( void );
+ extern void Decharger_librairies ( void );
+ extern void SubProcess_send_comm_to_master ( struct SUBPROCESS *module, gboolean etat );
+ extern void SubProcess_loop ( struct SUBPROCESS *module );
+ extern void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars );
+ extern void SubProcess_end ( struct SUBPROCESS *module );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

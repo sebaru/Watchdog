@@ -67,7 +67,7 @@
     Http_Post_to_local_BUS_AI ( module, vars->Output_voltage, 0.0, FALSE );
 
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s disconnected (host='%s')", __func__, thread_tech_id, host );
-    SubProcess_send_comm_to_master_new ( module, FALSE );
+    SubProcess_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -158,7 +158,7 @@
     vars->date_next_connexion = 0;
     vars->started = TRUE;
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s up and running (host='%s')", __func__, thread_tech_id, host );
-    SubProcess_send_comm_to_master_new ( module, TRUE );
+    SubProcess_send_comm_to_master ( module, TRUE );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -388,7 +388,7 @@
      { usleep(100000);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );

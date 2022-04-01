@@ -91,13 +91,13 @@
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
-    SubProcess_send_comm_to_master_new ( module, TRUE );
+    SubProcess_send_comm_to_master ( module, TRUE );
 
     while(module->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
      { usleep(100000);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );

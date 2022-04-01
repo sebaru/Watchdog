@@ -98,7 +98,7 @@
     GSM_FreeStateMachine(vars->gammu_machine);                                                 /* Free up used memory */
     vars->gammu_machine = NULL;
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Disconnected", __func__, thread_tech_id );
-    SubProcess_send_comm_to_master_new ( module, FALSE );
+    SubProcess_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
 /* smsg_connect: Ouvre une connexion vers le téléphone ou la clef 3G                                                          */
@@ -166,7 +166,7 @@
 
     Info_new( Config.log, module->Thread_debug, LOG_INFO,
               "%s: %s: Connection OK with '%s/%s'", __func__, thread_tech_id, constructeur, model );
-    SubProcess_send_comm_to_master_new ( module, TRUE );
+    SubProcess_send_comm_to_master ( module, TRUE );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -571,7 +571,7 @@ end:
      { usleep(100000);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );

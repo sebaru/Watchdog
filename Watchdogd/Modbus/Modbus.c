@@ -138,7 +138,7 @@
     vars->nbr_entree_ana = 0;
     vars->nbr_sortie_ana = 0;
     vars->nbr_sortie_tor = 0;
-    SubProcess_send_comm_to_master_new ( module, FALSE );
+    SubProcess_send_comm_to_master ( module, FALSE );
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Module '%s' disconnected", __func__, thread_tech_id, hostname );
   }
 /******************************************************************************************************************************/
@@ -790,7 +790,7 @@
 
     gint cpt_byte, cpt_poid, cpt;
     vars->date_last_reponse = Partage->top;                                                        /* Estampillage de la date */
-    SubProcess_send_comm_to_master_new ( module, TRUE );
+    SubProcess_send_comm_to_master ( module, TRUE );
     if (ntohs(vars->response.transaction_id) != vars->transaction_id)                                     /* Mauvaise reponse */
      { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                 "%s: '%s': wrong transaction_id: attendu %d, recu %d", __func__, thread_tech_id,
@@ -1045,7 +1045,7 @@
      { usleep(vars->delai);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );

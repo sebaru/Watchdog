@@ -550,7 +550,7 @@ error:
           synthese_comm &= element->attached;
           elements = g_slist_next ( elements );
         }
-       SubProcess_send_comm_to_master_new ( module, synthese_comm );               /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, synthese_comm );               /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );

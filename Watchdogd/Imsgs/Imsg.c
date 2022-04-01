@@ -339,7 +339,7 @@ reconnect:
      }
     else
      { Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Connexion in progress.", __func__, jabber_id );
-       SubProcess_send_comm_to_master_new ( module, TRUE );
+       SubProcess_send_comm_to_master ( module, TRUE );
      }
 
     while(module->Thread_run == TRUE && vars->signed_off == FALSE)                           /* On tourne tant que necessaire */
@@ -348,7 +348,7 @@ reconnect:
 
        xmpp_run_once ( vars->ctx, 500 ); /* En milliseconde */
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -387,7 +387,7 @@ end:
        Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': Ctx Free OK", __func__, jabber_id );
      }
     Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': XMPPshutdown OK", __func__, jabber_id );
-    SubProcess_send_comm_to_master_new ( module, FALSE );
+    SubProcess_send_comm_to_master ( module, FALSE );
 
     if (module->Thread_run == TRUE && vars->signed_off == TRUE)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Account signed off. Why ?? Reconnect in 2s!", __func__, jabber_id );

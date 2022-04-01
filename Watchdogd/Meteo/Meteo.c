@@ -60,7 +60,7 @@
     Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
     if (status_code!=200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase );
-       SubProcess_send_comm_to_master_new ( module, FALSE );
+       SubProcess_send_comm_to_master ( module, FALSE );
      }
     else
      { gint heure, minute;
@@ -83,7 +83,7 @@
                    "%s: %s ->  sunset at %02d:%02d", __func__, city_name, heure, minute );
         }
        Json_node_unref ( response );
-       SubProcess_send_comm_to_master_new ( module, TRUE );
+       SubProcess_send_comm_to_master ( module, TRUE );
      }
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
@@ -194,7 +194,7 @@
      { usleep(10000);
        sched_yield();
 
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );

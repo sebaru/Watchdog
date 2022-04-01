@@ -119,16 +119,6 @@
  extern struct PARTAGE *Shm_init ( void );                                                                      /* Dans shm.c */
  extern gboolean Shm_stop ( struct PARTAGE *partage );
 
- extern void Stopper_fils ( void );                                                                         /* Dans process.c */
- extern gboolean Demarrer_dls ( void );
- extern gboolean Demarrer_http ( void );
- extern gboolean Demarrer_arch ( void );
- extern void Charger_librairies ( void );
- extern void Decharger_librairies ( void );
- extern void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat );
- extern void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars );
- extern void SubProcess_end ( struct SUBPROCESS *module );
-
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
