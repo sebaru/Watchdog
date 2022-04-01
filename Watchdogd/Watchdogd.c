@@ -387,7 +387,6 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    if (!Config.installed) { sleep(2); }              /* Laisse le temps au thread HTTP de repondre OK au client avant reboot */
     Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
 
     MSRV_ws_end();

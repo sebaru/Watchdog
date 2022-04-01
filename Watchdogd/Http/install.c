@@ -139,13 +139,22 @@
     gchar *domain_secret = Json_get_string ( request, "domain_secret" );
     gchar *api_url       = Json_get_string ( request, "api_url" );
     if ( g_str_has_prefix ( api_url, "https://" ) ) api_url+=8;
+    if ( g_str_has_prefix ( api_url, "http://"  ) ) api_url+=7;
+    if ( g_str_has_prefix ( api_url, "wss://"   ) ) api_url+=6;
+    if ( g_str_has_prefix ( api_url, "ws://"    ) ) api_url+=5;
     if (strlen(api_url)==0) api_url = "api.abls-habitat.fr";
+
+    gchar instance_uuid[37];
+    gchar *instance_uuid_src = Json_get_string ( request, "instance_uuid" );
+    if (strlen(instance_uuid_src)) g_snprintf( instance_uuid, sizeof(instance_uuid), "%s", instance_uuid_src );
+    else UUID_New ( instance_uuid );
 /******************************************* Création fichier de config *******************************************************/
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Creating config file '%s'", __func__, fichier );
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string( RootNode, "domain_uuid", domain_uuid );
        Json_node_add_string( RootNode, "domain_secret", domain_secret );
+       Json_node_add_string( RootNode, "instance_uuid", instance_uuid );
        Json_node_add_string( RootNode, "api_url", api_url );
        Json_node_add_string( RootNode, "product", "agent" );
        Json_node_add_string( RootNode, "vendor", "abls-habitat.fr" );

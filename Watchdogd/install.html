@@ -36,27 +36,53 @@
 
 <hr>
 
-       <div class="row form-group">
-         <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Domain UUID</label>
-           <input id="idDOMAINUUID" type="text" class="form-control" placeholder="Domain UUID">
+       <div class="card">
+         <div class="card-header">
+           <label>Primary Options</label>
+         </div>
+         <div class="card-body">
+
+           <div class="row form-group">
+             <div class="input-group">
+               <label class="col-5 col-sm-4 col-form-label text-right">Domain UUID</label>
+               <input required id="idDOMAINUUID" type="text" class="form-control" placeholder="Domain UUID">
+             </div>
+           </div>
+
+           <div class="row form-group">
+             <div class="input-group">
+               <label class="col-5 col-sm-4 col-form-label text-right">Domain Secret Key</label>
+               <input required id="idDOMAINSECRET" type="password" class="form-control" placeholder="Domain's Secret Key">
+             </div>
+           </div>
+
+         </div>
+       </div>
+<br>
+       <div class="card">
+         <div class="card-header">
+           <a class="text-danger" data-toggle="collapse" href="#idAdvancedOptions" role="button">Advanced Options</a>
+         </div>
+         <div class="card-body collapse" id="idAdvancedOptions">
+
+           <div class="row form-group">
+             <div class="input-group">
+               <label class="col-5 col-sm-4 col-form-label text-right">Instance UUID</label>
+               <input id="idINSTANCEUUID" type="text" class="form-control" placeholder="keep empty if not sure">
+             </div>
+           </div>
+
+           <div class="row form-group">
+             <div class="input-group">
+               <label class="col-5 col-sm-4 col-form-label text-right">API URL</label>
+               <input id="idAPIURL" type="text" class="form-control" placeholder="default is api.abls-habitat.fr">
+             </div>
+           </div>
+
          </div>
        </div>
 
-       <div class="row form-group">
-         <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">Domain Secret Key</label>
-           <input id="idDOMAINSECRET" type="password" class="form-control" placeholder="Domain's Secret Key">
-         </div>
-       </div>
-
-       <div class="row form-group">
-         <div class="input-group">
-           <label class="col-5 col-sm-4 col-form-label text-right">API URL</label>
-           <input id="idAPIURL" type="text" class="form-control" placeholder="api.abls-habitat.fr">
-         </div>
-       </div>
-
+<br>
 
    <div class="row">
         <button type="button" onclick="Installer()" class="btn btn-primary ml-auto">
@@ -85,6 +111,7 @@
   { var json_request =
      { domain_uuid  : $('#idDOMAINUUID').val(),
        domain_secret: $('#idDOMAINSECRET').val(),
+       instance_uuid: $('#idINSTANCEUUID').val(),
        api_url      : $('#idAPIURL').val(),
      };
     $('#idSpinner').show();
@@ -94,7 +121,7 @@
     .then(function(res)   { return res.json(); },
           function(error) { console.log( "fetch error : " + error) }
          )
-    .then(function(data)  { setTimeout ( function () { location.href="/" }, 5000 ); } );
+    .then(function(data)  { setTimeout ( function () { location.href="/" }, 6000 ); } );
 	 }
 /******************************************************************************************************************************/
     </script>
