@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="google" content="notranslate">
         <meta name="robots" content="noindex, nofollow">
-        <link rel="icon" href="https://static.abls-habitat.fr/img/logo.svg">
+        <link rel="icon" href="https://static.abls-habitat.fr/img/abls.svg">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
         <script src="https://kit.fontawesome.com/1ca1f7ba56.js" crossorigin="anonymous"></script>
         <style>
@@ -77,7 +77,7 @@
 		<div class="card">
 			<div class="card-header">
      <div class="row">
-       <img class="col-4" src="https://static.abls-habitat.fr/img/logo.svg" alt="Watchdog Logo">
+       <img class="col-4" src="https://static.abls-habitat.fr/img/abls.svg" alt="Watchdog Logo">
        <h4 class="col-8 align-self-center text-center wtd_title">Connexion</h4>
      </div>
 			</div>

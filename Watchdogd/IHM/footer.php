@@ -4,7 +4,7 @@
 
   <!-- Copyright -->
   <div class="footer-copyright text-right m-1"><span class="text-white">© </span>
-    <a href="https://ABLS-habitat.fr/"><img src="https://static.abls-habitat.fr/img/logo.svg" alt="Watchdog Logo" width=48"></a>
+    <a href="https://ABLS-habitat.fr/"><img src="https://static.abls-habitat.fr/img/abls.svg" alt="Watchdog Logo" width=48"></a>
   </div>
   <!-- Copyright -->
 
