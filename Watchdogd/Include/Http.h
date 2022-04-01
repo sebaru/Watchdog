@@ -28,8 +28,8 @@
 #ifndef _HTTP_H_
  #define _HTTP_H_
 
- #define HTTP_DEFAUT_FILE_CERT         "https_api_cert.pem"
- #define HTTP_DEFAUT_FILE_KEY          "https_api_key.pem"
+ #define HTTP_DEFAUT_FILE_CERT         "https_bus_cert.pem"
+ #define HTTP_DEFAUT_FILE_KEY          "https_bus_key.pem"
  #define HTTP_DEFAUT_TCP_PORT          5560
 
  struct COM_HTTP                                                                     /* Communication entre le serveur et DLS */
