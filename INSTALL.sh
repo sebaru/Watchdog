@@ -62,7 +62,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y sox libsox-fmt-all python3-pip mpg123
   apt install -y libjson-glib-dev libgpiod-dev
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
-  apt install -y libsoup2.4-dev librsvg2-dev alsa-utils systemd-dev
+  apt install -y libsoup2.4-dev librsvg2-dev alsa-utils libsystemd-dev
   pip3 install gTTS-token gTTS --upgrade
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
   apt install -y libphidget22 libphidget22-dev

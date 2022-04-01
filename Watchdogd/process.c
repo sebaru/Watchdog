@@ -83,8 +83,6 @@
         { Http_Post_to_local_BUS_AI ( module, module->maxrss, conso.ru_maxrss, TRUE ); }
        module->telemetrie_top = Partage->top;
      }
-
-
   }
 /******************************************************************************************************************************/
 /* SubProcess_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */

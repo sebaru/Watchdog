@@ -385,10 +385,7 @@
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { usleep(100000);
-       sched_yield();
-
-       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );

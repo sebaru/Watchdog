@@ -343,12 +343,8 @@ reconnect:
      }
 
     while(module->Thread_run == TRUE && vars->signed_off == FALSE)                           /* On tourne tant que necessaire */
-     { /*g_usleep(200000);*/
-       sched_yield();
-
+     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
        xmpp_run_once ( vars->ctx, 500 ); /* En milliseconde */
-
-       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );

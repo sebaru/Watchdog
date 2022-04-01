@@ -539,18 +539,15 @@ error:
 
     gboolean synthese_comm = FALSE;                                                /* Synthese de la comm de tous les sensors */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { usleep(100000);
-       sched_yield();
-
+     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
 /************************************************* Calcul de la comm **********************************************************/
        GSList *elements = vars->Liste_sensors;
-       synthese_comm = TRUE;
+       module->comm_status = TRUE;
        while ( elements )                                             /* Si tous les sensors sont attached, alors comm = TRUE */
         { struct PHIDGET_ELEMENT *element = elements->data;
-          synthese_comm &= element->attached;
+          module->comm_status &= element->attached;
           elements = g_slist_next ( elements );
         }
-       SubProcess_send_comm_to_master ( module, synthese_comm );               /* Périodiquement envoie la comm au master */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
