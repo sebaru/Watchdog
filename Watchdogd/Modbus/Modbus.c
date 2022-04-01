@@ -1039,13 +1039,9 @@
     struct MODBUS_VARS *vars = module->vars;
 
     gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
-    gint   max_request_par_sec = Json_get_int    ( module->config, "max_request_par_sec" );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { usleep(vars->delai);
-       sched_yield();
-
-       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -1056,15 +1052,6 @@
           if ( !strcasecmp (bus_tag, "SET_DO") ) Modbus_SET_DO ( module, request );
           Json_node_unref ( request );
         }
-/********************************************************* Toutes les secondes ************************************************/
-       if (Partage->top>=vars->last_top+10)                                                          /* Toutes les 1 secondes */
-        { vars->nbr_request_par_sec = vars->nbr_request;
-          vars->nbr_request = 0;
-          if(vars->nbr_request_par_sec > max_request_par_sec) vars->delai += 50;
-          else if(vars->delai>0) vars->delai -= 50;
-          vars->last_top = Partage->top;
-        }
-
 /********************************************* Début de l'interrogation du module *********************************************/
        if ( vars->started == FALSE )                                               /* Si attente retente, on change de module */
         { if ( vars->date_retente <= Partage->top && Connecter_module(module)==FALSE )
@@ -1107,7 +1094,6 @@
                                               }
                                              else vars->mode = MODBUS_GET_DI;
                                              vars->do_check_eana = FALSE;                                /* Le check est fait */
-                                             vars->nbr_request++;
                                              break;
               }
            }

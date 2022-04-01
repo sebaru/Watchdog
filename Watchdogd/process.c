@@ -47,27 +47,44 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* SubProcess_send_comm_to_master: Envoi le statut de la comm au master                                                   */
+/* SubProcess_send_comm_to_master: Envoi le statut de la comm au master                                                       */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
  void SubProcess_send_comm_to_master ( struct SUBPROCESS *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { Http_Post_to_local_BUS_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
-       module->comm_next_update = Partage->top + 600;                                                      /* Toutes les minutes */
+       module->comm_next_update = Partage->top + 600;                                                   /* Toutes les minutes */
        module->comm_status = etat;
      }
   }
 /******************************************************************************************************************************/
-/* SubProcess_send_comm_to_master: Envoi le statut de la comm au master                                                   */
+/* SubProcess_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                               */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
  void SubProcess_loop ( struct SUBPROCESS *module )
-  { struct rusage conso;
-    SubProcess_send_comm_to_master ( module, module->comm_status );
-    if (getrusage ( RUSAGE_THREAD, &conso ))
-     { Http_Post_to_local_BUS_AI ( module, module->maxrss, conso.ru_maxrss, TRUE ); }
+  { SubProcess_send_comm_to_master ( module, module->comm_status );
+
+/********************************************************* tour par secondes **************************************************/
+    if (Partage->top >= module->nbr_tour_top+10)                                                          /* Toutes les 1 secondes */
+     { module->nbr_tour_par_sec = module->nbr_tour;
+       module->nbr_tour = 0;
+       if(module->nbr_tour_par_sec > 50) module->nbr_tour_delai += 50;
+       else if(module->nbr_tour_delai>0) module->nbr_tour_delai -= 50;
+       module->nbr_tour_top = Partage->top;
+     } else module->nbr_tour++;
+    usleep(module->nbr_tour_delai);
+
+/********************************************************* Toutes les secondes ************************************************/
+    if (Partage->top >= module->telemetrie_top+10)                                                          /* Toutes les 1 secondes */
+     { struct rusage conso;
+       if (getrusage ( RUSAGE_THREAD, &conso ))
+        { Http_Post_to_local_BUS_AI ( module, module->maxrss, conso.ru_maxrss, TRUE ); }
+       module->telemetrie_top = Partage->top;
+     }
+
+
   }
 /******************************************************************************************************************************/
 /* SubProcess_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */

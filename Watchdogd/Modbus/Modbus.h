@@ -108,10 +108,6 @@
     guint date_next_eana;                                            /* Utilisé pour gérer les interrogations des bornes EANA */
     gboolean do_check_eana;                                                           /* Interrogation des bornes EANA ou non */
     gboolean request;                                    /* Une requete a-t'elle été envoyée, et donc en attente de réponse ? */
-    gint last_top;                                                                           /* Nombre de requete par seconde */
-    gint nbr_request;                                                                        /* Nombre de requete par seconde */
-    gint nbr_request_par_sec;                                                                /* Nombre de requete par seconde */
-    gint delai;                                                  /* delai d'attente pour limiter le nb de request par seconde */
     struct TRAME_MODBUS_REPONSE response;
     JsonNode *AI_root, **AI;                                                           /* Tableau dynamique de mapping des DI */
     JsonNode *DI_root, **DI;                                                           /* Tableau dynamique de mapping des DI */

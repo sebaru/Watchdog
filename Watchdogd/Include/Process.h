@@ -47,6 +47,11 @@
     SoupWebsocketConnection *Master_websocket;
     GSList *Master_messages;
     JsonNode *maxrss;                                                                                 /* AI pour memory Usage */
+    gint nbr_tour;
+    gint nbr_tour_par_sec;
+    gint nbr_tour_top;
+    gint nbr_tour_delai;
+    gint telemetrie_top;
     void *vars;                                                               /* Pointeur vers les variables de run du module */
     void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
   };
