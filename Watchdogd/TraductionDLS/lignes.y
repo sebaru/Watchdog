@@ -143,20 +143,20 @@ alias_classe:     T_BI             {{ $$=MNEMO_BISTABLE;       }}
 
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
-                {{ if ($1 && $1->condition->is_bool == FALSE && $2)
+                {{ if ($1 && $1->condition->is_bool == FALSE)
                     { gint taille = $1->condition->taille + $1->actions->taille_alors + 256;
-                      $$ = New_chaine( taille + strlen($2) );
+                      $$ = New_chaine( taille + ($2 ? strlen($2) : 0) );
                       g_snprintf( $$, taille,
                                   "/* -----------------une_instr FLOAT-------*/\n"
                                   "vars->num_ligne = %d;\n"
                                   " { gdouble local_result=%s;\n"
                                   "   %s\n"
-                                  " }\n %s", $1->line_number, $1->condition->chaine, $1->actions->alors, $2 );
+                                  " }\n %s", $1->line_number, $1->condition->chaine, $1->actions->alors, ($2 ? $2 : "/**/") );
                     }
-                   else if ($1 && $1->condition->is_bool == TRUE && $2)
-                    { gint taille = $1->condition->taille + $1->actions->taille_alors + $1->actions->taille_sinon + strlen($2)+256;
+                   else if ($1 && $1->condition->is_bool == TRUE)
+                    { gint taille = $1->condition->taille + $1->actions->taille_alors + $1->actions->taille_sinon + ($2 ? strlen($2) : 0) + 256;
                       gchar *sinon = ($1->actions->sinon ? $1->actions->sinon : "/* no sinon action */");
-                      if ($1->options)
+                      if ( Get_option_entier($1->options, T_DAA, 0) || Get_option_entier($1->options, T_DAD, 0) )
                        { taille +=1024;
                          $$ = New_chaine( taille );
                          g_snprintf( $$, taille,
@@ -188,17 +188,18 @@ listeInstr:     une_instr listeInstr
                                      " }\n\n %s",
                                      $1->line_number, $1->condition->chaine,
                                      Get_option_entier($1->options, T_DAA, 0), $1->actions->alors,
-                                     Get_option_entier($1->options, T_DAD, 0), sinon, $2 );
+                                     Get_option_entier($1->options, T_DAD, 0), sinon, ($2 ? $2 : "/**/") );
                        }
-                     else
-                      { $$ = New_chaine( taille );
-                        g_snprintf( $$, taille,
-                                    "/* ------------- une_instr BOOL--------*/\n"
-                                    "vars->num_ligne = %d;\n"
-                                    " if (%s)\n {\n %s\n }\n else\n {\n %s\n }\n %s",
-                                    $1->line_number, $1->condition->chaine, $1->actions->alors, sinon, $2 );
-                      }
-                    } else $$=NULL;
+                      else
+                       { gint taille = $1->condition->taille + $1->actions->taille_alors + ($2 ? strlen($2) : 0) + 256;
+                         $$ = New_chaine( taille );
+                         g_snprintf( $$, taille,
+                                     "/* ------------- une_instr BOOL--------*/\n"
+                                     "vars->num_ligne = %d;\n"
+                                     " if (%s)\n {\n %s\n }\n else\n {\n %s\n }\n %s",
+                                     $1->line_number, $1->condition->chaine, $1->actions->alors, sinon, ($2 ? $2 : "/**/") );
+                       }
+                    } else { $$=NULL; }
                    Del_instruction($1);
                    if ($2) g_free($2);
                 }}

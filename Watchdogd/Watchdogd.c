@@ -103,13 +103,13 @@
     gchar *ttech_id_1 = Json_get_string ( node1, "thread_tech_id" );
     gchar *ttech_id_2 = Json_get_string ( node2, "thread_tech_id" );
     if (!ttech_id_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ttech_id1 is NULL", __func__ ); return(-1); }
-    if (!ttech_id_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ttech_id2 is NULL", __func__ ); return(-1); }
+    if (!ttech_id_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ttech_id2 is NULL", __func__ ); return(1); }
     gint result = strcasecmp ( ttech_id_1, ttech_id_2 );
     if (result) return(result);
     gchar *tacronyme_1 = Json_get_string ( node1, "thread_acronyme" );
     gchar *tacronyme_2 = Json_get_string ( node2, "thread_acronyme" );
     if (!tacronyme_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tacronyme1 is NULL", __func__ ); return(-1); }
-    if (!tacronyme_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tacronyme1 is NULL", __func__ ); return(-1); }
+    if (!tacronyme_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tacronyme2 is NULL", __func__ ); return(1); }
     return( strcasecmp ( tacronyme_1, tacronyme_2 ) );
   }
 /******************************************************************************************************************************/
@@ -122,13 +122,13 @@
     gchar *tech_id_1 = Json_get_string ( node1, "tech_id" );
     gchar *tech_id_2 = Json_get_string ( node2, "tech_id" );
     if (!tech_id_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tech_id1 is NULL", __func__ ); return(-1); }
-    if (!tech_id_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tech_id2 is NULL", __func__ ); return(-1); }
+    if (!tech_id_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tech_id2 is NULL", __func__ ); return(1); }
     gint result = strcasecmp ( tech_id_1, tech_id_2 );
     if (result) return(result);
     gchar *acronyme_1 = Json_get_string ( node1, "acronyme" );
     gchar *acronyme_2 = Json_get_string ( node2, "acronyme" );
     if (!acronyme_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: acronyme1 is NULL", __func__ ); return(-1); }
-    if (!acronyme_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: acronyme2 is NULL", __func__ ); return(-1); }
+    if (!acronyme_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: acronyme2 is NULL", __func__ ); return(1); }
     return( strcasecmp ( acronyme_1, acronyme_2 ) );
   }
 /******************************************************************************************************************************/
