@@ -101,7 +101,7 @@
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
  JsonNode *Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode )
-  { gboolean free_RootNode = FALSE;
+  { gboolean unref_RootNode = FALSE;
     JsonNode *result = NULL;
     gchar query[256];
 
@@ -113,7 +113,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
        return(NULL);
      }
-    if (!RootNode) { RootNode = Json_node_create(); free_RootNode = TRUE; }
+    if (!RootNode) { RootNode = Json_node_create(); unref_RootNode = TRUE; }
 
     Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
     Json_node_add_string ( RootNode, "instance_uuid", Json_get_string ( Config.config, "instance_uuid" ) );
@@ -121,7 +121,7 @@
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
     gchar *buf = Json_node_to_string ( RootNode );
-    if (free_RootNode) g_free(RootNode);
+    if (unref_RootNode) Json_node_unref(RootNode);
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
              "%s: Sending to API %s: %s", __func__, query, buf );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
