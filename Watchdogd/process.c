@@ -76,10 +76,10 @@
      } else module->nbr_tour++;
     usleep(module->nbr_tour_delai);
 
-/********************************************************* Toutes les secondes ************************************************/
-    if (Partage->top >= module->telemetrie_top+10)                                                          /* Toutes les 1 secondes */
+/********************************************************* Toutes les minutes *************************************************/
+    if (Partage->top >= module->telemetrie_top+600)                                                     /* Toutes les minutes */
      { struct rusage conso;
-       if (getrusage ( RUSAGE_THREAD, &conso ))
+       if (getrusage ( RUSAGE_THREAD, &conso ) == 0)
         { Http_Post_to_local_BUS_AI ( module, module->maxrss, conso.ru_maxrss, TRUE ); }
        module->telemetrie_top = Partage->top;
      }
