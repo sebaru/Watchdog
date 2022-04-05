@@ -153,9 +153,9 @@
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
-  { static gpointer arch_request_number;
+  { gint top = 0, last_delete = 0, last_count = 0, nb_enreg = 0;
+    static gpointer arch_request_number;
     struct DB *db;
-    gint top, last_delete, last_count, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );

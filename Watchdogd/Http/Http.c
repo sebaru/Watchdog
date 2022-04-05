@@ -46,7 +46,8 @@
     gsize taille;
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
+    if (!request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
+    g_bytes_unref(request_brute);
     return(request);
   }
 /******************************************************************************************************************************/
@@ -59,6 +60,7 @@
     gsize taille;
     g_object_get ( msg, "response-body-data", &reponse_brute, NULL );
     JsonNode *reponse = Json_get_from_string ( g_bytes_get_data ( reponse_brute, &taille ) );
+    g_bytes_unref(reponse_brute);
     return(reponse);
   }
 /******************************************************************************************************************************/
@@ -99,7 +101,8 @@
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
  JsonNode *Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode )
-  { JsonNode *result = NULL;
+  { gboolean free_RootNode = FALSE;
+    JsonNode *result = NULL;
     gchar query[256];
 
     g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
@@ -110,13 +113,15 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
        return(NULL);
      }
-    if (!RootNode) RootNode = Json_node_create();
+    if (!RootNode) { RootNode = Json_node_create(); free_RootNode = TRUE; }
+
     Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
     Json_node_add_string ( RootNode, "instance_uuid", Json_get_string ( Config.config, "instance_uuid" ) );
     Json_node_add_string ( RootNode, "api_tag", api_tag );
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
     gchar *buf = Json_node_to_string ( RootNode );
+    if (free_RootNode) g_free(RootNode);
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
              "%s: Sending to API %s: %s", __func__, query, buf );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -129,6 +134,7 @@
     if (status_code!=200)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
     else { result = Http_Response_Msg_to_Json ( soup_msg ); }
+    g_free(reason_phrase);
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
     return(result);
@@ -163,6 +169,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error getting %s: %s\n", __func__, query, reason_phrase ); }
     else
      { result = Http_Response_Msg_to_Json ( soup_msg ); }
+    g_free(reason_phrase);
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
     return(result);

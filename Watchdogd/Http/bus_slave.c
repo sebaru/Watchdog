@@ -70,6 +70,7 @@
     if (status_code!=200)
      { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
     else { retour = Http_Response_Msg_to_Json ( soup_msg ); }
+    g_free(reason_phrase);
     g_object_unref( soup_msg );
 end:
     soup_session_abort ( connexion );

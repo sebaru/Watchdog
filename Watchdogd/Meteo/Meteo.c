@@ -85,6 +85,7 @@
        Json_node_unref ( response );
        SubProcess_send_comm_to_master ( module, TRUE );
      }
+    g_free(reason_phrase);
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
   }
@@ -146,6 +147,7 @@
        Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module );
        Json_node_unref ( response );
      }
+    g_free(reason_phrase);
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
   }

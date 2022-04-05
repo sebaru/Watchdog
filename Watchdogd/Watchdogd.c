@@ -600,10 +600,14 @@
        grp_list[nbr_group-1] = grp->gr_gid;
      }
 
-    if (setgroups ( nbr_group, grp_list )==-1)
-     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot SetGroups for user '%s' (%s)\n",
-                 __func__, pwd->pw_name, strerror(errno) );
-       return(FALSE);
+    if (nbr_group)
+     { if (setgroups ( nbr_group, grp_list )==-1)
+        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot SetGroups for user '%s' (%s)\n",
+                    __func__, pwd->pw_name, strerror(errno) );
+          g_free(grp_list);
+          return(FALSE);
+        }
+       g_free(grp_list);
      }
 
     if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                  /* On drop les privilèges */

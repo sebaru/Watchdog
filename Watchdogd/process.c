@@ -67,7 +67,7 @@
   { SubProcess_send_comm_to_master ( module, module->comm_status );
 
 /********************************************************* tour par secondes **************************************************/
-    if (Partage->top >= module->nbr_tour_top+10)                                                          /* Toutes les 1 secondes */
+    if (Partage->top >= module->nbr_tour_top+10)                                                     /* Toutes les 1 secondes */
      { module->nbr_tour_par_sec = module->nbr_tour;
        module->nbr_tour = 0;
        if(module->nbr_tour_par_sec > 50) module->nbr_tour_delai += 50;

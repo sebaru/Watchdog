@@ -531,6 +531,7 @@
      { dls_syn_parent->Dls_sub_syns = g_slist_append ( dls_syn_parent->Dls_sub_syns, dls_syn ); }
     else
      { Partage->com_dls.Dls_syns = dls_syn; }
+    Json_node_unref(syn_enfants);
   }
 /******************************************************************************************************************************/
 /* Dls_arbre_dls_syn_erase_syn: Supprime le dls_syn en parametre de l'arbre des synoptique                                    */
