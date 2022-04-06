@@ -300,8 +300,12 @@
     static gchar *protocols[] = { "live-api", NULL };
     gchar chaine[256];
     g_snprintf(chaine, sizeof(chaine), "wss://%s/ws_api", Json_get_string ( Config.config, "api_url" ) );
-    soup_session_websocket_connect_async ( Partage->com_msrv.API_session, soup_message_new ( "GET", chaine ),
-                                           NULL, protocols, g_cancellable_new(), MSRV_ws_on_API_connected, NULL );
+    SoupMessage *query = soup_message_new ( "GET", chaine );
+    GCancellable *cancel = g_cancellable_new();
+    soup_session_websocket_connect_async ( Partage->com_msrv.API_session, query,
+                                           NULL, protocols, cancel, MSRV_ws_on_API_connected, NULL );
+    g_object_unref(query);
+    g_object_unref(cancel);
   }
 /******************************************************************************************************************************/
 /* MSRV_ws_init: appelé pour démarrer le websocket vers l'API                                                                 */
@@ -311,6 +315,8 @@
  static void MSRV_ws_end ( void )
   { soup_websocket_connection_close ( Partage->com_msrv.API_websocket, 0, "Thanks, Bye !" );
     soup_session_abort ( Partage->com_msrv.API_session );
+    g_object_unref( Partage->com_msrv.API_session );
+    Partage->com_msrv.API_session = NULL;
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */

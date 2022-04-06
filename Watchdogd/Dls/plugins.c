@@ -228,21 +228,22 @@
     if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
      { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
                  chaine, strerror(errno) );
+       g_free(Source);
        close(id_fichier);
        return(DLS_COMPIL_EXPORT_DB_FAILED);
      }
+
+    gint retour_write = write( id_fichier, Source, taille_source );
+    g_free(Source);
+    close(id_fichier);
+    if (retour_write<0)
+     { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Write %d bytes to file '%s' failed (%s)", __func__,
+                 taille_source, chaine, strerror(errno) );
+      return(DLS_COMPIL_EXPORT_DB_FAILED);
+     }
     else
-     { if (write( id_fichier, Source, taille_source )<0)
-        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Write %d bytes to file '%s' failed (%s)", __func__,
-                    taille_source, chaine, strerror(errno) );
-         close(id_fichier);
-         return(DLS_COMPIL_EXPORT_DB_FAILED);
-        }
-       else
-        { Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Write %d bytes to file '%s' OK", __func__,
-                    taille_source, chaine);
-          close(id_fichier);
-        }
+     { Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Write %d bytes to file '%s' OK", __func__,
+                 taille_source, chaine);
      }
 
     retour = Traduire_DLS( tech_id );                                                                       /* Traduction DLS */

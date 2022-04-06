@@ -120,8 +120,6 @@
 /******************************************************************************************************************************/
  static void SubProcess_ws_on_master_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
   { struct SUBPROCESS *module = user_data;
-    g_object_unref(module->Master_websocket);
-    module->Master_websocket = NULL;
     Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: WebSocket Close. Reboot Needed!", __func__ );
     /* Partage->com_msrv.Thread_run = FALSE; */
   }
@@ -149,7 +147,6 @@
     g_signal_connect ( module->Master_websocket, "closed",  G_CALLBACK(SubProcess_ws_on_master_close_CB), module );
     g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(SubProcess_ws_on_master_error_CB), module );
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': WebSocket to Master connected", __func__, thread_tech_id );
-
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
@@ -178,8 +175,12 @@
     g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );
     static gchar *protocols[] = { "live-bus", NULL };
     g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
-    soup_session_websocket_connect_async ( module->Master_session, soup_message_new ( "GET", chaine ),
-                                           NULL, protocols, g_cancellable_new(), SubProcess_ws_on_master_connected, module );
+    SoupMessage *query   = soup_message_new ( "GET", chaine );
+    GCancellable *cancel = g_cancellable_new();
+    soup_session_websocket_connect_async ( module->Master_session, query,
+                                           NULL, protocols, cancel, SubProcess_ws_on_master_connected, module );
+    g_object_unref(query);
+    g_object_unref(cancel);
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
@@ -199,7 +200,11 @@
   { SubProcess_send_comm_to_master ( module, FALSE );
     if (module->vars) g_free(module->vars);
     Json_node_unref ( module->maxrss );
-    soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
+    if (soup_websocket_connection_get_state (module->Master_websocket) == SOUP_WEBSOCKET_STATE_OPEN)
+     { soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
+       while (soup_websocket_connection_get_state (module->Master_websocket) != SOUP_WEBSOCKET_STATE_CLOSED) sched_yield();
+     }
+    module->Master_websocket = NULL;
     soup_session_abort ( module->Master_session );
     g_slist_foreach ( module->Master_messages, (GFunc) Json_node_unref, NULL );
     g_slist_free ( module->Master_messages );

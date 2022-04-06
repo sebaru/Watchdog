@@ -137,6 +137,7 @@
     g_free(reason_phrase);
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
+    g_object_unref( connexion );
     return(result);
  }
 /******************************************************************************************************************************/
@@ -160,7 +161,6 @@
 
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
     soup_session_send_message (connexion, soup_msg);
-
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
 
@@ -172,6 +172,7 @@
     g_free(reason_phrase);
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
+    g_object_unref ( connexion );
     return(result);
  }
 /******************************************************************************************************************************/
@@ -856,9 +857,15 @@
        if (Partage->com_http.loop) g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
      }
 
-    if (Partage->com_http.socket) soup_server_disconnect ( Partage->com_http.socket );          /* Arret du serveur WebSocket */
-    if (Partage->com_http.local_socket) soup_server_disconnect ( Partage->com_http.local_socket );
     if (Partage->com_http.loop) g_main_loop_unref( Partage->com_http.loop );
+    if (Partage->com_http.socket)
+     { soup_server_disconnect ( Partage->com_http.socket );                                     /* Arret du serveur WebSocket */
+       g_object_unref(Partage->com_http.socket);
+     }
+    if (Partage->com_http.local_socket)
+     { soup_server_disconnect ( Partage->com_http.local_socket );
+       g_object_unref(Partage->com_http.local_socket);
+     }
     Http_Save_and_close_sessions();
 
     Info_new( Config.log, Partage->com_http.Thread_debug, LOG_NOTICE, "%s: HTTP Down (%p)", __func__, pthread_self() );

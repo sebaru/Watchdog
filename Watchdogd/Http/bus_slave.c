@@ -74,6 +74,7 @@
     g_object_unref( soup_msg );
 end:
     soup_session_abort ( connexion );
+    g_object_unref( connexion );
     if (free_root_node) Json_node_unref ( RootNode );
     return(retour);
   }

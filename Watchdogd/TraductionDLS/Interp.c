@@ -1031,7 +1031,6 @@
 
     gint groupe = Get_option_entier ( alias->options, T_GROUPE, 0 );
 
-    action = New_action();
     taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
