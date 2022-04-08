@@ -125,8 +125,11 @@
     vars->request = FALSE;
     vars->nbr_deconnect++;
     vars->date_retente = Partage->top + MODBUS_RETRY;
-    if (vars->DI_root) { Json_node_unref(vars->DI_root); vars->DI_root = NULL; }
-    if (vars->DI)      { g_free(vars->DI); vars->DI = NULL; }
+    if (vars->DI)
+     { for (gint num=0 ;num<vars->nbr_entree_tor; num++) Json_node_unref ( vars->DI[num] );
+       g_free(vars->DI);
+       vars->DI = NULL;
+     }
     if (vars->AI_root) { Json_node_unref(vars->AI_root); vars->AI_root = NULL; }
     if (vars->AI)      { g_free(vars->AI); vars->AI = NULL; }
     if (vars->DO)
@@ -720,33 +723,20 @@
      }
 
 /***************************************************** Mapping des DigitalInput ***********************************************/
-    vars->DI_root = Json_node_create();
-    if (!vars->DI_root)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__, thread_tech_id); }
-    else
-     { Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__,thread_tech_id, vars->nbr_entree_tor );
-       SQL_Select_to_json_node ( vars->DI_root, "modbus_DI",
-                                 "SELECT *, 'DI' AS classe FROM modbus_DI "
-                                 "WHERE thread_tech_id='%s'", thread_tech_id );
-
-       vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
-       if (!vars->DI)
-        { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__, thread_tech_id);
-          return;
-        }
-
-       JsonArray *array = Json_get_array ( vars->DI_root, "modbus_DI" );
-       for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->DI_root, "modbus_DI" ) ); cpt++ )
-        { JsonNode *element = json_array_get_element ( array, cpt );
-          gint num = Json_get_int ( element, "num" );
-          if ( 0 <= num && num < vars->nbr_entree_tor )
-           { vars->DI[num] = element;
-             Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New DI '%s' (%s)", __func__, thread_tech_id,
-                       Json_get_string ( vars->DI[num], "thread_acronyme" ),
-                       Json_get_string ( vars->DI[num], "libelle" ));
-           } else Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': map DI: num %d out of range '%d'",
-                            __func__, thread_tech_id, num, vars->nbr_entree_tor );
-        }
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__,thread_tech_id, vars->nbr_entree_tor );
+    vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
+    if (!vars->DI)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__, thread_tech_id);
+       return;
+     }
+    for ( gint num = 0; num < vars->nbr_entree_tor; num++ )
+     { vars->DI[num] = Json_node_create ();
+       Json_node_add_string ( vars->DO[num], "thread_tech_id", thread_tech_id );
+       gchar chaine[16];
+       g_snprintf( chaine, sizeof(chaine), "DI%03d", num );
+       Json_node_add_string ( vars->DO[num], "thread_acronyme", chaine );
+       Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New DI '%s' (%s)", __func__, thread_tech_id, chaine );
      }
 /***************************************************** Mapping des DigitalOutput **********************************************/
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DO", __func__, thread_tech_id, vars->nbr_sortie_tor );
@@ -755,13 +745,14 @@
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, thread_tech_id );
        return;
      }
-    for ( gint num = 0; num < vars->nbr_sortie_tor; num ++ )
+    for ( gint num = 0; num < vars->nbr_sortie_tor; num++ )
      { vars->DO[num] = Json_node_create ();
        Json_node_add_string ( vars->DO[num], "thread_tech_id", thread_tech_id );
        gchar chaine[16];
        g_snprintf( chaine, sizeof(chaine), "DO%03d", num );
        Json_node_add_string ( vars->DO[num], "thread_acronyme", chaine );
        Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New DO '%s' (%s)", __func__, thread_tech_id, chaine );
      }
     Modbus_Get_DO_from_master ( module );
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
