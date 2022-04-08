@@ -254,11 +254,11 @@
   { if (!Json_has_member ( element, "thread_tech_id" ))
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_tech_id' in Json", __func__ ); return; }
 
-    if (!Json_has_member ( element, "thread_name" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_name' in Json", __func__ ); return; }
+    if (!Json_has_member ( element, "thread_classe" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_classe' in Json", __func__ ); return; }
 
     gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
-    gchar *thread_name    = Json_get_string ( element, "thread_name" );
+    gchar *thread_classe  = Json_get_string ( element, "thread_classe" );
 
     struct SUBPROCESS *module = g_try_malloc0( sizeof(struct SUBPROCESS) );
     if (!module)
@@ -267,7 +267,7 @@
      }
 
     gchar nom_fichier[128];
-    g_snprintf( nom_fichier,  sizeof(nom_fichier), "%s/libwatchdog-server-%s.so", Config.librairie_dir, thread_name );
+    g_snprintf( nom_fichier,  sizeof(nom_fichier), "%s/libwatchdog-server-%s.so", Config.librairie_dir, thread_classe );
 
     module->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW );
     if (!module->dl_handle)
@@ -288,7 +288,7 @@
 
     JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-    Json_node_add_string ( RootNode, "thread_name",    thread_name );
+    Json_node_add_string ( RootNode, "thread_classe",  thread_classe );
     if(!RootNode)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Process: Memory Error. Unloading.", __func__, thread_tech_id );
        dlclose( module->dl_handle );
@@ -337,7 +337,7 @@
     pthread_attr_destroy(&attr);                                                                        /* Libération mémoire */
     Partage->com_msrv.Subprocess = g_slist_append ( Partage->com_msrv.Subprocess, module );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': process of class '%s' loaded with enable=%d",
-              __func__, thread_tech_id, thread_name, module->Thread_run );
+              __func__, thread_tech_id, thread_classe, module->Thread_run );
   }
 /******************************************************************************************************************************/
 /* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                                             */

@@ -99,7 +99,7 @@
 
     JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-    Json_node_add_string ( RootNode, "thread_name",    Json_get_string ( module->config, "thread_name") );
+    Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe") );
 /******************************************************* Récupère les Outputs *************************************************/
     JsonNode *result = Http_Post_to_local_BUS ( module, "GET_DO", NULL );
     if (result && Json_has_member ( result, "douts" ) )
@@ -908,6 +908,17 @@
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
                     );
+            JsonNode *RootNode = Json_node_create ();                                             /* Envoi de la conf a l'API */
+            if (!RootNode) break;
+            Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
+            Json_node_add_string ( RootNode, "thread_classe",  Json_get_string( module->config, "thread_classe" ) );
+            Json_node_add_int    ( RootNode, "nbr_entree_tor", vars->nbr_entree_tor );
+            Json_node_add_int    ( RootNode, "nbr_entree_ana", vars->nbr_entree_ana );
+            Json_node_add_int    ( RootNode, "nbr_sortie_tor", vars->nbr_sortie_tor );
+            Json_node_add_int    ( RootNode, "nbr_sortie_ana", vars->nbr_sortie_ana );
+            JsonNode *API_result = Http_Post_to_global_API ( "subprocess", "ADD_IO", RootNode );
+            Json_node_unref ( API_result );
+            Json_node_unref ( RootNode );
             vars->mode = MODBUS_GET_NBR_AI;
             break;
        case MODBUS_GET_NBR_AI:
@@ -915,12 +926,6 @@
                Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree ANA",
                          __func__, thread_tech_id, vars->nbr_entree_ana
                        );
-               for (gint cpt=0; cpt<vars->nbr_entree_ana; cpt++)
-                { SQL_Write_new ( "INSERT IGNORE INTO modbus_AI SET thread_tech_id='%s', thread_acronyme='AI%03d', num=%d",
-                                  thread_tech_id, cpt, cpt );
-                  SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='AI%03d'",
-                                  thread_tech_id, cpt );
-                }
                vars->mode = MODBUS_GET_NBR_AO;
              }
             break;
@@ -929,12 +934,6 @@
                Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie ANA",
                          __func__, thread_tech_id, vars->nbr_sortie_ana
                        );
-               for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                { SQL_Write_new ( "INSERT IGNORE INTO modbus_AO SET thread_tech_id='%s', thread_acronyme='AO%03d', num=%d",
-                                  thread_tech_id, cpt, cpt );
-                  SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='AO%03d'",
-                                  thread_tech_id, cpt );
-                }
                vars->mode = MODBUS_GET_NBR_DI;
              }
             break;
@@ -944,12 +943,6 @@
                vars->nbr_entree_tor = nbr;
                Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Entree TOR",
                          __func__, thread_tech_id, vars->nbr_entree_tor );
-               for (gint cpt=0; cpt<vars->nbr_entree_tor; cpt++)
-                { SQL_Write_new ( "INSERT IGNORE INTO modbus_DI SET thread_tech_id='%s', thread_acronyme='DI%03d', num=%d",
-                                  thread_tech_id, cpt, cpt );
-                  SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='DI%03d'",
-                                  thread_tech_id, cpt );
-                }
                vars->mode = MODBUS_GET_NBR_DO;
              }
             break;
@@ -957,12 +950,6 @@
              { vars->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
                Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Get %03d Sortie TOR",
                          __func__, thread_tech_id, vars->nbr_sortie_tor );
-               for (gint cpt=0; cpt<vars->nbr_sortie_tor; cpt++)
-                { SQL_Write_new ( "INSERT IGNORE INTO modbus_DO SET thread_tech_id='%s', thread_acronyme='DO%03d', num=%d",
-                                  thread_tech_id, cpt, cpt );
-                  SQL_Write_new ( "INSERT IGNORE INTO mappings SET thread_tech_id='%s', thread_acronyme='DO%03d'",
-                                  thread_tech_id, cpt );
-                }
                Modbus_load_io_config( module );                                                  /* Initialise les IO modules */
                vars->mode = MODBUS_GET_DI;
              }
@@ -1077,18 +1064,7 @@
                 case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
                 case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
                 case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
-                case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module );
-                                             JsonNode *RootNode = Json_node_create ();
-                                             if (!RootNode) break;
-                                             Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-                                             Json_node_add_int    ( RootNode, "nbr_entree_tor", vars->nbr_entree_tor );
-                                             Json_node_add_int    ( RootNode, "nbr_entree_ana", vars->nbr_entree_ana );
-                                             Json_node_add_int    ( RootNode, "nbr_sortie_tor", vars->nbr_sortie_tor );
-                                             Json_node_add_int    ( RootNode, "nbr_sortie_ana", vars->nbr_sortie_ana );
-                                             JsonNode *API_result = Http_Post_to_global_API ( "modbus", "INIT", RootNode );
-                                             Json_node_unref ( API_result );
-                                             Json_node_unref ( RootNode );
-                                             break;
+                case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
                 case MODBUS_GET_DI         : if (vars->nbr_entree_tor) Interroger_entree_tor( module );
                                              else vars->mode = MODBUS_GET_AI;
                                              break;
