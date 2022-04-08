@@ -125,26 +125,10 @@
     vars->request = FALSE;
     vars->nbr_deconnect++;
     vars->date_retente = Partage->top + MODBUS_RETRY;
-    if (vars->DI)
-     { for (gint num=0 ;num<vars->nbr_entree_tor; num++) Json_node_unref ( vars->DI[num] );
-       g_free(vars->DI);
-       vars->DI = NULL;
-     }
-    if (vars->DO)
-     { for (gint num=0 ;num<vars->nbr_sortie_tor; num++) Json_node_unref ( vars->DO[num] );
-       g_free(vars->DO);
-       vars->DO = NULL;
-     }
-    if (vars->AI)
-     { for (gint num=0 ;num<vars->nbr_entree_ana; num++) Json_node_unref ( vars->AI[num] );
-       g_free(vars->AI);
-       vars->AI = NULL;
-     }
-    if (vars->AO)
-     { for (gint num=0 ;num<vars->nbr_sortie_tor; num++) Json_node_unref ( vars->AO[num] );
-       g_free(vars->AO);
-       vars->AO = NULL;
-     }
+    if (vars->DI) { g_free(vars->DI); vars->DI = NULL; }
+    if (vars->DO) { g_free(vars->DO); vars->DO = NULL; }
+    if (vars->AI) { g_free(vars->AI); vars->AI = NULL; }
+    if (vars->AO) { g_free(vars->AO); vars->AO = NULL; }
     vars->nbr_entree_tor = 0;
     vars->nbr_entree_ana = 0;
     vars->nbr_sortie_ana = 0;
@@ -785,9 +769,6 @@
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Module '%s' : io config done",
               __func__, thread_tech_id, Json_get_string ( module->config, "description" ) );
-
-#warning Push config to Global API.
-
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
@@ -1096,7 +1077,18 @@
                 case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
                 case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
                 case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
-                case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
+                case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module );
+                                             JsonNode *RootNode = Json_node_create ();
+                                             if (!RootNode) break;
+                                             Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
+                                             Json_node_add_int    ( RootNode, "nbr_entree_tor", vars->nbr_entree_tor );
+                                             Json_node_add_int    ( RootNode, "nbr_entree_ana", vars->nbr_entree_ana );
+                                             Json_node_add_int    ( RootNode, "nbr_sortie_tor", vars->nbr_sortie_tor );
+                                             Json_node_add_int    ( RootNode, "nbr_sortie_ana", vars->nbr_sortie_ana );
+                                             JsonNode *API_result = Http_Post_to_global_API ( "modbus", "INIT", RootNode );
+                                             Json_node_unref ( API_result );
+                                             Json_node_unref ( RootNode );
+                                             break;
                 case MODBUS_GET_DI         : if (vars->nbr_entree_tor) Interroger_entree_tor( module );
                                              else vars->mode = MODBUS_GET_AI;
                                              break;
