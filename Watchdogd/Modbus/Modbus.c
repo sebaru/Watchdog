@@ -130,12 +130,20 @@
        g_free(vars->DI);
        vars->DI = NULL;
      }
-    if (vars->AI_root) { Json_node_unref(vars->AI_root); vars->AI_root = NULL; }
-    if (vars->AI)      { g_free(vars->AI); vars->AI = NULL; }
     if (vars->DO)
      { for (gint num=0 ;num<vars->nbr_sortie_tor; num++) Json_node_unref ( vars->DO[num] );
        g_free(vars->DO);
        vars->DO = NULL;
+     }
+    if (vars->AI)
+     { for (gint num=0 ;num<vars->nbr_entree_ana; num++) Json_node_unref ( vars->AI[num] );
+       g_free(vars->AI);
+       vars->AI = NULL;
+     }
+    if (vars->AO)
+     { for (gint num=0 ;num<vars->nbr_sortie_tor; num++) Json_node_unref ( vars->AO[num] );
+       g_free(vars->AO);
+       vars->AO = NULL;
      }
     vars->nbr_entree_tor = 0;
     vars->nbr_entree_ana = 0;
@@ -688,73 +696,92 @@
 /******************************************************************************************************************************/
  static void Modbus_load_io_config ( struct SUBPROCESS *module )
   { struct MODBUS_VARS *vars = module->vars;
-
+    JsonArray *array;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-/***************************************************** Mapping des AIgitalInput ***********************************************/
-    vars->AI_root = Json_node_create();
-    if (!vars->AI_root)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, thread_tech_id); }
-    else
-     { Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d AI", __func__,thread_tech_id, vars->nbr_entree_ana );
-       SQL_Select_to_json_node ( vars->AI_root, "modbus_AI",
-                                 "SELECT *, 'AI' AS classe FROM modbus_AI "
-                                 "WHERE thread_tech_id='%s'", thread_tech_id );
-
-       vars->AI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_ana );
-       if (!vars->AI)
-        { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, thread_tech_id);
-          return;
-        }
-
-       JsonArray *array = Json_get_array ( vars->AI_root, "modbus_AI" );
-       for ( gint cpt = 0; cpt < json_array_get_length ( Json_get_array ( vars->AI_root, "modbus_AI" ) ); cpt++ )
-        { JsonNode *element = json_array_get_element ( array, cpt );
-          gint num = Json_get_int ( element, "num" );
-          if ( 0 <= num && num < vars->nbr_entree_ana )
-           { vars->AI[num] = element;
-             Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New AI '%s' (%s, %s)", __func__, thread_tech_id,
-                       Json_get_string ( vars->AI[num], "thread_acronyme" ),
-                       Json_get_string ( vars->AI[num], "libelle" ),
-                       Json_get_string ( vars->AI[num], "unite" ) );
-           } else Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': map AI: num %d out of range '%d'",
-                            __func__, thread_tech_id, num, vars->nbr_entree_ana );
-        }
+/***************************************************** Mapping des AnalogInput ************************************************/
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocate %d AI", __func__,thread_tech_id, vars->nbr_entree_ana );
+    vars->AI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_ana );
+    if (!vars->AI)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AI", __func__, thread_tech_id);
+       return;
      }
 
+    array = Json_get_array ( module->config, "modbus_AI" );
+    for ( gint cpt = 0; cpt < json_array_get_length ( array ); cpt++ )
+     { JsonNode *element = json_array_get_element ( array, cpt );
+       gint num = Json_get_int ( element, "num" );
+       if ( 0 <= num && num < vars->nbr_entree_ana )
+        { vars->AI[num] = element;
+          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New AI '%s' (%s, %s)", __func__, thread_tech_id,
+                    Json_get_string ( vars->AI[num], "thread_acronyme" ),
+                    Json_get_string ( vars->AI[num], "libelle" ),
+                    Json_get_string ( vars->AI[num], "unite" ) );
+        } else Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': map AI: num %d out of range '%d'",
+                         __func__, thread_tech_id, num, vars->nbr_entree_ana );
+     }
 /***************************************************** Mapping des DigitalInput ***********************************************/
-    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DI", __func__,thread_tech_id, vars->nbr_entree_tor );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocate %d DI", __func__,thread_tech_id, vars->nbr_entree_tor );
     vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
     if (!vars->DI)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DI", __func__, thread_tech_id);
        return;
      }
-    for ( gint num = 0; num < vars->nbr_entree_tor; num++ )
-     { vars->DI[num] = Json_node_create ();
-       Json_node_add_string ( vars->DO[num], "thread_tech_id", thread_tech_id );
-       gchar chaine[16];
-       g_snprintf( chaine, sizeof(chaine), "DI%03d", num );
-       Json_node_add_string ( vars->DO[num], "thread_acronyme", chaine );
-       Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
-       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New DI '%s' (%s)", __func__, thread_tech_id, chaine );
+
+    array = Json_get_array ( module->config, "modbus_DI" );
+    for ( gint cpt = 0; cpt < json_array_get_length ( array ); cpt++ )
+     { JsonNode *element = json_array_get_element ( array, cpt );
+       gint num = Json_get_int ( element, "num" );
+       if ( 0 <= num && num < vars->nbr_entree_tor )
+        { vars->DI[num] = element;
+          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New DI '%s' (%s)", __func__, thread_tech_id,
+                    Json_get_string ( vars->DI[num], "thread_acronyme" ),
+                    Json_get_string ( vars->DI[num], "libelle" ));
+        } else Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': map DI: num %d out of range '%d'",
+                         __func__, thread_tech_id, num, vars->nbr_entree_tor );
      }
 /***************************************************** Mapping des DigitalOutput **********************************************/
-    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocated %d DO", __func__, thread_tech_id, vars->nbr_sortie_tor );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocate %d DO", __func__, thread_tech_id, vars->nbr_sortie_tor );
     vars->DO = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_sortie_tor );
     if (!vars->DO)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, thread_tech_id );
        return;
      }
-    for ( gint num = 0; num < vars->nbr_sortie_tor; num++ )
-     { vars->DO[num] = Json_node_create ();
-       Json_node_add_string ( vars->DO[num], "thread_tech_id", thread_tech_id );
-       gchar chaine[16];
-       g_snprintf( chaine, sizeof(chaine), "DO%03d", num );
-       Json_node_add_string ( vars->DO[num], "thread_acronyme", chaine );
-       Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
-       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New DO '%s' (%s)", __func__, thread_tech_id, chaine );
+    array = Json_get_array ( module->config, "modbus_DO" );
+    for ( gint cpt = 0; cpt < json_array_get_length ( array ); cpt++ )
+     { JsonNode *element = json_array_get_element ( array, cpt );
+       gint num = Json_get_int ( element, "num" );
+       if ( 0 <= num && num < vars->nbr_sortie_tor )
+        { vars->DO[num] = element;
+          Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
+          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New DO '%s' (%s)", __func__, thread_tech_id,
+                    Json_get_string ( vars->DO[num], "thread_acronyme" ),
+                    Json_get_string ( vars->DO[num], "libelle" ));
+        } else Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': map DO: num %d out of range '%d'",
+                         __func__, thread_tech_id, num, vars->nbr_sortie_tor );
      }
     Modbus_Get_DO_from_master ( module );
+/***************************************************** Mapping des DigitalOutput **********************************************/
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocate %d AO", __func__, thread_tech_id, vars->nbr_sortie_ana );
+    vars->AO = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_sortie_ana );
+    if (!vars->AO)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AO", __func__, thread_tech_id );
+       return;
+     }
+    array = Json_get_array ( module->config, "modbus_AO" );
+    for ( gint cpt = 0; cpt < json_array_get_length ( array ); cpt++ )
+     { JsonNode *element = json_array_get_element ( array, cpt );
+       gint num = Json_get_int ( element, "num" );
+       if ( 0 <= num && num < vars->nbr_sortie_ana )
+        { vars->AO[num] = element;
+          /*Json_node_add_bool   ( vars->AO[num], "etat", FALSE );*/
+          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New AO '%s' (%s)", __func__, thread_tech_id,
+                    Json_get_string ( vars->AO[num], "thread_acronyme" ),
+                    Json_get_string ( vars->AO[num], "libelle" ));
+        } else Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': map AO: num %d out of range '%d'",
+                         __func__, thread_tech_id, num, vars->nbr_sortie_ana );
+     }
+    /*Modbus_Get_AO_from_master ( module ); */
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Module '%s' : io config done",
               __func__, thread_tech_id, Json_get_string ( module->config, "description" ) );

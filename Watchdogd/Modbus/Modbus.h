@@ -109,7 +109,8 @@
     gboolean do_check_eana;                                                           /* Interrogation des bornes EANA ou non */
     gboolean request;                                    /* Une requete a-t'elle été envoyée, et donc en attente de réponse ? */
     struct TRAME_MODBUS_REPONSE response;
-    JsonNode *AI_root, **AI;                                                           /* Tableau dynamique de mapping des DI */
+    JsonNode **AI;                                                                                /* Tableau dynamique des AI */
+    JsonNode **AO;                                                                                /* Tableau dynamique des AO */
     JsonNode **DI;                                                                                /* Tableau dynamique des DI */
     JsonNode **DO;                                                                                /* Tableau dynamique des DO */
     gpointer *MSG_AI_OUT_OF_RANGE;                                             /* Tableau dynamique d'accès aux bits internes */
