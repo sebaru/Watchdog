@@ -691,7 +691,7 @@
        return;
      }
 
-    array = Json_get_array ( module->config, "modbus_AI" );
+    array = Json_get_array ( module->config, "AI" );
     for ( gint cpt = 0; cpt < json_array_get_length ( array ); cpt++ )
      { JsonNode *element = json_array_get_element ( array, cpt );
        gint num = Json_get_int ( element, "num" );
@@ -712,7 +712,7 @@
        return;
      }
 
-    array = Json_get_array ( module->config, "modbus_DI" );
+    array = Json_get_array ( module->config, "DI" );
     for ( gint cpt = 0; cpt < json_array_get_length ( array ); cpt++ )
      { JsonNode *element = json_array_get_element ( array, cpt );
        gint num = Json_get_int ( element, "num" );
@@ -725,34 +725,13 @@
                          __func__, thread_tech_id, num, vars->nbr_entree_tor );
      }
 /***************************************************** Mapping des DigitalOutput **********************************************/
-    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocate %d DO", __func__, thread_tech_id, vars->nbr_sortie_tor );
-    vars->DO = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_sortie_tor );
-    if (!vars->DO)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, thread_tech_id );
-       return;
-     }
-    array = Json_get_array ( module->config, "modbus_DO" );
-    for ( gint cpt = 0; cpt < json_array_get_length ( array ); cpt++ )
-     { JsonNode *element = json_array_get_element ( array, cpt );
-       gint num = Json_get_int ( element, "num" );
-       if ( 0 <= num && num < vars->nbr_sortie_tor )
-        { vars->DO[num] = element;
-          Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
-          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New DO '%s' (%s)", __func__, thread_tech_id,
-                    Json_get_string ( vars->DO[num], "thread_acronyme" ),
-                    Json_get_string ( vars->DO[num], "libelle" ));
-        } else Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': map DO: num %d out of range '%d'",
-                         __func__, thread_tech_id, num, vars->nbr_sortie_tor );
-     }
-    Modbus_Get_DO_from_master ( module );
-/***************************************************** Mapping des DigitalOutput **********************************************/
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocate %d AO", __func__, thread_tech_id, vars->nbr_sortie_ana );
     vars->AO = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_sortie_ana );
     if (!vars->AO)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for AO", __func__, thread_tech_id );
        return;
      }
-    array = Json_get_array ( module->config, "modbus_AO" );
+    array = Json_get_array ( module->config, "AO" );
     for ( gint cpt = 0; cpt < json_array_get_length ( array ); cpt++ )
      { JsonNode *element = json_array_get_element ( array, cpt );
        gint num = Json_get_int ( element, "num" );
@@ -766,6 +745,27 @@
                          __func__, thread_tech_id, num, vars->nbr_sortie_ana );
      }
     /*Modbus_Get_AO_from_master ( module ); */
+/***************************************************** Mapping des DigitalOutput **********************************************/
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Allocate %d DO", __func__, thread_tech_id, vars->nbr_sortie_tor );
+    vars->DO = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_sortie_tor );
+    if (!vars->DO)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for DO", __func__, thread_tech_id );
+       return;
+     }
+    array = Json_get_array ( module->config, "DO" );
+    for ( gint cpt = 0; cpt < json_array_get_length ( array ); cpt++ )
+     { JsonNode *element = json_array_get_element ( array, cpt );
+       gint num = Json_get_int ( element, "num" );
+       if ( 0 <= num && num < vars->nbr_sortie_tor )
+        { vars->DO[num] = element;
+          Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
+          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': New DO '%s' (%s)", __func__, thread_tech_id,
+                    Json_get_string ( vars->DO[num], "thread_acronyme" ),
+                    Json_get_string ( vars->DO[num], "libelle" ));
+        } else Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': map DO: num %d out of range '%d'",
+                         __func__, thread_tech_id, num, vars->nbr_sortie_tor );
+     }
+    Modbus_Get_DO_from_master ( module );
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Module '%s' : io config done",
               __func__, thread_tech_id, Json_get_string ( module->config, "description" ) );
