@@ -292,7 +292,7 @@ end:
        /*xmpp_handler_add   ( vars->conn, Imsgs_test, NULL, NULL, NULL, NULL );*/
 
        Imsgs_set_presence( module, "A votre écoute !" );
-       Imsgs_Envoi_message_to_all_available ( module, "Instance démarrée. A l'écoute !" );
+       Imsgs_Envoi_message_to_all_available ( module, "Agent démarré. A l'écoute !" );
      }
     else
      { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Account disconnected",

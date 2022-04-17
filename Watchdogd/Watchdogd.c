@@ -706,15 +706,15 @@
        Json_node_add_string ( RootNode, "version", WTD_VERSION );
        Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
 
-       JsonNode *api_result = Http_Post_to_global_API ( "instance", "START", RootNode );
+       JsonNode *api_result = Http_Post_to_global_API ( "agent", "START", RootNode );
        Json_node_unref ( RootNode );
 
        if (api_result) Json_node_unref ( api_result );
-       else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for INSTANCE START failed.", __func__ );
+       else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for AGENT START failed.", __func__ );
 
      }
-/************************************************* Get instance parameters ****************************************************/
-    JsonNode *api_result = Http_Post_to_global_API ( "instance", "GET_CONFIG", NULL );
+/************************************************* Get agent parameters *******************************************************/
+    JsonNode *api_result = Http_Post_to_global_API ( "agent", "GET_CONFIG", NULL );
     if (api_result)
      { Config.headless           = Json_get_bool ( api_result, "headless" );
        Config.log_db             = Json_get_bool ( api_result, "log_db" );
