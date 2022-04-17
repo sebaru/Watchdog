@@ -63,7 +63,7 @@
     Json_node_add_string ( RootNode, "instance_name",   g_get_host_name() );
     Json_node_add_bool   ( RootNode, "is_master",       Json_get_bool   ( Config.config, "is_master" ) );
     Json_node_add_string ( RootNode, "domain_uuid",     Json_get_string ( Config.config, "domain_uuid" ) );
-    Json_node_add_string ( RootNode, "instance_uuid",   Json_get_string ( Config.config, "instance_uuid" ) );
+    Json_node_add_string ( RootNode, "agent_uuid",   Json_get_string ( Config.config, "agent_uuid" ) );
     Json_node_add_string ( RootNode, "api_url",         Json_get_string ( Config.config, "api_url" ) );
     Json_node_add_string ( RootNode, "master_hostname", Json_get_string ( Config.config, "master_hostname" ) );
     Json_node_add_string ( RootNode, "headless",        Json_get_string ( Config.config, "headless" ) );

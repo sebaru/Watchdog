@@ -116,7 +116,7 @@
     if (!RootNode) { RootNode = Json_node_create(); unref_RootNode = TRUE; }
 
     Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
-    Json_node_add_string ( RootNode, "instance_uuid", Json_get_string ( Config.config, "instance_uuid" ) );
+    Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
     Json_node_add_string ( RootNode, "api_tag", api_tag );
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
