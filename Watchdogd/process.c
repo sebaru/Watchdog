@@ -295,7 +295,7 @@
        g_free(module);
        return;
      }
-    module->config = Http_Post_to_global_API ( "subprocess", "GET_CONFIG", RootNode );
+    module->config = Http_Post_to_global_API ( "/run/subprocess", "GET_CONFIG", RootNode );
     Json_node_unref(RootNode);
     if (module->config)
      { module->Thread_debug = Json_get_bool ( module->config, "debug" );
@@ -345,7 +345,7 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_librairies ( void )
-  { JsonNode *result = Http_Post_to_global_API ( "subprocess", "LOAD", NULL );
+  { JsonNode *result = Http_Post_to_global_API ( "/run/subprocess", "LOAD", NULL );
     if (result)                                                                                     /* Chargement des modules */
      { JsonArray *array = Json_get_array ( result, "subprocesses" );
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Loading %d subprocess",__func__, json_array_get_length(array) );
