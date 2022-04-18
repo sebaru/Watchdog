@@ -347,7 +347,10 @@
  void Charger_librairies ( void )
   { JsonNode *result = Http_Post_to_global_API ( "subprocess", "LOAD", NULL );
     if (result)                                                                                     /* Chargement des modules */
-     { Json_node_foreach_array_element ( result, "subprocesses", Process_Create_one_subprocess, NULL ); }
+     { JsonArray *array = Json_get_array ( result, "subprocesses" );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Loading %d subprocess",__func__, json_array_get_length(array) );
+       Json_node_foreach_array_element ( result, "subprocesses", Process_Create_one_subprocess, NULL );
+     }
     Json_node_unref(result);
   }
 /******************************************************************************************************************************/

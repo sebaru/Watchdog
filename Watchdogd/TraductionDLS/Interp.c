@@ -367,10 +367,12 @@
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  static struct CONDITION *New_condition_entree_ana( int barre, struct ALIAS *alias, GList *options )
-  { struct CONDITION *condition = New_condition( FALSE, 256 ); /* 10 caractères max */
+  {
+    gint in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
+
+    struct CONDITION *condition = New_condition( (in_range ? TRUE : FALSE), 256 ); /* 10 caractères max */
     if (!condition) return(NULL);
 
-    gint in_range = Get_option_entier ( options, T_IN_RANGE, 0 );
     if (in_range==1)
      { if (barre) g_snprintf( condition->chaine, condition->taille, "!Dls_data_get_AI_inrange(\"%s\",\"%s\",&_%s_%s)",
                               alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
@@ -1464,7 +1466,7 @@
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"
                     " gchar *version (void)\n"
-                    "  { return(\"V%s - %s\"); \n  }\n", WTD_VERSION, date );
+                    "  { return(\"%s - %s\"); \n  }\n", WTD_VERSION, date );
           write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
 /*----------------------------------------------- Ecriture de la fonction Go -------------------------------------------------*/
