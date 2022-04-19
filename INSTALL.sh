@@ -19,7 +19,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y json-glib-devel gammu-devel
   dnf install -y mpg123 sox libusb-devel libgpiod-devel
   dnf install -y librsvg2-devel
-  dnf install -y git systemd-devel
+  dnf install -y git systemd-devel libjwt-devel
 
   git clone https://github.com/strophe/libstrophe.git
   cd libstrophe
