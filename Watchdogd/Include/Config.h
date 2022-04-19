@@ -50,6 +50,7 @@
     gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
     gchar master_hostname[ 32 ];
+    gchar api_ws_password[ 64 ];                                               /* Password pour se connecter au WebSocket API */
     guint    log_level;                                                                       /* Niveau de debug du programme */
     gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
     gboolean log_bus;                                                                                      /* TRUE si log_bus */
