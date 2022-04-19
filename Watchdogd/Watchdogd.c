@@ -255,7 +255,6 @@
     /*module->Master_messages = g_slist_append ( module->Master_messages, response );
     pthread_mutex_unlock ( &module->synchro );*/
   }
-
 /******************************************************************************************************************************/
 /* MSRV_ws_on_master_close_CB: Traite une deconnexion sur la websocket MSRV                                                   */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
@@ -287,6 +286,15 @@
     g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(MSRV_ws_on_API_message_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(MSRV_ws_on_API_close_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(MSRV_ws_on_API_error_CB), NULL );
+    JsonNode *RootNode = Json_node_create();
+    Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
+    Json_node_add_string ( RootNode, "agent_uuid",  Json_get_string ( Config.config, "agent_uuid" ) );
+    Json_node_add_string ( RootNode, "api_tag",     "WS_AGENT_CONNECT" );
+    Json_node_add_string ( RootNode, "api_ws_password", Config.api_ws_password );
+    gchar *buffer = Json_node_to_string ( RootNode );
+    Json_node_unref ( RootNode );
+    soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buffer );
+    g_free(buffer);
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket to API connected", __func__ );
   }
 /******************************************************************************************************************************/
@@ -295,7 +303,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MSRV_ws_init ( void )
-  { Partage->com_msrv.API_session = soup_session_new_with_options( "idle-timeout", 600, NULL );   /* 10 minutes idle -> close */
+  { Partage->com_msrv.API_session = soup_session_new();
     g_object_set ( G_OBJECT(Partage->com_msrv.API_session), "ssl-strict", TRUE, NULL );
     static gchar *protocols[] = { "live-agent", NULL };
     gchar chaine[256];
@@ -309,7 +317,7 @@
     g_object_unref(cancel);
   }
 /******************************************************************************************************************************/
-/* MSRV_ws_init: appelé pour démarrer le websocket vers l'API                                                                 */
+/* MSRV_ws_end: appelé pour stopper la websocket vers l'API                                                                   */
 /* Entrée: néant                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -452,8 +460,8 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { /*JsonNode *body = Json_node_create ();
-          if(body)
+        { soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, "ping" );
+          /*if(body)
            { Json_node_add_string ( body, "zmq_tag", "SET_WATCHDOG" );
              Json_node_add_string ( body, "tech_id",  g_get_host_name() );
              Json_node_add_string ( body, "acronyme", "IO_COMM" );
@@ -725,7 +733,7 @@
        gchar *master_hostname    = Json_get_string ( api_result, "master_hostname" );
        if (master_hostname) g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "%s", master_hostname );
                        else g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "nomasterhost" );
-       g_snprintf( Config.api_ws_password, sizeof(Config.api_ws_password), "%s", Json_get_string ( api_result, "api_ws_password" ) );
+       g_snprintf( Config.api_ws_password, sizeof(Config.api_ws_password), "api_ws_password" );
 
        Info_change_log_level ( Config.log, Json_get_int ( api_result, "log_level" ) );
        Json_node_unref ( api_result );
