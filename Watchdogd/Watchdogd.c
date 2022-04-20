@@ -286,15 +286,6 @@
     g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(MSRV_ws_on_API_message_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(MSRV_ws_on_API_close_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(MSRV_ws_on_API_error_CB), NULL );
-    JsonNode *RootNode = Json_node_create();
-    Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
-    Json_node_add_string ( RootNode, "agent_uuid",  Json_get_string ( Config.config, "agent_uuid" ) );
-    Json_node_add_string ( RootNode, "api_tag",     "WS_AGENT_CONNECT" );
-    Json_node_add_string ( RootNode, "api_ws_password", Config.api_ws_password );
-    gchar *buffer = Json_node_to_string ( RootNode );
-    Json_node_unref ( RootNode );
-    soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buffer );
-    g_free(buffer);
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket to API connected", __func__ );
   }
 /******************************************************************************************************************************/
@@ -309,6 +300,20 @@
     gchar chaine[256];
     g_snprintf(chaine, sizeof(chaine), "wss://%s/websocket", Json_get_string ( Config.config, "api_url" ) );
     SoupMessage *query = soup_message_new ( "GET", chaine );
+    SoupMessageHeaders *headers;
+    g_object_get ( query, "request-headers", &headers, NULL );
+
+    JsonNode *RootNode = Json_node_create();
+    Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
+    Json_node_add_string ( RootNode, "agent_uuid",  Json_get_string ( Config.config, "agent_uuid" ) );
+    Json_node_add_string ( RootNode, "api_tag",     "WS_AGENT_CONNECT" );
+    gchar *token = Json_node_to_agent_jwt ( RootNode );
+    Json_node_unref ( RootNode );
+    soup_message_headers_append ( headers, "Origin", "abls-habitat.fr" );
+    soup_message_headers_append ( headers, "Authorization", token );
+    soup_message_headers_append ( headers, "X-ABLS-DOMAIN", Json_get_string ( Config.config, "domain_uuid" ) );
+    g_free(token);
+
     GCancellable *cancel = g_cancellable_new();
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Starting WebSocket connect to %s", __func__, chaine );
     soup_session_websocket_connect_async ( Partage->com_msrv.API_session, query,
@@ -460,7 +465,7 @@
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, "ping" );
+        { /*soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, "ping" );*/
           /*if(body)
            { Json_node_add_string ( body, "zmq_tag", "SET_WATCHDOG" );
              Json_node_add_string ( body, "tech_id",  g_get_host_name() );
@@ -733,7 +738,7 @@
        gchar *master_hostname    = Json_get_string ( api_result, "master_hostname" );
        if (master_hostname) g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "%s", master_hostname );
                        else g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "nomasterhost" );
-       g_snprintf( Config.api_ws_password, sizeof(Config.api_ws_password), "api_ws_password" );
+       g_snprintf( Config.api_ws_password, sizeof(Config.api_ws_password), Json_get_string ( api_result, "api_ws_password" ) );
 
        Info_change_log_level ( Config.log, Json_get_int ( api_result, "log_level" ) );
        Json_node_unref ( api_result );

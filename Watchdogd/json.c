@@ -39,7 +39,7 @@
 /* Entrée: le token au format string                                                                                          */
 /* Sortie: NULL si erreur, sinon le jsonnode associé                                                                          */
 /******************************************************************************************************************************/
- JsonNode *Json_jwt_to_node ( gchar *source )
+ JsonNode *Json_agent_jwt_to_node ( gchar *source )
   { jwt_t *token;
     gchar *key = Json_get_string ( Config.config, "domain_secret" );
     if ( jwt_decode ( &token, source, key, strlen(key) ) ) return(NULL);
@@ -54,7 +54,7 @@
 /* Entrée: le jsonnode                                                                                                        */
 /* Sortie: le token, ou NULL si erreur                                                                                        */
 /******************************************************************************************************************************/
- gchar *Json_node_to_jwt ( JsonNode *RootNode )
+ gchar *Json_node_to_agent_jwt ( JsonNode *RootNode )
   { jwt_t *token = NULL;
     if (jwt_new (&token)) return(NULL);
 
