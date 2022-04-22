@@ -100,30 +100,66 @@
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
+ void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size )
+  { gchar *origin        = "abls-habitat.fr";
+    gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
+    gchar *domain_secret = Json_get_string ( Config.config, "domain_secret" );
+    gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
+    gchar timestamp[20];
+    g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
+
+    unsigned char hash_bin[EVP_MAX_MD_SIZE];
+    gint md_len;
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(mdctx, domain_uuid,   strlen(domain_uuid));
+    EVP_DigestUpdate(mdctx, agent_uuid,    strlen(agent_uuid));
+    EVP_DigestUpdate(mdctx, domain_secret, strlen(domain_secret));
+    if (buf) EVP_DigestUpdate(mdctx, buf,           buf_size);
+    EVP_DigestUpdate(mdctx, timestamp,     strlen(timestamp));
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
+    gchar signature[64];
+    EVP_EncodeBlock( signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
+
+    SoupMessageHeaders *headers;
+    g_object_get ( msg, "request-headers", &headers, NULL );
+    soup_message_headers_append ( headers, "Origin",           origin );
+    soup_message_headers_append ( headers, "X-ABLS-DOMAIN",    domain_uuid );
+    soup_message_headers_append ( headers, "X-ABLS-AGENT",     agent_uuid );
+    soup_message_headers_append ( headers, "X-ABLS-TIMESTAMP", timestamp );
+    soup_message_headers_append ( headers, "X-ABLS-SIGNATURE", signature );
+  }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
  JsonNode *Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode )
   { gboolean unref_RootNode = FALSE;
     JsonNode *result = NULL;
     gchar query[256];
 
-    g_snprintf( query, sizeof(query), "https://%s%s", Json_get_string ( Config.config, "api_url"), URI );
+    g_snprintf( query, sizeof(query), "https://%s%s", Json_get_string ( Config.config, "api_url" ), URI );
 /********************************************************* Envoi de la requete ************************************************/
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
        return(NULL);
      }
-    if (!RootNode) { RootNode = Json_node_create(); unref_RootNode = TRUE; }
 
-    Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
-    Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
+    if (!RootNode) { RootNode = Json_node_create(); unref_RootNode = TRUE; }
     Json_node_add_string ( RootNode, "api_tag", api_tag );
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
-    gchar *buf = Json_node_to_string ( RootNode );
+    gchar *buf    = Json_node_to_string ( RootNode );
+    gint buf_size = strlen(buf);
     if (unref_RootNode) Json_node_unref(RootNode);
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-             "%s: Sending to API %s: %s", __func__, query, buf );
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+
+    Http_Add_Agent_signature ( soup_msg, buf, buf_size );
+
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending to API %s: %s", __func__, query, api_tag );
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, buf_size );
     /* Async soup_session_queue_message (client->Partage->com_msrv.Soup_session, msg, callback, client);*/
     soup_session_send_message (Partage->com_msrv.API_session, soup_msg); /* SYNC */
 
@@ -154,6 +190,8 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Reading from API %s", __func__, query );
        return(NULL);
      }
+
+    Http_Add_Agent_signature ( soup_msg, NULL, 0 );
 
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
     soup_session_send_message (Partage->com_msrv.API_session, soup_msg);

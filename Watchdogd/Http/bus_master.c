@@ -252,9 +252,6 @@
     /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
     g_object_ref(connexion);
   }
-
-
-
 /******************************************************************************************************************************/
 /* Http_ws_on_slave_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket slave                         */
 /* Entrée: les parametres de la libsoup                                                                                       */

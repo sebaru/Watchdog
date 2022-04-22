@@ -299,19 +299,7 @@
     gchar chaine[256];
     g_snprintf(chaine, sizeof(chaine), "wss://%s/websocket", Json_get_string ( Config.config, "api_url" ) );
     SoupMessage *query = soup_message_new ( "GET", chaine );
-    SoupMessageHeaders *headers;
-    g_object_get ( query, "request-headers", &headers, NULL );
-
-    JsonNode *RootNode = Json_node_create();
-    Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );
-    Json_node_add_string ( RootNode, "agent_uuid",  Json_get_string ( Config.config, "agent_uuid" ) );
-    Json_node_add_string ( RootNode, "api_tag",     "WS_AGENT_CONNECT" );
-    gchar *token = Json_node_to_agent_jwt ( RootNode );
-    Json_node_unref ( RootNode );
-    soup_message_headers_append ( headers, "Origin", "abls-habitat.fr" );
-    soup_message_headers_append ( headers, "Authorization", token );
-    soup_message_headers_append ( headers, "X-ABLS-DOMAIN", Json_get_string ( Config.config, "domain_uuid" ) );
-    g_free(token);
+    Http_Add_Agent_signature ( query, NULL, 0 );
 
     GCancellable *cancel = g_cancellable_new();
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Starting WebSocket connect to %s", __func__, chaine );
@@ -326,7 +314,8 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MSRV_ws_end ( void )
-  { if (soup_websocket_connection_get_state ( Partage->com_msrv.API_websocket ) == SOUP_WEBSOCKET_STATE_OPEN )
+  { if ( Partage->com_msrv.API_websocket &&
+         soup_websocket_connection_get_state ( Partage->com_msrv.API_websocket ) == SOUP_WEBSOCKET_STATE_OPEN )
      { soup_websocket_connection_close ( Partage->com_msrv.API_websocket, 0, "Thanks, Bye !" ); }
     Partage->com_msrv.API_websocket = NULL;
   }

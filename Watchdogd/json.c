@@ -35,44 +35,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Json_jwt_to_node: Prepare un RootNode depuis un token JWT avec validation                                                  */
-/* Entrée: le token au format string                                                                                          */
-/* Sortie: NULL si erreur, sinon le jsonnode associé                                                                          */
-/******************************************************************************************************************************/
- JsonNode *Json_agent_jwt_to_node ( gchar *source )
-  { jwt_t *token;
-    gchar *key = Json_get_string ( Config.config, "domain_secret" );
-    if ( jwt_decode ( &token, source, key, strlen(key) ) ) return(NULL);
-    gchar *RootNode_char = jwt_get_grants_json ( token, NULL );                                 /* Convert from token to Json */
-    jwt_free (token);
-    JsonNode *RootNode = Json_get_from_string ( RootNode_char );
-    g_free(RootNode_char);
-    return(RootNode);
- }
-/******************************************************************************************************************************/
-/* Json_node_to_jwt: Prepare un token jwt depuis un jsonnode                                                                  */
-/* Entrée: le jsonnode                                                                                                        */
-/* Sortie: le token, ou NULL si erreur                                                                                        */
-/******************************************************************************************************************************/
- gchar *Json_node_to_agent_jwt ( JsonNode *RootNode )
-  { jwt_t *token = NULL;
-    if (jwt_new (&token)) return(NULL);
-
-    gchar *key = Json_get_string ( Config.config, "domain_secret" );
-    if (jwt_set_alg ( token, jwt_str_alg ( "HS256" ), key, strlen(key) ) )
-     { jwt_free (token);
-       return(NULL);
-     }
-    gchar *rootnode_string = Json_node_to_string ( RootNode );
-    jwt_add_grants_json ( token, rootnode_string );
-    g_free(rootnode_string);
-
-    gchar *token_string = jwt_encode_str (token);
-    jwt_free (token);
-    if (!token_string) return(NULL);
-    return(token_string);
-  }
-/******************************************************************************************************************************/
 /* Json_create: Prepare un RootNode pour creer un nouveau buffer json                                                         */
 /* Entrée: néant                                                                                                              */
 /* Sortie: NULL si erreur                                                                                                     */
