@@ -107,7 +107,6 @@
 
     g_snprintf( query, sizeof(query), "https://%s%s", Json_get_string ( Config.config, "api_url"), URI );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
@@ -125,8 +124,8 @@
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
              "%s: Sending to API %s: %s", __func__, query, buf );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-    /* Async soup_session_queue_message (client->connexion, msg, callback, client);*/
-    soup_session_send_message (connexion, soup_msg); /* SYNC */
+    /* Async soup_session_queue_message (client->Partage->com_msrv.Soup_session, msg, callback, client);*/
+    soup_session_send_message (Partage->com_msrv.API_session, soup_msg); /* SYNC */
 
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
@@ -136,8 +135,6 @@
     else { result = Http_Response_Msg_to_Json ( soup_msg ); }
     g_free(reason_phrase);
     g_object_unref( soup_msg );
-    soup_session_abort ( connexion );
-    g_object_unref( connexion );
     return(result);
  }
 /******************************************************************************************************************************/
@@ -152,7 +149,6 @@
     if (!parametres) g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
                 else g_snprintf( query, sizeof(query), "https://%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
     if (!soup_msg)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Reading from API %s", __func__, query );
@@ -160,7 +156,7 @@
      }
 
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
-    soup_session_send_message (connexion, soup_msg);
+    soup_session_send_message (Partage->com_msrv.API_session, soup_msg);
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
 
@@ -171,8 +167,6 @@
      { result = Http_Response_Msg_to_Json ( soup_msg ); }
     g_free(reason_phrase);
     g_object_unref( soup_msg );
-    soup_session_abort ( connexion );
-    g_object_unref ( connexion );
     return(result);
  }
 /******************************************************************************************************************************/

@@ -294,9 +294,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MSRV_ws_init ( void )
-  { Partage->com_msrv.API_session = soup_session_new();
-    g_object_set ( G_OBJECT(Partage->com_msrv.API_session), "ssl-strict", TRUE, NULL );
-    static gchar *protocols[] = { "live-agent", NULL };
+  { static gchar *protocols[] = { "live-agent", NULL };
     gchar chaine[256];
     g_snprintf(chaine, sizeof(chaine), "wss://%s/websocket", Json_get_string ( Config.config, "api_url" ) );
     SoupMessage *query = soup_message_new ( "GET", chaine );
@@ -328,9 +326,6 @@
 /******************************************************************************************************************************/
  static void MSRV_ws_end ( void )
   { soup_websocket_connection_close ( Partage->com_msrv.API_websocket, 0, "Thanks, Bye !" );
-    soup_session_abort ( Partage->com_msrv.API_session );
-    g_object_unref( Partage->com_msrv.API_session );
-    Partage->com_msrv.API_session = NULL;
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
@@ -700,6 +695,10 @@
        goto second_stage_end;
      }
 
+/************************************************* Init libsoup session *******************************************************/
+    Partage->com_msrv.API_session = soup_session_new_with_options( "idle_timeout", 60, "timeout", "5", "ssl-strict", TRUE,
+                                                                   "user-agent", "Abls-habitat Agent", NULL );
+
 /************************************************* Test Connexion to Global API ***********************************************/
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
     if (API)
@@ -897,6 +896,9 @@ third_stage_end:
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
 second_stage_end:
+    soup_session_abort ( Partage->com_msrv.API_session );
+    g_object_unref( Partage->com_msrv.API_session );
+    Partage->com_msrv.API_session = NULL;
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
 first_stage_end:
