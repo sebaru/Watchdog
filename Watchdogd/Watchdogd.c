@@ -283,6 +283,7 @@
        return;
      }
     g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(256000), NULL );
+    g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "keepalive-interval", G_GINT64_CONSTANT(60), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(MSRV_ws_on_API_message_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(MSRV_ws_on_API_close_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(MSRV_ws_on_API_error_CB), NULL );
@@ -325,7 +326,9 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MSRV_ws_end ( void )
-  { soup_websocket_connection_close ( Partage->com_msrv.API_websocket, 0, "Thanks, Bye !" );
+  { if (soup_websocket_connection_get_state ( Partage->com_msrv.API_websocket ) == SOUP_WEBSOCKET_STATE_OPEN )
+     { soup_websocket_connection_close ( Partage->com_msrv.API_websocket, 0, "Thanks, Bye !" ); }
+    Partage->com_msrv.API_websocket = NULL;
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
@@ -726,7 +729,7 @@
           sleep(5);
           error_code = EXIT_FAILURE;
           goto second_stage_end;
-        }
+        } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API Request for AGENT START OK.", __func__ );
 
        Config.headless           = Json_get_bool ( api_result, "headless" );
        Config.log_db             = Json_get_bool ( api_result, "log_db" );
@@ -770,7 +773,6 @@
      }
 
     pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
-    memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
     time ( &Partage->start_time );
     pthread_mutexattr_init( &attr );
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
