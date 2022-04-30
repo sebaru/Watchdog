@@ -386,6 +386,7 @@
           Dls_data_set_WATCHDOG ( NULL, g_get_host_name(), "IO_COMM", &bit_io_comm, 900 );
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           Activer_horlogeDB();
+          if (Partage->com_msrv.API_websocket == NULL) MSRV_ws_init();                 /* Si websocket closed, try to restart */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
@@ -461,6 +462,7 @@
              Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, body );
              Json_node_unref(body);
            }*/
+          if (Partage->com_msrv.API_websocket == NULL) MSRV_ws_init();                 /* Si websocket closed, try to restart */
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
