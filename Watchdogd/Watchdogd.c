@@ -707,7 +707,7 @@
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
      { Json_node_add_int    ( RootNode, "start_time", time(NULL) );
-       Json_node_add_string ( RootNode, "hostname", g_get_host_name() );
+       Json_node_add_string ( RootNode, "agent_hostname", g_get_host_name() );
        Json_node_add_string ( RootNode, "version", WTD_VERSION );
        Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
 
