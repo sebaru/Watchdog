@@ -236,24 +236,52 @@
   { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Message received !", __func__ );
     gsize taille;
 
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
-    if (!response)
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!request)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
        return;
      }
 
-    if (!Json_has_member ( response, "api_tag" ))
+    if (!Json_has_member ( request, "api_tag" ))
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'api_tag') !", __func__ );
-       Json_node_unref(response);
-       return;
+       goto end;
      }
 
-    gchar *api_tag = Json_get_string ( response, "bus_tag" );
+    gchar *api_tag = Json_get_string ( request, "api_tag" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive api_tag '%s'  !", __func__, api_tag );
 
-    /*pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au subprocess */
-    /*module->Master_messages = g_slist_append ( module->Master_messages, response );
-    pthread_mutex_unlock ( &module->synchro );*/
+         if ( !strcasecmp( api_tag, "RESET") )
+     { Partage->com_msrv.Thread_run = FALSE;
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: RESET: Stopping in progress", __func__ );
+     }
+    else if ( !strcasecmp( api_tag, "UPGRADE") )
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UPGRADE: Upgrading in progress", __func__ );
+       gint pid = fork();
+       if (pid<0)
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: UPGRADE: erreur Fork", __func__ ); }
+       else if (!pid)
+        { system("cd SRC; ./autogen.sh; sudo make install; " );
+          Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: UPGRADE: done. Restarting.", __func__ );
+          system("sudo killall Watchdogd" );
+          exit(0);
+        }
+     }
+    else if ( !strcasecmp( api_tag, "SET_LOG") )
+     { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
+               Json_has_member ( request, "log_msrv" )
+             )
+          )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_LOG: wrong parameters", __func__ );
+          goto end;
+        }
+       Config.log_bus  = Json_get_bool ( request, "log_bus" );
+       Config.log_msrv = Json_get_bool ( request, "log_msrv" );
+       Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: log_msrv=%d, bus=%d, log_level=%d", __func__,
+                 Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ) );
+     }
+end:
+    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* MSRV_ws_on_master_close_CB: Traite une deconnexion sur la websocket MSRV                                                   */
@@ -731,7 +759,6 @@
        gchar *master_hostname    = Json_get_string ( api_result, "master_hostname" );
        if (master_hostname) g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "%s", master_hostname );
                        else g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "nomasterhost" );
-       g_snprintf( Config.api_ws_password, sizeof(Config.api_ws_password), Json_get_string ( api_result, "api_ws_password" ) );
 
        Info_change_log_level ( Config.log, Json_get_int ( api_result, "log_level" ) );
        Json_node_unref ( api_result );

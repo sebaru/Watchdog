@@ -387,39 +387,6 @@
           exit(0);
         }
      }
-    else if ( !strcasecmp( zmq_tag, "INSTANCE_RESET") )
-     { Partage->com_msrv.Thread_run = FALSE;
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: INSTANCE_RESET: Stopping in progress", __func__ );
-     }
-    else if ( !strcasecmp( zmq_tag, "INSTANCE_UPGRADE") )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: INSTANCE_UPGRADE: Upgrading in progress", __func__ );
-       gint pid = fork();
-       if (pid<0)
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: INSTANCE_UPGRADE: erreur Fork target", __func__ ); }
-       else if (!pid)
-        { system("cd SRC; ./autogen.sh; sudo make install;" );
-          Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: INSTANCE_UPGRADE: done. Restarting.", __func__ );
-          system("sudo killall Watchdogd" );
-          exit(0);
-        }
-     }
-    else if ( !strcasecmp( zmq_tag, "SET_LOG") )
-     { if ( !( Json_has_member ( request, "log_db" ) && Json_has_member ( request, "log_trad" ) &&
-               Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
-               Json_has_member ( request, "log_msrv" )
-             )
-          )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_LOG: wrong parameters", __func__ );
-          goto end;
-        }
-       Config.log_db   = Json_get_bool ( request, "log_db" );
-       Config.log_bus  = Json_get_bool ( request, "log_bus" );
-       Config.log_trad = Json_get_bool ( request, "log_trad" );
-       Config.log_msrv = Json_get_bool ( request, "log_msrv" );
-       Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: log_msrv=%d, db=%d, bus=%d, trad=%d, log_level=%d", __func__,
-                 Config.log_msrv, Config.log_db, Config.log_bus, Config.log_trad, Json_get_int ( request, "log_level" ) );
-     }
 end:
 /*************************************************** Envoi au client **********************************************************/
     Json_node_unref(request);
