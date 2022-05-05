@@ -143,6 +143,7 @@
        return;
      }
     /*g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );*/
+    g_object_set ( G_OBJECT(infos->ws_motifs), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
     g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(SubProcess_ws_on_master_message_CB), module );
     g_signal_connect ( module->Master_websocket, "closed",  G_CALLBACK(SubProcess_ws_on_master_close_CB), module );
     g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(SubProcess_ws_on_master_error_CB), module );

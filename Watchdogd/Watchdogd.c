@@ -311,7 +311,7 @@ end:
        return;
      }
     g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(256000), NULL );
-    g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "keepalive-interval", G_GINT64_CONSTANT(60), NULL );
+    g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(MSRV_ws_on_API_message_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(MSRV_ws_on_API_close_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(MSRV_ws_on_API_error_CB), NULL );
