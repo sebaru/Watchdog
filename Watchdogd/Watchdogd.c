@@ -743,12 +743,14 @@ end:
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/agent", "START", RootNode );
        Json_node_unref ( RootNode );
-       if (!api_result)
+       if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API Request for AGENT START OK.", __func__ ); }
+        else
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for AGENT START failed. Sleep 5s and stopping.", __func__ );
           sleep(5);
           error_code = EXIT_FAILURE;
           goto second_stage_end;
-        } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API Request for AGENT START OK.", __func__ );
+        }
 
        Config.headless           = Json_get_bool ( api_result, "headless" );
        Config.log_db             = Json_get_bool ( api_result, "log_db" );

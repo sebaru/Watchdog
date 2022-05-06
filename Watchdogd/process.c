@@ -298,7 +298,7 @@
      }
     module->config = Http_Post_to_global_API ( "/run/subprocess", "GET_CONFIG", RootNode );
     Json_node_unref(RootNode);
-    if (module->config)
+    if (module->config && Json_get_int ( module->config, "api_status" ) == SOUP_STATUS_OK)
      { module->Thread_debug = Json_get_bool ( module->config, "debug" );
        module->Thread_run   = Json_get_bool ( module->config, "enable" );
      }
@@ -346,13 +346,13 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_librairies ( void )
-  { JsonNode *result = Http_Post_to_global_API ( "/run/subprocess", "LOAD", NULL );
-    if (result)                                                                                     /* Chargement des modules */
-     { JsonArray *array = Json_get_array ( result, "subprocesses" );
+  { JsonNode *api_result = Http_Post_to_global_API ( "/run/subprocess", "LOAD", NULL );
+    if (api_result && Json_get_int ( api_result, "api_result" ) == SOUP_STATUS_OK)                  /* Chargement des modules */
+     { JsonArray *array = Json_get_array ( api_result, "subprocesses" );
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Loading %d subprocess",__func__, json_array_get_length(array) );
-       Json_node_foreach_array_element ( result, "subprocesses", Process_Create_one_subprocess, NULL );
+       Json_node_foreach_array_element ( api_result, "subprocesses", Process_Create_one_subprocess, NULL );
      }
-    Json_node_unref(result);
+    Json_node_unref(api_result);
   }
 /******************************************************************************************************************************/
 /* Demarrer_dls: Thread un process DLS                                                                                        */
