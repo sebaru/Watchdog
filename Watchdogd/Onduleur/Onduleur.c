@@ -44,7 +44,7 @@
 /* Entrée: un id                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Deconnecter_UPS ( struct SUBPROCESS *module )
+ static void Deconnecter_UPS ( struct THREAD *module )
   { struct UPS_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -67,14 +67,14 @@
     Http_Post_to_local_BUS_AI ( module, vars->Output_voltage, 0.0, FALSE );
 
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s disconnected (host='%s')", __func__, thread_tech_id, host );
-    SubProcess_send_comm_to_master ( module, FALSE );
+    Thread_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
 /* Entrée: une nom et un password                                                                                             */
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
 /******************************************************************************************************************************/
- static gboolean Connecter_ups ( struct SUBPROCESS *module )
+ static gboolean Connecter_ups ( struct THREAD *module )
   { struct UPS_VARS *vars = module->vars;
     gchar buffer[80];
     int connexion;
@@ -158,7 +158,7 @@
     vars->date_next_connexion = 0;
     vars->started = TRUE;
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s up and running (host='%s')", __func__, thread_tech_id, host );
-    SubProcess_send_comm_to_master ( module, TRUE );
+    Thread_send_comm_to_master ( module, TRUE );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -166,7 +166,7 @@
 /* Entrée : l'ups, le nom de la commande                                                                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
- static void Onduleur_set_instcmd ( struct SUBPROCESS *module, gchar *nom_cmd )
+ static void Onduleur_set_instcmd ( struct THREAD *module, gchar *nom_cmd )
   { struct UPS_VARS *vars = module->vars;
     gchar buffer[80];
 
@@ -199,7 +199,7 @@
 /* Entrée : l'ups, le nom de variable, la variable a renseigner                                                               */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
- static gchar *Onduleur_get_var ( struct SUBPROCESS *module, gchar *nom_var )
+ static gchar *Onduleur_get_var ( struct THREAD *module, gchar *nom_var )
   { struct UPS_VARS *vars = module->vars;
     static gchar buffer[80];
     gint retour_read;
@@ -249,7 +249,7 @@
 /* Entrée: identifiants des upss ups                                                                                       */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
- static gboolean Interroger_ups( struct SUBPROCESS *module )
+ static gboolean Interroger_ups( struct THREAD *module )
   { struct UPS_VARS *vars = module->vars;
     gchar *reponse;
 
@@ -305,7 +305,7 @@
 /* Entrée: le module et le buffer Josn                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Ups_SET_DO ( struct SUBPROCESS *module, JsonNode *msg )
+ static void Ups_SET_DO ( struct THREAD *module, JsonNode *msg )
   { gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
     gchar *msg_thread_tech_id  = Json_get_string ( msg, "thread_tech_id" );
     gchar *msg_thread_acronyme = Json_get_string ( msg, "thread_acronyme" );
@@ -340,39 +340,39 @@
      }
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct UPS_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct UPS_VARS) );
     struct UPS_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (Json_get_bool ( module->config, "enable" ) == FALSE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping SubProcess", __func__, thread_tech_id );
-       SubProcess_end ( module );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping Thread", __func__, thread_tech_id );
+       Thread_end ( module );
      }
 
-    vars->Outlet_1_status = Mnemo_create_subprocess_DI ( module, "OUTLET_1_STATUS", "Statut de la prise n°1" );
-    vars->Outlet_2_status = Mnemo_create_subprocess_DI ( module, "OUTLET_2_STATUS", "Statut de la prise n°2" );
-    vars->Ups_online      = Mnemo_create_subprocess_DI ( module, "UPS_ONLINE", "UPS Online" );
-    vars->Ups_charging    = Mnemo_create_subprocess_DI ( module, "UPS_CHARGING", "UPS en charge" );
-    vars->Ups_on_batt     = Mnemo_create_subprocess_DI ( module, "UPS_ON_BATT",  "UPS sur batterie" );
-    vars->Ups_replace_batt= Mnemo_create_subprocess_DI ( module, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
-    vars->Ups_alarm       = Mnemo_create_subprocess_DI ( module, "UPS_ALARM",  "UPS en alarme !" );
+    vars->Outlet_1_status = Mnemo_create_thread_DI ( module, "OUTLET_1_STATUS", "Statut de la prise n°1" );
+    vars->Outlet_2_status = Mnemo_create_thread_DI ( module, "OUTLET_2_STATUS", "Statut de la prise n°2" );
+    vars->Ups_online      = Mnemo_create_thread_DI ( module, "UPS_ONLINE", "UPS Online" );
+    vars->Ups_charging    = Mnemo_create_thread_DI ( module, "UPS_CHARGING", "UPS en charge" );
+    vars->Ups_on_batt     = Mnemo_create_thread_DI ( module, "UPS_ON_BATT",  "UPS sur batterie" );
+    vars->Ups_replace_batt= Mnemo_create_thread_DI ( module, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
+    vars->Ups_alarm       = Mnemo_create_thread_DI ( module, "UPS_ALARM",  "UPS en alarme !" );
 
-    vars->Load            = Mnemo_create_subprocess_AI ( module, "LOAD", "Charge onduleur", "%", ARCHIVE_1_MIN );
-    vars->Realpower       = Mnemo_create_subprocess_AI ( module, "REALPOWER", "Charge onduleur", "W", ARCHIVE_1_MIN );
-    vars->Battery_charge  = Mnemo_create_subprocess_AI ( module, "BATTERY_CHARGE", "Charge batterie", "%", ARCHIVE_1_MIN );
-    vars->Input_voltage   = Mnemo_create_subprocess_AI ( module, "INPUT_VOLTAGE", "Tension d'entrée", "V", ARCHIVE_1_MIN );
-    vars->Battery_runtime = Mnemo_create_subprocess_AI ( module, "BATTERY_RUNTIME", "Durée de batterie restante", "s", ARCHIVE_1_MIN );
-    vars->Battery_voltage = Mnemo_create_subprocess_AI ( module, "BATTERY_VOLTAGE", "Tension batterie", "V", ARCHIVE_1_MIN );
-    vars->Input_hz        = Mnemo_create_subprocess_AI ( module, "INPUT_HZ", "Fréquence d'entrée", "HZ", ARCHIVE_1_MIN );
-    vars->Output_current  = Mnemo_create_subprocess_AI ( module, "OUTPUT_CURRENT", "Courant de sortie", "A", ARCHIVE_1_MIN );
-    vars->Output_hz       = Mnemo_create_subprocess_AI ( module, "OUTPUT_HZ", "Fréquence de sortie", "HZ", ARCHIVE_1_MIN );
-    vars->Output_voltage  = Mnemo_create_subprocess_AI ( module, "OUTPUT_VOLTAGE", "Tension de sortie", "V", ARCHIVE_1_MIN );
+    vars->Load            = Mnemo_create_thread_AI ( module, "LOAD", "Charge onduleur", "%", ARCHIVE_1_MIN );
+    vars->Realpower       = Mnemo_create_thread_AI ( module, "REALPOWER", "Charge onduleur", "W", ARCHIVE_1_MIN );
+    vars->Battery_charge  = Mnemo_create_thread_AI ( module, "BATTERY_CHARGE", "Charge batterie", "%", ARCHIVE_1_MIN );
+    vars->Input_voltage   = Mnemo_create_thread_AI ( module, "INPUT_VOLTAGE", "Tension d'entrée", "V", ARCHIVE_1_MIN );
+    vars->Battery_runtime = Mnemo_create_thread_AI ( module, "BATTERY_RUNTIME", "Durée de batterie restante", "s", ARCHIVE_1_MIN );
+    vars->Battery_voltage = Mnemo_create_thread_AI ( module, "BATTERY_VOLTAGE", "Tension batterie", "V", ARCHIVE_1_MIN );
+    vars->Input_hz        = Mnemo_create_thread_AI ( module, "INPUT_HZ", "Fréquence d'entrée", "HZ", ARCHIVE_1_MIN );
+    vars->Output_current  = Mnemo_create_thread_AI ( module, "OUTPUT_CURRENT", "Courant de sortie", "A", ARCHIVE_1_MIN );
+    vars->Output_hz       = Mnemo_create_thread_AI ( module, "OUTPUT_HZ", "Fréquence de sortie", "HZ", ARCHIVE_1_MIN );
+    vars->Output_voltage  = Mnemo_create_thread_AI ( module, "OUTPUT_VOLTAGE", "Tension de sortie", "V", ARCHIVE_1_MIN );
 
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "LOAD_OFF", "Coupe la sortie ondulée" );
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "LOAD_ON", "Active la sortie ondulée" );
@@ -385,7 +385,7 @@
     Mnemo_auto_create_DO ( FALSE, thread_tech_id, "STOP_TEST_BAT", "Stop le test de décharge batterie" );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -435,6 +435,6 @@
     Json_node_unref ( vars->Ups_replace_batt );
     Json_node_unref ( vars->Ups_alarm );
 
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

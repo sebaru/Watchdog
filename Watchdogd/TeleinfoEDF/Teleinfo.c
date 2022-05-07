@@ -42,7 +42,7 @@
 /* Init_teleinfo: Initialisation de la ligne TELEINFO                                                                         */
 /* Sortie: l'identifiant de la connexion                                                                                      */
 /******************************************************************************************************************************/
- static int Init_teleinfo ( struct SUBPROCESS *module )
+ static int Init_teleinfo ( struct THREAD *module )
   { struct termios oldtio;
     int fd;
 
@@ -66,7 +66,7 @@
     tcflush(fd, TCIOFLUSH);
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Ouverture port teleinfo okay %s", __func__, port );
 
-    SubProcess_send_comm_to_master ( module, TRUE );
+    Thread_send_comm_to_master ( module, TRUE );
     return(fd);
   }
 /******************************************************************************************************************************/
@@ -74,7 +74,7 @@
 /* Entrée: la trame a recue                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Processer_trame( struct SUBPROCESS *module )
+ static void Processer_trame( struct THREAD *module )
   { struct TELEINFO_VARS *vars = module->vars;
 
          if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Adco,  atof(vars->buffer + 5), TRUE ); }
@@ -89,22 +89,22 @@
     vars->last_view = Partage->top;
   }
 /******************************************************************************************************************************/
-/* Run_subprocess_message: Prend en charge un message recu du master                                                          */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread_message: Prend en charge un message recu du master                                                          */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess_message ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message )
+ void Run_thread_message ( struct THREAD *module, gchar *bus_tag, JsonNode *message )
   { gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': recu bus_tag '%s' from master", __func__, thread_tech_id, bus_tag );
   }
 
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct TELEINFO_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct TELEINFO_VARS) );
     struct TELEINFO_VARS *vars = module->vars;
     gint retval, nbr_octet_lu;
     struct timeval tv;
@@ -112,20 +112,20 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    vars->Adco  = Mnemo_create_subprocess_AI ( module, "ADCO",  "N° d’identification du compteur", "numéro", ARCHIVE_1_JOUR );
-    vars->Isous = Mnemo_create_subprocess_AI ( module, "ISOUS", "Intensité EDF souscrite ", "A", ARCHIVE_1_MIN );
-    vars->Base  = Mnemo_create_subprocess_AI ( module, "BASE",  "Index option BASE", "Wh", ARCHIVE_1_MIN );
-    vars->Hchc  = Mnemo_create_subprocess_AI ( module, "HCHC",  "Index heures creuses", "Wh", ARCHIVE_1_MIN );
-    vars->Hchp  = Mnemo_create_subprocess_AI ( module, "HCHP",  "Index heures pleines", "Wh", ARCHIVE_1_MIN );
-    vars->Iinst = Mnemo_create_subprocess_AI ( module, "IINST", "Intensité EDF instantanée", "A", ARCHIVE_1_MIN );
-    vars->Imax  = Mnemo_create_subprocess_AI ( module, "IMAX",  "Intensité EDF maximale", "A", ARCHIVE_1_MIN );
-    vars->Papp  = Mnemo_create_subprocess_AI ( module, "PAPP",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+    vars->Adco  = Mnemo_create_thread_AI ( module, "ADCO",  "N° d’identification du compteur", "numéro", ARCHIVE_1_JOUR );
+    vars->Isous = Mnemo_create_thread_AI ( module, "ISOUS", "Intensité EDF souscrite ", "A", ARCHIVE_1_MIN );
+    vars->Base  = Mnemo_create_thread_AI ( module, "BASE",  "Index option BASE", "Wh", ARCHIVE_1_MIN );
+    vars->Hchc  = Mnemo_create_thread_AI ( module, "HCHC",  "Index heures creuses", "Wh", ARCHIVE_1_MIN );
+    vars->Hchp  = Mnemo_create_thread_AI ( module, "HCHP",  "Index heures pleines", "Wh", ARCHIVE_1_MIN );
+    vars->Iinst = Mnemo_create_thread_AI ( module, "IINST", "Intensité EDF instantanée", "A", ARCHIVE_1_MIN );
+    vars->Imax  = Mnemo_create_thread_AI ( module, "IMAX",  "Intensité EDF maximale", "A", ARCHIVE_1_MIN );
+    vars->Papp  = Mnemo_create_thread_AI ( module, "PAPP",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
 
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
     vars->mode = TINFO_RETRING;
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -174,14 +174,10 @@
                 Processer_trame( module );
                 nbr_octet_lu = 0;
                 memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
-                SubProcess_send_comm_to_master ( module, TRUE );
+                Thread_send_comm_to_master ( module, TRUE );
               }
              else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)                        /* Encore en dessous de la limite ? */
-              { /* Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-                         "Run_process: Get one char : %d, %c (pos %d)",
-                          vars->buffer[nbr_octet_lu], vars->buffer[nbr_octet_lu], nbr_octet_lu );*/
-                nbr_octet_lu += cpt;                                                     /* Preparation du prochain caractere */
-              }
+              { nbr_octet_lu += cpt; }                                                   /* Preparation du prochain caractere */
              else { nbr_octet_lu = 0;                                                              /* Depassement de tampon ! */
                     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
                     Info_new( Config.log, module->Thread_debug, LOG_ERR,
@@ -210,7 +206,7 @@
            { close(vars->fd);
              vars->mode = TINFO_WAIT_BEFORE_RETRY;
              vars->date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             SubProcess_send_comm_to_master ( module, FALSE );
+             Thread_send_comm_to_master ( module, FALSE );
            }
         }
      }
@@ -225,6 +221,6 @@
     Json_node_unref ( vars->Imax );
     Json_node_unref ( vars->Papp );
 
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

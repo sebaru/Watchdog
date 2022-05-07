@@ -39,7 +39,7 @@
 /* Entrée: Niet                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Meteo_get_ephemeride ( struct SUBPROCESS *module )
+ static void Meteo_get_ephemeride ( struct THREAD *module )
   { gchar query[256];
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *token      = Json_get_string ( module->config, "token" );
@@ -60,7 +60,7 @@
     Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
     if (status_code!=200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase );
-       SubProcess_send_comm_to_master ( module, FALSE );
+       Thread_send_comm_to_master ( module, FALSE );
      }
     else
      { gint heure, minute;
@@ -83,7 +83,7 @@
                    "%s: %s ->  sunset at %02d:%02d", __func__, city_name, heure, minute );
         }
        Json_node_unref ( response );
-       SubProcess_send_comm_to_master ( module, TRUE );
+       Thread_send_comm_to_master ( module, TRUE );
      }
     g_free(reason_phrase);
     g_object_unref( soup_msg );
@@ -95,7 +95,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Meteo_update_forecast ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
+  { struct THREAD *module = user_data;
     struct METEO_VARS *vars = module->vars;
 
     gint day       = Json_get_int ( element, "day" );
@@ -121,7 +121,7 @@
 /* Entrée: Nier                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Meteo_get_forecast ( struct SUBPROCESS *module )
+ static void Meteo_get_forecast ( struct THREAD *module )
   { gchar query[256];
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *token      = Json_get_string ( module->config, "token" );
@@ -152,12 +152,12 @@
     soup_session_abort ( connexion );
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct METEO_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct METEO_VARS) );
     struct METEO_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -167,33 +167,33 @@
     for (gint cpt=0; cpt<14; cpt++)
      { gchar acronyme[64];
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", cpt );
-       vars->Temp_min[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Température minimum", "°C", ARCHIVE_1_HEURE );
+       vars->Temp_min[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Température minimum", "°C", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", cpt );
-       vars->Temp_max[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Température maximum", "°C", ARCHIVE_1_HEURE );
+       vars->Temp_max[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Température maximum", "°C", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_PLUIE", cpt );
-       vars->Proba_pluie[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de pluie (0-100%)", "%", ARCHIVE_1_HEURE );
+       vars->Proba_pluie[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Probabilité de pluie (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_GEL", cpt );
-       vars->Proba_gel[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de gel (0-100%)", "%", ARCHIVE_1_HEURE );
+       vars->Proba_gel[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Probabilité de gel (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_BROUILLARD", cpt );
-       vars->Proba_brouillard[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de brouillard (0-100%)", "%", ARCHIVE_1_HEURE );
+       vars->Proba_brouillard[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Probabilité de brouillard (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_70", cpt );
-       vars->Proba_vent_70[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de vent > 70km/h  (0-100%)", "%", ARCHIVE_1_HEURE );
+       vars->Proba_vent_70[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Probabilité de vent > 70km/h  (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_PROBA_VENT_100", cpt );
-       vars->Proba_vent_100[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Probabilité de vent > 100km/h (0-100%)", "%", ARCHIVE_1_HEURE );
+       vars->Proba_vent_100[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Probabilité de vent > 100km/h (0-100%)", "%", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT_SI_ORAGE", cpt );
-       vars->Proba_vent_orage[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Vitesse des rafales de vent si orage", "km/h", ARCHIVE_1_HEURE );
+       vars->Proba_vent_orage[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Vitesse des rafales de vent si orage", "km/h", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_VENT_A_10M", cpt );
-       vars->Vent_10m[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Vent moyen à 10 mètres", "km/h", ARCHIVE_1_HEURE );
+       vars->Vent_10m[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Vent moyen à 10 mètres", "km/h", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_DIRECTION_VENT", cpt );
-       vars->Direction_vent[cpt] = Mnemo_create_subprocess_AI ( module, acronyme, "Direction du vent", "°", ARCHIVE_1_HEURE );
+       vars->Direction_vent[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Direction du vent", "°", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_RAFALE_VENT", cpt );
-       vars->Rafale_vent[cpt] = Mnemo_create_subprocess_AI ( module, acronyme,  "Vitesse des rafales de vent", "km/h", ARCHIVE_1_HEURE );
+       vars->Rafale_vent[cpt] = Mnemo_create_thread_AI ( module, acronyme,  "Vitesse des rafales de vent", "km/h", ARCHIVE_1_HEURE );
      }
 
     Meteo_get_ephemeride( module );
     Meteo_get_forecast( module );
     while( module->Thread_run == TRUE )                                                      /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -227,6 +227,6 @@
        Json_node_unref ( vars->Rafale_vent[cpt] );
      }
 
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

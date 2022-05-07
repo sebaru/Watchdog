@@ -88,11 +88,11 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Mnemo_create_subprocess_DI: Créé un JSON pour une DI                                                                       */
-/* Entrée: la structure SUBPROCESS, les parametres de la DI                                                                   */
+/* Mnemo_create_thread_DI: Créé un JSON pour une DI                                                                       */
+/* Entrée: la structure THREAD, les parametres de la DI                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- JsonNode *Mnemo_create_subprocess_DI ( struct SUBPROCESS *module, gchar *thread_acronyme, gchar *libelle )
+ JsonNode *Mnemo_create_thread_DI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
   { JsonNode *node = Json_node_create();
     if (!node) return(NULL);
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );

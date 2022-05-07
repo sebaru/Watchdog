@@ -41,7 +41,7 @@
 /* Entrée : le nom du fichier wav                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static gboolean Jouer_wav_by_file ( struct SUBPROCESS *module, gchar *texte )
+ static gboolean Jouer_wav_by_file ( struct THREAD *module, gchar *texte )
   { gint fd_cible, pid;
     gchar fichier[80];
 
@@ -90,7 +90,7 @@
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
 /******************************************************************************************************************************/
- gboolean Jouer_google_speech ( struct SUBPROCESS *module, gchar *audio_libelle )
+ gboolean Jouer_google_speech ( struct THREAD *module, gchar *audio_libelle )
   { gint pid;
 
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Send '%s'", __func__, audio_libelle );
@@ -118,12 +118,12 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct AUDIO_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct AUDIO_VARS) );
     struct AUDIO_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -132,13 +132,13 @@
     Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_NONE", "Profil audio: All Hps disabled" );
 
     gboolean retour = Jouer_google_speech( module, "Instance démarrée !" );
-    SubProcess_send_comm_to_master ( module, retour );
+    Thread_send_comm_to_master ( module, retour );
     vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { usleep(100000);
        sched_yield();
 
-       SubProcess_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+       Thread_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
 /******************************************************************************************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -175,11 +175,11 @@
 
                 if (strlen(audio_libelle))                  /* Si audio_libelle, le jouer, sinon jouer le libelle tout court) */
                  { gboolean retour = Jouer_google_speech( module, audio_libelle );
-                   SubProcess_send_comm_to_master ( module, retour );
+                   Thread_send_comm_to_master ( module, retour );
                  }
                 else
                  { gboolean retour = Jouer_google_speech( module, libelle );
-                   SubProcess_send_comm_to_master ( module, retour );
+                   Thread_send_comm_to_master ( module, retour );
                  }
                 Envoyer_commande_dls_data( "AUDIO", "P_NONE" );                              /* Bit de fin d'emission message */
               }
@@ -201,6 +201,6 @@
         }
      }
 
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

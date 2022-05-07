@@ -46,7 +46,7 @@
 /* Entrée : la structure referencant le module                                                                                */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
- static void Dmx_do_mapping ( struct SUBPROCESS *module )
+ static void Dmx_do_mapping ( struct THREAD *module )
   { struct DMX_VARS *vars = module->vars;
     gchar critere[80];
     struct DB *db;
@@ -90,7 +90,7 @@
 /* Entrée: Néant.                                                                                                             */
 /* Sortie: -1 si erreur, sinon, le FileDescriptor associé                                                                     */
 /******************************************************************************************************************************/
- static gboolean Dmx_init ( struct SUBPROCESS *module )
+ static gboolean Dmx_init ( struct THREAD *module )
   { struct DMX_VARS *vars = module->vars;
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
     gchar *device  = Json_get_string ( module->config, "device" );
@@ -106,7 +106,7 @@
     memset ( &vars->Trame_dmx, 0, sizeof(struct TRAME_DMX) );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Ouverture port dmx okay %s",
               __func__, tech_id, device );
-    SubProcess_send_comm_to_master ( module, TRUE );
+    Thread_send_comm_to_master ( module, TRUE );
     Dmx_do_mapping( module );
     return(TRUE);
   }
@@ -114,7 +114,7 @@
 /* Dmx_close: Fermeture de la ligne DMX                                                                                       */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Dmx_close ( struct SUBPROCESS *module )
+ static void Dmx_close ( struct THREAD *module )
   { struct DMX_VARS *vars = module->vars;
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
     if ( vars->fd != -1 )
@@ -123,13 +123,13 @@
 		         "%s: %s: Fermeture device '%s' dmx okay", __func__, tech_id, Json_get_string ( module->config, "device" ) );
 	   vars->fd = -1;
      }
-    SubProcess_send_comm_to_master ( module, FALSE );
+    Thread_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
 /* Envoyer_trame_dmx_request: envoie une trame DMX au token USB                                                               */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
- static gboolean Envoyer_trame_dmx_request( struct SUBPROCESS *module )
+ static gboolean Envoyer_trame_dmx_request( struct THREAD *module )
   { struct DMX_VARS *vars = module->vars;
     if (module->comm_status == FALSE) return(FALSE);
 
@@ -150,18 +150,18 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct DMX_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct DMX_VARS) );
     struct DMX_VARS *vars = module->vars;
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -232,6 +232,6 @@
      }                                                                                         /* Fin du while partage->arret */
     Dmx_close(module);
 
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

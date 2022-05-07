@@ -21,27 +21,6 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- Base de données: `WatchdogDB`
 --
 
--- --------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `processes` (
-  `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
-  `uuid` VARCHAR(37) UNIQUE NOT NULL,
-  `instance` VARCHAR(64) NOT NULL,
-  `name` VARCHAR(64) NOT NULL,
-  `classe` VARCHAR(16) DEFAULT NULL,
-  `version` VARCHAR(32) DEFAULT NULL,
-  `database_version` INT(11) NOT NULL DEFAUT 0,
-  `enable` BOOLEAN NOT NULL,
-  `started` BOOLEAN DEFAULT 0,
-  `start_time` DATETIME DEFAULT NOW(),
-  `debug` BOOLEAN NOT NULL,
-  `description` VARCHAR(128) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
-
---
--- Structure de la table `cameras`
---
-
 CREATE TABLE IF NOT EXISTS `cameras` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `location` VARCHAR(600) NOT NULL,

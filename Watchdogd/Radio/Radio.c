@@ -45,7 +45,7 @@
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Stopper_radio ( struct SUBPROCESS *module )
+ static void Stopper_radio ( struct THREAD *module )
   { struct RADIO_VARS *vars = module->vars;
     if (vars->radio_pid>0)
      { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: Sending kill to radio pid %d", __func__, vars->radio_pid );
@@ -60,7 +60,7 @@
 /* Entrée : le nom du fichier wav                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static gboolean Jouer_radio ( struct SUBPROCESS *module, gchar *radio )
+ static gboolean Jouer_radio ( struct THREAD *module, gchar *radio )
   { struct RADIO_VARS *vars = module->vars;
     Stopper_radio( module );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Starting playing radio %s", __func__, radio );
@@ -81,20 +81,20 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct RADIO_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct RADIO_VARS) );
     /*struct RADIO_VARS *vars = module->vars;*/
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
-    SubProcess_send_comm_to_master ( module, TRUE );
+    Thread_send_comm_to_master ( module, TRUE );
 
     while(module->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -117,6 +117,6 @@
         }
      }
     Stopper_radio( module );
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/process.c        Gestion des process                                                                             */
+/* Watchdogd/thread.c        Gestion des process                                                                              */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 11 avr 2009 12:21:45 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * process.c
+ * thread.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien LEFEVRE
@@ -47,11 +47,11 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* SubProcess_send_comm_to_master: Envoi le statut de la comm au master                                                       */
+/* Thread_send_comm_to_master: Envoi le statut de la comm au master                                                       */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
- void SubProcess_send_comm_to_master ( struct SUBPROCESS *module, gboolean etat )
+ void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { Http_Post_to_local_BUS_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
        module->comm_next_update = Partage->top + 600;                                                   /* Toutes les minutes */
@@ -59,12 +59,12 @@
      }
   }
 /******************************************************************************************************************************/
-/* SubProcess_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                               */
+/* Thread_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                               */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
- void SubProcess_loop ( struct SUBPROCESS *module )
-  { SubProcess_send_comm_to_master ( module, module->comm_status );
+ void Thread_loop ( struct THREAD *module )
+  { Thread_send_comm_to_master ( module, module->comm_status );
 
 /********************************************************* tour par secondes **************************************************/
     if (Partage->top >= module->nbr_tour_top+10)                                                     /* Toutes les 1 secondes */
@@ -85,12 +85,12 @@
      }
   }
 /******************************************************************************************************************************/
-/* SubProcess_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */
+/* Thread_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void SubProcess_ws_on_master_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
+ static void Thread_ws_on_master_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
+  { struct THREAD *module = user_data;
     Info_new( Config.log, Config.log_bus, LOG_INFO, "%s: WebSocket Message received !", __func__ );
     gsize taille;
 
@@ -109,7 +109,7 @@
     gchar *bus_tag = Json_get_string ( response, "bus_tag" );
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, bus_tag );
 
-    pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au subprocess */
+    pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
     module->Master_messages = g_slist_append ( module->Master_messages, response );
     pthread_mutex_unlock ( &module->synchro );
   }
@@ -118,13 +118,13 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void SubProcess_ws_on_master_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
+ static void Thread_ws_on_master_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
+  { struct THREAD *module = user_data;
     Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: WebSocket Close. Reboot Needed!", __func__ );
     /* Partage->com_msrv.Thread_run = FALSE; */
   }
- static void SubProcess_ws_on_master_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { struct SUBPROCESS *module = user_data;
+ static void Thread_ws_on_master_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
+  { struct THREAD *module = user_data;
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
   }
 /******************************************************************************************************************************/
@@ -132,8 +132,8 @@
 /* Entrée: les variables traditionnelles de libsous                                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void SubProcess_ws_on_master_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
+ static void Thread_ws_on_master_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
+  { struct THREAD *module = user_data;
     GError *error = NULL;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     module->Master_websocket = soup_session_websocket_connect_finish ( module->Master_session, res, &error );
@@ -144,9 +144,9 @@
      }
     /*g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );*/
     g_object_set ( G_OBJECT(module->Master_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
-    g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(SubProcess_ws_on_master_message_CB), module );
-    g_signal_connect ( module->Master_websocket, "closed",  G_CALLBACK(SubProcess_ws_on_master_close_CB), module );
-    g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(SubProcess_ws_on_master_error_CB), module );
+    g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(Thread_ws_on_master_message_CB), module );
+    g_signal_connect ( module->Master_websocket, "closed",  G_CALLBACK(Thread_ws_on_master_close_CB), module );
+    g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(Thread_ws_on_master_error_CB), module );
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': WebSocket to Master connected", __func__, thread_tech_id );
   }
 /******************************************************************************************************************************/
@@ -154,7 +154,7 @@
 /* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars )
+ void Thread_init ( struct THREAD *module, gint sizeof_vars )
   { gchar chaine[128];
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -167,7 +167,7 @@
      { module->vars = g_try_malloc0 ( sizeof_vars );
        if (!module->vars)
         { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory error for vars.", __func__, thread_tech_id );
-          SubProcess_end ( module );                            /* Pas besoin de return : SubProcess_end fait un pthread_exit */
+          Thread_end ( module );                            /* Pas besoin de return : Thread_end fait un pthread_exit */
         }
      }
 
@@ -179,7 +179,7 @@
     SoupMessage *query   = soup_message_new ( "GET", chaine );
     GCancellable *cancel = g_cancellable_new();
     soup_session_websocket_connect_async ( module->Master_session, query,
-                                           NULL, protocols, cancel, SubProcess_ws_on_master_connected, module );
+                                           NULL, protocols, cancel, Thread_ws_on_master_connected, module );
     g_object_unref(query);
     g_object_unref(cancel);
 
@@ -188,7 +188,7 @@
     if (Dls_auto_create_plugin( thread_tech_id, description ) == FALSE)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, thread_tech_id, description ); }
 
-    module->maxrss = Mnemo_create_subprocess_AI ( module, "MAXRSS", "Memory Usage", "kb", ARCHIVE_1_MIN );
+    module->maxrss = Mnemo_create_thread_AI ( module, "MAXRSS", "Memory Usage", "kb", ARCHIVE_1_MIN );
     Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Subprocess '%s' is UP", __func__, thread_tech_id );
   }
@@ -197,8 +197,8 @@
 /* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void SubProcess_end ( struct SUBPROCESS *module )
-  { SubProcess_send_comm_to_master ( module, FALSE );
+ void Thread_end ( struct THREAD *module )
+  { Thread_send_comm_to_master ( module, FALSE );
     if (module->vars) g_free(module->vars);
     Json_node_unref ( module->maxrss );
     if (module->Master_websocket && soup_websocket_connection_get_state (module->Master_websocket) == SOUP_WEBSOCKET_STATE_OPEN)
@@ -223,20 +223,20 @@
 
     liste = Partage->com_msrv.Subprocess;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
-     { struct SUBPROCESS *module = liste->data;
+     { struct THREAD *module = liste->data;
        module->Thread_run = FALSE;                                                       /* On demande au thread de s'arreter */
        liste = liste->next;
      }
 
     liste = Partage->com_msrv.Subprocess;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
-     { struct SUBPROCESS *module = liste->data;
+     { struct THREAD *module = liste->data;
        if (module->TID) pthread_join( module->TID, NULL );                                             /* Attente fin du fils */
        liste = liste->next;
      }
 
     while(Partage->com_msrv.Subprocess)                                                     /* Liberation mémoire des modules */
-     { struct SUBPROCESS *module = Partage->com_msrv.Subprocess->data;
+     { struct THREAD *module = Partage->com_msrv.Subprocess->data;
        if (module->dl_handle) dlclose( module->dl_handle );
        pthread_mutex_destroy( &module->synchro );
        Partage->com_msrv.Subprocess = g_slist_remove( Partage->com_msrv.Subprocess, module );
@@ -247,11 +247,11 @@
      }
   }
 /******************************************************************************************************************************/
-/* Process_Create_one_subprocess: Création d'un sous process                                                                  */
+/* Process_Create_one_thread: Création d'un sous process                                                                  */
 /* Entrée: La structure JSON de issue de la requete Global API de Load subProcess                                             */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Process_Create_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+ static void Process_Create_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { if (!Json_has_member ( element, "thread_tech_id" ))
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_tech_id' in Json", __func__ ); return; }
 
@@ -261,7 +261,7 @@
     gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
     gchar *thread_classe  = Json_get_string ( element, "thread_classe" );
 
-    struct SUBPROCESS *module = g_try_malloc0( sizeof(struct SUBPROCESS) );
+    struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
     if (!module)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Not Enought Memory", __func__, thread_tech_id );
        return;
@@ -278,8 +278,8 @@
        return;
      }
 
-    module->Run_subprocess = dlsym( module->dl_handle, "Run_subprocess" );                        /* Recherche de la fonction */
-    if (!module->Run_subprocess)
+    module->Run_thread = dlsym( module->dl_handle, "Run_thread" );                        /* Recherche de la fonction */
+    if (!module->Run_thread)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: '%s': Process %s rejected (Run_process not found)",
                  __func__, thread_tech_id, nom_fichier );
        dlclose( module->dl_handle );
@@ -296,7 +296,7 @@
        g_free(module);
        return;
      }
-    module->config = Http_Post_to_global_API ( "/run/subprocess", "GET_CONFIG", RootNode );
+    module->config = Http_Post_to_global_API ( "/run/thread", "GET_CONFIG", RootNode );
     Json_node_unref(RootNode);
     if (module->config && Json_get_int ( module->config, "api_status" ) == SOUP_STATUS_OK)
      { module->Thread_debug = Json_get_bool ( module->config, "debug" );
@@ -329,7 +329,7 @@
     pthread_mutexattr_setpshared( &param, PTHREAD_PROCESS_SHARED );
     pthread_mutex_init( &module->synchro, &param );
 
-    if ( module->Thread_run && pthread_create( &module->TID, &attr, (void *)module->Run_subprocess, module ) )
+    if ( module->Thread_run && pthread_create( &module->TID, &attr, (void *)module->Run_thread, module ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': pthread_create failed. Unloading.", __func__, thread_tech_id );
        dlclose( module->dl_handle );
        g_free(module);
@@ -346,11 +346,11 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_librairies ( void )
-  { JsonNode *api_result = Http_Post_to_global_API ( "/run/subprocess", "LOAD", NULL );
+  { JsonNode *api_result = Http_Post_to_global_API ( "/run/thread", "LOAD", NULL );
     if (api_result && Json_get_int ( api_result, "api_result" ) == SOUP_STATUS_OK)                  /* Chargement des modules */
-     { JsonArray *array = Json_get_array ( api_result, "subprocesses" );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Loading %d subprocess",__func__, json_array_get_length(array) );
-       Json_node_foreach_array_element ( api_result, "subprocesses", Process_Create_one_subprocess, NULL );
+     { JsonArray *array = Json_get_array ( api_result, "threads" );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Loading %d thread",__func__, json_array_get_length(array) );
+       Json_node_foreach_array_element ( api_result, "threads", Process_Create_one_thread, NULL );
      }
     Json_node_unref(api_result);
   }

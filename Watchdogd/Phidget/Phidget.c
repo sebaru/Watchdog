@@ -278,7 +278,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_AI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
+  { struct THREAD *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
     gchar *thread_tech_id = Json_get_string(module->config, "thread_tech_id");
     gchar *capteur  = Json_get_string(element, "capteur");
@@ -385,7 +385,7 @@ error:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_DI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
+  { struct THREAD *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
     gchar *thread_tech_id = Json_get_string(module->config, "thread_tech_id");
     gchar *capteur  = Json_get_string(element, "capteur");
@@ -435,7 +435,7 @@ error:
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_DO (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
+  { struct THREAD *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
     gchar *thread_tech_id = Json_get_string(module->config, "thread_tech_id");
     gchar *capteur     = Json_get_string(element, "capteur");
@@ -479,12 +479,12 @@ error:
     g_free(canal);
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct PHIDGET_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct PHIDGET_VARS) );
     struct PHIDGET_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -492,8 +492,8 @@ error:
     gchar *description = Json_get_string ( module->config, "description" );
 
     if (Json_get_bool ( module->config, "enable" ) == FALSE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Not Enabled. Stopping SubProcess", __func__, thread_tech_id );
-       SubProcess_end ( module );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Not Enabled. Stopping Thread", __func__, thread_tech_id );
+       Thread_end ( module );
      }
 
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Loading %s('%s')", __func__, thread_tech_id, hostname, description );
@@ -539,7 +539,7 @@ error:
 
     gboolean synthese_comm = FALSE;                                                /* Synthese de la comm de tous les sensors */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /************************************************* Calcul de la comm **********************************************************/
        GSList *elements = vars->Liste_sensors;
        module->comm_status = TRUE;
@@ -594,6 +594,6 @@ error:
     g_slist_foreach ( vars->Liste_sensors, (GFunc) g_free, NULL );
     g_slist_free ( vars->Liste_sensors );
 
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

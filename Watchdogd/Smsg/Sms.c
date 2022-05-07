@@ -39,7 +39,7 @@
 /* Entrée: le nom du destinataire                                                                                             */
 /* Sortie : booléen, TRUE/FALSE                                                                                               */
 /******************************************************************************************************************************/
- static gboolean Smsg_is_allow_cde ( struct SUBPROCESS *module, gchar *tel )
+ static gboolean Smsg_is_allow_cde ( struct THREAD *module, gchar *tel )
   { gchar *phone;
     gboolean retour;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -74,7 +74,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Smsg_Send_CB (GSM_StateMachine *sm, int status, int MessageReference, void * user_data)
-  { struct SUBPROCESS *module = user_data;
+  { struct THREAD *module = user_data;
     struct SMS_VARS *vars = module->vars;
     if (status==0) { vars->gammu_send_status = ERR_NONE; }
     else vars->gammu_send_status = ERR_UNKNOWN;
@@ -84,7 +84,7 @@
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Smsg_disconnect ( struct SUBPROCESS *module )
+ static void Smsg_disconnect ( struct THREAD *module )
   { struct SMS_VARS *vars = module->vars;
     GSM_Error error;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -98,14 +98,14 @@
     GSM_FreeStateMachine(vars->gammu_machine);                                                 /* Free up used memory */
     vars->gammu_machine = NULL;
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Disconnected", __func__, thread_tech_id );
-    SubProcess_send_comm_to_master ( module, FALSE );
+    Thread_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
 /* smsg_connect: Ouvre une connexion vers le téléphone ou la clef 3G                                                          */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static gboolean Smsg_connect ( struct SUBPROCESS *module )
+ static gboolean Smsg_connect ( struct THREAD *module )
   { struct SMS_VARS *vars = module->vars;
     GSM_Error error;
 
@@ -166,7 +166,7 @@
 
     Info_new( Config.log, module->Thread_debug, LOG_INFO,
               "%s: %s: Connection OK with '%s/%s'", __func__, thread_tech_id, constructeur, model );
-    SubProcess_send_comm_to_master ( module, TRUE );
+    Thread_send_comm_to_master ( module, TRUE );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -174,7 +174,7 @@
 /* Entrée: le message à envoyer sateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static gboolean Envoi_sms_gsm ( struct SUBPROCESS *module, JsonNode *msg, gchar *telephone )
+ static gboolean Envoi_sms_gsm ( struct THREAD *module, JsonNode *msg, gchar *telephone )
   { struct SMS_VARS *vars = module->vars;
     GSM_SMSMessage sms;
     GSM_SMSC PhoneSMSC;
@@ -250,7 +250,7 @@
 /* Entrée: le message à envoyer sateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Envoi_sms_ovh ( struct SUBPROCESS *module, JsonNode *msg, gchar *telephone )
+ static void Envoi_sms_ovh ( struct THREAD *module, JsonNode *msg, gchar *telephone )
   { gchar clair[512], hash_string[48], signature[48], query[128];
     unsigned char hash_bin[EVP_MAX_MD_SIZE];
     EVP_MD_CTX *mdctx;
@@ -334,7 +334,7 @@
 /* Entrée: le message                                                                                                         */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Smsg_send_to_all_authorized_recipients ( struct SUBPROCESS *module, JsonNode *msg )
+ static void Smsg_send_to_all_authorized_recipients ( struct THREAD *module, JsonNode *msg )
   { struct SMS_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -385,7 +385,7 @@
 /* Entrée: un texte au format UTF8 si possible                                                                                */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Envoyer_smsg_ovh_text ( struct SUBPROCESS *module, gchar *texte )
+ static void Envoyer_smsg_ovh_text ( struct THREAD *module, gchar *texte )
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
@@ -398,7 +398,7 @@
 /* Entrée: un texte au format UTF8 si possible                                                                                */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Envoyer_smsg_gsm_text ( struct SUBPROCESS *module, gchar *texte )
+ static void Envoyer_smsg_gsm_text ( struct THREAD *module, gchar *texte )
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
@@ -411,7 +411,7 @@
 /* Entrée: le message text à traiter                                                                                          */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Traiter_commande_sms ( struct SUBPROCESS *module, gchar *from, gchar *texte )
+ static void Traiter_commande_sms ( struct THREAD *module, gchar *from, gchar *texte )
   { struct SMS_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -500,7 +500,7 @@ end:
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static gboolean Lire_sms_gsm ( struct SUBPROCESS *module )
+ static gboolean Lire_sms_gsm ( struct THREAD *module )
   { struct SMS_VARS *vars = module->vars;
     gchar from[80], texte[180];
     GSM_MultiSMSMessage sms;
@@ -543,22 +543,22 @@ end:
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* Run_subprocess_message: Prend en charge un message recu du master                                                          */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread_message: Prend en charge un message recu du master                                                          */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess_message ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *message )
+ void Run_thread_message ( struct THREAD *module, gchar *bus_tag, JsonNode *message )
   { gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': recu bus_tag '%s' from master", __func__, thread_tech_id, bus_tag );
 
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct SMS_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct SMS_VARS) );
     struct SMS_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -568,7 +568,7 @@ end:
     gint next_try = 0;
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -609,6 +609,6 @@ end:
     #warning a migrer vers global APi
      /*SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE uuid='%s'", module->name, vars->nbr_sms, module->uuid ); */
 
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

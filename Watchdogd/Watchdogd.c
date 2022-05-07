@@ -228,7 +228,7 @@
     Updater_confDB_BI();                                             /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
-/* SubProcess_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */
+/* Thread_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -770,8 +770,8 @@ end:
 
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
     Print_config();
-                                                                                      /* Verification de l'unicité du process */
-    fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
+
+    fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );              /* Verification de l'unicité du processus */
     if (fd_lock<0)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Lock file creation failed: %s/%s.", __func__, Config.home, VERROU_SERVEUR );
        error_code = EXIT_FAILURE;

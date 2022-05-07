@@ -667,7 +667,7 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
-/* Run_process: Thread principal                                                                                              */
+/* Run_HTTP: Thread principal                                                                                                 */
 /* Entrée: une structure PROCESS                                                                                              */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
@@ -758,13 +758,6 @@
     soup_server_add_handler ( socket, "/api/archive/clear",        Http_traiter_archive_clear, NULL, NULL );
     soup_server_add_handler ( socket, "/api/archive/purge",        Http_traiter_archive_purge, NULL, NULL );
     soup_server_add_handler ( socket, "/api/archive/testdb",       Http_traiter_archive_testdb, NULL, NULL );
-
-    soup_server_add_handler ( socket, "/api/process/reload", Http_traiter_process_reload, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/enable", Http_traiter_process_enable, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/debug",  Http_traiter_process_debug, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/list",   Http_traiter_process_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/config", Http_traiter_process_config, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/send",   Http_traiter_process_send, NULL, NULL );
 
     soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/instance/set",   Http_traiter_instance_set, NULL, NULL );

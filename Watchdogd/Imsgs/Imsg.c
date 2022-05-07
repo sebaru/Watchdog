@@ -35,7 +35,7 @@
 /* Entrée: le nom du destinataire et le message                                                                               */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Imsgs_Envoi_message_to ( struct SUBPROCESS *module, const gchar *dest, gchar *message )
+ static void Imsgs_Envoi_message_to ( struct THREAD *module, const gchar *dest, gchar *message )
   { struct IMSGS_VARS *vars = module->vars;
     xmpp_stanza_t *stanza = xmpp_message_new ( vars->ctx, "normal", dest, NULL );
     xmpp_message_set_body ( stanza, message );
@@ -47,7 +47,7 @@
 /* Entrée: le jabber_id                                                                                                       */
 /* Sortie: struct IMSGSDB *imsg                                                                                               */
 /******************************************************************************************************************************/
- static gboolean Imsgs_recipient_is_allow_command ( struct SUBPROCESS *module, gchar *jabber_id )
+ static gboolean Imsgs_recipient_is_allow_command ( struct THREAD *module, gchar *jabber_id )
   { gchar *jabberid, hostonly[80], *ptr;
 
     JsonNode *RootNode = Json_node_create ();
@@ -81,7 +81,7 @@
 /* Entrée: le message                                                                                                         */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- void Imsgs_Envoi_message_to_all_available ( struct SUBPROCESS *module, gchar *message )
+ void Imsgs_Envoi_message_to_all_available ( struct THREAD *module, gchar *message )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode)
      { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: Memory Error", __func__ );
@@ -107,7 +107,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static int Imsgs_handle_message_CB (xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata)
-  { struct SUBPROCESS *module = userdata;
+  { struct THREAD *module = userdata;
     struct IMSGS_VARS *vars = module->vars;
 
     gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
@@ -193,7 +193,7 @@ end:
 /* Entrée: le contact et le statut                                                                                            */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Imsgs_Sauvegarder_statut_contact ( struct SUBPROCESS *module, const gchar *jabber_id, gboolean available )
+ static void Imsgs_Sauvegarder_statut_contact ( struct THREAD *module, const gchar *jabber_id, gboolean available )
   { gchar *jabberid, hostonly[80], *ptr;
 
     g_snprintf( hostonly, sizeof(hostonly), "%s", jabber_id );
@@ -216,7 +216,7 @@ end:
 /* Imsgs_set_presence: Défini le statut présenté aux partenaires                                                              */
 /* Entrée : le statut au format chaine de caratères                                                                           */
 /******************************************************************************************************************************/
-  static void Imsgs_set_presence ( struct SUBPROCESS *module, const char *status_to_send )
+  static void Imsgs_set_presence ( struct THREAD *module, const char *status_to_send )
   { struct IMSGS_VARS *vars = module->vars;
     xmpp_stanza_t *pres = xmpp_presence_new(vars->ctx);
 
@@ -247,7 +247,7 @@ end:
 /* Entrée : les infos de la librairie                                                                                         */
 /******************************************************************************************************************************/
  static int Imsgs_handle_presence_CB ( xmpp_conn_t *const conn, xmpp_stanza_t *const stanza, void *const userdata )
-  { struct SUBPROCESS *module = userdata;
+  { struct THREAD *module = userdata;
     struct IMSGS_VARS *vars = module->vars;
     const char *type, *from;
     type = xmpp_stanza_get_type ( stanza );
@@ -281,7 +281,7 @@ end:
 /******************************************************************************************************************************/
  static void Imsgs_connexion_CB ( xmpp_conn_t *const conn, const xmpp_conn_event_t status, const int error,
                                   xmpp_stream_error_t *const stream_error, void *const userdata )
-  { struct SUBPROCESS *module = userdata;
+  { struct THREAD *module = userdata;
     struct IMSGS_VARS *vars = module->vars;
     if (status == XMPP_CONN_CONNECT)
      {
@@ -301,12 +301,12 @@ end:
      }
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct IMSGS_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct IMSGS_VARS) );
     struct IMSGS_VARS *vars = module->vars;
 
     gchar *thread_tech_id   = Json_get_string ( module->config, "thread_tech_id" );
@@ -339,11 +339,11 @@ reconnect:
      }
     else
      { Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Connexion in progress.", __func__, jabber_id );
-       SubProcess_send_comm_to_master ( module, TRUE );
+       Thread_send_comm_to_master ( module, TRUE );
      }
 
     while(module->Thread_run == TRUE && vars->signed_off == FALSE)                           /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
        xmpp_run_once ( vars->ctx, 500 ); /* En milliseconde */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
@@ -383,7 +383,7 @@ end:
        Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': Ctx Free OK", __func__, jabber_id );
      }
     Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': XMPPshutdown OK", __func__, jabber_id );
-    SubProcess_send_comm_to_master ( module, FALSE );
+    Thread_send_comm_to_master ( module, FALSE );
 
     if (module->Thread_run == TRUE && vars->signed_off == TRUE)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Account signed off. Why ?? Reconnect in 2s!", __func__, jabber_id );
@@ -392,6 +392,6 @@ end:
        goto reconnect;
      }
 
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

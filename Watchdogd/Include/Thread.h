@@ -34,7 +34,7 @@
  #include <errno.h>
  #include <json-glib/json-glib.h>
 
- struct SUBPROCESS
+ struct THREAD
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
@@ -53,20 +53,20 @@
     gint nbr_tour_delai;
     gint telemetrie_top;
     void *vars;                                                               /* Pointeur vers les variables de run du module */
-    void (*Run_subprocess)( struct SUBPROCESS *module );                          /* Fonction principale de gestion du module */
+    void (*Run_thread)( struct THREAD *module );                          /* Fonction principale de gestion du module */
   };
 
 /************************************************ Définitions des prototypes **************************************************/
- extern void Stopper_fils ( void );                                                                         /* Dans process.c */
+ extern void Stopper_fils ( void );                                                                          /* Dans thread.c */
  extern gboolean Demarrer_dls ( void );
  extern gboolean Demarrer_http ( void );
  extern gboolean Demarrer_arch ( void );
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );
- extern void SubProcess_send_comm_to_master ( struct SUBPROCESS *module, gboolean etat );
- extern void SubProcess_loop ( struct SUBPROCESS *module );
- extern void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars );
- extern void SubProcess_end ( struct SUBPROCESS *module );
+ extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );
+ extern void Thread_loop ( struct THREAD *module );
+ extern void Thread_init ( struct THREAD *module, gint sizeof_vars );
+ extern void Thread_end ( struct THREAD *module );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

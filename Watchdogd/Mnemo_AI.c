@@ -109,10 +109,10 @@
   }
 /******************************************************************************************************************************/
 /* Mnemo_create_json_AI: Créé un JSON pour une AI                                                                             */
-/* Entrée: la structure SUBPROCESS, les parametres de l'AI                                                                    */
+/* Entrée: la structure THREAD, les parametres de l'AI                                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- JsonNode *Mnemo_create_subprocess_AI ( struct SUBPROCESS *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
+ JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
   { JsonNode *node = Json_node_create();
     if (!node) return(NULL);
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );

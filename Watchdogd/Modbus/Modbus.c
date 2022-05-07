@@ -49,7 +49,7 @@
 /* Entrée: le module et le buffer Josn                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Modbus_SET_DO ( struct SUBPROCESS *module, JsonNode *msg )
+ static void Modbus_SET_DO ( struct THREAD *module, JsonNode *msg )
   { struct MODBUS_VARS *vars = module->vars;
     gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
     gchar *msg_thread_tech_id  = Json_get_string ( msg, "thread_tech_id" );
@@ -86,7 +86,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Modbus_SET_DO_by_array ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
+  { struct THREAD *module = user_data;
     Modbus_SET_DO ( module, element );
   }
 /******************************************************************************************************************************/
@@ -94,7 +94,7 @@
 /* Entrée: le module et le buffer Josn                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Modbus_Get_DO_from_master ( struct SUBPROCESS *module )
+ static void Modbus_Get_DO_from_master ( struct THREAD *module )
   { gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     JsonNode *RootNode = Json_node_create();
@@ -111,7 +111,7 @@
 /* Entrée: un id                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Deconnecter_module ( struct SUBPROCESS *module )
+ static void Deconnecter_module ( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     if (!module) return;
     if (vars->started == FALSE) return;
@@ -133,7 +133,7 @@
     vars->nbr_entree_ana = 0;
     vars->nbr_sortie_ana = 0;
     vars->nbr_sortie_tor = 0;
-    SubProcess_send_comm_to_master ( module, FALSE );
+    Thread_send_comm_to_master ( module, FALSE );
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': Module '%s' disconnected", __func__, thread_tech_id, hostname );
   }
 /******************************************************************************************************************************/
@@ -141,7 +141,7 @@
 /* Entrée: une nom et un password                                                                                             */
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                                              */
 /******************************************************************************************************************************/
- static gboolean Connecter_module ( struct SUBPROCESS *module )
+ static gboolean Connecter_module ( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct addrinfo *result, *rp;
     struct timeval sndtimeout;
@@ -220,7 +220,7 @@
 /* Interroger_description : envoie une commande d'identification au module                                                    */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
- static void Interroger_description( struct SUBPROCESS *module )
+ static void Interroger_description( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -251,7 +251,7 @@
 /* Interroger_description : envoie une commande d'identification au module                                                    */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
- static void Interroger_firmware( struct SUBPROCESS *module )
+ static void Interroger_firmware( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -283,7 +283,7 @@
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Init_watchdog1( struct SUBPROCESS *module )
+ static void Init_watchdog1( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -315,7 +315,7 @@
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
 /******************************************************************************************************************************/
- static void Init_watchdog2( struct SUBPROCESS *module )
+ static void Init_watchdog2( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -350,7 +350,7 @@
 /* watchdog can be triggered. The time value is stored in multiples of 100ms (e.g., 0x0009 is .9 seconds). It is not possible */
 /* to modify this value while the watchdog is running                                                                         */
 /******************************************************************************************************************************/
- static void Init_watchdog3( struct SUBPROCESS *module )
+ static void Init_watchdog3( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -382,7 +382,7 @@
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
 /******************************************************************************************************************************/
- static void Init_watchdog4( struct SUBPROCESS *module )
+ static void Init_watchdog4( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -413,7 +413,7 @@
 /* Interroger_nbr_entree_ANA : Demander au module d'envoyer son nombre d'entree ANALOGIQUE                                    */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
- static void Interroger_nbr_entree_ANA( struct SUBPROCESS *module )
+ static void Interroger_nbr_entree_ANA( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -444,7 +444,7 @@
 /* Interroger_nbr_entree_ANA : Demander au module d'envoyer son nombre de sortie ANALOGIQUE                                   */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
- static void Interroger_nbr_sortie_ANA( struct SUBPROCESS *module )
+ static void Interroger_nbr_sortie_ANA( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -475,7 +475,7 @@
 /* Interroger_nbr_entree_TOR : Demander au module d'envoyer son nombre d'entree TOR                                           */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
- static void Interroger_nbr_entree_TOR( struct SUBPROCESS *module )
+ static void Interroger_nbr_entree_TOR( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -506,7 +506,7 @@
 /* Interroger_nbr_sortie_TOR : Demander au module d'envoyer son nombre de sortie TOR                                          */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
- static void Interroger_nbr_sortie_TOR( struct SUBPROCESS *module )
+ static void Interroger_nbr_sortie_TOR( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -538,7 +538,7 @@
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
 /******************************************************************************************************************************/
- static void Interroger_entree_tor( struct SUBPROCESS *module )
+ static void Interroger_entree_tor( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -567,7 +567,7 @@
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
 /******************************************************************************************************************************/
- static void Interroger_entree_ana( struct SUBPROCESS *module )
+ static void Interroger_entree_ana( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
@@ -596,7 +596,7 @@
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
 /******************************************************************************************************************************/
- static void Interroger_sortie_tor( struct SUBPROCESS *module )
+ static void Interroger_sortie_tor( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint cpt_poid, cpt_byte, cpt, taille, nbr_data;
@@ -639,7 +639,7 @@
 /* Entrée: le module à interroger                                                                                             */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Interroger_sortie_ana( struct SUBPROCESS *module )
+ static void Interroger_sortie_ana( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint cpt_byte, cpt, taille;
@@ -678,7 +678,7 @@
 /* Entrée : la structure referencant le module                                                                                */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
- static void Modbus_load_io_config ( struct SUBPROCESS *module )
+ static void Modbus_load_io_config ( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
@@ -776,7 +776,7 @@
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
 /******************************************************************************************************************************/
- static void Modbus_Processer_trame( struct SUBPROCESS *module )
+ static void Modbus_Processer_trame( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     vars->nbr_oct_lu = 0;
     vars->request = FALSE;                                                                       /* Une requete a été traitée */
@@ -790,7 +790,7 @@
 
     gint cpt_byte, cpt_poid, cpt;
     vars->date_last_reponse = Partage->top;                                                        /* Estampillage de la date */
-    SubProcess_send_comm_to_master ( module, TRUE );
+    Thread_send_comm_to_master ( module, TRUE );
     if (ntohs(vars->response.transaction_id) != vars->transaction_id)                                     /* Mauvaise reponse */
      { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                 "%s: '%s': wrong transaction_id: attendu %d, recu %d", __func__, thread_tech_id,
@@ -917,7 +917,7 @@
             Json_node_add_int    ( RootNode, "nbr_entree_ana", vars->nbr_entree_ana );
             Json_node_add_int    ( RootNode, "nbr_sortie_tor", vars->nbr_sortie_tor );
             Json_node_add_int    ( RootNode, "nbr_sortie_ana", vars->nbr_sortie_ana );
-            JsonNode *API_result = Http_Post_to_global_API ( "/run/subprocess", "ADD_IO", RootNode );
+            JsonNode *API_result = Http_Post_to_global_API ( "/run/thread", "ADD_IO", RootNode );
             Json_node_unref ( API_result );
             Json_node_unref ( RootNode );
             vars->mode = MODBUS_GET_NBR_AI;
@@ -962,7 +962,7 @@
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
 /******************************************************************************************************************************/
- static void Recuperer_reponse_module( struct SUBPROCESS *module )
+ static void Recuperer_reponse_module( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
     fd_set fdselect;
     struct timeval tv;
@@ -1017,18 +1017,18 @@
       }
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct MODBUS_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct MODBUS_VARS) );
     struct MODBUS_VARS *vars = module->vars;
 
     gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->Master_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -1086,6 +1086,6 @@
            }
        }
      }
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

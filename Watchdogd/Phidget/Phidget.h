@@ -35,7 +35,7 @@
   };
 
  struct PHIDGET_ELEMENT
-  { struct SUBPROCESS *module; /* Module père de l'élément */
+  { struct THREAD *module; /* Module père de l'élément */
     PhidgetHandle handle;
     gchar tech_id[32];
     gboolean attached;

@@ -37,7 +37,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Charger_un_gpio (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct SUBPROCESS *module = user_data;
+  { struct THREAD *module = user_data;
     struct GPIOD_VARS *vars = module->vars;
 
     gint num = Json_get_int ( element, "num" );
@@ -80,7 +80,7 @@
 /* Entrée: rien                                                                                                               */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gboolean Charger_tous_gpio ( struct SUBPROCESS *module )
+ static gboolean Charger_tous_gpio ( struct THREAD *module )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode) return(FALSE);
 
@@ -95,12 +95,12 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct GPIOD_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct GPIOD_VARS) );
     struct GPIOD_VARS *vars = module->vars;
 
     gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
@@ -136,7 +136,7 @@
 
     gint last_top = 0, nbr_tour_par_sec = 0, nbr_tour = 0;                        /* Limitation du nombre de tour par seconde */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { SubProcess_loop ( module );                                       /* Loop sur process pour mettre a jour la telemetrie */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 
        if (Partage->top>=last_top+10)                                                                /* Toutes les 1 secondes */
         { nbr_tour_par_sec = nbr_tour;
@@ -203,6 +203,6 @@ end:
 
     if (vars->lignes) g_free(vars->lignes);
 
-    SubProcess_end(module);
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

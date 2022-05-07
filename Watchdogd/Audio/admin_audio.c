@@ -52,12 +52,12 @@
      { SQL_Write_new ( "UPDATE %s SET uuid='%s', tech_id='%s', thread_tech_id='%s', device='%s', description='%s' WHERE id='%d'",
                        lib->name, uuid, tech_id, thread_tech_id, device, description,
                        Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: thread '%s/%s' updated.", __func__, uuid, tech_id );
      }
     else
      { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', thread_tech_id='%s', device='%s', description='%s' ",
                        lib->name, uuid, tech_id, thread_tech_id, device, description );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: thread '%s/%s' created.", __func__, uuid, tech_id );
      }
 
     g_free(uuid);

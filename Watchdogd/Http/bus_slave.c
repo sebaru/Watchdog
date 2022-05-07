@@ -33,7 +33,7 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- JsonNode *Http_Post_to_local_BUS ( struct SUBPROCESS *module, gchar *bus_tag, JsonNode *RootNode )
+ JsonNode *Http_Post_to_local_BUS ( struct THREAD *module, gchar *bus_tag, JsonNode *RootNode )
   { gchar query[256];
     JsonNode *retour = NULL;
     gboolean free_root_node = FALSE;
@@ -80,10 +80,10 @@ end:
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_DI: Envoie le bit DI au master                                                                      */
-/* Entrée: la structure SUBPROCESS, le json associé, l'etat attentu                                                           */
+/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_DI ( struct SUBPROCESS *module, JsonNode *di, gboolean etat )
+ void Http_Post_to_local_BUS_DI ( struct THREAD *module, JsonNode *di, gboolean etat )
   { if (!module) return;
     gboolean update = FALSE;
     if (!Json_has_member ( di, "etat" )) { Json_node_add_bool ( di, "first_send", TRUE ); update = TRUE; }
@@ -99,10 +99,10 @@ end:
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_AI: Envoie le bit AI au master                                                                      */
-/* Entrée: la structure SUBPROCESS, le json associé, l'etat attentu                                                           */
+/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_AI ( struct SUBPROCESS *module, JsonNode *ai, gdouble valeur, gboolean in_range )
+ void Http_Post_to_local_BUS_AI ( struct THREAD *module, JsonNode *ai, gdouble valeur, gboolean in_range )
   { if (!module) return;
     gboolean update = FALSE;
     if (!Json_has_member ( ai, "valeur" )) { Json_node_add_bool ( ai, "first_send", TRUE ); update = TRUE; }
@@ -120,10 +120,10 @@ end:
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */
-/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_CDE ( struct SUBPROCESS *module, gchar *tech_id, gchar *acronyme )
+ void Http_Post_to_local_BUS_CDE ( struct THREAD *module, gchar *tech_id, gchar *acronyme )
   { if (!module) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
@@ -134,10 +134,10 @@ end:
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_WATCHDOG: Envoie le bit WATCHDOG au master selon le status                                          */
-/* Entrée: la structure SUBPROCESS, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                    */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_WATCHDOG ( struct SUBPROCESS *module, gchar *acronyme, gint consigne )
+ void Http_Post_to_local_BUS_WATCHDOG ( struct THREAD *module, gchar *acronyme, gint consigne )
   { if (!module) return;
     JsonNode *body = Json_node_create ();
     if(!body) return;
