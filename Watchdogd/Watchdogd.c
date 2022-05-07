@@ -267,6 +267,7 @@
         }
      }
     else if ( !strcasecmp( api_tag, "THREAD_CREATE") ) { Thread_Create_one_thread ( NULL, 0, request, NULL ); }
+    else if ( !strcasecmp( api_tag, "THREAD_DELETE") ) { Thread_Delete_one_thread ( request ); }
     else if ( !strcasecmp( api_tag, "SET_LOG") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_msrv" )

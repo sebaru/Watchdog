@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/thread.c        Gestion des process                                                                              */
+/* Watchdogd/thread.c        Gestion des Threads                                                                              */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 11 avr 2009 12:21:45 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -221,6 +221,8 @@
  void Decharger_librairies ( void )
   { GSList *liste;
 
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+
     liste = Partage->com_msrv.Threads;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct THREAD *module = liste->data;
@@ -241,24 +243,68 @@
        pthread_mutex_destroy( &module->synchro );
        Partage->com_msrv.Threads = g_slist_remove( Partage->com_msrv.Threads, module );
                                                                              /* Destruction de l'entete associé dans la GList */
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': process unloaded", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': thread unloaded", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
        Json_node_unref ( module->config );
        g_free( module );
      }
+
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* Thread_Create_one_thread: Création d'un sous process                                                                       */
+/* Thread_Delete_one_thread: Decharge un seul et unique thread                                                                */
+/* Entrée: Le tech_id du thread                                                                                               */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Thread_Delete_one_thread ( JsonNode *element )
+  { if (!element)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: element not provided", __func__ ); return; }
+
+    if (!Json_has_member ( element, "thread_tech_id" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_tech_id' in Json", __func__ ); return; }
+    gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
+
+    struct THREAD *module = NULL;
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    while(liste)
+     { struct THREAD *search_module = liste->data;
+       if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
+        { module = search_module;                                                        /* On demande au thread de s'arreter */
+          Partage->com_msrv.Threads = g_slist_remove( Partage->com_msrv.Threads, module );
+          break;
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+
+    if (!module)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': thread not found", __func__, thread_tech_id ); return; }
+
+    module->Thread_run = FALSE;
+    if (module->TID) pthread_join( module->TID, NULL );                                                /* Attente fin du fils */
+
+    if (module->dl_handle) dlclose( module->dl_handle );
+    pthread_mutex_destroy( &module->synchro );
+                                                                             /* Destruction de l'entete associé dans la GList */
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': thread unloaded", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_node_unref ( module->config );
+    g_free( module );
+  }
+/******************************************************************************************************************************/
+/* Thread_Create_one_thread: Création d'un sous thread                                                                       */
 /* Entrée: La structure JSON de issue de la requete Global API de Load Thread                                                 */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Thread_Create_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { if (!Json_has_member ( element, "thread_tech_id" ))
+  { if (!element)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: element not provided", __func__ ); return; }
+
+    if (!Json_has_member ( element, "thread_tech_id" ))
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_tech_id' in Json", __func__ ); return; }
+    gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
 
     if (!Json_has_member ( element, "thread_classe" ))
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_classe' in Json", __func__ ); return; }
-
-    gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
     gchar *thread_classe  = Json_get_string ( element, "thread_classe" );
 
     struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
@@ -280,7 +326,7 @@
 
     module->Run_thread = dlsym( module->dl_handle, "Run_thread" );                        /* Recherche de la fonction */
     if (!module->Run_thread)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: '%s': Process %s rejected (Run_process not found)",
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: '%s': Process %s rejected (Run_thread not found)",
                  __func__, thread_tech_id, nom_fichier );
        dlclose( module->dl_handle );
        g_free(module);
@@ -336,7 +382,9 @@
        return;
      }
     pthread_attr_destroy(&attr);                                                                        /* Libération mémoire */
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
     Partage->com_msrv.Threads = g_slist_append ( Partage->com_msrv.Threads, module );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': thread of class '%s' loaded with enable=%d",
               __func__, thread_tech_id, thread_classe, module->Thread_run );
   }
@@ -354,11 +402,10 @@
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Loading %d thread",__func__, json_array_get_length(array) );
        Json_node_foreach_array_element ( api_result, "threads", Thread_Create_one_thread, NULL );
      }
-    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error %s",__func__, Json_get_string ( api_result, "api_error" ) ); }
     Json_node_unref(api_result);
   }
 /******************************************************************************************************************************/
-/* Demarrer_dls: Thread un process DLS                                                                                        */
+/* Demarrer_dls: Processus D.L.S                                                                                              */
 /* EntrÃ©e: rien                                                                                                              */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
@@ -377,7 +424,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Demarrer_http: Thread un process HTTP                                                                                      */
+/* Demarrer_http: Processus HTTP                                                                                              */
 /* EntrÃ©e: rien                                                                                                              */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
@@ -396,7 +443,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Demarrer_arch: Thread un process arch                                                                                      */
+/* Demarrer_arch: Processus d'archivage                                                                                       */
 /* EntrÃée: rien                                                                                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
