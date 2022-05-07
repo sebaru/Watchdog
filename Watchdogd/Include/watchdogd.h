@@ -70,8 +70,7 @@
     GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
-    GSList *Librairies;                                                        /* Liste des librairies chargées pour Watchdog */
-    GSList *Subprocess;                                                        /* Liste des librairies chargées pour Watchdog */
+    GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
     SoupSession *API_session;
     SoupWebsocketConnection *API_websocket;
     gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */

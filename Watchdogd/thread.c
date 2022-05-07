@@ -59,7 +59,7 @@
      }
   }
 /******************************************************************************************************************************/
-/* Thread_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                               */
+/* Thread_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                                   */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
@@ -85,7 +85,7 @@
      }
   }
 /******************************************************************************************************************************/
-/* Thread_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */
+/* Thread_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master     */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -190,7 +190,7 @@
 
     module->maxrss = Mnemo_create_thread_AI ( module, "MAXRSS", "Memory Usage", "kb", ARCHIVE_1_MIN );
     Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Subprocess '%s' is UP", __func__, thread_tech_id );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Thread '%s' is UP", __func__, thread_tech_id );
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
@@ -221,25 +221,25 @@
  void Decharger_librairies ( void )
   { GSList *liste;
 
-    liste = Partage->com_msrv.Subprocess;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    liste = Partage->com_msrv.Threads;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct THREAD *module = liste->data;
        module->Thread_run = FALSE;                                                       /* On demande au thread de s'arreter */
        liste = liste->next;
      }
 
-    liste = Partage->com_msrv.Subprocess;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    liste = Partage->com_msrv.Threads;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct THREAD *module = liste->data;
        if (module->TID) pthread_join( module->TID, NULL );                                             /* Attente fin du fils */
        liste = liste->next;
      }
 
-    while(Partage->com_msrv.Subprocess)                                                     /* Liberation mémoire des modules */
-     { struct THREAD *module = Partage->com_msrv.Subprocess->data;
+    while(Partage->com_msrv.Threads)                                                     /* Liberation mémoire des modules */
+     { struct THREAD *module = Partage->com_msrv.Threads->data;
        if (module->dl_handle) dlclose( module->dl_handle );
        pthread_mutex_destroy( &module->synchro );
-       Partage->com_msrv.Subprocess = g_slist_remove( Partage->com_msrv.Subprocess, module );
+       Partage->com_msrv.Threads = g_slist_remove( Partage->com_msrv.Threads, module );
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': process unloaded", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
        Json_node_unref ( module->config );
@@ -247,11 +247,11 @@
      }
   }
 /******************************************************************************************************************************/
-/* Process_Create_one_thread: Création d'un sous process                                                                  */
-/* Entrée: La structure JSON de issue de la requete Global API de Load subProcess                                             */
+/* Thread_Create_one_thread: Création d'un sous process                                                                       */
+/* Entrée: La structure JSON de issue de la requete Global API de Load Thread                                                 */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Process_Create_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+ void Thread_Create_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { if (!Json_has_member ( element, "thread_tech_id" ))
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_tech_id' in Json", __func__ ); return; }
 
@@ -336,8 +336,8 @@
        return;
      }
     pthread_attr_destroy(&attr);                                                                        /* Libération mémoire */
-    Partage->com_msrv.Subprocess = g_slist_append ( Partage->com_msrv.Subprocess, module );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': process of class '%s' loaded with enable=%d",
+    Partage->com_msrv.Threads = g_slist_append ( Partage->com_msrv.Threads, module );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': thread of class '%s' loaded with enable=%d",
               __func__, thread_tech_id, thread_classe, module->Thread_run );
   }
 /******************************************************************************************************************************/
@@ -347,11 +347,14 @@
 /******************************************************************************************************************************/
  void Charger_librairies ( void )
   { JsonNode *api_result = Http_Post_to_global_API ( "/run/thread", "LOAD", NULL );
-    if (api_result && Json_get_int ( api_result, "api_result" ) == SOUP_STATUS_OK)                  /* Chargement des modules */
+    if (!api_result) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error for /run/thread LOAD",__func__ ); return; }
+
+    if (Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)                                /* Chargement des modules */
      { JsonArray *array = Json_get_array ( api_result, "threads" );
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Loading %d thread",__func__, json_array_get_length(array) );
-       Json_node_foreach_array_element ( api_result, "threads", Process_Create_one_thread, NULL );
+       Json_node_foreach_array_element ( api_result, "threads", Thread_Create_one_thread, NULL );
      }
+    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error %s",__func__, Json_get_string ( api_result, "api_error" ) ); }
     Json_node_unref(api_result);
   }
 /******************************************************************************************************************************/

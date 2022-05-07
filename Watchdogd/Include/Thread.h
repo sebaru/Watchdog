@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/process.h      Déclarations générales watchdog                                                                   */
+/* Watchdogd/include/thread.h      Déclarations générales de gestion des threads                                              */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    30.01.2022 12:46:36 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * process.h
+ * thread.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre
@@ -25,8 +25,8 @@
  * Boston, MA  02110-1301  USA
  */
 
- #ifndef _PROCESS_H_
- #define _PROCESS_H_
+ #ifndef _THREAD_H_
+ #define _THREAD_H_
 
  #include <glib.h>
  #include <pthread.h>
@@ -63,6 +63,7 @@
  extern gboolean Demarrer_arch ( void );
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );
+ extern void Thread_Create_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
  extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );
  extern void Thread_loop ( struct THREAD *module );
  extern void Thread_init ( struct THREAD *module, gint sizeof_vars );

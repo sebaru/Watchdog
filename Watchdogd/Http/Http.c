@@ -165,10 +165,15 @@
 
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: %s Status %d, reason %s", __func__, URI, status_code, reason_phrase );
+    result = Http_Response_Msg_to_Json ( soup_msg );
     if (status_code!=200)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
-    else { result = Http_Response_Msg_to_Json ( soup_msg ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: %s Error %d for '%s': %s\n", __func__, URI, status_code, query, reason_phrase );
+       if (result)
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error %s",__func__, Json_get_string ( result, "api_error" ) ); }
+       else
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error Unknown",__func__ ); }
+     }
     g_free(reason_phrase);
     g_object_unref( soup_msg );
     return(result);

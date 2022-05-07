@@ -248,7 +248,7 @@
      }
 
     gchar *api_tag = Json_get_string ( request, "api_tag" );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive api_tag '%s'  !", __func__, api_tag );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive api_tag '%s' !", __func__, api_tag );
 
          if ( !strcasecmp( api_tag, "RESET") )
      { Partage->com_msrv.Thread_run = FALSE;
@@ -266,6 +266,7 @@
           exit(0);
         }
      }
+    else if ( !strcasecmp( api_tag, "THREAD_CREATE") ) { Thread_Create_one_thread ( NULL, 0, request, NULL ); }
     else if ( !strcasecmp( api_tag, "SET_LOG") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_msrv" )
