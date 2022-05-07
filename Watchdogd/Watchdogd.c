@@ -266,9 +266,10 @@
           exit(0);
         }
      }
-    else if ( !strcasecmp( api_tag, "THREAD_CREATE") )       { Thread_Create_one_thread ( NULL, 0, request, NULL ); }
-    else if ( !strcasecmp( api_tag, "THREAD_DELETE") )       { Thread_Delete_one_thread ( request ); }
-    else if ( !strcasecmp( api_tag, "THREAD_RELOAD_BY_ID") ) { Thread_Reload_one_thread ( request ); }
+    else if ( !strcasecmp( api_tag, "THREAD_START") )        { Thread_Start_one_thread ( NULL, 0, request, NULL ); }
+    else if ( !strcasecmp( api_tag, "THREAD_STOP") )         { Thread_Stop_one_thread ( request ); }
+    else if ( !strcasecmp( api_tag, "THREAD_RELOAD") )       { Thread_Reload_one_thread ( request ); }
+    else if ( !strcasecmp( api_tag, "THREAD_RELOAD_BY_ID") ) { Thread_Reload_by_id_one_thread ( request ); }
     else if ( !strcasecmp( api_tag, "SET_LOG") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_msrv" )

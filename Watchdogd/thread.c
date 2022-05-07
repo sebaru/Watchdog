@@ -251,11 +251,11 @@
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* Thread_Reload_one_thread: Decharge/Recharge un thread par son id                                                           */
+/* Thread_Reload_by_id_one_thread: Decharge/Recharge un thread par son id                                                     */
 /* Entrée: La requete API                                                                                                     */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- void Thread_Reload_one_thread ( JsonNode *element )
+ void Thread_Reload_by_id_one_thread ( JsonNode *element )
   { if (!element)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: element not provided", __func__ ); return; }
 
@@ -288,15 +288,47 @@
     if (!module)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: thread %s/%d not found", __func__, thread_classe, id ); return; }
 
-    Thread_Delete_one_thread ( module->config );
-    Thread_Create_one_thread ( NULL, 0, element, NULL );
+    Thread_Stop_one_thread ( module->config );
+    Thread_Start_one_thread ( NULL, 0, element, NULL );
   }
 /******************************************************************************************************************************/
-/* Thread_Delete_one_thread: Decharge un seul et unique thread                                                                */
+/* Thread_Reload_one_thread: Decharge et Recharge un seul et unique thread                                                     */
 /* Entrée: Le tech_id du thread                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- void Thread_Delete_one_thread ( JsonNode *element )
+ void Thread_Reload_one_thread ( JsonNode *element )
+  { if (!element)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: element not provided", __func__ ); return; }
+
+    if (!Json_has_member ( element, "thread_tech_id" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_tech_id' in Json", __func__ ); return; }
+    gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
+
+    struct THREAD *module = NULL;
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    while(liste)
+     { struct THREAD *search_module = liste->data;
+       if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
+        { module = search_module;                                                        /* On demande au thread de s'arreter */
+          break;
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+
+    if (!module)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': thread not found", __func__, thread_tech_id ); return; }
+
+    Thread_Stop_one_thread ( module->config );
+    Thread_Start_one_thread ( NULL, 0, element, NULL );
+  }
+/******************************************************************************************************************************/
+/* Thread_Stop_one_thread: Decharge un seul et unique thread                                                                  */
+/* Entrée: Le tech_id du thread                                                                                               */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Thread_Stop_one_thread ( JsonNode *element )
   { if (!element)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: element not provided", __func__ ); return; }
 
@@ -332,11 +364,11 @@
     g_free( module );
   }
 /******************************************************************************************************************************/
-/* Thread_Create_one_thread: Création d'un sous thread                                                                       */
+/* Thread_Start_one_thread: Création d'un sous thread                                                                         */
 /* Entrée: La structure JSON de issue de la requete Global API de Load Thread                                                 */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Thread_Create_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+ void Thread_Start_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { if (!element)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: element not provided", __func__ ); return; }
 
@@ -440,7 +472,7 @@
     if (Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)                                /* Chargement des modules */
      { JsonArray *array = Json_get_array ( api_result, "threads" );
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Loading %d thread",__func__, json_array_get_length(array) );
-       Json_node_foreach_array_element ( api_result, "threads", Thread_Create_one_thread, NULL );
+       Json_node_foreach_array_element ( api_result, "threads", Thread_Start_one_thread, NULL );
      }
     Json_node_unref(api_result);
   }
