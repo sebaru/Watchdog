@@ -251,6 +251,47 @@
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
+/* Thread_Reload_one_thread: Decharge/Recharge un thread par son id                                                           */
+/* Entrée: La requete API                                                                                                     */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Thread_Reload_one_thread ( JsonNode *element )
+  { if (!element)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: element not provided", __func__ ); return; }
+
+    if (!Json_has_member ( element, "thread_classe" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_classe' in Json", __func__ ); return; }
+    gchar *thread_classe  = Json_get_string ( element, "thread_classe" );
+
+    gchar id_key[80];
+    g_snprintf ( id_key, sizeof(id_key), "%s_id", thread_classe );
+
+    if (!Json_has_member ( element, id_key ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no '%s' in Json", __func__, id_key ); return; }
+    gint id = Json_get_int ( element, id_key );
+
+    struct THREAD *module = NULL;
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    while(liste)
+     { struct THREAD *search_module = liste->data;
+       if (!strcasecmp ( thread_classe, Json_get_string ( search_module->config, "thread_classe" ) ) &&
+            id == Json_get_int ( search_module->config, id_key )
+          )
+        { module = search_module;                                                        /* On demande au thread de s'arreter */
+          break;
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+
+    if (!module)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: thread %s/%d not found", __func__, thread_classe, id ); return; }
+
+    Thread_Delete_one_thread ( module->config );
+    Thread_Create_one_thread ( NULL, 0, element, NULL );
+  }
+/******************************************************************************************************************************/
 /* Thread_Delete_one_thread: Decharge un seul et unique thread                                                                */
 /* Entrée: Le tech_id du thread                                                                                               */
 /* Sortie: Rien                                                                                                               */
@@ -335,7 +376,6 @@
 
     JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-    Json_node_add_string ( RootNode, "thread_classe",  thread_classe );
     if(!RootNode)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Process: Memory Error. Unloading.", __func__, thread_tech_id );
        dlclose( module->dl_handle );
