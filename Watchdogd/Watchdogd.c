@@ -270,19 +270,24 @@
     else if ( !strcasecmp( api_tag, "THREAD_STOP") )         { Thread_Stop_one_thread ( request ); }
     else if ( !strcasecmp( api_tag, "THREAD_RELOAD") )       { Thread_Reload_one_thread ( request ); }
     else if ( !strcasecmp( api_tag, "THREAD_RELOAD_BY_ID") ) { Thread_Reload_by_id_one_thread ( request ); }
-    else if ( !strcasecmp( api_tag, "SET_LOG") )
+    else if ( !strcasecmp( api_tag, "AGENT_SET") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
-               Json_has_member ( request, "log_msrv" )
+               Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
              )
           )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SET_LOG: wrong parameters", __func__ );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: AGENT_SET: wrong parameters", __func__ );
           goto end;
         }
-       Config.log_bus  = Json_get_bool ( request, "log_bus" );
-       Config.log_msrv = Json_get_bool ( request, "log_msrv" );
+       Config.log_bus    = Json_get_bool ( request, "log_bus" );
+       Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
+       gboolean headless = Json_get_bool ( request, "headless" );
        Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: SET_LOG: log_msrv=%d, bus=%d, log_level=%d", __func__,
-                 Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d", __func__,
+                 Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
+       if (Config.headless != headless)
+        { Partage->com_msrv.Thread_run = FALSE;
+          Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: AGENT_SET: headless has changed, rebooting", __func__ );
+        }
      }
 end:
     Json_node_unref(request);
