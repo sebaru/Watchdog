@@ -30,10 +30,10 @@
  #include <mysql.h>
  #include "Erreur.h"
 
- #define TAILLE_DB_HOST           30
- #define TAILLE_DB_USERNAME       30
- #define TAILLE_DB_PASSWORD       48
- #define TAILLE_DB_DATABASE       20
+ #define TAILLE_DB_HOST           32
+ #define TAILLE_DB_USERNAME       64
+ #define TAILLE_DB_PASSWORD       64
+ #define TAILLE_DB_DATABASE       64
 
  struct DB
   { MYSQL *mysql;

@@ -764,10 +764,6 @@
     soup_server_add_handler ( socket, "/api/archive/purge",        Http_traiter_archive_purge, NULL, NULL );
     soup_server_add_handler ( socket, "/api/archive/testdb",       Http_traiter_archive_testdb, NULL, NULL );
 
-    soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/instance/set",   Http_traiter_instance_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/instance/reload_icons",
-                                                             Http_traiter_instance_reload_icons, NULL, NULL );
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/api/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/bus",            Http_traiter_bus, NULL, NULL );
