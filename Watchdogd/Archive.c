@@ -86,14 +86,6 @@
   { static gint last_log = 0;
 
     if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
-    else if (Partage->com_arch.taille_arch > Partage->com_arch.buffer_size)
-     { if ( last_log + 600 < Partage->top )
-        { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "%s: DROP arch (taille>%d) '%s:%s'", __func__, Partage->com_arch.buffer_size, tech_id, acronyme );
-          last_log = Partage->top;
-        }
-       return;
-     }
     else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
      { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
@@ -163,13 +155,15 @@ reload:
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/archive", "save", RootNode );
        if (api_result && Json_get_int ( api_result, "api_result" ) == SOUP_STATUS_OK )
-        { while ( nb_enreg )
+        { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
+          while ( nb_enreg )
            { arch = Partage->com_arch.liste_arch->data;                                               /* Recuperation du arch */
              Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
              Partage->com_arch.taille_arch--;
              g_free(arch);
              nb_enreg--;
            }
+          pthread_mutex_unlock( &Partage->com_arch.synchro );
         } else sleep(5);
 
        Json_node_unref ( api_result );
