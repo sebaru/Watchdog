@@ -155,7 +155,6 @@
  void Run_arch ( void )
   { gint top = 0, last_count = 0, nb_enreg = 0;
     static gpointer arch_request_number;
-    struct DB *db;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -184,13 +183,6 @@ reload:
           continue;
         }
 
-       db = Init_ArchDB_SQL();
-       if (!db)
-        { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to open database %s/%s/%s. Restarting in 10s.", __func__,
-                    Partage->com_arch.archdb_hostname, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
-          sleep(10);
-          continue;
-        }
        Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Traitement de %05d archive(s)", __func__,
                  Partage->com_arch.taille_arch );
        top = Partage->top;
