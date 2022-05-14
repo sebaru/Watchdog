@@ -36,55 +36,11 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
 
 /******************************************************************************************************************************/
-/* Arch_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
-/* Entrée: le pointeur sur la PROCESS                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static gboolean Arch_Lire_config ( void )
-  { gchar *nom, *valeur, valeur_defaut[80];
-    struct DB *db;
-
-    Creer_configDB ( "archive", "database", Config.db_database );
-    Creer_configDB ( "archive", "username", Config.db_username );
-    Creer_configDB ( "archive", "password", Config.db_password );
-    Creer_configDB ( "archive", "hostname", Config.db_hostname );
-    g_snprintf( valeur_defaut, sizeof(valeur_defaut), "%d", ARCHIVE_DEFAUT_BUFFER_SIZE );
-    Creer_configDB ( "archive", "buffer_size", valeur_defaut );
-    g_snprintf( valeur_defaut, sizeof(valeur_defaut), "%d", ARCHIVE_DEFAUT_RETENTION );
-    Creer_configDB ( "archive", "retention", valeur_defaut );
-
-    if ( ! Recuperer_configDB( &db, "archive" ) )                                           /* Connexion a la base de données */
-     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Database connexion failed.", __func__ );
-       return(FALSE);
-     }
-
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     {      if ( ! g_ascii_strcasecmp ( nom, "database" ) )
-        { g_snprintf( Partage->com_arch.archdb_database, sizeof(Partage->com_arch.archdb_database), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "username" ) )
-        { g_snprintf( Partage->com_arch.archdb_username, sizeof(Partage->com_arch.archdb_username), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
-        { g_snprintf( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "hostname" ) )
-        { g_snprintf( Partage->com_arch.archdb_hostname, sizeof(Partage->com_arch.archdb_hostname), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "port" ) )
-        { Partage->com_arch.archdb_port = atoi(valeur);  }
-       else if ( ! g_ascii_strcasecmp ( nom, "buffer_size" ) )
-        { Partage->com_arch.buffer_size = atoi(valeur);  }
-       else if ( ! g_ascii_strcasecmp ( nom, "retention" ) )
-        { Partage->com_arch.retention = atoi(valeur);  }
-       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Config.log_arch = TRUE;  }
-
-     }
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Arch_clear_list: efface la liste des archives a prendre en compte                                                          */
 /* Entrées: néant                                                                                                             */
 /* Sortie : le nombre d'archive detruites                                                                                     */
 /******************************************************************************************************************************/
- gint Arch_Clear_list ( void )
+ static gint Arch_Clear_list ( void )
   { struct ARCHDB *arch;
     gint save_nbr;
     pthread_mutex_lock( &Partage->com_arch.synchro );                                                        /* lockage futex */
@@ -159,7 +115,6 @@
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
 
-    Arch_Lire_config ();                                                                       /* Lecture des données en base */
     Partage->com_arch.liste_arch  = NULL;                                                     /* Initialisation des variables */
     Partage->com_arch.Thread_run  = TRUE;                                                               /* Le thread tourne ! */
     Partage->com_arch.taille_arch = 0;
@@ -183,19 +138,17 @@ reload:
           continue;
         }
 
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Traitement de %05d archive(s)", __func__,
-                 Partage->com_arch.taille_arch );
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Traitement de %05d archive(s)", __func__, Partage->com_arch.taille_arch );
        top = Partage->top;
        nb_enreg = 0;                                                       /* Au début aucun enregistrement est passé a la DB */
        JsonNode *RootNode = Json_node_create();
        JsonArray *archives = Json_node_add_array ( RootNode, "archives" );
 
-       pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
-       while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE &&
+       GSList *liste = Partage->com_arch.liste_arch;
+       pthread_mutex_lock( &Partage->com_arch.synchro );                                                     /* lockage futex */
+       while (liste && Partage->com_arch.Thread_run == TRUE &&
               Partage->com_arch.Thread_reload == FALSE && nb_enreg<1000)
-        { arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
-          Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
-          Partage->com_arch.taille_arch--;
+        { arch = liste->data;                                                                         /* Recuperation du arch */
           JsonNode *element = Json_node_create();
           Json_node_add_string ( element, "tech_id",   arch->tech_id );
           Json_node_add_string ( element, "acronyme",  arch->acronyme );
@@ -203,13 +156,22 @@ reload:
           Json_node_add_int    ( element, "date_usec", arch->date_usec );
           Json_node_add_double ( element, "valeur",    arch->valeur );
           Json_array_add_element ( archives, element );
-          g_free(arch);
           nb_enreg++;                       /* Permet de limiter a au plus 1000 enregistrements histoire de limiter la famine */
         }
        pthread_mutex_unlock( &Partage->com_arch.synchro );
-       JsonNode *api_result = Http_Post_to_global_API ( "/run/archive", "save", RootNode );
-       Json_node_unref ( api_result );
 
+       JsonNode *api_result = Http_Post_to_global_API ( "/run/archive", "save", RootNode );
+       if (api_result && Json_get_int ( api_result, "api_result" ) == SOUP_STATUS_OK )
+        { while ( nb_enreg )
+           { arch = Partage->com_arch.liste_arch->data;                                               /* Recuperation du arch */
+             Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
+             Partage->com_arch.taille_arch--;
+             g_free(arch);
+             nb_enreg--;
+           }
+        }
+
+       Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
        Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
                  nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
@@ -222,7 +184,6 @@ reload:
                  g_slist_length(Partage->com_arch.liste_arch) );
        pthread_mutex_unlock( &Partage->com_arch.synchro );
        Partage->com_arch.Thread_reload = FALSE;
-       Arch_Lire_config();
        goto reload;
      }
 

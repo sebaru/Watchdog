@@ -95,8 +95,8 @@
        return;
      }
 
-    gint nbr = Arch_Clear_list();
-    Json_node_add_int ( RootNode, "nbr_archive_deleted", nbr );
+/*    gint nbr = Arch_Clear_list();
+    Json_node_add_int ( RootNode, "nbr_archive_deleted", nbr );*/
 
     gchar *buf = Json_node_to_string ( RootNode );
     Json_node_unref(RootNode);

@@ -65,7 +65,6 @@
 
 /******************************************* Définitions des prototypes *******************************************************/
  extern void Run_arch ( void );                                                                             /* Dans Archive.c */
- extern gint Arch_Clear_list ( void );
  extern void Ajouter_arch( gchar *tech_id, gchar *nom, gdouble valeur );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
