@@ -157,6 +157,7 @@ reload:
           Json_node_add_double ( element, "valeur",    arch->valeur );
           Json_array_add_element ( archives, element );
           nb_enreg++;                       /* Permet de limiter a au plus 1000 enregistrements histoire de limiter la famine */
+          liste = g_slist_next(liste);
         }
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
@@ -169,7 +170,7 @@ reload:
              g_free(arch);
              nb_enreg--;
            }
-        }
+        } else sleep(5);
 
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
