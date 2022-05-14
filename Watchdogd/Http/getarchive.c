@@ -129,14 +129,14 @@
        return;
      }
 
-    if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
+ /*   if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
      { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ );
        Json_node_add_string ( RootNode, "exec_purge_thread", "failed" );
      }
     else
      { pthread_detach( tid );                                        /* On le detache pour qu'il puisse se terminer tout seul */
-       Json_node_add_string ( RootNode, "exec_purge_thread", "success" );
-     }
+   /*    Json_node_add_string ( RootNode, "exec_purge_thread", "success" );
+     }*/
 
     gchar *buf = Json_node_to_string ( RootNode );
     Json_node_unref(RootNode);

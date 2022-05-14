@@ -31,8 +31,6 @@
  #define ARCHIVE_DEFAUT_RETENTION        4000                            /* Nom de jours par défaut de retention des archives */
  #define ARCHIVE_DEFAUT_BUFFER_SIZE  10000000  /* Buffer de retention pour pallier les indispos du serveur de base de données */
 
- #define NOM_TABLE_ARCH    "histo_bit"
-
  enum
   { ARCHIVE_NONE,
     ARCHIVE_5_SEC,
@@ -44,8 +42,8 @@
  struct ARCHDB
   { guint   date_sec;                                                                                     /* Date de la photo */
     guint   date_usec;                                                                                    /* Date de la photo */
-    gchar   tech_id[NBR_CARAC_TECHID];
-    gchar   acronyme[NBR_CARAC_ACRONYME];
+    gchar   tech_id[32];
+    gchar   acronyme[64];
     gdouble valeur;                                                                          /* Valeur de l'entrée analogique */
   };
 
@@ -69,8 +67,5 @@
  extern void Run_arch ( void );                                                                             /* Dans Archive.c */
  extern gint Arch_Clear_list ( void );
  extern void Ajouter_arch( gchar *tech_id, gchar *nom, gdouble valeur );
- extern gboolean Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
- extern void Admin_arch_json ( SoupMessage *msg, const char *path, GHashTable *query, gint access_level );
- extern void Arch_Update_SQL_Partitions_thread ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

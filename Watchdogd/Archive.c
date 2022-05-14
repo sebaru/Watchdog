@@ -153,7 +153,7 @@
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
-  { gint top = 0, last_delete = 0, last_count = 0, nb_enreg = 0;
+  { gint top = 0, last_count = 0, nb_enreg = 0;
     static gpointer arch_request_number;
     struct DB *db;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
@@ -169,19 +169,9 @@
     Mnemo_auto_create_AI ( FALSE, "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrements dans le tampon d'archivage", "enreg." );
     Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 0.0, TRUE );
 
-    last_delete = Partage->top;
 reload:
     while(Partage->com_arch.Thread_run == TRUE && Partage->com_arch.Thread_reload == FALSE)  /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
-
-       if ( (Partage->top - last_delete) >= 864000 )                                                     /* Une fois par jour */
-        { pthread_t tid;
-          if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
-           { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ ); }
-          else
-           { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
-          last_delete=Partage->top;
-        }
 
        if ( (Partage->top - last_count) >= 600 )                                                       /* Une fois par minute */
         { Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 1.0*Partage->com_arch.taille_arch, TRUE );
@@ -205,21 +195,32 @@ reload:
                  Partage->com_arch.taille_arch );
        top = Partage->top;
        nb_enreg = 0;                                                       /* Au début aucun enregistrement est passé a la DB */
-       gboolean retour = TRUE;
+       JsonNode *RootNode = Json_node_create();
+       JsonArray *archives = Json_node_add_array ( RootNode, "archives" );
+
+       pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
        while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE &&
-              Partage->com_arch.Thread_reload == FALSE && nb_enreg<1000 && retour==TRUE)
-        { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
-          arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
+              Partage->com_arch.Thread_reload == FALSE && nb_enreg<1000)
+        { arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
           Partage->com_arch.taille_arch--;
-          pthread_mutex_unlock( &Partage->com_arch.synchro );
-          retour = Ajouter_archDB ( db, arch );
+          JsonNode *element = Json_node_create();
+          Json_node_add_string ( element, "tech_id",   arch->tech_id );
+          Json_node_add_string ( element, "acronyme",  arch->acronyme );
+          Json_node_add_int    ( element, "date_sec",  arch->date_sec );
+          Json_node_add_int    ( element, "date_usec", arch->date_usec );
+          Json_node_add_double ( element, "valeur",    arch->valeur );
+          Json_array_add_element ( archives, element );
           g_free(arch);
           nb_enreg++;                       /* Permet de limiter a au plus 1000 enregistrements histoire de limiter la famine */
         }
+       pthread_mutex_unlock( &Partage->com_arch.synchro );
+       JsonNode *api_result = Http_Post_to_global_API ( "/run/archive", "save", RootNode );
+       Json_node_unref ( api_result );
+
+       Json_node_unref ( RootNode );
        Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
                  nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
-       Libere_DB_SQL( &db );                                                                               /* pour historique */
      }
 
     if (Partage->com_arch.Thread_reload)                                                          /* On a recu reload ?? */
