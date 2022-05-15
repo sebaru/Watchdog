@@ -414,7 +414,7 @@
        g_free(module);
        return;
      }
-    module->config = Http_Post_to_global_API ( "/run/thread", "GET_CONFIG", RootNode );
+    module->config = Http_Post_to_global_API ( "/run/thread/get_config", RootNode );
     Json_node_unref(RootNode);
     if (module->config && Json_get_int ( module->config, "api_status" ) == SOUP_STATUS_OK)
      { module->Thread_debug = Json_get_bool ( module->config, "debug" );
@@ -466,7 +466,7 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_librairies ( void )
-  { JsonNode *api_result = Http_Post_to_global_API ( "/run/thread", "LOAD", NULL );
+  { JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/load", NULL );
     if (!api_result) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error for /run/thread LOAD",__func__ ); return; }
 
     if (Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)                                /* Chargement des modules */

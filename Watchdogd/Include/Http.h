@@ -93,7 +93,7 @@
  extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level );
  extern void Http_Formater_cadran( struct HTTP_CADRAN *cadran );
  extern void Run_HTTP ( void );
- extern JsonNode *Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode );
+ extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres );
 
  extern void Http_traiter_status  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

@@ -134,10 +134,10 @@ reload:
         }
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
-       JsonNode *api_result = Http_Post_to_global_API ( "/run/archive", "save", RootNode );
+       JsonNode *api_result = Http_Post_to_global_API ( "/run/archive/save", RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
         { Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
-                    nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
+                    nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch-nb_enreg );
           pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           while ( nb_enreg )
            { JsonNode *arch = Partage->com_arch.liste_arch->data;                                     /* Recuperation du arch */

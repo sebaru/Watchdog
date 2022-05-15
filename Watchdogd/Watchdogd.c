@@ -750,7 +750,7 @@ end:
        Json_node_add_string ( RootNode, "version", WTD_VERSION );
        Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
 
-       JsonNode *api_result = Http_Post_to_global_API ( "/run/agent", "START", RootNode );
+       JsonNode *api_result = Http_Post_to_global_API ( "/run/agent/start", RootNode );
        Json_node_unref ( RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
          { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API Request for AGENT START OK.", __func__ ); }

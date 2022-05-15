@@ -54,7 +54,7 @@
                );
        JsonNode *element = Json_node_create ();
        Dls_VISUEL_to_json ( element, visu );
-       JsonNode *API_result = Http_Post_to_global_API ( "/run/visuels", "SET_VISUEL", element );
+       JsonNode *API_result = Http_Post_to_global_API ( "/run/visuels/set", element );
        Json_node_unref ( API_result );
        Http_ws_send_to_all( element );
        Json_node_unref ( element );
