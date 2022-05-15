@@ -154,7 +154,7 @@ reload:
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/archive", "save", RootNode );
-       if (api_result && Json_get_int ( api_result, "api_result" ) == SOUP_STATUS_OK )
+       if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
         { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           while ( nb_enreg )
            { arch = Partage->com_arch.liste_arch->data;                                               /* Recuperation du arch */
