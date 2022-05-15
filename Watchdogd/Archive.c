@@ -101,8 +101,7 @@
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
-  { gint top = 0, last_count = 0, nb_enreg = 0;
-    static gpointer arch_request_number;
+  { gint top = 0, nb_enreg = 0;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -112,17 +111,9 @@
     Partage->com_arch.taille_arch = 0;
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-    Mnemo_auto_create_AI ( FALSE, "SYS", "ARCH_REQUEST_NUMBER", "Nb enregistrements dans le tampon d'archivage", "enreg." );
-    Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 0.0, TRUE );
-
 reload:
     while(Partage->com_arch.Thread_run == TRUE && Partage->com_arch.Thread_reload == FALSE)  /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
-
-       if ( (Partage->top - last_count) >= 600 )                                                       /* Une fois par minute */
-        { Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 1.0*Partage->com_arch.taille_arch, TRUE );
-          last_count=Partage->top;
-        }
 
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
         { sched_yield();
@@ -155,7 +146,9 @@ reload:
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/archive", "save", RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
-        { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
+        { Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
+                    nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
+          pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           while ( nb_enreg )
            { arch = Partage->com_arch.liste_arch->data;                                               /* Recuperation du arch */
              Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
@@ -168,8 +161,6 @@ reload:
 
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
-       Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
-                 nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
      }
 
     if (Partage->com_arch.Thread_reload)                                                          /* On a recu reload ?? */
