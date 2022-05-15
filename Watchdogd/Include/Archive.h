@@ -39,14 +39,6 @@
     ARCHIVE_1_JOUR
   };
 
- struct ARCHDB
-  { guint   date_sec;                                                                                     /* Date de la photo */
-    guint   date_usec;                                                                                    /* Date de la photo */
-    gchar   tech_id[32];
-    gchar   acronyme[64];
-    gdouble valeur;                                                                          /* Valeur de l'entrée analogique */
-  };
-
  struct COM_ARCH                                                                                   /* Communication vers ARCH */
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */

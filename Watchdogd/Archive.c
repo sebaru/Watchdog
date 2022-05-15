@@ -41,13 +41,13 @@
 /* Sortie : le nombre d'archive detruites                                                                                     */
 /******************************************************************************************************************************/
  static gint Arch_Clear_list ( void )
-  { struct ARCHDB *arch;
+  { JsonNode *arch;
     gint save_nbr;
     pthread_mutex_lock( &Partage->com_arch.synchro );                                                        /* lockage futex */
     save_nbr = Partage->com_arch.taille_arch;
     while ( Partage->com_arch.liste_arch )
      { arch = Partage->com_arch.liste_arch->data;                                                     /* Recuperation du arch */
-       g_free(arch);                                                                                    /* Libération mémoire */
+       Json_node_unref(arch);                                                                           /* Libération mémoire */
        Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
        Partage->com_arch.taille_arch--;
      }
@@ -61,17 +61,15 @@
 /******************************************************************************************************************************/
  static void Ajouter_arch_all( gchar *tech_id, gchar *acronyme, gdouble valeur )
   { struct timeval tv;
-    struct ARCHDB *arch;
-
-    arch = (struct ARCHDB *)g_try_malloc0( sizeof(struct ARCHDB) );
+    JsonNode *arch = Json_node_create ();
     if (!arch) return;
 
     gettimeofday( &tv, NULL );                                                                   /* On prend l'heure actuelle */
-    g_snprintf( arch->tech_id,  sizeof(arch->tech_id),  "%s", tech_id );
-    g_snprintf( arch->acronyme, sizeof(arch->acronyme), "%s", acronyme );
-    arch->valeur    = valeur;
-    arch->date_sec  = tv.tv_sec;
-    arch->date_usec = tv.tv_usec;
+    Json_node_add_string ( arch, "tech_id",   tech_id );
+    Json_node_add_string ( arch, "acronyme",  acronyme );
+    Json_node_add_double ( arch, "valeur",    valeur );
+    Json_node_add_int    ( arch, "date_sec",  tv.tv_sec );
+    Json_node_add_int    ( arch, "date_usec", tv.tv_usec );
 
     pthread_mutex_lock( &Partage->com_arch.synchro );                                /* Ajout dans la liste de arch a traiter */
     Partage->com_arch.liste_arch = g_slist_prepend( Partage->com_arch.liste_arch, arch );
@@ -113,9 +111,7 @@
 
 reload:
     while(Partage->com_arch.Thread_run == TRUE && Partage->com_arch.Thread_reload == FALSE)  /* On tourne tant que necessaire */
-     { struct ARCHDB *arch;
-
-       if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
+     { if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
         { sched_yield();
           sleep(2);
           continue;
@@ -131,14 +127,8 @@ reload:
        pthread_mutex_lock( &Partage->com_arch.synchro );                                                     /* lockage futex */
        while (liste && Partage->com_arch.Thread_run == TRUE &&
               Partage->com_arch.Thread_reload == FALSE && nb_enreg<1000)
-        { arch = liste->data;                                                                         /* Recuperation du arch */
-          JsonNode *element = Json_node_create();
-          Json_node_add_string ( element, "tech_id",   arch->tech_id );
-          Json_node_add_string ( element, "acronyme",  arch->acronyme );
-          Json_node_add_int    ( element, "date_sec",  arch->date_sec );
-          Json_node_add_int    ( element, "date_usec", arch->date_usec );
-          Json_node_add_double ( element, "valeur",    arch->valeur );
-          Json_array_add_element ( archives, element );
+        { JsonNode *arch = liste->data;                                                               /* Recuperation du arch */
+          Json_array_add_element ( archives, json_node_copy ( arch ) );
           nb_enreg++;                       /* Permet de limiter a au plus 1000 enregistrements histoire de limiter la famine */
           liste = g_slist_next(liste);
         }
@@ -150,10 +140,10 @@ reload:
                     nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
           pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           while ( nb_enreg )
-           { arch = Partage->com_arch.liste_arch->data;                                               /* Recuperation du arch */
+           { JsonNode *arch = Partage->com_arch.liste_arch->data;                                     /* Recuperation du arch */
              Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
              Partage->com_arch.taille_arch--;
-             g_free(arch);
+             Json_node_unref(arch);
              nb_enreg--;
            }
           pthread_mutex_unlock( &Partage->com_arch.synchro );
