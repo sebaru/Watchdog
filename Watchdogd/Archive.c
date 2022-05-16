@@ -134,6 +134,8 @@ reload:
         }
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Sending %05d archive(s). reste %d",
+                 __func__, nb_enreg, Partage->com_arch.taille_arch );
        JsonNode *api_result = Http_Post_to_global_API ( "/run/archive/save", RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
         { gint nbr_saved = Json_get_int ( api_result, "nbr_archives_saved" );
