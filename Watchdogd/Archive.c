@@ -150,7 +150,11 @@ reload:
              nbr_saved--;
            }
           pthread_mutex_unlock( &Partage->com_arch.synchro );
-        } else sleep(5);
+        }
+       else { Info_new( Config.log, Config.log_arch, LOG_ERR, "API Error. Sleeping 5s before retrying. reste %05d", __func__,
+                        Partage->com_arch.taille_arch );
+              sleep(5);
+            }
 
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
