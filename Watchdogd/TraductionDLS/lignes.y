@@ -359,10 +359,10 @@ unite:          barre un_alias liste_options
                 | T_VALF   {{ $$ = New_condition_valf ( $1 );   }}
                 | ENTIER   {{ $$ = New_condition_entier ( $1 ); }}
                 | T_HEURE ordre ENTIER T_DPOINTS ENTIER
-                {{ if ($2>23) $2=23;
-                   if ($2<0)  $2=0;
-                   if ($4>59) $4=59;
-                   if ($4<0)  $4=0;
+                {{ if ($3>23) $2=23;
+                   if ($3<0)  $2=0;
+                   if ($5>59) $4=59;
+                   if ($5<0)  $4=0;
                    $$ = New_condition( TRUE, 20 );
                    if ($$)
                     { switch ($2)
