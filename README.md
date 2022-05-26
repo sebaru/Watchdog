@@ -1,10 +1,21 @@
-Watchdog by Abls-Habitat
-========================
+# Abls-Habitat Project
 
-Many years ago, we wanted to deal with our houses. Now there we are, with a great project.
+Abls-Habitat is my own project to do home automation. it presents:
 
-Please see installation instructions here:
+* one or more [Agents](https://github.com/sebaru/abls-habitat-agent), in house, to interact with sensors and outputs
+* one [API](https://github.com/sebaru/abls-habitat-api) on SaaS, main process of project, to handle all of agents
+* one [Console](https://github.com/sebaru/abls-habitat-console) to configure each element and develop [D.L.S module](https://docs.abls-habitat.fr/)
+* one [Home](https://github/com/sebaru/abls-habitat-home) frontend for all users
 
-* https://docs.abls-habitat.fr/
-* https://wiki.abls-habitat.fr
+This software is Work In Progress. It is a complete refund of all-in-one Watchdog Project.
+I'm developing on my sparse-time, not so easy with little kid :-).
 
+All detailed documentations [are here](https://docs.abls-habitat.fr)
+Have a good day, Sebaru.
+
+## What is Watchdog
+
+This component is the legacy all in one program for my home automation.
+I'm going to move parts of it into API, Console and HOME. Goal is to only keep code for dealing with sensors and output.
+
+This repository will be renamed to abls-habitat-agent when I will be ready.
