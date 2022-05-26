@@ -1,7 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([Watchdog], [3.x],
-        [sebastien.lefevre@abls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
+AC_INIT([Watchdog],[3.x],[sebastien.lefevre@abls-habitat.fr],[Watchdog],[https://wiki.abls-habitat.fr ])
 
 AC_DEFINE_UNQUOTED([WTD_VERSION], "[m4_esyscmd_s([sh -c "git describe --tags | tr -d '\n'"])]", [Numero de version])
 
@@ -22,7 +21,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_CONFIG_MACRO_DIR([m4])
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror],[cposix])
 AM_PROG_CC_C_O
 
 PKG_PROG_PKG_CONFIG
@@ -32,8 +31,8 @@ AC_SUBST([systemduserunitdir], $($PKG_CONFIG --variable=systemduserunitdir syste
 AC_SUBST([sudoersdir], "/etc/sudoers.d" )
 AM_CONDITIONAL([HAVE_SYSTEMD], [test "x$with_systemdsystemunitdir" != "xno"])
 
-AM_DISABLE_STATIC
-AC_PROG_LIBTOOL
+AC_DISABLE_STATIC([])
+LT_INIT
 
 AM_PATH_GLIB_2_0( 2.2.2 )
 GLIB_GSETTINGS
@@ -52,7 +51,18 @@ AC_STRUCT_TM
 
 dnl Checks for library functions.
 AC_FUNC_MEMCMP
-AC_TYPE_SIGNAL
+AC_DIAGNOSE([obsolete],[your code may safely assume C89 semantics that RETSIGTYPE is void.
+Remove this warning and the `AC_CACHE_CHECK' when you adjust the code.])dnl
+AC_CACHE_CHECK([return type of signal handlers],[ac_cv_type_signal],[AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([#include <sys/types.h>
+#include <signal.h>
+],
+		 [return *(signal (0, 0)) (0) == 1;])],
+		   [ac_cv_type_signal=int],
+		   [ac_cv_type_signal=void])])
+AC_DEFINE_UNQUOTED([RETSIGTYPE],[$ac_cv_type_signal],[Define as the return type of signal handlers
+		    (`int' or `void').])
+
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(gettimeofday select socket strdup strerror)
 
@@ -92,7 +102,7 @@ AC_SUBST(LIBDLS_MICRO_VERSION)
 
 ALL_LINGUAS=""
 
-AC_OUTPUT( \
+AC_CONFIG_FILES([\
 Makefile \
 ClientGTK3/Makefile \
 ClientGTK3/Include/Makefile \
@@ -112,4 +122,5 @@ Watchdogd/Dmx/Makefile \
 Watchdogd/Meteo/Makefile \
 Watchdogd/Phidget/Makefile \
 Watchdogd/Gpiod/Makefile \
-)
+])
+AC_OUTPUT
