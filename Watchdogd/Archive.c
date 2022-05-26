@@ -99,8 +99,7 @@
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
-  { gint top = 0, nb_enreg = 0;
-    prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
+  { prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
 
@@ -118,43 +117,47 @@ reload:
         }
 
        Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Traitement de %05d archive(s)", __func__, Partage->com_arch.taille_arch );
-       top = Partage->top;
-       nb_enreg = 0;                                                       /* Au début aucun enregistrement est passé a la DB */
-       JsonNode *RootNode = Json_node_create();
+       gint top            = Partage->top;
+       gint nb_enreg       = 0;                                            /* Au début aucun enregistrement est passé a la DB */
+       JsonNode *RootNode  = Json_node_create();
        JsonArray *archives = Json_node_add_array ( RootNode, "archives" );
 
-       GSList *liste = Partage->com_arch.liste_arch;
        pthread_mutex_lock( &Partage->com_arch.synchro );                                                     /* lockage futex */
+       GSList *liste = Partage->com_arch.liste_arch;
        while (liste && Partage->com_arch.Thread_run == TRUE &&
-              Partage->com_arch.Thread_reload == FALSE && nb_enreg<1000)
+              Partage->com_arch.Thread_reload == FALSE && nb_enreg<500)
         { JsonNode *arch = liste->data;                                                               /* Recuperation du arch */
-          Json_array_add_element ( archives, json_node_copy ( arch ) );
-          nb_enreg++;                       /* Permet de limiter a au plus 1000 enregistrements histoire de limiter la famine */
+          json_node_ref ( arch );
+          Json_array_add_element ( archives, arch );
+          nb_enreg++;                        /* Permet de limiter a au plus 500 enregistrements histoire de limiter la famine */
           liste = g_slist_next(liste);
         }
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Sending %05d archive(s). reste %d",
-                 __func__, nb_enreg, Partage->com_arch.taille_arch );
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Sending %05d archive(s).", __func__, nb_enreg );
+
        JsonNode *api_result = Http_Post_to_global_API ( "/run/archive/save", RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
         { gint nbr_saved = Json_get_int ( api_result, "nbr_archives_saved" );
-          Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
-                    nbr_saved, (Partage->top-top)/10.0, Partage->com_arch.taille_arch-nbr_saved );
+
           pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
-          while ( nbr_saved )
+          while (nbr_saved)
            { JsonNode *arch = Partage->com_arch.liste_arch->data;                                     /* Recuperation du arch */
              Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
              Partage->com_arch.taille_arch--;
-             Json_node_unref(arch);
+             Json_node_unref ( arch );
              nbr_saved--;
            }
           pthread_mutex_unlock( &Partage->com_arch.synchro );
+
+          Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
+                    Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
         }
-       else { Info_new( Config.log, Config.log_arch, LOG_ERR, "API Error. Sleeping 5s before retrying. reste %05d", __func__,
-                        Partage->com_arch.taille_arch );
-              sleep(5);
-            }
+       else
+        { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: API Error. Sleeping 5s before retrying. reste %05d", __func__,
+                    Partage->com_arch.taille_arch );
+          sleep(5);
+        }
 
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
@@ -169,7 +172,6 @@ reload:
        Partage->com_arch.Thread_reload = FALSE;
        goto reload;
      }
-
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Cleaning Arch List before stop", __func__);
     Arch_Clear_list();                                              /* Suppression des enregistrements restants dans la liste */
