@@ -762,9 +762,7 @@ end:
         }
 
        Config.headless           = Json_get_bool ( api_result, "headless" );
-       Config.log_db             = Json_get_bool ( api_result, "log_db" );
        Config.log_bus            = Json_get_bool ( api_result, "log_bus" );
-       Config.log_trad           = Json_get_bool ( api_result, "log_trad" );
        Config.log_msrv           = Json_get_bool ( api_result, "log_msrv" );
        Config.instance_is_master = Json_get_bool ( api_result, "is_master" );
        gchar *master_hostname    = Json_get_string ( api_result, "master_hostname" );

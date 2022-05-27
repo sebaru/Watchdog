@@ -76,7 +76,7 @@ make install
 cd ..
 rm -rf watchdogabls
 systemctl daemon-reload
-
+systemctl start Watchdogd
 #      echo "Pour lancer Watchdog, tapez 'systemctl --user enable Watchdogd-user --now'"
 
   echo "Le point d'accès pour poursuivre l'installation est https://localhost:5559/install"
