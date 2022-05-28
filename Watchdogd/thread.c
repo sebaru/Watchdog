@@ -324,6 +324,40 @@
     Thread_Start_one_thread ( NULL, 0, element, NULL );
   }
 /******************************************************************************************************************************/
+/* Thread_ws_on_API_message: Recoit une commande depuis l'API, au travers du master                                           */
+/* Entrée: L'element json decrivant la requete                                                                                */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Thread_ws_on_API_message ( JsonNode *request )
+  { if (!request)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: request not provided", __func__ ); return; }
+
+    if (!Json_has_member ( request, "thread_tech_id" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_tech_id' in Json", __func__ ); return; }
+    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+
+    struct THREAD *module = NULL;
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    while(liste)
+     { struct THREAD *search_module = liste->data;
+       if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
+        { module = search_module;                                                        /* On demande au thread de s'arreter */
+          break;
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+
+    if (!module)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': thread not found", __func__, thread_tech_id ); return; }
+
+    json_node_ref ( request );                 /* Car la request est unref dans MSRV_ws_on_API_message_CB, on garde une copie */
+    pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
+    module->Master_messages = g_slist_append ( module->Master_messages, request );
+    pthread_mutex_unlock ( &module->synchro );
+  }
+/******************************************************************************************************************************/
 /* Thread_Stop_one_thread: Decharge un seul et unique thread                                                                  */
 /* Entrée: Le tech_id du thread                                                                                               */
 /* Sortie: Rien                                                                                                               */

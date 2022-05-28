@@ -67,6 +67,7 @@
  extern void Thread_Stop_one_thread ( JsonNode *element );
  extern void Thread_Reload_one_thread ( JsonNode *element );
  extern void Thread_Reload_by_id_one_thread ( JsonNode *element );
+ extern void Thread_ws_on_API_message ( JsonNode *request );
  extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );
  extern void Thread_loop ( struct THREAD *module );
  extern void Thread_init ( struct THREAD *module, gint sizeof_vars );
