@@ -45,7 +45,7 @@
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     SoupSession *Master_session;
     SoupWebsocketConnection *Master_websocket;
-    GSList *Master_messages;
+    GSList *WS_messages;
     JsonNode *maxrss;                                                                                 /* AI pour memory Usage */
     gint nbr_tour;
     gint nbr_tour_par_sec;
@@ -65,8 +65,6 @@
  extern void Decharger_librairies ( void );
  extern void Thread_Start_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
  extern void Thread_Stop_one_thread ( JsonNode *element );
- extern void Thread_Reload_one_thread ( JsonNode *element );
- extern void Thread_Reload_by_id_one_thread ( JsonNode *element );
  extern void Thread_ws_on_API_message ( JsonNode *request );
  extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );
  extern void Thread_loop ( struct THREAD *module );

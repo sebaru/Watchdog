@@ -570,10 +570,10 @@ end:
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
-       while ( module->Master_messages )
+       while ( module->WS_messages )
         { pthread_mutex_lock ( &module->synchro );
-          JsonNode *message = module->Master_messages->data;
-          module->Master_messages = g_slist_remove ( module->Master_messages, message );
+          JsonNode *message = module->WS_messages->data;
+          module->WS_messages = g_slist_remove ( module->WS_messages, message );
           pthread_mutex_unlock ( &module->synchro );
           gchar *bus_tag = Json_get_string ( message, "bus_tag" );
           if ( !strcasecmp( bus_tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&

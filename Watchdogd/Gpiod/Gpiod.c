@@ -159,10 +159,10 @@
         }
 
 /****************************************************** Ecoute du master ******************************************************/
-       while ( module->Master_messages )
+       while ( module->WS_messages )
         { pthread_mutex_lock ( &module->synchro );
-          JsonNode *request = module->Master_messages->data;
-          module->Master_messages = g_slist_remove ( module->Master_messages, request );
+          JsonNode *request = module->WS_messages->data;
+          module->WS_messages = g_slist_remove ( module->WS_messages, request );
           pthread_mutex_unlock ( &module->synchro );
           gchar *bus_tag = Json_get_string ( request, "bus_tag" );
 

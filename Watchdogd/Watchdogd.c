@@ -268,8 +268,6 @@
      }
     else if ( !strcasecmp( api_tag, "THREAD_START") )        { Thread_Start_one_thread ( NULL, 0, request, NULL ); }
     else if ( !strcasecmp( api_tag, "THREAD_STOP") )         { Thread_Stop_one_thread ( request ); }
-    else if ( !strcasecmp( api_tag, "THREAD_RELOAD") )       { Thread_Reload_one_thread ( request ); }
-    else if ( !strcasecmp( api_tag, "THREAD_RELOAD_BY_ID") ) { Thread_Reload_by_id_one_thread ( request ); }
     else if ( !strcasecmp( api_tag, "THREAD_SEND") )         { Thread_ws_on_API_message ( request ); }
     else if ( !strcasecmp( api_tag, "AGENT_SET") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&

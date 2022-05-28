@@ -110,7 +110,7 @@
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, bus_tag );
 
     pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
-    module->Master_messages = g_slist_append ( module->Master_messages, response );
+    module->WS_messages = g_slist_append ( module->WS_messages, response );
     pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
@@ -207,8 +207,8 @@
      }
     module->Master_websocket = NULL;
     soup_session_abort ( module->Master_session );
-    g_slist_foreach ( module->Master_messages, (GFunc) Json_node_unref, NULL );
-    g_slist_free ( module->Master_messages );
+    g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
+    g_slist_free ( module->WS_messages );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s' is DOWN",
               __func__, Json_get_string ( module->config, "thread_tech_id") );
     pthread_exit(0);
@@ -251,79 +251,6 @@
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* Thread_Reload_by_id_one_thread: Decharge/Recharge un thread par son id                                                     */
-/* Entrée: La requete API                                                                                                     */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Thread_Reload_by_id_one_thread ( JsonNode *element )
-  { if (!element)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: element not provided", __func__ ); return; }
-
-    if (!Json_has_member ( element, "thread_classe" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_classe' in Json", __func__ ); return; }
-    gchar *thread_classe  = Json_get_string ( element, "thread_classe" );
-
-    gchar id_key[80];
-    g_snprintf ( id_key, sizeof(id_key), "%s_id", thread_classe );
-
-    if (!Json_has_member ( element, id_key ))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no '%s' in Json", __func__, id_key ); return; }
-    gint id = Json_get_int ( element, id_key );
-
-    struct THREAD *module = NULL;
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
-    while(liste)
-     { struct THREAD *search_module = liste->data;
-       if (!strcasecmp ( thread_classe, Json_get_string ( search_module->config, "thread_classe" ) ) &&
-            id == Json_get_int ( search_module->config, id_key )
-          )
-        { module = search_module;                                                        /* On demande au thread de s'arreter */
-          break;
-        }
-       liste = liste->next;
-     }
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
-
-    if (!module)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: thread %s/%d not found", __func__, thread_classe, id ); return; }
-
-    Thread_Stop_one_thread ( module->config );
-    Thread_Start_one_thread ( NULL, 0, element, NULL );
-  }
-/******************************************************************************************************************************/
-/* Thread_Reload_one_thread: Decharge et Recharge un seul et unique thread                                                     */
-/* Entrée: Le tech_id du thread                                                                                               */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Thread_Reload_one_thread ( JsonNode *element )
-  { if (!element)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: element not provided", __func__ ); return; }
-
-    if (!Json_has_member ( element, "thread_tech_id" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_tech_id' in Json", __func__ ); return; }
-    gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
-
-    struct THREAD *module = NULL;
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
-    while(liste)
-     { struct THREAD *search_module = liste->data;
-       if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
-        { module = search_module;                                                        /* On demande au thread de s'arreter */
-          break;
-        }
-       liste = liste->next;
-     }
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
-
-    if (!module)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': thread not found", __func__, thread_tech_id ); return; }
-
-    Thread_Stop_one_thread ( module->config );
-    Thread_Start_one_thread ( NULL, 0, element, NULL );
-  }
-/******************************************************************************************************************************/
 /* Thread_ws_on_API_message: Recoit une commande depuis l'API, au travers du master                                           */
 /* Entrée: L'element json decrivant la requete                                                                                */
 /* Sortie: Rien                                                                                                               */
@@ -354,7 +281,7 @@
 
     json_node_ref ( request );                 /* Car la request est unref dans MSRV_ws_on_API_message_CB, on garde une copie */
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
-    module->Master_messages = g_slist_append ( module->Master_messages, request );
+    module->WS_messages = g_slist_append ( module->WS_messages, request );
     pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
