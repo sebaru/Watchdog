@@ -390,41 +390,41 @@
     liste_bit = Partage->Dls_data_MSG;                                                /* Decharge tous les messages du module */
     while(liste_bit)
      { struct DLS_MESSAGES *msg = liste_bit->data;
-       liste_bit = g_slist_next(liste_bit);
        if (!strcasecmp(msg->tech_id, plugin->tech_id))
         { Dls_data_set_MSG ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
+       liste_bit = g_slist_next(liste_bit);
      }
 
     liste_bit = Partage->Dls_data_MONO;                                               /* Decharge tous les monoeens du module */
     while(liste_bit)
      { struct DLS_MONO *mono = liste_bit->data;
-       liste_bit = g_slist_next(liste_bit);
        if (!strcasecmp(mono->tech_id, plugin->tech_id) && strcasecmp(mono->acronyme, "IO_COMM") )
         { Dls_data_set_MONO ( &plugin->vars, mono->tech_id, mono->acronyme, (gpointer)&mono, FALSE ); }
+       liste_bit = g_slist_next(liste_bit);
      }
 
     liste_bit = Partage->Dls_data_BI;                                               /* Decharge tous les bieens du module */
     while(liste_bit)
      { struct DLS_BI *bi = liste_bit->data;
-       liste_bit = g_slist_next(liste_bit);
        if (!strcasecmp(bi->tech_id, plugin->tech_id) && strcasecmp(bi->acronyme, "IO_COMM") )
         { Dls_data_set_BI   ( &plugin->vars, bi->tech_id, bi->acronyme, (gpointer)&bi, FALSE ); }
+       liste_bit = g_slist_next(liste_bit);
      }
 
     liste_bit = Partage->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
     while(liste_bit)
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
-       liste_bit = g_slist_next(liste_bit);
        if (!strcasecmp(wtd->tech_id, plugin->tech_id) && strcasecmp(wtd->acronyme, "IO_COMM") )
         { Dls_data_set_WATCHDOG ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
+       liste_bit = g_slist_next(liste_bit);
      }
 
     liste_bit = Partage->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
     while(liste_bit)
      { struct DLS_VISUEL *visu = liste_bit->data;
-       liste_bit = g_slist_next(liste_bit);
        if (!strcasecmp(visu->tech_id, plugin->tech_id))
         { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE, "resetted" ); }
+       liste_bit = g_slist_next(liste_bit);
      }
 
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );

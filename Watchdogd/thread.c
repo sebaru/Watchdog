@@ -91,23 +91,24 @@
 /******************************************************************************************************************************/
  static void Thread_ws_on_master_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
   { struct THREAD *module = user_data;
-    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: WebSocket Message received !", __func__ );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: '%s': WebSocket Message received !", __func__, thread_tech_id );
     gsize taille;
 
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': WebSocket Message Dropped (not JSON) !", __func__, thread_tech_id );
        return;
      }
 
     if (!Json_has_member ( response, "bus_tag" ))
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: WebSocket Message Dropped (no 'bus_tag') !", __func__ );
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': WebSocket Message Dropped (no 'bus_tag') !", __func__, thread_tech_id );
        Json_node_unref(response);
        return;
      }
 
     gchar *bus_tag = Json_get_string ( response, "bus_tag" );
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: receive bus_tag '%s'  !", __func__, bus_tag );
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': receive bus_tag '%s'  !", __func__, thread_tech_id, bus_tag );
 
     pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
     module->WS_messages = g_slist_append ( module->WS_messages, response );
@@ -151,7 +152,7 @@
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
-/* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
+/* Entrée: La structure afférente                                                                                             */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Thread_init ( struct THREAD *module, gint sizeof_vars )
@@ -193,8 +194,8 @@
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Thread '%s' is UP", __func__, thread_tech_id );
   }
 /******************************************************************************************************************************/
-/* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
-/* Entrée: Le nom du thread, sa classe, la structure afférente, sa version, et sa description                                 */
+/* Thread_end: appelé par chaque thread, lors de son arret                                                                    */
+/* Entrée: La structure afférente                                                                                             */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Thread_end ( struct THREAD *module )
@@ -340,6 +341,13 @@
     if (!Json_has_member ( element, "thread_classe" ))
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_classe' in Json", __func__ ); return; }
     gchar *thread_classe  = Json_get_string ( element, "thread_classe" );
+
+    if (!Json_has_member ( element, "agent_uuid" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'agent_uuid' in Json", __func__ ); return; }
+    gchar *agent_uuid  = Json_get_string ( element, "agent_uuid" );
+
+    if (strcmp ( agent_uuid, Json_get_string ( Config.config, "agent_uuid" ) ))
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: 'agent_uuid' is not our agent_uuid. Dropping.", __func__ ); return; }
 
     struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
     if (!module)

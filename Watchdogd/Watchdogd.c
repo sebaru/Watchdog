@@ -225,10 +225,10 @@
     Updater_confDB_Registre();                                                                    /* Sauvegarde des registres */
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
     Updater_confDB_MONO();                                             /* Sauvegarde des valeurs des bistables et monostables */
-    Updater_confDB_BI();                                             /* Sauvegarde des valeurs des bistables et monostables */
+    Updater_confDB_BI();                                               /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
-/* Thread_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master */
+/* MSRV_ws_on_API_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée à l'API            */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/

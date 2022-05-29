@@ -175,7 +175,6 @@ end:
      }
     gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
 
-
     if ( !Json_has_member ( request, "domain_uuid" ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "domain_uuid missing");
        Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: domain_uuid missing for thread_tech_id %s", __func__, thread_tech_id );
