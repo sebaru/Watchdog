@@ -97,18 +97,18 @@
 
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': WebSocket Message Dropped (not JSON) !", __func__, thread_tech_id );
+     { Info_new( Config.log, Config.log_bus, LOG_WARNING, "%s: '%s': WebSocket Message Dropped (not JSON) !", __func__, thread_tech_id );
        return;
      }
 
     if (!Json_has_member ( response, "bus_tag" ))
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': WebSocket Message Dropped (no 'bus_tag') !", __func__, thread_tech_id );
+     { Info_new( Config.log, Config.log_bus, LOG_WARNING, "%s: '%s': WebSocket Message Dropped (no 'bus_tag') !", __func__, thread_tech_id );
        Json_node_unref(response);
        return;
      }
 
     gchar *bus_tag = Json_get_string ( response, "bus_tag" );
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': receive bus_tag '%s'  !", __func__, thread_tech_id, bus_tag );
+    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: '%s': receive bus_tag '%s'  !", __func__, thread_tech_id, bus_tag );
 
     pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
     module->WS_messages = g_slist_append ( module->WS_messages, response );

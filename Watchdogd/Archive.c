@@ -134,6 +134,7 @@ reload:
         }
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
+       Json_node_add_int ( RootNode, "nbr_archives", nb_enreg );
        Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Sending %05d archive(s).", __func__, nb_enreg );
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/archive/save", RootNode );

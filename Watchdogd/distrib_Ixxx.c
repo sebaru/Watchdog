@@ -38,26 +38,42 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_Ixxx_dls ( void )
-  { gint reste;
+  { if (!Partage->com_msrv.liste_visuel) return;                                               /* Traitement des I dynamiques */
 
-    if (Partage->com_msrv.liste_visuel)                                                        /* Traitement des I dynamiques */
-     { struct DLS_VISUEL *visu;
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                            /* Récupération depuis la liste a traiter */
-       visu = Partage->com_msrv.liste_visuel->data;                                       /* Recuperation du numero du visuel */
-       Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visu );
-       reste = g_slist_length(Partage->com_msrv.liste_visuel);
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    JsonNode *RootNode  = Json_node_create();
+    if (!RootNode) return;
+    JsonArray *visuels = Json_node_add_array ( RootNode, "visuels" );
+    if (!visuels) return;
 
+    gint top = Partage->top;
+    gint nb_enreg = 0;
+    pthread_mutex_lock( &Partage->com_msrv.synchro );                                                        /* lockage futex */
+    while (Partage->com_msrv.liste_visuel && Partage->com_msrv.Thread_run == TRUE && nb_enreg<100)
+     { struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
+       Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                 "%s: Recu VISUEL %s:%s mode=%s, color=%s, cligno=%d. Reste a traiter %03d", __func__,
-                 visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno, reste
+                "%s: Recu VISUEL %s:%s mode=%s, color=%s, cligno=%d.", __func__,
+                 visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->cligno
                );
        JsonNode *element = Json_node_create ();
-       Dls_VISUEL_to_json ( element, visu );
-       JsonNode *API_result = Http_Post_to_global_API ( "/run/visuels/set", element );
-       Json_node_unref ( API_result );
-       Http_ws_send_to_all( element );
-       Json_node_unref ( element );
+       Dls_VISUEL_to_json ( element, visuel );
+       Http_ws_send_to_all( element ); /* A virer une fois full API */
+       Json_array_add_element ( visuels, element );
+       nb_enreg++;                           /* Permet de limiter a au plus 100 enregistrements histoire de limiter la famine */
      }
+    gint reste = g_slist_length(Partage->com_msrv.liste_visuel);
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+
+    Json_node_add_int ( RootNode, "nbr_visuels", nb_enreg );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/visuels/set", RootNode );
+    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
+     { gint nbr_saved = Json_get_int ( api_result, "nbr_visuels_saved" );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Traitement de %05d visuel(s) en %06.1fs. Reste %05d.", __func__,
+                 nbr_saved, (Partage->top-top)/10.0, reste );
+     }
+    else
+     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: API Error. Reste %05d", __func__, reste ); }
+    Json_node_unref ( RootNode );
+    Json_node_unref ( api_result );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
