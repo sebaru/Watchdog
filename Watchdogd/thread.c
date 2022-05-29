@@ -91,7 +91,7 @@
 /******************************************************************************************************************************/
  static void Thread_ws_on_master_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
   { struct THREAD *module = user_data;
-    Info_new( Config.log, Config.log_bus, LOG_INFO, "%s: WebSocket Message received !", __func__ );
+    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: WebSocket Message received !", __func__ );
     gsize taille;
 
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
@@ -107,7 +107,7 @@
      }
 
     gchar *bus_tag = Json_get_string ( response, "bus_tag" );
-    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, bus_tag );
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: receive bus_tag '%s'  !", __func__, bus_tag );
 
     pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
     module->WS_messages = g_slist_append ( module->WS_messages, response );
