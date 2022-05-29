@@ -65,7 +65,7 @@
  extern void Decharger_librairies ( void );
  extern void Thread_Start_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
  extern void Thread_Stop_one_thread ( JsonNode *element );
- extern void Thread_ws_on_API_message ( JsonNode *request );
+ extern void Thread_Push_API_message ( JsonNode *request );
  extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );
  extern void Thread_loop ( struct THREAD *module );
  extern void Thread_init ( struct THREAD *module, gint sizeof_vars );

@@ -252,11 +252,11 @@
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* Thread_ws_on_API_message: Recoit une commande depuis l'API, au travers du master                                           */
+/* Thread_Push_API_message: Recoit une commande depuis l'API, au travers du master                                              */
 /* Entrée: L'element json decrivant la requete                                                                                */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- void Thread_ws_on_API_message ( JsonNode *request )
+ void Thread_Push_API_message ( JsonNode *request )
   { if (!request)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: request not provided", __func__ ); return; }
 
@@ -280,7 +280,6 @@
     if (!module)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': thread not found", __func__, thread_tech_id ); return; }
 
-    json_node_ref ( request );                 /* Car la request est unref dans MSRV_ws_on_API_message_CB, on garde une copie */
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->WS_messages = g_slist_append ( module->WS_messages, request );
     pthread_mutex_unlock ( &module->synchro );

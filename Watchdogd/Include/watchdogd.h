@@ -73,6 +73,7 @@
     GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
     SoupSession *API_session;
     SoupWebsocketConnection *API_websocket;
+    GSList *API_ws_messages;                                                             /* Liste des messages recue de l'API */
     gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
   };
 

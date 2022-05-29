@@ -228,24 +228,18 @@
     Updater_confDB_BI();                                               /* Sauvegarde des valeurs des bistables et monostables */
   }
 /******************************************************************************************************************************/
-/* MSRV_ws_on_API_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée à l'API            */
+/* MSRV_handle_API_messages: Traite les messages recue de l'API                                                               */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void MSRV_ws_on_API_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Message received !", __func__ );
-    gsize taille;
+ static void MSRV_handle_API_messages ( void )
+  {
+    if (!Partage->com_msrv.API_ws_messages) return;
 
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
-    if (!request)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
-       return;
-     }
-
-    if (!Json_has_member ( request, "api_tag" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'api_tag') !", __func__ );
-       goto end;
-     }
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    JsonNode *request = Partage->com_msrv.API_ws_messages->data;
+    Partage->com_msrv.API_ws_messages = g_slist_remove ( Partage->com_msrv.API_ws_messages, request );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
 
     gchar *api_tag = Json_get_string ( request, "api_tag" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive api_tag '%s' !", __func__, api_tag );
@@ -266,9 +260,9 @@
           exit(0);
         }
      }
-    else if ( !strcasecmp( api_tag, "THREAD_START") )        { Thread_Start_one_thread ( NULL, 0, request, NULL ); }
-    else if ( !strcasecmp( api_tag, "THREAD_STOP") )         { Thread_Stop_one_thread ( request ); }
-    else if ( !strcasecmp( api_tag, "THREAD_SEND") )         { Thread_ws_on_API_message ( request ); }
+    else if ( !strcasecmp( api_tag, "THREAD_START") ) { Thread_Start_one_thread ( NULL, 0, request, NULL ); }
+    else if ( !strcasecmp( api_tag, "THREAD_STOP") )  { Thread_Stop_one_thread ( request ); }
+    else if ( !strcasecmp( api_tag, "THREAD_SEND") )  { Thread_Push_API_message ( request ); }
     else if ( !strcasecmp( api_tag, "AGENT_SET") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
@@ -292,17 +286,42 @@ end:
     Json_node_unref(request);
   }
 /******************************************************************************************************************************/
+/* MSRV_on_API_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée à l'API               */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_on_API_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
+  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Message received !", __func__ );
+    gsize taille;
+
+    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    if (!request)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
+       return;
+     }
+
+    if (!Json_has_member ( request, "api_tag" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'api_tag') !", __func__ );
+       Json_node_unref(request);
+       return;
+     }
+
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );                                       /* Ajout dans la liste a traiter */
+    Partage->com_msrv.API_ws_messages = g_slist_append ( Partage->com_msrv.API_ws_messages, request );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  }
+/******************************************************************************************************************************/
 /* MSRV_ws_on_master_close_CB: Traite une deconnexion sur la websocket MSRV                                                   */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void MSRV_ws_on_API_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
+ static void MSRV_on_API_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
   { g_object_unref(Partage->com_msrv.API_websocket);
     Partage->com_msrv.API_websocket = NULL;
     Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: WebSocket Close. Reboot Needed!", __func__ );
     /* Partage->com_msrv.Thread_run = FALSE; */
   }
- static void MSRV_ws_on_API_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
+ static void MSRV_on_API_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
   { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
   }
 /******************************************************************************************************************************/
@@ -310,7 +329,7 @@ end:
 /* Entrée: les variables traditionnelles de libsous                                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void MSRV_ws_on_API_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
+ static void MSRV_on_API_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
   { GError *error = NULL;
     Partage->com_msrv.API_websocket = soup_session_websocket_connect_finish ( Partage->com_msrv.API_session, res, &error );
     if (!Partage->com_msrv.API_websocket)                                                    /* No limit on incoming packet ! */
@@ -320,9 +339,9 @@ end:
      }
     g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(256000), NULL );
     g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
-    g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(MSRV_ws_on_API_message_CB), NULL );
-    g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(MSRV_ws_on_API_close_CB), NULL );
-    g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(MSRV_ws_on_API_error_CB), NULL );
+    g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(MSRV_on_API_message_CB), NULL );
+    g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(MSRV_on_API_close_CB), NULL );
+    g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(MSRV_on_API_error_CB), NULL );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket to API connected", __func__ );
   }
 /******************************************************************************************************************************/
@@ -340,7 +359,7 @@ end:
     GCancellable *cancel = g_cancellable_new();
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Starting WebSocket connect to %s", __func__, chaine );
     soup_session_websocket_connect_async ( Partage->com_msrv.API_session, query,
-                                           NULL, protocols, cancel, MSRV_ws_on_API_connected, NULL );
+                                           NULL, protocols, cancel, MSRV_on_API_connected, NULL );
     g_object_unref(query);
     g_object_unref(cancel);
   }
@@ -354,6 +373,11 @@ end:
          soup_websocket_connection_get_state ( Partage->com_msrv.API_websocket ) == SOUP_WEBSOCKET_STATE_OPEN )
      { soup_websocket_connection_close ( Partage->com_msrv.API_websocket, 0, "Thanks, Bye !" ); }
     Partage->com_msrv.API_websocket = NULL;
+    if (Partage->com_msrv.API_ws_messages)
+     { g_slist_foreach ( Partage->com_msrv.API_ws_messages, (GFunc) json_node_unref, NULL );
+       g_slist_free ( Partage->com_msrv.API_ws_messages );
+       Partage->com_msrv.API_ws_messages = NULL;
+     }
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
@@ -410,6 +434,7 @@ end:
      { Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
+       MSRV_handle_API_messages();
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { Save_dls_data_to_DB();
@@ -484,7 +509,8 @@ end:
 /*    Http_Post_to_local_BUS ( module, "SLAVE_START", NULL );*/
 
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
-     { if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
+     { MSRV_handle_API_messages();
+       if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 
