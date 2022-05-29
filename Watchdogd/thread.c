@@ -316,12 +316,14 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': thread not found", __func__, thread_tech_id ); return; }
 
     module->Thread_run = FALSE;
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: '%s': Stopping", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
     if (module->TID) pthread_join( module->TID, NULL );                                                /* Attente fin du fils */
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: '%s': Stopped", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
 
     if (module->dl_handle) dlclose( module->dl_handle );
     pthread_mutex_destroy( &module->synchro );
                                                                              /* Destruction de l'entete associé dans la GList */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': thread unloaded", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: '%s': Unloaded", __func__, Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_unref ( module->config );
     g_free( module );
   }
@@ -360,7 +362,7 @@
 
     module->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW );
     if (!module->dl_handle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: '%s': Process '%s' loading failed (%s)",
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: '%s': Thread '%s' loading failed (%s)",
                  __func__, thread_tech_id, nom_fichier, dlerror() );
        g_free(module);
        return;
@@ -368,7 +370,7 @@
 
     module->Run_thread = dlsym( module->dl_handle, "Run_thread" );                        /* Recherche de la fonction */
     if (!module->Run_thread)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: '%s': Process %s rejected (Run_thread not found)",
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: '%s': Thread '%s' rejected (Run_thread not found)",
                  __func__, thread_tech_id, nom_fichier );
        dlclose( module->dl_handle );
        g_free(module);
@@ -378,7 +380,7 @@
     JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
     if(!RootNode)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Process: Memory Error. Unloading.", __func__, thread_tech_id );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Thread: Memory Error. Unloading.", __func__, thread_tech_id );
        dlclose( module->dl_handle );
        g_free(module);
        return;
