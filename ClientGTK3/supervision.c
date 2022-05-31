@@ -278,8 +278,8 @@
  static void Updater_les_visuels( struct PAGE_NOTEBOOK *page, JsonNode *motif )
   { struct TYPE_INFO_SUPERVISION *infos = page->infos;
     gint cpt;
-    /*printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
-           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );*/
+    printf("%s: %s:%s => %d, %s, %d\n", __func__, Json_get_string( motif, "tech_id" ), Json_get_string( motif, "acronyme" ),
+           Json_get_int( motif, "mode" ), Json_get_string( motif, "color" ), Json_get_bool( motif, "cligno" ) );
 
     if (!infos->Trame) return;
     pthread_mutex_lock ( &infos->Trame->lock );
@@ -443,8 +443,10 @@
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response) return;
 
-    if (!Json_has_member(response, "zmq_tag")) return;
+    if (!Json_has_member(response, "zmq_tag")) { printf( "no zmq tag\n"); return; }
     gchar *zmq_tag = Json_get_string(response,"zmq_tag");
+
+    printf("%s: recu zmq_tag '%s'\n", __func__, zmq_tag );
 
          if ( !strcasecmp ( zmq_tag, "DLS_CADRAN" ) ) { Updater_les_cadrans ( page, response ); }
     else if ( !strcasecmp ( zmq_tag, "DLS_VISUEL" ) ) { Updater_les_visuels  ( page, response ); }
