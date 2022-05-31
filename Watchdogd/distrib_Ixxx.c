@@ -57,6 +57,7 @@
                );
        JsonNode *element = Json_node_create ();
        Dls_VISUEL_to_json ( element, visuel );
+       Json_node_add_string ( element, "DLS_VISUEL" ); /* A virer une fois full API */
        Http_ws_send_to_all( element ); /* A virer une fois full API */
        Json_array_add_element ( visuels, element );
        nb_enreg++;                           /* Permet de limiter a au plus 100 enregistrements histoire de limiter la famine */

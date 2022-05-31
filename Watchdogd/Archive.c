@@ -109,7 +109,7 @@
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
 reload:
-    while(Partage->com_arch.Thread_run == TRUE && Partage->com_arch.Thread_reload == FALSE)  /* On tourne tant que necessaire */
+    while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
         { sched_yield();
           sleep(2);
@@ -124,8 +124,7 @@ reload:
 
        pthread_mutex_lock( &Partage->com_arch.synchro );                                                     /* lockage futex */
        GSList *liste = Partage->com_arch.liste_arch;
-       while (liste && Partage->com_arch.Thread_run == TRUE &&
-              Partage->com_arch.Thread_reload == FALSE && nb_enreg<500)
+       while (liste && Partage->com_arch.Thread_run == TRUE && nb_enreg<500)
         { JsonNode *arch = liste->data;                                                               /* Recuperation du arch */
           json_node_ref ( arch );
           Json_array_add_element ( archives, arch );
@@ -162,16 +161,6 @@ reload:
 
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
-     }
-
-    if (Partage->com_arch.Thread_reload)                                                          /* On a recu reload ?? */
-     { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: RELOAD", __func__ );
-       pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
-       Info_new( Config.log, Config.log_arch, LOG_INFO, "%s: Reste %05d a traiter", __func__,
-                 g_slist_length(Partage->com_arch.liste_arch) );
-       pthread_mutex_unlock( &Partage->com_arch.synchro );
-       Partage->com_arch.Thread_reload = FALSE;
-       goto reload;
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Cleaning Arch List before stop", __func__);

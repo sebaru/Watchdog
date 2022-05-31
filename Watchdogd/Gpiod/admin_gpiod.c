@@ -99,8 +99,8 @@
     g_free(acronyme);
 
     soup_message_set_status (msg, SOUP_STATUS_OK);
-    Lib->Thread_reload = TRUE;
-    while ( Lib->Thread_run == TRUE && Lib->Thread_reload == TRUE);                              /* Attente reboot du process */
+
+    while ( Lib->Thread_run == TRUE);                              /* Attente reboot du process */
   }
 /******************************************************************************************************************************/
 /* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
