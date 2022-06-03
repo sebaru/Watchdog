@@ -59,32 +59,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Thread_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                                   */
-/* Entrée: La structure afférente                                                                                             */
-/* Sortie: aucune                                                                                                             */
-/******************************************************************************************************************************/
- void Thread_loop ( struct THREAD *module )
-  { Thread_send_comm_to_master ( module, module->comm_status );
-
-/********************************************************* tour par secondes **************************************************/
-    if (Partage->top >= module->nbr_tour_top+10)                                                     /* Toutes les 1 secondes */
-     { module->nbr_tour_par_sec = module->nbr_tour;
-       module->nbr_tour = 0;
-       if(module->nbr_tour_par_sec > 50) module->nbr_tour_delai += 50;
-       else if(module->nbr_tour_delai>0) module->nbr_tour_delai -= 50;
-       module->nbr_tour_top = Partage->top;
-     } else module->nbr_tour++;
-    usleep(module->nbr_tour_delai);
-
-/********************************************************* Toutes les minutes *************************************************/
-    if (Partage->top >= module->telemetrie_top+600)                                                     /* Toutes les minutes */
-     { struct rusage conso;
-       if (getrusage ( RUSAGE_THREAD, &conso ) == 0)
-        { Http_Post_to_local_BUS_AI ( module, module->maxrss, conso.ru_maxrss, TRUE ); }
-       module->telemetrie_top = Partage->top;
-     }
-  }
-/******************************************************************************************************************************/
 /* Thread_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master     */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
@@ -122,7 +96,7 @@
  static void Thread_ws_on_master_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
   { struct THREAD *module = user_data;
     Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: WebSocket Close. Reboot Needed!", __func__ );
-    /* Partage->com_msrv.Thread_run = FALSE; */
+    module->Master_websocket = NULL;
   }
  static void Thread_ws_on_master_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
   { struct THREAD *module = user_data;
@@ -151,6 +125,57 @@
     Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': WebSocket to Master connected", __func__, thread_tech_id );
   }
 /******************************************************************************************************************************/
+/* Thread_ws_bus_init: appelé par chaque thread pour demarrer le websocket vers le master                                     */
+/* Entrée: La thread                                                                                                          */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Thread_ws_bus_init ( struct THREAD *module )
+  { gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    if (module->Master_websocket )
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': WebSocket error: Already UP.", __func__, thread_tech_id );
+       return;
+     }
+
+    module->Master_session = soup_session_new();
+    g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );
+    static gchar *protocols[] = { "live-bus", NULL };
+    gchar chaine[256];
+    g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
+    SoupMessage *query   = soup_message_new ( "GET", chaine );
+    GCancellable *cancel = g_cancellable_new();
+    soup_session_websocket_connect_async ( module->Master_session, query,
+                                           NULL, protocols, cancel, Thread_ws_on_master_connected, module );
+    g_object_unref(query);
+    g_object_unref(cancel);
+  }
+/******************************************************************************************************************************/
+/* Thread_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                                   */
+/* Entrée: La structure afférente                                                                                             */
+/* Sortie: aucune                                                                                                             */
+/******************************************************************************************************************************/
+ void Thread_loop ( struct THREAD *module )
+  { Thread_send_comm_to_master ( module, module->comm_status );
+
+/********************************************************* tour par secondes **************************************************/
+    if (Partage->top >= module->nbr_tour_top+10)                                                     /* Toutes les 1 secondes */
+     { module->nbr_tour_par_sec = module->nbr_tour;
+       module->nbr_tour = 0;
+       if(module->nbr_tour_par_sec > 50) module->nbr_tour_delai += 50;
+       else if(module->nbr_tour_delai>0) module->nbr_tour_delai -= 50;
+       module->nbr_tour_top = Partage->top;
+     } else module->nbr_tour++;
+    usleep(module->nbr_tour_delai);
+
+/********************************************************* Toutes les minutes *************************************************/
+    if (Partage->top >= module->telemetrie_top+600)                                                     /* Toutes les minutes */
+     { struct rusage conso;
+       if (getrusage ( RUSAGE_THREAD, &conso ) == 0)
+        { Http_Post_to_local_BUS_AI ( module, module->maxrss, conso.ru_maxrss, TRUE ); }
+       if (!module->Master_websocket) Thread_ws_bus_init ( module );               /* si perte de la websocket, on reconnecte */
+       module->telemetrie_top = Partage->top;
+     }
+  }
+/******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: néant                                                                                                              */
@@ -173,16 +198,7 @@
      }
 
 /******************************************************* Ecoute du Master *****************************************************/
-    module->Master_session = soup_session_new();
-    g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );
-    static gchar *protocols[] = { "live-bus", NULL };
-    g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
-    SoupMessage *query   = soup_message_new ( "GET", chaine );
-    GCancellable *cancel = g_cancellable_new();
-    soup_session_websocket_connect_async ( module->Master_session, query,
-                                           NULL, protocols, cancel, Thread_ws_on_master_connected, module );
-    g_object_unref(query);
-    g_object_unref(cancel);
+    Thread_ws_bus_init( module );
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
