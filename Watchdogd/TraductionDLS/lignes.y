@@ -160,7 +160,7 @@ listeInstr:     une_instr listeInstr
                        { taille +=1024;
                          $$ = New_chaine( taille );
                          g_snprintf( $$, taille,
-                                     " /* --------------------une_instr différée----------*\n"
+                                     " /* --------------------une_instr différée----------*/\n"
                                      "vars->num_ligne = %d;\n"
                                      " { static gboolean counting_on=FALSE;\n"
                                      "   static gboolean counting_off=FALSE;\n"
