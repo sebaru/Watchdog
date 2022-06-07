@@ -215,7 +215,6 @@
  void Thread_end ( struct THREAD *module )
   { Thread_send_comm_to_master ( module, FALSE );
     if (module->vars) g_free(module->vars);
-    Json_node_unref ( module->maxrss );
     Json_node_unref ( module->tour_par_sec );
     if (module->Master_websocket && soup_websocket_connection_get_state (module->Master_websocket) == SOUP_WEBSOCKET_STATE_OPEN)
      { soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );

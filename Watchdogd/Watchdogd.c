@@ -215,8 +215,8 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Save_dls_data_to_DB ( void )
-  { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saving DLS_DATA", __func__ );
+  { if (Config.instance_is_master == FALSE) pthread_exit(0);                       /* Seul le master sauvegarde les compteurs */
+    gint top = Partage->top;
     Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
     Updater_confDB_DO();                                                            /* Sauvegarde des valeurs des Sorties TOR */
     Updater_confDB_CH();                                                                  /* Sauvegarde des compteurs Horaire */
@@ -226,6 +226,8 @@
     Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
     Updater_confDB_MONO();                                             /* Sauvegarde des valeurs des bistables et monostables */
     Updater_confDB_BI();                                               /* Sauvegarde des valeurs des bistables et monostables */
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saved DLS_DATA in %04.1fs", __func__, (Partage->top-top)/10.0 );
+    pthread_exit(0);
   }
 /******************************************************************************************************************************/
 /* MSRV_handle_API_messages: Traite les messages recue de l'API                                                               */
@@ -437,7 +439,11 @@ end:
        MSRV_handle_API_messages();
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { Save_dls_data_to_DB();
+        { pthread_attr_t attr;                                                 /* Attribut de mutex pour parametrer le module */
+          pthread_t TID;
+          pthread_attr_init(&attr);                                                 /* Initialisation des attributs du thread */
+          pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);                       /* On le laisse joinable au boot */
+          pthread_create( &TID, &attr, (void *)Save_dls_data_to_DB, NULL );
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 
