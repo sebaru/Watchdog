@@ -215,7 +215,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Save_dls_data_to_DB ( void )
-  { if (Config.instance_is_master == FALSE) pthread_exit(0);                       /* Seul le master sauvegarde les compteurs */
+  { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
     gint top = Partage->top;
     Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
     Updater_confDB_DO();                                                            /* Sauvegarde des valeurs des Sorties TOR */
@@ -227,7 +227,7 @@
     Updater_confDB_MONO();                                             /* Sauvegarde des valeurs des bistables et monostables */
     Updater_confDB_BI();                                               /* Sauvegarde des valeurs des bistables et monostables */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saved DLS_DATA in %04.1fs", __func__, (Partage->top-top)/10.0 );
-    pthread_exit(0);
+    return;
   }
 /******************************************************************************************************************************/
 /* MSRV_handle_API_messages: Traite les messages recue de l'API                                                               */
