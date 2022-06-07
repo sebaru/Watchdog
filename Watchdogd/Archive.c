@@ -108,7 +108,6 @@
     Partage->com_arch.taille_arch = 0;
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-reload:
     while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
         { sched_yield();

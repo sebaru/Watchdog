@@ -171,6 +171,7 @@
      { struct rusage conso;
        if (getrusage ( RUSAGE_THREAD, &conso ) == 0)
         { Http_Post_to_local_BUS_AI ( module, module->maxrss, conso.ru_maxrss, TRUE ); }
+       Http_Post_to_local_BUS_AI ( module, module->tour_par_sec, module->nbr_tour_par_sec, TRUE );
        if (!module->Master_websocket) Thread_ws_bus_init ( module );               /* si perte de la websocket, on reconnecte */
        module->telemetrie_top = Partage->top;
      }
@@ -205,7 +206,8 @@
     if (Dls_auto_create_plugin( thread_tech_id, description ) == FALSE)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, thread_tech_id, description ); }
 
-    module->maxrss = Mnemo_create_thread_AI ( module, "MAXRSS", "Memory Usage", "kb", ARCHIVE_1_MIN );
+    module->maxrss       = Mnemo_create_thread_AI ( module, "MAXRSS", "Memory Usage", "kb", ARCHIVE_1_MIN );
+    module->tour_par_sec = Mnemo_create_thread_AI ( module, "THREAD_TOUR_PAR_SEC", "Nombre de tour par seconde", "t/s", ARCHIVE_1_MIN );
     Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Thread '%s' is UP", __func__, thread_tech_id );
   }
@@ -218,6 +220,7 @@
   { Thread_send_comm_to_master ( module, FALSE );
     if (module->vars) g_free(module->vars);
     Json_node_unref ( module->maxrss );
+    Json_node_unref ( module->tour_par_sec );
     if (module->Master_websocket && soup_websocket_connection_get_state (module->Master_websocket) == SOUP_WEBSOCKET_STATE_OPEN)
      { soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
        while (soup_websocket_connection_get_state (module->Master_websocket) != SOUP_WEBSOCKET_STATE_CLOSED) sched_yield();

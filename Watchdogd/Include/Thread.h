@@ -47,6 +47,7 @@
     SoupWebsocketConnection *Master_websocket;
     GSList *WS_messages;
     JsonNode *maxrss;                                                                                 /* AI pour memory Usage */
+    JsonNode *tour_par_sec;                                                                               /* Tour par seconde */
     gint nbr_tour;
     gint nbr_tour_par_sec;
     gint nbr_tour_top;
