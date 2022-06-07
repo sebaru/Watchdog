@@ -168,10 +168,7 @@
 
 /********************************************************* Toutes les minutes *************************************************/
     if (Partage->top >= module->telemetrie_top+600)                                                     /* Toutes les minutes */
-     { struct rusage conso;
-       if (getrusage ( RUSAGE_THREAD, &conso ) == 0)
-        { Http_Post_to_local_BUS_AI ( module, module->maxrss, conso.ru_maxrss, TRUE ); }
-       Http_Post_to_local_BUS_AI ( module, module->tour_par_sec, module->nbr_tour_par_sec, TRUE );
+     { Http_Post_to_local_BUS_AI ( module, module->tour_par_sec, module->nbr_tour_par_sec, TRUE );
        if (!module->Master_websocket) Thread_ws_bus_init ( module );               /* si perte de la websocket, on reconnecte */
        module->telemetrie_top = Partage->top;
      }
@@ -206,7 +203,6 @@
     if (Dls_auto_create_plugin( thread_tech_id, description ) == FALSE)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, thread_tech_id, description ); }
 
-    module->maxrss       = Mnemo_create_thread_AI ( module, "MAXRSS", "Memory Usage", "kb", ARCHIVE_1_MIN );
     module->tour_par_sec = Mnemo_create_thread_AI ( module, "THREAD_TOUR_PAR_SEC", "Nombre de tour par seconde", "t/s", ARCHIVE_1_MIN );
     Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Thread '%s' is UP", __func__, thread_tech_id );
