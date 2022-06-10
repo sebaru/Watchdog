@@ -1,0 +1,98 @@
+/******************************************************************************************************************************/
+/* Watchdogd/Archive/Archive.c  Gestion des archivages bit_internes Watchdog 2.0                                              */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         mer. 09 mai 2012 12:44:56 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
+/*
+ * Archive.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2010-2020 - Sebastien Lefevre
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+
+ #include <glib.h>
+ #include <sys/time.h>
+ #include <sys/prctl.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <unistd.h>
+ #include <locale.h>
+
+ #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
+
+/******************************************************************************************************************************/
+/* Arch_clear_list: efface la liste des archives a prendre en compte                                                          */
+/* Entrées: néant                                                                                                             */
+/* Sortie : le nombre d'archive detruites                                                                                     */
+/******************************************************************************************************************************/
+ void API_Clear_ARCHIVE ( void )
+  { gint save_nbr;
+    pthread_mutex_lock( &Partage->archive_liste_sync );                                                      /* lockage futex */
+    save_nbr = Partage->archive_liste_taille;
+    g_slist_foreach ( Partage->archive_liste, (GFunc) Json_node_unref, NULL );
+    pthread_mutex_unlock( &Partage->archive_liste_sync );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Clear %05d archive(s)", __func__, save_nbr );
+ }
+/******************************************************************************************************************************/
+/* API_Send_ARCHIVE: Envoi les archives a l'API                                                                               */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
+ void API_Send_ARCHIVE ( void )
+  { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Traitement de %05d archive(s)", __func__, Partage->archive_liste_taille );
+    gint top            = Partage->top;
+    gint nb_enreg       = 0;                                               /* Au début aucun enregistrement est passé a la DB */
+    JsonNode *RootNode  = Json_node_create();
+    JsonArray *archives = Json_node_add_array ( RootNode, "archives" );
+
+    pthread_mutex_lock( &Partage->archive_liste_sync );                                                      /* lockage futex */
+    GSList *liste = Partage->archive_liste;
+    while (liste && Partage->com_msrv.Thread_run == TRUE && nb_enreg<ARCHIVE_MAX_ENREG_TO_API)
+     { JsonNode *arch = liste->data;                                                               /* Recuperation du arch */
+       json_node_ref ( arch );
+       Json_array_add_element ( archives, arch );
+       nb_enreg++;                        /* Permet de limiter a au plus 500 enregistrements histoire de limiter la famine */
+       liste = g_slist_next(liste);
+     }
+    pthread_mutex_unlock( &Partage->archive_liste_sync );
+
+    Json_node_add_int ( RootNode, "nbr_archives", nb_enreg );
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending %05d archive(s).", __func__, nb_enreg );
+
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/archive/save", RootNode );
+    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
+     { gint nbr_saved = Json_get_int ( api_result, "nbr_archives_saved" );
+
+       pthread_mutex_lock( &Partage->archive_liste_sync );                                                   /* lockage futex */
+       while (nbr_saved)
+        { JsonNode *arch = Partage->archive_liste->data;                                              /* Recuperation du arch */
+          Partage->archive_liste = g_slist_remove ( Partage->archive_liste, arch );
+          Partage->archive_liste_taille--;
+          Json_node_unref ( arch );
+          nbr_saved--;
+        }
+       pthread_mutex_unlock( &Partage->archive_liste_sync );
+
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
+                 Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, Partage->archive_liste_taille );
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error. Reste %05d.", __func__, Partage->archive_liste_taille ); }
+    Json_node_unref ( api_result );
+    Json_node_unref ( RootNode );
+  }
+/*----------------------------------------------------------------------------------------------------------------------------*/
