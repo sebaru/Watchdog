@@ -409,10 +409,7 @@ end:
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
     else
      { if (Config.installed)
-        { if (!Demarrer_arch())                                                                /* Demarrage gestion Archivage */
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb ARCH", __func__ ); }
-
-          if (!Demarrer_dls())                                                                            /* Démarrage D.L.S. */
+        { if (!Demarrer_dls())                                                                            /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
 
           if (!Demarrer_api_sync())                                                                     /* Démarrage API_SYNC */
@@ -831,19 +828,16 @@ end:
        goto third_stage_end;
      }
 
-    pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
     time ( &Partage->start_time );
-    pthread_mutexattr_init( &attr );
-    pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
-    pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
-    pthread_mutex_init( &Partage->com_http.synchro, &attr );
-    pthread_mutex_init( &Partage->com_dls.synchro, &attr );
-    pthread_mutex_init( &Partage->com_dls.synchro_traduction, &attr );
-    pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );
-    pthread_mutex_init( &Partage->com_arch.synchro, &attr );
-    pthread_mutex_init( &Partage->com_db.synchro, &attr );
+    pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
+    pthread_mutex_init( &Partage->com_http.synchro, NULL );
+    pthread_mutex_init( &Partage->com_dls.synchro, NULL );
+    pthread_mutex_init( &Partage->com_dls.synchro_traduction, NULL );
+    pthread_mutex_init( &Partage->com_dls.synchro_data, NULL );
+    pthread_mutex_init( &Partage->archive_liste_sync, NULL );
+    pthread_mutex_init( &Partage->com_db.synchro, NULL );
 
-/********************************** Création des zones de bits internes dynamiques *****************************************/
+/************************************* Création des zones de bits internes dynamiques *****************************************/
     Partage->Dls_data_DI       = NULL;
     Partage->Dls_data_DO       = NULL;
     Partage->Dls_data_AI       = NULL;
@@ -947,7 +941,7 @@ end:
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
     pthread_mutex_destroy( &Partage->com_dls.synchro_data );
-    pthread_mutex_destroy( &Partage->com_arch.synchro );
+    pthread_mutex_destroy( &Partage->archive_liste_sync );
     pthread_mutex_destroy( &Partage->com_db.synchro );
 
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */

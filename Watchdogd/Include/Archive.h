@@ -28,8 +28,7 @@
 #ifndef _ARCHIVAGE_DB_H_
  #define _ARCHIVAGE_DB_H_
 
- #define ARCHIVE_DEFAUT_RETENTION        4000                            /* Nom de jours par défaut de retention des archives */
- #define ARCHIVE_DEFAUT_BUFFER_SIZE  10000000  /* Buffer de retention pour pallier les indispos du serveur de base de données */
+ #define ARCHIVE_MAX_ENREG_TO_API   500
 
  enum
   { ARCHIVE_NONE,
@@ -39,23 +38,7 @@
     ARCHIVE_1_JOUR
   };
 
- struct COM_ARCH                                                                                   /* Communication vers ARCH */
-  { pthread_t TID;                                                                                   /* Identifiant du thread */
-    pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    GSList *liste_arch;                                                                   /* liste de struct ARCHDB a traiter */
-    gint taille_arch;
-    gint buffer_size;                                                       /* Taille max de la liste des archives avant drop */
-    gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gint  retention;                                                    /* Duree de retention des données d'archive, en jours */
-    gint  archdb_port;
-    gchar archdb_hostname[ TAILLE_DB_HOST+1 ];                                  /* Nom du host de la base de donnes d'archive */
-    gchar archdb_username[ TAILLE_DB_USERNAME+1 ];                           /* Nom de l'administrateur de la base de données */
-    gchar archdb_database[ TAILLE_DB_DATABASE+1 ];                                          /* Chemin d'acces aux DB watchdog */
-    gchar archdb_password[ TAILLE_DB_PASSWORD+1 ];                                          /* Mot de passe de connexion ODBC */
-  };
-
 /******************************************* Définitions des prototypes *******************************************************/
- extern void Run_arch ( void );                                                                             /* Dans Archive.c */
  extern void Ajouter_arch( gchar *tech_id, gchar *nom, gdouble valeur );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

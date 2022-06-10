@@ -754,15 +754,6 @@
     soup_server_add_handler ( socket, "/api/tableau/map/del",  Http_traiter_tableau_map_del, NULL, NULL );
     soup_server_add_handler ( socket, "/api/tableau/map/set",  Http_traiter_tableau_map_set, NULL, NULL );
 
-    soup_server_add_handler ( socket, "/api/archive/set",          Http_traiter_archive_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/get",          Http_traiter_archive_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/status",       Http_traiter_archive_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/table_status", Http_traiter_archive_table_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/del",          Http_traiter_archive_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/clear",        Http_traiter_archive_clear, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/purge",        Http_traiter_archive_purge, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/testdb",       Http_traiter_archive_testdb, NULL, NULL );
-
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/api/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/bus",            Http_traiter_bus, NULL, NULL );

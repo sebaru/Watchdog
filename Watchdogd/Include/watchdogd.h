@@ -93,7 +93,10 @@
     struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_HTTP com_http;                                                                       /* Zone mémoire pour HTTP */
-    struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
+
+    pthread_mutex_t archive_liste_sync;                                                   /* Bit de synchronisation processus */
+    GSList *archive_liste;                                                                /* liste de struct ARCHDB a traiter */
+    gint archive_liste_taille;
 
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
@@ -124,7 +127,9 @@
 
  extern void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max );
 
- extern void API_Send_visuels ( void );                                                                     /* Dans api_xxx.c */
+ extern void API_Send_ARCHIVE ( void );                                                                     /* Dans api_xxx.c */
+ extern void API_Clear_ARCHIVE ( void );
+ extern void API_Send_visuels ( void );
  extern void API_Send_MSGS ( void );
  extern void Run_api_sync ( void );
 

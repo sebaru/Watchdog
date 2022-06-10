@@ -513,24 +513,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Demarrer_arch: Processus d'archivage                                                                                       */
-/* EntrÃée: rien                                                                                                               */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Demarrer_arch ( void )
-  { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Demande de demarrage %d", __func__, getpid() );
-    if (Partage->com_arch.Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: An instance is already running", __func__, Partage->com_arch.TID );
-       return(FALSE);
-     }
-    if (pthread_create( &Partage->com_arch.TID, NULL, (void *)Run_arch, NULL ))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: pthread_create failed", __func__ );
-       return(FALSE);
-     }
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: thread arch (%p) seems to be running", __func__, Partage->com_arch.TID );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Stopper_fils: arret de tous les fils Watchdog                                                                              */
 /* Entré/Sortie: néant                                                                                                        */
 /******************************************************************************************************************************/
@@ -541,11 +523,6 @@
     Partage->com_dls.Thread_run = FALSE;
     while ( Partage->com_dls.TID != 0 ) sched_yield();                                                     /* Attente fin DLS */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: ok, DLS is down", __func__ );
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Waiting for ARCH (%p) to finish", __func__, Partage->com_arch.TID );
-    Partage->com_arch.Thread_run = FALSE;
-    while ( Partage->com_arch.TID != 0 ) sched_yield();                                                    /* Attente fin DLS */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: ok, ARCH is down", __func__ );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Waiting for API_SYNC (%p) to finish", __func__, Partage->com_msrv.TID_api_sync );
     if ( Partage->com_msrv.TID_api_sync ) pthread_join ( Partage->com_msrv.TID_api_sync, NULL );

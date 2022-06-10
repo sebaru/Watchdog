@@ -48,8 +48,11 @@
       if (Partage->com_msrv.liste_visuel) API_Send_visuels ();                                 /* Traitement des I dynamiques */
 /*---------------------------------------------- Report des messages ---------------------------------------------------------*/
       else if (Partage->com_msrv.liste_msg) API_Send_MSGS();
+      else if (Partage->archive_liste) API_Send_ARCHIVE();
       else { sched_yield(); sleep(2); }
      }
+
+    API_Clear_ARCHIVE();                                            /* Suppression des enregistrements restants dans la liste */
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));

@@ -138,15 +138,6 @@
                                Config.db_password, Config.db_database, Config.db_port, FALSE ) );
   }
 /******************************************************************************************************************************/
-/* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
-/* Entrée: toutes les infos necessaires a la connexion                                                                        */
-/* Sortie: une structure DB de référence                                                                                      */
-/******************************************************************************************************************************/
- struct DB *Init_ArchDB_SQL ( void )
-  { return( Init_DB_SQL_with ( Partage->com_arch.archdb_hostname, Partage->com_arch.archdb_username,
-                               Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port, FALSE ) );
-  }
-/******************************************************************************************************************************/
 /* SQL_Field_to_Json : Intéègre un MYSQL_FIELD dans une structure JSON                                                        */
 /* Entrée: Le JsonNode et le MYSQL_FIELD                                                                                      */
 /* Sortie: le jsonnode est mis a jour                                                                                         */
@@ -174,8 +165,7 @@
 /******************************************************************************************************************************/
  static gboolean SQL_Select_to_json_node_reel ( gboolean db_arch, JsonNode *RootNode, gchar *array_name, gchar *requete )
   { struct DB *db;
-    if (db_arch) db = Init_ArchDB_SQL ();
-            else db = Init_DB_SQL ();
+    db = Init_DB_SQL ();
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
        return(FALSE);
@@ -252,29 +242,6 @@
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
- gboolean SQL_Arch_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... )
-  { va_list ap;
-
-    va_start( ap, format );
-    gsize taille = g_printf_string_upper_bound (format, ap);
-    va_end ( ap );
-    gchar *chaine = g_try_malloc(taille+1);
-    if (chaine)
-     { va_start( ap, format );
-       g_vsnprintf ( chaine, taille, format, ap );
-       va_end ( ap );
-
-       gboolean retour = SQL_Select_to_json_node_reel ( TRUE, RootNode, array_name, chaine );
-       g_free(chaine);
-       return(retour);
-     }
-    return(FALSE);
-  }
-/******************************************************************************************************************************/
-/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
-/* Entrée: La DB, la requete                                                                                                  */
-/* Sortie: TRUE si pas de souci                                                                                               */
-/******************************************************************************************************************************/
  gboolean SQL_Write ( gchar *requete )
   { struct DB *db = Init_DB_SQL ();
     if (!db)
@@ -322,28 +289,6 @@
  gboolean SQL_Writes ( gchar *requete )
   { struct DB *db = Init_DB_SQL_with ( Config.db_hostname, Config.db_username,
                                        Config.db_password, Config.db_database, Config.db_port, TRUE );
-    if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Init DB FAILED for '%s'", __func__, requete );
-       return(FALSE);
-     }
-
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
-       Libere_DB_SQL ( &db );
-       return(FALSE);
-     }
-    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
-
-    Libere_DB_SQL ( &db );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
-/* Entrée: La DB, la requete                                                                                                  */
-/* Sortie: TRUE si pas de souci                                                                                               */
-/******************************************************************************************************************************/
- gboolean SQL_Arch_Write ( gchar *requete )
-  { struct DB *db = Init_ArchDB_SQL ();
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Init DB FAILED for '%s'", __func__, requete );
        return(FALSE);
