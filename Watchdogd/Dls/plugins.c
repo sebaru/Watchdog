@@ -546,7 +546,7 @@
        dls_syn->Dls_sub_syns = g_slist_remove ( dls_syn->Dls_sub_syns, sub_syn );
        Dls_arbre_dls_syn_erase_syn ( sub_syn );
      }
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Arbre syn '%d' erased", dls_syn->syn_id );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Arbre syn '%d' erased", __func__, dls_syn->syn_id );
     g_free(dls_syn);
   }
 /******************************************************************************************************************************/

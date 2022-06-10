@@ -230,330 +230,6 @@
     return;
   }
 /******************************************************************************************************************************/
-/* MSRV_handle_API_messages: Traite les messages recue de l'API                                                               */
-/* Entrée: les parametres de la libsoup                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MSRV_handle_API_messages ( void )
-  {
-    if (!Partage->com_msrv.API_ws_messages) return;
-
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    JsonNode *request = Partage->com_msrv.API_ws_messages->data;
-    Partage->com_msrv.API_ws_messages = g_slist_remove ( Partage->com_msrv.API_ws_messages, request );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
-
-    gchar *api_tag = Json_get_string ( request, "api_tag" );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive api_tag '%s' !", __func__, api_tag );
-
-         if ( !strcasecmp( api_tag, "RESET") )
-     { Partage->com_msrv.Thread_run = FALSE;
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: RESET: Stopping in progress", __func__ );
-     }
-    else if ( !strcasecmp( api_tag, "UPGRADE") )
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UPGRADE: Upgrading in progress", __func__ );
-       gint pid = fork();
-       if (pid<0)
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: UPGRADE: erreur Fork", __func__ ); }
-       else if (!pid)
-        { system("cd SRC; ./autogen.sh; sudo make install; " );
-          Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: UPGRADE: done. Restarting.", __func__ );
-          system("sudo killall Watchdogd" );
-          exit(0);
-        }
-     }
-    else if ( !strcasecmp( api_tag, "THREAD_START") ) { Thread_Start_one_thread ( NULL, 0, request, NULL ); }
-    else if ( !strcasecmp( api_tag, "THREAD_STOP") )  { Thread_Stop_one_thread ( request ); }
-    else if ( !strcasecmp( api_tag, "THREAD_SEND") )  { Thread_Push_API_message ( request ); }
-    else if ( !strcasecmp( api_tag, "AGENT_SET") )
-     { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
-               Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
-             )
-          )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: AGENT_SET: wrong parameters", __func__ );
-          goto end;
-        }
-       Config.log_bus    = Json_get_bool ( request, "log_bus" );
-       Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
-       gboolean headless = Json_get_bool ( request, "headless" );
-       Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d", __func__,
-                 Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
-       if (Config.headless != headless)
-        { Partage->com_msrv.Thread_run = FALSE;
-          Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: AGENT_SET: headless has changed, rebooting", __func__ );
-        }
-     }
-end:
-    Json_node_unref(request);
-  }
-/******************************************************************************************************************************/
-/* MSRV_on_API_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée à l'API               */
-/* Entrée: les parametres de la libsoup                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MSRV_on_API_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Message received !", __func__ );
-    gsize taille;
-
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
-    if (!request)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
-       return;
-     }
-
-    if (!Json_has_member ( request, "api_tag" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'api_tag') !", __func__ );
-       Json_node_unref(request);
-       return;
-     }
-
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );                                       /* Ajout dans la liste a traiter */
-    Partage->com_msrv.API_ws_messages = g_slist_append ( Partage->com_msrv.API_ws_messages, request );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
-  }
-/******************************************************************************************************************************/
-/* MSRV_ws_on_master_close_CB: Traite une deconnexion sur la websocket MSRV                                                   */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void MSRV_on_API_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { g_object_unref(Partage->com_msrv.API_websocket);
-    Partage->com_msrv.API_websocket = NULL;
-    Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: WebSocket Close. Reboot Needed!", __func__ );
-    /* Partage->com_msrv.Thread_run = FALSE; */
-  }
- static void MSRV_on_API_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
-  }
-/******************************************************************************************************************************/
-/* MSRV_ws_on_API_connected: Termine la creation de la connexion websocket API MSRV et raccorde le signal handler             */
-/* Entrée: les variables traditionnelles de libsous                                                                           */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MSRV_on_API_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
-  { GError *error = NULL;
-    Partage->com_msrv.API_websocket = soup_session_websocket_connect_finish ( Partage->com_msrv.API_session, res, &error );
-    if (!Partage->com_msrv.API_websocket)                                                    /* No limit on incoming packet ! */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: WebSocket error: %s.", __func__, error->message );
-       g_error_free (error);
-       return;
-     }
-    g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(256000), NULL );
-    g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
-    g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(MSRV_on_API_message_CB), NULL );
-    g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(MSRV_on_API_close_CB), NULL );
-    g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(MSRV_on_API_error_CB), NULL );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket to API connected", __func__ );
-  }
-/******************************************************************************************************************************/
-/* MSRV_ws_init: appelé pour démarrer le websocket vers l'API                                                                 */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MSRV_ws_init ( void )
-  { static gchar *protocols[] = { "live-agent", NULL };
-    gchar chaine[256];
-    g_snprintf(chaine, sizeof(chaine), "wss://%s/websocket", Json_get_string ( Config.config, "api_url" ) );
-    SoupMessage *query = soup_message_new ( "GET", chaine );
-    Http_Add_Agent_signature ( query, NULL, 0 );
-
-    GCancellable *cancel = g_cancellable_new();
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Starting WebSocket connect to %s", __func__, chaine );
-    soup_session_websocket_connect_async ( Partage->com_msrv.API_session, query,
-                                           NULL, protocols, cancel, MSRV_on_API_connected, NULL );
-    g_object_unref(query);
-    g_object_unref(cancel);
-  }
-/******************************************************************************************************************************/
-/* MSRV_ws_end: appelé pour stopper la websocket vers l'API                                                                   */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MSRV_ws_end ( void )
-  { if ( Partage->com_msrv.API_websocket &&
-         soup_websocket_connection_get_state ( Partage->com_msrv.API_websocket ) == SOUP_WEBSOCKET_STATE_OPEN )
-     { soup_websocket_connection_close ( Partage->com_msrv.API_websocket, 0, "Thanks, Bye !" ); }
-    Partage->com_msrv.API_websocket = NULL;
-    if (Partage->com_msrv.API_ws_messages)
-     { g_slist_foreach ( Partage->com_msrv.API_ws_messages, (GFunc) json_node_unref, NULL );
-       g_slist_free ( Partage->com_msrv.API_ws_messages );
-       Partage->com_msrv.API_ws_messages = NULL;
-     }
-  }
-/******************************************************************************************************************************/
-/* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static void *Boucle_pere_master ( void )
-  { gint cpt_5_minutes, cpt_1_minute;
-
-    prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
-    Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-
-    gchar *requete = SQL_Read_from_file ( "base_icones.sql" );                                    /* Load DB icons at startup */
-    if (!requete)
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB Error.", __func__ ); }
-    else if (!SQL_Writes ( requete ))
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB SQL Error.", __func__ ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Icons DB Loaded.", __func__ );
-    if (requete) g_free(requete);
-
-/***************************************** Active l'API ***********************************************************************/
-    if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
-/***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single)                                                                             /* Si demarrage des thread */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
-    else
-     { if (Config.installed)
-        { if (!Demarrer_dls())                                                                            /* Démarrage D.L.S. */
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
-
-          if (!Demarrer_api_sync())                                                                     /* Démarrage API_SYNC */
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb API_SYNC", __func__ ); }
-
-          Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
-        }
-       else
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
-     }
-
-/***************************************** WebSocket Connect to API ************************************************************/
-    MSRV_ws_init();
-
-/***************************************** Charge le mapping des bits internes ************************************************/
-    MSRV_Remap();
-
-/***************************************** Debut de la boucle sans fin ********************************************************/
-    cpt_5_minutes = Partage->top + 3000;
-    cpt_1_minute  = Partage->top + 600;
-
-    sleep(1);
-    while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
-     { Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
-       MSRV_handle_API_messages();
-
-       if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { pthread_attr_t attr;                                                 /* Attribut de mutex pour parametrer le module */
-          pthread_t TID;
-          pthread_attr_init(&attr);                                                 /* Initialisation des attributs du thread */
-          pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);                       /* On le laisse joinable au boot */
-          pthread_create( &TID, &attr, (void *)Save_dls_data_to_DB, NULL );
-          cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
-        }
-
-       if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { static gpointer bit_io_comm = NULL;
-          Http_Send_ping_to_slaves();
-          Dls_data_set_WATCHDOG ( NULL, g_get_host_name(), "IO_COMM", &bit_io_comm, 900 );
-          Print_SQL_status();                                                             /* Print SQL status for debugging ! */
-          Activer_horlogeDB();
-          if (Partage->com_msrv.API_websocket == NULL) MSRV_ws_init();                 /* Si websocket closed, try to restart */
-          cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
-        }
-
-       usleep(1000);
-       sched_yield();
-     }
-
-/*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
-
-    MSRV_ws_end();
-    Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
-    Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
-
-    if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
-    if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
-    if (Partage->Maps_root) Json_node_unref ( Partage->Maps_root );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
-    pthread_exit( NULL );
-  }
-/******************************************************************************************************************************/
-/* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static void *Boucle_pere_slave ( void )
-  { gint cpt_5_minutes = 0, cpt_1_minute = 0;
-    gchar chaine[128];
-
-    prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
-
-    g_snprintf(chaine, sizeof(chaine), "Gestion de l'instance slave %s", g_get_host_name());
-    if (Dls_auto_create_plugin( g_get_host_name(), chaine ) == FALSE)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: %s: DLS Create ERROR\n", __func__, g_get_host_name ); }
-
-    g_snprintf(chaine, sizeof(chaine), "Statut de la communication avec le slave %s", g_get_host_name() );
-    Mnemo_auto_create_WATCHDOG ( FALSE, g_get_host_name(), "IO_COMM", chaine );
-
-/***************************************** Active l'API ***********************************************************************/
-    if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
-/***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single)                                                                             /* Si demarrage des thread */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
-    else
-     { if (Config.installed)
-        { Charger_librairies(); }                                             /* Chargement de toutes les librairies Watchdog */
-       else
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
-     }
-
-/***************************************** WebSocket Connect to API ************************************************************/
-    MSRV_ws_init();
-
-/***************************************** Debut de la boucle sans fin ********************************************************/
-    sleep(1);
-    Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-/*    Http_Post_to_local_BUS ( module, "SLAVE_START", NULL );*/
-
-    while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
-     { MSRV_handle_API_messages();
-       if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
-        }
-
-       if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { /*soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, "ping" );*/
-          /*if(body)
-           { Json_node_add_string ( body, "zmq_tag", "SET_WATCHDOG" );
-             Json_node_add_string ( body, "tech_id",  g_get_host_name() );
-             Json_node_add_string ( body, "acronyme", "IO_COMM" );
-             Json_node_add_int    ( body, "consigne", 900 );
-             Zmq_Send_json_node ( Partage->com_msrv.zmq_to_master, g_get_host_name(), Config.master_hostname, body );
-             Json_node_unref(body);
-           }*/
-          if (Partage->com_msrv.API_websocket == NULL) MSRV_ws_init();                 /* Si websocket closed, try to restart */
-          Print_SQL_status();                                                             /* Print SQL status for debugging ! */
-          cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
-        }
-
-       /*if (Partage->com_msrv.last_master_ping + 1200 < Partage->top)
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Master is not responding. Restart Slave in 10s.", __func__ );
-          Partage->com_msrv.Thread_run = FALSE;
-          sleep(10);
-        }*/
-       usleep(1000);
-       sched_yield();
-     }
-
-/*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-/*    Http_Post_to_local_BUS ( module, "SLAVE_STOP", NULL );*/
-
-    MSRV_ws_end();
-    Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
-    Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
-
-/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
-    pthread_exit( NULL );
-  }
-/******************************************************************************************************************************/
 /* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
 /* Entrée: argc, argv                                                                                                         */
 /* Sortie: -1 si erreur, 0 si ok                                                                                              */
@@ -725,9 +401,9 @@ end:
     struct sigaction sig;
     gchar strpid[12];
     gint fd_lock;
-    pthread_t TID;
     gint error_code = EXIT_OK;
 
+    prctl(PR_SET_NAME, "W-INIT", 0, 0, 0 );
     umask(022);                                                                              /* Masque de creation de fichier */
 
     Lire_config();                                                     /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
@@ -858,19 +534,31 @@ end:
     Update_database_schema();                                                       /* Update du schéma de Database si besoin */
     Charger_config_bit_interne ();                            /* Chargement des configurations des bits internes depuis la DB */
 
-    if (Config.instance_is_master)
-     { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_master, NULL ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                   "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
-        }
-     }
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
+    Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
+
+/***************************************** Active le thread HTTP **************************************************************/
+    if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
+/***************************************** Demarrage des threads builtin et librairies ****************************************/
+    if (Config.single)                                                                             /* Si demarrage des thread */
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
     else
-     { if ( pthread_create( &TID, NULL, (void *)Boucle_pere_slave, NULL ) )
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                   "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
+     { if (!Config.installed)
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
+       else
+        { if (Config.instance_is_master)                                                                  /* Démarrage D.L.S. */
+           { if (!Demarrer_dls())                                                                         /* Démarrage D.L.S. */
+              { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
+
+             if (!Demarrer_api_sync())                                                                     /* Démarrage API_SYNC */
+              { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb API_SYNC", __func__ ); }
+           }
+          Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
         }
      }
-                                                         /********** Mise en place de la gestion des signaux ******************/
+
+/*************************************** Mise en place de la gestion des signaux **********************************************/
     sig.sa_handler = Traitement_signaux;                                            /* Gestionnaire de traitement des signaux */
     sig.sa_flags = SA_RESTART;                            /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
     sigaction( SIGALRM, &sig, NULL );                                                                /* Reinitialisation soft */
@@ -890,11 +578,59 @@ end:
     sigdelset ( &sig.sa_mask, SIGPIPE );
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
-    timer.it_value.tv_sec = timer.it_interval.tv_sec = 0;                                       /* Tous les 100 millisecondes */
+    timer.it_value.tv_sec  = timer.it_interval.tv_sec  = 0;                                     /* Tous les 100 millisecondes */
     timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;                                    /* = 10 fois par secondes */
     setitimer( ITIMER_REAL, &timer, NULL );                                                                /* Active le timer */
 
-    pthread_join( TID, NULL );                                                          /* Attente fin de la boucle pere MSRV */
+/***************************************** Debut de la boucle sans fin ********************************************************/
+    gint cpt_5_minutes = Partage->top + 3000;
+    gint cpt_1_minute  = Partage->top + 600;
+
+    sleep(1);
+    if (Config.instance_is_master)
+     { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
+       MSRV_Remap();
+       while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
+        { Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
+
+          if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
+           { pthread_t TID;
+             pthread_create ( &TID, NULL, (void *)Save_dls_data_to_DB, NULL );
+             pthread_detach ( TID );
+             cpt_5_minutes += 3000;                                                        /* Sauvegarde toutes les 5 minutes */
+           }
+
+          if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
+           { static gpointer bit_io_comm = NULL;
+             Http_Send_ping_to_slaves();
+             Dls_data_set_WATCHDOG ( NULL, g_get_host_name(), "IO_COMM", &bit_io_comm, 900 );
+             Print_SQL_status();                                                          /* Print SQL status for debugging ! */
+             Activer_horlogeDB();
+             cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
+           }
+
+          usleep(1000);
+          sched_yield();
+        }
+     }
+    else
+     { prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
+       while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
+        { usleep(1000);
+          sched_yield();
+        }
+     }
+/*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
+    Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
+
+    Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
+    Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
+
+    if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
+    if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
+    if (Partage->Maps_root) Json_node_unref ( Partage->Maps_root );
+
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MONO", __func__ );
