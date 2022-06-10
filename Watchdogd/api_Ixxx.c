@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/distrib_Ixxx.c        Distribution des changements d'etats motif                                                 */
+/* Watchdogd/api_Ixxx.c        Distribution des Visuels à l'API                                                               */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                          lun 10 mai 2004 11:31:17 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * distrib_Ixxx.c
+ * api_Ixxx.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien LEFEVRE
@@ -29,18 +29,17 @@
  #include <string.h>
  #include <unistd.h>
  #include <time.h>
+ #include <sys/prctl.h>
 
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Gerer_arrive_Ixxx_dls: Gestion de l'arrive des motifs depuis DLS                                                           */
+/* API_Send_visuels: Envoi les visuels a l'API                                                                                */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void Gerer_arrive_Ixxx_dls ( void )
-  { if (!Partage->com_msrv.liste_visuel) return;                                               /* Traitement des I dynamiques */
-
-    JsonNode *RootNode  = Json_node_create();
+ void API_Send_visuels ( void )
+  { JsonNode *RootNode  = Json_node_create();
     if (!RootNode) return;
     JsonArray *visuels = Json_node_add_array ( RootNode, "visuels" );
     if (!visuels) return;
@@ -52,7 +51,7 @@
      { struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
        Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                "%s: Recu VISUEL %s:%s mode=%s, color=%s, cligno=%d.", __func__,
+                "%s: Send VISUEL %s:%s mode=%s, color=%s, cligno=%d.", __func__,
                  visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->cligno
                );
        JsonNode *element = Json_node_create ();

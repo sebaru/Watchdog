@@ -65,6 +65,7 @@
  struct COM_MSRV                                                            /* Communication entre DLS et le serveur Watchdog */
   { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
+    pthread_t TID_api_sync;                                                                          /* Identifiant du thread */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
@@ -121,10 +122,11 @@
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 
- extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
  extern void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max );
 
- extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
+ extern void API_Send_visuels ( void );                                                                     /* Dans api_xxx.c */
+ extern void API_Send_MSGS ( void );
+ extern void Run_api_sync ( void );
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 

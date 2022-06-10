@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/distrib.c        Distribution des messages DLS aux clients                                                       */
+/* Watchdogd/api_MSGxxx.c        Distribution des messages DLS à l'API                                                        */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                        mar. 14 août 2012 19:05:42 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * distrib_MSGxxx.c
+ * api_MSGxxx.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien LEFEVRE
@@ -174,10 +174,10 @@
     Json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
   }
 /******************************************************************************************************************************/
-/* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
+/* API_Send_MSGS: Envoi les messages a l'API                                                                                  */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void Gerer_arrive_MSGxxx_dls ( void )
+ void API_Send_MSGS ( void )
   { struct DLS_MESSAGES_EVENT *event;
 
     while (Partage->com_msrv.liste_msg)

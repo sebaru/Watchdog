@@ -59,6 +59,7 @@
 /************************************************ Définitions des prototypes **************************************************/
  extern void Stopper_fils ( void );                                                                          /* Dans thread.c */
  extern gboolean Demarrer_dls ( void );
+ extern gboolean Demarrer_api_sync ( void );
  extern gboolean Demarrer_http ( void );
  extern gboolean Demarrer_arch ( void );
  extern void Charger_librairies ( void );

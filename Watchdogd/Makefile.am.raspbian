@@ -12,7 +12,7 @@ Watchdogd_SOURCES = Watchdogd.c thread.c Archive.c Erreur.c \
                     db.c Mnemonique.c Mnemo_AI.c Mnemo_CI.c Mnemo_CH.c Message.c \
                     Mnemo_Horloges.c Mnemo_MONO.c Mnemo_BI.c Mnemo_AO.c Mnemo_WATCHDOG.c \
                     Mnemo_Tempo.c Histo_msgs.c distrib_Events.c \
-                    distrib_MSGxxx.c distrib_Ixxx.c mail.c uuid.c \
+                    api_sync.c api_MSGxxx.c api_Ixxx.c mail.c uuid.c \
                     Synoptiques.c Syn_visuels.c Syn_comment.c Syn_cadran.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \

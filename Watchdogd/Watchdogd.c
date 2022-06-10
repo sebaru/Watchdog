@@ -391,6 +391,7 @@ end:
 
     prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
+    Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
 
     gchar *requete = SQL_Read_from_file ( "base_icones.sql" );                                    /* Load DB icons at startup */
     if (!requete)
@@ -414,6 +415,9 @@ end:
           if (!Demarrer_dls())                                                                            /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
 
+          if (!Demarrer_api_sync())                                                                     /* Démarrage API_SYNC */
+           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb API_SYNC", __func__ ); }
+
           Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
         }
        else
@@ -431,11 +435,8 @@ end:
     cpt_1_minute  = Partage->top + 600;
 
     sleep(1);
-    Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
     while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
-     { Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */
-       Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
-       Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
+     { Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
        MSRV_handle_API_messages();
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
