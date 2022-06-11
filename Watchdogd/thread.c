@@ -218,9 +218,8 @@
     Json_node_unref ( module->tour_par_sec );
     if (module->Master_websocket && soup_websocket_connection_get_state (module->Master_websocket) == SOUP_WEBSOCKET_STATE_OPEN)
      { soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
-       while (soup_websocket_connection_get_state (module->Master_websocket) != SOUP_WEBSOCKET_STATE_CLOSED) sched_yield();
+       while ( module->Master_websocket ) sched_yield();
      }
-    module->Master_websocket = NULL;
     soup_session_abort ( module->Master_session );
     g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
     g_slist_free ( module->WS_messages );

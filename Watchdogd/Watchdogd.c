@@ -540,6 +540,8 @@
 /***************************************** Active le thread HTTP **************************************************************/
     if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
+    if (!Demarrer_api_sync())                                                                           /* Démarrage API_SYNC */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb API_SYNC", __func__ ); }
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single)                                                                             /* Si demarrage des thread */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
@@ -551,8 +553,6 @@
            { if (!Demarrer_dls())                                                                         /* Démarrage D.L.S. */
               { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
 
-             if (!Demarrer_api_sync())                                                                     /* Démarrage API_SYNC */
-              { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb API_SYNC", __func__ ); }
            }
           Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
         }
