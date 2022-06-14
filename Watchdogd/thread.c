@@ -265,7 +265,7 @@
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* Thread_Push_API_message: Recoit une commande depuis l'API, au travers du master                                              */
+/* Thread_Push_API_message: Recoit une commande depuis l'API, au travers du master                                            */
 /* Entrée: L'element json decrivant la requete                                                                                */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
@@ -294,6 +294,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': thread not found", __func__, thread_tech_id ); return; }
 
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
+    json_node_ref ( request );
     module->WS_messages = g_slist_append ( module->WS_messages, request );
     pthread_mutex_unlock ( &module->synchro );
   }
