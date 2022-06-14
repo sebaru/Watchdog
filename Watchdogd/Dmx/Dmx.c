@@ -168,8 +168,8 @@
           JsonNode *request = module->WS_messages->data;
           module->WS_messages = g_slist_remove ( module->WS_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
-          if ( !strcasecmp( bus_tag, "SET_AO" ) &&
+          gchar *tag = Json_get_string ( request, "tag" );
+          if ( !strcasecmp( tag, "SET_AO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
                Json_get_int  ( request, "type_sms" ) != MESSAGE_SMS_NONE )
            { gchar *tech_id  = Json_get_string ( request, "tech_id" );

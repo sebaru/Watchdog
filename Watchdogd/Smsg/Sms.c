@@ -543,16 +543,6 @@ end:
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* Run_thread_message: Prend en charge un message recu du master                                                          */
-/* Entrée: la structure THREAD associée                                                                                   */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_thread_message ( struct THREAD *module, gchar *bus_tag, JsonNode *message )
-  { gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': recu bus_tag '%s' from master", __func__, thread_tech_id, bus_tag );
-
-  }
-/******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
 /* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
@@ -575,8 +565,8 @@ end:
           JsonNode *message = module->WS_messages->data;
           module->WS_messages = g_slist_remove ( module->WS_messages, message );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *bus_tag = Json_get_string ( message, "bus_tag" );
-          if ( !strcasecmp( bus_tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
+          gchar *tag = Json_get_string ( message, "tag" );
+          if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
                Json_get_int ( message, "sms_notification" ) != MESSAGE_SMS_NONE )
            { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending msg '%s:%s' (%s)", __func__, thread_tech_id,
                        Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
@@ -585,10 +575,10 @@ end:
 /*************************************************** Envoi en mode GSM ********************************************************/
              Smsg_send_to_all_authorized_recipients( module, message );
            }
-/*    else if ( !strcasecmp ( zmq_tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
-    else if ( !strcasecmp ( zmq_tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );*/
+          else if ( !strcasecmp ( tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
+          else if ( !strcasecmp ( tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
           else
-           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: bus_tag '%s' not for this thread", __func__, thread_tech_id, bus_tag ); }
+           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: tag '%s' not for this thread", __func__, thread_tech_id, tag ); }
           Json_node_unref(message);
         }
 /****************************************************** Tentative de connexion ************************************************/

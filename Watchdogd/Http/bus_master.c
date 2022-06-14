@@ -177,7 +177,7 @@
   { pthread_mutex_lock( &Partage->com_http.synchro );
     GSList *liste = Partage->com_http.Slaves;
     JsonNode *RootNode=Json_node_create();
-    Json_node_add_string ( RootNode, "bus_tag", "PING" );
+    Json_node_add_string ( RootNode, "tag", "PING" );
     while ( liste )
      { struct HTTP_WS_SESSION *slave = liste->data;
        Http_ws_send_json_to_slave ( slave, RootNode );
@@ -268,13 +268,13 @@
        return;
      }
 
-    if (!Json_has_member ( response, "bus_tag" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'bus_tag') !", __func__ );
+    if (!Json_has_member ( response, "tag" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'tag') !", __func__ );
        Json_node_unref(response);
        return;
      }
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive bus_tag '%s'  !", __func__, Json_get_string ( response, "bus_tag" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive tag '%s'  !", __func__, Json_get_string ( response, "tag" ) );
 
     Json_node_unref(response);
   }

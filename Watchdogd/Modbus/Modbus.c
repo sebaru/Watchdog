@@ -1035,8 +1035,8 @@
           JsonNode *request = module->WS_messages->data;
           module->WS_messages = g_slist_remove ( module->WS_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
-          if ( !strcasecmp (bus_tag, "SET_DO") ) Modbus_SET_DO ( module, request );
+          gchar *tag = Json_get_string ( request, "tag" );
+          if ( !strcasecmp (tag, "SET_DO") ) Modbus_SET_DO ( module, request );
           Json_node_unref ( request );
         }
 /********************************************* Début de l'interrogation du module *********************************************/

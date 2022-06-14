@@ -351,9 +351,9 @@ reconnect:
           JsonNode *request = module->WS_messages->data;
           module->WS_messages = g_slist_remove ( module->WS_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
+          gchar *tag = Json_get_string ( request, "tag" );
 
-          if ( !strcasecmp( bus_tag, "DLS_HISTO" ) &&
+          if ( !strcasecmp( tag, "DLS_HISTO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE )
            { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Sending msg '%s:%s' (%s)", __func__,
                        jabber_id,
@@ -363,10 +363,10 @@ reconnect:
              g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( request, "dls_shortname" ), Json_get_string ( request, "libelle" ) );
              Imsgs_Envoi_message_to_all_available ( module, chaine );
            }
-          else if ( !strcasecmp( bus_tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
+          else if ( !strcasecmp( tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
           else
-           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': bus_tag '%s' not for this thread", __func__,
-                       jabber_id, bus_tag ); }
+           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': tag '%s' not for this thread", __func__,
+                       jabber_id, tag ); }
           Json_node_unref(request);
         }
      }                                                                                         /* Fin du while partage->arret */

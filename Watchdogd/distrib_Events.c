@@ -57,7 +57,7 @@
        goto suite_AO;
      }
     Dls_DO_to_json ( RootNode, dout );
-    Json_node_add_string ( RootNode, "bus_tag", "SET_DO" );
+    Json_node_add_string ( RootNode, "tag", "SET_DO" );
     if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( NULL, RootNode );
 
     Json_node_unref ( RootNode );
@@ -77,7 +77,7 @@ suite_AO:
     RootNode = Json_node_create ();
     if (RootNode)
      { Dls_AO_to_json ( RootNode, ao );
-       Json_node_add_string ( RootNode, "bus_tag", "SET_AO" );
+       Json_node_add_string ( RootNode, "tag", "SET_AO" );
        Http_Send_to_slaves ( NULL, RootNode );
        Json_node_unref ( RootNode );
      }

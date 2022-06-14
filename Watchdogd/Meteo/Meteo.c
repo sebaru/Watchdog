@@ -200,9 +200,9 @@
           JsonNode *request = module->WS_messages->data;
           module->WS_messages = g_slist_remove ( module->WS_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
+          gchar *tag = Json_get_string ( request, "tag" );
 
-          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: bus_tag '%s' not for this thread", __func__, thread_tech_id, bus_tag );
+          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: tag '%s' not for this thread", __func__, thread_tech_id, tag );
           Json_node_unref(request);
         }
 /****************************************************** Connexion ! ***********************************************************/

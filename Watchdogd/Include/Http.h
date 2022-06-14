@@ -231,7 +231,7 @@
  extern void Http_traiter_map ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data );
 
- extern JsonNode *Http_Post_to_local_BUS ( struct THREAD *module, gchar *bus_tag, JsonNode *RootNode );
+ extern JsonNode *Http_Post_to_local_BUS ( struct THREAD *module, gchar *tag, JsonNode *RootNode );
  extern void Http_Post_to_local_BUS_DI ( struct THREAD *module, JsonNode *di, gboolean etat );
  extern void Http_Post_to_local_BUS_AI ( struct THREAD *module, JsonNode *ai, gdouble valeur, gboolean in_range );
  extern void Http_Post_to_local_BUS_CDE ( struct THREAD *module, gchar *tech_id, gchar *acronyme );

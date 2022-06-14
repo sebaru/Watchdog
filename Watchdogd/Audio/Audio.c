@@ -145,8 +145,8 @@
           JsonNode *request = module->WS_messages->data;
           module->WS_messages = g_slist_remove ( module->WS_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
-          if ( !strcasecmp( bus_tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
+          gchar *tag = Json_get_string ( request, "tag" );
+          if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
                Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "acronyme" ) &&
                Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
@@ -184,16 +184,16 @@
                 Envoyer_commande_dls_data( "AUDIO", "P_NONE" );                              /* Bit de fin d'emission message */
               }
            }
-          else if ( !strcasecmp( bus_tag, "DISABLE" ) )
+          else if ( !strcasecmp( tag, "DISABLE" ) )
            { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s : Diffusion disabled by master", __func__ );
              vars->diffusion_enabled = FALSE;
            }
-          else if ( !strcasecmp( bus_tag, "ENABLE" ) )
+          else if ( !strcasecmp( tag, "ENABLE" ) )
            { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s : Diffusion enabled by master", __func__ );
              vars->diffusion_enabled = TRUE;
            }
 #warning push to API
-/*          else if ( !strcasecmp( bus_tag, "TEST" ) )
+/*          else if ( !strcasecmp( tag, "TEST" ) )
            { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s : Test de diffusion", __func__ );
              Jouer_google_speech( module, "Ceci est un test de diffusion audio" );
            }*/

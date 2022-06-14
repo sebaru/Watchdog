@@ -33,7 +33,7 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- JsonNode *Http_Post_to_local_BUS ( struct THREAD *module, gchar *bus_tag, JsonNode *RootNode )
+ JsonNode *Http_Post_to_local_BUS ( struct THREAD *module, gchar *tag, JsonNode *RootNode )
   { gchar query[256];
     JsonNode *retour = NULL;
     gboolean free_root_node = FALSE;
@@ -42,7 +42,7 @@
     if (!RootNode) RootNode = Json_node_create();
 
     Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_string ( RootNode, "bus_tag", bus_tag );
+    Json_node_add_string ( RootNode, "tag", tag );
 
     g_snprintf( query, sizeof(query), "https://%s:5559/bus", Config.master_hostname );
 /********************************************************* Envoi de la requete ************************************************/
@@ -159,17 +159,17 @@ end:
        return;
      }
 
-    if ( !Json_has_member ( request, "bus_tag" ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "bus_tag missing");
-       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s': bus_tag missing", __func__ );
+    if ( !Json_has_member ( request, "tag" ) )
+     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "tag missing");
+       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s': tag missing", __func__ );
        Json_node_unref(request);
        return;
      }
-    gchar *bus_tag = Json_get_string ( request, "bus_tag" );
+    gchar *tag = Json_get_string ( request, "tag" );
 
     if ( !Json_has_member ( request, "thread_tech_id" ) )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing");
-       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for bus_tag %s", __func__, bus_tag );
+       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for tag %s", __func__, tag );
        Json_node_unref(request);
        return;
      }
@@ -191,7 +191,7 @@ end:
      }
 
 /************************************ Positionne un watchdog ******************************************************************/
-    if ( !strcasecmp( bus_tag, "SET_WATCHDOG") )
+    if ( !strcasecmp( tag, "SET_WATCHDOG") )
      { if (! (Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "consigne" ) ) )
         { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_WATCHDOG: wrong parameters from '%s'", __func__, thread_tech_id );
           soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -206,7 +206,7 @@ end:
                                Json_get_int ( request, "consigne" ) );
      }
 /************************************ Positionne une valeur d'une Entrée Analogique *******************************************/
-    else if ( !strcasecmp( bus_tag, "SET_AI") )
+    else if ( !strcasecmp( tag, "SET_AI") )
      { if (! (Json_has_member ( request, "thread_acronyme" ) &&
               Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
               Json_has_member ( request, "libelle" ) && Json_has_member ( request, "unite" )
@@ -246,7 +246,7 @@ end:
         }
      }
 /************************************ Réaction sur SET_CDE ********************************************************************/
-    else if ( !strcasecmp( bus_tag, "SET_CDE") )
+    else if ( !strcasecmp( tag, "SET_CDE") )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
         { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_CDE: wrong parameters from '%s'", __func__, thread_tech_id );
           soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -259,7 +259,7 @@ end:
        Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
      }
 /************************************ Réaction sur SET_DI *********************************************************************/
-    else if ( !strcasecmp( bus_tag, "SET_DI") )
+    else if ( !strcasecmp( tag, "SET_DI") )
      { if (! (Json_has_member ( request, "thread_acronyme" ) &&
               Json_has_member ( request, "etat" )&& Json_has_member ( request, "libelle" )
              )
@@ -295,7 +295,7 @@ end:
         }
      }
 /************************************ Réaction sur GET_DO *********************************************************************/
-    else if ( !strcasecmp( bus_tag, "GET_DO") )
+    else if ( !strcasecmp( tag, "GET_DO") )
      { JsonNode *Response = Json_node_create();
        JsonArray *output_array = Json_node_add_array ( Response, "douts" );
        GSList *liste = Partage->Dls_data_DO;

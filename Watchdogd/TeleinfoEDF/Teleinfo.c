@@ -89,16 +89,6 @@
     vars->last_view = Partage->top;
   }
 /******************************************************************************************************************************/
-/* Run_thread_message: Prend en charge un message recu du master                                                          */
-/* Entrée: la structure THREAD associée                                                                                   */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_thread_message ( struct THREAD *module, gchar *bus_tag, JsonNode *message )
-  { gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': recu bus_tag '%s' from master", __func__, thread_tech_id, bus_tag );
-  }
-
-/******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
 /* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
@@ -132,8 +122,8 @@
           JsonNode *message = module->WS_messages->data;
           module->WS_messages = g_slist_remove ( module->WS_messages, message );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *bus_tag = Json_get_string ( message, "bus_tag" );
-          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: bus_tag '%s' not for this thread", __func__, thread_tech_id, bus_tag );
+          gchar *tag = Json_get_string ( message, "tag" );
+          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: tag '%s' not for this thread", __func__, thread_tech_id, tag );
           Json_node_unref(message);
         }
 /************************************************* Traitement opérationnel ****************************************************/

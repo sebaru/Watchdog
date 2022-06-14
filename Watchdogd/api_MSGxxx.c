@@ -131,7 +131,7 @@
 /******************************************************* Envoi du histo aux librairies abonnées *******************************/
     if (Partage->top >= msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
      { msg->last_on = Partage->top;
-       Json_node_add_string ( histo, "bus_tag", "DLS_HISTO" );
+       Json_node_add_string ( histo, "tag", "DLS_HISTO" );
        Http_Send_to_slaves ( NULL, histo );
        Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
        Http_ws_send_to_all( histo );
@@ -167,7 +167,7 @@
     Json_node_add_bool   ( histo, "alive", FALSE );
     Retirer_histo_msgsDB( histo );
 /******************************************************* Envoi du histo aux librairies abonnées *******************************/
-    Json_node_add_string ( histo, "bus_tag", "DLS_HISTO" );
+    Json_node_add_string ( histo, "tag", "DLS_HISTO" );
     Http_Send_to_slaves ( NULL, histo );
     Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
     Http_ws_send_to_all( histo );

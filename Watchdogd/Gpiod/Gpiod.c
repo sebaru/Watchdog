@@ -164,9 +164,9 @@
           JsonNode *request = module->WS_messages->data;
           module->WS_messages = g_slist_remove ( module->WS_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
+          gchar *tag = Json_get_string ( request, "tag" );
 
-          if ( !strcasecmp( bus_tag, "SET_DO" ) )
+          if ( !strcasecmp( tag, "SET_DO" ) )
            { if (!Json_has_member ( request, "tech_id"))
               { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: requete mal formée manque tech_id", __func__, tech_id ); }
              else if (!Json_has_member ( request, "acronyme" ))

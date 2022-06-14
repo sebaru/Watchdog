@@ -973,7 +973,7 @@
 
     JsonNode *RootNode = Json_node_create ();
     option_chaine = Get_option_chaine ( options, T_TAG, "PING" );
-    if (option_chaine) Json_node_add_string ( RootNode, "bus_tag", option_chaine );
+    if (option_chaine) Json_node_add_string ( RootNode, "tag", option_chaine );
 
     option_chaine = Get_option_chaine ( options, T_TARGET, NULL );
     if (option_chaine) Json_node_add_string ( RootNode, "target", option_chaine );

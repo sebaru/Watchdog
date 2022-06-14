@@ -101,18 +101,18 @@
           JsonNode *request = module->WS_messages->data;
           module->WS_messages = g_slist_remove ( module->WS_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *bus_tag = Json_get_string ( request, "bus_tag" );
-          if ( !strcasecmp( bus_tag, "PLAY_RADIO" ) )
+          gchar *tag = Json_get_string ( request, "tag" );
+          if ( !strcasecmp( tag, "PLAY_RADIO" ) )
            { gchar *radio = Json_get_string ( request, "radio" );
              Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Diffusing %s", __func__, tech_id, radio );
              Jouer_radio ( module, radio );
            }
-          else if ( !strcasecmp( bus_tag, "STOP_RADIO" ) )
+          else if ( !strcasecmp( tag, "STOP_RADIO" ) )
            { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Stopping radio", __func__, tech_id );
              Stopper_radio( module );
            }
           else
-           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: bus_tag '%s' not for this thread", __func__, tech_id, bus_tag ); }
+           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: tag '%s' not for this thread", __func__, tech_id, tag ); }
           Json_node_unref(request);
         }
      }

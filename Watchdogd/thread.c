@@ -75,14 +75,14 @@
        return;
      }
 
-    if (!Json_has_member ( response, "bus_tag" ))
-     { Info_new( Config.log, Config.log_bus, LOG_WARNING, "%s: '%s': WebSocket Message Dropped (no 'bus_tag') !", __func__, thread_tech_id );
+    if (!Json_has_member ( response, "tag" ))
+     { Info_new( Config.log, Config.log_bus, LOG_WARNING, "%s: '%s': WebSocket Message Dropped (no 'tag') !", __func__, thread_tech_id );
        Json_node_unref(response);
        return;
      }
 
-    gchar *bus_tag = Json_get_string ( response, "bus_tag" );
-    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: '%s': receive bus_tag '%s'  !", __func__, thread_tech_id, bus_tag );
+    gchar *tag = Json_get_string ( response, "tag" );
+    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: '%s': receive tag '%s'  !", __func__, thread_tech_id, tag );
 
     pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
     module->WS_messages = g_slist_append ( module->WS_messages, response );

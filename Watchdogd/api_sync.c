@@ -46,14 +46,14 @@
     Partage->com_msrv.API_ws_messages = g_slist_remove ( Partage->com_msrv.API_ws_messages, request );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
 
-    gchar *api_tag = Json_get_string ( request, "api_tag" );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive api_tag '%s' !", __func__, api_tag );
+    gchar *tag = Json_get_string ( request, "tag" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive tag '%s' !", __func__, tag );
 
-         if ( !strcasecmp( api_tag, "RESET") )
+         if ( !strcasecmp( tag, "RESET") )
      { Partage->com_msrv.Thread_run = FALSE;
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: RESET: Stopping in progress", __func__ );
      }
-    else if ( !strcasecmp( api_tag, "UPGRADE") )
+    else if ( !strcasecmp( tag, "UPGRADE") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UPGRADE: Upgrading in progress", __func__ );
        gint pid = fork();
        if (pid<0)
@@ -65,10 +65,10 @@
           exit(0);
         }
      }
-    else if ( !strcasecmp( api_tag, "THREAD_START") ) { Thread_Start_one_thread ( NULL, 0, request, NULL ); }
-    else if ( !strcasecmp( api_tag, "THREAD_STOP") )  { Thread_Stop_one_thread ( request ); }
-    else if ( !strcasecmp( api_tag, "THREAD_SEND") )  { Thread_Push_API_message ( request ); }
-    else if ( !strcasecmp( api_tag, "AGENT_SET") )
+    else if ( !strcasecmp( tag, "THREAD_START") ) { Thread_Start_one_thread ( NULL, 0, request, NULL ); }
+    else if ( !strcasecmp( tag, "THREAD_STOP") )  { Thread_Stop_one_thread ( request ); }
+    else if ( !strcasecmp( tag, "THREAD_SEND") )  { Thread_Push_API_message ( request ); }
+    else if ( !strcasecmp( tag, "AGENT_SET") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
              )
@@ -105,8 +105,8 @@ end:
        return;
      }
 
-    if (!Json_has_member ( request, "api_tag" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'api_tag') !", __func__ );
+    if (!Json_has_member ( request, "tag" ))
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'tag') !", __func__ );
        Json_node_unref(request);
        return;
      }
