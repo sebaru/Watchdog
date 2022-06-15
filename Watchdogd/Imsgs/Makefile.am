@@ -3,10 +3,10 @@
 #* Projet WatchDog version 3.0       Gestion d'habitat                          sam 28 juil 2012 18:13:27 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS= 
+SUBDIRS=
 
 lib_LTLIBRARIES                     = libwatchdog-server-imsgs.la
-libwatchdog_server_imsgs_la_SOURCES = Imsg.c Imsg.h admin_imsg.c 
+libwatchdog_server_imsgs_la_SOURCES = Imsg.c Imsg.h
 
 libwatchdog_server_imsgs_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` -lstrophe \
                                       `mysql_config --libs` \
