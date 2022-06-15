@@ -192,11 +192,10 @@
            { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s : Diffusion enabled by master", __func__ );
              vars->diffusion_enabled = TRUE;
            }
-#warning push to API
-/*          else if ( !strcasecmp( tag, "TEST" ) )
+          else if ( !strcasecmp( tag, "TEST" ) )
            { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s : Test de diffusion", __func__ );
              Jouer_google_speech( module, "Ceci est un test de diffusion audio" );
-           }*/
+           }
           Json_node_unref ( request );
         }
      }
