@@ -293,6 +293,8 @@
     if (!module)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': thread not found", __func__, thread_tech_id ); return; }
 
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: '%s': '%s' sent", __func__, thread_tech_id, Json_get_string ( request, "tag" ) );
+
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     json_node_ref ( request );
     module->WS_messages = g_slist_append ( module->WS_messages, request );
