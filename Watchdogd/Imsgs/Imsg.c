@@ -353,8 +353,7 @@ reconnect:
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
 
-          if ( !strcasecmp( tag, "DLS_HISTO" ) &&
-               Json_get_bool ( request, "alive" ) == TRUE )
+          if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( request, "alive" ) == TRUE )
            { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Sending msg '%s:%s' (%s)", __func__,
                        jabber_id,
                        Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
