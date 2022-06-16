@@ -179,12 +179,9 @@
     Partage->Maps_from_thread = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_thread );
     Partage->Maps_to_thread   = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_local );
 
-    Partage->Maps_root = Http_Post_to_global_API ( "/run/mappings", NULL );
+    Partage->Maps_root = Http_Post_to_global_API ( "/run/mapping/list", NULL );
     if (Partage->Maps_root)
-     { /*SQL_Select_to_json_node ( Partage->Maps_root, "mappings",
-                                 "SELECT * FROM mappings "
-                                 "WHERE tech_id IS NOT NULL AND acronyme IS NOT NULL" );*/
-       GList *Results = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "mappings" ) );
+     { GList *Results = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "mappings" ) );
        GList *results = Results;
        while(results)
         { JsonNode *element = results->data;
