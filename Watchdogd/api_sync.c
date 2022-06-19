@@ -61,7 +61,7 @@
        else if (!pid)
         { system("cd SRC; ./autogen.sh; sudo make install; " );
           Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: UPGRADE: done. Restarting.", __func__ );
-          system("sudo killall Watchdogd" );
+          system("sudo killall watchdogd" );
           exit(0);
         }
      }
@@ -87,6 +87,8 @@
           Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: AGENT_SET: headless has changed, rebooting", __func__ );
         }
      }
+    else if ( !strcasecmp( agent_tag, "REMAP") && Config.instance_is_master == TRUE) MSRV_Remap();
+
 end:
     Json_node_unref(request);
   }

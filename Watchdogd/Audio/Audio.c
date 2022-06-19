@@ -101,7 +101,11 @@
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "Wtd_play_google.sh", "Wtd_play_google", Json_get_string ( module->config, "language" ), audio_libelle,
+     { Info_new( Config.log, module->Thread_debug, LOG_INFO,
+                 "%s: Running Wtd_play_google.sh %s %s %s", __func__,
+                 Json_get_string ( module->config, "language" ), audio_libelle, Json_get_string ( module->config, "device" ) );
+
+       execlp( "Wtd_play_google.sh", "Wtd_play_google", Json_get_string ( module->config, "language" ), audio_libelle,
                                                         Json_get_string ( module->config, "device" ), NULL );
        Info_new( Config.log, module->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, audio_libelle, pid, strerror( errno ) );
@@ -135,10 +139,7 @@
     Thread_send_comm_to_master ( module, retour );
     vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
-     { usleep(100000);
-       sched_yield();
-
-       Thread_send_comm_to_master ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /******************************************************************************************************************************/
        while ( module->WS_messages )
         { pthread_mutex_lock ( &module->synchro );

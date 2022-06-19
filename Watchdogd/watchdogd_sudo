@@ -4,6 +4,6 @@ watchdog  ALL=(ALL) NOPASSWD: /usr/bin/make install
 watchdog  ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop Watchdogd
 watchdog  ALL=(ALL) NOPASSWD: /usr/bin/systemctl start Watchdogd
 watchdog  ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart Watchdogd
-watchdog  ALL=(ALL) NOPASSWD: /usr/bin/killall Watchdogd
+watchdog  ALL=(ALL) NOPASSWD: /usr/bin/killall watchdogd
 watchdog  ALL=(ALL) NOPASSWD: /usr/bin/journalctl -f -u Watchdogd
 Defaults:watchdog !requiretty
