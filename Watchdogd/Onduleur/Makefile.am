@@ -6,7 +6,7 @@
 SUBDIRS= 
 
 lib_LTLIBRARIES     = libwatchdog-server-ups.la
-libwatchdog_server_ups_la_SOURCES = Onduleur.c admin_onduleur.c Onduleur.h
+libwatchdog_server_ups_la_SOURCES = Onduleur.c Onduleur.h
 
 libwatchdog_server_ups_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 libupsclient json-glib-1.0 libsoup-2.4` \
                                     `mysql_config --libs` \

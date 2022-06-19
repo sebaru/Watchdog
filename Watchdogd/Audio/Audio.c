@@ -135,7 +135,7 @@
     Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_ALL", "Profil Audio: All Hps Enabled" );
     Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_NONE", "Profil audio: All Hps disabled" );
 
-    gboolean retour = Jouer_google_speech( module, "Instance démarrée !" );
+    gboolean retour = Jouer_google_speech( module, "Module audio démarré !" );
     Thread_send_comm_to_master ( module, retour );
     vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
@@ -152,12 +152,12 @@
                Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
                strcasecmp( Json_get_string( request, "audio_profil" ), "P_NONE" ) )
-           { gchar *thread_tech_id       = Json_get_string ( request, "thread_tech_id" );
-             gchar *acronyme      = Json_get_string ( request, "acronyme" );
-             gchar *audio_profil  = Json_get_string ( request, "audio_profil" );
-             gchar *audio_libelle = Json_get_string ( request, "audio_libelle" );
-             gchar *libelle       = Json_get_string ( request, "libelle" );
-             gint typologie = Json_get_int ( request, "typologie" );
+           { gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+             gchar *acronyme       = Json_get_string ( request, "acronyme" );
+             gchar *audio_profil   = Json_get_string ( request, "audio_profil" );
+             gchar *audio_libelle  = Json_get_string ( request, "audio_libelle" );
+             gchar *libelle        = Json_get_string ( request, "libelle" );
+             gint typologie        = Json_get_int ( request, "typologie" );
 
              Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
                        "%s: Recu message '%s:%s' (audio_profil=%s)", __func__, thread_tech_id, acronyme, audio_profil );
