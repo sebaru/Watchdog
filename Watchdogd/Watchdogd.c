@@ -136,7 +136,12 @@
 /* Entrée: FALSE si pas trouvé                                                                                                */
 /******************************************************************************************************************************/
  gboolean MSRV_Map_to_thread ( JsonNode *key )
-  { JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, key );
+  { if (!Partage->Maps_to_thread)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Mapping is not done. Could not map '%s:%s' to thread.",
+                 __func__, Json_get_string ( key, "tech_id" ), Json_get_string ( key, "acronyme" ) );
+       return(FALSE);
+     }
+    JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, key );
     if (map && Json_has_member ( map, "thread_tech_id" ) && Json_has_member ( map, "thread_acronyme" ) )
      { Json_node_add_string ( key, "thread_tech_id",  Json_get_string ( map, "thread_tech_id" ) );
        Json_node_add_string ( key, "thread_acronyme", Json_get_string ( map, "thread_acronyme" ) );
@@ -149,7 +154,12 @@
 /* Entrée: FALSE si pas trouvé                                                                                                */
 /******************************************************************************************************************************/
  gboolean MSRV_Map_from_thread ( JsonNode *key )
-  { JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, key );
+  { if (!Partage->Maps_from_thread)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Mapping is not done. Could not map '%s:%s' from thread.",
+                 __func__, Json_get_string ( key, "thread_tech_id" ), Json_get_string ( key, "thread_acronyme" ) );
+       return(FALSE);
+     }
+    JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, key );
     if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
      { Json_node_add_string ( key, "tech_id",  Json_get_string ( map, "tech_id" ) );
        Json_node_add_string ( key, "acronyme", Json_get_string ( map, "acronyme" ) );
@@ -584,6 +594,8 @@
     gint cpt_1_minute  = Partage->top + 600;
 
     sleep(1);
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Starting Main Thread", __func__ );
+
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
        MSRV_Remap();
