@@ -32,34 +32,38 @@
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  static struct DLS_AI *Dls_data_AI_lookup ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
-  { struct DLS_AI *ai;
+  { struct DLS_AI *ai = NULL;
     if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
      { ai = (struct DLS_AI *)*ai_p;
        return( ai );
      }
     if (!tech_id || !acronyme) return(NULL);
 
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );
     GSList *liste = Partage->Dls_data_AI;
     while (liste)                                                                               /* A la recherche du message. */
      { ai = (struct DLS_AI *)liste->data;
        if ( !strcasecmp( ai->tech_id, tech_id ) && !strcasecmp( ai->acronyme, acronyme ) )
         { if (ai_p) *ai_p = (gpointer)ai;                                           /* Sauvegarde pour acceleration si besoin */
-          return(ai);
+          break;
         }
        liste = g_slist_next(liste);
      }
 
-    ai = g_try_malloc0 ( sizeof(struct DLS_AI) );
-    if (!ai)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
-       return(NULL);
+    if (liste)
+     { pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+       return(ai);
      }
-    g_snprintf( ai->acronyme, sizeof(ai->acronyme), "%s", acronyme );
-    g_snprintf( ai->tech_id,  sizeof(ai->tech_id),  "%s", tech_id );
-    pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
+
+    ai = g_try_malloc0 ( sizeof(struct DLS_AI) );
+    if (ai)
+     { g_snprintf( ai->acronyme, sizeof(ai->acronyme), "%s", acronyme );
+       g_snprintf( ai->tech_id,  sizeof(ai->tech_id),  "%s", tech_id );
+       Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: adding AI '%s:%s'", __func__, tech_id, acronyme );
+     }
+    else Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: adding AI '%s:%s'", __func__, tech_id, acronyme );
     return(ai);
   }
 /******************************************************************************************************************************/

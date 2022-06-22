@@ -1417,6 +1417,9 @@
        options = New_option_entier ( options, T_TYPE, MSG_DEFAUT );
        New_alias_permanent ( NULL, "MSG_COMM_HS", MNEMO_MSG, options );
 
+       SQL_Write_new ( "DELETE FROM mnemos_BI   WHERE deletable=1 AND tech_id='%s'", tech_id );
+       SQL_Write_new ( "DELETE FROM mnemos_MONO WHERE deletable=1 AND tech_id='%s'", tech_id );
+
        DlsScanner_debug = TRUE;/*Config.log_trad;*/
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
@@ -1481,7 +1484,7 @@
         }
 
 /*----------------------------------------------- Prise en charge du peuplement de la database -------------------------------*/
-       gchar *Liste_BI = NULL, *Liste_MONO = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
+       gchar *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
        gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
        gchar *Liste_CI = NULL, *Liste_CH = NULL;
        gchar *Liste_CADRANS = NULL, *Liste_MOTIF = NULL;
@@ -1501,8 +1504,6 @@
 /************************ Calcul des alias locaux pour préparer la suppression automatique ************************************/
           if (!strcmp(alias->tech_id, Dls_plugin.tech_id))
            {      if (alias->classe == MNEMO_BUS)        { }
-             else if (alias->classe == MNEMO_BISTABLE)   { Liste_BI = Add_csv ( Liste_BI, alias->acronyme ); }
-             else if (alias->classe == MNEMO_MONOSTABLE) { Liste_MONO = Add_csv ( Liste_MONO, alias->acronyme ); }
              else if (alias->classe == MNEMO_ENTREE)     { Liste_DI = Add_csv ( Liste_DI, alias->acronyme ); }
              else if (alias->classe == MNEMO_SORTIE)     { Liste_DO = Add_csv ( Liste_DO, alias->acronyme ); }
              else if (alias->classe == MNEMO_SORTIE_ANA) { Liste_AO = Add_csv ( Liste_AO, alias->acronyme ); }
@@ -1515,7 +1516,7 @@
              else if (alias->classe == MNEMO_CPTH)       { Liste_CH = Add_csv ( Liste_CH, alias->acronyme ); }
              else if (alias->classe == MNEMO_MSG)        { Liste_MESSAGE = Add_csv ( Liste_MESSAGE, alias->acronyme ); }
              else if (alias->classe == MNEMO_VISUEL)
-              { gchar *forme   = Get_option_chaine( alias->options, T_FORME, NULL );
+              { gchar *forme = Get_option_chaine( alias->options, T_FORME, NULL );
                 if (forme) { Liste_MOTIF = Add_csv ( Liste_MOTIF, alias->acronyme ); }
               }
            }
@@ -1577,18 +1578,6 @@
        requete = g_strconcat ( "DELETE FROM mnemos_R WHERE tech_id='", tech_id, "' ",
                                " AND acronyme NOT IN (", (Liste_REGISTRE?Liste_REGISTRE:"''") , ")", NULL );
        if (Liste_REGISTRE) g_free(Liste_REGISTRE);
-       SQL_Write ( requete );
-       g_free(requete);
-
-       requete = g_strconcat ( "DELETE FROM mnemos_BI WHERE deletable=1 AND tech_id='", tech_id, "' ",
-                               " AND acronyme NOT IN (", (Liste_BI?Liste_BI:"''") , ")", NULL );
-       if (Liste_BI) g_free(Liste_BI);
-       SQL_Write ( requete );
-       g_free(requete);
-
-       requete = g_strconcat ( "DELETE FROM mnemos_MONO WHERE deletable=1 AND tech_id='", tech_id, "' ",
-                               " AND acronyme NOT IN (", (Liste_MONO?Liste_MONO:"''") , ")", NULL );
-       if (Liste_MONO) g_free(Liste_MONO);
        SQL_Write ( requete );
        g_free(requete);
 
