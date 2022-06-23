@@ -6,7 +6,7 @@
 SUBDIRS= 
 
 lib_LTLIBRARIES                         = libwatchdog-server-teleinfoedf.la
-libwatchdog_server_teleinfoedf_la_SOURCES    = Teleinfo.c Teleinfo.h admin_teleinfo.c
+libwatchdog_server_teleinfoedf_la_SOURCES    = Teleinfo.c Teleinfo.h
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include
