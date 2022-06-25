@@ -559,9 +559,8 @@
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
        else
         { if (Config.instance_is_master)                                                                  /* Démarrage D.L.S. */
-           { if (!Demarrer_dls())                                                                         /* Démarrage D.L.S. */
-              { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ ); }
-
+           { if (!Demarrer_dls()) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ );
+             MSRV_Remap();                                                 /* Mappage des bits avant de charger les thread IO */
            }
           Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
         }
@@ -600,7 +599,6 @@
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
-       MSRV_Remap();
        while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
 
