@@ -25,18 +25,20 @@
  * Boston, MA  02110-1301  USA
  */
 
-%{
-#include <stdio.h>
-#include <string.h>
-#include "Proto_traductionDLS.h"
-#include "lignes.h"
-%}
-
 /* On n'utilise pas la fonction yywrap associée */
 %option 8bit noyywrap nounput noinput
 /* On garde le numéro de ligne lors du scan des tokens */
 %option yylineno
  /*%option debug*/
+/*%option reentrant bison-bridge*/
+
+%{
+#include <stdio.h>
+#include <string.h>
+#include "Proto_traductionDLS.h"
+#include "lignes.h"
+/*#include "mots.tab.h"*/
+%}
 
 /* Expressions rationnelles de detection */
 digit         [-]?[0-9]+

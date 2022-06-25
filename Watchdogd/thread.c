@@ -496,8 +496,22 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Demarrer_ARCH_sync: Processus de synchronisation d'archive                                                                 */
+/* Entrée: rien                                                                                                               */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Demarrer_arch_sync ( void )
+  { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Demande de demarrage %d", __func__, getpid() );
+    if ( pthread_create( &Partage->com_msrv.TID_arch_sync, NULL, (void *)Run_arch_sync, NULL ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: pthread_create failed", __func__ );
+       return(FALSE);
+     }
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: thread arch_sync (%p) seems to be running", __func__, Partage->com_msrv.TID_arch_sync );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Demarrer_http: Processus HTTP                                                                                              */
-/* EntrÃ©e: rien                                                                                                              */
+/* Entrée: rien                                                                                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Demarrer_http ( void )
@@ -529,6 +543,10 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Waiting for API_SYNC (%p) to finish", __func__, Partage->com_msrv.TID_api_sync );
     if ( Partage->com_msrv.TID_api_sync ) pthread_join ( Partage->com_msrv.TID_api_sync, NULL );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: ok, API_SYNC is down", __func__ );
+
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Waiting for ARCH_SYNC (%p) to finish", __func__, Partage->com_msrv.TID_arch_sync );
+    if ( Partage->com_msrv.TID_arch_sync ) pthread_join ( Partage->com_msrv.TID_arch_sync, NULL );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: ok, ARCH_SYNC is down", __func__ );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Waiting for HTTP (%p) to finish", __func__, Partage->com_http.TID );
     Partage->com_http.Thread_run = FALSE;

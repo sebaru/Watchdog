@@ -59,4 +59,74 @@
     Partage->archive_liste_taille++;
     pthread_mutex_unlock( &Partage->archive_liste_sync );
   }
+/******************************************************************************************************************************/
+/* Arch_clear_list: efface la liste des archives a prendre en compte                                                          */
+/* Entrées: néant                                                                                                             */
+/* Sortie : le nombre d'archive detruites                                                                                     */
+/******************************************************************************************************************************/
+ static void ARCH_Clear ( void )
+  { pthread_mutex_lock( &Partage->archive_liste_sync );                                                      /* lockage futex */
+    gint save_nbr = Partage->archive_liste_taille;
+    g_slist_foreach ( Partage->archive_liste, (GFunc) Json_node_unref, NULL );
+    pthread_mutex_unlock( &Partage->archive_liste_sync );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Clear %05d archive(s)", __func__, save_nbr );
+ }
+/******************************************************************************************************************************/
+/* Run_arch_sync: Envoi les archives a l'API                                                                                  */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
+ void Run_arch_sync ( void )
+  { prctl(PR_SET_NAME, "W-ARCHSYNC", 0, 0, 0 );
+
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+
+    while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
+     { if (!Partage->archive_liste) { sleep(2); continue; }
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Begin %05d archive(s)", __func__, Partage->archive_liste_taille );
+       gint top            = Partage->top;
+       gint nb_enreg       = 0;                                            /* Au début aucun enregistrement est passé a la DB */
+       JsonNode *RootNode  = Json_node_create();
+       JsonArray *archives = Json_node_add_array ( RootNode, "archives" );
+
+       pthread_mutex_lock( &Partage->archive_liste_sync );                                                   /* lockage futex */
+       GSList *liste = Partage->archive_liste;
+       while (liste && Partage->com_msrv.Thread_run == TRUE && nb_enreg<ARCHIVE_MAX_ENREG_TO_API)
+        { JsonNode *arch = liste->data;                                                               /* Recuperation du arch */
+          json_node_ref ( arch );
+          Json_array_add_element ( archives, arch );
+          nb_enreg++;                        /* Permet de limiter a au plus 500 enregistrements histoire de limiter la famine */
+          liste = g_slist_next(liste);
+        }
+       pthread_mutex_unlock( &Partage->archive_liste_sync );
+
+       Json_node_add_int ( RootNode, "nbr_archives", nb_enreg );
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending %05d archive(s).", __func__, nb_enreg );
+
+       JsonNode *api_result = Http_Post_to_global_API ( "/run/archive/save", RootNode );
+       if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
+        { gint nbr_saved = Json_get_int ( api_result, "nbr_archives_saved" );
+
+          pthread_mutex_lock( &Partage->archive_liste_sync );                                                   /* lockage futex */
+          while (nbr_saved)
+           { JsonNode *arch = Partage->archive_liste->data;                                              /* Recuperation du arch */
+             Partage->archive_liste = g_slist_remove ( Partage->archive_liste, arch );
+             Partage->archive_liste_taille--;
+             Json_node_unref ( arch );
+             nbr_saved--;
+           }
+          pthread_mutex_unlock( &Partage->archive_liste_sync );
+
+          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
+                    Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, Partage->archive_liste_taille );
+        }
+       else
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error. Reste %05d.", __func__, Partage->archive_liste_taille ); }
+       Json_node_unref ( api_result );
+       Json_node_unref ( RootNode );
+     }
+
+    ARCH_Clear();                                                   /* Suppression des enregistrements restants dans la liste */
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
+    pthread_exit(GINT_TO_POINTER(0));
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

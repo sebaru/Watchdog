@@ -28,7 +28,7 @@
 #ifndef _ARCHIVAGE_DB_H_
  #define _ARCHIVAGE_DB_H_
 
- #define ARCHIVE_MAX_ENREG_TO_API   500
+ #define ARCHIVE_MAX_ENREG_TO_API   100
 
  enum
   { ARCHIVE_NONE,
@@ -40,5 +40,7 @@
 
 /******************************************* Définitions des prototypes *******************************************************/
  extern void Ajouter_arch( gchar *tech_id, gchar *nom, gdouble valeur );
+ extern void Run_arch_sync ( void );                                                                        /* Dans Archive.h */
+
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

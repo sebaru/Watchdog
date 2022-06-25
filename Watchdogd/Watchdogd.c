@@ -439,7 +439,7 @@
      }
 
 /************************************************* Init libsoup session *******************************************************/
-    Partage->com_msrv.API_session = soup_session_new_with_options( "idle_timeout", 0, "timeout", 60, "ssl-strict", TRUE,
+    Partage->com_msrv.API_session = soup_session_new_with_options( "idle_timeout", 0, "timeout", 120, "ssl-strict", TRUE,
                                                                    "user-agent", "Abls-habitat Agent", NULL );
 
 /************************************************* Test Connexion to Global API ***********************************************/
@@ -549,6 +549,8 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
     if (!Demarrer_api_sync())                                                                           /* Démarrage API_SYNC */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb API_SYNC", __func__ ); }
+    if (!Demarrer_arch_sync())                                                                         /* Démarrage ARCH_SYNC */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb ARCH_SYNC", __func__ ); }
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single)                                                                             /* Si demarrage des thread */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }

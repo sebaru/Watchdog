@@ -66,6 +66,7 @@
   { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     pthread_t TID_api_sync;                                                                          /* Identifiant du thread */
+    pthread_t TID_arch_sync;                                                                         /* Identifiant du thread */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */

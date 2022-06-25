@@ -203,7 +203,6 @@ end:
        if (Partage->com_msrv.liste_visuel) API_Send_visuels ();                                /* Traitement des I dynamiques */
 /*---------------------------------------------- Report des messages ---------------------------------------------------------*/
        if (Partage->com_msrv.liste_msg) API_Send_MSGS();
-       if (Partage->archive_liste) API_Send_ARCHIVE();
        if (Partage->com_msrv.API_ws_messages) API_handle_API_messages();
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
@@ -220,8 +219,6 @@ end:
        sched_yield();
      }
     API_ws_end();
-
-    API_Clear_ARCHIVE();                                            /* Suppression des enregistrements restants dans la liste */
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
