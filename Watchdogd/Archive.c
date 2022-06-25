@@ -80,8 +80,14 @@
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
+    gint cpt_1_minute = Partage->top + 600;
     while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
-     { if (!Partage->archive_liste) { sleep(2); continue; }
+     { if (cpt_1_minute < Partage->top)                                                      /* Sauvegarde toutes les minutes */
+        { Ajouter_arch ( "SYS", "ARCHIVE_BUFFER_SIZE", 1.0*Partage->archive_liste_taille );
+          cpt_1_minute += 600;
+        }
+
+       if (!Partage->archive_liste) { sleep(2); continue; }
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Begin %05d archive(s)", __func__, Partage->archive_liste_taille );
        gint top            = Partage->top;
        gint nb_enreg       = 0;                                            /* Au début aucun enregistrement est passé a la DB */
