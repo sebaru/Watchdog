@@ -198,14 +198,14 @@
           <i class="fas fa-crown"></i> Domaine
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDOMAINE">
-          <a class="dropdown-item" href="/tech/instance"><i class="fas fa-crown text-danger"></i> <span>Instances</span></a>
+          <a class="dropdown-item" href="https://console.abls-habitat.fr/agent"><i class="fas fa-crown text-danger"></i> <span>Instances</span></a>
           <a class="dropdown-item" href="/tech/process"><i class="fas fa-microchip text-primary"></i> <span>Processus</span></a>
-          <a class="dropdown-item" href="/tech/archive"><i class="fas fa-database text-secondary"></i> <span>Archivage</span></a>
+          <a class="dropdown-item" href="https://console.abls-habitat.fr/archive"><i class="fas fa-database text-secondary"></i> <span>Archivage</span></a>
           <a class="dropdown-item" href="/tech/dashboard_courbes"> <i class="fas fa-chart-line text-secondary"></i> <span>Courbes</span> </a>
         </div>
       </li>
 
-      <a class="nav-link rounded" href="/tech/io_config"><i class="fas fa-link"></i> <span>Connecteurs</span></a>
+      <a class="nav-link rounded" href="https://console.abls-habitat.fr/io_config"><i class="fas fa-link"></i> <span>Connecteurs</span></a>
 
     </ul>
 
