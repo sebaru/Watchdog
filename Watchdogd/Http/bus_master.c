@@ -164,9 +164,8 @@
 /******************************************************************************************************************************/
  void Http_ws_send_json_to_slave ( struct HTTP_WS_SESSION *slave, JsonNode *RootNode )
   { gchar *buffer = Json_node_to_string ( RootNode );
-    GBytes *gbytes = g_bytes_new_take ( buffer, strlen(buffer) );
-    soup_websocket_connection_send_message ( slave->connexion, SOUP_WEBSOCKET_DATA_TEXT, gbytes );
-    g_bytes_unref( gbytes );
+    soup_websocket_connection_send_text ( slave->connexion, buffer );
+    g_free(buffer);
   }
 /******************************************************************************************************************************/
 /* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
