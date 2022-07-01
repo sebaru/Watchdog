@@ -168,10 +168,22 @@
 
 /********************************************************* Toutes les minutes *************************************************/
     if (Partage->top >= module->telemetrie_top+600)                                                     /* Toutes les minutes */
-     { Http_Post_to_local_BUS_AI ( module, module->tour_par_sec, module->nbr_tour_par_sec, TRUE );
+     { Http_Post_to_local_BUS_AI ( module, module->ai_nbr_tour_par_sec, module->nbr_tour_par_sec, TRUE );
        if (!module->Master_websocket) Thread_ws_bus_init ( module );               /* si perte de la websocket, on reconnecte */
        module->telemetrie_top = Partage->top;
      }
+  }
+/******************************************************************************************************************************/
+/* Thread_every_hour: Renvoie TRUE une fois par heure                                                                         */
+/* Entrée: La structure afférente                                                                                             */
+/* Sortie: TRUE une fois par heure                                                                                            */
+/******************************************************************************************************************************/
+ gboolean Thread_every_hour ( struct THREAD *module )
+  { if (Partage->top >= module->hour_top + 36000)                                                    /* Toutes les 1 secondes */
+     { module->hour_top = Partage->top;
+       return(TRUE);
+     }
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */

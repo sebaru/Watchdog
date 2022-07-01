@@ -46,12 +46,13 @@
     SoupSession *Master_session;
     SoupWebsocketConnection *Master_websocket;
     GSList *WS_messages;
-    JsonNode *tour_par_sec;                                                                               /* Tour par seconde */
+    JsonNode *ai_nbr_tour_par_sec;                                                                        /* Tour par seconde */
     gint nbr_tour;
     gint nbr_tour_par_sec;
     gint nbr_tour_top;
     gint nbr_tour_delai;
     gint telemetrie_top;
+    gint hour_top;
     void *vars;                                                               /* Pointeur vers les variables de run du module */
     void (*Run_thread)( struct THREAD *module );                          /* Fonction principale de gestion du module */
   };
@@ -72,6 +73,7 @@
  extern void Thread_loop ( struct THREAD *module );
  extern void Thread_init ( struct THREAD *module, gint sizeof_vars );
  extern void Thread_end ( struct THREAD *module );
+ extern gboolean Thread_every_hour ( struct THREAD *module );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
