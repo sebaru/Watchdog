@@ -35,6 +35,7 @@
     GSM_Error gammu_send_status;
     GSM_StateMachine *gammu_machine;
     INI_Section *gammu_cfg;
+    JsonNode *ai_nbr_sms;
     guint nbr_sms;
   };
 

@@ -379,6 +379,7 @@
      }
     g_list_free(recipients);
     Json_node_unref ( RootNode );
+    Http_Post_to_local_BUS_AI ( module, vars->ai_nbr_sms, ++vars->nbr_sms, TRUE );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -544,7 +545,7 @@ end:
   }
 /******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
-/* Entrée: la structure THREAD associée                                                                                   */
+/* Entrée: la structure THREAD associée                                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct THREAD *module )
@@ -553,12 +554,15 @@ end:
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    /*Envoyer_smsg_gsm_text ( "SMS System is running" );*/
+    Envoyer_smsg_gsm_text ( module, "SMS System is running" );
     vars->sending_is_disabled = FALSE;                                               /* A l'init, l'envoi de SMS est autorisé */
+    vars->ai_nbr_sms = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyé", "sms", ARCHIVE_1_HEURE );
+    vars->nbr_sms = 0;
     gint next_try = 0;
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
+
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->WS_messages )
         { pthread_mutex_lock ( &module->synchro );
@@ -595,10 +599,7 @@ end:
         }
      }
     Smsg_disconnect(module);
-
-    #warning a migrer vers global APi
-     /*SQL_Write_new ( "UPDATE %s SET nbr_sms='%d' WHERE uuid='%s'", module->name, vars->nbr_sms, module->uuid ); */
-
+    Json_node_unref ( vars->ai_nbr_sms );
     Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
