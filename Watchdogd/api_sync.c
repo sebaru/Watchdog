@@ -206,12 +206,7 @@ end:
        if (Partage->com_msrv.API_ws_messages) API_handle_API_messages();
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { static gpointer bit_io_comm = NULL;
-          Http_Send_ping_to_slaves();
-          Dls_data_set_WATCHDOG ( NULL, g_get_host_name(), "IO_COMM", &bit_io_comm, 900 );
-          Print_SQL_status();                                                             /* Print SQL status for debugging ! */
-          Activer_horlogeDB();
-          if (Partage->com_msrv.API_websocket == NULL) API_ws_init();                 /* Si websocket closed, try to restart */
+        { if (Partage->com_msrv.API_websocket == NULL) API_ws_init();                 /* Si websocket closed, try to restart */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 

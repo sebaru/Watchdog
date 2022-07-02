@@ -8,7 +8,6 @@ noinst_HEADERS    = Db.h Message_DB.h Histo_DB.h Erreur.h \
                     Json.h Thread.h \
                     Synoptiques_DB.h  \
                     Mnemonique_DB.h \
-                    Proto_traductionDLS.h \
                     watchdogd.h Dls.h \
                     Archive.h
 

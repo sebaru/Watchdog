@@ -46,7 +46,6 @@
  #include "Message_DB.h"
  #include "Histo_DB.h"
  #include "Synoptiques_DB.h"
- #include "Proto_traductionDLS.h"
  #include "Mnemonique_DB.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */

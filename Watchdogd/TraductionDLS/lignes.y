@@ -30,7 +30,19 @@
 #include <string.h>
 #include <glib.h>
 #include "watchdogd.h"
+
+#include "lignes.h"
+#include "Proto_traductionDLS.h"
+
 %}
+
+%define api.pure full
+%define parse.error verbose
+%defines "lignes.h"
+
+%lex-param { void * scan_instance }
+%parse-param { void *scan_instance }
+/*{ void *scan_module }*/
 
 %union { gint val;
          gdouble valf;
@@ -93,7 +105,7 @@
 %left INF SUP INF_OU_EGAL SUP_OU_EGAL T_EGAL
 
 %%
-fichier: listeDefinitions listeInstr {{ if($2) { Emettre( $2 ); g_free($2); } }}
+fichier: listeDefinitions listeInstr {{ if($2) { Emettre( scan_instance, $2 ); g_free($2); } }}
                         ;
 
 /*************************************************** Gestion des alias ********************************************************/
@@ -104,7 +116,7 @@ listeDefinitions:
 
 une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
                 {{ if ( Get_local_alias(NULL, $2) )                                                          /* Deja defini ? */
-                        { Emettre_erreur_new( "'%s' is already defined", $2 );
+                        { Emettre_erreur_new( scan_instance, "'%s' is already defined", $2 );
                           Liberer_options($5);
                         }
                    else { New_alias(NULL, $2, $4, $5); }
@@ -113,7 +125,7 @@ une_definition: T_DEFINE ID EQUIV alias_classe liste_options PVIRGULE
                 | T_LINK ID T_DPOINTS ID liste_options PVIRGULE
                 {{ if ($2 && $4)
                     { if ( Get_local_alias($2, $4) )                                                         /* Deja defini ? */
-                       { Emettre_erreur_new( "'%s:%s' is already defined", $2, $3 );
+                       { Emettre_erreur_new( scan_instance, "'%s:%s' is already defined", $2, $3 );
                          Liberer_options($5);
                        }
                       else { New_external_alias($2, $4, $5); }
@@ -213,7 +225,7 @@ listeInstr:     une_instr listeInstr
                       g_snprintf( $$, taille, "/* Ligne %d (CASE BEGIN)------------*/\n"
                                               "%s\n"
                                               "/* Ligne %d (CASE END)--------------*/\n %s\n",
-                                              DlsScanner_get_lineno(), $2, DlsScanner_get_lineno(), ($3 ? $3 : "") );
+                                              DlsScanner_get_lineno(scan_instance), $2, DlsScanner_get_lineno(scan_instance), ($3 ? $3 : "") );
                     } else $$=NULL;
                    if ($2) g_free($2);
                    if ($3) g_free($3);
@@ -222,22 +234,22 @@ listeInstr:     une_instr listeInstr
                 ;
 
 une_instr:      T_MOINS expr DONNE liste_action PVIRGULE
-                {{ $$=New_instruction ( $2, NULL, $4 ); }}
+                {{ $$=New_instruction ( scan_instance, $2, NULL, $4 ); }}
                 | T_MOINS expr T_DIFFERE options DONNE liste_action PVIRGULE
-                {{ $$=New_instruction ( $2, $4, $6 ); }}
+                {{ $$=New_instruction ( scan_instance, $2, $4, $6 ); }}
                 | T_MOINS expr DONNE T_ACCOUV listeInstr T_ACCFERM
                 {{ if ($5)
                     { struct ACTION *action = New_action();
                       action->alors = $5;
                       action->taille_alors = strlen($5);
-                      $$=New_instruction ( $2, NULL, action );
+                      $$=New_instruction ( scan_instance, $2, NULL, action );
                     } else $$=NULL;
                 }}
                 ;
 
 listeCase:      T_PIPE une_instr listeCase
                 {{ if ($2 && $2->condition && $2->condition->is_bool == FALSE)
-                    { Emettre_erreur_new( "Boolean is left mandatory" ); $$=NULL; }
+                    { Emettre_erreur_new( scan_instance, "Boolean is left mandatory" ); $$=NULL; }
                    else if ($2)
                     { gchar *suite = ($3 ? $3 : "/* no suite */");
                       gint taille = $2->actions->taille_alors+$2->actions->taille_sinon+$2->condition->taille+256 + strlen(suite);
@@ -257,7 +269,7 @@ listeCase:      T_PIPE une_instr listeCase
                       $$ = New_chaine( taille );
                       g_snprintf( $$, taille,
                                   "/* Ligne %d (CASE INSIDE DEFAULT)--*/\n"
-                                  "  %s", DlsScanner_get_lineno(), $4->alors );
+                                  "  %s", DlsScanner_get_lineno( scan_instance ), $4->alors );
                     } else $$=NULL;
                    Del_actions($4);
                 }}
@@ -267,7 +279,7 @@ listeCase:      T_PIPE une_instr listeCase
 expr:           expr T_PLUS expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool != $3->is_bool)
-                       { Emettre_erreur_new( "Mixing Bool and Float is forbidden" ); $$=NULL; }
+                       { Emettre_erreur_new( scan_instance, "Mixing Bool and Float is forbidden" ); $$=NULL; }
                       else
                        { $$ = New_condition( $1->is_bool, $1->taille + $3->taille + 6 );
                          if ($$ && $1->is_bool)
@@ -282,7 +294,7 @@ expr:           expr T_PLUS expr
                 | expr T_MOINS expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
-                       { Emettre_erreur_new( "Boolean not allowed within -" ); $$=NULL; }
+                       { Emettre_erreur_new( scan_instance, "Boolean not allowed within -" ); $$=NULL; }
                       else
                        { gint taille = $1->taille + $3->taille + 3;
                          $$ = New_condition( FALSE, taille );
@@ -296,7 +308,7 @@ expr:           expr T_PLUS expr
                 | expr ET expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool == FALSE || $3->is_bool == FALSE)
-                       { Emettre_erreur_new( "Boolean mandatory in AND" ); $$=NULL; }
+                       { Emettre_erreur_new( scan_instance, "Boolean mandatory in AND" ); $$=NULL; }
                       else
                        { $$ = New_condition( TRUE, $1->taille + $3->taille + 6 );
                          if ($$)
@@ -309,7 +321,7 @@ expr:           expr T_PLUS expr
                 | expr T_FOIS expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
-                       { Emettre_erreur_new( "Float mandatory in *" ); $$=NULL; }
+                       { Emettre_erreur_new( scan_instance, "Float mandatory in *" ); $$=NULL; }
                       else
                        { $$ = New_condition( FALSE, $1->taille + $3->taille + 3 );
                          if ($$)
@@ -322,7 +334,7 @@ expr:           expr T_PLUS expr
                 | expr BARRE expr
                 {{ if ($1 && $3)
                     { if ($1->is_bool == TRUE || $3->is_bool == TRUE)
-                       { Emettre_erreur_new( "Boolean not allowed within /" ); $$=NULL; }
+                       { Emettre_erreur_new( scan_instance, "Boolean not allowed within /" ); $$=NULL; }
                       else
                        { gint taille = $1->taille + $3->taille + 36;
                          $$ = New_condition( FALSE, taille );
@@ -335,7 +347,7 @@ expr:           expr T_PLUS expr
                 }}
                 | barre T_POUV expr T_PFERM
                 {{ if ($3)
-                    { if ($1 && $3->is_bool == FALSE) Emettre_erreur_new( "'!' allow only with boolean" );
+                    { if ($1 && $3->is_bool == FALSE) Emettre_erreur_new( scan_instance, "'!' allow only with boolean" );
                       else
                        { $$ = New_condition( $3->is_bool, $3->taille+3 );
                          if ($1) { g_snprintf( $$->chaine, $$->taille, "!(%s)", $3->chaine ); }
@@ -345,7 +357,7 @@ expr:           expr T_PLUS expr
                    Del_condition($3);
                 }}
                 | expr ordre expr %prec T_FOIS
-                {{ $$ = New_condition_comparaison ( $1, $2, $3 );
+                {{ $$ = New_condition_comparaison ( scan_instance, $1, $2, $3 );
                    Del_condition($1);
                    Del_condition($3);
                 }}
@@ -353,7 +365,7 @@ expr:           expr T_PLUS expr
                 ;
 
 unite:          barre un_alias liste_options
-                {{ $$ = New_condition_alias ( $1, $2, $3 );
+                {{ $$ = New_condition_alias ( scan_instance, $1, $2, $3 );
                    if($$==NULL) Liberer_options($3);
                 }}
                 | T_VALF   {{ $$ = New_condition_valf ( $1 );   }}
@@ -430,7 +442,7 @@ liste_action:   liste_action VIRGULE une_action
 une_action:     T_NOP
                   {{ $$=New_action(); $$->alors=g_strdup("/*NOP*/"); }}
                 | T_PID liste_options
-                  {{ $$=New_action_PID($2);
+                  {{ $$=New_action_PID( scan_instance, $2 );
                      Liberer_options($2);
                   }}
                 | barre un_alias liste_options
@@ -450,7 +462,7 @@ une_action:     T_NOP
                                  alias->classe==MNEMO_WATCHDOG ||
                                  alias->classe==MNEMO_MONOSTABLE)
                          )
-                       { Emettre_erreur_new( "'/%s' ne peut s'utiliser", alias->acronyme );
+                       { Emettre_erreur_new( scan_instance, "'/%s' ne peut s'utiliser", alias->acronyme );
                          $$ = NULL;
                        }
                       else switch(alias->classe)
@@ -467,7 +479,7 @@ une_action:     T_NOP
                          case MNEMO_WATCHDOG  : $$=New_action_WATCHDOG( alias, options ); break;
                          case MNEMO_REGISTRE  : $$=New_action_REGISTRE( alias, options ); break;
                          case MNEMO_SORTIE_ANA: $$=New_action_AO( alias, options ); break;
-                         default: { Emettre_erreur_new( "'%s:%s' syntax error", alias->tech_id, alias->acronyme );
+                         default: { Emettre_erreur_new( scan_instance, "'%s:%s' syntax error", alias->tech_id, alias->acronyme );
                                     $$=NULL;
                                   }
                        }
@@ -778,7 +790,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = ID;
                    $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
-                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                    { Emettre_erreur_new( scan_instance, "'%s' is not defined", $3 ); }
                 }}
                 | T_KP T_EGAL ID
                 {{ $$=New_option();
@@ -786,7 +798,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = ID;
                    $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
-                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                    { Emettre_erreur_new( scan_instance, "'%s' is not defined", $3 ); }
                 }}
                 | T_KI T_EGAL ID
                 {{ $$=New_option();
@@ -794,7 +806,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = ID;
                    $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
-                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                    { Emettre_erreur_new( scan_instance, "'%s' is not defined", $3 ); }
                 }}
                 | T_KD T_EGAL ID
                 {{ $$=New_option();
@@ -802,7 +814,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = ID;
                    $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
-                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                    { Emettre_erreur_new( scan_instance, "'%s' is not defined", $3 ); }
                 }}
                 | T_MIN T_EGAL ID
                 {{ $$=New_option();
@@ -810,7 +822,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = ID;
                    $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
-                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                    { Emettre_erreur_new( scan_instance, "'%s' is not defined", $3 ); }
                 }}
                 | T_MAX T_EGAL ID
                 {{ $$=New_option();
@@ -818,7 +830,7 @@ une_option:     T_CONSIGNE T_EGAL ENTIER
                    $$->token_classe = ID;
                    $$->val_as_alias = Get_local_alias ( NULL, $3 );
                    if (!$$->val_as_alias)
-                    { Emettre_erreur_new( "'%s' is not defined", $3 ); }
+                    { Emettre_erreur_new( scan_instance, "'%s' is not defined", $3 ); }
                 }}
                 ;
 
@@ -848,7 +860,7 @@ un_alias:       ID
                    if (!$$)
                     { $$ = New_external_alias( NULL, $1, NULL ); }                   /* Si dependance externe, on va chercher */
                    if (!$$)
-                    { Emettre_erreur_new( "'%s' is not defined", $1 ); }
+                    { Emettre_erreur_new( scan_instance, "'%s' is not defined", $1 ); }
                    g_free($1);
                 }}
                 | ID T_DPOINTS ID
@@ -856,7 +868,7 @@ un_alias:       ID
                    if (!$$)
                     { $$ = New_external_alias( $1, $3, NULL ); }                     /* Si dependance externe, on va chercher */
                    if (!$$)
-                    { Emettre_erreur_new( "'%s:%s' is not defined", $1, $3 ); }
+                    { Emettre_erreur_new( scan_instance, "'%s:%s' is not defined", $1, $3 ); }
                    g_free($1);
                    g_free($3);
                 }}

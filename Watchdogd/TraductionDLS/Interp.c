@@ -38,6 +38,7 @@
 
  #include "watchdogd.h"
  #include "lignes.h"
+ #include "Proto_traductionDLS.h"
 
  static GSList *Alias=NULL;                                                  /* Liste des alias identifiés dans le source DLS */
  static gchar *Buffer=NULL;
@@ -62,7 +63,7 @@
 /* Entrées: la ligne d'instruction à mettre                                                                                   */
 /* Sortie: void                                                                                                               */
 /******************************************************************************************************************************/
- void Emettre( char *chaine )
+ void Emettre( void *scan_instance, char *chaine )
   { int taille;
     taille = strlen(chaine);
     if ( Buffer_used + taille > Buffer_taille)
@@ -78,7 +79,7 @@
        Buffer_taille = Buffer_taille + taille;
        Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Buffer expanded to %d bytes", __func__, Buffer_taille );
      }
-    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: ligne %d : %s", __func__, DlsScanner_get_lineno(scan_instance), chaine );
     memcpy ( Buffer + Buffer_used, chaine, taille );                                             /* Recopie du bout de buffer */
     Buffer_used += taille;
   }
@@ -87,15 +88,15 @@
 /* Entrée : la chaine source de l'erreur de syntaxe                                                                           */
 /* Sortie : appel de la fonction Emettre_erreur_new en backend                                                                */
 /******************************************************************************************************************************/
- int DlsScanner_error ( char *s )
-  { Emettre_erreur_new( "Ligne %d: %s", DlsScanner_get_lineno(), s );
+ int DlsScanner_error ( void *scan_instance ,char *s )
+  { Emettre_erreur_new ( scan_instance, "Ligne %d: %s", DlsScanner_get_lineno(scan_instance), s );
     return(0);
   }
 /******************************************************************************************************************************/
 /* Emettre_erreur_new: collecte des erreurs de traduction D.L.S                                                               */
 /* Entrée: le numéro de ligne, le format et les paramètres associés                                                           */
 /******************************************************************************************************************************/
- void Emettre_erreur_new( gchar *format, ... )
+ void Emettre_erreur_new ( void *scan_instance, gchar *format, ... )
   { static gchar *too_many="Too many events. Limiting output...\n";
     gchar log[256], chaine[256];
     va_list ap;
@@ -104,10 +105,10 @@
      { va_start( ap, format );
        g_vsnprintf( chaine, sizeof(chaine), format, ap );
        va_end ( ap );
-       g_snprintf( log, sizeof(log), "Ligne %d: %s\n", DlsScanner_get_lineno(), chaine );
+       g_snprintf( log, sizeof(log), "Ligne %d: %s\n", DlsScanner_get_lineno(scan_instance), chaine );
        write( Id_log, log, strlen(log) );
 
-       Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
+       Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Ligne %d : %s", __func__, DlsScanner_get_lineno(scan_instance), chaine );
      }
     else if (nbr_erreur==15)
      { write( Id_log, too_many, strlen(too_many)+1 ); }
@@ -339,12 +340,12 @@
 /* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- struct CONDITION *New_condition_comparaison( struct CONDITION *condition_g, gint ordre, struct CONDITION *condition_d )
+ struct CONDITION *New_condition_comparaison( void *scan_instance, struct CONDITION *condition_g, gint ordre, struct CONDITION *condition_d )
   { if (!condition_g) return(NULL);
     if (!condition_d) return(NULL);
 
-    if (condition_g->is_bool == TRUE ) { Emettre_erreur_new( "Boolean cannot be compared" ); return(NULL); }
-    if (condition_d->is_bool == TRUE ) { Emettre_erreur_new( "Boolean cannot be compared" ); return(NULL); }
+    if (condition_g->is_bool == TRUE ) { Emettre_erreur_new ( scan_instance, "Boolean cannot be compared" ); return(NULL); }
+    if (condition_d->is_bool == TRUE ) { Emettre_erreur_new ( scan_instance, "Boolean cannot be compared" ); return(NULL); }
 
     struct CONDITION *result = New_condition ( TRUE, condition_g->taille + condition_d->taille + 10 );
     if (!result) return(NULL);
@@ -436,7 +437,7 @@
 /* Entrées: le tech_id/acronyme, ses options, son comparateur                                                                 */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- struct CONDITION *New_condition_alias( gint barre, struct ALIAS *alias, GList *options )
+ struct CONDITION *New_condition_alias( void *scan_instance, gint barre, struct ALIAS *alias, GList *options )
   { if (!alias) return(NULL);
 
     switch(alias->classe)                                                  /* On traite que ce qui peut passer en "condition" */
@@ -452,7 +453,7 @@
        case MNEMO_CPT_IMP:    return ( New_condition_CI( barre, alias, options ) );
        case MNEMO_CPTH:       return ( New_condition_CH( barre, alias, options ) );
        default:
-        { Emettre_erreur_new( "'%s' n'est pas une condition valide", alias->acronyme ); }
+        { Emettre_erreur_new ( scan_instance, "'%s' n'est pas une condition valide", alias->acronyme ); }
      }
     return(NULL);
   }
@@ -461,74 +462,74 @@
 /* Entrées: la liste d'option associée au PID                                                                                 */
 /* Sortie: la chaine de calcul DLS                                                                                            */
 /******************************************************************************************************************************/
- gchar *New_calcul_PID ( GList *options )
+ gchar *New_calcul_PID ( void *scan_instance, GList *options )
   { struct ALIAS *input = Get_option_alias ( options, T_INPUT );
     if (!input)
-     { Emettre_erreur_new ( "PID : input unknown. Select one R." );
+     { Emettre_erreur_new ( scan_instance, "PID : input unknown. Select one R." );
        return(g_strdup("0"));
      }
     if ( input->classe != MNEMO_REGISTRE )
-     { Emettre_erreur_new ( "PID : input must be R." );
+     { Emettre_erreur_new ( scan_instance, "PID : input must be R." );
        return(g_strdup("0"));
      }
 
     struct ALIAS *consigne = Get_option_alias ( options, T_CONSIGNE );
     if (!consigne)
-     { Emettre_erreur_new ( "PID : consigne unknown. Select one R." );
+     { Emettre_erreur_new ( scan_instance, "PID : consigne unknown. Select one R." );
        return(g_strdup("0"));
      }
     if ( consigne->classe != MNEMO_REGISTRE )
-     { Emettre_erreur_new ( "PID : consigne must be R." );
+     { Emettre_erreur_new ( scan_instance, "PID : consigne must be R." );
        return(g_strdup("0"));
      }
 
     struct ALIAS *kp = Get_option_alias ( options, T_KP );
     if (!kp)
-     { Emettre_erreur_new ( "PID : kp. Select one R." );
+     { Emettre_erreur_new ( scan_instance, "PID : kp. Select one R." );
        return(g_strdup("0"));
      }
     if ( kp->classe != MNEMO_REGISTRE )
-     { Emettre_erreur_new ( "PID : kp must be R." );
+     { Emettre_erreur_new ( scan_instance, "PID : kp must be R." );
        return(g_strdup("0"));
      }
 
     struct ALIAS *ki = Get_option_alias ( options, T_KD );
     if (!ki)
-     { Emettre_erreur_new ( "PID : ki. Select one R." );
+     { Emettre_erreur_new ( scan_instance, "PID : ki. Select one R." );
        return(g_strdup("0"));
      }
     if ( ki->classe != MNEMO_REGISTRE )
-     { Emettre_erreur_new ( "PID : ki must be R." );
+     { Emettre_erreur_new ( scan_instance, "PID : ki must be R." );
        return(g_strdup("0"));
      }
 
     struct ALIAS *kd = Get_option_alias ( options, T_KI );
     if (!kd)
-     { Emettre_erreur_new ( "PID : kd. Select one R." );
+     { Emettre_erreur_new ( scan_instance, "PID : kd. Select one R." );
        return(g_strdup("0"));
      }
     if ( kd->classe != MNEMO_REGISTRE )
-     { Emettre_erreur_new ( "PID : kd must be R." );
+     { Emettre_erreur_new ( scan_instance, "PID : kd must be R." );
        return(g_strdup("0"));
      }
 
     struct ALIAS *output_min = Get_option_alias ( options, T_MIN );
     if (!output_min)
-     { Emettre_erreur_new ( "PID : output_min. Select one R." );
+     { Emettre_erreur_new ( scan_instance, "PID : output_min. Select one R." );
        return(g_strdup("0"));
      }
     if ( output_min->classe != MNEMO_REGISTRE )
-     { Emettre_erreur_new ( "PID : output_min must be R." );
+     { Emettre_erreur_new ( scan_instance, "PID : output_min must be R." );
        return(g_strdup("0"));
      }
 
     struct ALIAS *output_max = Get_option_alias ( options, T_MAX );
     if (!output_max)
-     { Emettre_erreur_new ( "PID : output_max. Select one R." );
+     { Emettre_erreur_new ( scan_instance, "PID : output_max. Select one R." );
        return(g_strdup("0"));
      }
     if ( output_max->classe != MNEMO_REGISTRE )
-     { Emettre_erreur_new ( "PID : output_max must be R." );
+     { Emettre_erreur_new ( scan_instance, "PID : output_max must be R." );
        return(g_strdup("0"));
      }
 
@@ -555,20 +556,20 @@
 /* Entrées: la liste d'option associée au PID                                                                                 */
 /* Sortie: la chaine de calcul DLS                                                                                            */
 /******************************************************************************************************************************/
- struct ACTION *New_action_PID ( GList *options )
+ struct ACTION *New_action_PID ( void *scan_instance, GList *options )
   { gint reset = Get_option_entier ( options, T_RESET, 0 );
     if (reset==0)
-     { Emettre_erreur_new ( "PID : En action, l'option 'reset' est nécessaire." );
+     { Emettre_erreur_new ( scan_instance, "PID : En action, l'option 'reset' est nécessaire." );
        return(NULL);
      }
 
     struct ALIAS *input = Get_option_alias ( options, T_INPUT );
     if (!input)
-     { Emettre_erreur_new ( "PID : input unknown. Select one input (R or AI)." );
+     { Emettre_erreur_new ( scan_instance, "PID : input unknown. Select one input (R or AI)." );
        return(NULL);
      }
     if ( ! (input->classe == MNEMO_REGISTRE /*|| input->classe == MNEMO_ENTREE_ANA*/ ) )
-     { Emettre_erreur_new ( "PID : input must be R or AI." );
+     { Emettre_erreur_new ( scan_instance, "PID : input must be R or AI." );
        return(NULL);
      }
 
@@ -613,7 +614,7 @@
 /* Entrées: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
- struct INSTRUCTION *New_instruction( struct CONDITION *condition, GList *options, struct ACTION *actions )
+ struct INSTRUCTION *New_instruction( void *scan_instance, struct CONDITION *condition, GList *options, struct ACTION *actions )
   { if (!condition) return(NULL);
     if (!actions)   return(NULL);
     struct INSTRUCTION *instr = g_try_malloc0( sizeof(struct INSTRUCTION) );
@@ -621,7 +622,7 @@
     instr->condition = condition;
     instr->options = options;
     instr->actions = actions;
-    instr->line_number = DlsScanner_get_lineno();
+    instr->line_number = DlsScanner_get_lineno(scan_instance);
     return (instr);
   }
 /******************************************************************************************************************************/
@@ -1352,8 +1353,9 @@
 
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
 
+    void *scan_instance = NULL;
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
-    DlsScanner_set_lineno(1);                                                                     /* reset du numéro de ligne */
+
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR_NO_FILE;
@@ -1417,23 +1419,22 @@
        options = New_option_entier ( options, T_TYPE, MSG_DEFAUT );
        New_alias_permanent ( NULL, "MSG_COMM_HS", MNEMO_MSG, options );
 
-       SQL_Write_new ( "DELETE FROM mnemos_BI   WHERE deletable=1 AND tech_id='%s'", tech_id );
-       SQL_Write_new ( "DELETE FROM mnemos_MONO WHERE deletable=1 AND tech_id='%s'", tech_id );
-
+       DlsScanner_lex_init (&scan_instance);
        DlsScanner_debug = TRUE;/*Config.log_trad;*/
-       DlsScanner_restart(rc);
-       DlsScanner_parse();                                                                       /* Parsing du fichier source */
+       DlsScanner_restart(rc, scan_instance );
+       DlsScanner_set_lineno( 1, scan_instance );                                                    /* reset du numéro de ligne */
+       DlsScanner_parse( scan_instance );                                                        /* Parsing du fichier source */
        fclose(rc);
      }
 
     if (nbr_erreur)
-     { Emettre_erreur_new( "%d error%s found", nbr_erreur, (nbr_erreur>1 ? "s" : "") );
+     { Emettre_erreur_new ( scan_instance, "%d error%s found", nbr_erreur, (nbr_erreur>1 ? "s" : "") );
        retour = TRAD_DLS_SYNTAX_ERROR;
      }
     else
      { gchar chaine[4096], date[64];
        gint fd;
-       Emettre_erreur_new( "No error found" );                      /* Pas d'erreur rencontré (mais peut etre des warnings !) */
+       Emettre_erreur_new ( scan_instance, "No error found" );                      /* Pas d'erreur rencontré (mais peut etre des warnings !) */
        retour = TRAD_DLS_OK;
 
        unlink ( cible );
@@ -1484,7 +1485,7 @@
         }
 
 /*----------------------------------------------- Prise en charge du peuplement de la database -------------------------------*/
-       gchar *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
+       gchar *Liste_MONO = NULL, *Liste_BI = NULL, *Liste_DI = NULL, *Liste_DO = NULL, *Liste_AO = NULL, *Liste_AI = NULL;
        gchar *Liste_TEMPO = NULL, *Liste_HORLOGE = NULL, *Liste_REGISTRE = NULL, *Liste_WATCHDOG = NULL, *Liste_MESSAGE = NULL;
        gchar *Liste_CI = NULL, *Liste_CH = NULL;
        gchar *Liste_CADRANS = NULL, *Liste_MOTIF = NULL;
@@ -1498,12 +1499,14 @@
                     )
                 )
              )
-           { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
+           { Emettre_erreur_new ( scan_instance, "Warning: %s not used", alias->acronyme );
              retour = TRAD_DLS_WARNING;
            }
 /************************ Calcul des alias locaux pour préparer la suppression automatique ************************************/
           if (!strcmp(alias->tech_id, Dls_plugin.tech_id))
            {      if (alias->classe == MNEMO_BUS)        { }
+             else if (alias->classe == MNEMO_MONOSTABLE) { Liste_MONO = Add_csv ( Liste_MONO, alias->acronyme ); }
+             else if (alias->classe == MNEMO_BISTABLE)   { Liste_BI = Add_csv ( Liste_BI, alias->acronyme ); }
              else if (alias->classe == MNEMO_ENTREE)     { Liste_DI = Add_csv ( Liste_DI, alias->acronyme ); }
              else if (alias->classe == MNEMO_SORTIE)     { Liste_DO = Add_csv ( Liste_DO, alias->acronyme ); }
              else if (alias->classe == MNEMO_SORTIE_ANA) { Liste_AO = Add_csv ( Liste_AO, alias->acronyme ); }
@@ -1551,6 +1554,18 @@
           liste = liste->next;
         }
 /*--------------------------------------- Suppression des mnemoniques non utilisés -------------------------------------------*/
+       requete = g_strconcat ( "DELETE FROM mnemos_MONO WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_MONO?Liste_MONO:"''") , ")", NULL );
+       if (Liste_MONO) g_free(Liste_MONO);
+       SQL_Write ( requete );
+       g_free(requete);
+
+       requete = g_strconcat ( "DELETE FROM mnemos_BI WHERE deletable=1 AND tech_id='", tech_id, "' ",
+                               " AND acronyme NOT IN (", (Liste_BI?Liste_BI:"''") , ")", NULL );
+       if (Liste_BI) g_free(Liste_BI);
+       SQL_Write ( requete );
+       g_free(requete);
+
        requete = g_strconcat ( "DELETE FROM mnemos_AI WHERE deletable=1 AND tech_id='", tech_id, "' ",
                                " AND acronyme NOT IN (", (Liste_AI?Liste_AI:"''") , ")", NULL );
        if (Liste_AI) g_free(Liste_AI);
@@ -1627,6 +1642,7 @@
        if (Liste_MOTIF) g_free(Liste_MOTIF);
      }
     close(Id_log);
+    DlsScanner_lex_destroy (scan_instance);
     Liberer_memoire();
     g_free(Buffer);
     Buffer = NULL;

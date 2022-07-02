@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Include/Proto_traductionDLS.h     Interpretation du langage DLS                                                  */
+/* Watchdogd/TraductionDLS/Proto_traductionDLS.h     Interpretation du langage DLS                                            */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                           ven 23 nov 2007 20:33:19 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -31,12 +31,6 @@
  #include <glib.h>
  #include <stdio.h>
  #include "Erreur.h"
-
- enum { TRAD_DLS_OK,                                                                   /* Retour de la fonction Traduire DLS. */
-        TRAD_DLS_WARNING,
-        TRAD_DLS_SYNTAX_ERROR,
-        TRAD_DLS_ERROR_NO_FILE
-      };
 
  struct ACTION
   { gint taille_alors;
@@ -77,22 +71,21 @@
   };
 
 /****************************************************** Prototypes ************************************************************/
- extern gint Traduire_DLS( gchar *tech_id );                                                                 /* Dans Interp.c */
  extern char *New_chaine( int longueur );
- extern void Emettre( char *chaine );
- extern void Emettre_erreur_new( gchar *format, ... );
+ extern void Emettre( void *scan_instance, char *chaine );
+ extern void Emettre_erreur_new( void *scan_instance, gchar *format, ... );
  extern void Emettre_init_alias( void );
  extern gchar *New_condition_vars( int barre, gchar *nom );
- extern gchar *New_calcul_PID ( GList *options );
+ extern gchar *New_calcul_PID ( void *scan_instance, GList *options );
  extern struct CONDITION *New_condition_entier( gint entier );
  extern struct CONDITION *New_condition_valf( gdouble valf );
  extern struct CONDITION *New_condition( gboolean is_bool, gint taille );
- extern struct INSTRUCTION *New_instruction( struct CONDITION *condition, GList *options, struct ACTION *actions );
+ extern struct INSTRUCTION *New_instruction( void *scan_instance, struct CONDITION *condition, GList *options, struct ACTION *actions );
  extern void Del_instruction( struct INSTRUCTION *instr );
  extern void Del_condition( struct CONDITION *condition );
  extern void Del_actions( struct ACTION *action );
- extern struct CONDITION *New_condition_comparaison( struct CONDITION *condition_g, gint ordre, struct CONDITION *condition_d );
- extern struct CONDITION *New_condition_alias( gint barre, struct ALIAS *alias, GList *options );
+ extern struct CONDITION *New_condition_comparaison( void *scan_instance, struct CONDITION *condition_g, gint ordre, struct CONDITION *condition_d );
+ extern struct CONDITION *New_condition_alias( void *scan_instance, gint barre, struct ALIAS *alias, GList *options );
  extern gint Get_option_entier( GList *liste_options, gint token, gint defaut );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( struct ALIAS *alias, GList *options );
@@ -109,18 +102,20 @@
  extern struct ACTION *New_action_WATCHDOG( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_REGISTRE( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_AO( struct ALIAS *alias, GList *options );
- extern struct ACTION *New_action_PID ( GList *options );
+ extern struct ACTION *New_action_PID ( void *scan_instance, GList *options );
  extern struct ALIAS *New_alias( gchar *tech_id, gchar *acronyme, gint classe, GList *options );
  extern struct ALIAS *New_external_alias( gchar *tech_id, gchar *acronyme, GList *options );
  extern struct ALIAS *Get_local_alias( gchar *tech_id, gchar *acronyme );
  extern struct OPTION *New_option( void );
  /*extern int Get_option_entier( GList *liste_options, gint type );*/
  extern void Liberer_options ( GList *options );
- extern int DlsScanner_error ( char *s );
+ extern int  DlsScanner_error ( void *scan_instance ,char *s );
 /* Fonctions mise a disposition par Flex et Bison */
- extern int  DlsScanner_lex (void);
- extern void DlsScanner_restart (FILE * input_file);
- extern int  DlsScanner_get_lineno (void );
- extern void DlsScanner_set_lineno (int _line_number);
+ extern int  DlsScanner_lex ( YYSTYPE *lvalp, void *scan_instance );
+ extern int  DlsScanner_lex_init ( void **scan_instance );
+ extern int  DlsScanner_lex_destroy ( void *scan_instance );
+ extern void DlsScanner_restart (FILE * input_file, void *scan_instance );
+ extern int  DlsScanner_get_lineno (void *scan_instance);
+ extern void DlsScanner_set_lineno (int _line_number, void *scan_instance );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

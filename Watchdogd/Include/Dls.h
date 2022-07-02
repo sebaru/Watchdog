@@ -65,6 +65,12 @@
     NBR_DLS_COMPIL_STATUS
   };
 
+ enum { TRAD_DLS_OK,                                                                   /* Retour de la fonction Traduire DLS. */
+        TRAD_DLS_WARNING,
+        TRAD_DLS_SYNTAX_ERROR,
+        TRAD_DLS_ERROR_NO_FILE
+      };
+
  #define NBR_CARAC_TECHID     32
  #define NBR_CARAC_ACRONYME   64
  #define NBR_CARAC_UNITE      32
@@ -304,6 +310,8 @@
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
+ extern gint Traduire_DLS( gchar *tech_id );                                                                 /* Dans Interp.c */
+
  extern gboolean Recuperer_plugins_dlsDB( struct DB **db );                                                  /* Dans Dls_db.c */
  extern struct DLS_PLUGIN *Recuperer_plugins_dlsDB_suite( struct DB **db );
  extern struct DLS_PLUGIN *Rechercher_plugin_dlsDB( gchar *tech_id_src );

@@ -215,7 +215,7 @@
     if (Dls_auto_create_plugin( thread_tech_id, description ) == FALSE)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: DLS Create ERROR (%s)\n", __func__, thread_tech_id, description ); }
 
-    module->tour_par_sec = Mnemo_create_thread_AI ( module, "THREAD_TOUR_PAR_SEC", "Nombre de tour par seconde", "t/s", ARCHIVE_1_MIN );
+    module->ai_nbr_tour_par_sec = Mnemo_create_thread_AI ( module, "THREAD_TOUR_PAR_SEC", "Nombre de tour par seconde", "t/s", ARCHIVE_1_MIN );
     Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Thread '%s' is UP", __func__, thread_tech_id );
   }
@@ -227,7 +227,7 @@
  void Thread_end ( struct THREAD *module )
   { Thread_send_comm_to_master ( module, FALSE );
     if (module->vars) g_free(module->vars);
-    Json_node_unref ( module->tour_par_sec );
+    Json_node_unref ( module->ai_nbr_tour_par_sec );
     if (module->Master_websocket && soup_websocket_connection_get_state (module->Master_websocket) == SOUP_WEBSOCKET_STATE_OPEN)
      { soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
        while ( module->Master_websocket ) sched_yield();

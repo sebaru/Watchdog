@@ -83,7 +83,7 @@
     gint cpt_1_minute = Partage->top + 600;
     while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { if (cpt_1_minute < Partage->top)                                                      /* Sauvegarde toutes les minutes */
-        { Ajouter_arch ( "SYS", "ARCHIVE_BUFFER_SIZE", 1.0*Partage->archive_liste_taille );
+        { Ajouter_arch ( "SYS", "ARCHIVE_LIST_SIZE", 1.0*Partage->archive_liste_taille );
           cpt_1_minute += 600;
         }
 
