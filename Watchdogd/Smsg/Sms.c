@@ -35,40 +35,6 @@
  #include "Sms.h"
 
 /******************************************************************************************************************************/
-/* Smsg_is_allow_cde : Renvoi TRUE si le telephone en parametre peut set ou reset un bit interne                              */
-/* Entrée: le nom du destinataire                                                                                             */
-/* Sortie : booléen, TRUE/FALSE                                                                                               */
-/******************************************************************************************************************************/
- static gboolean Smsg_is_allow_cde ( struct THREAD *module, gchar *tel )
-  { gchar *phone;
-    gboolean retour;
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    phone = Normaliser_chaine ( tel );
-    if (!phone)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                 "%s: %s: Normalisation phone impossible", __func__ , thread_tech_id);
-       return(FALSE);
-     }
-
-    JsonNode *RootNode = Json_node_create();
-    if (!RootNode)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                 "%s: %s: Memory error", __func__, thread_tech_id );
-       g_free(phone);
-       return(FALSE);
-     }
-
-    SQL_Select_to_json_node ( RootNode, "recipient",
-                              "SELECT id,username,enable,comment,notification,phone,allow_cde "
-                              "FROM users as user WHERE enable=1 AND allow_cde=1 AND phone LIKE '%s'"
-                              " ORDER BY username LIMIT 1", phone );
-    g_free(phone);
-
-    retour = (Json_get_int ( RootNode, "nbr_recipient" ) == 1 ? TRUE : FALSE);
-    Json_node_unref(RootNode);
-    return(retour);
-  }
-/******************************************************************************************************************************/
 /* Smsg_Send_CB: Appelé par le téléphone quand le SMS est parti                                                               */
 /* Entrée: le message à envoyer sateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
@@ -344,22 +310,18 @@
        return;
      }
 
-    JsonNode *RootNode = Json_node_create ();
-    if (!RootNode)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: %s: Memory Error", __func__, thread_tech_id );
+/********************************************* Chargement des informations en bases *******************************************/
+    JsonNode *UsersNode = Http_Post_to_global_API ( "/run/user/can_recv_sms", NULL );
+    if (!UsersNode || Json_get_int ( UsersNode, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USERS from API", __func__, thread_tech_id );
        return;
      }
 
-/********************************************* Chargement des informations en bases *******************************************/
-    SQL_Select_to_json_node ( RootNode, "recipients",
-                              "SELECT id,username,enable,comment,notification,phone,allow_cde "
-                              "FROM users AS user WHERE enable=1 AND notification=1 ORDER BY username" );
-
     gint sms_notification = Json_get_int ( msg, "sms_notification" );
-    GList *recipients = json_array_get_elements ( Json_get_array ( RootNode, "recipients" ) );
+    GList *recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
     while(recipients)
-     { JsonNode *element = recipients->data;
-       gchar *user_phone = Json_get_string ( element, "phone" );
+     { JsonNode *user = recipients->data;
+       gchar *user_phone = Json_get_string ( user, "phone" );
        switch (sms_notification)
         { case MESSAGE_SMS_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
@@ -378,7 +340,7 @@
        recipients = g_list_next(recipients);
      }
     g_list_free(recipients);
-    Json_node_unref ( RootNode );
+    Json_node_unref ( UsersNode );
     Http_Post_to_local_BUS_AI ( module, vars->ai_nbr_sms, ++vars->nbr_sms, TRUE );
   }
 /******************************************************************************************************************************/
@@ -422,18 +384,19 @@
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Memory Error for '%s'", __func__, thread_tech_id, from );
        return;
      }
-    Json_add_string ( RootNode, "phone", from );
+    Json_node_add_string ( RootNode, "phone", from );
 
-    JsonNode *UserNode = Http_Post_to_Global_API ( "/user/list", RootNode );
+    JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt", RootNode );
     Json_node_unref ( RootNode );
     if (!UserNode || Json_get_int ( UserNode, "api_status" ) != 200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );
        goto end_user;
      }
-        
+
     if ( Json_get_bool ( UserNode, "can_send_txt" ) == FALSE )
      { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
-                "%s: %s: %s is not allowed to send txt. Dropping message %s...", __func__, thread_tech_id, from, texte );
+                "%s: %s: %s ('%s') is not allowed to send txt. Dropping command '%s'...", __func__, thread_tech_id,
+                from, Json_get_string ( UserNode, "email" ), texte );
        goto end_user;
      }
 
@@ -464,8 +427,8 @@
      }
     Json_node_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
     Json_node_add_string ( RootNode, "thread_acronyme", texte );
-     
-    JsonNode *MapNode = Http_Post_to_Global_API ( "/map/from_thread", RootNode );
+
+    JsonNode *MapNode = Http_Post_to_global_API ( "/map/from_thread", RootNode );
     Json_node_unref ( RootNode );
     if (!MapNode || Json_get_int ( MapNode, "api_status" ) != 200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );

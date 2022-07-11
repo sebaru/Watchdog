@@ -58,7 +58,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y subversion libtool automake autoconf gcc git cmake openssl
   apt install -y libglib2.0-dev bison flex libgif-dev
   apt install -y libupsclient-dev libssl-dev default-libmysqlclient-dev libstrophe-dev libgammu-dev
-  apt install -y libpopt-dev libssl-dev libmariadbclient-dev
+  apt install -y libpopt-dev libssl-dev libmariadb-dev
   apt install -y sox libsox-fmt-all python3-pip mpg123
   apt install -y libjson-glib-dev libgpiod-dev
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
