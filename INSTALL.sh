@@ -12,7 +12,7 @@ if [ "$SOCLE" = "fedora" ]
  then
   echo "Installing Fedora dependencies"
   dnf update -y
-  dnf install -y subversion libtool automake autoconf gcc gcc-c++ redhat-rpm-config
+  dnf install -y libtool automake autoconf gcc gcc-c++ redhat-rpm-config
   dnf install -y glib2-devel bison flex giflib-devel openssl
   dnf install -y nut-devel mariadb-devel libuuid-devel
   dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel

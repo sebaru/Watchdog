@@ -416,56 +416,76 @@
   { struct SMS_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    if ( Smsg_is_allow_cde ( module, from ) == FALSE )
-     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
-                "%s: %s: unknown sender %s. Dropping message %s...", __func__, thread_tech_id, from, texte );
-       return;
-     }
-
-    if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
-     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Ping Received from '%s'. Sending Pong", __func__, thread_tech_id, from );
-       Envoyer_smsg_gsm_text ( module, "Pong !" );
-       return;
-     }
-
-    if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
-     { vars->sending_is_disabled = TRUE;
-       Envoyer_smsg_gsm_text ( module, "Sending SMS is off !" );
-       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is DISABLED by '%s'", __func__, thread_tech_id, from );
-       return;
-     }
-
-    if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
-     { Envoyer_smsg_gsm_text ( module, "Sending SMS is on !" );
-       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is ENABLED by '%s'", __func__, thread_tech_id, from );
-       vars->sending_is_disabled = FALSE;
-       return;
-     }
 
     JsonNode *RootNode = Json_node_create();
     if ( RootNode == NULL )
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Memory Error for '%s'", __func__, thread_tech_id, from );
        return;
      }
-    SQL_Select_to_json_node ( RootNode, "results",
-                              "SELECT * FROM mnemos_DI AS m "
-                              "INNER JOIN mappings AS map ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
-                              "WHERE map.thread_tech_id='_COMMAND_TEXT' AND map.thread_acronyme LIKE '%%%s%%'", texte );
+    Json_add_string ( RootNode, "phone", from );
 
-    if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, texte );
-       Envoyer_smsg_gsm_text ( module, "Error searching Database .. Sorry .." );
-       goto end;
+    JsonNode *UserNode = Http_Post_to_Global_API ( "/user/list", RootNode );
+    Json_node_unref ( RootNode );
+    if (!UserNode || Json_get_int ( UserNode, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );
+       goto end_user;
+     }
+        
+    if ( Json_get_bool ( UserNode, "can_send_txt" ) == FALSE )
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
+                "%s: %s: %s is not allowed to send txt. Dropping message %s...", __func__, thread_tech_id, from, texte );
+       goto end_user;
      }
 
-    gint nbr_results = Json_get_int ( RootNode, "nbr_results" );
+    if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Ping Received from '%s'. Sending Pong", __func__, thread_tech_id, from );
+       Envoyer_smsg_gsm_text ( module, "Pong !" );
+       goto end_user;
+     }
+
+    if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
+     { vars->sending_is_disabled = TRUE;
+       Envoyer_smsg_gsm_text ( module, "Sending SMS is off !" );
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is DISABLED by '%s'", __func__, thread_tech_id, from );
+       goto end_user;
+     }
+
+    if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
+     { Envoyer_smsg_gsm_text ( module, "Sending SMS is on !" );
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is ENABLED by '%s'", __func__, thread_tech_id, from );
+       vars->sending_is_disabled = FALSE;
+       goto end_user;
+     }
+
+    RootNode = Json_node_create();
+    if ( RootNode == NULL )
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: MapNode Error for '%s'", __func__, thread_tech_id, from );
+       goto end_user;
+     }
+    Json_node_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
+    Json_node_add_string ( RootNode, "thread_acronyme", texte );
+     
+    JsonNode *MapNode = Http_Post_to_Global_API ( "/map/from_thread", RootNode );
+    Json_node_unref ( RootNode );
+    if (!MapNode || Json_get_int ( MapNode, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );
+       goto end_map;
+     }
+
+    if ( Json_has_member ( MapNode, "nbr_results" ) == FALSE )
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, texte );
+       Envoyer_smsg_gsm_text ( module, "Error searching Database .. Sorry .." );
+       goto end_map;
+     }
+
+    gint nbr_results = Json_get_int ( MapNode, "nbr_results" );
     if ( nbr_results == 0 )
      { Envoyer_smsg_gsm_text ( module, "Je n'ai pas trouvé, désolé." ); }
     else
      { if ( nbr_results > 1 )                                               /* Si trop d'enregistrements, demande de préciser */
         { Envoyer_smsg_gsm_text ( module, "Aîe, plusieurs choix sont possibles ... :" ); }
 
-       GList *Results = json_array_get_elements ( Json_get_array ( RootNode, "results" ) );
+       GList *Results = json_array_get_elements ( Json_get_array ( MapNode, "results" ) );
        if ( nbr_results > 1 )
         { GList *results = Results;
           while(results)
@@ -486,15 +506,19 @@
           gchar *tech_id         = Json_get_string ( element, "tech_id" );
           gchar *acronyme        = Json_get_string ( element, "acronyme" );
           gchar *libelle         = Json_get_string ( element, "libelle" );
-          Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
-                    thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+          Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' (%s)-> '%s:%s' - %s", __func__,
+                    thread_tech_id, from, Json_get_string( UserNode, "email" ), thread_acronyme, tech_id, acronyme, libelle );
           Http_Post_to_local_BUS_CDE ( module, tech_id, acronyme );
-          Envoyer_smsg_gsm_text ( module, "Fait." );
+          gchar chaine[256];
+          g_snprintf ( chaine, sizeof(chaine), "'%s' fait.", texte );
+          Envoyer_smsg_gsm_text ( module, chaine );
         }
        g_list_free(Results);
      }
-end:
-    Json_node_unref( RootNode );
+end_map:
+    Json_node_unref ( MapNode );
+end_user:
+    Json_node_unref ( UserNode );
   }
 /******************************************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                                               */
