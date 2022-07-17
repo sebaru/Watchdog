@@ -39,7 +39,6 @@ if [ "$SOCLE" = "fedora" ]
   rm -rf libphidget22*
 
   echo "/usr/local/lib" > /etc/ld.so.conf.d/local.conf
-  ldconfig
 
 fi
 
@@ -75,6 +74,8 @@ echo "Compiling and installing"
 make install
 cd ..
 rm -rf watchdogabls
+
+ldconfig
 systemctl daemon-reload
 systemctl start Watchdogd
 #      echo "Pour lancer Watchdog, tapez 'systemctl --user enable Watchdogd-user --now'"
