@@ -6,7 +6,7 @@
 SUBDIRS=
 
 lib_LTLIBRARIES                     = libwatchdog-server-meteo.la
-libwatchdog_server_meteo_la_SOURCES = Meteo.c Meteo.h admin_meteo.c
+libwatchdog_server_meteo_la_SOURCES = Meteo.c Meteo.h
 
 libwatchdog_server_meteo_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
                                       `mysql_config --libs` \
