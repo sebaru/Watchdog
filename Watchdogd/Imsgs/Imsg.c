@@ -101,16 +101,16 @@
 
     Json_node_add_string ( RootNode, "xmpp", hostonly );
 
-    JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt", RootNode );
+    JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt_cde", RootNode );
     Json_node_unref ( RootNode );
     if (!UserNode || Json_get_int ( UserNode, "api_status" ) != 200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );
        goto end_user;
      }
 
-    if ( Json_get_bool ( UserNode, "can_send_txt" ) == FALSE )
+    if ( Json_get_bool ( UserNode, "can_send_txt_cde" ) == FALSE )
      { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
-                "%s: %s: %s ('%s') is not allowed to send txt. Dropping command '%s'...", __func__, thread_tech_id,
+                "%s: %s: %s ('%s') is not allowed to send txt_cde. Dropping command '%s'...", __func__, thread_tech_id,
                 from, Json_get_string ( UserNode, "email" ), message );
        goto end_user;
      }
