@@ -395,9 +395,9 @@
        goto end_user;
      }
 
-    if ( Json_get_bool ( UserNode, "can_send_txt" ) == FALSE )
+    if ( Json_get_bool ( UserNode, "can_send_txt_cde" ) == FALSE )
      { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
-                "%s: %s: %s ('%s') is not allowed to send txt. Dropping command '%s'...", __func__, thread_tech_id,
+                "%s: %s: %s ('%s') is not allowed to send txt_cde. Dropping command '%s'...", __func__, thread_tech_id,
                 from, Json_get_string ( UserNode, "email" ), texte );
        goto end_user;
      }
