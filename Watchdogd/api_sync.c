@@ -61,7 +61,7 @@
        else if (!pid)
         { system("cd SRC; ./autogen.sh; sudo make install; " );
           Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: UPGRADE: done. Restarting.", __func__ );
-          system("sudo killall watchdogd" );
+          Partage->com_msrv.Thread_run = FALSE;
           exit(0);
         }
      }
