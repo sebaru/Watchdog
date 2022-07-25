@@ -388,7 +388,7 @@
      }
     Json_node_add_string ( RootNode, "phone", from );
 
-    JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt", RootNode );
+    JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt_cde", RootNode );
     Json_node_unref ( RootNode );
     if (!UserNode || Json_get_int ( UserNode, "api_status" ) != 200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );
