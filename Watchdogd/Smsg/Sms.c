@@ -428,7 +428,7 @@
     Json_node_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
     Json_node_add_string ( RootNode, "thread_acronyme", texte );
 
-    JsonNode *MapNode = Http_Post_to_global_API ( "/mapping/search_txt", RootNode );
+    JsonNode *MapNode = Http_Post_to_global_API ( "/run/mapping/search_txt", RootNode );
     Json_node_unref ( RootNode );
     if (!MapNode || Json_get_int ( MapNode, "api_status" ) != 200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );

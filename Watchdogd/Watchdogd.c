@@ -383,7 +383,7 @@
     if ( Config.headless )
          { g_snprintf(Config.home, sizeof(Config.home), "%s", pwd->pw_dir ); }
     else { g_snprintf(Config.home, sizeof(Config.home), "%s/.watchdog", pwd->pw_dir ); }
-    mkdir (Config.home, 0);
+    mkdir (Config.home, S_IRUSR | S_IWUSR | S_IXUSR );
 
     if (Config.instance_is_master)
      { gchar chaine[128];
