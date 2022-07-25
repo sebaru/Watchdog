@@ -311,7 +311,7 @@
      }
 
 /********************************************* Chargement des informations en bases *******************************************/
-    JsonNode *UsersNode = Http_Post_to_global_API ( "/run/user/can_recv_sms", NULL );
+    JsonNode *UsersNode = Http_Post_to_global_API ( "/run/users/wanna_be_notified", NULL );
     if (!UsersNode || Json_get_int ( UsersNode, "api_status" ) != 200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USERS from API", __func__, thread_tech_id );
        return;
@@ -322,20 +322,22 @@
     while(recipients)
      { JsonNode *user = recipients->data;
        gchar *user_phone = Json_get_string ( user, "phone" );
-       switch (sms_notification)
-        { case MESSAGE_SMS_YES:
-               if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
-                { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                            "%s: %s: Error sending with GSM. Falling back to OVH", __func__, thread_tech_id );
-                  Envoi_sms_ovh( module, msg, user_phone );
-                }
-               break;
-          case MESSAGE_SMS_GSM_ONLY:
-               Envoi_sms_gsm ( module, msg, user_phone );
-               break;
-          case MESSAGE_SMS_OVH_ONLY:
-               Envoi_sms_ovh ( module, msg, user_phone );
-               break;
+       if (user_phone && strlen(user_phone))
+        { switch (sms_notification)
+           { case MESSAGE_SMS_YES:
+                  if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
+                   { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                               "%s: %s: Error sending with GSM. Falling back to OVH", __func__, thread_tech_id );
+                     Envoi_sms_ovh( module, msg, user_phone );
+                   }
+                  break;
+             case MESSAGE_SMS_GSM_ONLY:
+                  Envoi_sms_gsm ( module, msg, user_phone );
+                  break;
+             case MESSAGE_SMS_OVH_ONLY:
+                  Envoi_sms_ovh ( module, msg, user_phone );
+                  break;
+           }
         }
        recipients = g_list_next(recipients);
      }

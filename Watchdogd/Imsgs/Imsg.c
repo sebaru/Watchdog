@@ -43,63 +43,30 @@
     xmpp_stanza_release ( stanza );
   }
 /******************************************************************************************************************************/
-/* Imsgs_recipient_allow_command : Renvoie un contact IMSGDB si delui-ci dispose du flag allow_cde                            */
-/* Entrée: le jabber_id                                                                                                       */
-/* Sortie: struct IMSGSDB *imsg                                                                                               */
-/******************************************************************************************************************************/
- static gboolean Imsgs_recipient_is_allow_command ( struct THREAD *module, gchar *jabber_id )
-  { gchar *jabberid, hostonly[80], *ptr;
-
-    JsonNode *RootNode = Json_node_create ();
-    if (!RootNode)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Memory Error", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( hostonly, sizeof(hostonly), "%s", jabber_id );
-    ptr = strstr( hostonly, "/" );
-    if (ptr) *ptr=0;
-
-    jabberid = Normaliser_chaine ( hostonly );
-    if (!jabberid)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation jabberid impossible", __func__ );
-       Json_node_unref(RootNode);
-       return(FALSE);
-     }
-
-    SQL_Select_to_json_node ( RootNode, NULL,
-                             "SELECT allow_cde "
-                             "FROM users AS user WHERE enable=1 AND allow_cde=1 AND xmpp LIKE '%s' LIMIT 1", jabberid );
-    g_free(jabberid);
-    gboolean retour = FALSE;
-    if (Json_has_member ( RootNode, "allow_cde" ) && Json_get_bool ( RootNode, "allow_cde" ) == TRUE) retour = TRUE;
-    Json_node_unref ( RootNode );
-    return( retour );
-  }
-/******************************************************************************************************************************/
 /* Imsgs_Envoi_message_to_all_available : Envoi un message aux contacts disponibles                                           */
 /* Entrée: le message                                                                                                         */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void Imsgs_Envoi_message_to_all_available ( struct THREAD *module, gchar *message )
-  { JsonNode *RootNode = Json_node_create ();
-    if (!RootNode)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: Memory Error", __func__ );
+  {
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+
+/********************************************* Chargement des informations en bases *******************************************/
+    JsonNode *UsersNode = Http_Post_to_global_API ( "/run/users/wanna_be_notified", NULL );
+    if (!UsersNode || Json_get_int ( UsersNode, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USERS from API", __func__, thread_tech_id );
        return;
      }
-/********************************************* Chargement des informations en bases *******************************************/
-    SQL_Select_to_json_node ( RootNode, "recipients",
-                              "SELECT id,username,enable,comment,notification,xmpp,allow_cde,imsg_available "
-                              "FROM users AS user WHERE enable=1 AND notification=1 AND imsg_available=1 ORDER BY username" );
 
-    GList *recipients = json_array_get_elements ( Json_get_array ( RootNode, "recipients" ) );
+    GList *recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
     while(recipients)
-     { JsonNode *element = recipients->data;
-       Imsgs_Envoi_message_to ( module, Json_get_string ( element, "xmpp" ), message );
+     { JsonNode *user = recipients->data;
+       gchar *xmpp = Json_get_string ( user, "xmpp" );
+       if (xmpp && strlen(xmpp)) Imsgs_Envoi_message_to ( module, Json_get_string ( user, "xmpp" ), message );
        recipients = g_list_next(recipients);
      }
     g_list_free(recipients);
-    Json_node_unref ( RootNode );
+    Json_node_unref ( UsersNode );
   }
 /******************************************************************************************************************************/
 /* Imsgs_handle_message_CB : CB appellé lorsque l'on recoit un message xmpp                                                   */
@@ -121,41 +88,67 @@
 
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': From '%s' -> '%s'", __func__, thread_tech_id, from, message );
 
-    if (Imsgs_recipient_is_allow_command ( module, from ) == FALSE)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                "%s: '%s': unknown sender '%s' or not allow to send command. Dropping message...", __func__, thread_tech_id, from );
-       goto end;
+    JsonNode *RootNode = Json_node_create();
+    if ( RootNode == NULL )
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Memory Error for '%s'", __func__, thread_tech_id, from );
+       return(1);
+     }
+
+    gchar hostonly[128];
+    g_snprintf( hostonly, sizeof(hostonly), "%s", from ); /* Remove all char after '/' */
+    gchar *ptr = strstr( hostonly, "/" );
+    if (ptr) *ptr=0;
+
+    Json_node_add_string ( RootNode, "xmpp", hostonly );
+
+    JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt", RootNode );
+    Json_node_unref ( RootNode );
+    if (!UserNode || Json_get_int ( UserNode, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );
+       goto end_user;
+     }
+
+    if ( Json_get_bool ( UserNode, "can_send_txt" ) == FALSE )
+     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
+                "%s: %s: %s ('%s') is not allowed to send txt. Dropping command '%s'...", __func__, thread_tech_id,
+                from, Json_get_string ( UserNode, "email" ), message );
+       goto end_user;
      }
 
     if ( ! strcasecmp( message, "ping" ) )                                                             /* Interfacage de test */
      { Imsgs_Envoi_message_to( module, from, "Pong !" );
-       goto end;
+       goto end_user;
      }
 
-    JsonNode *RootNode = Json_node_create();
+    RootNode = Json_node_create();
     if ( RootNode == NULL )
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Memory Error for '%s'", __func__, thread_tech_id, from );
-       goto end;
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: MapNode Error for '%s'", __func__, thread_tech_id, from );
+       goto end_user;
      }
-    SQL_Select_to_json_node ( RootNode, "results",
-                              "SELECT * FROM mnemos_DI AS m "
-                              "INNER JOIN mappings AS map ON m.tech_id = map.tech_id AND m.acronyme = map.acronyme "
-                              "WHERE map.thread_tech_id='_COMMAND_TEXT' AND map.thread_acronyme LIKE '%%%s%%'", message );
+    Json_node_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
+    Json_node_add_string ( RootNode, "thread_acronyme", message );
 
-    if ( Json_has_member ( RootNode, "nbr_results" ) == FALSE )
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, message );
-       Imsgs_Envoi_message_to( module, from, "Error searching Database .. Sorry .." );
-       goto end;
+    JsonNode *MapNode = Http_Post_to_global_API ( "/run/mapping/search_txt", RootNode );
+    Json_node_unref ( RootNode );
+    if (!MapNode || Json_get_int ( MapNode, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER '%s' from API for '%s'", __func__, thread_tech_id, from, message );
+       goto end_map;
      }
 
-    gint nbr_results = Json_get_int ( RootNode, "nbr_results" );
+    if ( Json_has_member ( MapNode, "nbr_results" ) == FALSE )
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for user '%s', '%s'", __func__, thread_tech_id, from, message );
+       Imsgs_Envoi_message_to( module, from,"Error searching Database .. Sorry .." );
+       goto end_map;
+     }
+
+    gint nbr_results = Json_get_int ( MapNode, "nbr_results" );
     if ( nbr_results == 0 )
      { Imsgs_Envoi_message_to( module, from, "Je n'ai pas trouvé, désolé." ); }
     else
      { if ( nbr_results > 1 )                                               /* Si trop d'enregistrements, demande de préciser */
         { Imsgs_Envoi_message_to( module, from, "Aîe, plusieurs choix sont possibles ... :" ); }
 
-       GList *Results = json_array_get_elements ( Json_get_array ( RootNode, "results" ) );
+       GList *Results = json_array_get_elements ( Json_get_array ( MapNode, "results" ) );
        if ( nbr_results > 1 )
         { GList *results = Results;
           while(results)
@@ -166,7 +159,7 @@
              gchar *libelle         = Json_get_string ( element, "libelle" );
              Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
                        thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
-             Imsgs_Envoi_message_to ( module, from, thread_acronyme );                              /* Envoi des différents choix */
+             Imsgs_Envoi_message_to ( module, from, thread_acronyme );                          /* Envoi des différents choix */
              results = g_list_next(results);
            }
         }
@@ -176,16 +169,21 @@
           gchar *tech_id         = Json_get_string ( element, "tech_id" );
           gchar *acronyme        = Json_get_string ( element, "acronyme" );
           gchar *libelle         = Json_get_string ( element, "libelle" );
-          Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
-                    thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
+          Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' (%s)-> '%s:%s' - %s", __func__,
+                    thread_tech_id, from, Json_get_string( UserNode, "email" ), thread_acronyme, tech_id, acronyme, libelle );
           Http_Post_to_local_BUS_CDE ( module, tech_id, acronyme );
-          Imsgs_Envoi_message_to ( module, from, "Fait." );                                     /* Envoi des différents choix */
+          gchar chaine[256];
+          g_snprintf ( chaine, sizeof(chaine), "'%s' fait.", message );
+          Imsgs_Envoi_message_to ( module, from, chaine );
         }
        g_list_free(Results);
      }
-end:
-    Json_node_unref( RootNode );
+
+end_map:
+    Json_node_unref ( MapNode );
+end_user:
     xmpp_free(vars->ctx, message);
+    Json_node_unref ( UserNode );
     return(1);
   }
 /******************************************************************************************************************************/
@@ -194,23 +192,14 @@ end:
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Imsgs_Sauvegarder_statut_contact ( struct THREAD *module, const gchar *jabber_id, gboolean available )
-  { gchar *jabberid, hostonly[80], *ptr;
+  { gchar hostonly[80], *ptr;
 
     g_snprintf( hostonly, sizeof(hostonly), "%s", jabber_id );
     ptr = strstr( hostonly, "/" );
     if (ptr) *ptr=0;
 
-    jabberid = Normaliser_chaine ( hostonly );
-    if (!jabberid)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation jabberid '%s' impossible", __func__, hostonly );
-       return;
-     }
-
-    if (SQL_Write_new ( "UPDATE users SET imsg_available='%d' WHERE xmpp='%s'", available, jabberid ) == FALSE)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: Requete failed", __func__ ); }
-    else { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-                    "%s : jabber_id %s -> Availability updated to %d.", __func__, jabber_id, available );
-         }
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
+              "%s : jabber_id %s -> Availability updated to %d.", __func__, jabber_id, available );
   }
 /******************************************************************************************************************************/
 /* Imsgs_set_presence: Défini le statut présenté aux partenaires                                                              */
