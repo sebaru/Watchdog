@@ -395,8 +395,14 @@
        goto end_user;
      }
 
-    if ( Json_get_bool ( UserNode, "can_send_txt_cde" ) == FALSE )
-     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
+    if ( !Json_has_member ( UserNode, "email" ) )
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                "%s: %s: %s is not an known user. Dropping command '%s'...", __func__, thread_tech_id, from, texte );
+       goto end_user;
+     }
+
+    if ( !Json_has_member ( UserNode, "can_send_txt_cde" ) || Json_get_bool ( UserNode, "can_send_txt_cde" ) == FALSE )
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: %s: %s ('%s') is not allowed to send txt_cde. Dropping command '%s'...", __func__, thread_tech_id,
                 from, Json_get_string ( UserNode, "email" ), texte );
        goto end_user;

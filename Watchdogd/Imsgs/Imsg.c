@@ -47,7 +47,7 @@
 /* Entrée: le message                                                                                                         */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- void Imsgs_Envoi_message_to_all_available ( struct THREAD *module, gchar *message )
+ static void Imsgs_Envoi_message_to_all_available ( struct THREAD *module, gchar *message )
   {
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
@@ -62,7 +62,7 @@
     while(recipients)
      { JsonNode *user = recipients->data;
        gchar *xmpp = Json_get_string ( user, "xmpp" );
-       if (xmpp && strlen(xmpp)) Imsgs_Envoi_message_to ( module, Json_get_string ( user, "xmpp" ), message );
+       if (xmpp && strlen(xmpp)) Imsgs_Envoi_message_to ( module, xmpp, message );
        recipients = g_list_next(recipients);
      }
     g_list_free(recipients);
@@ -82,7 +82,7 @@
     const gchar *from = xmpp_stanza_get_attribute ( stanza, "from" );
     gchar *message    = xmpp_message_get_body ( stanza );
     if (!from || !message)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': Error : from or message = NULL", __func__, thread_tech_id );
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': Error: from or message = NULL", __func__, thread_tech_id );
        return(1);
      }
 
@@ -108,8 +108,14 @@
        goto end_user;
      }
 
-    if ( Json_get_bool ( UserNode, "can_send_txt_cde" ) == FALSE )
-     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
+    if ( !Json_has_member ( UserNode, "email" ) )
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                "%s: %s: %s is not an known user. Dropping command '%s'...", __func__, thread_tech_id, from, message );
+       goto end_user;
+     }
+
+    if ( !Json_has_member ( UserNode, "can_send_txt_cde" ) || Json_get_bool ( UserNode, "can_send_txt_cde" ) == FALSE )
+     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                 "%s: %s: %s ('%s') is not allowed to send txt_cde. Dropping command '%s'...", __func__, thread_tech_id,
                 from, Json_get_string ( UserNode, "email" ), message );
        goto end_user;
@@ -352,9 +358,7 @@ reconnect:
              Imsgs_Envoi_message_to_all_available ( module, chaine );
            }
           else if ( !strcasecmp( tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
-          else
-           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': tag '%s' not for this thread", __func__,
-                       jabber_id, tag ); }
+          else Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': tag '%s' not for this thread", __func__, jabber_id, tag );
           Json_node_unref(request);
         }
      }                                                                                         /* Fin du while partage->arret */
