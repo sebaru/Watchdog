@@ -6,6 +6,7 @@ AC_DEFINE_UNQUOTED([WTD_VERSION], "[m4_esyscmd_s([sh -c "git describe --tags | t
 
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
+AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE([foreign])
 
 dnl Checks for programs.
@@ -14,7 +15,7 @@ AC_PROG_AWK
 AC_PROG_YACC
 AC_PROG_CC
 AC_PROG_CPP
-AM_PROG_LEX(noyywrap)
+AC_PROG_LEX(noyywrap)
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET

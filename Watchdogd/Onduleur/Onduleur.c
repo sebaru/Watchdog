@@ -112,6 +112,7 @@
           g_snprintf( description, sizeof(description), "%s", buffer + strlen(name) + 10 );
           description [ strlen(description) - 1 ] = 0; /* supprime les " du début/fin */
           Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Reading GET UPSDESC %s", __func__, thread_tech_id, description );
+
 #warning a modifier en envoie API
           /*SQL_Write_new ( "UPDATE %s SET description='%s' WHERE thread_tech_id='%s'",
                           module->lib->name, description, thread_tech_id );*/
