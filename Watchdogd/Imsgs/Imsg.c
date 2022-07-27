@@ -62,7 +62,15 @@
     while(recipients)
      { JsonNode *user = recipients->data;
        gchar *xmpp = Json_get_string ( user, "xmpp" );
-       if (xmpp && strlen(xmpp)) Imsgs_Envoi_message_to ( module, xmpp, message );
+       if (!xmpp)
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                    "%s: %s: Warning: User %s does not have an XMPP id", __func__, thread_tech_id, Json_get_string ( user, "email" ) );
+        }
+       else if (!strlen(xmpp))
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                    "%s: %s: Warning: User %s has an empty XMPP id", __func__, thread_tech_id, Json_get_string ( user, "email" ) );
+        }
+       else Imsgs_Envoi_message_to ( module, xmpp, message );
        recipients = g_list_next(recipients);
      }
     g_list_free(recipients);

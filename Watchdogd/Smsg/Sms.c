@@ -322,22 +322,28 @@
     while(recipients)
      { JsonNode *user = recipients->data;
        gchar *user_phone = Json_get_string ( user, "phone" );
-       if (user_phone && strlen(user_phone))
-        { switch (sms_notification)
-           { case MESSAGE_SMS_YES:
-                  if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
-                   { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                               "%s: %s: Error sending with GSM. Falling back to OVH", __func__, thread_tech_id );
-                     Envoi_sms_ovh( module, msg, user_phone );
-                   }
-                  break;
-             case MESSAGE_SMS_GSM_ONLY:
-                  Envoi_sms_gsm ( module, msg, user_phone );
-                  break;
-             case MESSAGE_SMS_OVH_ONLY:
-                  Envoi_sms_ovh ( module, msg, user_phone );
-                  break;
-           }
+       if (!user_phone)
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                    "%s: %s: Warning: User %s does not have an Phone number", __func__, thread_tech_id, Json_get_string ( user, "email" ) );
+        }
+       else if (!strlen(user_phone))
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                    "%s: %s: Warning: User %s has an empty Phone number", __func__, thread_tech_id, Json_get_string ( user, "email" ) );
+        }
+       else switch (sms_notification)
+        { case MESSAGE_SMS_YES:
+               if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
+                { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                            "%s: %s: Error sending with GSM. Falling back to OVH", __func__, thread_tech_id );
+                  Envoi_sms_ovh( module, msg, user_phone );
+                }
+               break;
+          case MESSAGE_SMS_GSM_ONLY:
+               Envoi_sms_gsm ( module, msg, user_phone );
+               break;
+          case MESSAGE_SMS_OVH_ONLY:
+               Envoi_sms_ovh ( module, msg, user_phone );
+               break;
         }
        recipients = g_list_next(recipients);
      }
