@@ -88,9 +88,25 @@
     gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
 
     const gchar *from = xmpp_stanza_get_attribute ( stanza, "from" );
+    if (!from)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Error: from is NULL", __func__, thread_tech_id );
+       return(1);
+     }
+
+    const gchar *type = xmpp_stanza_get_type ( stanza );
+    if (!strcmp ( type, "error" ))
+     { xmpp_stanza_t *error          = xmpp_stanza_get_child_by_name(stanza, "error");
+       const gchar   *error_type     = xmpp_stanza_get_attribute ( error, "type" );
+       xmpp_stanza_t *condition      = xmpp_stanza_get_children ( error );
+       const gchar   *condition_name = xmpp_stanza_get_name ( condition );
+       Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': From '%s' -> Stanza Error '%s'->'%s'",
+                 __func__, thread_tech_id, from, error_type, condition_name );
+       return(1);
+     }
+
     gchar *message    = xmpp_message_get_body ( stanza );
-    if (!from || !message)
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: '%s': Error: from or message = NULL", __func__, thread_tech_id );
+    if (!message)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': From '%s' -> Error: message is NULL", __func__, thread_tech_id, from );
        return(1);
      }
 
@@ -99,7 +115,7 @@
     JsonNode *RootNode = Json_node_create();
     if ( RootNode == NULL )
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Memory Error for '%s'", __func__, thread_tech_id, from );
-       return(1);
+       goto end_message;
      }
 
     gchar hostonly[128];
@@ -196,8 +212,9 @@
 end_map:
     Json_node_unref ( MapNode );
 end_user:
-    xmpp_free(vars->ctx, message);
     Json_node_unref ( UserNode );
+end_message:
+    xmpp_free(vars->ctx, message);
     return(1);
   }
 /******************************************************************************************************************************/
@@ -212,7 +229,7 @@ end_user:
     ptr = strstr( hostonly, "/" );
     if (ptr) *ptr=0;
 
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
               "%s : jabber_id %s -> Availability updated to %d.", __func__, jabber_id, available );
   }
 /******************************************************************************************************************************/
