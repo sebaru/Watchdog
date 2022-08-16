@@ -1047,12 +1047,12 @@
              vars->date_retente = Partage->top + MODBUS_RETRY;
            }
         }
-       else
+       else for (gint i=0; i<4; i++)                                     /* 1 tour programme = 4 itérations GET (DI/DO/AI/AO) */
         { if ( vars->request )                                                           /* Requete en cours pour ce module ? */
            { Recuperer_reponse_module ( module ); }
           else
            { if (vars->date_next_eana<Partage->top)                                    /* Gestion décalée des I/O Analogiques */
-              { vars->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;                         /* Tous les 2 dixieme */
+              { vars->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;                        /* Tous les 5 dixiemes */
                 vars->do_check_eana = TRUE;
               }
              switch (vars->mode)
@@ -1070,15 +1070,14 @@
                                              else vars->mode = MODBUS_GET_AI;
                                              break;
                 case MODBUS_GET_AI         : if (vars->nbr_entree_ana && vars->do_check_eana)
-                                                  Interroger_entree_ana( module );
+                                              { Interroger_entree_ana( module ); }
                                              else vars->mode = MODBUS_SET_DO;
                                              break;
                 case MODBUS_SET_DO         : if (vars->nbr_sortie_tor) Interroger_sortie_tor( module );
                                              else vars->mode = MODBUS_SET_AO;
                                              break;
                 case MODBUS_SET_AO         : if (vars->nbr_sortie_ana && vars->do_check_eana)
-                                              { Interroger_sortie_ana( module );
-                                              }
+                                              { Interroger_sortie_ana( module ); }
                                              else vars->mode = MODBUS_GET_DI;
                                              vars->do_check_eana = FALSE;                                /* Le check est fait */
                                              break;
