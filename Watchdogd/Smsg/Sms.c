@@ -44,6 +44,8 @@
     struct SMS_VARS *vars = module->vars;
     if (status==0) { vars->gammu_send_status = ERR_NONE; }
     else vars->gammu_send_status = ERR_UNKNOWN;
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
+              "%s: status = %d, vars->gammu_send_status=%d", __func__, status, vars->gammu_send_status );
   }
 /******************************************************************************************************************************/
 /* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */
@@ -199,7 +201,10 @@
        return(FALSE);
      }
 
-    while ( vars->gammu_send_status == ERR_TIMEOUT ) { GSM_ReadDevice(vars->gammu_machine, TRUE); }
+    gint timeout = Partage->top+100;
+
+    while ( module->Thread_run == TRUE && vars->gammu_send_status == ERR_TIMEOUT && Partage->top < timeout )
+     { GSM_ReadDevice(vars->gammu_machine, TRUE); }
 
     if (vars->gammu_send_status == ERR_NONE)
      { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
@@ -555,11 +560,11 @@ end_user:
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    Envoyer_smsg_gsm_text ( module, "SMS System is running" );
     vars->sending_is_disabled = FALSE;                                               /* A l'init, l'envoi de SMS est autorisé */
-    vars->ai_nbr_sms = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyé", "sms", ARCHIVE_1_HEURE );
+    vars->ai_nbr_sms = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyés", "sms", ARCHIVE_1_HEURE );
     vars->nbr_sms = 0;
     gint next_try = 0;
+    Envoyer_smsg_gsm_text ( module, "SMS System is running" );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
