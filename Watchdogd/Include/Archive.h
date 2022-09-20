@@ -28,7 +28,7 @@
 #ifndef _ARCHIVAGE_DB_H_
  #define _ARCHIVAGE_DB_H_
 
- #define ARCHIVE_MAX_ENREG_TO_API   100
+ #define ARCHIVE_MAX_ENREG_TO_API   1000
 
  enum
   { ARCHIVE_NONE,

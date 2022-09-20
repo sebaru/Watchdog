@@ -81,6 +81,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
     gint cpt_1_minute = Partage->top + 600;
+    gint max_enreg = ARCHIVE_MAX_ENREG_TO_API;
     while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { if (cpt_1_minute < Partage->top)                                                      /* Sauvegarde toutes les minutes */
         { Ajouter_arch ( "SYS", "ARCHIVE_LIST_SIZE", 1.0*Partage->archive_liste_taille );
@@ -96,7 +97,7 @@
 
        pthread_mutex_lock( &Partage->archive_liste_sync );                                                   /* lockage futex */
        GSList *liste = Partage->archive_liste;
-       while (liste && Partage->com_msrv.Thread_run == TRUE && nb_enreg<ARCHIVE_MAX_ENREG_TO_API)
+       while (liste && Partage->com_msrv.Thread_run == TRUE && nb_enreg<max_enreg)
         { JsonNode *arch = liste->data;                                                               /* Recuperation du arch */
           json_node_ref ( arch );
           Json_array_add_element ( archives, arch );
@@ -124,9 +125,14 @@
 
           Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
                     Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, Partage->archive_liste_taille );
+          max_enreg = max_enreg * 10;
+          if (max_enreg>ARCHIVE_MAX_ENREG_TO_API) max_enreg = ARCHIVE_MAX_ENREG_TO_API;
         }
        else
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error. Reste %05d.", __func__, Partage->archive_liste_taille ); }
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error. Reste %05d.", __func__, Partage->archive_liste_taille );
+          max_enreg = max_enreg / 10;
+          if (max_enreg==0) max_enreg = 1;
+        }
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
      }
