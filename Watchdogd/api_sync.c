@@ -55,13 +55,14 @@
      }
     else if ( !strcasecmp( agent_tag, "UPGRADE") )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: UPGRADE: Upgrading in progress", __func__ );
-       gint pid = fork();
-       if (pid<0)
+       gint pid = getpid();
+       gint new_pid = fork();
+       if (new_pid<0)
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: UPGRADE: erreur Fork", __func__ ); }
-       else if (!pid)
+       else if (!new_pid)
         { system("cd SRC; ./autogen.sh; sudo make install; " );
           Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s_Fils: UPGRADE: done. Restarting.", __func__ );
-          Partage->com_msrv.Thread_run = FALSE;
+          kill (pid, SIGTERM);                                                                          /* Stop old processes */
           exit(0);
         }
      }
