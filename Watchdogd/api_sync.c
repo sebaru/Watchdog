@@ -95,7 +95,7 @@
           goto end;
         }
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
-       Compiler_source_dls_from_api ( plugin_tech_id, Json_get_string ( request, "codec" ) );
+       Dls_Save_CodeC_to_disk ( plugin_tech_id, Json_get_string ( request, "codec" ) );
        Dls_Reseter_un_plugin ( plugin_tech_id );
      }
 

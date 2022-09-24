@@ -204,37 +204,47 @@
           else Dls_foreach_plugins ( tech_id, Dls_stop_plugin_reel );
   }
 /******************************************************************************************************************************/
-/* Compiler_source_dls_from_api: Compilation de la source DLS recu de l'API                                                   */
+/* Dls_Save_CodeC_to_disk: Enregistre un codec sur le disque pour le tech_id en parametre                                     */
+/* Entrée: Le tech_id du DLS a sauver, et le codeC associé                                                                    */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Dls_Save_CodeC_to_disk ( gchar *tech_id, gchar *codec )
+  { gchar source_file[128];
+
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Saving '%s' started", __func__, tech_id );
+    g_snprintf( source_file, sizeof(source_file), "Dls/%s.c", tech_id );
+    unlink(source_file);
+    gint id_fichier = open( source_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+    if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
+     { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
+                 source_file, strerror(errno) );
+       close(id_fichier);
+       return(FALSE);
+     }
+
+    gint taille_codec = strlen(codec);
+    gint retour_write = write( id_fichier, codec, taille_codec );
+    close(id_fichier);
+    if (retour_write<0)
+     { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Write %d bytes to file '%s' failed (%s)", __func__,
+                 taille_codec, source_file, strerror(errno) );
+       return(FALSE);
+     }
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Write %d bytes to file '%s' OK.", __func__, taille_codec, source_file );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Compiler_source_dls: Compilation de la source DLS en librairie                                                             */
 /* Entrée: Le tech_id du DLS a compiler, et le codeC associé                                                                  */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Compiler_source_dls_from_api( gchar *tech_id, gchar *codec )
-  { gchar source_file[128];
+ gboolean Compiler_source_dls( gchar *tech_id )
+  { gchar source_file[128], target_file[128];
 
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Compilation of '%s' started", __func__, tech_id );
     gint top = Partage->top;
     g_snprintf( source_file, sizeof(source_file), "Dls/%s.c", tech_id );
-    if (codec)
-     { unlink(source_file);
-       gint id_fichier = open( source_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-       if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-        { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
-                    source_file, strerror(errno) );
-          close(id_fichier);
-          return(FALSE);
-        }
-
-       gint taille_codec = strlen(codec);
-       gint retour_write = write( id_fichier, codec, taille_codec );
-       close(id_fichier);
-       if (retour_write<0)
-        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Write %d bytes to file '%s' failed (%s)", __func__,
-                    taille_codec, source_file, strerror(errno) );
-          return(FALSE);
-        }
-       Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Write %d bytes to file '%s' OK.", __func__, taille_codec, source_file );
-     }
-    else Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Using old file '%s'.", __func__, source_file );
+    g_snprintf( target_file, sizeof(target_file),  "Dls/libdls%s.so", tech_id );
     Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Starting GCC.", __func__ );
 
     gint pidgcc = fork();
@@ -243,17 +253,19 @@
        return(FALSE);
      }
     else if (!pidgcc)
-     { gchar cible[128];
-       g_snprintf( cible,  sizeof(cible),  "Dls/libdls%s.so", tech_id );
-       execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
+     { execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
                "-I/usr/lib/i386-linux-gnu/glib-2.0/include", "-I/usr/lib/x86_64-linux-gnu/glib-2.0/include",
-               "-shared", "--no-gnu-unique", "-Wno-unused-variable", "-ggdb", "-Wall", "-lwatchdog-dls", source_file, "-fPIC", "-o", cible, NULL );
+               "-shared", "--no-gnu-unique", "-Wno-unused-variable", "-ggdb", "-Wall", "-lwatchdog-dls",
+               source_file, "-fPIC", "-o", target_file, NULL );
        _exit(0);
      }
 
     Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Waiting for gcc to finish pid %d", __func__, pidgcc );
-    wait4(pidgcc, NULL, 0, NULL );
-    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: gcc pid %d is down", __func__, pidgcc );
+    gint wcode;
+    waitpid(pidgcc, &wcode, 0 );
+    gint gcc_return_code = WEXITSTATUS(wcode);
+    if (gcc_return_code == 1) unlink(target_file);
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: gcc pid %d is down with return code %d", __func__, pidgcc, gcc_return_code );
     Info_new( Config.log, Config.log_trad, LOG_INFO, "%s: Compilation of '%s' finished in %05.1fs", __func__, tech_id, (Partage->top - top)/10.0 );
     return(TRUE);
   }
@@ -267,7 +279,7 @@
 
     if (Partage->com_dls.Thread_run == FALSE) return(FALSE);          /* si l'instance est en cours d'arret, on sort de suite */
 
-    Compiler_source_dls_from_api( dls->tech_id, NULL );
+    if (compil) Compiler_source_dls( dls->tech_id );
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%s.so", dls->tech_id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */

@@ -319,7 +319,8 @@
  extern gboolean Get_source_dls_from_DB ( gchar *tech_id_src, gchar **result_buffer, gint *result_taille );
  extern gboolean Save_source_dls_to_DB( gchar *tech_id, gchar *buffer, gint taille );
  extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom );
- extern gboolean Compiler_source_dls_from_api( gchar *tech_id, gchar *codec );
+ extern gboolean Dls_Save_CodeC_to_disk ( gchar *tech_id, gchar *codec );
+ extern gboolean Compiler_source_dls( gchar *tech_id );
 
  extern void Dls_Charger_plugins ( gboolean compil );                                                       /* Dans plugins.c */
  extern void Dls_Decharger_plugins ( void );
