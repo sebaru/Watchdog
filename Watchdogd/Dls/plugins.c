@@ -204,111 +204,58 @@
           else Dls_foreach_plugins ( tech_id, Dls_stop_plugin_reel );
   }
 /******************************************************************************************************************************/
-/* Proto_compiler_source_dls: Compilation de la source DLS                                                                    */
-/* Entrée: Le tech_id du DLS a compiler                                                                                       */
-/* Sortie: code de compilation DLS_COMPIL_xxx                                                                                 */
+/* Compiler_source_dls_from_api: Compilation de la source DLS recu de l'API                                                   */
+/* Entrée: Le tech_id du DLS a compiler, et le codeC associé                                                                  */
+/* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- static gint Compiler_source_dls( gchar *tech_id )
-  { gint retour, pidgcc, id_fichier;
-    gchar log_buffer[1024], log_file[64];
-    gchar chaine[128];
-    gint taille_source;
-    gchar *Source;
+ gboolean Compiler_source_dls_from_api( gchar *tech_id, gchar *codec )
+  { gchar source_file[128];
 
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Compilation module DLS '%s'", __func__, tech_id );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Compilation of '%s' started", __func__, tech_id );
+    gint top = Partage->top;
+    g_snprintf( source_file, sizeof(source_file), "Dls/%s.c", tech_id );
+    if (codec)
+     { unlink(source_file);
+       gint id_fichier = open( source_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+       if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
+        { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
+                    source_file, strerror(errno) );
+          close(id_fichier);
+          return(FALSE);
+        }
 
-    if ( Get_source_dls_from_DB ( tech_id, &Source, &taille_source ) == FALSE )         /* On récupère le source depuis la DB */
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Cannot get Source DLS for id '%s'", __func__, tech_id );
-       return(DLS_COMPIL_EXPORT_DB_FAILED);
-     }
-
-    g_snprintf( chaine, sizeof(chaine), "Dls/%s.dls", tech_id );
-    unlink(chaine);
-    id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-     { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
-                 chaine, strerror(errno) );
-       g_free(Source);
+       gint taille_codec = strlen(codec);
+       gint retour_write = write( id_fichier, codec, taille_codec );
        close(id_fichier);
-       return(DLS_COMPIL_EXPORT_DB_FAILED);
+       if (retour_write<0)
+        { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Write %d bytes to file '%s' failed (%s)", __func__,
+                    taille_codec, source_file, strerror(errno) );
+          return(FALSE);
+        }
+       Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Write %d bytes to file '%s' OK.", __func__, taille_codec, source_file );
      }
+    else Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Using old file '%s'.", __func__, source_file );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Starting GCC.", __func__ );
 
-    gint retour_write = write( id_fichier, Source, taille_source );
-    g_free(Source);
-    close(id_fichier);
-    if (retour_write<0)
-     { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Write %d bytes to file '%s' failed (%s)", __func__,
-                 taille_source, chaine, strerror(errno) );
-      return(DLS_COMPIL_EXPORT_DB_FAILED);
-     }
-    else
-     { Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Write %d bytes to file '%s' OK", __func__,
-                 taille_source, chaine);
-     }
-
-    retour = Traduire_DLS( tech_id );                                                                       /* Traduction DLS */
-    Info_new( Config.log, Config.log_trad, LOG_DEBUG,
-             "%s: fin traduction '%s'. Code retour '%d'", __func__, tech_id, retour );
-
-    if (retour == TRAD_DLS_ERROR_NO_FILE)                                             /* Retour de la traduction D.L.S vers C */
-     { Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: envoi erreur file Traduction D.L.S '%s'", tech_id );
-       Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_ERROR_LOAD_SOURCE, "Erreur chargement source" );
-       return( DLS_COMPIL_ERROR_LOAD_SOURCE );
-     }
-
-    memset ( log_buffer, 0, sizeof(log_buffer) );                            /* Chargement de fichier de log dans la database */
-
-    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Chargement du fichier de log D.L.S '%s'", __func__, tech_id );
-    g_snprintf( log_file, sizeof(log_file), "Dls/%s.log", tech_id );
-
-    id_fichier = open( log_file, O_RDONLY, 0 );              /* Ouverture du fichier log et chargement du contenu dans buffer */
-    if (id_fichier<0)
-     { Info_new( Config.log, Config.log_trad, LOG_ERR,
-                "%s: Impossible de charger le fichier de log '%s' : %s", __func__, log_file, strerror(errno) );
-       Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_ERROR_LOAD_LOG, "Erreur chargement log" );
-       return(DLS_COMPIL_ERROR_LOAD_LOG);
-     }
-    else
-     { int nbr_car, nbr_car_lu;
-       nbr_car = nbr_car_lu = 0;
-       while ( (nbr_car = read (id_fichier, log_buffer + nbr_car_lu, sizeof(log_buffer)-1-nbr_car_lu )) > 0 )
-        { nbr_car_lu+=nbr_car; }
-       close(id_fichier);
-     }
-
-    if ( retour == TRAD_DLS_SYNTAX_ERROR )
-     { Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_SYNTAX_ERROR, log_buffer );
-       return ( DLS_COMPIL_SYNTAX_ERROR );
-     }
-
-    pidgcc = fork();
+    gint pidgcc = fork();
     if (pidgcc<0)
      { Info_new( Config.log, Config.log_trad, LOG_WARNING, "%s_Fils: envoi erreur Fork GCC '%s'", __func__, tech_id );
-       Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_ERROR_FORK_GCC, "Erreur Fork GCC" );
-       return(DLS_COMPIL_ERROR_FORK_GCC);
+       return(FALSE);
      }
     else if (!pidgcc)
-     { gchar source[80], cible[80];
-       g_snprintf( source, sizeof(source), "Dls/%s.c", tech_id );
+     { gchar cible[128];
        g_snprintf( cible,  sizeof(cible),  "Dls/libdls%s.so", tech_id );
        execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
                "-I/usr/lib/i386-linux-gnu/glib-2.0/include", "-I/usr/lib/x86_64-linux-gnu/glib-2.0/include",
-               "-shared", "--no-gnu-unique", "-ggdb", "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
+               "-shared", "--no-gnu-unique", "-Wno-unused-variable", "-ggdb", "-Wall", "-lwatchdog-dls", source_file, "-fPIC", "-o", cible, NULL );
        _exit(0);
      }
 
     Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: Waiting for gcc to finish pid %d", __func__, pidgcc );
     wait4(pidgcc, NULL, 0, NULL );
-    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: gcc is down, OK %d", __func__, pidgcc );
-
-    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: end of '%s'", __func__, tech_id );
-    if (retour == TRAD_DLS_WARNING)
-     { Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_OK_WITH_WARNINGS, log_buffer );
-       return( DLS_COMPIL_OK_WITH_WARNINGS );
-     }
-
-    Set_compil_status_plugin_dlsDB( tech_id, DLS_COMPIL_OK, "Pas d'erreur !" );
-    return( DLS_COMPIL_OK );
+    Info_new( Config.log, Config.log_trad, LOG_DEBUG, "%s: gcc pid %d is down", __func__, pidgcc );
+    Info_new( Config.log, Config.log_trad, LOG_INFO, "%s: Compilation of '%s' finished in %05.1fs", __func__, tech_id, (Partage->top - top)/10.0 );
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
@@ -320,13 +267,7 @@
 
     if (Partage->com_dls.Thread_run == FALSE) return(FALSE);          /* si l'instance est en cours d'arret, on sort de suite */
 
-    if (compil)
-     { dls->compil_status = Compiler_source_dls( dls->tech_id );
-       if (dls->compil_status<DLS_COMPIL_OK)
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                   "%s: Candidat '%s' CompilStatus failed. Keeping old .so, if it exists.", __func__, dls->tech_id );
-        }
-     }
+    Compiler_source_dls_from_api( dls->tech_id, NULL );
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%s.so", dls->tech_id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
@@ -556,6 +497,7 @@
 /******************************************************************************************************************************/
  void Dls_arbre_dls_syn_erase ( void )
   { if (Partage->com_dls.Dls_syns) Dls_arbre_dls_syn_erase_syn(Partage->com_dls.Dls_syns);
+    Partage->com_dls.Dls_syns = NULL;
     Partage->com_dls.Dls_syns = NULL;
   }
 /******************************************************************************************************************************/

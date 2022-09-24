@@ -89,6 +89,15 @@
         }
      }
     else if ( !strcasecmp( agent_tag, "REMAP") && Config.instance_is_master == TRUE) MSRV_Remap();
+    else if ( !strcasecmp( agent_tag, "DLS_COMPIL") && Config.instance_is_master == TRUE)
+     { if ( !( Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "codec" ) ) )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DLS_COMPIL: wrong parameters", __func__ );
+          goto end;
+        }
+       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
+       Compiler_source_dls_from_api ( plugin_tech_id, Json_get_string ( request, "codec" ) );
+       Dls_Reseter_un_plugin ( plugin_tech_id );
+     }
 
 end:
     Json_node_unref(request);
