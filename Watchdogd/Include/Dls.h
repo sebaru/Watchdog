@@ -53,30 +53,12 @@
     NBR_TYPE_MNEMO
   };
 
- enum                                                                                  /* Code retour de la compilation D.L.S */
-  { DLS_COMPIL_NEVER_COMPILED_YET,
-    DLS_COMPIL_EXPORT_DB_FAILED,
-    DLS_COMPIL_ERROR_LOAD_SOURCE,
-    DLS_COMPIL_ERROR_LOAD_LOG,
-    DLS_COMPIL_SYNTAX_ERROR,
-    DLS_COMPIL_ERROR_FORK_GCC,
-    DLS_COMPIL_OK,
-    DLS_COMPIL_OK_WITH_WARNINGS,
-    NBR_DLS_COMPIL_STATUS
-  };
-
- enum { TRAD_DLS_OK,                                                                   /* Retour de la fonction Traduire DLS. */
-        TRAD_DLS_WARNING,
-        TRAD_DLS_SYNTAX_ERROR,
-        TRAD_DLS_ERROR_NO_FILE
-      };
-
  #define NBR_CARAC_TECHID     32
  #define NBR_CARAC_ACRONYME   64
  #define NBR_CARAC_UNITE      32
 
  struct DLS_PLUGIN
-  { gchar nom[128];
+  { gchar name[128];
     gchar shortname[ NBR_CARAC_ACRONYME ];
     gchar tech_id[NBR_CARAC_TECHID];
     gchar package[130];
@@ -310,19 +292,10 @@
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
- extern gint Traduire_DLS( gchar *tech_id );                                                                 /* Dans Interp.c */
-
- extern gboolean Recuperer_plugins_dlsDB( struct DB **db );                                                  /* Dans Dls_db.c */
- extern struct DLS_PLUGIN *Recuperer_plugins_dlsDB_suite( struct DB **db );
- extern struct DLS_PLUGIN *Rechercher_plugin_dlsDB( gchar *tech_id_src );
- extern gboolean Set_compil_status_plugin_dlsDB( gchar *tech_id_src, gint status, gchar *log_buffer );
- extern gboolean Get_source_dls_from_DB ( gchar *tech_id_src, gchar **result_buffer, gint *result_taille );
- extern gboolean Save_source_dls_to_DB( gchar *tech_id, gchar *buffer, gint taille );
- extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom );
+ extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom );                                       /* Dans Dls_db.c */
  extern gboolean Dls_Save_CodeC_to_disk ( gchar *tech_id, gchar *codec );
- extern gboolean Compiler_source_dls( gchar *tech_id );
 
- extern void Dls_Charger_plugins ( gboolean compil );                                                       /* Dans plugins.c */
+ extern void Dls_Importer_plugins ( void );                                                                 /* Dans plugins.c */
  extern void Dls_Decharger_plugins ( void );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );

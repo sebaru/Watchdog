@@ -51,7 +51,7 @@
     Json_node_add_int    ( element, "dls_id",    dls->dls_id );
     Json_node_add_string ( element, "tech_id",   dls->tech_id );
     Json_node_add_string ( element, "shortname", dls->shortname );
-    Json_node_add_string ( element, "name" ,     dls->nom );
+    Json_node_add_string ( element, "name" ,     dls->name );
     if (dls->version) Json_node_add_string ( element, "version", dls->version() );
                  else Json_node_add_string ( element, "version", "Unknown" );
     Json_node_add_bool   ( element, "started",   dls->on );
@@ -687,77 +687,6 @@
     g_free(name);
     g_free(shortname);
     g_free(tech_id);
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Http_traiter_dls_compil ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                SoupClientContext *client, gpointer user_data )
-  { gchar log_buffer[1024];
-    if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-    if (Json_has_member ( request, "sourcecode" ))
-     { gchar *sourcecode = Json_get_string( request, "sourcecode" );
-       Save_source_dls_to_DB ( Json_get_string( request, "tech_id" ), sourcecode, strlen(sourcecode) );
-     }
-
-    Dls_Reseter_un_plugin ( Json_get_string( request, "tech_id" ) );
-
-    JsonNode *RootNode = Json_node_create ();
-    if (!RootNode)
-     { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Json Memory Error");
-       return;
-     }
-
-    SQL_Select_to_json_node ( RootNode, NULL,
-                             "SELECT errorlog, compil_status FROM dls WHERE tech_id='%s'",
-                              Json_get_string( request, "tech_id" ) );
-
-    switch(Json_get_int( RootNode, "compil_status" ))
-     { case DLS_COMPIL_ERROR_LOAD_SOURCE:
-            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Source File Error" );
-       break;
-       case DLS_COMPIL_ERROR_LOAD_LOG:
-            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Log File Error" );
-            break;
-       case DLS_COMPIL_OK_WITH_WARNINGS:
-            soup_message_set_status (msg, SOUP_STATUS_OK );
-            break;
-       case DLS_COMPIL_SYNTAX_ERROR:
-            soup_message_set_status (msg, SOUP_STATUS_OK );
-            break;
-       case DLS_COMPIL_ERROR_FORK_GCC:
-            g_snprintf( log_buffer, sizeof(log_buffer), "Gcc fork failed !" );
-            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Gcc Error" );
-            break;
-       case DLS_COMPIL_OK:
-            g_snprintf( log_buffer, sizeof(log_buffer), "-- No error --\n-- Reset plugin OK --" );
-            soup_message_set_status (msg, SOUP_STATUS_OK);
-            break;
-       default : g_snprintf( log_buffer, sizeof(log_buffer), "Unknown Error !");
-            soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Unknown Error" );
-     }
-    Audit_log ( session, "DLS '%s' compilé", Json_get_string ( request, "tech_id" ) );
-    Json_node_unref(request);
-    gchar *buf = Json_node_to_string (RootNode);
-    Json_node_unref(RootNode);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */

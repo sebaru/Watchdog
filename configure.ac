@@ -12,10 +12,8 @@ AM_INIT_AUTOMAKE([foreign])
 dnl Checks for programs.
 AC_PROG_CXX
 AC_PROG_AWK
-AC_PROG_YACC
 AC_PROG_CC
 AC_PROG_CPP
-AC_PROG_LEX(noyywrap)
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
@@ -52,21 +50,6 @@ AC_FUNC_MEMCMP
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(gettimeofday select socket strdup strerror)
 
-AC_CHECK_PROGS(BISON,bison,none)
-if test "$BISON" = "none"
-then
-  AC_MSG_ERROR([no suitable bison found. Please install the 'bison' package.])
-fi
-
-AC_CHECK_PROGS(FLEX,flex,none)
-if test "$FLEX" = "none"
-then
-  AC_MSG_ERROR([no suitable flex found. Please install the 'flex' package.])
-fi
-
-LEXLIB=
-AC_SUBST(LEXLIB)
-
 dnl parametres par defaut
 CFLAGS="-Wall -Wno-unused-result -Wno-comment -Wno-pointer-sign -Wno-discarded-qualifiers -pipe -g -ggdb -fdiagnostics-color"
 
@@ -100,7 +83,6 @@ Watchdogd/Audio/Makefile \
 Watchdogd/Modbus/Makefile \
 Watchdogd/Imsgs/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
-Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
 Watchdogd/Http/Makefile \
 Watchdogd/Radio/Makefile \

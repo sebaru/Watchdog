@@ -3,7 +3,7 @@
 #* Projet WatchDog version 3.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Dls Http TraductionDLS Smsg Modbus Audio Onduleur TeleinfoEDF Radio Dmx Imsgs Meteo Phidget Gpiod
+SUBDIRS = Include Dls Http Smsg Modbus Audio Onduleur TeleinfoEDF Radio Dmx Imsgs Meteo Phidget Gpiod
 
 bin_SCRIPTS = Wtd_set_volume.sh Wtd_play_google.sh
 bin_PROGRAMS = Watchdogd
@@ -16,8 +16,7 @@ Watchdogd_SOURCES = Watchdogd.c thread.c Archive.c Erreur.c \
                     Synoptiques.c Syn_visuels.c Syn_comment.c Syn_cadran.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
-                    Http/libwatchdog-http.la \
-                    TraductionDLS/libtradDLS.la
+                    Http/libwatchdog-http.la
 
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
 Watchdogd_LDFLAGS = -rdynamic -lpopt -ldl \

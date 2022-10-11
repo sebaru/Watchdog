@@ -1665,7 +1665,7 @@ Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
      { sleep(1); wait--; }
 
-    Dls_Charger_plugins(TRUE);                                                 /* Chargement des modules dls avec compilation */
+    Dls_Importer_plugins();                                                    /* Chargement des modules dls avec compilation */
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
     Dls_recalculer_arbre_dls_syn();
 
@@ -1707,7 +1707,7 @@ Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
           Dls_Lire_config();
           Dls_Decharger_plugins();
-          Dls_Charger_plugins(Partage->com_dls.Thread_reload_with_recompil);
+          Dls_Importer_plugins();
           Dls_recalculer_arbre_comm();                                                  /* Calcul de l'arbre de communication */
           Dls_recalculer_arbre_dls_syn();
           Partage->com_dls.Thread_reload               = FALSE;
