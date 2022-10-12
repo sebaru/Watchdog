@@ -170,7 +170,6 @@
     plugin->conso = 0.0;
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: '%s' stopped (%s)", __func__,
               plugin->tech_id, plugin->name );
-    SQL_Write_new ( "UPDATE dls SET actif='0' WHERE tech_id = '%s'", plugin->tech_id );
   }
 /******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
@@ -192,7 +191,6 @@
     plugin->start_date = time(NULL);
     plugin->vars.resetted = FALSE;
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: '%s' started (%s)", __func__, plugin->tech_id, plugin->name );
-    SQL_Write_new ( "UPDATE dls SET actif='1' WHERE tech_id = '%s'", plugin->tech_id );
   }
 /******************************************************************************************************************************/
 /* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
@@ -567,12 +565,9 @@
  static void Dls_Debug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { gchar chaine[128];
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug started ('%s')", __func__,
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug started ('%s')", __func__,
                  plugin->tech_id, plugin->name );
        plugin->debug = plugin->vars.debug = TRUE;
-       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='1' WHERE tech_id = '%s'", plugin->tech_id );
-       SQL_Write ( chaine );
      }
   }
 /******************************************************************************************************************************/
@@ -583,12 +578,9 @@
  static void Dls_Undebug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { gchar chaine[128];
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug stopped ('%s')", __func__,
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: '%s' debug stopped ('%s')", __func__,
                  plugin->tech_id, plugin->name );
        plugin->debug = plugin->vars.debug = FALSE;
-       g_snprintf(chaine, sizeof(chaine), "UPDATE dls SET debug='0' WHERE tech_id = '%s'", plugin->tech_id );
-       SQL_Write ( chaine );
      }
   }
 /******************************************************************************************************************************/

@@ -1660,11 +1660,6 @@ Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
     Dls_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Wait 10sec to let threads init", __func__ );
-    wait=10;                    /* On laisse 10 secondes pour charger tous les threads et préparer les eventuels DLS associés */
-    while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
-     { sleep(1); wait--; }
-
     Dls_Importer_plugins();                                                    /* Chargement des modules dls avec compilation */
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
     Dls_recalculer_arbre_dls_syn();

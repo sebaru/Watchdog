@@ -98,6 +98,15 @@
        Dls_Save_CodeC_to_disk ( plugin_tech_id, Json_get_string ( request, "codec" ) );
        Dls_Reseter_un_plugin ( plugin_tech_id );
      }
+    else if ( !strcasecmp( agent_tag, "DLS_SET") && Config.instance_is_master == TRUE)
+     { if ( ! Json_has_member ( request, "tech_id" )  )
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DLS_SET: wrong parameters", __func__ );
+          goto end;
+        }
+       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
+       if (Json_has_member ( request, "debug"  )) Dls_Debug_plugin   ( plugin_tech_id, Json_get_bool ( request, "debug" ) );
+       if (Json_has_member ( request, "enable" )) Dls_Activer_plugin ( plugin_tech_id, Json_get_bool ( request, "enable" ) );
+     }
 
 end:
     Json_node_unref(request);
