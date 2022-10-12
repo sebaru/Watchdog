@@ -297,6 +297,7 @@
 
  extern void Dls_Importer_plugins ( void );                                                                 /* Dans plugins.c */
  extern void Dls_Decharger_plugins ( void );
+ extern gboolean Dls_Compiler_source_dls( gchar *tech_id );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Reseter_un_plugin ( gchar *tech_id );

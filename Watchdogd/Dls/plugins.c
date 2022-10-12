@@ -236,7 +236,7 @@
 /* Entrée: Le tech_id du DLS a compiler, et le codeC associé                                                                  */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Compiler_source_dls( gchar *tech_id )
+ gboolean Dls_Compiler_source_dls( gchar *tech_id )
   { gchar source_file[128], target_file[128];
 
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Compilation of '%s' started", __func__, tech_id );

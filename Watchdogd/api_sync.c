@@ -96,6 +96,7 @@
         }
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Save_CodeC_to_disk ( plugin_tech_id, Json_get_string ( request, "codec" ) );
+       Dls_Compiler_source_dls ( plugin_tech_id );
        Dls_Reseter_un_plugin ( plugin_tech_id );
      }
     else if ( !strcasecmp( agent_tag, "DLS_SET") && Config.instance_is_master == TRUE)
