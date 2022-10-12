@@ -280,7 +280,8 @@
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
 
     if (dls->handle)
-     { if (dlclose( dls->handle ))
+     { dls->go = NULL;                                      /* On empeche DLS de lancer la fonction qui est en cours de decom */
+       if (dlclose( dls->handle ))
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for '%s' (%s)", __func__,
                     dlerror(), dls->tech_id, dls->shortname );
         }
@@ -534,9 +535,9 @@
     g_snprintf ( dls->shortname, sizeof(dls->shortname), "%s", Json_get_string ( element, "shortname" ) );
     dls->debug = Json_get_bool ( element, "debug" );
     dls->on    = Json_get_bool ( element, "enable" );
-    Dls_Charger_un_plugin ( dls );
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
+    Dls_Charger_un_plugin ( dls );
     Partage->com_dls.Dls_plugins = g_slist_append( Partage->com_dls.Dls_plugins, dls );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
