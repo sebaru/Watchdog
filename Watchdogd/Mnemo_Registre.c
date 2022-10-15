@@ -177,6 +177,8 @@
  void Updater_confDB_Registre( void )
   { GSList *liste;
 
+    JsonNode  *RootNode  = Json_node_create();
+    JsonArray *RootArray = Json_node_add_array ( RootNode, "mnemos_REGISTRE" );
     gint cpt = 0;
     liste = Partage->Dls_data_REGISTRE;
     while ( liste )
@@ -184,10 +186,21 @@
        SQL_Write_new( "UPDATE mnemos_R as m SET valeur='%f' "
                       "WHERE m.tech_id='%s' AND m.acronyme='%s';",
                       r->valeur, r->tech_id, r->acronyme );
+       JsonNode *element = Json_node_create();
+       Json_node_add_string ( RootNode, "tech_id", r->tech_id );
+       Json_node_add_string ( RootNode, "acronyme", r->acronyme );
+       Json_node_add_double ( RootNode, "valeur", r->valeur );
+       Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
        cpt++;
      }
-
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos", RootNode );
+    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d REGISTRE to API.", __func__, cpt ); }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving %d REGISTRE to API.", __func__, cpt ); }
+    Json_node_unref ( api_result );
+    Json_node_unref ( RootNode );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d REGISTRE updated", __func__, cpt );
   }
 /******************************************************************************************************************************/

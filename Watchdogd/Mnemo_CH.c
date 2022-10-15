@@ -130,7 +130,8 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
        return;
      }
-
+    JsonNode  *RootNode  = Json_node_create();
+    JsonArray *RootArray = Json_node_add_array ( RootNode, "mnemos_CH" );
     cpt=0;
     liste = Partage->Dls_data_CH;
     while ( liste )
@@ -140,10 +141,22 @@
                    "WHERE m.tech_id='%s' AND m.acronyme='%s';",
                    cpt_h->valeur, cpt_h->etat, cpt_h->tech_id, cpt_h->acronyme );
        Lancer_requete_SQL ( db, requete );
+       JsonNode *element = Json_node_create();
+       Json_node_add_string ( RootNode, "tech_id", cpt_h->tech_id );
+       Json_node_add_string ( RootNode, "acronyme", cpt_h->acronyme );
+       Json_node_add_int    ( RootNode, "valeur", cpt_h->valeur );
+       Json_node_add_bool   ( RootNode, "etat", cpt_h->etat );
+       Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
        cpt++;
      }
-
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos", RootNode );
+    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d MONO to API.", __func__, cpt ); }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving %d MONO to API.", __func__, cpt ); }
+    Json_node_unref ( api_result );
+    Json_node_unref ( RootNode );
     Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d CptH updated", __func__, cpt );
   }

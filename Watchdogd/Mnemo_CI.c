@@ -125,7 +125,8 @@
  void Updater_confDB_CI ( void )
   { GSList *liste;
     gint cpt;
-
+    JsonNode  *RootNode  = Json_node_create();
+    JsonArray *RootArray = Json_node_add_array ( RootNode, "mnemos_CI" );
     cpt = 0;
     liste = Partage->Dls_data_CI;
     while ( liste )
@@ -133,10 +134,22 @@
        SQL_Write_new ( "UPDATE mnemos_CI as m SET valeur='%d', etat='%d' "
                        "WHERE m.tech_id='%s' AND m.acronyme='%s';",
                        cpt_imp->valeur, cpt_imp->etat, cpt_imp->tech_id, cpt_imp->acronyme );
+       JsonNode *element = Json_node_create();
+       Json_node_add_string ( RootNode, "tech_id", cpt_imp->tech_id );
+       Json_node_add_string ( RootNode, "acronyme", cpt_imp->acronyme );
+       Json_node_add_int    ( RootNode, "valeur", cpt_imp->valeur );
+       Json_node_add_bool   ( RootNode, "etat", cpt_imp->etat );
+       Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
        cpt++;
      }
-
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos", RootNode );
+    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d CI to API.", __func__, cpt ); }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving %d CI to API.", __func__, cpt ); }
+    Json_node_unref ( api_result );
+    Json_node_unref ( RootNode );
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d CptIMP updated", __func__, cpt );
   }
 /******************************************************************************************************************************/
