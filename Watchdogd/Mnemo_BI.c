@@ -125,9 +125,9 @@
                        "WHERE m.tech_id='%s' AND m.acronyme='%s';",
                        bi->etat, bi->tech_id, bi->acronyme );
        JsonNode *element = Json_node_create();
-       Json_node_add_string ( RootNode, "tech_id", bi->tech_id );
-       Json_node_add_string ( RootNode, "acronyme", bi->acronyme );
-       Json_node_add_int    ( RootNode, "etat", bi->etat );
+       Json_node_add_string ( element, "tech_id", bi->tech_id );
+       Json_node_add_string ( element, "acronyme", bi->acronyme );
+       Json_node_add_int    ( element, "etat", bi->etat );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
        cpt++;

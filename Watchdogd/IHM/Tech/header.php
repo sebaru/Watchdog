@@ -186,8 +186,8 @@
           <i class="fas fa-wrench"></i> Configuration
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarCONFIG">
-          <a class="dropdown-item" href="/tech/synoptiques"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
-          <a class="dropdown-item" href="/tech/dls"> <i class="fas fa-code text-primary"></i> <span>Modules D.L.S</span> </a>
+          <a class="dropdown-item" href="https://console.abls-habitat.fr/synoptiques"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
+          <a class="dropdown-item" href="https://console.abls-habitat.fr/dls"> <i class="fas fa-code text-primary"></i> <span>Modules D.L.S</span> </a>
           <a class="dropdown-item" href="/tech/tableau"> <i class="fas fa-chart-line text-secondary"></i> <span>Tableaux</span> </a>
         </div>
       </li>

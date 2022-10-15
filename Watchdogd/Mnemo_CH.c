@@ -142,10 +142,10 @@
                    cpt_h->valeur, cpt_h->etat, cpt_h->tech_id, cpt_h->acronyme );
        Lancer_requete_SQL ( db, requete );
        JsonNode *element = Json_node_create();
-       Json_node_add_string ( RootNode, "tech_id", cpt_h->tech_id );
-       Json_node_add_string ( RootNode, "acronyme", cpt_h->acronyme );
-       Json_node_add_int    ( RootNode, "valeur", cpt_h->valeur );
-       Json_node_add_bool   ( RootNode, "etat", cpt_h->etat );
+       Json_node_add_string ( element, "tech_id", cpt_h->tech_id );
+       Json_node_add_string ( element, "acronyme", cpt_h->acronyme );
+       Json_node_add_int    ( element, "valeur", cpt_h->valeur );
+       Json_node_add_bool   ( element, "etat", cpt_h->etat );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
        cpt++;
