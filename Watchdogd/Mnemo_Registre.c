@@ -194,7 +194,7 @@
        liste = g_slist_next(liste);
        cpt++;
      }
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos", RootNode );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
     if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d REGISTRE to API.", __func__, cpt ); }
     else
