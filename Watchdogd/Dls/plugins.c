@@ -183,7 +183,7 @@
        return(FALSE);
      }
     Json_node_add_string ( RootNode, "tech_id", tech_id );
-    Json_node_add_string ( RootNode, "description )", description );
+    Json_node_add_string ( RootNode, "description", description );
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/create", RootNode );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
