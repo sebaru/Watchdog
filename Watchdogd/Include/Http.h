@@ -98,28 +98,12 @@
 
  extern void Http_traiter_status  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                        SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_run    ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_run_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_start ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                      SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_stop ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                     SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_debug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                      SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_undebug ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                        SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                    SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                    SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_dls_source ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                       SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_dls_acquitter ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                           SoupClientContext *client, gpointer user_data );
 
@@ -190,20 +174,6 @@
                                         SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_archive_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                            SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_users_list     ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                           SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_users_set      ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                           SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_users_get      ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                           SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_users_add      ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                           SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_users_del      ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                           SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_users_kill     ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                           SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_users_sessions ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                           SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
                                                      SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_histo_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
@@ -226,8 +196,6 @@
                                     SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_install ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_map ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                SoupClientContext *client, gpointer user_data );
 
  extern JsonNode *Http_Post_to_local_BUS ( struct THREAD *module, gchar *tag, JsonNode *RootNode );
  extern void Http_Post_to_local_BUS_DI ( struct THREAD *module, JsonNode *di, gboolean etat );
