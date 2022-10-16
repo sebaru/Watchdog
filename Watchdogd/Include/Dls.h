@@ -292,10 +292,9 @@
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
- extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *nom );                                       /* Dans Dls_db.c */
- extern gboolean Dls_Save_CodeC_to_disk ( gchar *tech_id, gchar *codec );
-
  extern void Dls_Importer_plugins ( void );                                                                 /* Dans plugins.c */
+ extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description );
+ extern gboolean Dls_Save_CodeC_to_disk ( gchar *tech_id, gchar *codec );
  extern void Dls_Decharger_plugins ( void );
  extern gboolean Dls_Compiler_source_dls( gchar *tech_id );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );

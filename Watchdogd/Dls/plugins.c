@@ -172,6 +172,31 @@
               plugin->tech_id, plugin->name );
   }
 /******************************************************************************************************************************/
+/* Dls_auto_create_plugin: Créé automatiquement le plugin en parametre (tech_id, nom)                                         */
+/* Entrées: le tech_id (unique) et le nom associé                                                                             */
+/* Sortie: -1 si pb, id sinon                                                                                                 */
+/******************************************************************************************************************************/
+ gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description )
+  { JsonNode *RootNode = Json_node_create ();
+    if (!RootNode)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for DLS create %s", __func__, tech_id );
+       return(FALSE);
+     }
+    Json_node_add_string ( RootNode, "tech_id", tech_id );
+    Json_node_add_string ( RootNode, "description )", description );
+
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/create", RootNode );
+    if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
+                 "%s: API Request for DLS CREATE failed. '%s' not created.", __func__, tech_id );
+       Json_node_unref ( RootNode );
+       return(FALSE);
+     }
+    Json_node_unref ( api_result );
+    Json_node_unref ( RootNode );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
@@ -549,12 +574,12 @@
  void Dls_Importer_plugins ( void )
   { JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/plugins", NULL );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for DLS PLUGIN failed. No plugin loaded.", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: API Request for DLS PLUGIN failed. No plugin loaded.", __func__ );
        return;
      }
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API Request for DLS PLUGINS OK.", __func__ );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: API Request for DLS PLUGINS OK.", __func__ );
     Json_node_foreach_array_element ( api_result, "plugins", Dls_Plugin_load_by_array, NULL );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %03d plugins loaded", __func__,
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: %03d plugins loaded", __func__,
               Json_get_int ( api_result, "nbr_plugins" ) );
     Json_node_unref ( api_result );
   }
