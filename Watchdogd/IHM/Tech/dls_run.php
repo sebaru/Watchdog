@@ -221,4 +221,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/dls_run.js" type="text/javascript"></script>
+<script src="/js/dls_run.js" type="text/javascript"></script>

@@ -456,6 +456,49 @@
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
+/* HTTP_Handle_request: Repond aux requests reçues                                                                            */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void HTTP_Handle_request_CB ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                      SoupClientContext *client, gpointer user_data )
+  { SoupMessageHeaders *headers;
+    g_object_get ( G_OBJECT(msg), SOUP_MESSAGE_RESPONSE_HEADERS, &headers, NULL );
+    soup_message_headers_append ( headers, "Cache-Control", "no-store, must-revalidate" );
+    soup_message_headers_append ( headers, "Access-Control-Allow-Origin", "*" );
+    soup_message_headers_append ( headers, "Access-Control-Allow-Methods", "*" );
+    soup_message_headers_append ( headers, "Access-Control-Allow-Headers", "content-type, authorization" );
+
+/*---------------------------------------------------- OPTIONS ---------------------------------------------------------------*/
+    if (msg->method == SOUP_METHOD_OPTIONS)
+     { soup_message_headers_append ( headers, "Access-Control-Max-Age", "86400" );
+       soup_message_set_status (msg, SOUP_STATUS_OK );
+       return;
+     }
+/*------------------------------------------------------ GET -----------------------------------------------------------------*/
+
+    if (Config.installed == FALSE)
+     { if (msg->method == SOUP_METHOD_GET)
+        {      if (!strcasecmp ( path, "/install" ))   Http_traiter_install ( server, msg, path, query, client, user_data );
+          else if (!strcasecmp ( path, "/status" ))    Http_traiter_status  ( server, msg, path, query, client, user_data );
+          else soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
+        }
+       else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
+     }
+    else if (msg->method == SOUP_METHOD_GET)
+     {      if (!strcasecmp ( path, "/" ))               Http_traiter_status     ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/api/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/api/dls/run" ))    Http_traiter_dls_run    ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/status" ))         Http_traiter_status     ( server, msg, path, query, client, user_data );
+       else { Http_traiter_new_file ( server, msg, path, query, client, user_data ); return; }
+     }
+    else if (msg->method == SOUP_METHOD_POST)
+     {      if (!strcasecmp ( path, "/api/dls/run/set" ))  Http_traiter_dls_run_set    ( server, msg, "dls_run", query, client, user_data );
+     }
+    else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
+    soup_message_set_status (msg, SOUP_STATUS_OK );
+  }
+/******************************************************************************************************************************/
 /* Run_HTTP: Thread principal                                                                                                 */
 /* Entrée: une structure PROCESS                                                                                              */
 /* Sortie: Niet                                                                                                               */
@@ -576,13 +619,7 @@
        return;
      }
 
-    if (Config.installed == FALSE)
-     { soup_server_add_handler ( socket, "/install", Http_traiter_install, NULL, NULL );
-       soup_server_add_handler ( socket, "/", Http_traiter_install, NULL, NULL );
-     }
-    else soup_server_add_handler ( socket, "/", Http_traiter_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/status",   Http_traiter_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/dls/run" , Http_traiter_dls_run, NULL, NULL );
+    soup_server_add_handler ( socket, "/" , HTTP_Handle_request_CB, NULL, NULL );
 
     if (Config.instance_is_master)
      { soup_server_add_handler ( socket, "/bus", Http_traiter_bus, NULL, NULL );
