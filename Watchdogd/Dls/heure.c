@@ -68,12 +68,26 @@
 /* Sortie: TRUE / FALSE                                                                                                       */
 /******************************************************************************************************************************/
  int Heure_apres ( int heure, int minute )
-  { return( (heure<nbr_heure || (heure==nbr_heure && minute<=nbr_minute)) ); }
+  { return( (heure<nbr_heure || (heure==nbr_heure && minute<nbr_minute)) ); }
 /******************************************************************************************************************************/
 /* Heure: renvoie TRUE si l'heure actuelle est antérieure a celle en parametre                                                */
 /* Entrée: heure et minute attendue                                                                                           */
 /* Sortie: TRUE / FALSE                                                                                                       */
 /******************************************************************************************************************************/
  int Heure_avant ( int heure, int minute )
+  { return( (heure>nbr_heure || (heure==nbr_heure && minute>nbr_minute)) ); }
+/******************************************************************************************************************************/
+/* Heure: renvoie TRUE si l'heure actuelle est future à celle en parametre                                                    */
+/* Entrée: heure et minute attendue                                                                                           */
+/* Sortie: TRUE / FALSE                                                                                                       */
+/******************************************************************************************************************************/
+ int Heure_apres_egal ( int heure, int minute )
+  { return( (heure<nbr_heure || (heure==nbr_heure && minute<=nbr_minute)) ); }
+/******************************************************************************************************************************/
+/* Heure: renvoie TRUE si l'heure actuelle est antérieure a celle en parametre                                                */
+/* Entrée: heure et minute attendue                                                                                           */
+/* Sortie: TRUE / FALSE                                                                                                       */
+/******************************************************************************************************************************/
+ int Heure_avant_egal ( int heure, int minute )
   { return( (heure>nbr_heure || (heure==nbr_heure && minute>=nbr_minute)) ); }
 /*----------------------------------------------------------------------------------------------------------------------------*/
