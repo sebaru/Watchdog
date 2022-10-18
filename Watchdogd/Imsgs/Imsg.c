@@ -41,6 +41,7 @@
     xmpp_message_set_body ( stanza, message );
     xmpp_send ( vars->conn , stanza ) ;
     xmpp_stanza_release ( stanza );
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: Send '%s' to '%s'", __func__, dest, message );
   }
 /******************************************************************************************************************************/
 /* Imsgs_Envoi_message_to_all_available : Envoi un message aux contacts disponibles                                           */
