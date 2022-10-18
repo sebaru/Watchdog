@@ -1664,24 +1664,6 @@ Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
     Dls_recalculer_arbre_comm();                                                        /* Calcul de l'arbre de communication */
     Dls_recalculer_arbre_dls_syn();
 
-    Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_BIT_PER_SEC", "nb bit par seconde", "bit par seconde" );
-    Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_WAIT", "delai d'attente DLS", "micro seconde" );
-    Mnemo_auto_create_AI ( FALSE, "SYS", "DLS_TOUR_PER_SEC", "Nombre de tour dls par seconde", "tour par seconde" );
-    Mnemo_auto_create_AI ( FALSE, "SYS", "TIME", "Represente l'heure/minute actuelles", "hh:mm" );
-    Mnemo_auto_create_AI ( FALSE, "SYS", "NBR_MSG_QUEUE", "Nombre de messages dans la file de traitement", "messages" );
-    Mnemo_auto_create_AI ( FALSE, "SYS", "NBR_VISUEL_QUEUE", "Nombre de visuels dans la file de traitement", "visuels" );
-    Mnemo_auto_create_AI ( FALSE, "SYS", "NBR_LIGNE_DLS", "Nombre de lignes total de tous modules D.L.S", "lignes" );
-    Mnemo_auto_create_MONO ( FALSE, "SYS", "TOP_1MIN", "Impulsion toutes les minutes" );
-    Mnemo_auto_create_MONO ( FALSE, "SYS", "TOP_1SEC", "Impulsion toutes les secondes" );
-    Mnemo_auto_create_MONO ( FALSE, "SYS", "TOP_5SEC", "Impulsion toutes les 5 secondes" );
-    Mnemo_auto_create_MONO ( FALSE, "SYS", "TOP_10SEC", "Impulsion toutes les 10 secondes" );
-    Mnemo_auto_create_MONO ( FALSE, "SYS", "TOP_2HZ", "Impulsion toutes les demi-secondes" );
-    Mnemo_auto_create_MONO ( FALSE, "SYS", "TOP_5HZ", "Impulsion toutes les 1/5 secondes" );
-    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_2SEC", "Creneaux d'une durée de deux secondes", 0 );
-    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_1SEC", "Creneaux d'une durée d'une seconde", 0 );
-    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_2HZ",  "Creneaux d'une durée d'une demi seconde", 0 );
-    Mnemo_auto_create_BI ( FALSE, "SYS", "FLIPFLOP_5HZ",  "Creneaux d'une durée d'un 5ième de seconde", 0 );
-
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Wait 20sec to let threads get I/Os", __func__ );
     wait=20;
     while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
