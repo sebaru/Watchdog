@@ -768,6 +768,11 @@
     soup_server_add_handler ( socket, "/api/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
     soup_server_add_handler ( socket, "/api/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
 
+    soup_server_add_handler ( socket, "/api/syn/save",       Http_traiter_syn_save, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/ack",        Http_traiter_syn_ack, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
+
     soup_server_add_handler ( socket, "/api/horloge/get",    Http_traiter_horloge_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/horloge/ticks/set", Http_traiter_horloge_ticks_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/horloge/ticks/del", Http_traiter_horloge_ticks_del, NULL, NULL );
