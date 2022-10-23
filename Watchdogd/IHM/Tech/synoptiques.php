@@ -101,4 +101,4 @@
 </div>
 
 
-<script src="/js/tech/synoptiques.js" type="text/javascript"></script>
+<script src="/js/synoptiques.js" type="text/javascript"></script>

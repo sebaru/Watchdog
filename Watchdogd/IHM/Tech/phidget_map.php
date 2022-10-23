@@ -455,4 +455,4 @@
   </div>
 </div>
 
-<script src="/js/tech/phidget_map.js" type="text/javascript"></script>
+<script src="/js/phidget_map.js" type="text/javascript"></script>

@@ -97,4 +97,4 @@
 </div>
 
 
-<script src="/js/tech/gpiod.js" type="text/javascript"></script>
+<script src="/js/gpiod.js" type="text/javascript"></script>

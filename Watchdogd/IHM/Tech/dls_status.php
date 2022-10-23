@@ -19,4 +19,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/dls_status.js" type="text/javascript"></script>
+<script src="/js/dls_status.js" type="text/javascript"></script>

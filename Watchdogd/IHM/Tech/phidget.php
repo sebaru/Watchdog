@@ -83,4 +83,4 @@
   </div>
 </div>
 
-<script src="/js/tech/phidget.js" type="text/javascript"></script>
+<script src="/js/phidget.js" type="text/javascript"></script>

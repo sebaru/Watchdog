@@ -78,4 +78,4 @@
   </div>
 </div>
 
-<script src="/js/tech/audio.js" type="text/javascript"></script>
+<script src="/js/audio.js" type="text/javascript"></script>

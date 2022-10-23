@@ -24,4 +24,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/tableau_map.js" type="text/javascript"></script>
+<script src="/js/tableau_map.js" type="text/javascript"></script>

@@ -153,5 +153,5 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/common_tech.js" type="text/javascript"></script>
-<script src="/js/tech/mnemos.js" type="text/javascript"></script>
+<script src="/js/common_tech.js" type="text/javascript"></script>
+<script src="/js/mnemos.js" type="text/javascript"></script>

@@ -72,4 +72,4 @@
   </div>
 </div>
 
-<script src="/js/tech/teleinfoedf.js" type="text/javascript"></script>
+<script src="/js/teleinfoedf.js" type="text/javascript"></script>

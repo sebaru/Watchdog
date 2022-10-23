@@ -22,4 +22,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/instance.js" type="text/javascript"></script>
+<script src="/js/instance.js" type="text/javascript"></script>

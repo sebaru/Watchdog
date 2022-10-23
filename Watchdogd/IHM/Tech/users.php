@@ -70,4 +70,4 @@
 </div>
 
 
-<script src="/js/tech/users.js" type="text/javascript"></script>
+<script src="/js/users.js" type="text/javascript"></script>

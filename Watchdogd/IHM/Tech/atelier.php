@@ -26,4 +26,4 @@
 </div>
 
 <script src="/js/graphique.js" type="text/javascript"></script>
-<script src="/js/tech/atelier.js" type="text/javascript"></script>
+<script src="/js/atelier.js" type="text/javascript"></script>

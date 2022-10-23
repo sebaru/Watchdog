@@ -94,4 +94,4 @@
   </div>
 </div>
 
-<script src="/js/tech/smsg.js" type="text/javascript"></script>
+<script src="/js/smsg.js" type="text/javascript"></script>

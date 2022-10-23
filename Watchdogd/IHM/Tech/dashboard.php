@@ -193,6 +193,6 @@
 </div>
 </div>
 
-<script src="/js/tech/dashboard.js" type="text/javascript"></script>
+<script src="/js/dashboard.js" type="text/javascript"></script>
 <!-- Container -->
 </div>

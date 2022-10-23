@@ -79,4 +79,4 @@
   </div>
 </div>
 
-<script src="/js/tech/meteo.js" type="text/javascript"></script>
+<script src="/js/meteo.js" type="text/javascript"></script>

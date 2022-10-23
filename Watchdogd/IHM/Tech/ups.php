@@ -82,4 +82,4 @@
   </div>
 </div>
 
-<script src="/js/tech/ups.js" type="text/javascript"></script>
+<script src="/js/ups.js" type="text/javascript"></script>

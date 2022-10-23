@@ -23,4 +23,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/command_text.js" type="text/javascript"></script>
+<script src="/js/command_text.js" type="text/javascript"></script>
