@@ -702,11 +702,12 @@
        else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
      }
     else if (msg->method == SOUP_METHOD_GET)
-     {      if (!strcasecmp ( path, "/" ))               Http_traiter_status     ( server, msg, path, query, client, user_data );
-       else if (!strcasecmp ( path, "/api/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, client, user_data );
-       else if (!strcasecmp ( path, "/api/dls/run" ))    Http_traiter_dls_run    ( server, msg, path, query, client, user_data );
-       else if (!strcasecmp ( path, "/status" ))         Http_traiter_status     ( server, msg, path, query, client, user_data );
-       else { Http_traiter_new_file ( server, msg, path, query, client, user_data ); return; }
+     {      if (!strcasecmp ( path, "/" ))           Http_traiter_status     ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/dls/run" ))    Http_traiter_dls_run    ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/status" ))     Http_traiter_status     ( server, msg, path, query, client, user_data );
+       else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
+       /*else { Http_traiter_new_file ( server, msg, path, query, client, user_data ); return; }*/
      }
     else if (msg->method == SOUP_METHOD_POST)
      {      if (!strcasecmp ( path, "/api/dls/run/set" ))  Http_traiter_dls_run_set    ( server, msg, "dls_run", query, client, user_data );

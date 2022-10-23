@@ -133,9 +133,6 @@
 		     return;
      }
 
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-
     gchar *tech_id_src = g_hash_table_lookup ( query, "tech_id" );
     gchar *classe_src  = g_hash_table_lookup ( query, "classe" );
     if (! (tech_id_src && classe_src))
