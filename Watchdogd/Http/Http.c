@@ -710,7 +710,8 @@
        /*else { Http_traiter_new_file ( server, msg, path, query, client, user_data ); return; }*/
      }
     else if (msg->method == SOUP_METHOD_POST)
-     {      if (!strcasecmp ( path, "/api/dls/run/set" ))  Http_traiter_dls_run_set    ( server, msg, "dls_run", query, client, user_data );
+     {      if (!strcasecmp ( path, "/dls/run/set" ))  Http_traiter_dls_run_set   ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/dls/acquitter")) Http_traiter_dls_acquitter ( server, msg, path, query, client, user_data );
      }
     else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
     soup_message_set_status (msg, SOUP_STATUS_OK );
@@ -759,7 +760,6 @@
      }
 
     soup_server_add_handler ( socket, "/api/dls/status" ,    Http_traiter_dls_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/run/set" ,   Http_traiter_dls_run_set, NULL, NULL );
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
 

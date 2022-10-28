@@ -355,8 +355,6 @@
 		     return;
      }
 
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
@@ -375,36 +373,36 @@
     if ( !strcasecmp ( classe, "DI" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
        Dls_data_set_DI ( NULL, tech_id, acronyme, NULL, valeur );
-       Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );
+       /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "DO" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
        Dls_data_set_DO ( NULL, tech_id, acronyme, NULL, valeur );
-       Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );
+       /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "BI" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
        Dls_data_set_BI ( NULL, tech_id, acronyme, NULL, valeur );
-       Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );
+       /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "MONO" ) )
      { Dls_data_set_MONO ( NULL, tech_id, acronyme, NULL, TRUE );
-       Audit_log ( session, "DLS %s '%s:%s' set to TRUE", classe, tech_id, acronyme );
+       /*Audit_log ( session, "DLS %s '%s:%s' set to TRUE", classe, tech_id, acronyme );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "MSG" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
        Dls_data_set_MSG ( NULL, tech_id, acronyme, NULL, FALSE, valeur );
-       Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );
+       /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "REGISTRE" ) )
      { gdouble valeur = Json_get_double ( request, "valeur" );
        Dls_data_set_REGISTRE ( NULL, tech_id, acronyme, NULL, valeur );
-       Audit_log ( session, "DLS %s '%s:%s' set to %f", classe, tech_id, acronyme, valeur );
+       /*Audit_log ( session, "DLS %s '%s:%s' set to %f", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else soup_message_set_status_full (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Wrong Class" );
@@ -425,8 +423,6 @@
 		     return;
      }
 
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
@@ -437,7 +433,7 @@
      }
 
     Dls_acquitter_plugin ( Json_get_string ( request, "tech_id" ) );
-    Audit_log ( session, "DLS '%s' acquitté", Json_get_string ( request, "tech_id" ) );
+    /*Audit_log ( session, "DLS '%s' acquitté", Json_get_string ( request, "tech_id" ) );*/
     Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
