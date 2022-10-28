@@ -217,6 +217,7 @@
           if (!strcasecmp(bit->tech_id, tech_id))
            { JsonNode *element = Json_node_create();
              Dls_AI_to_json ( element, bit );
+             MSRV_Map_to_thread ( element );
              Json_array_add_element ( array, element );
            }
           liste = g_slist_next(liste);
@@ -231,6 +232,7 @@
           if (!strcasecmp(bit->tech_id, tech_id))
            { JsonNode *element = Json_node_create();
              Dls_AO_to_json ( element, bit );
+             MSRV_Map_to_thread ( element );
              Json_array_add_element ( array, element );
            }
           liste = g_slist_next(liste);
@@ -259,6 +261,7 @@
           if (!strcasecmp(bit->tech_id, tech_id))
            { JsonNode *element = Json_node_create();
              Dls_DI_to_json ( element, bit );
+             MSRV_Map_to_thread ( element );
              Json_array_add_element ( array, element );
            }
           liste = g_slist_next(liste);
@@ -273,6 +276,7 @@
           if (!strcasecmp(bit->tech_id, tech_id))
            { JsonNode *element = Json_node_create();
              Dls_DO_to_json ( element, bit );
+             MSRV_Map_to_thread ( element );
              Json_array_add_element ( array, element );
            }
           liste = g_slist_next(liste);
