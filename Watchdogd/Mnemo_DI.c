@@ -112,4 +112,24 @@
     Json_node_add_string ( element, "acronyme", bit->acronyme );
     Json_node_add_bool   ( element, "etat", bit->etat );
   }
+/******************************************************************************************************************************/
+/* Dls_all_DI_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_DI_to_json ( JsonNode *target )
+  { gint cpt = 0;
+
+    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_DI" );
+    GSList *liste = Partage->Dls_data_DI;
+    while ( liste )
+     { struct DLS_DI *bit = (struct DLS_DI *)liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_DI_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+    Json_node_add_int ( target, "nbr_mnemos_DI", cpt );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

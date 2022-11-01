@@ -104,25 +104,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MONO loaded", __func__, cpt );
   }
 /******************************************************************************************************************************/
-/* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Updater_confDB_MONO ( void )
-  { gint cpt = 0;
-
-    GSList *liste = Partage->Dls_data_MONO;
-    while ( liste )
-     { struct DLS_MONO *mono = (struct DLS_MONO *)liste->data;
-       SQL_Write_new ( "UPDATE mnemos_MONO as m SET etat='%d' "
-                       "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                       mono->etat, mono->tech_id, mono->acronyme );
-       liste = g_slist_next(liste);
-       cpt++;
-     }
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MONO updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Dls_MONO_to_json : Formate un bit au format JSON                                                                           */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -131,5 +112,25 @@
   { Json_node_add_string ( element, "tech_id",  bit->tech_id );
     Json_node_add_string ( element, "acronyme", bit->acronyme );
     Json_node_add_bool   ( element, "etat",     bit->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_all_MONO_to_json: Transforme tous les bits en JSON                                                                     */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_MONO_to_json ( JsonNode *target )
+  { gint cpt = 0;
+
+    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_MONO" );
+    GSList *liste = Partage->Dls_data_MONO;
+    while ( liste )
+     { struct DLS_MONO *bit = (struct DLS_MONO *)liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_MONO_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+    Json_node_add_int ( target, "nbr_mnemos_MONO", cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

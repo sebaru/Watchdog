@@ -221,20 +221,43 @@
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Save_dls_data_to_DB ( void )
+ static void Export_Dls_Data_to_API ( void )
   { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
+
+    JsonNode *RootNode = Json_node_create();
+    if (!RootNode)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving dls_data to API.", __func__ ); }
+
     gint top = Partage->top;
-    Updater_confDB_AO();                                                    /* Sauvegarde des valeurs des Sorties Analogiques */
-    Updater_confDB_DO();                                                            /* Sauvegarde des valeurs des Sorties TOR */
-    Updater_confDB_CH();                                                                  /* Sauvegarde des compteurs Horaire */
-    Updater_confDB_CI();                                                              /* Sauvegarde des compteurs d'impulsion */
-    Updater_confDB_AI();                                                              /* Sauvegarde des compteurs d'impulsion */
-    Updater_confDB_Registre();                                                                    /* Sauvegarde des registres */
-    Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
-    Updater_confDB_MONO();                                             /* Sauvegarde des valeurs des bistables et monostables */
-    Updater_confDB_BI();                                               /* Sauvegarde des valeurs des bistables et monostables */
+    Dls_all_BI_to_json ( RootNode );
+    Dls_all_MONO_to_json ( RootNode );
+    Dls_all_REGISTRE_to_json ( RootNode );
+    Dls_all_AI_to_json ( RootNode );
+    Dls_all_AO_to_json ( RootNode );
+    Dls_all_CH_to_json ( RootNode );
+    Dls_all_CI_to_json ( RootNode );
+    Dls_all_DI_to_json ( RootNode );
+    Dls_all_DO_to_json ( RootNode );
+  /*Updater_confDB_MSG();                                                              /* Sauvegarde des valeurs des messages */
+
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
+    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d BI to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_BI" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d MONO to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_MONO" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d REGISTRE to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_REGISTRE" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d DI to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_DI" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d DO to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_DO" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d AI to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_AI" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d AO to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_AO" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d CI to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_CI" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d CH to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_CH" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Dls_Data saved to API", __func__ );
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving dls_data to API.", __func__ ); }
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saved DLS_DATA in %04.1fs", __func__, (Partage->top-top)/10.0 );
-    return;
+    Json_node_unref ( api_result );
+    Json_node_unref ( RootNode );
   }
 /******************************************************************************************************************************/
 /* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
@@ -604,7 +627,7 @@
 
           if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
            { pthread_t TID;
-             pthread_create ( &TID, NULL, (void *)Save_dls_data_to_DB, NULL );
+             pthread_create ( &TID, NULL, (void *)Export_Dls_Data_to_API, NULL );
              pthread_detach ( TID );
              cpt_5_minutes += 3000;                                                        /* Sauvegarde toutes les 5 minutes */
            }
@@ -631,7 +654,7 @@
      }
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
-    Save_dls_data_to_DB();                                                                 /* Dernière sauvegarde avant arret */
+    Export_Dls_Data_to_API();                                                              /* Dernière sauvegarde avant arret */
 
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */

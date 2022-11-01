@@ -79,28 +79,6 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Updater_confDO: Mise a jour des valeurs des DigitalOutput en base                                                          */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Updater_confDB_DO( void )
-  { GSList *liste;
-    gint cpt;
-
-    cpt = 0;
-    liste = Partage->Dls_data_DO;
-    while ( liste )
-     { struct DLS_DO *dout = liste->data;
-       SQL_Write_new( "UPDATE mnemos_DO as m SET etat='%d' "
-                      "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                      dout->etat, dout->tech_id, dout->acronyme );
-       liste = g_slist_next(liste);
-       cpt++;
-     }
-
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d DO updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Dls_DO_to_json : Formate un bit au format JSON                                                                             */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -109,5 +87,25 @@
   { Json_node_add_string ( element, "tech_id",  bit->tech_id );
     Json_node_add_string ( element, "acronyme", bit->acronyme );
     Json_node_add_bool   ( element, "etat",     bit->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_all_DO_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_DO_to_json ( JsonNode *target )
+  { gint cpt = 0;
+
+    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_DO" );
+    GSList *liste = Partage->Dls_data_DO;
+    while ( liste )
+     { struct DLS_DO *bit = (struct DLS_DO *)liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_DO_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+    Json_node_add_int ( target, "nbr_mnemos_DO", cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

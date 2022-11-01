@@ -99,25 +99,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MSG loaded", __func__, cpt );
   }
 /******************************************************************************************************************************/
-/* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Updater_confDB_MSG ( void )
-  { gint cpt = 0;
-
-    GSList *liste = Partage->Dls_data_MSG;
-    while ( liste )
-     { struct DLS_MESSAGES *msg = (struct DLS_MESSAGES *)liste->data;
-       SQL_Write_new ( "UPDATE msgs as m SET m.etat='%d' "
-                       "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                       msg->etat, msg->tech_id, msg->acronyme );
-       liste = g_slist_next(liste);
-       cpt++;
-     }
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MSG updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Dls_MESSAGE_to_json : Formate un bit au format JSON                                                                        */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */

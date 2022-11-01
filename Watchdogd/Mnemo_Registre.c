@@ -170,50 +170,36 @@
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
-/* Updater_confDB_R: Mise a jour des valeurs de R en base                                                                   */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Updater_confDB_Registre( void )
-  { GSList *liste;
-
-    JsonNode  *RootNode  = Json_node_create();
-    JsonArray *RootArray = Json_node_add_array ( RootNode, "mnemos_REGISTRE" );
-    gint cpt = 0;
-    liste = Partage->Dls_data_REGISTRE;
-    while ( liste )
-     { struct DLS_REGISTRE *r = (struct DLS_REGISTRE *)liste->data;
-       SQL_Write_new( "UPDATE mnemos_R as m SET valeur='%f' "
-                      "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                      r->valeur, r->tech_id, r->acronyme );
-       JsonNode *element = Json_node_create();
-       Json_node_add_string ( element, "tech_id", r->tech_id );
-       Json_node_add_string ( element, "acronyme", r->acronyme );
-       Json_node_add_double ( element, "valeur", r->valeur );
-       Json_array_add_element ( RootArray, element );
-       liste = g_slist_next(liste);
-       cpt++;
-     }
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
-    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d REGISTRE to API.", __func__, cpt ); }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving %d REGISTRE to API.", __func__, cpt ); }
-    Json_node_unref ( api_result );
-    Json_node_unref ( RootNode );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d REGISTRE updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Dls_REGISTRE_to_json : Formate un bit au format JSON                                                                       */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_REGISTRE_to_json ( JsonNode *element, struct DLS_REGISTRE *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_double ( element, "valeur", bit->valeur );
-    Json_node_add_string ( element, "unite", bit->unite );
+  { Json_node_add_string ( element, "tech_id",   bit->tech_id );
+    Json_node_add_string ( element, "acronyme",  bit->acronyme );
+    Json_node_add_double ( element, "valeur",    bit->valeur );
+    Json_node_add_string ( element, "unite",     bit->unite );
     Json_node_add_int    ( element, "archivage", bit->archivage );
     Json_node_add_int    ( element, "last_arch", bit->last_arch );
+  }
+/******************************************************************************************************************************/
+/* Dls_all_REGISTRE_to_json: Transforme tous les bits en JSON                                                                 */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_REGISTRE_to_json ( JsonNode *target )
+  { gint cpt = 0;
+
+    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_REGISTRE" );
+    GSList *liste = Partage->Dls_data_REGISTRE;
+    while ( liste )
+     { struct DLS_REGISTRE *bit = (struct DLS_REGISTRE *)liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_REGISTRE_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+    Json_node_add_int ( target, "nbr_mnemos_REGISTRE", cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

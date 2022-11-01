@@ -118,41 +118,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Updater_confDB_CI: Mise a jour des valeurs de CI en base                                                                   */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Updater_confDB_CI ( void )
-  { GSList *liste;
-    gint cpt;
-    JsonNode  *RootNode  = Json_node_create();
-    JsonArray *RootArray = Json_node_add_array ( RootNode, "mnemos_CI" );
-    cpt = 0;
-    liste = Partage->Dls_data_CI;
-    while ( liste )
-     { struct DLS_CI *cpt_imp = (struct DLS_CI *)liste->data;
-       SQL_Write_new ( "UPDATE mnemos_CI as m SET valeur='%d', etat='%d' "
-                       "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                       cpt_imp->valeur, cpt_imp->etat, cpt_imp->tech_id, cpt_imp->acronyme );
-       JsonNode *element = Json_node_create();
-       Json_node_add_string ( element, "tech_id", cpt_imp->tech_id );
-       Json_node_add_string ( element, "acronyme", cpt_imp->acronyme );
-       Json_node_add_int    ( element, "valeur", cpt_imp->valeur );
-       Json_node_add_bool   ( element, "etat", cpt_imp->etat );
-       Json_array_add_element ( RootArray, element );
-       liste = g_slist_next(liste);
-       cpt++;
-     }
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
-    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d CI to API.", __func__, cpt ); }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving %d CI to API.", __func__, cpt ); }
-    Json_node_unref ( api_result );
-    Json_node_unref ( RootNode );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d CptIMP updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Dls_CI_to_json : Formate un CI au format JSON                                                                              */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -168,4 +133,24 @@
     Json_node_add_int    ( element, "archivage", bit->archivage );
     Json_node_add_int    ( element, "last_arch", bit->last_arch );
   };
+/******************************************************************************************************************************/
+/* Dls_all_CI_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_CI_to_json ( JsonNode *target )
+  { gint cpt = 0;
+
+    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_CI" );
+    GSList *liste = Partage->Dls_data_CI;
+    while ( liste )
+     { struct DLS_CI *bit = (struct DLS_CI *)liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_CI_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+    Json_node_add_int ( target, "nbr_mnemos_CI", cpt );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

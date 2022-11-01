@@ -115,52 +115,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Updater_confDB_CH : Met à jour l'ensemble des CompteurHoraire dans la base de données                                      */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Updater_confDB_CH ( void )
-  { gchar requete[200];
-    GSList *liste;
-    struct DB *db;
-    gint cpt;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
-       return;
-     }
-    JsonNode  *RootNode  = Json_node_create();
-    JsonArray *RootArray = Json_node_add_array ( RootNode, "mnemos_CH" );
-    cpt=0;
-    liste = Partage->Dls_data_CH;
-    while ( liste )
-     { struct DLS_CH *cpt_h = (struct DLS_CH *)liste->data;
-       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_CH as m SET valeur='%d', etat='%d' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   cpt_h->valeur, cpt_h->etat, cpt_h->tech_id, cpt_h->acronyme );
-       Lancer_requete_SQL ( db, requete );
-       JsonNode *element = Json_node_create();
-       Json_node_add_string ( element, "tech_id", cpt_h->tech_id );
-       Json_node_add_string ( element, "acronyme", cpt_h->acronyme );
-       Json_node_add_int    ( element, "valeur", cpt_h->valeur );
-       Json_node_add_bool   ( element, "etat", cpt_h->etat );
-       Json_array_add_element ( RootArray, element );
-       liste = g_slist_next(liste);
-       cpt++;
-     }
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
-    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d MONO to API.", __func__, cpt ); }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving %d MONO to API.", __func__, cpt ); }
-    Json_node_unref ( api_result );
-    Json_node_unref ( RootNode );
-    Libere_DB_SQL( &db );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d CptH updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Dls_CH_to_json : Formate un CH au format JSON                                                                              */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -172,4 +126,24 @@
     Json_node_add_bool   ( element, "etat",      bit->etat );
     Json_node_add_int    ( element, "last_arch", bit->last_arch );
   };
+/******************************************************************************************************************************/
+/* Dls_all_CH_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_CH_to_json ( JsonNode *target )
+  { gint cpt = 0;
+
+    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_CH" );
+    GSList *liste = Partage->Dls_data_CH;
+    while ( liste )
+     { struct DLS_CH *bit = (struct DLS_CH *)liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_CH_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+    Json_node_add_int ( target, "nbr_mnemos_CH", cpt );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

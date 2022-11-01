@@ -166,28 +166,6 @@
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
-/* Updater_confDB_R: Mise a jour des valeurs de R en base                                                                   */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Updater_confDB_AI( void )
-  { GSList *liste;
-    gint cpt;
-
-    cpt = 0;
-    liste = Partage->Dls_data_AI;
-    while ( liste )
-     { struct DLS_AI *ai = (struct DLS_AI *)liste->data;
-       SQL_Write_new( "UPDATE mnemos_AI as m SET valeur='%f', in_range='%d' "
-                      "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                      ai->valeur, ai->in_range, ai->tech_id, ai->acronyme );
-       liste = g_slist_next(liste);
-       cpt++;
-     }
-
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d AI updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Dls_AI_to_json : Formate un bit au format JSON                                                                             */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -200,5 +178,25 @@
     Json_node_add_int    ( element, "in_range",     bit->in_range );
     Json_node_add_int    ( element, "last_arch",    bit->last_arch );
     Json_node_add_int    ( element, "archivage",    bit->archivage );
+  }
+/******************************************************************************************************************************/
+/* Dls_all_AI_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_AI_to_json ( JsonNode *target )
+  { gint cpt = 0;
+
+    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_AI" );
+    GSList *liste = Partage->Dls_data_AI;
+    while ( liste )
+     { struct DLS_AI *bit = (struct DLS_AI *)liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_AI_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+    Json_node_add_int ( target, "nbr_mnemos_AI", cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

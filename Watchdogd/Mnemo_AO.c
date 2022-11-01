@@ -124,39 +124,6 @@
     return(TRUE);                                                                                    /* Résultat dans db->row */
   }
 /******************************************************************************************************************************/
-/* Updater_confDB_AO: Met a jour les valeurs des Sortie analogiques dans la base de données                                   */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Updater_confDB_AO ( void )
-  { gchar requete[200];
-    struct DB *db;
-    GSList *liste;
-    gint cpt;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
-       return;
-     }
-
-    cpt=0;
-    liste = Partage->Dls_data_AO;
-    while ( liste )
-     { struct DLS_AO *ao = (struct DLS_AO *)liste->data;
-       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_AO as m SET valeur='%f' "
-                   "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                   ao->valeur, ao->tech_id, ao->acronyme );
-       Lancer_requete_SQL ( db, requete );
-       liste = g_slist_next(liste);
-       cpt++;
-     }
-
-    Libere_DB_SQL( &db );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d AO updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Dls_AO_to_json: Convertir un AO en JSON                                                                                    */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -169,5 +136,25 @@
     Json_node_add_double ( element, "valeur_max",   bit->max );
     Json_node_add_double ( element, "valeur",       bit->valeur );
     Json_node_add_int    ( element, "type",         bit->type );
+  }
+/******************************************************************************************************************************/
+/* Dls_all_AO_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_AO_to_json ( JsonNode *target )
+  { gint cpt = 0;
+
+    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_AO" );
+    GSList *liste = Partage->Dls_data_AO;
+    while ( liste )
+     { struct DLS_AO *bit = (struct DLS_AO *)liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_AO_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+    Json_node_add_int ( target, "nbr_mnemos_AO", cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

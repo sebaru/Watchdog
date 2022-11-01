@@ -108,40 +108,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d BI loaded", __func__, cpt );
   }
 /******************************************************************************************************************************/
-/* Updater_confDB_BI: Update les parametres d'un bit interne en database                                                      */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Updater_confDB_BI ( void )
-  { gint cpt = 0;
-
-    JsonNode  *RootNode  = Json_node_create();
-    JsonArray *RootArray = Json_node_add_array ( RootNode, "mnemos_BI" );
-
-    GSList *liste = Partage->Dls_data_BI;
-    while ( liste )
-     { struct DLS_BI *bi = (struct DLS_BI *)liste->data;
-       SQL_Write_new ( "UPDATE mnemos_BI as m SET etat='%d' "
-                       "WHERE m.tech_id='%s' AND m.acronyme='%s';",
-                       bi->etat, bi->tech_id, bi->acronyme );
-       JsonNode *element = Json_node_create();
-       Json_node_add_string ( element, "tech_id", bi->tech_id );
-       Json_node_add_string ( element, "acronyme", bi->acronyme );
-       Json_node_add_int    ( element, "etat", bi->etat );
-       Json_array_add_element ( RootArray, element );
-       liste = g_slist_next(liste);
-       cpt++;
-     }
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
-    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d BI to API.", __func__, cpt ); }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving %d bI to API.", __func__, cpt ); }
-    Json_node_unref ( api_result );
-    Json_node_unref ( RootNode );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d BI updated", __func__, cpt );
-  }
-/******************************************************************************************************************************/
 /* Dls_BI_to_json : Formate un bit au format JSON                                                                           */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -151,5 +117,25 @@
     Json_node_add_string ( element, "acronyme", bit->acronyme );
     Json_node_add_bool   ( element, "etat",     bit->etat );
     Json_node_add_int    ( element, "groupe",   bit->groupe );
+  }
+/******************************************************************************************************************************/
+/* Dls_all_BI_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_BI_to_json ( JsonNode *target )
+  { gint cpt = 0;
+
+    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_BI" );
+    GSList *liste = Partage->Dls_data_BI;
+    while ( liste )
+     { struct DLS_BI *bit = (struct DLS_BI *)liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_BI_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
+    Json_node_add_int ( target, "nbr_mnemos_BI", cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
