@@ -204,12 +204,6 @@
  static void Dls_start_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = user_data;
     if ( strcasecmp ( tech_id, plugin->tech_id ) ) return;
-    if ( plugin->compil_status == FALSE )
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE,
-		         "%s: '%s' (%s) could not be started because of CompilStatus Not OK", __func__,
-                 plugin->tech_id, plugin->name );
-       return;
-     }
 
     plugin->on = TRUE;
     plugin->conso = 0.0;
@@ -322,15 +316,6 @@
        return(FALSE);
      }
 
-    dls->go = dlsym( dls->handle, "Go" );                                                    /* Recherche de la fonction 'Go' */
-    if (!dls->go)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                 "%s: Candidat '%s' failed sur absence GO", __func__, dls->tech_id );
-       dlclose( dls->handle );
-       dls->handle = NULL;
-       return(FALSE);
-     }
-
     dls->version = dlsym( dls->handle, "version" );                                               /* Recherche de la fonction */
     if (!dls->version)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
@@ -347,6 +332,16 @@
     dls->vars.debug = dls->debug;                                  /* Recopie du champ de debug depuis la DB vers la zone RUN */
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE,
               "%s: Candidat '%s' loaded (%s)", __func__, dls->tech_id, dls->shortname );
+
+/*------------------------------------------------------- Chargement GO ------------------------------------------------------*/
+    dls->go = dlsym( dls->handle, "Go" );                                                    /* Recherche de la fonction 'Go' */
+    if (!dls->go)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+                 "%s: Candidat '%s' failed sur absence GO", __func__, dls->tech_id );
+       dlclose( dls->handle );
+       dls->handle = NULL;
+       return(FALSE);
+     }
 
     return(TRUE);
   }
@@ -543,11 +538,11 @@
     Dls_recalculer_arbre_syn_for_childs (NULL, 0, NULL, NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_Plugin_load_by_array: Importe un plugin depius l'API dans la liste des plugins                                         */
+/* Dls_Add_Plugin_by_array: Ajoute un plugin dans la liste des plugins                                                        */
 /* Entrée: les données JSON recu de la requete HTTP                                                                           */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Dls_Plugin_load_by_array (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
+ static void Dls_Add_Plugin_by_array (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { gchar *tech_id = Json_get_string ( element, "tech_id" );
     struct DLS_PLUGIN *dls = g_try_malloc0 ( sizeof (struct DLS_PLUGIN ) );
     if (!dls)
@@ -556,13 +551,13 @@
      }
 
     g_snprintf ( dls->tech_id,   sizeof(dls->tech_id),   "%s", tech_id );
-    g_snprintf ( dls->name,       sizeof(dls->name),       "%s", Json_get_string ( element, "name" ) );
+    g_snprintf ( dls->name,      sizeof(dls->name),       "%s", Json_get_string ( element, "name" ) );
     g_snprintf ( dls->shortname, sizeof(dls->shortname), "%s", Json_get_string ( element, "shortname" ) );
     dls->debug = Json_get_bool ( element, "debug" );
     dls->on    = Json_get_bool ( element, "enable" );
 
-    pthread_mutex_lock( &Partage->com_dls.synchro );
     Dls_Charger_un_plugin ( dls );
+    pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Dls_plugins = g_slist_append( Partage->com_dls.Dls_plugins, dls );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
@@ -578,7 +573,7 @@
        return;
      }
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: API Request for DLS PLUGINS OK.", __func__ );
-    Json_node_foreach_array_element ( api_result, "plugins", Dls_Plugin_load_by_array, NULL );
+    Json_node_foreach_array_element ( api_result, "plugins", Dls_Add_Plugin_by_array, NULL );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: %03d plugins loaded", __func__,
               Json_get_int ( api_result, "nbr_plugins" ) );
     Json_node_unref ( api_result );

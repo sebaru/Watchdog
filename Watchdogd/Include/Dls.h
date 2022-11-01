@@ -67,10 +67,6 @@
     guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint dls_id;
     gboolean on;
-    gchar compil_date[32];                                                                    /* Date de derniere compilation */
-    guint compil_status;                                                                    /* Statut de derniere compilation */
-    guint nbr_compil;                                                                         /* Nombre de compilation totale */
-    guint nbr_ligne;                                                                               /* Nombre de ligne de code */
     gboolean debug;                                                                                /* Nombre de ligne de code */
     gboolean is_thread;
 

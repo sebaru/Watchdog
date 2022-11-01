@@ -102,17 +102,13 @@
     struct timeval tv;
     struct tm *temps;
 
-    JsonNode *histo = Json_node_create ();
-    if (!histo) return;
-    SQL_Select_to_json_node ( histo, NULL,
-                             "SELECT msgs.*,dls.shortname as dls_shortname, dls.syn_id,"
-                             "parent_syn.page as syn_parent_page, syn.page as syn_page "
-                             "FROM msgs "
-                             "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
-                             "INNER JOIN syns as syn ON syn.syn_id = dls.syn_id "
-                             "INNER JOIN syns as parent_syn ON parent_syn.syn_id = syn.parent_id "
-                             "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme            /* Where */
-                            );
+    gchar parametre[128];
+    g_snprintf ( parametre, sizeof(parametre), "tech_id=%s&acronyme=%s", msg->tech_id, msg->acronyme );
+    JsonNode *histo = Http_Get_from_global_API ( "/run/message", parametre );
+    if (histo == NULL || Json_get_int ( histo, "api_status" ) != SOUP_STATUS_OK)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for /run/message failed. Dropping message.", __func__ );
+       return;
+     }
 
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
