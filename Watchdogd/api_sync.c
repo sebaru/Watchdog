@@ -177,7 +177,7 @@ end:
  static void API_ws_init ( void )
   { static gchar *protocols[] = { "live-agent", NULL };
     gchar chaine[256];
-    g_snprintf(chaine, sizeof(chaine), "wss://%s/websocket", Json_get_string ( Config.config, "api_url" ) );
+    g_snprintf(chaine, sizeof(chaine), "wss://%s/run/websocket", Json_get_string ( Config.config, "api_url" ) );
     SoupMessage *query = soup_message_new ( "GET", chaine );
     Http_Add_Agent_signature ( query, NULL, 0 );
 

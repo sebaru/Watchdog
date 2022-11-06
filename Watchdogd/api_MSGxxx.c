@@ -33,6 +33,8 @@
 /****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
 
+ static GSList *Liste_Histo_to_send = NULL;
+
 /************************************* Converstion du histo dynamique *******************************************************/
  void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max )
   { gchar chaine[512], prefixe[128], tech_id[32], acronyme[64], suffixe[128];
@@ -97,7 +99,7 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- static void Gerer_arrive_MSG_event_dls_on ( struct DLS_MESSAGES *msg )
+ static JsonNode *MSGS_Convert_msg_on_to_histo ( struct DLS_MESSAGES *msg )
   { gchar libelle[128], chaine[512], date_create[128];
     struct timeval tv;
     struct tm *temps;
@@ -107,7 +109,7 @@
     JsonNode *histo = Http_Get_from_global_API ( "/run/message", parametre );
     if (histo == NULL || Json_get_int ( histo, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for /run/message failed. Dropping message.", __func__ );
-       return;
+       return(NULL);
      }
 
     gettimeofday( &tv, NULL );
@@ -123,22 +125,13 @@
     Json_node_add_string ( histo, "libelle", libelle );                                       /* Ecrasement libelle d'origine */
     Json_node_add_string ( histo, "date_create", date_create );                               /* Ecrasement libelle d'origine */
     Json_node_add_bool   ( histo, "alive", TRUE );
-    Ajouter_histo_msgsDB( histo );                                                                     /* Si ajout dans DB OK */
-/******************************************************* Envoi du histo aux librairies abonnées *******************************/
-    if (Partage->top >= msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
-     { msg->last_on = Partage->top;
-       Json_node_add_string ( histo, "tag", "DLS_HISTO" );
-       Http_Send_to_slaves ( NULL, histo );
-       Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
-       Http_ws_send_to_all( histo );
-     }
-    Json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
+    return(histo);
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- static void Gerer_arrive_MSG_event_dls_off ( struct DLS_MESSAGES *msg )
+ static JsonNode *MSGS_Convert_msg_off_to_histo ( struct DLS_MESSAGES *msg )
   { gchar chaine[256], date_fin[128];
     struct timeval tv;
     struct tm *temps;
@@ -151,23 +144,11 @@
     g_free( date_utf8 );
 
     JsonNode *histo = Json_node_create ();
-    if (!histo) return;
-    SQL_Select_to_json_node ( histo, NULL,
-                             "SELECT msgs.*, syn.syn_id as syn_id, syn.page as syn_page "
-                             "FROM msgs "
-                             "INNER JOIN dls ON msgs.tech_id = dls.tech_id "
-                             "INNER JOIN syns as syn ON syn.syn_id = dls.syn_id "
-                             "WHERE msgs.tech_id='%s' AND msgs.acronyme='%s'", msg->tech_id, msg->acronyme );
-
-    Json_node_add_string ( histo, "date_fin", date_fin );
-    Json_node_add_bool   ( histo, "alive", FALSE );
-    Retirer_histo_msgsDB( histo );
-/******************************************************* Envoi du histo aux librairies abonnées *******************************/
-    Json_node_add_string ( histo, "tag", "DLS_HISTO" );
-    Http_Send_to_slaves ( NULL, histo );
-    Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
-    Http_ws_send_to_all( histo );
-    Json_node_unref( histo );                                                          /* On a plus besoin de cette reference */
+    if (histo)
+     { Json_node_add_string ( histo, "date_fin", date_fin );
+       Json_node_add_bool   ( histo, "alive", FALSE );
+     }
+    return( histo );
   }
 /******************************************************************************************************************************/
 /* API_Send_MSGS: Envoi les messages a l'API                                                                                  */
@@ -177,17 +158,52 @@
   { struct DLS_MESSAGES_EVENT *event;
 
     while (Partage->com_msrv.liste_msg)
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       event = Partage->com_msrv.liste_msg->data;                        /* Recuperation du numero de msg */
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
+       event = Partage->com_msrv.liste_msg->data;                                            /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "%s: Handle MSG'%s:%s'=%d, Reste a %d a traiter", __func__,
                  event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
 
-            if (event->etat == 0) Gerer_arrive_MSG_event_dls_off( event->msg );
-       else if (event->etat == 1) Gerer_arrive_MSG_event_dls_on ( event->msg );
+       if (event->etat == 1)
+        { JsonNode *histo = MSGS_Convert_msg_on_to_histo ( event->msg );
+          if (histo)
+           { if (Partage->top >= event->msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
+              { event->msg->last_on = Partage->top;
+                Json_node_add_string ( histo, "tag", "DLS_HISTO" );
+                Http_Send_to_slaves ( NULL, histo );
+                Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
+                Http_ws_send_to_all( histo );
+                Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
+              } else Json_node_unref(histo);
+           }
+        }
+       else if (event->etat == 0)
+        { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );
+          if(histo)
+           { Json_node_add_string ( histo, "tag", "DLS_HISTO" );
+             Http_Send_to_slaves ( NULL, histo );
+             Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
+             Http_ws_send_to_all( histo );
+             Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
+           }
+        }
        g_free(event);
+     }
+
+/******************************************************* Envoi à l'API ********************************************************/
+    static gint next_try;
+    while (Liste_Histo_to_send && next_try <= Partage->top)
+     { JsonNode *histo = Liste_Histo_to_send->data;
+       JsonNode *api_result = Http_Post_to_global_API ( "/run/message", histo );
+       if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Post for /run/message failed. Retry in 60 seconds.", __func__ );
+          next_try = Partage->top + 600;
+          break;
+        }
+       Liste_Histo_to_send = g_slist_remove ( Liste_Histo_to_send, histo );
+       Json_node_unref ( histo );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
