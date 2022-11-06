@@ -54,7 +54,7 @@
     Json_node_add_string ( element, "name" ,     dls->name );
     if (dls->version) Json_node_add_string ( element, "version", dls->version() );
                  else Json_node_add_string ( element, "version", "Unknown" );
-    Json_node_add_bool   ( element, "started",   dls->on );
+    Json_node_add_bool   ( element, "started",   dls->enable );
     Json_node_add_string ( element, "start_date", date );
 
     Json_node_add_double ( element, "conso", dls->conso );

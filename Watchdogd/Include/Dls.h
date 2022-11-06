@@ -66,16 +66,16 @@
     gchar syn_page[NBR_CARAC_TECHID];
     guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint dls_id;
-    gboolean on;
+    gboolean enable;
     gboolean debug;                                                                                /* Nombre de ligne de code */
     gboolean is_thread;
 
-    gchar nom_fichier[60];                                                                                  /* Nom du fichier */
     time_t start_date;                                                                  /* time_t date de demarrage du plugin */
     void *handle;                                                                              /* Handle du fichier librairie */
     void (*go)(struct DLS_TO_PLUGIN *);                                                   /* Fonction de traitement du module */
     gdouble conso;                                                                       /* Consommation temporelle du plugin */
     gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
+    void (*reset_all_alias)(void);                                                                   /* Set all Alias to NULL */
     struct DLS_TO_PLUGIN vars;
     GSList *Arbre_Comm;                         /* Liste tech_id des dependances du module pour le calcul de sa communication */
   };
@@ -260,7 +260,6 @@
  struct COM_DLS                                                                      /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultanées de plugins D.L.S */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
     GSList *Dls_plugins;                                                                             /* Liste d'execution DLS */
     struct DLS_SYN *Dls_syns;                                                              /* Arbre de calcule des etats */
@@ -290,9 +289,7 @@
 /************************************************ Prototypes de fonctions *****************************************************/
  extern void Dls_Importer_plugins ( void );                                                                 /* Dans plugins.c */
  extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description );
- extern gboolean Dls_Save_CodeC_to_disk ( gchar *tech_id, gchar *codec );
  extern void Dls_Decharger_plugins ( void );
- extern gboolean Dls_Compiler_source_dls( gchar *tech_id );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Reseter_un_plugin ( gchar *tech_id );

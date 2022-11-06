@@ -538,7 +538,6 @@
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_http.synchro, NULL );
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
-    pthread_mutex_init( &Partage->com_dls.synchro_traduction, NULL );
     pthread_mutex_init( &Partage->com_dls.synchro_data, NULL );
     pthread_mutex_init( &Partage->archive_liste_sync, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
@@ -707,7 +706,6 @@
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
-    pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
     pthread_mutex_destroy( &Partage->com_dls.synchro_data );
     pthread_mutex_destroy( &Partage->archive_liste_sync );
     pthread_mutex_destroy( &Partage->com_db.synchro );

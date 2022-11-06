@@ -1638,7 +1638,7 @@ Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
     Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_OK", &plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
     Dls_data_set_MSG_reel ( &plugin->vars, plugin->tech_id, "MSG_COMM_HS", &plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
 
-    if (!(plugin->on && plugin->go)) return;                          /* si plugin a l'arret, on considère que la comm est OK */
+    if (!(plugin->enable && plugin->go)) return;                      /* si plugin a l'arret, on considère que la comm est OK */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
     gettimeofday( &tv_avant, NULL );
     plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
@@ -1678,7 +1678,6 @@ Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
        gpointer dls_flipflop_2sec=NULL, dls_flipflop_5hz=NULL;
        gpointer dls_wait = NULL, dls_tour_per_sec = NULL, dls_bit_per_sec = NULL;
        gpointer dls_nbr_msg_queue = NULL, dls_nbr_visuel_queue = NULL;
-       gpointer dls_nbr_ligne_dls = NULL;
 
        if (Partage->com_dls.Thread_reload || Partage->com_dls.Thread_reload_with_recompil)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
@@ -1771,13 +1770,7 @@ Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_10min>=6000)                                                        /* Toutes les 10 minutes */
-        { JsonNode *result = Json_node_create();
-          if (result)
-           { SQL_Select_to_json_node ( result, NULL, "SELECT SUM(nbr_ligne) AS nbr_ligne_total FROM dls" );
-             Dls_data_set_AI ( "SYS", "NBR_LIGNE_DLS", &dls_nbr_ligne_dls, Json_get_int( result, "nbr_ligne_total" )*1.0, TRUE );
-             Json_node_unref(result);
-           }
-          GSList *liste = Partage->Dls_data_AI;
+        { GSList *liste = Partage->Dls_data_AI;
           while (liste)
            { struct DLS_AI *ai = liste->data;
              if ( (ai->archivage == 3 && ai->last_arch + 36000  <= Partage->top) ||

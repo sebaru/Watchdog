@@ -50,10 +50,7 @@
        liste = g_slist_next(liste);
      }
 
-    if (liste)
-     { pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-       return(ai);
-     }
+    if (liste) goto end;
 
     ai = g_try_malloc0 ( sizeof(struct DLS_AI) );
     if (ai)
@@ -61,8 +58,10 @@
        g_snprintf( ai->tech_id,  sizeof(ai->tech_id),  "%s", tech_id );
        Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: adding AI '%s:%s'", __func__, tech_id, acronyme );
+       if (!strcasecmp ( tech_id, "SYS" ) ) ai->archivage = 2;          /* Si AI du plugin SYS, on archive toutes les minutes */
      }
     else Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+end:
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
     return(ai);
   }

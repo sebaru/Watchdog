@@ -90,13 +90,11 @@
      }
     else if ( !strcasecmp( agent_tag, "REMAP") && Config.instance_is_master == TRUE) MSRV_Remap();
     else if ( !strcasecmp( agent_tag, "DLS_COMPIL") && Config.instance_is_master == TRUE)
-     { if ( !( Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "codec" ) ) )
+     { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DLS_COMPIL: wrong parameters", __func__ );
           goto end;
         }
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
-       Dls_Save_CodeC_to_disk ( plugin_tech_id, Json_get_string ( request, "codec" ) );
-       Dls_Compiler_source_dls ( plugin_tech_id );
        Dls_Reseter_un_plugin ( plugin_tech_id );
      }
     else if ( !strcasecmp( agent_tag, "DLS_SET") && Config.instance_is_master == TRUE)
