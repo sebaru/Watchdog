@@ -145,7 +145,9 @@
 
     JsonNode *histo = Json_node_create ();
     if (histo)
-     { Json_node_add_string ( histo, "date_fin", date_fin );
+     { Json_node_add_string ( histo, "tech_id",  msg->tech_id );
+       Json_node_add_string ( histo, "acronyme", msg->acronyme );
+       Json_node_add_string ( histo, "date_fin", date_fin );
        Json_node_add_bool   ( histo, "alive", FALSE );
      }
     return( histo );
@@ -193,12 +195,13 @@
      }
 
 /******************************************************* Envoi à l'API ********************************************************/
-    static gint next_try;
+    static gint next_try = 0;
     while (Liste_Histo_to_send && next_try <= Partage->top)
      { JsonNode *histo = Liste_Histo_to_send->data;
-       JsonNode *api_result = Http_Post_to_global_API ( "/run/message", histo );
+       JsonNode *api_result = Http_Post_to_global_API ( "/run/histo", histo );
        if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Post for /run/message failed. Retry in 60 seconds.", __func__ );
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Post for /run/histo failed. Retry %04d MSGS in 60 seconds.",
+                    __func__, g_slist_length(Liste_Histo_to_send) );
           next_try = Partage->top + 600;
           break;
         }
