@@ -202,11 +202,20 @@
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
 
+    gchar nom_fichier[256], encoded[256];
+    EVP_EncodeBlock( encoded, query, strlen(query) );
+    g_snprintf ( nom_fichier, sizeof(nom_fichier), "API/get-%s", encoded );
+
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error getting %s: %s\n", __func__, query, reason_phrase ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error getting %s: %s", __func__, query, reason_phrase );
+       result = Json_read_from_file ( nom_fichier );
+       if (result) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Using cache for %s", __func__, query );
+     }
     else
-     { result = Http_Response_Msg_to_Json ( soup_msg ); }
+     { result = Http_Response_Msg_to_Json ( soup_msg );
+       Json_write_to_file ( nom_fichier, result );
+     }
     g_free(reason_phrase);
     g_object_unref( soup_msg );
     return(result);
