@@ -202,9 +202,9 @@
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
 
-    gchar nom_fichier[256], encoded[256];
-    EVP_EncodeBlock( encoded, query, strlen(query) );
-    g_snprintf ( nom_fichier, sizeof(nom_fichier), "API/get-%s", encoded );
+    gchar nom_fichier[256];
+    g_snprintf ( nom_fichier, sizeof(nom_fichier), "API/get-%s", query );
+    g_strcanon ( nom_fichier+4, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYYZ", '_' );
 
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
     if (status_code!=200)
