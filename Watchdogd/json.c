@@ -243,7 +243,7 @@
     if (!content) return(NULL);
 
     gint fd = open ( filename, O_RDONLY );
-    if (!fd)
+    if (fd<0)
      { g_free(content);
        return(NULL);
      }
@@ -266,9 +266,10 @@
  gboolean Json_write_to_file ( gchar *filename, JsonNode *RootNode )
   { unlink ( filename );
     gint fd = creat ( filename, S_IWUSR | S_IRUSR );
-    if (!fd)
-     { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Open %s to write Failed", __func__, filename ); return(FALSE); }
-    gchar *buf=Json_node_to_string ( RootNode );
+    if (fd<0)
+     { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Creat %s to write Failed: %s", __func__, filename, strerror(errno) ); return(FALSE); }
+
+    gchar *buf = Json_node_to_string ( RootNode );
     if (!buf)
      { close(fd);
        Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Json to Buf failed, writing to %s", __func__, filename );
@@ -276,8 +277,8 @@
      }
     gint taille = strlen(buf);
     if (write ( fd, buf, taille ) != taille)
-     { close(fd);
-       Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Error writing to %s: %s", __func__, filename, strerror(errno) );
+     { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Error writing %d bytes to %s: %s", __func__, taille, filename, strerror(errno) );
+       close(fd);
        return(FALSE);
      }
     close(fd);

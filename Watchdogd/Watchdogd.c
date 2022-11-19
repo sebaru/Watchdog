@@ -413,9 +413,6 @@
        g_snprintf( chaine, sizeof(chaine), "%s/Dls", Config.home );
        mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Created Dls '%s' directory'", __func__, chaine );
-       g_snprintf( chaine, sizeof(chaine), "%s/API", Config.home );
-       mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Created API '%s' directory'", __func__, chaine );
      }
 
     if (chdir(Config.home))                                                             /* Positionnement à la racine du home */

@@ -53,7 +53,7 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
 /********************************************* Chargement des informations en bases *******************************************/
-    JsonNode *UsersNode = Http_Post_to_global_API ( "/run/users/wanna_be_notified", NULL );
+    JsonNode *UsersNode = Http_Get_from_global_API ( "/run/users/wanna_be_notified", NULL );
     if (!UsersNode || Json_get_int ( UsersNode, "api_status" ) != 200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USERS from API", __func__, thread_tech_id );
        return;
