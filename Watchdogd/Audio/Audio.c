@@ -130,10 +130,8 @@
   { Thread_init ( module, sizeof(struct AUDIO_VARS) );
     struct AUDIO_VARS *vars = module->vars;
 
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-
-  /*  Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_ALL", "Profil Audio: All Hps Enabled" );
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_NONE", "Profil audio: All Hps disabled" );*/
+    vars->p_all  = Mnemo_create_thread_DI ( module, "P_ALL", "Profil Audio: All Hps Enabled" );
+    vars->p_none = Mnemo_create_thread_DI ( module, "P_NONE", "Profil Audio: All Hps disabled" );
 
     gboolean retour = Jouer_google_speech( module, "Module audio démarré !" );
     Thread_send_comm_to_master ( module, retour );
@@ -168,7 +166,7 @@
                           "%s: Envoi audio inhibé. Dropping '%s:%s'", __func__, thread_tech_id, acronyme );
               }
              else
-              { Envoyer_commande_dls_data( "AUDIO", audio_profil );                   /* Pos. du profil audio via interne */
+              { Http_Post_to_local_BUS_CDE ( module, "AUDIO", "P_ALL" );                  /* Pos. du profil audio via interne */
 
                 if (vars->last_audio + AUDIO_JINGLE < Partage->top)                            /* Si Pas de message depuis xx */
                  { Jouer_wav_by_file( module, "jingle"); }                                          /* On balance le jingle ! */
@@ -182,7 +180,7 @@
                  { gboolean retour = Jouer_google_speech( module, libelle );
                    Thread_send_comm_to_master ( module, retour );
                  }
-                Envoyer_commande_dls_data( "AUDIO", "P_NONE" );                              /* Bit de fin d'emission message */
+                Http_Post_to_local_BUS_CDE ( module, "AUDIO", "P_NONE" );                    /* Bit de fin d'emission message */
               }
            }
           else if ( !strcasecmp( tag, "DISABLE" ) )
@@ -200,6 +198,8 @@
           Json_node_unref ( request );
         }
      }
+    Json_node_unref ( vars->p_all );
+    Json_node_unref ( vars->p_none );
 
     Thread_end(module);
   }

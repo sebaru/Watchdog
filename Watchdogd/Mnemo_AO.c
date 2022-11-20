@@ -36,92 +36,27 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
-/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
-/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/* Mnemo_create_thread_AO: Créer un JSON pour une AO                                                                          */
+/* Entrée: la structure THREAD, les parametres de l'AO                                                                        */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_AO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
-  { gchar *acro, *libelle;
-    gchar requete[1024];
-    gboolean retour;
-    struct DB *db;
-
-/******************************************** Préparation de la base du mnemo *************************************************/
-    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
-    if ( !acro )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
-       return(FALSE);
+ JsonNode *Mnemo_create_thread_AO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "AO" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    Json_node_add_string ( node, "unite", unite );
+    Json_node_add_int    ( node, "archivage", archivage );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/ao", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add AO %s to API", __func__, thread_tech_id, thread_acronyme );
      }
-
-    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
-    if ( !libelle )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
-       g_free(acro);
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_AO SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                deletable, tech_id, acro, libelle );
-    g_free(libelle);
-    g_free(acro);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return (retour);
-  }
-/******************************************************************************************************************************/
-/* Rechercher_AO_by_text: Recupération des champs de base de données pour le AI par map                                       */
-/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
-/* Sortie: la struct DB                                                                                                       */
-/******************************************************************************************************************************/
- gboolean Recuperer_mnemos_AO_by_text ( struct DB **db_retour, gchar *thread, gchar *text )
-  { gchar requete[1024];
-    gboolean retour;
-    struct DB *db;
-
-    g_snprintf( requete, sizeof(requete),
-               "SELECT m.tech_id, m.acronyme, m.map_tag, m.libelle, m.min, m.max, m.type, m.valeur "
-               "FROM mnemos_AO as m "
-               " WHERE (m.map_host IS NULL OR m.map_host LIKE '%s') AND (m.map_thread LIKE '%s')"
-               " AND m.map_tag LIKE '%s'", g_get_host_name(), thread, text );
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base                                  */
-/* Entrée: un pointeur sur la connexion de baase de données                                                                   */
-/* Sortie: une structure nouvellement allouée                                                                                 */
-/******************************************************************************************************************************/
- gboolean Recuperer_mnemos_AO_suite( struct DB **db_orig )
-  { struct DB *db;
-
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    return(TRUE);                                                                                    /* Résultat dans db->row */
+    Json_node_unref ( api_result );
+    return(node);
   }
 /******************************************************************************************************************************/
 /* Dls_AO_to_json: Convertir un AO en JSON                                                                                    */

@@ -36,6 +36,9 @@
  struct AUDIO_VARS
   { gint last_audio;                                                                   /* Date de la derniere emission sonore */
     gboolean diffusion_enabled;                                                        /* Diffusion autorisée pourle thread ? */
+/*********************************************************** Digital Input ****************************************************/
+    JsonNode *p_all;
+    JsonNode *p_none;
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/

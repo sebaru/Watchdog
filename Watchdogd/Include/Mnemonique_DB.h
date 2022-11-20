@@ -40,11 +40,10 @@
  extern gint Rechercher_DICO_type ( gchar *tech_id, gchar *acronyme );                                   /* Dans Mnemonique.c */
  extern JsonNode *Rechercher_DICO ( gchar *tech_id, gchar *acronyme );
 
- extern void Charger_confDB_AI ( gchar *tech_id, gchar *acronyme );                                       /* Dans Mnemos_AI.c */
- extern JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme,
-                                               gchar *libelle, gchar *unite, gint archivage );
- extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
+ extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );                                    /* Dans Mnemos_AI.c */
  extern void Dls_all_AI_to_json ( JsonNode *target );
+ extern JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage );
+ extern void Charger_confDB_AI ( gchar *tech_id, gchar *acronyme );
 
  extern void Activer_horlogeDB ( void );                                                            /* Dans Mnemos_Horloges.c */
  extern gboolean Mnemo_auto_create_HORLOGE ( gint deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
@@ -90,11 +89,9 @@
  extern void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit );
  extern void Dls_all_BI_to_json ( JsonNode *target );
 
- extern gboolean Mnemo_auto_create_AO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle );/* Dans mnemos_AO.c */
- extern gboolean Recuperer_mnemos_AO_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
- extern gboolean Recuperer_mnemos_AO_suite( struct DB **db_orig );
- extern void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit );
+ extern void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit );                                    /* Dans mnemos_AO.c */
  extern void Dls_all_AO_to_json ( JsonNode *target );
+ extern JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage );
 
  extern gboolean Mnemo_auto_create_WATCHDOG ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
  extern void Dls_WATCHDOG_to_json ( JsonNode *element, struct DLS_WATCHDOG *bit );

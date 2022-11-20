@@ -351,11 +351,6 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    if (Json_get_bool ( module->config, "enable" ) == FALSE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Not Enabled. Stopping Thread", __func__, thread_tech_id );
-       Thread_end ( module );
-     }
-
     vars->Outlet_1_status = Mnemo_create_thread_DI ( module, "OUTLET_1_STATUS", "Statut de la prise n°1" );
     vars->Outlet_2_status = Mnemo_create_thread_DI ( module, "OUTLET_2_STATUS", "Statut de la prise n°2" );
     vars->Ups_online      = Mnemo_create_thread_DI ( module, "UPS_ONLINE", "UPS Online" );

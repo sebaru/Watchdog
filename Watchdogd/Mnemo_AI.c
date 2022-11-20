@@ -37,8 +37,8 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Mnemo_create_json_AI: Créé un JSON pour une AI                                                                             */
-/* Entrée: la structure THREAD, les parametres de l'AI                                                                    */
+/* Mnemo_create_thread_AI: Créer un JSON pour une AI                                                                          */
+/* Entrée: la structure THREAD, les parametres de l'AI                                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
