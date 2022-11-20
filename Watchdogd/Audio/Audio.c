@@ -146,11 +146,11 @@
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
           if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
-               Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+               Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
                Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
                strcasecmp( Json_get_string( request, "audio_profil" ), "P_NONE" ) )
-           { gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+           { gchar *tech_id        = Json_get_string ( request, "tech_id" );
              gchar *acronyme       = Json_get_string ( request, "acronyme" );
              gchar *audio_profil   = Json_get_string ( request, "audio_profil" );
              gchar *audio_libelle  = Json_get_string ( request, "audio_libelle" );
@@ -158,12 +158,12 @@
              gint typologie        = Json_get_int ( request, "typologie" );
 
              Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-                       "%s: Recu message '%s:%s' (audio_profil=%s)", __func__, thread_tech_id, acronyme, audio_profil );
+                       "%s: Recu message '%s:%s' (audio_profil=%s)", __func__, tech_id, acronyme, audio_profil );
 
              if ( vars->diffusion_enabled == FALSE && ! (typologie == MSG_ALERTE || typologie == MSG_DANGER)
                 )                                                               /* Bit positionné quand arret diffusion audio */
               { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                          "%s: Envoi audio inhibé. Dropping '%s:%s'", __func__, thread_tech_id, acronyme );
+                          "%s: Envoi audio inhibé. Dropping '%s:%s'", __func__, tech_id, acronyme );
               }
              else
               { Http_Post_to_local_BUS_CDE ( module, "AUDIO", "P_ALL" );                  /* Pos. du profil audio via interne */

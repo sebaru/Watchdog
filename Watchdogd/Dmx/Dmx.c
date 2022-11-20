@@ -226,7 +226,7 @@
            }
           if (closing == TRUE)
            { Dmx_close ( module );
-			 vars->date_next_retry = Partage->top + DMX_RETRY_DELAI;
+			          vars->date_next_retry = Partage->top + DMX_RETRY_DELAI;
            }
         }
      }                                                                                         /* Fin du while partage->arret */
