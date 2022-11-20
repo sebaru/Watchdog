@@ -41,7 +41,6 @@
  extern JsonNode *Rechercher_DICO ( gchar *tech_id, gchar *acronyme );
 
  extern void Charger_confDB_AI ( gchar *tech_id, gchar *acronyme );                                       /* Dans Mnemos_AI.c */
- extern gboolean Mnemo_auto_create_AI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src );
  extern JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme,
                                                gchar *libelle, gchar *unite, gint archivage );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
@@ -72,12 +71,12 @@
  extern void Dls_REGISTRE_to_json ( JsonNode *element, struct DLS_REGISTRE *bit );
  extern void Dls_all_REGISTRE_to_json ( JsonNode *target );
 
- extern gboolean Mnemo_auto_create_DI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle );/* Dans mnemos_DI.c */
- extern JsonNode *Mnemo_create_thread_DI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle );
+ extern JsonNode *Mnemo_create_thread_DI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle );/* Dans mnemos_DI.c */
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
  extern void Dls_all_DI_to_json ( JsonNode *target );
 
- extern gboolean Mnemo_auto_create_DO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle );/* Dans mnemos_DO.c */
+ extern gboolean Mnemo_auto_create_DO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle );
+ extern void Mnemo_create_thread_DO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle );    /* Dans mnemos_DO.c */
  extern void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit );
  extern void Dls_all_DO_to_json ( JsonNode *target );
 

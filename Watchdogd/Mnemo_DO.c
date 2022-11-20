@@ -36,47 +36,25 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Mnemo_auto_create_DO: Ajoute un mnemo DO en base                                                                           */
-/* Entrée: les parametres du mnemo                                                                                            */
-/* Sortie: FALSE si erreur                                                                                                    */
+/* Mnemo_create_thread_DO: Créé un JSON pour une DI                                                                           */
+/* Entrée: la structure THREAD, les parametres de la DI                                                                       */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_DO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
-  { gchar *acro, *libelle;
-    gchar requete[1024];
-    gboolean retour;
-    struct DB *db;
-
-/******************************************** Préparation de la base du mnemo *************************************************/
-    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
-    if ( !acro )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
-       return(FALSE);
+ void Mnemo_create_thread_DO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
+  { JsonNode *node = Json_node_create();
+    if (!node) return;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "DO" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/do", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add DO %s to API", __func__, thread_tech_id, thread_acronyme );
      }
-
-    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
-    if ( !libelle )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
-       g_free(acro);
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_DO SET deletable='%d', tech_id='%s',acronyme='%s',libelle='%s' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                deletable, tech_id, acro, libelle );
-    g_free(libelle);
-    g_free(acro);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return (retour);
+    Json_node_unref ( api_result );
+    Json_node_unref ( node );
   }
 /******************************************************************************************************************************/
 /* Dls_DO_to_json : Formate un bit au format JSON                                                                             */

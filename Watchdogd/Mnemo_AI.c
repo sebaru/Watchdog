@@ -37,77 +37,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Mnemo_auto_create_AI_by_tech_id: Ajoute un mnemonique dans la base via le tech_id                                          */
-/* Entrée: le tech_id, l'acronyme, le libelle et l'unite                                                                      */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gboolean Mnemo_auto_create_AI ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
-  { gchar *acro, *libelle=NULL, *unite=NULL;
-    gchar requete[1024];
-    gboolean retour;
-
-/******************************************** Préparation de la base du mnemo *************************************************/
-    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
-    if ( !acro )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
-       return(FALSE);
-     }
-
-    if (libelle_src)
-     { libelle    = Normaliser_chaine ( libelle_src );                                        /* Formatage correct des chaines */
-       if ( !libelle )
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                   "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
-          g_free(acro);
-          return(FALSE);
-        }
-     }
-
-    if(unite_src)
-     { unite = Normaliser_chaine ( unite_src );                                              /* Formatage correct des chaines */
-       if ( !unite )
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                   "%s: Normalisation unite impossible. Mnemo NOT added nor modified.", __func__ );
-          g_free(acro);
-          if (libelle) g_free(libelle);
-          return(FALSE);
-        }
-     } else unite = NULL;
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_AI SET deletable='%d', tech_id='%s',acronyme='%s' ",
-                deletable, tech_id, acro );
-    g_free(acro);
-
-    if (libelle)
-     { gchar add[128];
-       g_snprintf( add, sizeof(add), ",libelle='%s'", libelle );
-       g_strlcat ( requete, add, sizeof(requete) );
-     }
-
-    if (unite)
-     { gchar add[128];
-       g_snprintf( add, sizeof(add), ",unite='%s'", unite );
-       g_strlcat ( requete, add, sizeof(requete) );
-     }
-
-    g_strlcat ( requete, " ON DUPLICATE KEY UPDATE acronyme=VALUES(acronyme) ", sizeof(requete) );
-
-    if (unite)
-     { g_strlcat ( requete, ",unite=VALUES(unite)", sizeof(requete) );
-       g_free(unite);
-     }
-
-    if (libelle)
-     { g_strlcat ( requete, ",libelle=VALUES(libelle)", sizeof(requete) );
-       g_free(libelle);
-     }
-
-    retour = SQL_Write_new ( requete );
-    return (retour);
-  }
-/******************************************************************************************************************************/
 /* Mnemo_create_json_AI: Créé un JSON pour une AI                                                                             */
 /* Entrée: la structure THREAD, les parametres de l'AI                                                                    */
 /* Sortie: néant                                                                                                              */
@@ -122,6 +51,12 @@
     Json_node_add_string ( node, "libelle", libelle );
     Json_node_add_string ( node, "unite", unite );
     Json_node_add_int    ( node, "archivage", archivage );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/ai", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add AI %s to API", __func__, thread_tech_id, thread_acronyme );
+     }
+    Json_node_unref ( api_result );
     return(node);
   }
 /******************************************************************************************************************************/

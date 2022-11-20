@@ -86,10 +86,9 @@ end:
  void Http_Post_to_local_BUS_DI ( struct THREAD *module, JsonNode *di, gboolean etat )
   { if (!module) return;
     gboolean update = FALSE;
-    if (!Json_has_member ( di, "etat" )) { Json_node_add_bool ( di, "first_send", TRUE ); update = TRUE; }
+    if (!Json_has_member ( di, "etat" )) { update = TRUE; }
     else
-     { Json_node_add_bool ( di, "first_send", FALSE );
-       gboolean old_etat = Json_get_bool ( di, "etat" );
+     { gboolean old_etat = Json_get_bool ( di, "etat" );
        if ( old_etat != etat ) update = TRUE;
      }
     if (update)
@@ -105,10 +104,9 @@ end:
  void Http_Post_to_local_BUS_AI ( struct THREAD *module, JsonNode *ai, gdouble valeur, gboolean in_range )
   { if (!module) return;
     gboolean update = FALSE;
-    if (!Json_has_member ( ai, "valeur" )) { Json_node_add_bool ( ai, "first_send", TRUE ); update = TRUE; }
+    if (!Json_has_member ( ai, "valeur" )) { update = TRUE; }
     else
-     { Json_node_add_bool ( ai, "first_send", FALSE );
-       gdouble  old_valeur   = Json_get_double ( ai, "valeur" );
+     { gdouble  old_valeur   = Json_get_double ( ai, "valeur" );
        gboolean old_in_range = Json_get_bool   ( ai, "in_range" );
        if ( old_valeur != valeur || old_in_range != in_range ) update = TRUE;
      }
@@ -209,7 +207,7 @@ end:
     else if ( !strcasecmp( tag, "SET_AI") )
      { if (! (Json_has_member ( request, "thread_acronyme" ) &&
               Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
-              Json_has_member ( request, "libelle" ) && Json_has_member ( request, "unite" )
+              Json_has_member ( request, "unite" )
              )
           )
         { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_AI: wrong parameters from '%s'", __func__, thread_tech_id );
@@ -233,17 +231,6 @@ end:
        struct DLS_AI *ai = NULL;
        Dls_data_set_AI ( tech_id, acronyme, (gpointer)&ai,
                          Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-       if (Json_get_bool ( request, "first_send" ) == TRUE )
-        { g_snprintf ( ai->libelle, sizeof(ai->libelle), "%s", Json_get_string ( request, "libelle" ) );
-          g_snprintf ( ai->unite,   sizeof(ai->unite),   "%s", Json_get_string ( request, "unite" ) );
-          ai->archivage = Json_get_int ( request, "archivage" );
-          gchar *libelle = Normaliser_chaine ( ai->libelle );
-          SQL_Write_new ( "INSERT INTO mappings SET classe='AI', "
-                          "thread_tech_id = '%s', thread_acronyme = '%s', tech_id = '%s', acronyme = '%s', libelle='%s' "
-                          "ON DUPLICATE KEY UPDATE classe=VALUE(classe), libelle=VALUE(libelle) ",
-                          thread_tech_id, thread_acronyme, tech_id, acronyme, libelle );
-          g_free(libelle);
-        }
      }
 /************************************ Réaction sur SET_CDE ********************************************************************/
     else if ( !strcasecmp( tag, "SET_CDE") )
@@ -284,15 +271,6 @@ end:
                  Json_get_bool ( request, "etat" ) );
        struct DLS_DI *di = NULL;
        Dls_data_set_DI ( NULL, tech_id, acronyme, (gpointer)&di, Json_get_bool ( request, "etat" ) );
-       if (Json_get_bool ( request, "first_send" ) == TRUE )
-        { g_snprintf ( di->libelle, sizeof(di->libelle), "%s", Json_get_string ( request, "libelle" ) );
-          gchar *libelle = Normaliser_chaine ( di->libelle );
-          SQL_Write_new ( "INSERT INTO mappings SET classe='DI', "
-                          "thread_tech_id = '%s', thread_acronyme = '%s', tech_id = '%s', acronyme = '%s', libelle='%s' "
-                          "ON DUPLICATE KEY UPDATE classe=VALUE(classe), libelle=VALUE(libelle) ",
-                          thread_tech_id, thread_acronyme, tech_id, acronyme, libelle );
-          g_free(libelle);
-        }
      }
 /************************************ Réaction sur GET_DO *********************************************************************/
     else if ( !strcasecmp( tag, "GET_DO") )

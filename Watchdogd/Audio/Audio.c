@@ -132,8 +132,8 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_ALL", "Profil Audio: All Hps Enabled" );
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_NONE", "Profil audio: All Hps disabled" );
+  /*  Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_ALL", "Profil Audio: All Hps Enabled" );
+    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_NONE", "Profil audio: All Hps disabled" );*/
 
     gboolean retour = Jouer_google_speech( module, "Module audio démarré !" );
     Thread_send_comm_to_master ( module, retour );
