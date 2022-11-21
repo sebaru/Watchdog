@@ -40,7 +40,7 @@
 /* Entrée: la structure THREAD, les parametres de la DI                                                                       */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Mnemo_create_thread_DO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
+ JsonNode *Mnemo_create_thread_DO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
   { JsonNode *node = Json_node_create();
     if (!node) return;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -54,7 +54,8 @@
                  "%s: %s: Could not add DO %s to API", __func__, thread_tech_id, thread_acronyme );
      }
     Json_node_unref ( api_result );
-    Json_node_unref ( node );
+    Json_array_add_element ( Json_get_array ( module, "IOs" ), node );
+    return(node);
   }
 /******************************************************************************************************************************/
 /* Dls_DO_to_json : Formate un bit au format JSON                                                                             */

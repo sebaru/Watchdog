@@ -56,6 +56,7 @@
                  "%s: %s: Could not add AO %s to API", __func__, thread_tech_id, thread_acronyme );
      }
     Json_node_unref ( api_result );
+    Json_array_add_element ( Json_get_array ( module, "IOs" ), node );
     return(node);
   }
 /******************************************************************************************************************************/

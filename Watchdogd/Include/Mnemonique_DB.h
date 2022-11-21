@@ -74,8 +74,7 @@
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
  extern void Dls_all_DI_to_json ( JsonNode *target );
 
- extern gboolean Mnemo_auto_create_DO ( gboolean deletable, gchar *tech_id, gchar *acronyme, gchar *libelle );
- extern void Mnemo_create_thread_DO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle );    /* Dans mnemos_DO.c */
+ extern JsonNode *Mnemo_create_thread_DO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle );    /* Dans mnemos_DO.c */
  extern void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit );
  extern void Dls_all_DO_to_json ( JsonNode *target );
 
