@@ -162,8 +162,9 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    Mnemo_auto_create_HORLOGE ( FALSE, thread_tech_id, "SUNRISE", "Horloge du levé du soleil" );
-    Mnemo_auto_create_HORLOGE ( FALSE, thread_tech_id, "SUNSET",  "Horloge du couché du soleil" );
+    Mnemo_create_thread_HORLOGE ( module, "SUNRISE", "Horloge du levé du soleil" );
+    Mnemo_create_thread_HORLOGE ( module, "SUNSET",  "Horloge du couché du soleil" );
+
     for (gint cpt=0; cpt<14; cpt++)
      { gchar acronyme[64];
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", cpt );

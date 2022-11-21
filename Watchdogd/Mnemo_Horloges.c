@@ -36,47 +36,26 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
-/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
-/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/* Mnemo_create_thread_HORLOGE: Créé un JSON pour une Horloge                                                                 */
+/* Entrée: la structure THREAD, les parametres de l'HORLOGE                                                                   */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_HORLOGE ( gint deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src )
-  { gchar *acro, *libelle;
-    gchar requete[1024];
-    gboolean retour;
-    struct DB *db;
-
-/******************************************** Préparation de la base du mnemo *************************************************/
-    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
-    if ( !acro )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
-       return(FALSE);
+ JsonNode *Mnemo_create_thread_HORLOGE ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "HORLOGE" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/horloge", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add HORLOGE %s to API", __func__, thread_tech_id, thread_acronyme );
      }
-
-    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
-    if ( !libelle )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
-       g_free(acro);
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_HORLOGE SET deletable=%d, tech_id='%s',acronyme='%s',libelle='%s' "
-                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
-                deletable, tech_id, acro, libelle );
-    g_free(libelle);
-    g_free(acro);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return (retour);
+    Json_node_unref ( api_result );
+    Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
+    return(node);
   }
 /******************************************************************************************************************************/
 /* Horloge_del_all_ticks: Retire tous les ticks d'une horloge                                                                 */

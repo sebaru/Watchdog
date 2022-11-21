@@ -79,7 +79,7 @@
     gchar buffer[80];
     int connexion;
 
-    gchar *thread_tech_id        = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *host           = Json_get_string ( module->config, "host" );
     gchar *name           = Json_get_string ( module->config, "name" );
     gchar *admin_username = Json_get_string ( module->config, "admin_username" );

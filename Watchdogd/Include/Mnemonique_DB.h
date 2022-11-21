@@ -45,8 +45,8 @@
  extern JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage );
  extern void Charger_confDB_AI ( gchar *tech_id, gchar *acronyme );
 
- extern void Activer_horlogeDB ( void );                                                            /* Dans Mnemos_Horloges.c */
- extern gboolean Mnemo_auto_create_HORLOGE ( gint deletable, gchar *tech_id, gchar *acronyme, gchar *libelle_src );
+ extern JsonNode *Mnemo_create_thread_HORLOGE ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle );/* Dans mnemos_HORLOGE.c */
+ extern void Activer_horlogeDB ( void );
  extern gboolean Horloge_del_all_ticks ( gchar *tech_id, gchar *acronyme );
  extern gboolean Horloge_add_tick ( gchar *tech_id, gchar *acronyme, gint heure, gint minute );
 
