@@ -213,20 +213,6 @@
         }
      }
 
-    for (gint cpt=0; cpt<14; cpt++)
-     { Json_node_unref ( vars->Temp_min[cpt] );
-       Json_node_unref ( vars->Temp_max[cpt] );
-       Json_node_unref ( vars->Proba_pluie[cpt] );
-       Json_node_unref ( vars->Proba_gel[cpt] );
-       Json_node_unref ( vars->Proba_brouillard[cpt] );
-       Json_node_unref ( vars->Proba_vent_70[cpt] );
-       Json_node_unref ( vars->Proba_vent_100[cpt] );
-       Json_node_unref ( vars->Proba_vent_orage[cpt] );
-       Json_node_unref ( vars->Vent_10m[cpt] );
-       Json_node_unref ( vars->Direction_vent[cpt] );
-       Json_node_unref ( vars->Rafale_vent[cpt] );
-     }
-
     Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

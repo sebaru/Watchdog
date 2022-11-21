@@ -330,7 +330,7 @@ end_message:
   { Thread_init ( module, sizeof(struct IMSGS_VARS) );
     struct IMSGS_VARS *vars = module->vars;
 
-    gchar *thread_tech_id   = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *jabber_id = Json_get_string ( module->config, "jabberid" );
 
     if ( ! (thread_tech_id && jabber_id) )

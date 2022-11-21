@@ -130,6 +130,8 @@
   { Thread_init ( module, sizeof(struct AUDIO_VARS) );
     struct AUDIO_VARS *vars = module->vars;
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+
     vars->p_all  = Mnemo_create_thread_DI ( module, "P_ALL", "Profil Audio: All Hps Enabled" );
     vars->p_none = Mnemo_create_thread_DI ( module, "P_NONE", "Profil Audio: All Hps disabled" );
 
@@ -158,15 +160,15 @@
              gint typologie        = Json_get_int ( request, "typologie" );
 
              Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-                       "%s: Recu message '%s:%s' (audio_profil=%s)", __func__, tech_id, acronyme, audio_profil );
+                       "%s: %s: Recu message '%s:%s' (audio_profil=%s)", __func__, thread_tech_id, tech_id, acronyme, audio_profil );
 
              if ( vars->diffusion_enabled == FALSE && ! (typologie == MSG_ALERTE || typologie == MSG_DANGER)
                 )                                                               /* Bit positionné quand arret diffusion audio */
               { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                          "%s: Envoi audio inhibé. Dropping '%s:%s'", __func__, tech_id, acronyme );
+                          "%s: %s: Envoi audio inhibé. Dropping '%s:%s'", __func__, thread_tech_id, tech_id, acronyme );
               }
              else
-              { Http_Post_to_local_BUS_CDE ( module, "AUDIO", "P_ALL" );                  /* Pos. du profil audio via interne */
+              { Http_Post_to_local_BUS_CDE ( module, thread_tech_id, "P_ALL" );                  /* Pos. du profil audio via interne */
 
                 if (vars->last_audio + AUDIO_JINGLE < Partage->top)                            /* Si Pas de message depuis xx */
                  { Jouer_wav_by_file( module, "jingle"); }                                          /* On balance le jingle ! */
@@ -180,26 +182,24 @@
                  { gboolean retour = Jouer_google_speech( module, libelle );
                    Thread_send_comm_to_master ( module, retour );
                  }
-                Http_Post_to_local_BUS_CDE ( module, "AUDIO", "P_NONE" );                    /* Bit de fin d'emission message */
+                Http_Post_to_local_BUS_CDE ( module, thread_tech_id, "P_NONE" );                    /* Bit de fin d'emission message */
               }
            }
           else if ( !strcasecmp( tag, "DISABLE" ) )
-           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s : Diffusion disabled by master", __func__ );
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Diffusion disabled by master", __func__, thread_tech_id );
              vars->diffusion_enabled = FALSE;
            }
           else if ( !strcasecmp( tag, "ENABLE" ) )
-           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s : Diffusion enabled by master", __func__ );
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Diffusion enabled by master", __func__, thread_tech_id );
              vars->diffusion_enabled = TRUE;
            }
           else if ( !strcasecmp( tag, "TEST" ) )
-           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s : Test de diffusion", __func__ );
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Test de diffusion", __func__, thread_tech_id );
              Jouer_google_speech( module, "Ceci est un test de diffusion audio" );
            }
           Json_node_unref ( request );
         }
      }
-    Json_node_unref ( vars->p_all );
-    Json_node_unref ( vars->p_none );
 
     Thread_end(module);
   }

@@ -158,8 +158,8 @@
   { Thread_init ( module, sizeof(struct DMX_VARS) );
     struct DMX_VARS *vars = module->vars;
 
-    gchar *tech_id = Json_get_string ( module->config, "tech_id" );
-
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
@@ -201,7 +201,7 @@
 /************************************************* Traitement opérationnel ****************************************************/
        if (module->comm_status == FALSE && vars->date_next_retry <= Partage->top )
         { vars->date_next_retry = 0;
-          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, tech_id );
+          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, thread_tech_id );
           if ( Dmx_init(module) == FALSE )
            { vars->date_next_retry = Partage->top + DMX_RETRY_DELAI; }
           else
@@ -215,13 +215,13 @@
           retour = fstat( vars->fd, &buf );
           if (retour == -1)
            { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                      "%s: %s: Fstat Error (%s), closing and re-trying in %ds", __func__, tech_id,
+                      "%s: %s: Fstat Error (%s), closing and re-trying in %ds", __func__, thread_tech_id,
                        strerror(errno), DMX_RETRY_DELAI/10 );
              closing = TRUE;
            }
           else if ( buf.st_nlink < 1 )
            { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                      "%s: %s: USB device disappeared. Closing and re-trying in %ds", __func__, tech_id, DMX_RETRY_DELAI/10 );
+                      "%s: %s: USB device disappeared. Closing and re-trying in %ds", __func__, thread_tech_id, DMX_RETRY_DELAI/10 );
              closing = TRUE;
            }
           if (closing == TRUE)
