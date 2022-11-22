@@ -41,30 +41,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
-/* Entrée: le pointeur sur la PROCESS                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static gboolean Dls_Lire_config ( void )
-  { gchar *nom, *valeur;
-    struct DB *db;
-
-    Creer_configDB ( "dls", "debug", "false" );                                                /* Settings default parameters */
-    Partage->com_dls.Thread_debug   = FALSE;                                                   /* Settings default parameters */
-
-    if ( ! Recuperer_configDB( &db, "dls" ) )                                               /* Connexion a la base de données */
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                "%s: Database connexion failed. Using Default Parameters", __func__ );
-       return(FALSE);
-     }
-
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     {      if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Thread_debug = TRUE;  }
-     }
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Dls_get_top_alerte: Remonte la valeur du plus haut bit d'alerte dans l'arbre DLS                                           */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: TRUE ou FALSe                                                                                                      */
@@ -1657,7 +1633,6 @@ Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
-    Dls_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
     Dls_Importer_plugins();                                                    /* Chargement des modules dls avec compilation */
@@ -1681,7 +1656,6 @@ Zmq_Send_json_node( Partage->com_dls.zmq_to_master, "DLS", "*", RootNode );
 
        if (Partage->com_dls.Thread_reload || Partage->com_dls.Thread_reload_with_recompil)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
-          Dls_Lire_config();
           Dls_Decharger_plugins();
           Dls_Importer_plugins();
           Dls_recalculer_arbre_comm();                                                  /* Calcul de l'arbre de communication */
