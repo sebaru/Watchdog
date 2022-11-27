@@ -6,7 +6,8 @@
 SUBDIRS=
 
 lib_LTLIBRARIES            = libwatchdog-dls.la
-libwatchdog_dls_la_SOURCES = plugins.c heure.c The_dls.c The_dls_AI.c The_dls_DI.c
+libwatchdog_dls_la_SOURCES = plugins.c heure.c The_dls.c The_dls_AI.c The_dls_AO.c The_dls_DI.c The_dls_DO.c The_dls_CH.c The_dls_CI.c \
+                             The_dls_REGISTRE.c The_dls_WATCHDOG.c The_dls_HORLOGE.c The_dls_TEMPO.c The_dls_BI.c The_dls_MONO.c
 
 libwatchdog_dls_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
                     `mysql_config --libs` \

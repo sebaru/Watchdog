@@ -101,20 +101,6 @@
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
-
-    GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
-    GSList *Dls_data_MONO;                                                                           /* Liste des monostables */
-    GSList *Dls_data_BI;                                                                               /* Liste des bistables */
-    GSList *Dls_data_DI;                                                                  /* Liste des entrees dynamiques TOR */
-    GSList *Dls_data_DO;                                                                  /* Liste des sorties dynamiques TOR */
-    GSList *Dls_data_AI;                                                                  /* Liste des entrees dynamiques ANA */
-    GSList *Dls_data_AO;                                                                  /* Liste des sorties dynamiques ANA */
-    GSList *Dls_data_MSG;                                                                               /* Liste des messages */
-    GSList *Dls_data_CI;                                                                  /* Liste des compteurs d'impulsions */
-    GSList *Dls_data_CH;                                                                      /* Liste des compteurs horaires */
-    GSList *Dls_data_VISUEL;                                                                    /* Liste des visuels (bits I) */
-    GSList *Dls_data_REGISTRE;                                                                /* Liste des registres (bits R) */
-    GSList *Dls_data_WATCHDOG;                                                                /* Liste des registres (bits R) */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

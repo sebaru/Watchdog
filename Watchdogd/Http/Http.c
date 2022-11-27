@@ -698,7 +698,7 @@
     soup_message_headers_append ( headers, "Cache-Control", "no-store, must-revalidate" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Origin", "*" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Methods", "*" );
-    soup_message_headers_append ( headers, "Access-Control-Allow-Headers", "content-type, authorization" );
+    soup_message_headers_append ( headers, "Access-Control-Allow-Headers", "content-type, authorization, X-ABLS-DOMAIN" );
 
 /*---------------------------------------------------- OPTIONS ---------------------------------------------------------------*/
     if (msg->method == SOUP_METHOD_OPTIONS)

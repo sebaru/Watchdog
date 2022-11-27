@@ -36,56 +36,117 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Rechercher_type_bit: Recherche le type d'un bit matérialisé par son tech_id:acronyme                                       */
-/* Entrée: le tech_id et acronyme                                                                                             */
-/* Sortie: -1 si erreur                                                                                                       */
+/* Mnemo_create_thread_AI: Créer un JSON pour une AI                                                                          */
+/* Entrée: la structure THREAD, les parametres de l'AI                                                                        */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- gint Rechercher_DICO_type ( gchar *tech_id, gchar *acronyme )
-  { gchar requete[512];
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(-1);
+ JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "AI" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    Json_node_add_string ( node, "unite", unite );
+    Json_node_add_int    ( node, "archivage", archivage );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/ai", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add AI %s to API", __func__, thread_tech_id, thread_acronyme );
      }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT classe_int FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'", tech_id, acronyme
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return(-1);
-     }
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Libere_DB_SQL( &db );
-       return(-1);
-     }
-    gint result = atoi(db->row[0]);
-    Libere_DB_SQL( &db );
-    return(result);
+    Json_node_unref ( api_result );
+    Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
+    return(node);
   }
 /******************************************************************************************************************************/
-/* Rechercher_type_bit: Recherche le type d'un bit matérialisé par son tech_id:acronyme                                       */
-/* Entrée: le tech_id et acronyme                                                                                             */
-/* Sortie: -1 si erreur                                                                                                       */
+/* Mnemo_create_thread_DI: Créé un JSON pour une DI                                                                       */
+/* Entrée: la structure THREAD, les parametres de la DI                                                                   */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- JsonNode *Rechercher_DICO ( gchar *tech_id, gchar *acronyme )
-  { JsonNode *result = Json_node_create ();
-    if (!result) return(NULL);
-
-    gboolean retour = SQL_Select_to_json_node ( result, NULL,
-                                                "SELECT * FROM dictionnaire WHERE tech_id='%s' AND acronyme='%s'",
-                                                tech_id, acronyme
-                                              );
-    if (!retour)
-     { Info_new( Config.log, Config.log_trad, LOG_ERR, "%s: Erreur de recherche de '%s:%s' dans le dictionnaire", __func__,
-                 tech_id, acronyme );
-       Json_node_unref(result);
-       result = NULL;
+ JsonNode *Mnemo_create_thread_DI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "DI" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/di", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add DI %s to API", __func__, thread_tech_id, thread_acronyme );
      }
-    return(result);
+    Json_node_unref ( api_result );
+    Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
+    return(node);
+  }
+/******************************************************************************************************************************/
+/* Mnemo_create_thread_DO: Créé un JSON pour une DI                                                                           */
+/* Entrée: la structure THREAD, les parametres de la DI                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ JsonNode *Mnemo_create_thread_DO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "DO" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/do", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add DO %s to API", __func__, thread_tech_id, thread_acronyme );
+     }
+    Json_node_unref ( api_result );
+    Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
+    return(node);
+  }
+/******************************************************************************************************************************/
+/* Mnemo_create_thread_AO: Créer un JSON pour une AO                                                                          */
+/* Entrée: la structure THREAD, les parametres de l'AO                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ JsonNode *Mnemo_create_thread_AO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "AO" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    Json_node_add_string ( node, "unite", unite );
+    Json_node_add_int    ( node, "archivage", archivage );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/ao", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add AO %s to API", __func__, thread_tech_id, thread_acronyme );
+     }
+    Json_node_unref ( api_result );
+    Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
+    return(node);
+  }
+/******************************************************************************************************************************/
+/* Mnemo_create_thread_HORLOGE: Créé un JSON pour une Horloge                                                                 */
+/* Entrée: la structure THREAD, les parametres de l'HORLOGE                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ JsonNode *Mnemo_create_thread_HORLOGE ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "HORLOGE" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/horloge", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add HORLOGE %s to API", __func__, thread_tech_id, thread_acronyme );
+     }
+    Json_node_unref ( api_result );
+    Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
+    return(node);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

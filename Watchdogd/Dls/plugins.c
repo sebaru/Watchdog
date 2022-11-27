@@ -40,11 +40,11 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Dls_get_plugin_by_tech_id: Decharge toutes les librairies                                                                            */
-/* Entrée: Le numéro du plugin a décharger                                                                                    */
-/* Sortie: Rien                                                                                                               */
+/* Dls_get_plugin_by_tech_id: Recupere le plugin depuis son tech_id                                                           */
+/* Entrée: Le tech_id du plugin a récupérer                                                                                   */
+/* Sortie: le plugin DLS ou NULL si besoin                                                                                    */
 /******************************************************************************************************************************/
- static struct DLS_PLUGIN *Dls_get_plugin_by_tech_id ( gchar *tech_id )
+ struct DLS_PLUGIN *Dls_get_plugin_by_tech_id ( gchar *tech_id )
   { GSList *liste = Partage->com_dls.Dls_plugins;
     while (liste)
      { struct DLS_PLUGIN *plugin;
@@ -64,115 +64,14 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     liste = Partage->com_dls.Dls_plugins;
     while (liste)
-     { struct DLS_PLUGIN *plugin;
-       plugin = (struct DLS_PLUGIN *)liste->data;
+     { struct DLS_PLUGIN *plugin = liste->data;
        do_plugin( user_data, plugin );
        liste = liste->next;
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
-/* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
-/* Entrée : le Dls_tree et les fonctions a appliquer                                                                          */
-/* Sortie : rien                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_foreach_syns_reel ( struct DLS_SYN *syn_tree, gpointer user_data, void (*do_syn) (gpointer user_data, struct DLS_SYN *) )
-  { GSList *liste;
-    liste = syn_tree->Dls_sub_syns;
-    while (liste)
-     { struct DLS_SYN *sub_tree = liste->data;
-       Dls_foreach_syns_reel( sub_tree, user_data, do_syn );
-       liste = liste->next;
-     }
-    do_syn( user_data, syn_tree );
-  }
-/******************************************************************************************************************************/
-/* Dls_foreach: Parcours l'arbre DLS et execute des commandes en parametres                                                   */
-/* Entrée : les fonctions a appliquer                                                                                         */
-/* Sortie : rien                                                                                                              */
-/******************************************************************************************************************************/
- void Dls_foreach_syns ( gpointer user_data, void (*do_syn)(gpointer user_data, struct DLS_SYN *) )
-  { if (Partage->com_dls.Dls_syns)
-     { pthread_mutex_lock( &Partage->com_dls.synchro );
-       Dls_foreach_syns_reel( Partage->com_dls.Dls_syns, user_data, do_syn );
-       pthread_mutex_unlock( &Partage->com_dls.synchro );
-     }
-  }
-/******************************************************************************************************************************/
-/* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
-/* Entrée : le Dls_tree et les fonctions a appliquer                                                                          */
-/* Sortie : rien                                                                                                              */
-/******************************************************************************************************************************/
- static struct DLS_SYN *Dls_search_syn_reel ( struct DLS_SYN *syn_tree, gint id )
-  { GSList *liste;
-    if (syn_tree->syn_id == id) return(syn_tree);
-
-    liste = syn_tree->Dls_sub_syns;
-    while (liste)
-     { struct DLS_SYN *sub_tree = liste->data;
-       struct DLS_SYN *result = Dls_search_syn_reel( sub_tree, id );
-       if (result) return(result);
-       liste = liste->next;
-     }
-    return(NULL);
-  }
-/******************************************************************************************************************************/
-/* Dls_search_syn: Recherche le synoptique dont l'id est en parametre dans l'arbre des synoptiques                            */
-/* Entrée : l'id du synoptique                                                                                                */
-/* Sortie : rien                                                                                                              */
-/******************************************************************************************************************************/
- struct DLS_SYN *Dls_search_syn ( gint id )
-  { if (!Partage->com_dls.Dls_syns) return(NULL);
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    struct DLS_SYN *result = Dls_search_syn_reel( Partage->com_dls.Dls_syns, id );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
-    return(result);
-  }
-/******************************************************************************************************************************/
-/* Dls_plugin_recalcule_arbre_comm: Calcule l'arbre de communication du module                                                */
-/* Entrée: Le plugin D.L.S                                                                                                    */
-/* Sortie: FALSE si problème                                                                                                  */
-/******************************************************************************************************************************/
- static void Dls_plugin_recalculer_arbre_comm ( gpointer user_data, struct DLS_PLUGIN *dls )
-  { gchar chaine[256];
-
-    struct DB *db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return;
-     }
-
-    if (dls->Arbre_Comm)
-     { g_slist_free(dls->Arbre_Comm);
-       dls->Arbre_Comm = NULL;
-     }
-/*---------------------------- On recherche tous les tech_id des thread de DigitalInput --------------------------------------*/
-    g_snprintf( chaine, sizeof(chaine), "SELECT DISTINCT(thread_tech_id) FROM mappings "
-                                        "WHERE tech_id='%s' AND thread_tech_id NOT LIKE '_%%'", dls->tech_id );
-    if (!Lancer_requete_SQL ( db, chaine ))
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: DB request failed", __func__ );
-       return;
-     }
-
-    while ( Recuperer_ligne_SQL ( db ) != NULL )
-     { gpointer comm = NULL;
-       if (db->row[0])
-        { Dls_data_get_MONO ( db->row[0], "COMM", &comm );
-          if (comm) dls->Arbre_Comm = g_slist_prepend ( dls->Arbre_Comm, comm );
-          else { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: %s:COMM not found !", __func__, db->row[0] ); }
-        }
-     }
-    Libere_DB_SQL ( &db );
-  }
-/******************************************************************************************************************************/
-/* Dls_plugin_recalcule_arbre_comm: Calcule l'arbre de communication du module                                                */
-/* Entrée: Le plugin D.L.S                                                                                                    */
-/* Sortie: FALSE si problème                                                                                                  */
-/******************************************************************************************************************************/
- void Dls_recalculer_arbre_comm ( void )
-  { Dls_foreach_plugins ( NULL, Dls_plugin_recalculer_arbre_comm ); }
-/******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Dls_stop_plugin_reel: Stoppe un plugin                                                                                     */
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -339,10 +238,10 @@
        return(FALSE);
      }
 
-    plugin->reset_all_alias = dlsym( plugin->handle, "reset_all_alias" );                         /* Recherche de la fonction */
-    if (!plugin->reset_all_alias)
+    plugin->remap_all_alias = dlsym( plugin->handle, "remap_all_alias" );                         /* Recherche de la fonction */
+    if (!plugin->remap_all_alias)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
-                "%s: '%s' does not provide reset_all_alias function", __func__, plugin->tech_id );
+                "%s: '%s' does not provide remap_all_alias function", __func__, plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
@@ -378,58 +277,100 @@
   { GSList *liste_bit;
 
     pthread_mutex_lock( &Partage->com_dls.synchro_data );                                 /* Décharge tous les bits du module */
-    liste_bit = Partage->Dls_data_TEMPO;
+    liste_bit = plugin->Dls_data_TEMPO;
     while(liste_bit)
      { struct DLS_TEMPO *tempo = liste_bit->data;
-       if (!strcasecmp(tempo->tech_id, plugin->tech_id))
-        { tempo->status = DLS_TEMPO_NOT_COUNTING;                                           /* La tempo ne compte pas du tout */
-          tempo->state  = FALSE;
-          tempo->init   = FALSE;
-        }
+       tempo->status = DLS_TEMPO_NOT_COUNTING;                                              /* La tempo ne compte pas du tout */
+       tempo->state  = FALSE;
+       tempo->init   = FALSE;
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = Partage->Dls_data_MSG;                                                /* Decharge tous les messages du module */
+    liste_bit = plugin->Dls_data_MESSAGE;                                             /* Decharge tous les messages du module */
     while(liste_bit)
      { struct DLS_MESSAGES *msg = liste_bit->data;
-       if (!strcasecmp(msg->tech_id, plugin->tech_id))
-        { Dls_data_set_MSG ( &plugin->vars, msg->tech_id, msg->acronyme, (gpointer *)&msg, FALSE, FALSE ); }
+       Dls_data_set_MSG ( &plugin->vars, msg, FALSE, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = Partage->Dls_data_MONO;                                            /* Decharge tous les monostables du module */
+    liste_bit = plugin->Dls_data_MONO;                                             /* Decharge tous les monostables du module */
     while(liste_bit)
      { struct DLS_MONO *mono = liste_bit->data;
-       if (!strcasecmp(mono->tech_id, plugin->tech_id) && strcasecmp(mono->acronyme, "IO_COMM") )
-        { Dls_data_set_MONO ( &plugin->vars, mono->tech_id, mono->acronyme, (gpointer)&mono, FALSE ); }
+       Dls_data_set_MONO ( &plugin->vars, mono, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = Partage->Dls_data_BI;                                               /* Decharge tous les bieens du module */
+    liste_bit = plugin->Dls_data_BI;                                                    /* Decharge tous les bieens du module */
     while(liste_bit)
      { struct DLS_BI *bi = liste_bit->data;
-       if (!strcasecmp(bi->tech_id, plugin->tech_id) && strcasecmp(bi->acronyme, "IO_COMM") )
-        { Dls_data_set_BI   ( &plugin->vars, bi->tech_id, bi->acronyme, (gpointer)&bi, FALSE ); }
+       Dls_data_set_BI   ( &plugin->vars, bi, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = Partage->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
+    liste_bit = plugin->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
     while(liste_bit)
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
-       if (!strcasecmp(wtd->tech_id, plugin->tech_id) && strcasecmp(wtd->acronyme, "IO_COMM") )
-        { Dls_data_set_WATCHDOG ( &plugin->vars, wtd->tech_id, wtd->acronyme, (gpointer *)&wtd, FALSE ); }
+       Dls_data_set_WATCHDOG ( &plugin->vars, wtd, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = Partage->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
+    liste_bit = plugin->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
     while(liste_bit)
      { struct DLS_VISUEL *visu = liste_bit->data;
-       if (!strcasecmp(visu->tech_id, plugin->tech_id))
-        { Dls_data_set_VISUEL ( &plugin->vars, visu->tech_id, visu->acronyme, (gpointer *)&visu, 0, "black", FALSE, "resetted" ); }
-       liste_bit = g_slist_next(liste_bit);
+       Dls_data_set_VISUEL ( &plugin->vars, visu, "black", FALSE, "resetted" );
      }
 
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+  }
+/******************************************************************************************************************************/
+/* Dls_plugin_init_dls_data: initialise les bits internes du plugin en parametre selon les valeurs recues depuis l'API        */
+/* Entrée: les données JSON recu de la requete HTTP                                                                           */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_plugin_init_own_data ( struct DLS_PLUGIN *target, JsonNode *api_result )
+  {
+    if (target->Dls_data_CI) { g_slist_free_full ( target->Dls_data_CI, (GDestroyNotify) g_free ); target->Dls_data_CI = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_CI", Dls_data_CI_create_by_array, target );
+
+    if (target->Dls_data_CH) { g_slist_free_full ( target->Dls_data_CH, (GDestroyNotify) g_free ); target->Dls_data_CH = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_CH", Dls_data_CH_create_by_array, target );
+
+    if (target->Dls_data_DI) { g_slist_free_full ( target->Dls_data_DI, (GDestroyNotify) g_free ); target->Dls_data_DI = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_DI", Dls_data_DI_create_by_array, target );
+
+    if (target->Dls_data_DO) { g_slist_free_full ( target->Dls_data_DO, (GDestroyNotify) g_free ); target->Dls_data_DO = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_DO", Dls_data_DO_create_by_array, target );
+
+    if (target->Dls_data_AI) { g_slist_free_full ( target->Dls_data_AI, (GDestroyNotify) g_free ); target->Dls_data_AI = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_AI", Dls_data_DI_create_by_array, target );
+
+    if (target->Dls_data_AO) { g_slist_free_full ( target->Dls_data_AO, (GDestroyNotify) g_free ); target->Dls_data_AO = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_AO", Dls_data_AO_create_by_array, target );
+
+    if (target->Dls_data_MONO) { g_slist_free_full ( target->Dls_data_MONO, (GDestroyNotify) g_free ); target->Dls_data_MONO = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_MONO", Dls_data_MONO_create_by_array, target );
+
+    if (target->Dls_data_BI) { g_slist_free_full ( target->Dls_data_BI, (GDestroyNotify) g_free ); target->Dls_data_BI = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_BI", Dls_data_BI_create_by_array, target );
+
+    if (target->Dls_data_VISUEL) { g_slist_free_full ( target->Dls_data_VISUEL, (GDestroyNotify) g_free ); target->Dls_data_VISUEL = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_VISUEL", Dls_data_VISUEL_create_by_array, target );
+
+    if (target->Dls_data_MESSAGE) { g_slist_free_full ( target->Dls_data_MESSAGE, (GDestroyNotify) g_free ); target->Dls_data_MESSAGE = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_MESSAGE", Dls_data_MESSAGE_create_by_array, target );
+  }
+/******************************************************************************************************************************/
+/* Dls_plugins_remap_all_alias: remap les alias d'un plugin donné                                                             */
+/* Entrée: le plugin                                                                                                          */
+/* Sortie : les alias sont mappés                                                                                             */
+/******************************************************************************************************************************/
+ static void Dls_plugins_remap_all_alias ( void )
+  { GSList *liste = Partage->com_dls.Dls_plugins;
+    while (liste)
+     { struct DLS_PLUGIN *plugin = liste->data;
+       if (plugin->remap_all_alias) plugin->remap_all_alias();
+       liste = g_slist_next(liste);
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_Importer_un_plugin: Ajoute ou Recharge un plugin dans la liste des plugins                                             */
@@ -465,8 +406,7 @@
     struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
     if (plugin == NULL)                                                            /* si pas trouvé, on créé l'enregistrement */
      { plugin = g_try_malloc0 ( sizeof (struct DLS_PLUGIN) );
-       if (plugin)
-/* Peuplement de la structure */
+       if (plugin)                                                                              /* Peuplement de la structure */
         { g_snprintf ( plugin->tech_id,   sizeof(plugin->tech_id),   "%s", tech_id );
           g_snprintf ( plugin->name,      sizeof(plugin->name),      "%s", Json_get_string ( api_result, "name" ) );
           g_snprintf ( plugin->shortname, sizeof(plugin->shortname), "%s", Json_get_string ( api_result, "shortname" ) );
@@ -482,6 +422,8 @@
        Json_node_unref(api_result);
        return(NULL);
      }
+
+    Dls_plugin_init_own_data ( plugin, api_result );
 
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: '%s' Error when dlopening", __func__, tech_id ); }
@@ -512,21 +454,27 @@
     Json_node_foreach_array_element ( api_result, "plugins", Dls_Importer_un_plugin_by_array, NULL );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: %03d plugins loaded in %03.1fs", __func__,
               Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0 );
+    Dls_plugins_remap_all_alias();
     Json_node_unref ( api_result );
   }
 /******************************************************************************************************************************/
-/* Retirer_plugins: Decharge toutes les librairies                                                                            */
+/* Dls_Reseter_un_plugin: Recharge un plugin par tech_id                                                                      */
 /* Entrée: Le numéro du plugin a décharger                                                                                    */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Dls_Reseter_un_plugin ( gchar *tech_id )
-  { struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( tech_id );
+  { struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( tech_id );
+    if (found) Dls_Export_Data_to_API ( found );      /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( tech_id );
     if (dls)
      { Reseter_all_bit_interne ( dls );
        dls->vars.resetted = TRUE;                                                  /* au chargement, le bit de start vaut 1 ! */
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: '%s': resetted", __func__, tech_id );
      }
     else Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s': error when resetting", __func__, tech_id );
+    Dls_plugins_remap_all_alias();
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
 /* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
@@ -537,10 +485,26 @@
   { pthread_mutex_lock( &Partage->com_dls.synchro );
     while(Partage->com_dls.Dls_plugins)                                                     /* Liberation mémoire des modules */
      { struct DLS_PLUGIN *plugin = Partage->com_dls.Dls_plugins->data;
+       Dls_Export_Data_to_API ( plugin );                                         /* Sauvegarde les valeurs des bits internes */
        if (plugin->handle && dlclose( plugin->handle ))
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: dlclose error '%s' for '%s' (%s)", __func__,
                     dlerror(), plugin->tech_id, plugin->shortname );
         }
+
+       if (plugin->Dls_data_CI)       g_slist_free_full ( plugin->Dls_data_CI, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_CH)       g_slist_free_full ( plugin->Dls_data_CH, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_DI)       g_slist_free_full ( plugin->Dls_data_DI, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_DO)       g_slist_free_full ( plugin->Dls_data_DO, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_AI)       g_slist_free_full ( plugin->Dls_data_AI, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_AO)       g_slist_free_full ( plugin->Dls_data_AO, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_BI)       g_slist_free_full ( plugin->Dls_data_BI, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_MONO)     g_slist_free_full ( plugin->Dls_data_MONO, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_REGISTRE) g_slist_free_full ( plugin->Dls_data_REGISTRE, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_TEMPO)    g_slist_free_full ( plugin->Dls_data_TEMPO, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_WATCHDOG) g_slist_free_full ( plugin->Dls_data_WATCHDOG, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_VISUEL)   g_slist_free_full ( plugin->Dls_data_VISUEL, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_MESSAGE)  g_slist_free_full ( plugin->Dls_data_MESSAGE, (GDestroyNotify) g_free );
+
        Partage->com_dls.Dls_plugins = g_slist_remove( Partage->com_dls.Dls_plugins, plugin );
        if (plugin->Arbre_Comm) g_slist_free(plugin->Arbre_Comm);
                                                                              /* Destruction de l'entete associé dans la GList */
@@ -549,90 +513,6 @@
        g_free( plugin );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-  }
-/******************************************************************************************************************************/
-/* Dls_Add_plugin_to_dls_syn: Ajoute les dependances du syn en parametre                                                      */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Dls_Add_plugin_to_dls_syn ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { struct DLS_SYN *dls_syn = user_data;
-    if (plugin->syn_id == dls_syn->syn_id)
-     { dls_syn->Dls_plugins = g_slist_append( dls_syn->Dls_plugins, plugin ); }
-  }
-/******************************************************************************************************************************/
-/* Dls_recalculer_arbre_syn_for_id: Calcule l'arbre de dependance des synooptiques                                            */
-/* Entrée: l'id du synoptique a traiter, a travers le json array                                                              */
-/* Sortie: L'arbre DLS est mis à jour                                                                                         */
-/******************************************************************************************************************************/
- static void Dls_recalculer_arbre_syn_for_childs ( JsonArray *ids, guint index, JsonNode *element, gpointer data )
-  { struct DLS_SYN *dls_syn_parent = data;
-    gint syn_id;
-    if (!dls_syn_parent) syn_id = 1;
-    else syn_id = Json_get_int ( element, "syn_id" );
-
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Starting for syn_id '%d'", __func__, syn_id );
-    struct DLS_SYN *dls_syn = g_try_malloc0( sizeof(struct DLS_SYN) );
-    if (!dls_syn)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for syn_id '%s'", __func__, syn_id );
-       return;
-     }
-    dls_syn->syn_id = syn_id;
-
-    Dls_foreach_plugins ( dls_syn, Dls_Add_plugin_to_dls_syn );
-
-    JsonNode *syn_enfants = Json_node_create ();
-    if (!syn_enfants)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error for syn_id '%s'", __func__, syn_id );
-       g_free(dls_syn);
-       return;
-     }
-
-    SQL_Select_to_json_node ( syn_enfants, "enfants",
-                              "SELECT syn_id FROM syns "
-                              "WHERE parent_id='%d' AND syn_id!=1",                    /* Pas de bouclage sur le synoptique 1 */
-                              syn_id );
-
-    Json_node_foreach_array_element ( syn_enfants, "enfants", Dls_recalculer_arbre_syn_for_childs, dls_syn );
-    if (dls_syn_parent)
-     { dls_syn_parent->Dls_sub_syns = g_slist_append ( dls_syn_parent->Dls_sub_syns, dls_syn ); }
-    else
-     { Partage->com_dls.Dls_syns = dls_syn; }
-    Json_node_unref(syn_enfants);
-  }
-/******************************************************************************************************************************/
-/* Dls_arbre_dls_syn_erase_syn: Supprime le dls_syn en parametre de l'arbre des synoptique                                    */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Dls_arbre_dls_syn_erase_syn ( struct DLS_SYN *dls_syn )
-  { if(dls_syn->Dls_plugins) g_slist_free( dls_syn->Dls_plugins );
-    while (dls_syn->Dls_sub_syns)
-     { struct DLS_SYN *sub_syn = dls_syn->Dls_sub_syns->data;
-       dls_syn->Dls_sub_syns = g_slist_remove ( dls_syn->Dls_sub_syns, sub_syn );
-       Dls_arbre_dls_syn_erase_syn ( sub_syn );
-     }
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Arbre syn '%d' erased", __func__, dls_syn->syn_id );
-    g_free(dls_syn);
-  }
-/******************************************************************************************************************************/
-/* Dls_arbre_dls_syn_erase: Efface l'arbre des synoptiques                                                                    */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Dls_arbre_dls_syn_erase ( void )
-  { if (Partage->com_dls.Dls_syns) Dls_arbre_dls_syn_erase_syn(Partage->com_dls.Dls_syns);
-    Partage->com_dls.Dls_syns = NULL;
-    Partage->com_dls.Dls_syns = NULL;
-  }
-/******************************************************************************************************************************/
-/* Dls_recalculer_arbre_dls_syn: Calcule l'arbre des synoptiques                                                              */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Dls_recalculer_arbre_dls_syn ( void )
-  { Dls_arbre_dls_syn_erase();
-    Dls_recalculer_arbre_syn_for_childs (NULL, 0, NULL, NULL);
   }
 /******************************************************************************************************************************/
 /* Dls_Debug_plugin_reel: Active le debug d'un plugin                                                                         */

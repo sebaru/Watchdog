@@ -28,88 +28,110 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Dls_data_DI_lookup : Recupere la structure DI selon tech_id/acronyme                                                       */
+/* Dls_data_DI_create_by_array : Création d'un DI pour le plugin                                                              */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- static struct DLS_DI *Dls_data_DI_lookup ( gchar *tech_id, gchar *acronyme, gpointer *di_p )
-  { struct DLS_DI *di = NULL;
-    if (di_p && *di_p)                                                               /* Si pointeur d'acceleration disponible */
-     { di = (struct DLS_DI *)*di_p;
-       return( di );
+ void Dls_data_DI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data )
+  { struct DLS_PLUGIN *plugin = user_data;
+    gchar *tech_id  = Json_get_string ( element, "tech_id" );
+    gchar *acronyme = Json_get_string ( element, "acronyme" );
+    struct DLS_DI *bit = g_try_malloc0 ( sizeof(struct DLS_DI) );
+    if (!bit)
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+       return;
      }
-    if (!tech_id || !acronyme) return(NULL);
-
-    pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    GSList *liste = Partage->Dls_data_DI;
-    while (liste)                                                                               /* A la recherche du message. */
-     { di = (struct DLS_DI *)liste->data;
-       if ( !strcasecmp( di->tech_id, tech_id ) && !strcasecmp( di->acronyme, acronyme ) )
-        { if (di_p) *di_p = (gpointer)di;                                           /* Sauvegarde pour acceleration si besoin */
-          break;
+    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
+    g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", libelle );
+    bit->etat = Json_get_bool ( element, "etat" );
+    plugin->Dls_data_DI = g_slist_prepend ( plugin->Dls_data_DI, bit );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_lookup_DI: Recherche un DI dans les plugins DLS                                                                   */
+/* Entrée: le tech_id, l'acronyme                                                                                             */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ struct DLS_DI *Dls_data_lookup_DI ( gchar *tech_id, gchar *acronyme )
+  { GSList *plugins = Partage->com_dls.Dls_plugins;
+    while (plugins)
+     { struct DLS_PLUGIN *plugin = plugins->data;
+       GSList *liste = plugin->Dls_data_DI;
+       while (liste)
+        { struct DLS_DI *bit = liste->data;
+          if ( !strcasecmp ( bit->acronyme, acronyme ) && !strcasecmp( bit->tech_id, tech_id ) ) return(bit);
+          liste = g_slist_next(liste);
         }
-       liste = g_slist_next(liste);
+       plugins = g_slist_next(plugins);
      }
-
-    if (liste)
-     { pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-       return(di);
-     }
-
-    di = g_try_malloc0 ( sizeof(struct DLS_DI) );
-    if (di)
-     { g_snprintf( di->acronyme, sizeof(di->acronyme), "%s", acronyme );
-       g_snprintf( di->tech_id,  sizeof(di->tech_id),  "%s", tech_id );
-       Partage->Dls_data_DI = g_slist_prepend ( Partage->Dls_data_DI, di );
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: adding DI '%s:%s'", __func__, tech_id, acronyme );
-     }
-    else Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-    return(di);
+    return(NULL);
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_DI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_DI ( gchar *tech_id, gchar *acronyme, gpointer *di_p )
-  { struct DLS_DI *di = Dls_data_DI_lookup ( tech_id, acronyme, di_p );
-    if (!di) return(FALSE);
-    return( di->etat );
+ gboolean Dls_data_get_DI ( struct DLS_DI *bit )
+  { if (!bit) return(FALSE);
+    return( bit->etat );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_DI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_DI_up ( gchar *tech_id, gchar *acronyme, gpointer *di_p )
-  { struct DLS_DI *di = Dls_data_DI_lookup ( tech_id, acronyme, di_p );
-    if (!di) return(FALSE);
-    return( di->edge_up );
+ gboolean Dls_data_get_DI_up ( struct DLS_DI *bit )
+  { if (!bit) return(FALSE);
+    return( bit->edge_up );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_DI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_DI_down ( gchar *tech_id, gchar *acronyme, gpointer *di_p )
-  { struct DLS_DI *di = Dls_data_DI_lookup ( tech_id, acronyme, di_p );
-    if (!di) return(FALSE);
-    return( di->edge_down );
+ gboolean Dls_data_get_DI_down ( struct DLS_DI *bit )
+  { if (!bit) return(FALSE);
+    return( bit->edge_down );
   }
 /******************************************************************************************************************************/
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *di_p, gboolean valeur )
-  { struct DLS_DI *di;
-    di = Dls_data_DI_lookup ( tech_id, acronyme, di_p );
-    if (!di) return;
-    if (di_p) *di_p = (gpointer)di;                                                 /* Sauvegarde pour acceleration si besoin */
+ void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit, gboolean valeur )
+  { if (!bit) return;
 
-    if (di->etat != valeur)
+    if (bit->etat != valeur)
      { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_DI '%s:%s'=%d up %d down %d",
-                 __func__, di->tech_id, di->acronyme, valeur, di->edge_up, di->edge_down );
-       if (valeur == TRUE) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up, di );
-                      else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, di );
+                 __func__, bit->tech_id, bit->acronyme, valeur, bit->edge_up, bit->edge_down );
+       if (valeur == TRUE) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up, bit );
+                      else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, bit );
        Partage->audit_bit_interne_per_sec++;
      }
-    di->etat = valeur;
+    bit->etat = valeur;
+  }
+/******************************************************************************************************************************/
+/* Dls_DI_to_json : Formate un bit au format JSON                                                                             */
+/* Entrées: le JsonNode et le bit                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit )
+  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
+    Json_node_add_string ( element, "acronyme", bit->acronyme );
+    Json_node_add_bool   ( element, "etat", bit->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_all_DI_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_DI_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
+  { JsonArray *RootArray = array;
+    gint cpt = 0;
+
+    GSList *liste = plugin->Dls_data_DI;
+    while ( liste )
+     { struct DLS_DI *bit = liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_DI_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+       cpt++;
+     }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

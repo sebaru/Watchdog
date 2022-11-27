@@ -29,6 +29,158 @@
  #define _MODULE_DLS_H_
  #include <glib.h>
 
+ enum                                                                                  /* différent statut des temporisations */
+  { DLS_TEMPO_NOT_COUNTING,                                                                 /* La tempo ne compte pas du tout */
+    DLS_TEMPO_WAIT_FOR_DELAI_ON,                                       /* La tempo compte, en attendant le delai de mise à un */
+    DLS_TEMPO_WAIT_FOR_MIN_ON,                                         /* Delai de MAU dépassé, en attente du creneau minimum */
+    DLS_TEMPO_WAIT_FOR_MAX_ON,                                      /* Creneau minimum atteint, en attente du creneau maximum */
+    DLS_TEMPO_WAIT_FOR_DELAI_OFF,                                /* Creneau max atteint, en attente du delai de remise a zero */
+    DLS_TEMPO_WAIT_FOR_COND_OFF                                            /* Attend que la condition soit tombée avant reset */
+  };
+
+ struct DLS_TEMPO                                                                           /* Définition d'une temporisation */
+  { gchar   acronyme[64];
+    gchar   tech_id[32];
+    gboolean init;                                   /* True si les données delai_on/off min_on/off ont bien été positionnées */
+    guint status;                                                                               /* Statut de la temporisation */
+    guint date_on;                                                              /* date a partir de laquelle la tempo sera ON */
+    guint date_off;                                                            /* date a partir de laquelle la tempo sera OFF */
+    gboolean state;
+    guint delai_on;                                                     /* delai avant mise à un (fixé par option mnémonique) */
+    guint delai_off;                                                  /* delai avant mise à zero (fixé par option mnémonique) */
+    guint min_on;                            /* Durée minimale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+    guint max_on;                            /* Durée maximale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+    guint random;                                         /* Est-ce une tempo random ? si oui, est la dynamique max du random */
+  };
+
+ struct DLS_AI
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gchar   libelle[128];                                                                                     /* Km, h, ° ... */
+    gchar   unite[32];                                                                                        /* Km, h, ° ... */
+    gdouble valeur;
+    guint   last_arch;                                                                         /* Date de la derniere archive */
+    guint   in_range;
+    guint   archivage;
+   };
+
+ struct DLS_AO
+  { gchar   acronyme[64];
+    gchar   tech_id[32];
+    gdouble min;
+    gdouble max;
+    guint   type;                                                                                  /* Type de gestion de l'EA */
+    gchar   unite[32];                                                                           /* Km, h, ° ... */
+    gdouble valeur;
+    guint   last_arch;                                                                         /* Date de la derniere archive */
+  };
+
+ struct SORTIE_TOR                                                                             /* Définition d'une sortie TOR */
+  { gchar etat;                                                                                   /* Etat de la sortie 0 ou 1 */
+    gint last_change;                                                                    /* Date du dernier changement d'etat */
+  };
+
+ struct DLS_WATCHDOG
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gint    top;
+  };
+
+ struct DLS_MONO
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gboolean etat;                                                                                      /* Etat actuel du bit */
+    gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
+    gboolean edge_up;
+    gboolean edge_down;
+  };
+
+ struct DLS_BI
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gint    groupe; /* Groupe 'radio' */
+    gboolean etat;                                                                                      /* Etat actuel du bit */
+    gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
+    gboolean edge_up;
+    gboolean edge_down;
+  };
+
+ struct DLS_DI
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gchar   libelle[128];                                                                                     /* Km, h, ° ... */
+    gboolean etat;
+    gboolean edge_up;
+    gboolean edge_down;
+  };
+
+ struct DLS_DO
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gchar   libelle[128];                                                                                     /* Km, h, ° ... */
+    gboolean etat;
+    gboolean edge_up;
+    gboolean edge_down;
+  };
+
+ struct DLS_CI
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gint    valeur;
+    gint    val_en_cours1;                                                    /* valeur en cours pour le calcul via les ratio */
+    gdouble ratio;
+    gdouble multi;
+    guint   last_update;
+    gint    imp_par_minute;
+    gint    valeurs[60];                                                                              /* 60 dernieres valeurs */
+    gchar   unite[32];
+    gboolean etat;
+    gint    archivage;
+    guint   last_arch;
+  };
+
+ struct DLS_CH
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    guint valeur;
+    guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
+    guint old_top;                                                                         /* Date de debut du comptage du CH */
+    gboolean etat;
+  };
+
+ struct DLS_VISUEL
+  { gchar    tech_id[32];
+    gchar    acronyme[64];
+    gchar    mode[32];
+    gchar    color[16];
+    gboolean cligno;
+    gint     last_change;
+    gint     changes;
+    gchar    libelle[128]; /* libelle issu du plugin DLS */
+  };
+
+ struct DLS_MESSAGES
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gboolean etat;
+    gboolean etat_update;
+    gint groupe;
+    gint last_change;
+    gint last_on;
+    gint changes;
+  };
+
+ struct DLS_REGISTRE
+  { gchar   tech_id[32];
+    gchar   acronyme[64];
+    gdouble valeur;
+    gchar   unite[32];
+    gint    archivage;
+    guint   last_arch;                                                   /* Date de dernier enregistrement en base de données */
+    gdouble pid_somme_erreurs;                                                                                /* Calcul PID KI*/
+    gdouble pid_prev_erreur;                                                                                 /* Calcul PID KD */
+  };
+
  struct DLS_TO_PLUGIN                                                 /* structure dechange de données entre DLS et le plugin */
   { gboolean resetted;                                  /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
@@ -56,39 +208,46 @@
 
  extern gboolean Dls_get_top_alerte ( void );
  extern gboolean Dls_get_top_alerte_fugitive ( void );
- extern gboolean Dls_data_get_BI        ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gboolean Dls_data_get_BI_up     ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gboolean Dls_data_get_BI_down   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gboolean Dls_data_get_MONO      ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gboolean Dls_data_get_MONO_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gboolean Dls_data_get_MONO_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern void     Dls_data_set_BI        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur );
- extern void     Dls_data_set_BI_groupe ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bi_p, gint groupe );
- extern void     Dls_data_set_MONO      ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur );
- extern gboolean Dls_data_get_DI        ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
- extern gboolean Dls_data_get_DI_up     ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
- extern gboolean Dls_data_get_DI_down   ( gchar *tech_id, gchar *acronyme, gpointer *di_p );
- extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *dout_p, gboolean valeur );
- extern void     Dls_data_set_MSG       ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean update, gboolean etat );
- extern void     Dls_data_set_MSG_groupe( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *msg_p, gint groupe );
- extern void     Dls_data_set_tempo     ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *tempo_p, gboolean etat,
+ extern gboolean Dls_data_get_BI        ( struct DLS_BI *bit );
+ extern gboolean Dls_data_get_BI_up     ( struct DLS_BI *bit );
+ extern gboolean Dls_data_get_BI_down   ( struct DLS_BI *bit );
+ extern gboolean Dls_data_get_MONO      ( struct DLS_MONO *bit );
+ extern gboolean Dls_data_get_MONO_up   ( struct DLS_MONO *bit );
+ extern gboolean Dls_data_get_MONO_down ( struct DLS_MONO *bit );
+ extern void     Dls_data_set_BI        ( struct DLS_TO_PLUGIN *vars, struct DLS_BI *bit, gboolean valeur );
+ extern void     Dls_data_set_BI_groupe ( struct DLS_TO_PLUGIN *vars, struct DLS_BI *bit, gint groupe );
+ extern void     Dls_data_set_MONO      ( struct DLS_TO_PLUGIN *vars, struct DLS_MONO *bit, gboolean valeur );
+ extern gboolean Dls_data_get_DI        ( struct DLS_DI *bit );
+ extern gboolean Dls_data_get_DI_up     ( struct DLS_DI *bit );
+ extern gboolean Dls_data_get_DI_down   ( struct DLS_DI *bit );
+ extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *bit, gboolean valeur );
+ extern void     Dls_data_set_MSG       ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGES *bit, gboolean update, gboolean etat );
+ extern void     Dls_data_set_MSG_groupe( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGES *bit, gint groupe );
+ extern void     Dls_data_set_tempo     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,
                                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
- extern gdouble  Dls_data_get_AO        ( gchar *tech_id, gchar *acronyme, gpointer *ao_p );
+ extern gdouble  Dls_data_get_AO        ( struct DLS_AO *bit );
  extern void     Dls_data_set_AO        ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *ao_p, gdouble valeur );
- extern gboolean Dls_data_get_tempo     ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p );
- extern gboolean Dls_data_get_WATCHDOG ( gchar *tech_id, gchar *acronyme, gpointer *wtd_p );
+ extern gboolean Dls_data_get_tempo     ( struct DLS_TEMPO *bit );
+ extern gboolean Dls_data_get_WATCHDOG ( struct DLS_WATCHDOG *bit );
  extern void     Dls_data_set_WATCHDOG ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *wtd_p, gint consigne );
  extern void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gchar *target_tech_id, gchar *json_parametre );
- extern gdouble  Dls_data_get_AI        ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
- extern gboolean Dls_data_get_AI_inrange ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
- extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio );
- extern gint Dls_data_get_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p );
- extern void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset );
- extern gint Dls_data_get_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p );
- extern void    Dls_data_set_REGISTRE ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *r_p, gdouble valeur );
- extern gdouble Dls_data_get_REGISTRE ( gchar *tech_id, gchar *acronyme, gpointer *r_p );
- extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *acronyme, gpointer *visuel_p,
+ extern gdouble  Dls_data_get_AI        ( struct DLS_AI *bit );
+ extern gboolean Dls_data_get_AI_inrange ( struct DLS_AI *bit );
+ extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat, gint reset, gint ratio );
+ extern gint Dls_data_get_CI ( struct DLS_CI *bit );
+
+ extern struct DLS_CH *Dls_data_lookup_CH ( gchar *tech_id, gchar *acronyme );
+ extern void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *cpt_h, gboolean etat, gint reset );
+ extern gint Dls_data_get_CH ( struct DLS_CH *cpt_h );
+
+ extern struct DLS_REGISTRE *Dls_data_lookup_REGISTRE ( gchar *tech_id, gchar *acronyme );
+ extern void    Dls_data_set_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *reg, gdouble valeur );
+ extern gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg );
+
+ extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
+ extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
                                    gchar *mode, gchar *color, gboolean cligno, gchar *libelle );
+
  extern void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input );
  extern gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,
                           gchar *consigne_tech_id, gchar *consigne_acronyme, gpointer *r_consigne,

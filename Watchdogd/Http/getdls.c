@@ -140,6 +140,12 @@
        return;
      }
 
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id_src );
+    if (!plugin)
+     { soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found");
+       return;
+     }
+
     JsonNode *dls_run = Json_node_create ();
     if (!dls_run)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
@@ -197,14 +203,12 @@
 /*--------------------------------------------------- Compteur horaires ------------------------------------------------------*/
     else if (!strcasecmp ( classe, "CH" ))
      { array = Json_node_add_array ( dls_run, "CH" );
-       liste = Partage->Dls_data_CH;
+       liste = plugin->Dls_data_CH;
        while(liste)
         { struct DLS_CH *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_CH_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_CH_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }

@@ -436,10 +436,9 @@ end:
  void Http_Formater_cadran( struct HTTP_CADRAN *cadran )
   { if (!cadran) return;
     if ( ! strcmp ( cadran->classe, "AI" ) )
-     { cadran->valeur = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_AI *ai=cadran->dls_data;
+     { struct DLS_AI *ai = Dls_data_lookup_AI ( cadran->tech_id, cadran->acronyme );
        if (!ai)                                                  /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = ai->in_range;
           cadran->valeur   = ai->valeur;
@@ -448,24 +447,23 @@ end:
      }
     else if ( !strcmp ( cadran->classe, "CH" ) )
      { cadran->in_range = TRUE;
-       cadran->valeur = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+       struct DLS_CH *cpt_h = Dls_data_lookup_CH ( cadran->tech_id, cadran->acronyme );
+       cadran->valeur = (cpt_h ? cpt_h->valeur : 0.0);
      }
     else if ( !strcmp ( cadran->classe, "CI" ) )
-     { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_CI *ci=cadran->dls_data;
+     { struct DLS_CI *ci = Dls_data_lookup_CI ( cadran->tech_id, cadran->acronyme );
        if (!ci)                                                  /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = TRUE;
-          cadran->valeur *= ci->multi;                                                                    /* Multiplication ! */
+          cadran->valeur = ci->valeur * ci->multi;                                                        /* Multiplication ! */
           g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
         }
      }
     else if ( !strcmp ( cadran->classe, "REGISTRE" ) )
-     { cadran->valeur = Dls_data_get_REGISTRE(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_REGISTRE *registre=cadran->dls_data;
+     { struct DLS_REGISTRE *registre = Dls_data_lookup_REGISTRE ( cadran->tech_id, cadran->acronyme );
        if (!registre)                                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = TRUE;
           cadran->valeur = registre->valeur;
@@ -473,10 +471,9 @@ end:
         }
      }
     else if ( !strcmp ( cadran->classe, "WATCHDOG" ) )
-     { Dls_data_get_WATCHDOG(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_WATCHDOG *wtd=cadran->dls_data;
+     { struct DLS_WATCHDOG *wtd = Dls_data_lookup_WATCHDOG ( cadran->tech_id, cadran->acronyme );
        if (!wtd)                                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = TRUE;
           gint gap = wtd->top - Partage->top;
@@ -487,9 +484,9 @@ end:
      }
     else if ( !strcmp ( cadran->classe, "T" ) )
      { Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_TEMPO *tempo = cadran->dls_data;
+       struct DLS_TEMPO *tempo = Dls_data_lookup_TEMPO ( cadran->tech_id, cadran->acronyme );
        if (!tempo)
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = TRUE;
           if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON)                     /* Temporisation Retard en train de compter */
