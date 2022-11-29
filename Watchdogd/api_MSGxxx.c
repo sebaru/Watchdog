@@ -99,7 +99,7 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- static JsonNode *MSGS_Convert_msg_on_to_histo ( struct DLS_MESSAGES *msg )
+ static JsonNode *MSGS_Convert_msg_on_to_histo ( struct DLS_MESSAGE *msg )
   { gchar libelle[128], chaine[512], date_create[128];
     struct timeval tv;
     struct tm *temps;
@@ -131,7 +131,7 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- static JsonNode *MSGS_Convert_msg_off_to_histo ( struct DLS_MESSAGES *msg )
+ static JsonNode *MSGS_Convert_msg_off_to_histo ( struct DLS_MESSAGE *msg )
   { gchar chaine[256], date_fin[128];
     struct timeval tv;
     struct tm *temps;
@@ -157,7 +157,7 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void API_Send_MSGS ( void )
-  { struct DLS_MESSAGES_EVENT *event;
+  { struct DLS_MESSAGE_EVENT *event;
 
     while (Partage->com_msrv.liste_msg)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */

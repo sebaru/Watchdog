@@ -50,7 +50,7 @@
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
-    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", libelle );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_WATCHDOG = g_slist_prepend ( plugin->Dls_data_WATCHDOG, bit );
   }
 /******************************************************************************************************************************/
@@ -89,8 +89,8 @@
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
  gboolean Dls_data_get_WATCHDOG ( struct DLS_WATCHDOG *bit )
-  { if (!bit) return;
-    bit->etat = Partage->top < wtd->top;
+  { if (!bit) return(FALSE);
+    bit->etat = (Partage->top < bit->top ? TRUE : FALSE);
     return( bit->etat );
   }
 /******************************************************************************************************************************/

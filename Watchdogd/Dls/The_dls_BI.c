@@ -50,15 +50,15 @@
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
-    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", libelle );
-    bit->etat = bi->next_etat = Json_get_bool ( element, "etat" );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
+    bit->etat = bit->next_etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_BI = g_slist_prepend ( plugin->Dls_data_BI, bit );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_BI : Recherche un CH dans les plugins DLS                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- static struct DLS_BI *Dls_data_lookup_BI ( gchar *tech_id, gchar *acronyme )
+ struct DLS_BI *Dls_data_lookup_BI ( gchar *tech_id, gchar *acronyme )
   { GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
      { struct DLS_PLUGIN *plugin = plugins->data;
@@ -71,6 +71,44 @@
        plugins = g_slist_next(plugins);
      }
     return(NULL);
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_BI: Positionne un bistable                                                                                    */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
+ void Dls_data_set_BI ( struct DLS_TO_PLUGIN *vars, struct DLS_BI *bi, gboolean valeur )
+  { if (!bi) return;
+    if (bi->next_etat != valeur)
+     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d", __func__,
+                 (vars ? vars->num_ligne : -1), bi->tech_id, bi->acronyme, valeur, bi->edge_up, bi->edge_down );
+       Partage->audit_bit_interne_per_sec++;
+       bi->next_etat = valeur;
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_BI: Remonte l'etat d'un bistable                                                                             */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_BI ( struct DLS_BI *bi )
+  { if (!bi) return(FALSE);
+    return( bi->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bi_up: Remonte le front montant d'un boolean                                                                    */
+/* Sortie : TRUE sur le boolean vient de passer à UP                                                                            */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_BI_up ( struct DLS_BI *bi )
+  { if (!bi) return(FALSE);
+    return( bi->edge_up );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bi_down: Remonte le front descendant d'un boolean                                                               */
+/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                          */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_BI_down ( struct DLS_BI *bi )
+  { if (!bi) return(FALSE);
+    return( bi->edge_down );
   }
 /******************************************************************************************************************************/
 /* Dls_BI_to_json : Formate un bit au format JSON                                                                           */
@@ -90,8 +128,6 @@
 /******************************************************************************************************************************/
  void Dls_all_BI_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
   { JsonArray *RootArray = array;
-    gint cpt = 0;
-
     GSList *liste = plugin->Dls_data_BI;
     while ( liste )
      { struct DLS_BI *bit = liste->data;
@@ -99,7 +135,6 @@
        Dls_BI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
-       cpt++;
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

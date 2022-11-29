@@ -288,7 +288,7 @@
 
     liste_bit = plugin->Dls_data_MESSAGE;                                             /* Decharge tous les messages du module */
     while(liste_bit)
-     { struct DLS_MESSAGES *msg = liste_bit->data;
+     { struct DLS_MESSAGE *msg = liste_bit->data;
        Dls_data_set_MSG ( &plugin->vars, msg, FALSE, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
@@ -317,47 +317,10 @@
     liste_bit = plugin->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
     while(liste_bit)
      { struct DLS_VISUEL *visu = liste_bit->data;
-       Dls_data_set_VISUEL ( &plugin->vars, visu, "black", FALSE, "resetted" );
+       Dls_data_set_VISUEL ( &plugin->vars, visu, "resetted", "black", FALSE, "resetted" );
      }
 
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-  }
-/******************************************************************************************************************************/
-/* Dls_plugin_init_dls_data: initialise les bits internes du plugin en parametre selon les valeurs recues depuis l'API        */
-/* Entrée: les données JSON recu de la requete HTTP                                                                           */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_plugin_init_own_data ( struct DLS_PLUGIN *target, JsonNode *api_result )
-  {
-    if (target->Dls_data_CI) { g_slist_free_full ( target->Dls_data_CI, (GDestroyNotify) g_free ); target->Dls_data_CI = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_CI", Dls_data_CI_create_by_array, target );
-
-    if (target->Dls_data_CH) { g_slist_free_full ( target->Dls_data_CH, (GDestroyNotify) g_free ); target->Dls_data_CH = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_CH", Dls_data_CH_create_by_array, target );
-
-    if (target->Dls_data_DI) { g_slist_free_full ( target->Dls_data_DI, (GDestroyNotify) g_free ); target->Dls_data_DI = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_DI", Dls_data_DI_create_by_array, target );
-
-    if (target->Dls_data_DO) { g_slist_free_full ( target->Dls_data_DO, (GDestroyNotify) g_free ); target->Dls_data_DO = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_DO", Dls_data_DO_create_by_array, target );
-
-    if (target->Dls_data_AI) { g_slist_free_full ( target->Dls_data_AI, (GDestroyNotify) g_free ); target->Dls_data_AI = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_AI", Dls_data_DI_create_by_array, target );
-
-    if (target->Dls_data_AO) { g_slist_free_full ( target->Dls_data_AO, (GDestroyNotify) g_free ); target->Dls_data_AO = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_AO", Dls_data_AO_create_by_array, target );
-
-    if (target->Dls_data_MONO) { g_slist_free_full ( target->Dls_data_MONO, (GDestroyNotify) g_free ); target->Dls_data_MONO = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_MONO", Dls_data_MONO_create_by_array, target );
-
-    if (target->Dls_data_BI) { g_slist_free_full ( target->Dls_data_BI, (GDestroyNotify) g_free ); target->Dls_data_BI = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_BI", Dls_data_BI_create_by_array, target );
-
-    if (target->Dls_data_VISUEL) { g_slist_free_full ( target->Dls_data_VISUEL, (GDestroyNotify) g_free ); target->Dls_data_VISUEL = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_VISUEL", Dls_data_VISUEL_create_by_array, target );
-
-    if (target->Dls_data_MESSAGE) { g_slist_free_full ( target->Dls_data_MESSAGE, (GDestroyNotify) g_free ); target->Dls_data_MESSAGE = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_MESSAGE", Dls_data_MESSAGE_create_by_array, target );
   }
 /******************************************************************************************************************************/
 /* Dls_plugins_remap_all_alias: remap les alias d'un plugin donné                                                             */
@@ -423,12 +386,81 @@
        return(NULL);
      }
 
-    Dls_plugin_init_own_data ( plugin, api_result );
+    if (plugin->Dls_data_CI) { g_slist_free_full ( plugin->Dls_data_CI, (GDestroyNotify) g_free ); plugin->Dls_data_CI = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_CI", Dls_data_CI_create_by_array, plugin );
+
+    if (plugin->Dls_data_CH) { g_slist_free_full ( plugin->Dls_data_CH, (GDestroyNotify) g_free ); plugin->Dls_data_CH = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_CH", Dls_data_CH_create_by_array, plugin );
+
+    if (plugin->Dls_data_DI) { g_slist_free_full ( plugin->Dls_data_DI, (GDestroyNotify) g_free ); plugin->Dls_data_DI = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_DI", Dls_data_DI_create_by_array, plugin );
+
+    if (plugin->Dls_data_DO) { g_slist_free_full ( plugin->Dls_data_DO, (GDestroyNotify) g_free ); plugin->Dls_data_DO = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_DO", Dls_data_DO_create_by_array, plugin );
+
+    if (plugin->Dls_data_AI) { g_slist_free_full ( plugin->Dls_data_AI, (GDestroyNotify) g_free ); plugin->Dls_data_AI = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_AI", Dls_data_DI_create_by_array, plugin );
+
+    if (plugin->Dls_data_AO) { g_slist_free_full ( plugin->Dls_data_AO, (GDestroyNotify) g_free ); plugin->Dls_data_AO = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_AO", Dls_data_AO_create_by_array, plugin );
+
+    if (plugin->Dls_data_MONO) { g_slist_free_full ( plugin->Dls_data_MONO, (GDestroyNotify) g_free ); plugin->Dls_data_MONO = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_MONO", Dls_data_MONO_create_by_array, plugin );
+
+    if (plugin->Dls_data_BI) { g_slist_free_full ( plugin->Dls_data_BI, (GDestroyNotify) g_free ); plugin->Dls_data_BI = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_BI", Dls_data_BI_create_by_array, plugin );
+
+    if (plugin->Dls_data_VISUEL) { g_slist_free_full ( plugin->Dls_data_VISUEL, (GDestroyNotify) g_free ); plugin->Dls_data_VISUEL = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_VISUEL", Dls_data_VISUEL_create_by_array, plugin );
+
+    if (plugin->Dls_data_MESSAGE) { g_slist_free_full ( plugin->Dls_data_MESSAGE, (GDestroyNotify) g_free ); plugin->Dls_data_MESSAGE = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_MESSAGE", Dls_data_MESSAGE_create_by_array, plugin );
+
+    if (plugin->Thread_tech_ids) { g_slist_free_full ( plugin->Thread_tech_ids, (GDestroyNotify) g_free ); plugin->Thread_tech_ids = NULL; }
+
+    GList *Thread_tech_ids = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "thread_tech_ids" ) );
+    GList *thread_tech_ids = Thread_tech_ids;
+    while(thread_tech_ids)
+     { JsonNode *element = thread_tech_ids->data;
+       plugin->Thread_tech_ids = g_slist_append ( plugin->Thread_tech_ids, Json_get_string ( element, "thread_tech_id" ) );
+       thread_tech_ids = g_list_next(thread_tech_ids);
+     }
+    g_list_free(Thread_tech_ids);
+    Json_node_unref(api_result);
+
+    if (!strcasecmp ( tech_id, "SYS" ) )
+     { Partage->com_dls.dls_flipflop_5hz     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
+       Partage->com_dls.dls_flipflop_2hz     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
+       Partage->com_dls.dls_flipflop_1sec    = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
+       Partage->com_dls.dls_flipflop_2sec    = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2SEC" );
+       Partage->com_dls.dls_top_5hz          = Dls_data_lookup_MONO ( "SYS", "TOP_5HZ" );
+       Partage->com_dls.dls_top_2hz          = Dls_data_lookup_MONO ( "SYS", "TOP_2HZ" );
+       Partage->com_dls.dls_top_1sec         = Dls_data_lookup_MONO ( "SYS", "TOP_1SEC" );
+       Partage->com_dls.dls_top_5sec         = Dls_data_lookup_MONO ( "SYS", "TOP_5SEC" );
+       Partage->com_dls.dls_top_10sec        = Dls_data_lookup_MONO ( "SYS", "TOP_10SEC" );
+       Partage->com_dls.dls_top_1min         = Dls_data_lookup_MONO ( "SYS", "TOP_1MIN" );
+       Partage->com_dls.dls_bit_per_sec      = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
+       Partage->com_dls.dls_tour_per_sec     = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
+       Partage->com_dls.dls_wait             = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
+       Partage->com_dls.dls_nbr_msg_queue    = Dls_data_lookup_AI   ( "SYS", "NBR_MSG_QUEUE" );
+       Partage->com_dls.dls_nbr_visuel_queue = Dls_data_lookup_AI   ( "SYS", "NBR_VISUEL_QUEUE" );
+     }
+
+    plugin->vars.dls_memsa_ok               = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_OK" );
+    plugin->vars.dls_memsa_defaut           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT" );
+    plugin->vars.dls_memsa_defaut_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT_FIXE" );
+    plugin->vars.dls_memsa_alarme           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME" );
+    plugin->vars.dls_memsa_alarme_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME_FIXE" );
+    plugin->vars.dls_memsa_alerte           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALERTE" );
+    plugin->vars.dls_memsa_alerte_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALERTE_FIXE" );
+    plugin->vars.dls_memsa_derangement      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DERANGEMENT" );
+    plugin->vars.dls_memsa_derangement_fixe = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DERANGEMENT_FIXE" );
+    plugin->vars.dls_memsa_danger           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DANGER" );
+    plugin->vars.dls_memsa_danger_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DANGER_FIXE" );
 
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: '%s' Error when dlopening", __func__, tech_id ); }
 
-    Json_node_unref(api_result);
     return(plugin);
   }
 /******************************************************************************************************************************/

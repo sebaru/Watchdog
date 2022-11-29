@@ -84,6 +84,8 @@
     GSList *Dls_data_REGISTRE;                                                                /* Liste des registres (bits R) */
     GSList *Dls_data_WATCHDOG;                                                                /* Liste des registres (bits R) */
     GSList *Dls_data_MESSAGE;                                                                /* Liste des messages (bits MSG) */
+    GSList *Dls_data_HORLOGE;                                                            /* Liste des horloges (bits HORLOGE) */
+    GSList *Thread_tech_ids;                                                             /* Liste des tech_id des dependances */
 
     time_t start_date;                                                                  /* time_t date de demarrage du plugin */
     void *handle;                                                                              /* Handle du fichier librairie */
@@ -94,11 +96,34 @@
     struct DLS_TO_PLUGIN vars;
     GSList *Arbre_Comm;                         /* Liste tech_id des dependances du module pour le calcul de sa communication */
   };
- struct DLS_MESSAGES_EVENT
-  { struct DLS_MESSAGES *msg;
+
+
+ enum
+  { MSG_ETAT,                                                        /* Definitions des types de messages */
+    MSG_ALERTE,
+    MSG_DEFAUT,
+    MSG_ALARME,
+    MSG_VEILLE,
+    MSG_ATTENTE,
+    MSG_DANGER,
+    MSG_DERANGEMENT,
+    NBR_TYPE_MSG
+  };
+
+ enum
+  { MESSAGE_SMS_NONE,
+    MESSAGE_SMS_YES,
+    MESSAGE_SMS_GSM_ONLY,
+    MESSAGE_SMS_OVH_ONLY,
+    NBR_TYPE_MESSAGE_SMS
+  };
+
+ struct DLS_MESSAGE_EVENT
+  { struct DLS_MESSAGE *msg;
     gboolean etat;
   };
 
+#warning a virer
  struct DLS_SYN
   { gint syn_id;
     gboolean bit_comm;
@@ -124,21 +149,23 @@
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
     GSList *Dls_plugins;                                                                             /* Liste d'execution DLS */
+#warning a virer
     struct DLS_SYN *Dls_syns;                                                              /* Arbre de calcule des etats */
-    GSList *Set_Dls_DI_Edge_up;                                                 /* liste des Mxxx a activer au debut tour prg */
-    GSList *Set_Dls_DI_Edge_down;                                               /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_DI_Edge_up;                                                /* liste des DIxxx a activer au debut tour prg */
+    GSList *Set_Dls_DI_Edge_down;                                              /* liste des DIxxx a activer au debut tour prg */
     GSList *Set_Dls_MONO_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
     GSList *Set_Dls_MONO_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
-    GSList *Set_Dls_BI_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
-    GSList *Set_Dls_BI_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
+    GSList *Set_Dls_BI_Edge_up;                                                 /* liste des Bxxx a activer au debut tour prg */
+    GSList *Set_Dls_BI_Edge_down;                                               /* liste des Bxxx a activer au debut tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_DI_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_DI_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_MONO_Edge_up;                                             /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_MONO_Edge_down;                                           /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_Dls_BI_Edge_up;                                             /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_Dls_BI_Edge_down;                                           /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_BI_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_BI_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
+    GSList *HORLOGE_actives;                                         /* liste des HORLOGE actives au moment du tour programme */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
@@ -146,6 +173,23 @@
     gboolean Thread_reload_with_recompil;                       /* TRUE si le thread doit rebooter en recompilant les modules */
     guint temps_sched;                                          /* Delai d'attente DLS pour assurer 100 tours max par seconde */
     gboolean Top_check_horaire;                                                    /* True le controle horaire est réalisable */
+
+    struct DLS_BI *dls_flipflop_5hz;
+    struct DLS_BI *dls_flipflop_2hz;
+    struct DLS_BI *dls_flipflop_1sec;
+    struct DLS_BI *dls_flipflop_2sec;
+    struct DLS_MONO *dls_top_5hz;
+    struct DLS_MONO *dls_top_2hz;
+    struct DLS_MONO *dls_top_1sec;
+    struct DLS_MONO *dls_top_5sec;
+    struct DLS_MONO *dls_top_10sec;
+    struct DLS_MONO *dls_top_1min;
+    struct DLS_AI *dls_bit_per_sec;
+    struct DLS_AI *dls_tour_per_sec;
+    struct DLS_AI *dls_wait;
+    struct DLS_AI *dls_nbr_msg_queue;
+    struct DLS_AI *dls_nbr_visuel_queue;
+
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
@@ -158,19 +202,11 @@
  extern void Dls_foreach_plugins ( gpointer user_data, void (*do_plugin) (gpointer user_data, struct DLS_PLUGIN *) );
  extern void Dls_acquitter_plugin ( gchar *tech_id );
  struct DLS_PLUGIN *Dls_get_plugin_by_tech_id ( gchar *tech_id );
+ extern void Dls_run_archivage ( gpointer user_data, struct DLS_PLUGIN *plugin );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
- extern void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range );
- extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit, gboolean valeur );
- extern struct DLS_BI *Dls_data_BI_lookup ( gchar *tech_id, gchar *acronyme );
- extern struct DLS_MONO *Dls_data_MONO_lookup ( gchar *tech_id, gchar *acronyme );
- extern struct DLS_MESSAGES *Dls_data_MSG_lookup ( gchar *tech_id, gchar *acronyme );
- extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p );
- extern gboolean Dls_data_get_DO ( gchar *tech_id, gchar *acronyme, gpointer *dout_p );
- extern gboolean Dls_data_get_DO_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern gboolean Dls_data_get_DO_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
+
  extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
- extern void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *tree );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
 
@@ -191,16 +227,13 @@
  extern void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
  extern JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage );
+ extern void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range );
 
                                                                                                          /* Dans The_dls_AO.c */
  extern void Dls_data_AO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit );
  extern JsonNode *Mnemo_create_thread_AO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage );
-
-                                                                                                    /* Dans The_dls_HORLOGE.c */
- extern void Dls_data_HORLOGE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
- extern void Dls_HORLOGE_to_json ( JsonNode *element, struct DLS_HORLOGE *bit );
 
                                                                                                       /* Dans The_dls_TEMPO.c */
  extern void Dls_data_TEMPO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
@@ -214,11 +247,15 @@
  extern void Dls_data_DI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
+ extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit, gboolean valeur );
 
                                                                                                          /* Dans The_dls_DO.c */
  extern void Dls_data_DO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit );
+ extern gboolean Dls_data_get_DO ( struct DLS_DO *bit );
+ extern gboolean Dls_data_get_DO_up   ( struct DLS_DO *bit );
+ extern gboolean Dls_data_get_DO_down ( struct DLS_DO *bit );
 
                                                                                                        /* Dans The_dls_MONO.c */
  extern void Dls_data_MONO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
@@ -229,6 +266,17 @@
  extern void Dls_data_BI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_BI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit );
+
+                                                                                                    /* Dans The_dls_HORLOGE.c */
+ extern void Dls_data_set_HORLOGE ( gchar *tech_id, gchar *acronyme );
+ extern void Dls_data_clear_HORLOGE ();
+
+                                                                                                     /* Dans The_dls_VISUEL.c */
+ void Dls_data_VISUEL_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
+
+                                                                                                    /* Dans The_dls_MESSAGE.c */
+ extern void Dls_data_MESSAGE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
+
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

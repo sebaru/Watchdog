@@ -51,7 +51,7 @@
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
-    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", libelle );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->valeur = Json_get_double ( element, "valeur" );
     bit->etat   = Json_get_bool   ( element, "etat" );
     if (!strcasecmp ( tech_id, "SYS" ) ) bit->archivage = 2;            /* Si CH du plugin SYS, on archive toutes les minutes */
@@ -125,27 +125,6 @@
      { cpt_h->etat = FALSE; }
   }
 /******************************************************************************************************************************/
-/* Dls_data_CH_create_by_array: Ajoute un CH dans la liste des bits internes                                                  */
-/* Entrée: les données JSON recu de la requete HTTP                                                                           */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Dls_data_CH_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data )
-  { struct DLS_PLUGIN *plugin = user_data;
-    struct DLS_CH *ch = g_try_malloc0 ( sizeof ( struct DLS_CH ) );
-    if (!ch)
-     { Info_new( Config.log, plugin->debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__,
-                 Json_get_string ( element, "tech_id" ), Json_get_string ( element, "acronyme"  ) );
-       return;
-     }
-    g_snprintf ( ch->tech_id,  sizeof( ch->tech_id  ), "%s", Json_get_string ( element, "tech_id"  ) );
-    g_snprintf ( ch->acronyme, sizeof( ch->acronyme ), "%s", Json_get_string ( element, "acronyme" ) );
-    ch->valeur = Json_get_int ( element, "valeur" );
-    ch->etat   = Json_get_bool ( element, "etat" );
-    plugin->Dls_data_CH = g_slist_append ( plugin->Dls_data_CH, ch );
-    Info_new( Config.log, plugin->debug, LOG_DEBUG, "%s: Adding CH '%s:%s'=%d (etat=%d) ", __func__,
-              ch->tech_id, ch->acronyme, ch->valeur, ch->etat );
-  }
-/******************************************************************************************************************************/
 /* Dls_CH_to_json : Formate un CH au format JSON                                                                              */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -164,16 +143,13 @@
 /******************************************************************************************************************************/
  void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
   { JsonArray *RootArray = array;
-    gint cpt = 0;
-
-    GSList *liste = plugin->Dls_data_AI;
+    GSList *liste = plugin->Dls_data_CH;
     while ( liste )
      { struct DLS_AI *bit = liste->data;
        JsonNode *element = Json_node_create();
        Dls_AI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
-       cpt++;
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

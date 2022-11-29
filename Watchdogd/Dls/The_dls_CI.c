@@ -51,7 +51,7 @@
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
-    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", libelle );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     g_snprintf( bit->unite,    sizeof(bit->unite),    "%s", Json_get_string ( element, "unite" ) );
     bit->valeur    = Json_get_int ( element, "valeur" );
     bit->multi     = Json_get_int ( element, "multi" );
@@ -63,7 +63,7 @@
 /* Dls_data_lookup_CI : Recherche un CH dans les plugins DLS                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- static struct DLS_CI *Dls_data_lookup_CI ( gchar *tech_id, gchar *acronyme )
+ struct DLS_CI *Dls_data_lookup_CI ( gchar *tech_id, gchar *acronyme )
   { GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
      { struct DLS_PLUGIN *plugin = plugins->data;
@@ -78,6 +78,44 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_CI: Positionne un compteur d'impulsion                                                                        */
+/* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *cpt_imp, gboolean etat, gint reset, gint ratio )
+  { if (!cpt_imp) return;
+    if (etat)
+     { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
+        { if (cpt_imp->valeur!=0)
+           { cpt_imp->val_en_cours1 = 0;                                           /* Valeur transitoire pour gérer les ratio */
+             cpt_imp->valeur = 0;                                                  /* Valeur transitoire pour gérer les ratio */
+           }
+        }
+       else if ( cpt_imp->etat == FALSE )                                                                 /* Passage en actif */
+        { cpt_imp->etat = TRUE;
+          Partage->audit_bit_interne_per_sec++;
+          cpt_imp->val_en_cours1++;
+          if (cpt_imp->val_en_cours1>=ratio)
+           { cpt_imp->valeur++;
+             cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
+             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                       "%s: ligne %04d: Changing DLS_CI '%s:%s'=%d", __func__,
+                       (vars ? vars->num_ligne : -1), cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
+           }
+        }
+     }
+    else
+     { if (reset==0) cpt_imp->etat = FALSE; }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_CI : Recupere la valeur du compteur en parametre                                                              */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gint Dls_data_get_CI ( struct DLS_CI *cpt_imp )
+  { if (!cpt_imp) return(0);
+    return( cpt_imp->valeur );
+  }
+/******************************************************************************************************************************/
 /* Dls_CI_to_json : Formate un CI au format JSON                                                                              */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -86,7 +124,6 @@
   { Json_node_add_string ( element, "tech_id",   bit->tech_id );
     Json_node_add_string ( element, "acronyme",  bit->acronyme );
     Json_node_add_int    ( element, "valeur",    bit->valeur );
-    Json_node_add_int    ( element, "imp_par_minute", bit->imp_par_minute );
     Json_node_add_double ( element, "multi",     bit->multi );
     Json_node_add_string ( element, "unite",     bit->unite );
     Json_node_add_bool   ( element, "etat",      bit->etat );
@@ -100,8 +137,6 @@
 /******************************************************************************************************************************/
  void Dls_all_CI_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
   { JsonArray *RootArray = array;
-    gint cpt = 0;
-
     GSList *liste = plugin->Dls_data_CI;
     while ( liste )
      { struct DLS_CI *bit = liste->data;
@@ -109,7 +144,7 @@
        Dls_CI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
-       cpt++;
+
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

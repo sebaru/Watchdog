@@ -42,7 +42,7 @@
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
-    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", libelle );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_DI = g_slist_prepend ( plugin->Dls_data_DI, bit );
   }
@@ -122,8 +122,6 @@
 /******************************************************************************************************************************/
  void Dls_all_DI_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
   { JsonArray *RootArray = array;
-    gint cpt = 0;
-
     GSList *liste = plugin->Dls_data_DI;
     while ( liste )
      { struct DLS_DI *bit = liste->data;
@@ -131,7 +129,6 @@
        Dls_DI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
-       cpt++;
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

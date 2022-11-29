@@ -57,7 +57,7 @@
                            );
     g_free(libelle);
 
-    struct DLS_MESSAGES *msg = Dls_data_MSG_lookup ( tech_id, acronyme );          /* Recherche ou Création du message en RAM */
+    struct DLS_MESSAGE *msg = Dls_data_MSG_lookup ( tech_id, acronyme );          /* Recherche ou Création du message en RAM */
     if (msg) { msg->groupe = groupe; }                           /* Pas de modification de l'etat, on vient de la compilation */
 
     return(retour);
@@ -74,7 +74,7 @@
     gint   groupe   = Json_get_int    ( element, "groupe" );
     gboolean etat   = Json_get_int    ( element, "etat" );
     (*cpt_p)++;
-    struct DLS_MESSAGES *msg = Dls_data_MSG_lookup ( tech_id, acronyme );          /* Recherche ou Création du message en RAM */
+    struct DLS_MESSAGE *msg = Dls_data_MSG_lookup ( tech_id, acronyme );          /* Recherche ou Création du message en RAM */
     if (msg) /* A l'init, on recopie tous les champs */
      { msg->groupe = groupe;
        msg->etat   = etat;
@@ -98,15 +98,5 @@
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: %d MSG loaded", __func__, cpt );
   }
-/******************************************************************************************************************************/
-/* Dls_MESSAGE_to_json : Formate un bit au format JSON                                                                        */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_MESSAGE_to_json ( JsonNode *element, struct DLS_MESSAGES *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat",     bit->etat );
-    Json_node_add_int    ( element, "groupe",   bit->groupe );
-  }
+
 /*----------------------------------------------------------------------------------------------------------------------------*/

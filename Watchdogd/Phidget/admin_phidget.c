@@ -208,7 +208,6 @@
      }
     else
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
-    Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */
 end:
     g_free(thread_tech_id);
     g_free(acronyme);

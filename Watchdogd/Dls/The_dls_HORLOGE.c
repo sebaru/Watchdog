@@ -50,7 +50,7 @@
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
-    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", libelle );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_HORLOGE = g_slist_prepend ( plugin->Dls_data_HORLOGE, bit );
   }
 /******************************************************************************************************************************/
@@ -58,19 +58,55 @@
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_DI *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme )
+ struct DLS_HORLOGE *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme )
   { GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
      { struct DLS_PLUGIN *plugin = plugins->data;
        GSList *liste = plugin->Dls_data_HORLOGE;
        while (liste)
-        { struct DLS_DI *bit = liste->data;
+        { struct DLS_HORLOGE *bit = liste->data;
           if ( !strcasecmp ( bit->acronyme, acronyme ) && !strcasecmp( bit->tech_id, tech_id ) ) return(bit);
           liste = g_slist_next(liste);
         }
        plugins = g_slist_next(plugins);
      }
     return(NULL);
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_HORLOGE : Recupere la valeur de l'horloge en parametre                                                        */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit )
+  { if (!bit) return(FALSE);
+    gboolean found = FALSE;
+    GSList *Horloges = Partage->com_dls.HORLOGE_actives;
+    while (Horloges)
+     { struct DLS_HORLOGE *horloge = Horloges->data;
+       if ( !strcasecmp ( horloge->acronyme, bit->acronyme ) && !strcasecmp( horloge->tech_id, bit->tech_id ) ) found = TRUE;
+       Horloges = g_slist_next(Horloges);
+     }
+    return(found);
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_HORLOGE : Active une horloge                                                                                  */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_HORLOGE ( gchar *tech_id, gchar *acronyme )
+  { struct DLS_HORLOGE *horloge = g_try_malloc0 ( sizeof( struct DLS_HORLOGE ) );
+    if (!horloge) return;
+    g_snprintf ( horloge->tech_id, sizeof(horloge->tech_id), "%s", tech_id );
+    g_snprintf ( horloge->acronyme, sizeof(horloge->acronyme), "%s", acronyme );
+    Partage->com_dls.HORLOGE_actives = g_slist_append ( Partage->com_dls.HORLOGE_actives, horloge );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_HORLOGE : Active une horloge                                                                                  */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_clear_HORLOGE ()
+  { if (Partage->com_dls.HORLOGE_actives)
+     { g_slist_free_full ( Partage->com_dls.HORLOGE_actives, (GDestroyNotify) g_free );
+       Partage->com_dls.HORLOGE_actives = NULL;
+     }
   }
 /******************************************************************************************************************************/
 /* Activer_holorgeDB: Recherche toutes les actives à date et les positionne dans la mémoire partagée                          */

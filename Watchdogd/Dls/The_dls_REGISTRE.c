@@ -51,9 +51,9 @@
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
-    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", libelle );
-    bit->valeur    = Json_get_double  ( element, "valeur" );
-    bit->archivage = Json_get_integer ( element, "archivage" );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
+    bit->valeur    = Json_get_double ( element, "valeur" );
+    bit->archivage = Json_get_int    ( element, "archivage" );
     plugin->Dls_data_REGISTRE = g_slist_prepend ( plugin->Dls_data_REGISTRE, bit );
   }
 /******************************************************************************************************************************/
@@ -103,7 +103,7 @@
 /* Sortie : la valeur double du registre                                                                                      */
 /******************************************************************************************************************************/
  gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg )
-  { if (!reg) return;
+  { if (!reg) return(0.0);
     return( reg->valeur );
   }
 /******************************************************************************************************************************/
@@ -124,19 +124,15 @@
 /* Entrée: target                                                                                                             */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Dls_all_REGISTRE_to_json ( JsonNode *target )
-  { gint cpt = 0;
-
-    JsonArray *RootArray = Json_node_add_array ( target, "mnemos_REGISTRE" );
-    GSList *liste = Partage->Dls_data_REGISTRE;
+ void Dls_all_REGISTRE_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
+  { JsonArray *RootArray = array;
+    GSList *liste = plugin->Dls_data_REGISTRE;
     while ( liste )
-     { struct DLS_REGISTRE *bit = (struct DLS_REGISTRE *)liste->data;
+     { struct DLS_MONO *bit = liste->data;
        JsonNode *element = Json_node_create();
-       Dls_REGISTRE_to_json ( element, bit );
+       Dls_MONO_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
-       cpt++;
      }
-    Json_node_add_int ( target, "nbr_mnemos_REGISTRE", cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

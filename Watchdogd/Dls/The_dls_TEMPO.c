@@ -50,7 +50,7 @@
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
-    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", libelle );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_TEMPO = g_slist_prepend ( plugin->Dls_data_TEMPO, bit );
   }
 /******************************************************************************************************************************/
@@ -71,6 +71,138 @@
        plugins = g_slist_next(plugins);
      }
     return(NULL);
+  }
+/******************************************************************************************************************************/
+/* STR_local: Positionnement d'une Tempo retard DLS                                                                           */
+/* Entrée: la structure tempo et son etat                                                                                     */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
+ static void ST_local( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *tempo, int etat )
+  { static guint seed;
+    if (tempo->status == DLS_TEMPO_NOT_COUNTING && etat == 1)
+     { tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_ON;
+       if (tempo->random)
+        { gfloat ratio;
+          ratio = (gfloat)rand_r(&seed)/RAND_MAX;
+          tempo->delai_on  = (gint)(tempo->random * ratio);
+          if (tempo->delai_on<10) tempo->delai_on = 10;
+          tempo->min_on    = 0;
+          tempo->max_on    = 0;
+          tempo->delai_off = 0;
+        }
+       tempo->date_on = Partage->top + tempo->delai_on;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d, WAIT_FOR_DELAI_ON", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
+     { tempo->status = DLS_TEMPO_NOT_COUNTING;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d, NOT_COUNTING", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON && tempo->date_on <= Partage->top)
+     { tempo->status = DLS_TEMPO_WAIT_FOR_MIN_ON;
+       tempo->state = TRUE;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_MIN_ON", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
+        Partage->top < tempo->date_on + tempo->min_on )
+     { if (Partage->top+tempo->delai_off <= tempo->date_on + tempo->min_on)
+            { tempo->date_off = tempo->date_on+tempo->min_on; }
+       else { tempo->date_off = Partage->top+tempo->delai_off; }
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_OFF", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
+        tempo->date_on + tempo->min_on <= Partage->top )
+     { tempo->date_off = Partage->top+tempo->delai_off;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_OFF", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
+        tempo->date_on + tempo->min_on <= Partage->top )
+     { tempo->status = DLS_TEMPO_WAIT_FOR_MAX_ON;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_MAX_ON", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MAX_ON && etat == 0 )
+     { if (tempo->max_on)
+            { if (Partage->top+tempo->delai_off < tempo->date_on+tempo->max_on)
+                   { tempo->date_off = Partage->top + tempo->delai_off; }
+              else { tempo->date_off = tempo->date_on+tempo->max_on; }
+            }
+       else { tempo->date_off = Partage->top+tempo->delai_off; }
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_OFF", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->max_on &&
+        tempo->date_on + tempo->max_on <= Partage->top )
+     { tempo->date_off = tempo->date_on+tempo->max_on;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_OFF", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_OFF && tempo->date_off <= Partage->top )
+     { tempo->date_on = tempo->date_off = 0;
+       tempo->status = DLS_TEMPO_WAIT_FOR_COND_OFF;
+       tempo->state = FALSE;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_COND_OFF", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
+     { tempo->status = DLS_TEMPO_NOT_COUNTING;
+       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "%s: ligne %04d: Changing DLS_TEMPO '%s:%s'=%d NOT_COUNTING", __func__,
+                 (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
+/******************************************************************************************************************************/
+ void Dls_data_set_tempo ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *tempo, gboolean etat,
+                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
+  { if (!tempo) return;
+    if (tempo->init == FALSE)
+     { tempo->delai_on  = delai_on;
+       tempo->min_on    = min_on;
+       tempo->max_on    = max_on;
+       tempo->delai_off = delai_off;
+       tempo->random    = random;
+       tempo->init      = TRUE;
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Initializing TEMPO '%s:%s'",
+                 __func__, tempo->tech_id, tempo->acronyme );
+     }
+    ST_local ( vars, tempo, etat );                                                               /* Recopie dans la variable */
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_tempo ( struct DLS_TEMPO *tempo )
+  { if (!tempo) return(FALSE);
+    return( tempo->state );
   }
 /******************************************************************************************************************************/
 /* Dls_TEMPO_to_json : Formate un bit au format JSON                                                                          */
