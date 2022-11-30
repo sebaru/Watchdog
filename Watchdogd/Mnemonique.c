@@ -149,4 +149,26 @@
     Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
     return(node);
   }
+/******************************************************************************************************************************/
+/* Mnemo_create_thread_WATCHDOG: Créer un JSON pour un WATCHDOG                                                               */
+/* Entrée: la structure THREAD, les parametres du WATCHDOG                                                                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ JsonNode *Mnemo_create_thread_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
+  { JsonNode *node = Json_node_create();
+    if (!node) return(NULL);
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( node, "classe", "WATCHDOG" );
+    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "libelle", libelle );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/watchdog", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add WATCHDOG %s to API", __func__, thread_tech_id, thread_acronyme );
+     }
+    Json_node_unref ( api_result );
+    Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
+    return(node);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

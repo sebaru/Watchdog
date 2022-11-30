@@ -470,11 +470,7 @@
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_10min>=6000)                                                        /* Toutes les 10 minutes */
-        { pthread_t TID;
-          pthread_create ( &TID, NULL, (void *)Dls_Export_Data_to_API, NULL );
-          pthread_detach ( TID );
-
-          last_top_10min = Partage->top;
+        { last_top_10min = Partage->top;
         }
 
        Set_edge();                                                                     /* Mise à zero des bit de egde up/down */

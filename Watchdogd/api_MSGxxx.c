@@ -41,21 +41,16 @@
     memset ( suffixe, 0, sizeof(suffixe) );
     while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe ) == 4 )
      { gchar result[128];
-       gpointer dls_data_p = NULL;
        g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
-       gint type = Rechercher_DICO_type ( tech_id, acronyme );
-       if (type == MNEMO_ENTREE_ANA)
-        { Dls_data_get_AI ( tech_id, acronyme, &dls_data_p );
-          struct DLS_AI *ai = dls_data_p;
-          if (ai)
-           { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
-              { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
-             else*/
-              { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->valeur, ai->unite ); }
-           }
-          else g_snprintf( chaine, sizeof(chaine), "erreur" );
-          g_strlcat ( result, chaine, sizeof(result) );
+       struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
+       if (ai)
+        { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
+           { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
+          else*/
+           { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->valeur, ai->unite ); }
         }
+       else g_snprintf( chaine, sizeof(chaine), "erreur" );
+       g_strlcat ( result, chaine, sizeof(result) );
        g_strlcat ( result, suffixe, sizeof(result) );
        g_snprintf( libelle, taille_max, "%s", result );
        memset ( suffixe, 0, sizeof(suffixe) );

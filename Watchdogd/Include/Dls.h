@@ -226,14 +226,12 @@
  extern void Dls_data_AI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
- extern JsonNode *Mnemo_create_thread_AI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage );
  extern void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range );
 
                                                                                                          /* Dans The_dls_AO.c */
  extern void Dls_data_AO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit );
- extern JsonNode *Mnemo_create_thread_AO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage );
 
                                                                                                       /* Dans The_dls_TEMPO.c */
  extern void Dls_data_TEMPO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
@@ -241,6 +239,7 @@
 
                                                                                                    /* Dans The_dls_REGISTRE.c */
  extern void Dls_data_REGISTRE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
+ extern void Dls_all_REGISTRE_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_REGISTRE_to_json ( JsonNode *element, struct DLS_REGISTRE *bit );
 
                                                                                                          /* Dans The_dls_DI.c */
@@ -256,6 +255,7 @@
  extern gboolean Dls_data_get_DO ( struct DLS_DO *bit );
  extern gboolean Dls_data_get_DO_up   ( struct DLS_DO *bit );
  extern gboolean Dls_data_get_DO_down ( struct DLS_DO *bit );
+
 
                                                                                                        /* Dans The_dls_MONO.c */
  extern void Dls_data_MONO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
@@ -276,7 +276,10 @@
 
                                                                                                     /* Dans The_dls_MESSAGE.c */
  extern void Dls_data_MESSAGE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
+ extern void Dls_MESSAGE_to_json ( JsonNode *element, struct DLS_MESSAGE *bit );
 
+                                                                                                   /* Dans The_dls_WATCHDOG.c */
+ extern void Dls_WATCHDOG_to_json ( JsonNode *element, struct DLS_WATCHDOG *bit );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

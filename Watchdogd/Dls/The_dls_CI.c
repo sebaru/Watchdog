@@ -144,7 +144,6 @@
        Dls_CI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
-
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

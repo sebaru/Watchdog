@@ -54,7 +54,7 @@
     plugin->Dls_data_TEMPO = g_slist_prepend ( plugin->Dls_data_TEMPO, bit );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_TEMPO: Recherche un TEMPO dans les plugins DLS                                                                   */
+/* Dls_data_lookup_TEMPO: Recherche un TEMPO dans les plugins DLS                                                             */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/

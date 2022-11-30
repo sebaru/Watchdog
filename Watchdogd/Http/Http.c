@@ -779,13 +779,8 @@
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
 
     soup_server_add_handler ( socket, "/api/dls/acquitter",  Http_traiter_dls_acquitter, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/validate",Http_traiter_mnemos_validate, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/tech_id", Http_traiter_mnemos_tech_id, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
 
     soup_server_add_handler ( socket, "/api/syn/save",       Http_traiter_syn_save, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/ack",        Http_traiter_syn_ack, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
 
@@ -806,7 +801,6 @@
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
     soup_server_add_handler ( socket, "/api/search",         Http_traiter_search, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/histo/ack",      Http_traiter_histo_ack, NULL, NULL );
     soup_server_add_handler ( socket, "/api/upload",         Http_traiter_upload, NULL, NULL );
     soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
     if (Config.instance_is_master==TRUE)

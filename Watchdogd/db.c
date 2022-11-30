@@ -309,7 +309,7 @@
 /* Entrée: La DB                                                                                                              */
 /******************************************************************************************************************************/
  void Libere_DB_SQL( struct DB **adr_db )
-  { static struct DLS_AI *ai_nbr_dbrequest = NULL;
+  { /*static struct DLS_AI *ai_nbr_dbrequest = NULL;*/
     struct DB *db, *db_en_cours;
     gboolean found;
     GSList *liste;
@@ -345,7 +345,7 @@
              "Libere_DB_SQL: Deconnexion effective (DB%07d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
-    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, (gdouble)taille, TRUE );
+/*    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, (gdouble)taille, TRUE );*/
   }
 /******************************************************************************************************************************/
 /* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */

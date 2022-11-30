@@ -130,7 +130,7 @@
     while ( liste )
      { struct DLS_MONO *bit = liste->data;
        JsonNode *element = Json_node_create();
-       Dls_MONO_to_json ( element, bit );
+       Dls_REGISTRE_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
      }

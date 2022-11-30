@@ -219,7 +219,7 @@
     Json_node_add_array ( module->IOs, "IOs" );
 
     module->ai_nbr_tour_par_sec = Mnemo_create_thread_AI ( module, "THREAD_TOUR_PAR_SEC", "Nombre de tour par seconde", "t/s", ARCHIVE_1_MIN );
-    Mnemo_auto_create_WATCHDOG ( FALSE, thread_tech_id, "IO_COMM", "Statut de la communication" );
+    Mnemo_create_thread_WATCHDOG ( module, "IO_COMM", "Statut de la communication" );
     Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Thread '%s' is UP", __func__, thread_tech_id );
   }
 /******************************************************************************************************************************/

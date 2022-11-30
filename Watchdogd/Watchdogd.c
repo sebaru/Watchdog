@@ -204,20 +204,6 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données                                   */
-/* Entrée: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Charger_config_bit_interne( void )
-  { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
-    Charger_confDB_Registre(NULL);
-    /*Charger_confDB_AO(NULL, NULL);*/
-    Charger_confDB_AI(NULL, NULL);
-    Charger_confDB_MSG();
-    Charger_confDB_MONO();
-    Charger_confDB_BI();
-  }
-
-/******************************************************************************************************************************/
 /* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
 /* Entrée: argc, argv                                                                                                         */
 /* Sortie: -1 si erreur, 0 si ok                                                                                              */
@@ -500,31 +486,14 @@
     pthread_mutex_init( &Partage->archive_liste_sync, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
 
-/************************************* Création des zones de bits internes dynamiques *****************************************/
-    Partage->Dls_data_DI       = NULL;
-    Partage->Dls_data_DO       = NULL;
-    Partage->Dls_data_AI       = NULL;
-    Partage->Dls_data_AO       = NULL;
-    Partage->Dls_data_MONO     = NULL;
-    Partage->Dls_data_BI       = NULL;
-    Partage->Dls_data_REGISTRE = NULL;
-    Partage->Dls_data_MSG      = NULL;
-    Partage->Dls_data_CH       = NULL;
-    Partage->Dls_data_CI       = NULL;
-    Partage->Dls_data_TEMPO    = NULL;
-    Partage->Dls_data_VISUEL   = NULL;
-    Partage->Dls_data_WATCHDOG = NULL;
-
+/************************************************* Gestion des signaux ********************************************************/
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
-    Update_database_schema();                                                       /* Update du schéma de Database si besoin */
-    Charger_config_bit_interne ();                            /* Chargement des configurations des bits internes depuis la DB */
-
+/********************************************* Active les threads principaux **************************************************/
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
 
-/***************************************** Active le thread HTTP **************************************************************/
     if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
     if (!Demarrer_api_sync())                                                                           /* Démarrage API_SYNC */
@@ -588,9 +557,7 @@
            }
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
-           { static gpointer bit_io_comm = NULL;
-             Http_Send_ping_to_slaves();
-             Dls_data_set_WATCHDOG ( NULL, g_get_host_name(), "IO_COMM", &bit_io_comm, 900 );
+           { Http_Send_ping_to_slaves();
              Print_SQL_status();                                                          /* Print SQL status for debugging ! */
              Activer_horlogeDB();
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
@@ -617,47 +584,7 @@
     if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
     if (Partage->Maps_root) Json_node_unref ( Partage->Maps_root );
 
-/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MONO", __func__ );
-    g_slist_foreach (Partage->Dls_data_MONO, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_MONO);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique BI", __func__ );
-    g_slist_foreach (Partage->Dls_data_BI, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_BI);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DI", __func__ );
-    g_slist_foreach (Partage->Dls_data_DI, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_DI);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique DO", __func__ );
-    g_slist_foreach (Partage->Dls_data_DO, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_DO);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AI", __func__ );
-    g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_AI);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique R", __func__ );
-    g_slist_foreach (Partage->Dls_data_REGISTRE, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_REGISTRE);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique AO", __func__ );
-    g_slist_foreach (Partage->Dls_data_AO, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_AO);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique MSG", __func__ );
-    g_slist_foreach (Partage->Dls_data_MSG, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_MSG);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique TEMPO", __func__ );
-    g_slist_foreach (Partage->Dls_data_TEMPO, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_TEMPO);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CH", __func__ );
-    g_slist_foreach (Partage->Dls_data_CH, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_CH);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique CI", __func__ );
-    g_slist_foreach (Partage->Dls_data_CI, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_CI);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique VISUEL", __func__ );
-    g_slist_foreach (Partage->Dls_data_VISUEL, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_VISUEL);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique WATCHDOG", __func__ );
-    g_slist_foreach (Partage->Dls_data_WATCHDOG, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_WATCHDOG);
+/************************************************* Dechargement des mutex *****************************************************/
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );

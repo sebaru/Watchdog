@@ -289,7 +289,7 @@
     liste_bit = plugin->Dls_data_MESSAGE;                                             /* Decharge tous les messages du module */
     while(liste_bit)
      { struct DLS_MESSAGE *msg = liste_bit->data;
-       Dls_data_set_MSG ( &plugin->vars, msg, FALSE, FALSE );
+       Dls_data_set_MESSAGE ( &plugin->vars, msg, FALSE, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
 
@@ -606,8 +606,11 @@
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
+#warning a migrer depuis l'API
+#ifdef bouh
  static void Dls_acquitter_synoptique_reel ( gpointer user_data, struct DLS_SYN *syn )
-  { GSList *plugins = syn->Dls_plugins;
+  {
+GSList *plugins = syn->Dls_plugins;
     gint syn_id = GPOINTER_TO_INT(user_data);
     if (syn_id != syn->syn_id) return;
     while (plugins)
@@ -625,4 +628,5 @@
 /******************************************************************************************************************************/
  void Dls_acquitter_synoptique ( gint syn_id )
   { Dls_foreach_syns ( GINT_TO_POINTER(syn_id), Dls_acquitter_synoptique_reel ); }
+#endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

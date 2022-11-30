@@ -250,12 +250,6 @@
  extern struct DLS_DO *Dls_data_lookup_DO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *bit, gboolean valeur );
 
- extern void     Dls_data_set_MSG       ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *bit, gboolean update, gboolean etat );
-
- extern void     Dls_data_set_tempo     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,
-                                          gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
- extern gboolean Dls_data_get_tempo     ( struct DLS_TEMPO *bit );
-
  extern struct DLS_AO *Dls_data_lookup_AO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_AO        ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *bi, gdouble valeur );
  extern gdouble  Dls_data_get_AO        ( struct DLS_AO *bit );
@@ -292,6 +286,12 @@
 
  extern struct DLS_MESSAGE *Dls_data_lookup_MESSAGE ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gboolean update, gboolean etat );
+
+ extern struct DLS_TEMPO *Dls_data_lookup_TEMPO ( gchar *tech_id, gchar *acronyme );
+ extern void     Dls_data_set_tempo     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,
+                                          gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
+ extern gboolean Dls_data_get_tempo     ( struct DLS_TEMPO *bit );
+
 
  extern void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input );
  extern gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,

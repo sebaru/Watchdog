@@ -141,13 +141,13 @@
 /* Entrée: target                                                                                                             */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
+ void Dls_all_CH_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
   { JsonArray *RootArray = array;
     GSList *liste = plugin->Dls_data_CH;
     while ( liste )
-     { struct DLS_AI *bit = liste->data;
+     { struct DLS_CH *bit = liste->data;
        JsonNode *element = Json_node_create();
-       Dls_AI_to_json ( element, bit );
+       Dls_CH_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
      }
