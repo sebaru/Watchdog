@@ -46,14 +46,14 @@
 /* Sortie: TRUE ou FALSe                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Dls_get_top_alerte ( void )
-  { return( Partage->com_dls.Dls_syns->bit_alerte ); }
+  { return( Partage->com_dls.bit_alerte ); }
 /******************************************************************************************************************************/
 /* Dls_get_top_alerte_fugitive: Remonte la valeur du plus haut bit d'alerte fugitive dans l'arbre DLS                         */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: TRUE ou FALSe                                                                                                      */
 /******************************************************************************************************************************/
  gboolean Dls_get_top_alerte_fugitive ( void )
-  { return( Partage->com_dls.Dls_syns->bit_alerte_fugitive ); }
+  { return( Partage->com_dls.bit_alerte_fugitive ); }
 /******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
@@ -310,25 +310,33 @@
 /* Entrées: le buuilder Json et la connexion Websocket                                                                        */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_syn_vars_to_json ( gpointer user_data, struct DLS_SYN *dls_syn )
-  { JsonArray *array = user_data;
-    JsonNode *element = Json_node_create ();
-    Json_node_add_int  ( element, "syn_id", dls_syn->syn_id );
-    Json_node_add_bool ( element, "bit_comm", dls_syn->bit_comm );
-    Json_node_add_bool ( element, "bit_defaut", dls_syn->bit_defaut );
-    Json_node_add_bool ( element, "bit_defaut_fixe", dls_syn->bit_defaut_fixe );
-    Json_node_add_bool ( element, "bit_alarme", dls_syn->bit_alarme );
-    Json_node_add_bool ( element, "bit_alarme_fixe", dls_syn->bit_alarme_fixe );
-    Json_node_add_bool ( element, "bit_veille_partielle", dls_syn->bit_veille_partielle );
-    Json_node_add_bool ( element, "bit_veille_totale", dls_syn->bit_veille_totale );
-    Json_node_add_bool ( element, "bit_alerte", dls_syn->bit_alerte );
-    Json_node_add_bool ( element, "bit_alerte_fixe", dls_syn->bit_alerte_fixe );
-    Json_node_add_bool ( element, "bit_alerte_fugitive", dls_syn->bit_alerte_fugitive );
-    Json_node_add_bool ( element, "bit_derangement", dls_syn->bit_derangement );
-    Json_node_add_bool ( element, "bit_derangement_fixe", dls_syn->bit_derangement_fixe );
-    Json_node_add_bool ( element, "bit_danger", dls_syn->bit_danger );
-    Json_node_add_bool ( element, "bit_danger_fixe", dls_syn->bit_danger_fixe );
-    Json_array_add_element ( array, element );
+ void Dls_plugin_vars_to_json ( gpointer user_data, struct DLS_PLUGIN *plugin )
+  { JsonArray *RootArray = user_data;
+    GSList *liste = plugin->Dls_data_MONO;
+    while ( liste )
+     { struct DLS_MONO *bit = liste->data;
+       JsonNode *element = Json_node_create();
+       if ( !strcasecmp ( Json_get_string ( element, "acronyme" ), "COMM" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_OK" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_DEFAUT" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_DEFAUT_FIXE" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_ALARME" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_ALARME_FIXE" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSB_VEILLE" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSB_ALERTE" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSB_ALERTE_FIXE" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSB_ALERTE_FUGITIVE" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_OK" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_DERANGEMENT_FIXE" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_DERANGEMENT" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_DANGER" ) ||
+            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_DANGER_FIXE" )
+          )
+        { Dls_MONO_to_json ( element, bit );
+          Json_array_add_element ( RootArray, element );
+        }
+       liste = g_slist_next(liste);
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
@@ -339,18 +347,17 @@
   { struct timeval tv_avant, tv_apres;
     gboolean bit_comm_module = TRUE;
 
-#ifdef bouh
+    Partage->com_dls.next_bit_alerte          |= Dls_data_get_MONO( plugin->vars.dls_memssb_alerte );
+    Partage->com_dls.next_bit_alerte_fixe     |= Dls_data_get_MONO( plugin->vars.dls_memssb_alerte_fixe );
+    Partage->com_dls.next_bit_alerte_fugitive |= Dls_data_get_MONO( plugin->vars.dls_memssb_alerte_fugitive );
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
-    if (!plugin->is_thread)
-     { GSList *liste = plugin->Arbre_Comm;
-       while ( liste )
-        { gpointer comm = liste->data;
-          bit_comm_module &= Dls_data_get_MONO( NULL, NULL, &comm );
-          liste = g_slist_next ( liste );
-        }
+    GSList *liste = plugin->Arbre_Comm;
+    while ( liste )
+     { struct DLS_WATCHDOG *bit = liste->data;
+       bit_comm_module &= Dls_data_get_WATCHDOG( bit );
+       liste = g_slist_next ( liste );
      }
-    else bit_comm_module = Dls_data_get_WATCHDOG ( plugin->tech_id, "IO_COMM", &plugin->vars.bit_io_comm );
-    Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "COMM", &plugin->vars.bit_comm, bit_comm_module );
+    Dls_data_set_MONO ( &plugin->vars, plugin->vars.bit_comm, bit_comm_module );
 
     Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok,
                         bit_comm_module &&
@@ -362,18 +369,18 @@
 
                       );
 
-    Dls_data_set_MONO ( &plugin->vars, plugin->tech_id, "MEMSSP_OK", &plugin->vars.bit_secupers_ok,
-                        !( Dls_data_get_MONO( plugin->tech_id, "MEMSSP_DERANGEMENT", &plugin->vars.bit_derangement ) ||
-                           Dls_data_get_MONO( plugin->tech_id, "MEMSSP_DERANGEMENT_FIXE", &plugin->vars.bit_derangement_fixe ) ||
-                           Dls_data_get_MONO( plugin->tech_id, "MEMSSP_DANGER", &plugin->vars.bit_danger ) ||
-                           Dls_data_get_MONO( plugin->tech_id, "MEMSSP_DANGER_FIXE", &plugin->vars.bit_danger_fixe )
+    Dls_data_set_MONO ( &plugin->vars, plugin->vars.bit_secupers_ok,
+                        !( Dls_data_get_MONO( plugin->vars.bit_derangement ) ||
+                           Dls_data_get_MONO( plugin->vars.bit_derangement_fixe ) ||
+                           Dls_data_get_MONO( plugin->vars.bit_danger ) ||
+                           Dls_data_get_MONO( plugin->vars.bit_danger_fixe )
                          )
                       );
 
 /*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
     Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
     Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
-#endif
+
     if (!(plugin->enable && plugin->go)) return;                      /* si plugin a l'arret, on considère que la comm est OK */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
     gettimeofday( &tv_avant, NULL );
@@ -465,7 +472,7 @@
           Dls_data_set_AI ( NULL, Partage->com_dls.dls_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
           Dls_data_set_AI ( NULL, Partage->com_dls.dls_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
-#warning add check horloge
+          Activer_horloge();
           last_top_1min = Partage->top;
         }
 /******************************************************************************************************************************/
@@ -477,6 +484,9 @@
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
        Partage->top_cdg_plugin_dls = 0;                                                         /* On reset le cdg plugin DLS */
+       Partage->com_dls.next_bit_alerte = 0;
+       Partage->com_dls.next_bit_alerte_fixe = 0;
+       Partage->com_dls.next_bit_alerte_fugitive = 0;
        Dls_foreach_plugins ( NULL, Dls_run_plugin );
        Dls_foreach_plugins ( NULL, Dls_run_archivage );
 
@@ -484,9 +494,13 @@
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
        Dls_foreach_plugins ( NULL, Dls_set_all_bool );/* Positionne les booleans (mono/bi) selon la valeur calculé par les modules */
+       Partage->com_dls.bit_alerte          = Partage->com_dls.next_bit_alerte;
+       Partage->com_dls.bit_alerte_fixe     = Partage->com_dls.next_bit_alerte_fixe;
+       Partage->com_dls.bit_alerte_fugitive = Partage->com_dls.next_bit_alerte_fugitive;
        Dls_data_clear_HORLOGE();
-       Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */
+
 /******************************************** Gestion des 1000 tours DLS par seconde ******************************************/
+       Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */
        usleep(Partage->com_dls.temps_sched);
        sched_yield();
      }

@@ -548,10 +548,10 @@
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
-       while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
-        { Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
+       while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
+        { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
 
-          if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
+          if (cpt_5_minutes < Partage->top)                                                 /* Update DB toutes les 5 minutes */
            {
              cpt_5_minutes += 3000;                                                        /* Sauvegarde toutes les 5 minutes */
            }
@@ -559,7 +559,6 @@
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
            { Http_Send_ping_to_slaves();
              Print_SQL_status();                                                          /* Print SQL status for debugging ! */
-             Activer_horlogeDB();
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 

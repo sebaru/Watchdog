@@ -446,17 +446,20 @@
        Partage->com_dls.dls_nbr_visuel_queue = Dls_data_lookup_AI   ( "SYS", "NBR_VISUEL_QUEUE" );
      }
 
-    plugin->vars.dls_memsa_ok               = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_OK" );
-    plugin->vars.dls_memsa_defaut           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT" );
-    plugin->vars.dls_memsa_defaut_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT_FIXE" );
-    plugin->vars.dls_memsa_alarme           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME" );
-    plugin->vars.dls_memsa_alarme_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME_FIXE" );
-    plugin->vars.dls_memsa_alerte           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALERTE" );
-    plugin->vars.dls_memsa_alerte_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALERTE_FIXE" );
-    plugin->vars.dls_memsa_derangement      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DERANGEMENT" );
-    plugin->vars.dls_memsa_derangement_fixe = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DERANGEMENT_FIXE" );
-    plugin->vars.dls_memsa_danger           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DANGER" );
-    plugin->vars.dls_memsa_danger_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DANGER_FIXE" );
+    plugin->vars.dls_memsa_ok                = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_OK" );
+    plugin->vars.dls_memsa_defaut            = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT" );
+    plugin->vars.dls_memsa_defaut_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT_FIXE" );
+    plugin->vars.dls_memsa_alarme            = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME" );
+    plugin->vars.dls_memsa_alarme_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME_FIXE" );
+    plugin->vars.dls_memssb_veille           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_VEILLE" );
+    plugin->vars.dls_memssb_alerte           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE" );
+    plugin->vars.dls_memssb_alerte_fugitive  = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FUGITIVE" );
+    plugin->vars.dls_memssb_alerte_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FIXE" );
+    plugin->vars.dls_memssp_ok               = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_OK" );
+    plugin->vars.dls_memssp_derangement      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT" );
+    plugin->vars.dls_memssp_derangement_fixe = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT_FIXE" );
+    plugin->vars.dls_memssp_danger           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER" );
+    plugin->vars.dls_memssp_danger_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER_FIXE" );
 
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: '%s' Error when dlopening", __func__, tech_id ); }

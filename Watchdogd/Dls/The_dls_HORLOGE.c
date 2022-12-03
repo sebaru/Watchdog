@@ -109,19 +109,14 @@
      }
   }
 /******************************************************************************************************************************/
-/* Activer_holorgeDB: Recherche toutes les actives à date et les positionne dans la mémoire partagée                          */
+/* Activer_horloge: Recherche toutes les horloges actives à date et les positionne dans la mémoire partagée                   */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Les horloges sont directement pilotée dans la structure DLS_DATA                                                   */
 /******************************************************************************************************************************/
- void Activer_horlogeDB ( void )
+ void Activer_horloge ( void )
   { gchar requete[1024];
     struct DB *db;
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return;
-     }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT m.tech_id, m.acronyme"

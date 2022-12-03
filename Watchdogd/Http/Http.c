@@ -453,24 +453,6 @@
     g_free(session);
   }
 /******************************************************************************************************************************/
-/* Http_Save_and_close_sessions: Sauvegarde les sessions en base de données                                                   */
-/* Entrées: néant                                                                                                             */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_Save_and_close_sessions ( void )
-  { while ( Partage->com_http.liste_http_clients )
-     { struct HTTP_CLIENT_SESSION *session = Partage->com_http.liste_http_clients->data;
-       SQL_Write_new ( "INSERT INTO users_sessions SET id='%d', username='%s', appareil='%s', useragent='%s', "
-                       "wtd_session='%s', host='%s', last_request='%d' "
-                       "ON DUPLICATE KEY UPDATE last_request=VALUES(last_request)",
-                       session->id, session->username, session->appareil, session->useragent,
-                       session->wtd_session, session->host, session->last_request );
-       Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, session );
-       Http_destroy_session(session);
-     }
-    Partage->com_http.liste_http_clients = NULL;
-  }
-/******************************************************************************************************************************/
 /* Http_Load_sessions: Charge les sessions en base de données                                                                 */
 /* Entrées: néant                                                                                                             */
 /* Sortie: néant                                                                                                              */

@@ -29,10 +29,6 @@
 
  #include "Module_dls.h"
 
- #define NOM_TABLE_DLS         "dls"
- #define NBR_CARAC_TECHID      32
- #define NBR_CARAC_ACRONYME    64
-
  enum
   { MNEMO_BISTABLE,                                                                   /* Definitions des types de mnemoniques */
     MNEMO_MONOSTABLE,
@@ -68,7 +64,6 @@
     guint dls_id;
     gboolean enable;
     gboolean debug;                                                                                /* Nombre de ligne de code */
-    gboolean is_thread;
 
     GSList *Dls_data_BI;                                                                               /* Liste des bistables */
     GSList *Dls_data_MONO;                                                                           /* Liste des monostables */
@@ -97,7 +92,6 @@
     GSList *Arbre_Comm;                         /* Liste tech_id des dependances du module pour le calcul de sa communication */
   };
 
-
  enum
   { MSG_ETAT,                                                        /* Definitions des types de messages */
     MSG_ALERTE,
@@ -123,34 +117,12 @@
     gboolean etat;
   };
 
-#warning a virer
- struct DLS_SYN
-  { gint syn_id;
-    gboolean bit_comm;
-    gboolean bit_defaut;
-    gboolean bit_defaut_fixe;
-    gboolean bit_alarme;
-    gboolean bit_alarme_fixe;
-    gboolean bit_veille_partielle;
-    gboolean bit_veille_totale;
-    gboolean bit_alerte;
-    gboolean bit_alerte_fixe;
-    gboolean bit_alerte_fugitive;
-    gboolean bit_derangement;
-    gboolean bit_derangement_fixe;
-    gboolean bit_danger;
-    gboolean bit_danger_fixe;
-    GSList *Dls_plugins;                                                     /* Liste des plugins D.L.S associé au synoptique */
-    GSList *Dls_sub_syns;                                                    /* Liste des plugins D.L.S associé au synoptique */
-  };
-
  struct COM_DLS                                                                      /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
     GSList *Dls_plugins;                                                                             /* Liste d'execution DLS */
-#warning a virer
-    struct DLS_SYN *Dls_syns;                                                              /* Arbre de calcule des etats */
+
     GSList *Set_Dls_DI_Edge_up;                                                /* liste des DIxxx a activer au debut tour prg */
     GSList *Set_Dls_DI_Edge_down;                                              /* liste des DIxxx a activer au debut tour prg */
     GSList *Set_Dls_MONO_Edge_up;                                               /* liste des Mxxx a activer au debut tour prg */
@@ -190,6 +162,12 @@
     struct DLS_AI *dls_nbr_msg_queue;
     struct DLS_AI *dls_nbr_visuel_queue;
 
+    gboolean next_bit_alerte;
+    gboolean bit_alerte;
+    gboolean next_bit_alerte_fixe;
+    gboolean bit_alerte_fixe;
+    gboolean next_bit_alerte_fugitive;
+    gboolean bit_alerte_fugitive;
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
@@ -256,7 +234,6 @@
  extern gboolean Dls_data_get_DO_up   ( struct DLS_DO *bit );
  extern gboolean Dls_data_get_DO_down ( struct DLS_DO *bit );
 
-
                                                                                                        /* Dans The_dls_MONO.c */
  extern void Dls_data_MONO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_MONO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
@@ -270,7 +247,7 @@
                                                                                                     /* Dans The_dls_HORLOGE.c */
  extern void Dls_data_set_HORLOGE ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_clear_HORLOGE ();
-
+ extern void Activer_horloge ( void );
                                                                                                      /* Dans The_dls_VISUEL.c */
  void Dls_data_VISUEL_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
 

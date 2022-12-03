@@ -128,7 +128,7 @@
   { JsonArray *RootArray = array;
     GSList *liste = plugin->Dls_data_REGISTRE;
     while ( liste )
-     { struct DLS_MONO *bit = liste->data;
+     { struct DLS_REGISTRE *bit = liste->data;
        JsonNode *element = Json_node_create();
        Dls_REGISTRE_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
