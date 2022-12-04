@@ -892,7 +892,6 @@
      { soup_server_disconnect ( Partage->com_http.local_socket );
        g_object_unref(Partage->com_http.local_socket);
      }
-    Http_Save_and_close_sessions();
 
     Info_new( Config.log, Partage->com_http.Thread_debug, LOG_NOTICE, "%s: HTTP Down (%p)", __func__, pthread_self() );
     Partage->com_http.TID = 0;                                                /* On indique au master que le thread est mort. */
