@@ -453,24 +453,6 @@
     g_free(session);
   }
 /******************************************************************************************************************************/
-/* Http_Save_and_close_sessions: Sauvegarde les sessions en base de données                                                   */
-/* Entrées: néant                                                                                                             */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_Save_and_close_sessions ( void )
-  { while ( Partage->com_http.liste_http_clients )
-     { struct HTTP_CLIENT_SESSION *session = Partage->com_http.liste_http_clients->data;
-       SQL_Write_new ( "INSERT INTO users_sessions SET id='%d', username='%s', appareil='%s', useragent='%s', "
-                       "wtd_session='%s', host='%s', last_request='%d' "
-                       "ON DUPLICATE KEY UPDATE last_request=VALUES(last_request)",
-                       session->id, session->username, session->appareil, session->useragent,
-                       session->wtd_session, session->host, session->last_request );
-       Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, session );
-       Http_destroy_session(session);
-     }
-    Partage->com_http.liste_http_clients = NULL;
-  }
-/******************************************************************************************************************************/
 /* Http_Load_sessions: Charge les sessions en base de données                                                                 */
 /* Entrées: néant                                                                                                             */
 /* Sortie: néant                                                                                                              */
@@ -698,7 +680,7 @@
     soup_message_headers_append ( headers, "Cache-Control", "no-store, must-revalidate" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Origin", "*" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Methods", "*" );
-    soup_message_headers_append ( headers, "Access-Control-Allow-Headers", "content-type, authorization" );
+    soup_message_headers_append ( headers, "Access-Control-Allow-Headers", "content-type, authorization, X-ABLS-DOMAIN" );
 
 /*---------------------------------------------------- OPTIONS ---------------------------------------------------------------*/
     if (msg->method == SOUP_METHOD_OPTIONS)
@@ -779,13 +761,8 @@
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
 
     soup_server_add_handler ( socket, "/api/dls/acquitter",  Http_traiter_dls_acquitter, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/validate",Http_traiter_mnemos_validate, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/tech_id", Http_traiter_mnemos_tech_id, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
 
     soup_server_add_handler ( socket, "/api/syn/save",       Http_traiter_syn_save, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/ack",        Http_traiter_syn_ack, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
 
@@ -806,7 +783,6 @@
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
     soup_server_add_handler ( socket, "/api/search",         Http_traiter_search, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/histo/ack",      Http_traiter_histo_ack, NULL, NULL );
     soup_server_add_handler ( socket, "/api/upload",         Http_traiter_upload, NULL, NULL );
     soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
     if (Config.instance_is_master==TRUE)
