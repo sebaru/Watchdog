@@ -332,6 +332,7 @@
                    "%s: Creation of user 'watchdog' failed (%s). Stopping.", __func__, strerror(errno) );
           return(FALSE);
         }
+       system("loginctl enable-linger watchdog");                       /* Enable lingering for dbus and pipewire for example */
      }
     else /* When not headless */
      { gchar *session;
