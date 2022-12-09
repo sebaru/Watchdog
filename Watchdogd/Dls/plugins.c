@@ -446,6 +446,8 @@
        Partage->com_dls.dls_nbr_visuel_queue = Dls_data_lookup_AI   ( "SYS", "NBR_VISUEL_QUEUE" );
      }
 
+    plugin->vars.dls_osyn_acquit             = Dls_data_lookup_DI   ( plugin->tech_id, "OSYN_ACQUIT" );
+    plugin->vars.dls_comm                    = Dls_data_lookup_MONO ( plugin->tech_id, "COMM" );
     plugin->vars.dls_memsa_ok                = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_OK" );
     plugin->vars.dls_memsa_defaut            = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT" );
     plugin->vars.dls_memsa_defaut_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT_FIXE" );
@@ -460,6 +462,8 @@
     plugin->vars.dls_memssp_derangement_fixe = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT_FIXE" );
     plugin->vars.dls_memssp_danger           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER" );
     plugin->vars.dls_memssp_danger_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER_FIXE" );
+    plugin->vars.dls_msg_comm_ok             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_OK" );
+    plugin->vars.dls_msg_comm_hs             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_HS" );
 
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: '%s' Error when dlopening", __func__, tech_id ); }
@@ -604,32 +608,4 @@
 /******************************************************************************************************************************/
  void Dls_acquitter_plugin ( gchar *tech_id )
   { Dls_foreach_plugins ( tech_id, Dls_acquitter_plugin_reel ); }
-/******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
-#warning a migrer depuis l'API
-#ifdef bouh
- static void Dls_acquitter_synoptique_reel ( gpointer user_data, struct DLS_SYN *syn )
-  {
-GSList *plugins = syn->Dls_plugins;
-    gint syn_id = GPOINTER_TO_INT(user_data);
-    if (syn_id != syn->syn_id) return;
-    while (plugins)
-     { struct DLS_PLUGIN *plugin = plugins->data;
-       Info_new( Config.log, plugin->vars.debug, LOG_NOTICE,
-                 "%s: '%s' acquitté ('%s')", __func__, plugin->tech_id, plugin->shortname );
-       Envoyer_commande_dls_data ( plugin->tech_id, "OSYN_ACQUIT" );
-       plugins=g_slist_next(plugins);
-     }
-  }
-/******************************************************************************************************************************/
-/* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
-/* Entrée: l'ID du plugin                                                                                                     */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Dls_acquitter_synoptique ( gint syn_id )
-  { Dls_foreach_syns ( GINT_TO_POINTER(syn_id), Dls_acquitter_synoptique_reel ); }
-#endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -345,19 +345,19 @@
 /******************************************************************************************************************************/
  static void Dls_run_plugin ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct timeval tv_avant, tv_apres;
-    gboolean bit_comm_module = TRUE;
 
     Partage->com_dls.next_bit_alerte          |= Dls_data_get_MONO( plugin->vars.dls_memssb_alerte );
     Partage->com_dls.next_bit_alerte_fixe     |= Dls_data_get_MONO( plugin->vars.dls_memssb_alerte_fixe );
     Partage->com_dls.next_bit_alerte_fugitive |= Dls_data_get_MONO( plugin->vars.dls_memssb_alerte_fugitive );
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
+    gboolean bit_comm_module = TRUE;
     GSList *liste = plugin->Arbre_Comm;
     while ( liste )
      { struct DLS_WATCHDOG *bit = liste->data;
        bit_comm_module &= Dls_data_get_WATCHDOG( bit );
        liste = g_slist_next ( liste );
      }
-    Dls_data_set_MONO ( &plugin->vars, plugin->vars.bit_comm, bit_comm_module );
+    Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_comm, bit_comm_module );
 
     Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok,
                         bit_comm_module &&
@@ -369,17 +369,17 @@
 
                       );
 
-    Dls_data_set_MONO ( &plugin->vars, plugin->vars.bit_secupers_ok,
-                        !( Dls_data_get_MONO( plugin->vars.bit_derangement ) ||
-                           Dls_data_get_MONO( plugin->vars.bit_derangement_fixe ) ||
-                           Dls_data_get_MONO( plugin->vars.bit_danger ) ||
-                           Dls_data_get_MONO( plugin->vars.bit_danger_fixe )
+    Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memssp_ok,
+                        !( Dls_data_get_MONO( plugin->vars.dls_memssp_derangement ) ||
+                           Dls_data_get_MONO( plugin->vars.dls_memssp_derangement_fixe ) ||
+                           Dls_data_get_MONO( plugin->vars.dls_memssp_danger ) ||
+                           Dls_data_get_MONO( plugin->vars.dls_memssp_danger_fixe )
                          )
                       );
 
 /*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
-    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.bit_msg_comm_ok, FALSE,  bit_comm_module );
-    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.bit_msg_comm_hs, FALSE, !bit_comm_module );
+    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok, FALSE,  bit_comm_module );
+    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs, FALSE, !bit_comm_module );
 
     if (!(plugin->enable && plugin->go)) return;                      /* si plugin a l'arret, on considère que la comm est OK */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/

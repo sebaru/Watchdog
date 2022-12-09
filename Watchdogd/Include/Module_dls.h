@@ -194,6 +194,7 @@
   { gboolean resetted;                                  /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
     gint     num_ligne;                                                         /* N° de ligne du plugin en cours d'execution */
+    struct DLS_MONO *dls_comm;
     struct DLS_MONO *dls_memsa_ok;
     struct DLS_MONO *dls_memsa_defaut;
     struct DLS_MONO *dls_memsa_defaut_fixe;
@@ -208,6 +209,9 @@
     struct DLS_MONO *dls_memssp_derangement_fixe;
     struct DLS_MONO *dls_memssp_danger;
     struct DLS_MONO *dls_memssp_danger_fixe;
+    struct DLS_DI   *dls_osyn_acquit;
+    struct DLS_MESSAGE *dls_msg_comm_ok;
+    struct DLS_MESSAGE *dls_msg_comm_hs;
   };
 
  extern gboolean Dls_get_top_alerte ( void );
