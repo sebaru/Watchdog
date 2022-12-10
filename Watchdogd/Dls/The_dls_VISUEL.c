@@ -53,6 +53,8 @@
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_VISUEL = g_slist_prepend ( plugin->Dls_data_VISUEL, bit );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
+              "%s: Create bit DLS_VISUEL '%s:%s' (%s)", __func__, bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_VISUEL: Recherche un VISUEL dans les plugins DLS                                                           */

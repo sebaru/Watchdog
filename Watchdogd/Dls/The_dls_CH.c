@@ -52,10 +52,12 @@
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
-    bit->valeur = Json_get_double ( element, "valeur" );
-    bit->etat   = Json_get_bool   ( element, "etat" );
+    bit->valeur = Json_get_int  ( element, "valeur" );
+    bit->etat   = Json_get_bool ( element, "etat" );
     if (!strcasecmp ( tech_id, "SYS" ) ) bit->archivage = 2;            /* Si CH du plugin SYS, on archive toutes les minutes */
     plugin->Dls_data_CH = g_slist_prepend ( plugin->Dls_data_CH, bit );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
+              "%s: Create bit DLS_CH '%s:%s'=%d (%s)", __func__, bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_CH: Recherche un CH dans les plugins DLS                                                                   */

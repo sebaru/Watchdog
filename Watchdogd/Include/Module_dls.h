@@ -149,7 +149,7 @@
   { gchar   tech_id[32];
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
-    guint valeur;
+    guint   valeur;
     gint    archivage;
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
     guint old_top;                                                                         /* Date de debut du comptage du CH */

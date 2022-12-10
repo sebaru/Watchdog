@@ -127,7 +127,10 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data )
-  { json_array_foreach_element ( Json_get_array ( RootNode, nom ), fonction, data ); }
+  { JsonArray *array = Json_get_array ( RootNode, nom );
+    if (array) { json_array_foreach_element ( array, fonction, data ); }
+          else { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Array is null for '%s'", __func__, nom ); }
+  }
 /******************************************************************************************************************************/
 /* Json_node_to_string: transforme un JsonNode en string                                                                      */
 /* Entrée: le JsonNode a convertir                                                                                            */

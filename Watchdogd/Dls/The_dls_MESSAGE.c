@@ -52,6 +52,8 @@
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_MESSAGE = g_slist_prepend ( plugin->Dls_data_MESSAGE, bit );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
+              "%s: Create bit DLS_MESSAGE '%s:%s'=%d", __func__, bit->tech_id, bit->acronyme, bit->etat );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_MESSAGE: Recherche un MESSAGE dans les plugins DLS                                                         */

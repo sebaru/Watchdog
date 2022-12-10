@@ -52,6 +52,8 @@
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_HORLOGE = g_slist_prepend ( plugin->Dls_data_HORLOGE, bit );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
+              "%s: Create bit DLS_HORLOGE '%s:%s' (%s)", __func__, bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_HORLOGE: Recherche un HORLOGE dans les plugins DLS                                                         */
@@ -117,7 +119,7 @@
   { gchar requete[1024];
     struct DB *db;
 
-
+return;
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT m.tech_id, m.acronyme"
                 " FROM mnemos_HORLOGE as m INNER JOIN mnemos_HORLOGE_ticks as t ON m.id = t.horloge_id"

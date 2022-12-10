@@ -53,6 +53,8 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_DO = g_slist_prepend ( plugin->Dls_data_DO, bit );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
+              "%s: Create bit DLS_DO '%s:%s'=%d (%s)", __func__, bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_DO: Recherche un DO dans les plugins DLS                                                                   */

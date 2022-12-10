@@ -399,7 +399,7 @@
     Json_node_foreach_array_element ( api_result, "mnemos_DO", Dls_data_DO_create_by_array, plugin );
 
     if (plugin->Dls_data_AI) { g_slist_free_full ( plugin->Dls_data_AI, (GDestroyNotify) g_free ); plugin->Dls_data_AI = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_AI", Dls_data_DI_create_by_array, plugin );
+    Json_node_foreach_array_element ( api_result, "mnemos_AI", Dls_data_AI_create_by_array, plugin );
 
     if (plugin->Dls_data_AO) { g_slist_free_full ( plugin->Dls_data_AO, (GDestroyNotify) g_free ); plugin->Dls_data_AO = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_AO", Dls_data_AO_create_by_array, plugin );
@@ -416,9 +416,18 @@
     if (plugin->Dls_data_MESSAGE) { g_slist_free_full ( plugin->Dls_data_MESSAGE, (GDestroyNotify) g_free ); plugin->Dls_data_MESSAGE = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_MESSAGE", Dls_data_MESSAGE_create_by_array, plugin );
 
+    if (plugin->Dls_data_REGISTRE) { g_slist_free_full ( plugin->Dls_data_REGISTRE, (GDestroyNotify) g_free ); plugin->Dls_data_REGISTRE = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_REGISTRE", Dls_data_REGISTRE_create_by_array, plugin );
+
+    if (plugin->Dls_data_WATCHDOG) { g_slist_free_full ( plugin->Dls_data_WATCHDOG, (GDestroyNotify) g_free ); plugin->Dls_data_WATCHDOG = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_WATCHDOG", Dls_data_WATCHDOG_create_by_array, plugin );
+
+    if (plugin->Dls_data_TEMPO) { g_slist_free_full ( plugin->Dls_data_TEMPO, (GDestroyNotify) g_free ); plugin->Dls_data_TEMPO = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_TEMPO", Dls_data_TEMPO_create_by_array, plugin );
+
     if (plugin->Thread_tech_ids) { g_slist_free_full ( plugin->Thread_tech_ids, (GDestroyNotify) g_free ); plugin->Thread_tech_ids = NULL; }
 
-    GList *Thread_tech_ids = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "thread_tech_ids" ) );
+    GList *Thread_tech_ids = json_array_get_elements ( Json_get_array ( api_result, "thread_tech_ids" ) );
     GList *thread_tech_ids = Thread_tech_ids;
     while(thread_tech_ids)
      { JsonNode *element = thread_tech_ids->data;

@@ -228,7 +228,7 @@ end:
                  "%s: SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d)", __func__,
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
-       struct DLS_AI *bit = Dls_data_lookup_AI ( thread_tech_id, Json_get_string ( request, "acronyme" ) );
+       struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
        Dls_data_set_AI ( NULL, bit,
                          Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
      }

@@ -55,6 +55,8 @@
     bit->valeur    = Json_get_double ( element, "valeur" );
     bit->archivage = Json_get_int    ( element, "archivage" );
     plugin->Dls_data_REGISTRE = g_slist_prepend ( plugin->Dls_data_REGISTRE, bit );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
+              "%s: Create bit DLS_REGISTRE '%s:%s'=%f (%s)", __func__, bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_REGISTRE: Recherche un REGISTRE dans les plugins DLS                                                       */

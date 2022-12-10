@@ -44,55 +44,64 @@
     JsonArray *BIArray = Json_node_add_array ( RootNode, "mnemos_BI" );
     if (plugin) Dls_all_BI_to_json ( BIArray, plugin );
     else Dls_foreach_plugins ( BIArray, Dls_all_BI_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_BI", json_array_get_length ( BIArray ) );
 
     JsonArray *MONOArray = Json_node_add_array ( RootNode, "mnemos_MONO" );
     if (plugin) Dls_all_MONO_to_json ( MONOArray, plugin );
     else Dls_foreach_plugins ( MONOArray, Dls_all_MONO_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_MONO", json_array_get_length ( MONOArray ) );
 
     JsonArray *REGISTREArray = Json_node_add_array ( RootNode, "mnemos_REGISTRE" );
     if (plugin) Dls_all_REGISTRE_to_json ( REGISTREArray, plugin );
     else Dls_foreach_plugins ( REGISTREArray, Dls_all_REGISTRE_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_REGISTRE", json_array_get_length ( REGISTREArray ) );
 
     JsonArray *AIArray = Json_node_add_array ( RootNode, "mnemos_AI" );
     if (plugin) Dls_all_AI_to_json ( AIArray, plugin );
     else Dls_foreach_plugins ( AIArray, Dls_all_AI_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_AI", json_array_get_length ( AIArray ) );
 
     JsonArray *AOArray = Json_node_add_array ( RootNode, "mnemos_AO" );
     if (plugin) Dls_all_AO_to_json ( AOArray, plugin );
     else Dls_foreach_plugins ( AOArray, Dls_all_AO_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_AO", json_array_get_length ( AOArray ) );
 
     JsonArray *DIArray = Json_node_add_array ( RootNode, "mnemos_DI" );
     if (plugin) Dls_all_DI_to_json ( DIArray, plugin );
     else Dls_foreach_plugins ( DIArray, Dls_all_DI_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_DI", json_array_get_length ( DIArray ) );
 
     JsonArray *DOArray = Json_node_add_array ( RootNode, "mnemos_DO" );
     if (plugin) Dls_all_DO_to_json ( DOArray, plugin );
     else Dls_foreach_plugins ( DOArray, Dls_all_DO_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_DO", json_array_get_length ( DOArray ) );
 
     JsonArray *CIArray = Json_node_add_array ( RootNode, "mnemos_CI" );
     if (plugin) Dls_all_CI_to_json ( CIArray, plugin );
     else Dls_foreach_plugins ( CIArray, Dls_all_CI_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_CI", json_array_get_length ( CIArray ) );
 
     JsonArray *CHArray = Json_node_add_array ( RootNode, "mnemos_CH" );
     if (plugin) Dls_all_CH_to_json ( CHArray, plugin );
     else Dls_foreach_plugins ( CHArray, Dls_all_CH_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_CH", json_array_get_length ( CHArray ) );
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
     if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d BI to API.", __func__, Json_get_int ( api_result, "nbr_mnemos_BI" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d MONO to API.", __func__, Json_get_int ( api_result, "nbr_mnemos_MONO" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d REGISTRE to API.", __func__, Json_get_int ( api_result, "nbr_mnemos_REGISTRE" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d DI to API.", __func__, Json_get_int ( api_result, "nbr_mnemos_DI" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d DO to API.", __func__, Json_get_int ( api_result, "nbr_mnemos_DO" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d AI to API.", __func__, Json_get_int ( api_result, "nbr_mnemos_AI" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d AO to API.", __func__, Json_get_int ( api_result, "nbr_mnemos_AO" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d CI to API.", __func__, Json_get_int ( api_result, "nbr_mnemos_CI" ) );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d CH to API.", __func__, Json_get_int ( api_result, "nbr_mnemos_CH" ) );
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d BI to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_BI" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d MONO to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_MONO" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d REGISTRE to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_REGISTRE" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d DI to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_DI" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d DO to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_DO" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d AI to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_AI" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d AO to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_AO" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d CI to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_CI" ) );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Save %d CH to API.", __func__, Json_get_int ( RootNode, "nbr_mnemos_CH" ) );
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Dls_Data saved to API", __func__ );
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving dls_data to API.", __func__ ); }
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saved DLS_DATA in %04.1fs", __func__, (Partage->top-top)/10.0 );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error when saving '%s' dls_data to API.", __func__, plugin->tech_id ); }
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saved '%s' DLS_DATA in %04.1fs", __func__, plugin->tech_id, (Partage->top-top)/10.0 );
     Json_node_unref ( api_result );
     Json_node_unref ( RootNode );
   }

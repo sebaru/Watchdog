@@ -54,6 +54,8 @@
     bit->valeur = Json_get_double ( element, "valeur" );
     if (!strcasecmp ( tech_id, "SYS" ) ) bit->archivage = 2;            /* Si AO du plugin SYS, on archive toutes les minutes */
     plugin->Dls_data_AO = g_slist_prepend ( plugin->Dls_data_AO, bit );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
+              "%s: Create bit DLS_AO '%s:%s'=%f (%s)", __func__, bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_AO : Recherche un CH dans les plugins DLS                                                                  */

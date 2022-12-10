@@ -36,7 +36,7 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Dls_data_WATCHDOG_create_by_array : Création d'un WATCHDOG pour le plugin                                                              */
+/* Dls_data_WATCHDOG_create_by_array : Création d'un WATCHDOG pour le plugin                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  void Dls_data_WATCHDOG_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data )
@@ -52,9 +52,11 @@
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_WATCHDOG = g_slist_prepend ( plugin->Dls_data_WATCHDOG, bit );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
+              "%s: Create bit DLS_WATCHDOG '%s:%s' (%s)", __func__, bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_WATCHDOG: Recherche un WATCHDOG dans les plugins DLS                                                                   */
+/* Dls_data_lookup_WATCHDOG: Recherche un WATCHDOG dans les plugins DLS                                                       */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
