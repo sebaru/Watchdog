@@ -251,7 +251,6 @@
     plugin->conso = 0.0;
     if (plugin->enable) plugin->start_date = time(NULL);
                 else plugin->start_date = 0;
-    memset ( &plugin->vars, 0, sizeof(plugin->vars) );                           /* Mise à zero de tous les bits de remontées */
     plugin->vars.debug = plugin->debug;                            /* Recopie du champ de debug depuis la DB vers la zone RUN */
 
 /*------------------------------------------------------- Chargement GO ------------------------------------------------------*/

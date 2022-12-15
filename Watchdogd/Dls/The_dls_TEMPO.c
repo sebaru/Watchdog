@@ -65,11 +65,13 @@
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
      { struct DLS_PLUGIN *plugin = plugins->data;
-       GSList *liste = plugin->Dls_data_TEMPO;
-       while (liste)
-        { struct DLS_TEMPO *bit = liste->data;
-          if ( !strcasecmp ( bit->acronyme, acronyme ) && !strcasecmp( bit->tech_id, tech_id ) ) return(bit);
-          liste = g_slist_next(liste);
+       if (!strcasecmp( plugin->tech_id, tech_id ))
+        { GSList *liste = plugin->Dls_data_TEMPO;
+          while (liste)
+           { struct DLS_TEMPO *bit = liste->data;
+             if ( !strcasecmp ( bit->acronyme, acronyme ) ) return(bit);
+             liste = g_slist_next(liste);
+           }
         }
        plugins = g_slist_next(plugins);
      }
