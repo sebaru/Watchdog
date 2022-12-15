@@ -306,39 +306,6 @@
   }
 #endif
 /******************************************************************************************************************************/
-/* Http_Dls_get_syn_vars: ajoute un objet dans le tableau des syn_vars pour l'enoyer au client                                */
-/* Entrées: le buuilder Json et la connexion Websocket                                                                        */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_plugin_vars_to_json ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { JsonArray *RootArray = user_data;
-    GSList *liste = plugin->Dls_data_MONO;
-    while ( liste )
-     { struct DLS_MONO *bit = liste->data;
-       JsonNode *element = Json_node_create();
-       if ( !strcasecmp ( Json_get_string ( element, "acronyme" ), "COMM" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_OK" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_DEFAUT" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_DEFAUT_FIXE" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_ALARME" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSA_ALARME_FIXE" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSB_VEILLE" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSB_ALERTE" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSB_ALERTE_FIXE" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSB_ALERTE_FUGITIVE" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_OK" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_DERANGEMENT_FIXE" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_DERANGEMENT" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_DANGER" ) ||
-            !strcasecmp ( Json_get_string ( element, "acronyme" ), "MEMSSP_DANGER_FIXE" )
-          )
-        { Dls_MONO_to_json ( element, bit );
-          Json_array_add_element ( RootArray, element );
-        }
-       liste = g_slist_next(liste);
-     }
-  }
-/******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
 /* Entrée : le Dls_tree correspondant                                                                                         */
 /* Sortie : rien                                                                                                              */

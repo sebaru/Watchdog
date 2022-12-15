@@ -276,7 +276,6 @@
  static void Reseter_all_bit_interne ( struct DLS_PLUGIN *plugin )
   { GSList *liste_bit;
 
-    pthread_mutex_lock( &Partage->com_dls.synchro_data );                                 /* Décharge tous les bits du module */
     liste_bit = plugin->Dls_data_TEMPO;
     while(liste_bit)
      { struct DLS_TEMPO *tempo = liste_bit->data;
@@ -320,7 +319,6 @@
        Dls_data_set_VISUEL ( &plugin->vars, visu, "resetted", "black", FALSE, "resetted" );
      }
 
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
 /******************************************************************************************************************************/
 /* Dls_plugins_remap_all_alias: remap les alias d'un plugin donné                                                             */
