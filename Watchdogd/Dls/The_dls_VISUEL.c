@@ -73,8 +73,8 @@
              if ( !strcasecmp ( bit->acronyme, acronyme ) ) return(bit);
              liste = g_slist_next(liste);
            }
-          plugins = g_slist_next(plugins);
         }
+       plugins = g_slist_next(plugins);
      }
     return(NULL);
   }
