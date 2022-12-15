@@ -317,6 +317,7 @@
     while(liste_bit)
      { struct DLS_VISUEL *visu = liste_bit->data;
        Dls_data_set_VISUEL ( &plugin->vars, visu, "resetted", "black", FALSE, "resetted" );
+       liste_bit = g_slist_next(liste_bit);
      }
 
   }
