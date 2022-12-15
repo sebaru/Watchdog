@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Dls/The_dls_TEMPO.c              Déclaration des fonctions pour la gestion des tempo.c                           */
+/* Watchdogd/Dls/The_dls_TEMPO.c              DÃ©claration des fonctions pour la gestion des tempo.c                           */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                         sam. 09 mars 2013 11:47:18 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -36,8 +36,8 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Dls_data_TEMPO_create_by_array : Création d'un TEMPO pour le plugin                                                        */
-/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/* Dls_data_TEMPO_create_by_array : CrÃ©ation d'un TEMPO pour le plugin                                                        */
+/* EntrÃ©e : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  void Dls_data_TEMPO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data )
   { struct DLS_PLUGIN *plugin = user_data;
@@ -57,8 +57,8 @@
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_TEMPO: Recherche un TEMPO dans les plugins DLS                                                             */
-/* Entrée: le tech_id, l'acronyme                                                                                             */
-/* Sortie : Néant                                                                                                             */
+/* EntrÃ©e: le tech_id, l'acronyme                                                                                             */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  struct DLS_TEMPO *Dls_data_lookup_TEMPO ( gchar *tech_id, gchar *acronyme )
   { GSList *plugins = Partage->com_dls.Dls_plugins;
@@ -76,7 +76,7 @@
   }
 /******************************************************************************************************************************/
 /* STR_local: Positionnement d'une Tempo retard DLS                                                                           */
-/* Entrée: la structure tempo et son etat                                                                                     */
+/* EntrÃ©e: la structure tempo et son etat                                                                                     */
 /* Sortie: Neant                                                                                                              */
 /******************************************************************************************************************************/
  static void ST_local( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *tempo, int etat )
@@ -180,10 +180,10 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
-/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
+/* Dls_data_set_TEMPO : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* EntrÃ©e : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_tempo ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *tempo, gboolean etat,
+ void Dls_data_set_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *tempo, gboolean etat,
                            gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
   { if (!tempo) return;
     if (tempo->init == FALSE)
@@ -199,17 +199,17 @@
     ST_local ( vars, tempo, etat );                                                               /* Recopie dans la variable */
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
-/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci                                                                */
+/* Dls_data_get_TEMPO : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* EntrÃ©e : l'acronyme, le owner dls, un pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_tempo ( struct DLS_TEMPO *tempo )
+ gboolean Dls_data_get_TEMPO ( struct DLS_TEMPO *tempo )
   { if (!tempo) return(FALSE);
     return( tempo->state );
   }
 /******************************************************************************************************************************/
 /* Dls_TEMPO_to_json : Formate un bit au format JSON                                                                          */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
+/* EntrÃ©es: le JsonNode et le bit                                                                                             */
+/* Sortie : nÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_TEMPO_to_json ( JsonNode *element, struct DLS_TEMPO *bit )
   { Json_node_add_string ( element, "tech_id",  bit->tech_id );
