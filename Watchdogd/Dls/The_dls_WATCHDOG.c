@@ -61,7 +61,8 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  struct DLS_WATCHDOG *Dls_data_lookup_WATCHDOG ( gchar *tech_id, gchar *acronyme )
-  { GSList *plugins = Partage->com_dls.Dls_plugins;
+  { if (!(tech_id && acronyme)) return(NULL);
+    GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
      { struct DLS_PLUGIN *plugin = plugins->data;
        GSList *liste = plugin->Dls_data_WATCHDOG;
