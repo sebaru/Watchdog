@@ -277,15 +277,17 @@ end:
      { JsonNode *Response = Json_node_create();
        JsonArray *output_array = Json_node_add_array ( Response, "douts" );
        struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( thread_tech_id );
-       GSList *liste = plugin->Dls_data_DO;
-       while (liste)
-        { struct DLS_DO *dout = liste->data;
-          JsonNode *element = Json_node_create();
-          Dls_DO_to_json ( element, dout );
-          if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
-           { Json_array_add_element ( output_array, element );
-           } else Json_node_unref ( element );
-          liste = g_slist_next ( liste );
+       if (plugin)
+        { GSList *liste = plugin->Dls_data_DO;
+          while (liste)
+           { struct DLS_DO *dout = liste->data;
+             JsonNode *element = Json_node_create();
+             Dls_DO_to_json ( element, dout );
+             if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
+              { Json_array_add_element ( output_array, element );
+              } else Json_node_unref ( element );
+             liste = g_slist_next ( liste );
+           }
         }
        Http_Send_json_response ( msg, Response );
      }
