@@ -269,7 +269,7 @@ end:
                  "%s: SET_DI from '%s': '%s:%s/'%s:%s'=%d", __func__,
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_bool ( request, "etat" ) );
-       struct DLS_DI *bit = Dls_data_lookup_DI ( thread_tech_id, Json_get_string ( request, "acronyme" ) );
+       struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
        Dls_data_set_DI ( NULL, bit, Json_get_bool ( request, "etat" ) );
      }
 /************************************ Réaction sur GET_DO *********************************************************************/
