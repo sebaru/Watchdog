@@ -82,6 +82,7 @@
  extern JsonNode *Mnemo_create_thread_AO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gchar *unite, gint archivage );
  extern JsonNode *Mnemo_create_thread_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle );
  extern JsonNode *Mnemo_create_thread_HORLOGE ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle );
-
+ extern void Mnemo_create_thread_HORLOGE_tick ( struct THREAD *module, JsonNode *bit, gint heure, gint minute );
+ extern void Mnemo_delete_thread_HORLOGE_tick ( struct THREAD *module, JsonNode *bit );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

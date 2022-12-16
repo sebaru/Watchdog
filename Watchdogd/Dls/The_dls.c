@@ -439,7 +439,7 @@
           Dls_data_set_AI ( NULL, Partage->com_dls.dls_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
           Dls_data_set_AI ( NULL, Partage->com_dls.dls_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
-          Activer_horloge();
+          Dls_data_activer_horloge();
           last_top_1min = Partage->top;
         }
 /******************************************************************************************************************************/
@@ -457,7 +457,7 @@
        Dls_foreach_plugins ( NULL, Dls_run_plugin );
        Dls_foreach_plugins ( NULL, Dls_run_archivage );
 
-       Partage->com_dls.Top_check_horaire = FALSE;                         /* Cotrole horaire effectué un fois par minute max */
+       Partage->com_dls.Top_check_horaire = FALSE;                        /* Controle horaire effectué un fois par minute max */
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
        Dls_foreach_plugins ( NULL, Dls_set_all_bool );/* Positionne les booleans (mono/bi) selon la valeur calculé par les modules */

@@ -36,10 +36,10 @@
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
  #include "Json.h"
+ #include "Dls.h"
  #include "Thread.h"
  #include "Db.h"
  #include "config.h"
- #include "Dls.h"
  #include "Http.h"
  #include "Config.h"
  #include "Archive.h"
@@ -99,6 +99,7 @@
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
+    JsonNode *HORLOGE_ticks;                                                           /* Liste des horloges ticks a dérouler */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

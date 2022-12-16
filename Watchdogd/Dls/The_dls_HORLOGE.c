@@ -96,17 +96,6 @@
 /* Dls_data_set_HORLOGE : Active une horloge                                                                                  */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_HORLOGE ( gchar *tech_id, gchar *acronyme )
-  { struct DLS_HORLOGE *horloge = g_try_malloc0 ( sizeof( struct DLS_HORLOGE ) );
-    if (!horloge) return;
-    g_snprintf ( horloge->tech_id, sizeof(horloge->tech_id), "%s", tech_id );
-    g_snprintf ( horloge->acronyme, sizeof(horloge->acronyme), "%s", acronyme );
-    Partage->com_dls.HORLOGE_actives = g_slist_append ( Partage->com_dls.HORLOGE_actives, horloge );
-  }
-/******************************************************************************************************************************/
-/* Dls_data_set_HORLOGE : Active une horloge                                                                                  */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
  void Dls_data_clear_HORLOGE ()
   { if (Partage->com_dls.HORLOGE_actives)
      { g_slist_free_full ( Partage->com_dls.HORLOGE_actives, (GDestroyNotify) g_free );
@@ -114,40 +103,30 @@
      }
   }
 /******************************************************************************************************************************/
-/* Activer_horloge: Recherche toutes les horloges actives à date et les positionne dans la mémoire partagée                   */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Les horloges sont directement pilotée dans la structure DLS_DATA                                                   */
+/* Dls_data_activer_une_horloge: teste l'horloge en paramètre et l'active si c'est l'heure                                    */
+/* Entrée: Nier                                                                                                               */
+/* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Activer_horloge ( void )
-  { gchar requete[1024];
-    struct DB *db;
-
-return;
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.tech_id, m.acronyme"
-                " FROM mnemos_HORLOGE as m INNER JOIN mnemos_HORLOGE_ticks as t ON m.id = t.horloge_id"
-                " WHERE CURTIME() LIKE CONCAT(LPAD(t.heure,2,'0'),':',LPAD(t.minute,2,'0'),':%%')"
-                " AND ("
-                 "(DAYNAME(CURRENT_DATE()) = 'Monday' AND t.lundi=1) OR "
-                 "(DAYNAME(CURRENT_DATE()) = 'Tuesday' AND t.mardi=1) OR "
-                 "(DAYNAME(CURRENT_DATE()) = 'Wednesday' AND t.mercredi=1) OR "
-                 "(DAYNAME(CURRENT_DATE()) = 'Thursday' AND t.jeudi=1) OR "
-                 "(DAYNAME(CURRENT_DATE()) = 'Friday' AND t.vendredi=1) OR "
-                 "(DAYNAME(CURRENT_DATE()) = 'Saturday' AND t.samedi=1) OR "
-                 "(DAYNAME(CURRENT_DATE()) = 'Sunday' AND t.dimanche=1) "
-                "     )"
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return;
+ static void Dls_data_activer_une_horloge ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+  { gint heure  = Json_get_int ( element, "heure" );
+    gint minute = Json_get_int ( element, "minute" );
+    struct tm tm;
+    time_t temps;
+    time(&temps);
+    localtime_r( &temps, &tm );
+    if (heure == tm.tm_hour && minute == tm.tm_min)   /*num_jour_semaine = tm.tm_wday;*/
+     { gchar *tech_id  = Json_get_string ( element, "tech_id" );
+       gchar *acronyme = Json_get_string ( element, "acronyme" );
+       struct DLS_HORLOGE *bit = Dls_data_lookup_HORLOGE ( tech_id, acronyme );
+       if (bit) Partage->com_dls.HORLOGE_actives = g_slist_append ( Partage->com_dls.HORLOGE_actives, bit );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise à un de l'horloge %s:%s", __func__, tech_id, acronyme );
      }
-
-    while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un de l'horloge %s:%s 1/2",
-                 __func__, db->row[0], db->row[1] );
-       Envoyer_commande_dls_data ( db->row[0], db->row[1] );
-     }
-    Libere_DB_SQL( &db );
   }
+/******************************************************************************************************************************/
+/* Dls_data_activer_horloge: Recherche toutes les horloges actives à date et les positionne dans la mémoire partagée          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Les horloges sont directement pilotées dans la structure DLS_DATA                                                  */
+/******************************************************************************************************************************/
+ void Dls_data_activer_horloge ( void )
+  { Json_node_foreach_array_element ( Partage->HORLOGE_ticks, "horloges", Dls_data_activer_une_horloge, NULL ); }
 /*----------------------------------------------------------------------------------------------------------------------------*/

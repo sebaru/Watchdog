@@ -132,22 +132,59 @@
 /* Entrée: la structure THREAD, les parametres de l'HORLOGE                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- JsonNode *Mnemo_create_thread_HORLOGE ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
+ JsonNode *Mnemo_create_thread_HORLOGE ( struct THREAD *module, gchar *acronyme, gchar *libelle )
   { JsonNode *node = Json_node_create();
     if (!node) return(NULL);
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *tech_id = Json_get_string ( module->config, "thread_tech_id" );
     Json_node_add_string ( node, "classe", "HORLOGE" );
-    Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
-    Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
+    Json_node_add_string ( node, "tech_id", tech_id );
+    Json_node_add_string ( node, "acronyme", acronyme );
     Json_node_add_string ( node, "libelle", libelle );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/horloge", node );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/add", node );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                 "%s: %s: Could not add HORLOGE %s to API", __func__, thread_tech_id, thread_acronyme );
+                 "%s: %s: Could not add HORLOGE %s to API", __func__, tech_id, acronyme );
      }
     Json_node_unref ( api_result );
     Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
     return(node);
+  }
+/******************************************************************************************************************************/
+/* Mnemo_create_thread_HORLOGE_tick: Créé un tick sur une horloge donnée                                                      */
+/* Entrée: la structure THREAD, les parametres de l'HORLOGE                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Mnemo_create_thread_HORLOGE_tick ( struct THREAD *module, JsonNode *bit, gint heure, gint minute )
+  { JsonNode *node = Json_node_create();
+    if (!node) return;
+    Json_node_add_string ( node, "classe", "HORLOGE" );
+    Json_node_add_string ( node, "tech_id", Json_get_string ( bit, "tech_id" ) );
+    Json_node_add_string ( node, "acronyme", Json_get_string ( bit, "acronyme" ) );
+    Json_node_add_int    ( node, "heure", heure );
+    Json_node_add_int    ( node, "minute", minute );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/add/tick", node );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not add HORLOGE tick %s:%d:%d to API", __func__,
+                 Json_get_string ( bit, "tech_id" ), Json_get_string ( bit, "acronyme" ), heure, minute );
+     }
+    Json_node_unref ( api_result );
+  }
+/******************************************************************************************************************************/
+/* Mnemo_create_thread_HORLOGE_tick: Créé un tick sur une horloge donnée                                                      */
+/* Entrée: la structure THREAD, les parametres de l'HORLOGE                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Mnemo_delete_thread_HORLOGE_tick ( struct THREAD *module, JsonNode *bit )
+  { if (!bit) return;
+    Json_node_add_string ( bit, "classe", "HORLOGE" );
+    JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/del/tick", bit );
+    if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                 "%s: %s: Could not DEL HORLOGE tick for '%s'", __func__,
+                 Json_get_string ( bit, "tech_id" ), Json_get_string ( bit, "acronyme" ) );
+     }
+    Json_node_unref ( api_result );
   }
 /******************************************************************************************************************************/
 /* Mnemo_create_thread_WATCHDOG: Créer un JSON pour un WATCHDOG                                                               */

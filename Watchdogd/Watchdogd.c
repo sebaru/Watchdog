@@ -190,7 +190,7 @@
     Partage->Maps_to_thread   = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_local );
 
     Partage->Maps_root = Http_Post_to_global_API ( "/run/mapping/list", NULL );
-    if (Partage->Maps_root)
+    if (Partage->Maps_root && Json_get_int ( Partage->Maps_root, "api_status" ) == SOUP_STATUS_OK)
      { GList *Results = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "mappings" ) );
        GList *results = Results;
        while(results)
@@ -203,6 +203,21 @@
      }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
+/******************************************************************************************************************************/
+/* MSRV_Load_horloge_ticks: Charge les horloges depuis l'API                                                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Les horloges sont directement stockées dans la structure partagée                                                  */
+/******************************************************************************************************************************/
+ void MSRV_Load_horloge_ticks ( void )
+  { JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/load", NULL );
+    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+     { Json_node_unref ( Partage->HORLOGE_ticks );
+       Partage->HORLOGE_ticks = api_result;
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: HORLOGE ticks loaded.", __func__ );
+     }
+    else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for HORLOGE TICKS failed.", __func__ );
+  }
+
 /******************************************************************************************************************************/
 /* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
 /* Entrée: argc, argv                                                                                                         */
@@ -432,8 +447,8 @@
        JsonNode *api_result = Http_Post_to_global_API ( "/run/agent/start", RootNode );
        Json_node_unref ( RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API Request for AGENT START OK.", __func__ ); }
-        else
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API Request for AGENT START OK.", __func__ ); }
+       else
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for AGENT START failed. Sleep 5s and stopping.", __func__ );
           sleep(5);
           error_code = EXIT_FAILURE;
@@ -581,7 +596,8 @@
 
     if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
     if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
-    if (Partage->Maps_root) Json_node_unref ( Partage->Maps_root );
+    Json_node_unref ( Partage->Maps_root );
+    Json_node_unref ( Partage->HORLOGE_ticks );
 
 /************************************************* Dechargement des mutex *****************************************************/
 
