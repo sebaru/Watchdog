@@ -59,25 +59,25 @@
 
     Json_node_add_double ( element, "conso", dls->conso );
     Json_node_add_bool   ( element, "debug",                dls->vars.debug );
-    Json_node_add_bool   ( element, "bit_comm",             Dls_data_get_MONO ( dls->tech_id, "COMM", &dls->vars.bit_comm ) );
-    Json_node_add_bool   ( element, "bit_defaut",           Dls_data_get_MONO ( dls->tech_id, "MEMSA_DEFAUT", &dls->vars.bit_defaut ) );
-    Json_node_add_bool   ( element, "bit_defaut_fixe",      Dls_data_get_MONO ( dls->tech_id, "MEMSA_DEFAUT_FIXE", &dls->vars.bit_defaut_fixe ) );
-    Json_node_add_bool   ( element, "bit_alarme",           Dls_data_get_MONO ( dls->tech_id, "MEMSA_ALARME", &dls->vars.bit_alarme ) );
-    Json_node_add_bool   ( element, "bit_alarme_fixe",      Dls_data_get_MONO ( dls->tech_id, "MEMSA_ALARME_FIXE", &dls->vars.bit_alarme_fixe ) );
-    Json_node_add_bool   ( element, "bit_activite_ok",      Dls_data_get_MONO ( dls->tech_id, "MEMSA_OK", &dls->vars.bit_activite_ok ) );
+    Json_node_add_bool   ( element, "bit_comm",             Dls_data_get_MONO ( dls->vars.dls_comm ) );
+    Json_node_add_bool   ( element, "bit_defaut",           Dls_data_get_MONO ( dls->vars.dls_memsa_defaut ) );
+    Json_node_add_bool   ( element, "bit_defaut_fixe",      Dls_data_get_MONO ( dls->vars.dls_memsa_defaut_fixe ) );
+    Json_node_add_bool   ( element, "bit_alarme",           Dls_data_get_MONO ( dls->vars.dls_memsa_alarme ) );
+    Json_node_add_bool   ( element, "bit_alarme_fixe",      Dls_data_get_MONO ( dls->vars.dls_memsa_alarme_fixe ) );
+    Json_node_add_bool   ( element, "bit_activite_ok",      Dls_data_get_MONO ( dls->vars.dls_memsa_ok ) );
 
-    Json_node_add_bool   ( element, "bit_alerte",           Dls_data_get_MONO ( dls->tech_id, "MEMSSB_ALERTE", &dls->vars.bit_alerte ) );
-    Json_node_add_bool   ( element, "bit_alerte_fixe",      Dls_data_get_MONO ( dls->tech_id, "MEMSSB_ALERTE_FIXE", &dls->vars.bit_alerte_fixe ) );
-    Json_node_add_bool   ( element, "bit_alerte_fugitive",  Dls_data_get_MONO ( dls->tech_id, "MEMSSB_ALERTE_FUGITIVE", &dls->vars.bit_alerte_fugitive ) );
-    Json_node_add_bool   ( element, "bit_veille",           Dls_data_get_MONO ( dls->tech_id, "MEMSSB_VEILLE", &dls->vars.bit_veille ) );
+    Json_node_add_bool   ( element, "bit_alerte",           Dls_data_get_MONO ( dls->vars.dls_memssb_alerte ) );
+    Json_node_add_bool   ( element, "bit_alerte_fixe",      Dls_data_get_MONO ( dls->vars.dls_memssb_alerte_fixe ) );
+    Json_node_add_bool   ( element, "bit_alerte_fugitive",  Dls_data_get_MONO ( dls->vars.dls_memssb_alerte_fugitive ) );
+    Json_node_add_bool   ( element, "bit_veille",           Dls_data_get_MONO ( dls->vars.dls_memssb_veille ) );
 
-    Json_node_add_bool   ( element, "bit_derangement",      Dls_data_get_MONO ( dls->tech_id, "MEMSSP_DERANGEMENT", &dls->vars.bit_derangement ) );
-    Json_node_add_bool   ( element, "bit_derangement_fixe", Dls_data_get_MONO ( dls->tech_id, "MEMSSP_DERANGEMENT_FIXE", &dls->vars.bit_derangement_fixe ) );
-    Json_node_add_bool   ( element, "bit_danger",           Dls_data_get_MONO ( dls->tech_id, "MEMSSP_DANGER", &dls->vars.bit_danger ) );
-    Json_node_add_bool   ( element, "bit_danger_fixe",      Dls_data_get_MONO ( dls->tech_id, "MEMSSP_DANGER_FIXE", &dls->vars.bit_danger_fixe ) );
-    Json_node_add_bool   ( element, "bit_secu_pers_ok",     Dls_data_get_MONO ( dls->tech_id, "MEMSSP_OK", &dls->vars.bit_secupers_ok ) );
+    Json_node_add_bool   ( element, "bit_derangement",      Dls_data_get_MONO ( dls->vars.dls_memssp_derangement ) );
+    Json_node_add_bool   ( element, "bit_derangement_fixe", Dls_data_get_MONO ( dls->vars.dls_memssp_derangement_fixe ) );
+    Json_node_add_bool   ( element, "bit_danger",           Dls_data_get_MONO ( dls->vars.dls_memssp_danger ) );
+    Json_node_add_bool   ( element, "bit_danger_fixe",      Dls_data_get_MONO ( dls->vars.dls_memssp_danger_fixe ) );
+    Json_node_add_bool   ( element, "bit_secu_pers_ok",     Dls_data_get_MONO ( dls->vars.dls_memssp_ok ) );
 
-    Json_node_add_bool   ( element, "bit_acquit",           Dls_data_get_DI   ( dls->tech_id, "OSYN_ACQUIT", &dls->vars.bit_acquit ) );
+    Json_node_add_bool   ( element, "bit_acquit",           Dls_data_get_DI   ( dls->vars.dls_osyn_acquit ) );
     JsonArray *comm_array = Json_node_add_array  ( element, "bit_Comms" );
     GSList *liste = dls->Arbre_Comm;
     while(liste)
@@ -140,6 +140,12 @@
        return;
      }
 
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id_src );
+    if (!plugin)
+     { soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found");
+       return;
+     }
+
     JsonNode *dls_run = Json_node_create ();
     if (!dls_run)
      { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
@@ -155,186 +161,160 @@
 /*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
     if (!strcasecmp ( classe, "CI" ))
      { array = Json_node_add_array ( dls_run, "CI" );
-       liste = Partage->Dls_data_CI;
+       liste = plugin->Dls_data_CI;
        while(liste)
         { struct DLS_CI *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_CI_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_CI_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*--------------------------------------------------- Monostables ------------------------------------------------------------*/
     else if (!strcasecmp ( classe, "MONO" ))
      { array = Json_node_add_array ( dls_run, "MONO" );
-       liste = Partage->Dls_data_MONO;
+       liste = plugin->Dls_data_MONO;
        while(liste)
         { struct DLS_MONO *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_MONO_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_MONO_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
     else if (!strcasecmp ( classe, "BI" ))
      { array = Json_node_add_array ( dls_run, "BI" );
-       liste = Partage->Dls_data_BI;
+       liste = plugin->Dls_data_BI;
        while(liste)
         { struct DLS_BI *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_BI_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_BI_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*--------------------------------------------------- Compteur horaires ------------------------------------------------------*/
     else if (!strcasecmp ( classe, "CH" ))
      { array = Json_node_add_array ( dls_run, "CH" );
-       liste = Partage->Dls_data_CH;
+       liste = plugin->Dls_data_CH;
        while(liste)
         { struct DLS_CH *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_CH_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_CH_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
     else if (!strcasecmp ( classe, "AI" ))
      { array = Json_node_add_array ( dls_run, "AI" );
-       liste = Partage->Dls_data_AI;
+       liste = plugin->Dls_data_AI;
        while(liste)
         { struct DLS_AI *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_AI_to_json ( element, bit );
-             MSRV_Map_to_thread ( element );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_AI_to_json ( element, bit );
+          MSRV_Map_to_thread ( element );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*----------------------------------------------- Sortie Analogique ----------------------------------------------------------*/
     else if (!strcasecmp ( classe, "AO" ))
      { array = Json_node_add_array ( dls_run, "AO" );
-       liste = Partage->Dls_data_AO;
+       liste = plugin->Dls_data_AO;
        while(liste)
         { struct DLS_AO *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_AO_to_json ( element, bit );
-             MSRV_Map_to_thread ( element );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_AO_to_json ( element, bit );
+          MSRV_Map_to_thread ( element );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*----------------------------------------------- Temporisations -------------------------------------------------------------*/
     else if (!strcasecmp ( classe, "TEMPO" ))
      { array = Json_node_add_array ( dls_run, "TEMPO" );
-       liste = Partage->Dls_data_TEMPO;
+       liste = plugin->Dls_data_TEMPO;
        while(liste)
         { struct DLS_TEMPO *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_TEMPO_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_TEMPO_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*----------------------------------------------- Entrées TOR ----------------------------------------------------------------*/
     else if (!strcasecmp ( classe, "DI" ))
      { array = Json_node_add_array ( dls_run, "DI" );
-       liste = Partage->Dls_data_DI;
+       liste = plugin->Dls_data_DI;
        while(liste)
         { struct DLS_DI *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_DI_to_json ( element, bit );
-             MSRV_Map_to_thread ( element );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_DI_to_json ( element, bit );
+          MSRV_Map_to_thread ( element );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*----------------------------------------------- Sortie TOR -----------------------------------------------------------------*/
     else if (!strcasecmp ( classe, "DO" ))
      { array = Json_node_add_array ( dls_run, "DO" );
-       liste = Partage->Dls_data_DO;
+       liste = plugin->Dls_data_DO;
        while(liste)
         { struct DLS_DO *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_DO_to_json ( element, bit );
-             MSRV_Map_to_thread ( element );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_DO_to_json ( element, bit );
+          MSRV_Map_to_thread ( element );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*----------------------------------------------- Visuels --------------------------------------------------------------------*/
     else if (!strcasecmp ( classe, "VISUEL" ))
       {array = Json_node_add_array ( dls_run, "VISUEL" );
-       liste = Partage->Dls_data_VISUEL;
+       liste = plugin->Dls_data_VISUEL;
        while(liste)
         { struct DLS_VISUEL *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_VISUEL_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_VISUEL_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*----------------------------------------------- Messages -------------------------------------------------------------------*/
     else if (!strcasecmp ( classe, "MSG" ))
      { array = Json_node_add_array ( dls_run, "MSG" );
-       liste = Partage->Dls_data_MSG;
+       liste = plugin->Dls_data_MESSAGE;
        while(liste)
-        { struct DLS_MESSAGES *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_MESSAGE_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+        { struct DLS_MESSAGE *bit=liste->data;
+          JsonNode *element = Json_node_create();
+          Dls_MESSAGE_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*----------------------------------------------- Registre -------------------------------------------------------------------*/
     else if (!strcasecmp ( classe, "REGISTRE" ))
      { array = Json_node_add_array ( dls_run, "REGISTRE" );
-       liste = Partage->Dls_data_REGISTRE;
+       liste = plugin->Dls_data_REGISTRE;
        while(liste)
         { struct DLS_REGISTRE *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_REGISTRE_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_REGISTRE_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
 /*----------------------------------------------- Watchdog -------------------------------------------------------------------*/
     else if (!strcasecmp ( classe, "WATCHDOG" ))
      { array = Json_node_add_array ( dls_run, "WATCHDOG" );
-       liste = Partage->Dls_data_WATCHDOG;
+       liste = plugin->Dls_data_WATCHDOG;
        while(liste)
         { struct DLS_WATCHDOG *bit=liste->data;
-          if (!strcasecmp(bit->tech_id, tech_id))
-           { JsonNode *element = Json_node_create();
-             Dls_WATCHDOG_to_json ( element, bit );
-             Json_array_add_element ( array, element );
-           }
+          JsonNode *element = Json_node_create();
+          Dls_WATCHDOG_to_json ( element, bit );
+          Json_array_add_element ( array, element );
           liste = g_slist_next(liste);
         }
      }
@@ -371,41 +351,53 @@
        return;
      }
 
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( Json_get_string ( request, "tech_id" ) );
+    if (!plugin)
+     { soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found");
+       return;
+     }
+
     gchar *tech_id  = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
     gchar *acronyme = Normaliser_chaine ( Json_get_string ( request, "acronyme" ) );
     gchar *classe   = Normaliser_chaine ( Json_get_string ( request, "classe" ) );
     if ( !strcasecmp ( classe, "DI" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
-       Dls_data_set_DI ( NULL, tech_id, acronyme, NULL, valeur );
+       struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
+       Dls_data_set_DI ( NULL, bit, valeur );
        /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "DO" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
-       Dls_data_set_DO ( NULL, tech_id, acronyme, NULL, valeur );
+       struct DLS_DO *bit = Dls_data_lookup_DO ( tech_id, acronyme );
+       Dls_data_set_DO ( NULL, bit, valeur );
        /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "BI" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
-       Dls_data_set_BI ( NULL, tech_id, acronyme, NULL, valeur );
+       struct DLS_BI *bit = Dls_data_lookup_BI ( tech_id, acronyme );
+       Dls_data_set_BI ( NULL, bit, valeur );
        /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "MONO" ) )
-     { Dls_data_set_MONO ( NULL, tech_id, acronyme, NULL, TRUE );
+     { struct DLS_MONO *bit = Dls_data_lookup_MONO ( tech_id, acronyme );
+       Dls_data_set_MONO ( NULL, bit, TRUE );
        /*Audit_log ( session, "DLS %s '%s:%s' set to TRUE", classe, tech_id, acronyme );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "MSG" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
-       Dls_data_set_MSG ( NULL, tech_id, acronyme, NULL, FALSE, valeur );
+       struct DLS_MESSAGE *bit = Dls_data_lookup_MESSAGE ( tech_id, acronyme );
+       Dls_data_set_MESSAGE ( NULL, bit, FALSE, valeur );
        /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }
     else if ( !strcasecmp ( classe, "REGISTRE" ) )
      { gdouble valeur = Json_get_double ( request, "valeur" );
-       Dls_data_set_REGISTRE ( NULL, tech_id, acronyme, NULL, valeur );
+       struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
+       Dls_data_set_REGISTRE ( NULL, bit, valeur );
        /*Audit_log ( session, "DLS %s '%s:%s' set to %f", classe, tech_id, acronyme, valeur );*/
        soup_message_set_status (msg, SOUP_STATUS_OK );
      }

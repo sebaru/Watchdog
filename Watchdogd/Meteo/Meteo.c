@@ -40,7 +40,8 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Meteo_get_ephemeride ( struct THREAD *module )
-  { gchar query[256];
+  { struct METEO_VARS *vars = module->vars;
+    gchar query[256];
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *token      = Json_get_string ( module->config, "token" );
     gchar *code_insee = Json_get_string ( module->config, "code_insee" );
@@ -71,14 +72,14 @@
        gchar *sunrise       = Json_get_string ( ephemeride, "sunrise" );
        gchar *sunset        = Json_get_string ( ephemeride, "sunset" );
        if ( sscanf ( sunrise, "%d:%d", &heure, &minute ) == 2)
-        { Horloge_del_all_ticks ( thread_tech_id, "SUNRISE" );
-          Horloge_add_tick      ( thread_tech_id, "SUNRISE", heure, minute );
+        { Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunrise );
+          Mnemo_create_thread_HORLOGE_tick ( module, vars->sunrise, heure, minute );
           Info_new( Config.log, module->Thread_debug, LOG_INFO,
                    "%s: %s -> sunrise at %02d:%02d", __func__, city_name, heure, minute );
         }
        if ( sscanf ( sunset, "%d:%d", &heure, &minute ) == 2)
-        { Horloge_del_all_ticks ( thread_tech_id, "SUNSET" );
-          Horloge_add_tick      ( thread_tech_id, "SUNSET", heure, minute );
+        { Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunset );
+          Mnemo_create_thread_HORLOGE_tick ( module, vars->sunset, heure, minute );
           Info_new( Config.log, module->Thread_debug, LOG_INFO,
                    "%s: %s ->  sunset at %02d:%02d", __func__, city_name, heure, minute );
         }
@@ -162,8 +163,8 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    Mnemo_create_thread_HORLOGE ( module, "SUNRISE", "Horloge du levé du soleil" );
-    Mnemo_create_thread_HORLOGE ( module, "SUNSET",  "Horloge du couché du soleil" );
+    vars->sunrise = Mnemo_create_thread_HORLOGE ( module, "SUNRISE", "Horloge du levé du soleil" );
+    vars->sunset  = Mnemo_create_thread_HORLOGE ( module, "SUNSET",  "Horloge du couché du soleil" );
 
     for (gint cpt=0; cpt<14; cpt++)
      { gchar acronyme[64];

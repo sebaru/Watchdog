@@ -200,8 +200,8 @@ end:
        Info_new( Config.log, Config.log_bus, LOG_INFO,
                  "%s: SET_WATCHDOG for: '%s:%s'=%d", __func__, thread_tech_id,
                  Json_get_string ( request, "acronyme" ), Json_get_int ( request, "consigne" ) );
-       Dls_data_set_WATCHDOG ( NULL, thread_tech_id, Json_get_string ( request, "acronyme" ), NULL,
-                               Json_get_int ( request, "consigne" ) );
+       struct DLS_WATCHDOG *bit = Dls_data_lookup_WATCHDOG ( thread_tech_id, Json_get_string ( request, "acronyme" ) );
+       Dls_data_set_WATCHDOG ( NULL, bit, Json_get_int ( request, "consigne" ) );
      }
 /************************************ Positionne une valeur d'une Entrée Analogique *******************************************/
     else if ( !strcasecmp( tag, "SET_AI") )
@@ -228,8 +228,8 @@ end:
                  "%s: SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d)", __func__,
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
-       struct DLS_AI *ai = NULL;
-       Dls_data_set_AI ( tech_id, acronyme, (gpointer)&ai,
+       struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
+       Dls_data_set_AI ( NULL, bit,
                          Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
      }
 /************************************ Réaction sur SET_CDE ********************************************************************/
@@ -269,24 +269,25 @@ end:
                  "%s: SET_DI from '%s': '%s:%s/'%s:%s'=%d", __func__,
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_bool ( request, "etat" ) );
-       struct DLS_DI *di = NULL;
-       Dls_data_set_DI ( NULL, tech_id, acronyme, (gpointer)&di, Json_get_bool ( request, "etat" ) );
+       struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
+       Dls_data_set_DI ( NULL, bit, Json_get_bool ( request, "etat" ) );
      }
 /************************************ Réaction sur GET_DO *********************************************************************/
     else if ( !strcasecmp( tag, "GET_DO") )
      { JsonNode *Response = Json_node_create();
        JsonArray *output_array = Json_node_add_array ( Response, "douts" );
-       GSList *liste = Partage->Dls_data_DO;
-       while (liste)
-        { struct DLS_DO *dout = liste->data;
-          JsonNode *element = Json_node_create();
-          Dls_DO_to_json ( element, dout );
-          if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
-           { if (!strcasecmp ( Json_get_string ( element, "thread_tech_id" ), thread_tech_id ) )
-              {  Json_array_add_element ( output_array, element ); }
-             else Json_node_unref ( element );
-           } else Json_node_unref ( element );
-          liste = g_slist_next ( liste );
+       struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( thread_tech_id );
+       if (plugin)
+        { GSList *liste = plugin->Dls_data_DO;
+          while (liste)
+           { struct DLS_DO *dout = liste->data;
+             JsonNode *element = Json_node_create();
+             Dls_DO_to_json ( element, dout );
+             if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
+              { Json_array_add_element ( output_array, element );
+              } else Json_node_unref ( element );
+             liste = g_slist_next ( liste );
+           }
         }
        Http_Send_json_response ( msg, Response );
      }

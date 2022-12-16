@@ -126,21 +126,11 @@
 
  extern void Http_traiter_bus     ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_mnemos_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                        SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_mnemos_tech_id ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                           SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_mnemos_set  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                        SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_mnemos_validate ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                            SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_get  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                     SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_syn_set  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_save ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data );
@@ -148,8 +138,6 @@
                                      SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_syn_show ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                      SoupClientContext *client, gpointer user_data );
- extern void Http_traiter_syn_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                    SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_horloge_get  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                          SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_horloge_ticks_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
@@ -176,8 +164,6 @@
                                            SoupClientContext *client, gpointer user_data );
  extern void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
                                                      SoupClientContext *client, gpointer user_data);
- extern void Http_traiter_histo_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                      SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                         SoupClientContext *client, gpointer user_data);
  extern void Http_traiter_tech ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,

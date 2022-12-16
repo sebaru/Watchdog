@@ -157,106 +157,6 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_syn_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                             SoupClientContext *client, gpointer user_data )
-  { gchar requete[256];
-
-    if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( Json_has_member ( request, "syn_id" ) )
-     { if (Json_has_member ( request, "image" ) )
-        { gchar *chaine = Normaliser_chaine ( Json_get_string ( request, "image" ) );
-          SQL_Write_new ( "UPDATE syns SET image='%s' WHERE id='%d' AND access_level<='%d'",
-                          chaine, Json_get_int ( request, "syn_id" ), session->access_level );
-          g_free(chaine);
-        }
-
-       if ( Json_has_member ( request, "libelle" ) )
-        { gchar *chaine = Normaliser_chaine ( Json_get_string ( request, "libelle" ) );
-          SQL_Write_new ( "UPDATE syns SET libelle='%s' WHERE id='%d' AND access_level<='%d'",
-                          chaine, Json_get_int ( request, "syn_id" ), session->access_level );
-          g_free(chaine);
-        }
-
-       if ( Json_has_member ( request, "page" ) )
-        { gchar *chaine = Normaliser_chaine ( Json_get_string ( request, "page" ) );
-          SQL_Write_new ( "UPDATE syns SET page='%s' WHERE id='%d' AND access_level<='%d'",
-                          chaine, Json_get_int ( request, "syn_id" ), session->access_level );
-          g_free(chaine);
-        }
-
-       if ( Json_has_member ( request, "mode_affichage" ) )
-        { SQL_Write_new ( "UPDATE syns SET mode_affichage='%d' WHERE id='%d' AND access_level<='%d'",
-                          Json_get_int ( request, "mode_affichage" ), Json_get_int ( request, "syn_id" ), session->access_level );
-        }
-
-       if ( Json_has_member ( request, "access_level" ) )
-        { SQL_Write_new ( "UPDATE syns SET access_level='%d' WHERE id='%d' AND access_level<='%d'",
-                          Json_get_int ( request, "access_level" ), Json_get_int ( request, "syn_id" ), session->access_level );
-        }
-
-       if ( Json_has_member ( request, "parent_id" ) )
-        { SQL_Write_new ( "UPDATE syns SET parent_id='%d' WHERE id='%d' AND access_level<='%d'",
-                          Json_get_int ( request, "parent_id" ), Json_get_int ( request, "syn_id" ), session->access_level );
-          Partage->com_dls.Thread_reload = TRUE;                                                               /* Relance DLS */
-        }
-       soup_message_set_status (msg, SOUP_STATUS_OK);
-       goto end;
-     }
-    else if ( ! (Json_has_member ( request, "libelle" ) && Json_has_member ( request, "page" ) &&                 /* Si ajout */
-                 Json_has_member ( request, "parent_id" ) && Json_has_member ( request, "access_level" ) &&
-                 Json_has_member ( request, "image" )
-                ) )
-     { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    gint access_level  = Json_get_int ( request, "access_level" );
-    if (access_level>session->access_level)
-     { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-    gint   parent_id   = Json_get_int ( request, "parent_id" );
-    gchar *libelle     = Normaliser_chaine ( Json_get_string( request, "libelle" ) );
-    gchar *page        = Normaliser_chaine ( Json_get_string( request, "page" ) );
-    gchar *image       = Normaliser_chaine ( Json_get_string( request, "image" ) );
-
-    g_snprintf( requete, sizeof(requete),
-               "INSERT INTO syns SET libelle='%s', parent_id=%d, page='%s', image='%s', "
-                "access_level='%d'", libelle, parent_id, page, image, access_level );
-
-    if (SQL_Write (requete))
-     { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Partage->com_dls.Thread_reload = TRUE;                                                                  /* Relance DLS */
-     }
-    else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
-
-    if ( Json_has_member ( request, "syn_id" ) )                                                                   /* Edition */
-     { Audit_log ( session, "Synoptique %s - '%s' changed", page, libelle ); }
-    else
-     { Audit_log ( session, "Synoptique %s - '%s' created", page, libelle ); }
-    g_free(libelle);
-    g_free(page);
-    g_free(image);
-
-end:
-    Json_node_unref(request);
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
  void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                             SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_GET)
@@ -436,10 +336,9 @@ end:
  void Http_Formater_cadran( struct HTTP_CADRAN *cadran )
   { if (!cadran) return;
     if ( ! strcmp ( cadran->classe, "AI" ) )
-     { cadran->valeur = Dls_data_get_AI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_AI *ai=cadran->dls_data;
+     { struct DLS_AI *ai = Dls_data_lookup_AI ( cadran->tech_id, cadran->acronyme );
        if (!ai)                                                  /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = ai->in_range;
           cadran->valeur   = ai->valeur;
@@ -448,24 +347,23 @@ end:
      }
     else if ( !strcmp ( cadran->classe, "CH" ) )
      { cadran->in_range = TRUE;
-       cadran->valeur = Dls_data_get_CH(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+       struct DLS_CH *cpt_h = Dls_data_lookup_CH ( cadran->tech_id, cadran->acronyme );
+       cadran->valeur = (cpt_h ? cpt_h->valeur : 0.0);
      }
     else if ( !strcmp ( cadran->classe, "CI" ) )
-     { cadran->valeur = Dls_data_get_CI(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_CI *ci=cadran->dls_data;
+     { struct DLS_CI *ci = Dls_data_lookup_CI ( cadran->tech_id, cadran->acronyme );
        if (!ci)                                                  /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = TRUE;
-          cadran->valeur *= ci->multi;                                                                    /* Multiplication ! */
+          cadran->valeur = ci->valeur * ci->multi;                                                        /* Multiplication ! */
           g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
         }
      }
     else if ( !strcmp ( cadran->classe, "REGISTRE" ) )
-     { cadran->valeur = Dls_data_get_REGISTRE(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_REGISTRE *registre=cadran->dls_data;
+     { struct DLS_REGISTRE *registre = Dls_data_lookup_REGISTRE ( cadran->tech_id, cadran->acronyme );
        if (!registre)                                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = TRUE;
           cadran->valeur = registre->valeur;
@@ -473,10 +371,9 @@ end:
         }
      }
     else if ( !strcmp ( cadran->classe, "WATCHDOG" ) )
-     { Dls_data_get_WATCHDOG(cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_WATCHDOG *wtd=cadran->dls_data;
+     { struct DLS_WATCHDOG *wtd = Dls_data_lookup_WATCHDOG ( cadran->tech_id, cadran->acronyme );
        if (!wtd)                                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = TRUE;
           gint gap = wtd->top - Partage->top;
@@ -486,10 +383,9 @@ end:
         }
      }
     else if ( !strcmp ( cadran->classe, "T" ) )
-     { Dls_data_get_tempo ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
-       struct DLS_TEMPO *tempo = cadran->dls_data;
+     { struct DLS_TEMPO *tempo = Dls_data_lookup_TEMPO ( cadran->tech_id, cadran->acronyme );
        if (!tempo)
-        { cadran->in_range = FALSE; }
+        { cadran->in_range = FALSE; cadran->valeur = 0; }
        else
         { cadran->in_range = TRUE;
           if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON)                     /* Temporisation Retard en train de compter */
@@ -531,15 +427,8 @@ end:
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Http_add_etat_visuel_to_json ( JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { GSList *dls_visuels = Partage->Dls_data_VISUEL;
-    while(dls_visuels)                      /* Parcours tous les visuels et envoie ceux relatifs aux DLS du synoptique chargé */
-     { struct DLS_VISUEL *dls_visuel = dls_visuels->data;
-       if ( !strcasecmp( dls_visuel->tech_id, Json_get_string(element, "tech_id") ) &&
-            !strcasecmp( dls_visuel->acronyme, Json_get_string(element, "acronyme") )
-          )
-        { Dls_VISUEL_to_json ( element, dls_visuel ); return; }
-       dls_visuels = g_slist_next(dls_visuels);
-     }
+  { struct DLS_VISUEL *dls_visuel = Dls_data_lookup_VISUEL ( Json_get_string(element, "tech_id"), Json_get_string(element, "acronyme") );
+    Dls_VISUEL_to_json ( element, dls_visuel );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_syn_show: Fourni une list JSON des elements d'un synoptique                                                   */
@@ -621,8 +510,7 @@ end:
        return;
      }
 /*-------------------------------------------------- Envoi les syn_vars ------------------------------------------------------*/
-    JsonArray *syn_vars = Json_node_add_array ( synoptique, "syn_vars" );
-    Dls_foreach_syns ( syn_vars, Dls_syn_vars_to_json );
+    /*JsonArray *syn_vars = Json_node_add_array ( synoptique, "syn_vars" );*/
 
 /*-------------------------------------------------- Envoi les passerelles ---------------------------------------------------*/
     if (full_syn)
@@ -778,28 +666,5 @@ end:
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_log: Répond aux requetes sur l'URI log                                                                        */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_traiter_syn_ack ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                             SoupClientContext *client, gpointer user_data)
-  { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 0 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    gint syn_id  = Json_get_int( request, "syn_id" );
-
-    Dls_acquitter_synoptique(syn_id);
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    Json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
