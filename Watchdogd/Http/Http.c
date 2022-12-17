@@ -766,19 +766,7 @@
     soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
 
-    soup_server_add_handler ( socket, "/api/horloge/get",    Http_traiter_horloge_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/horloge/ticks/set", Http_traiter_horloge_ticks_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/horloge/ticks/del", Http_traiter_horloge_ticks_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/horloge/ticks/list",Http_traiter_horloge_ticks_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/list",   Http_traiter_tableau_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/del",    Http_traiter_tableau_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/set",    Http_traiter_tableau_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/map/list", Http_traiter_tableau_map_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/map/del",  Http_traiter_tableau_map_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/map/set",  Http_traiter_tableau_map_set, NULL, NULL );
-
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/bus",            Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
     soup_server_add_handler ( socket, "/api/search",         Http_traiter_search, NULL, NULL );

@@ -60,7 +60,6 @@
     gchar *acronyme = Normaliser_chaine ( Json_get_string( request, "acronyme" ) );
     Json_node_unref( request );
     Envoyer_commande_dls_data ( tech_id, acronyme );
-    Audit_log ( session, "Clic utilisateur sur %s:%s", tech_id, acronyme );
     g_free(tech_id);
     g_free(acronyme);
 /*************************************************** Envoi au client **********************************************************/
@@ -150,7 +149,6 @@
 
 /*************************************************** Envoi au client **********************************************************/
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    Audit_log ( session, "Synoptique '%d' deleted", syn_id );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
@@ -197,7 +195,6 @@
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-    Audit_log ( session, "Synoptique '%d' get", syn_id );
   }
 /******************************************************************************************************************************/
 /* Http_get_syn_save_un_visuel: Enregistre un motif en base de données                                                        */
@@ -468,9 +465,7 @@
      }
 
     if (session->access_level < Json_get_int ( result, "access_level" ))
-     { Audit_log ( session, "Access to synoptique '%s' (id '%d') forbidden",
-                   Json_get_string ( result, "libelle" ), syn_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Access Denied");
+     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Access Denied");
        Json_node_unref ( result );
        return;
      }

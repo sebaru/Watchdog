@@ -90,7 +90,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
               "%s: File '%s' uploaded with size='%d'", __func__, filename, taille );
 
-    Audit_log ( session, "File '%s' uploaded (size=%d)", filename, taille );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
