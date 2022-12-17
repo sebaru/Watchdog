@@ -16,6 +16,6 @@ Have a good day, Sebaru.
 ## What is Watchdog
 
 This component is the legacy all in one program for my home automation.
-I'm going to move parts of it into API, Console and HOME. Goal is to only keep code for dealing with sensors and output.
+I'm going to move parts of it into API, Console and HOME. Goal is to only keep code for dealing with sensors and outputs.
 
 This repository will be renamed to abls-habitat-agent when I will be ready.
