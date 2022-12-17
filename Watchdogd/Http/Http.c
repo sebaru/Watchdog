@@ -405,6 +405,7 @@
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_node_add_bool   ( RootNode, "connected", TRUE );
     Json_node_add_string ( RootNode, "version",  WTD_VERSION );
+    Json_node_add_string ( RootNode, "branche",  WTD_BRANCHE );
     Json_node_add_string ( RootNode, "username", session->username );
     Json_node_add_string ( RootNode, "appareil", session->appareil );
     Json_node_add_string ( RootNode, "instance", g_get_host_name() );

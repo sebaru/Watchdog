@@ -11,6 +11,13 @@ This software is Work In Progress. It is a complete refund of all-in-one Watchdo
 I'm developing on my sparse-time, not so easy with little kid :-).
 
 All detailed documentations [are here](https://docs.abls-habitat.fr)
+
+QuickStart:
+
+    git clone https://github.com/sebaru/Watchdog.git
+    cd Watchdog
+    sudo ./INSTALL.sh
+
 Have a good day, Sebaru.
 
 ## What is Watchdog

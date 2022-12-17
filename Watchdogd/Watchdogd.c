@@ -398,7 +398,7 @@
 
     Lire_config();                                                     /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
     Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s", WTD_VERSION );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s, branche '%s'", WTD_VERSION, WTD_BRANCHE );
 
     Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
     if (!Partage)
@@ -443,6 +443,7 @@
      { Json_node_add_int    ( RootNode, "start_time", time(NULL) );
        Json_node_add_string ( RootNode, "agent_hostname", g_get_host_name() );
        Json_node_add_string ( RootNode, "version", WTD_VERSION );
+       Json_node_add_string ( RootNode, "branche", WTD_BRANCHE );
        Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/agent/start", RootNode );
