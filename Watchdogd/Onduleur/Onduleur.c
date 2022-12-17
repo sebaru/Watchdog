@@ -32,7 +32,6 @@
  #include <string.h>
  #include <stdlib.h>
  #include <signal.h>
- #include <upsclient.h>
  #include <locale.h>
 
 /*********************************************************** Headers **********************************************************/
