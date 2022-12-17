@@ -12,12 +12,12 @@ libwatchdog_http_la_SOURCES  = Http.c install.c getstatus.c bus_master.c bus_sla
 
 
 libwatchdog_http_la_LDFLAGS = `pkg-config --libs glib-2.0 openssl gthread-2.0 json-glib-1.0 libsoup-2.4` \
-                              `mysql_config --libs` \
+                              `mariadb_config --libs` \
                               -rdynamic
 
 
 libwatchdog_http_la_CFLAGS = `pkg-config --cflags glib-2.0 openssl gthread-2.0 json-glib-1.0 libsoup-2.4` \
-                               `mysql_config --cflags`
+                               `mariadb_config --cflags`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include \
