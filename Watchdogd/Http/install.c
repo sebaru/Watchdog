@@ -30,8 +30,6 @@
  #include <string.h>
  #include <unistd.h>
  #include <fcntl.h>
- #include <pwd.h>
- #include <grp.h>
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
@@ -43,12 +41,8 @@
 /******************************************************************************************************************************/
  void Http_traiter_install ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                              SoupClientContext *client, gpointer user_data )
-  { gchar fichier[80], home[128], chaine[256], *welcome =
-          "#Welcome, your Agent is now installed !\n"
-          "#Sébastien Lefèvre - Abls-Habitat.fr\n";
+  { gchar fichier[80];
     struct stat stat_buf;
-    struct passwd *pwd;
-    gchar *db_schema;
 
     if (msg->method == SOUP_METHOD_GET)
      { SoupMessageHeaders *headers;
@@ -94,18 +88,36 @@
 
     g_snprintf ( fichier, sizeof(fichier), "/etc/abls-habitat-agent.conf" );
     if (stat (fichier, &stat_buf)!=-1)                   /* Si pas d'erreur et fichier présent, c'est que c'est deja installé */
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Already Installed" );
+     { JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_bool( RootNode, "success", FALSE );
+          Json_node_add_string( RootNode, "message", "Agent already installed" );
+          Http_Send_json_response ( msg, RootNode );
+        }
+       else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        return;
      }
 
     if (getuid()!=0)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_FORBIDDEN, "Not Running As ROOT" );
+     { JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_bool( RootNode, "success", FALSE );
+          Json_node_add_string( RootNode, "message", "Agent is not Running as ROOT" );
+          Http_Send_json_response ( msg, RootNode );
+        }
+       else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        return;
      }
 
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Parsing Request Failed" );
+     { JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_bool( RootNode, "success", FALSE );
+          Json_node_add_string( RootNode, "message", "Parsing Request Failed" );
+          Http_Send_json_response ( msg, RootNode );
+        }
+       else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
        return;
      }
 
@@ -113,121 +125,61 @@
           && Json_has_member ( request, "api_url" )
            )
        )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
+     { JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_bool( RootNode, "success", FALSE );
+          Json_node_add_string( RootNode, "message", "Mauvais parametres" );
+          Http_Send_json_response ( msg, RootNode );
+        }
+       else soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
+       Json_node_unref(request);
        return;
      }
     gchar *domain_uuid   = Json_get_string ( request, "domain_uuid" );
     gchar *domain_secret = Json_get_string ( request, "domain_secret" );
     gchar *api_url       = Json_get_string ( request, "api_url" );
+    if ( g_str_has_prefix ( api_url, "https://" ) ) api_url+=8;
+    if ( g_str_has_prefix ( api_url, "http://"  ) ) api_url+=7;
+    if ( g_str_has_prefix ( api_url, "wss://"   ) ) api_url+=6;
+    if ( g_str_has_prefix ( api_url, "ws://"    ) ) api_url+=5;
+    if (strlen(api_url)==0) api_url = "api.abls-habitat.fr";
 
-#ifdef bouh
-
-/******************************************* Creation du user *****************************************************************/
-    g_snprintf( chaine, sizeof(chaine), "useradd -m -c 'WatchdogServer' %s", Json_get_string(request, "run_as") );
-    system(chaine);
-    g_snprintf( chaine, sizeof(chaine), "usermod -a -G audio,dialout,gpio %s", Json_get_string(request, "run_as") );
-    system(chaine);
-
-/******************************************* Creation du home *****************************************************************/
-    pwd = getpwnam ( Json_get_string(request, "run_as" ) );
-    if (!pwd)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Wrong Run_AS");
-       return;
-     }
-
-    g_snprintf( home, sizeof(home), "%s", pwd->pw_dir );
-    if (Json_get_int(request, "use_subdir")) { g_strlcat( home, "/.watchdog", sizeof(home) ); }
-
-    mkdir ( home, S_IRUSR | S_IWUSR | S_IXUSR );
-    chown ( home, pwd->pw_uid, pwd->pw_gid );
-    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Home '%s' directory'", __func__, home );
-
-    if (is_master)
-     { g_snprintf( chaine, sizeof(chaine), "%s/Dls", home );
-       mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
-       chown ( chaine, pwd->pw_uid, pwd->pw_gid );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Dls '%s' directory'", __func__, chaine );
-
-       g_snprintf( chaine, sizeof(chaine), "%s/Upload", home );
-       mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
-       chown ( chaine, pwd->pw_uid, pwd->pw_gid );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Created Upload '%s' directory'", __func__, chaine );
-     }
-/******************************************* Test accès Database **************************************************************/
-    if (is_master)
-     { Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Loading DB Schema", __func__ );
-       db_schema = SQL_Read_from_file ( "init_db.sql" );
-       if (!db_schema)
-        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Read DB Schema Error" );
-          Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Read DB Schema Error", __func__ );
-          return;
-        }
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Loaded. Connecting to DB.", __func__ );
-     }
-
-    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Connecting to DB.", __func__ );
-    struct DB *db = Init_DB_SQL_with ( Json_get_string(request, "db_hostname"), Json_get_string(request, "db_username"),
-                                       Json_get_string(request, "db_password"), Json_get_string(request, "db_database"),
-                                       Json_get_int(request, "db_port" ), TRUE );
-
-    if (!db)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "DB Connect Error");
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Connect Error", __func__ );
-       g_free(db_schema);
-       return;
-     }
-
-    if (is_master)
-     { Lancer_requete_SQL ( db, db_schema );                                                            /* Création du schéma */
-       Liberer_resultat_SQL ( db );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Init OK (Master).", __func__ );
-     }
-    else Info_new( Config.log, TRUE, LOG_NOTICE, "%s: DB Schema Not Initialize (instance Slave).", __func__ );
-
-    gchar *master_host = Normaliser_chaine ( Json_get_string(request,"master_host") );
-    gchar *description = Normaliser_chaine ( Json_get_string(request,"description") );
-    SQL_Write_new ( "INSERT INTO instances SET instance='%s', is_master='%d', version='%s', start_time=NOW(), "
-                    "debug=0, log_db=0, log_trad=0, log_zmq=0, log_level=6,"
-                    "master_host='%s', description='%s', use_subdir='%d'",
-                    g_get_host_name(), is_master, WTD_VERSION, master_host, description, (Json_get_int(request,"use_subdir") ? "true" : "false") );
-    g_free(master_host);
-    g_free(description);
-
-    if (is_master)
-     { g_snprintf( chaine, sizeof(chaine), "UPDATE syns SET libelle='%s' WHERE id='1'", description );
-       Lancer_requete_SQL ( db, chaine );
-     }
-    g_free(description);
-
-    Libere_DB_SQL ( &db );
-#endif
+    gchar agent_uuid[37];
+    gchar *agent_uuid_src = Json_get_string ( request, "agent_uuid" );
+    if (strlen(agent_uuid_src)) g_snprintf( agent_uuid, sizeof(agent_uuid), "%s", agent_uuid_src );
+    else UUID_New ( agent_uuid );
 /******************************************* Création fichier de config *******************************************************/
     Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Creating config file '%s'", __func__, fichier );
-
-    gint fd = creat ( fichier, S_IRUSR | S_IWUSR );
-    if (fd==-1)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Create Error");
-       json_node_unref(request);
-       return;
-     }
-    write (fd, welcome, strlen(welcome) );
-
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Json_node_add_string( RootNode, "domain_uuid", domain_uuid );
        Json_node_add_string( RootNode, "domain_secret", domain_secret );
+       Json_node_add_string( RootNode, "agent_uuid", agent_uuid );
        Json_node_add_string( RootNode, "api_url", api_url );
-       gchar *result = Json_node_to_string ( RootNode );
-       json_node_unref(RootNode);
-       write (fd, result, strlen(result));
-       g_free(result);
+       Json_node_add_string( RootNode, "product", "agent" );
+       Json_node_add_string( RootNode, "vendor", "abls-habitat.fr" );
+       time_t t = time(NULL);
+       struct tm *temps = localtime( &t );
+       if (temps)
+        { gchar date[64];
+          strftime( date, sizeof(date), "%F %T", temps );
+          Json_node_add_string( RootNode, "install_time", date );
+        }
+       Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );
+       Json_node_unref(RootNode);
      }
-    else { Info_new( Config.log, TRUE, LOG_ERR, "%s: Writing config failed.", __func__ ); }
-    close(fd);
+    else { Info_new( Config.log, TRUE, LOG_ERR, "%s: Writing config failed: Memory Error.", __func__ ); }
 
-    json_node_unref(request);
+    Json_node_unref(request);
+
+    RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+    Json_node_add_string ( RootNode, "status", "installed" );
+    Http_Send_json_response ( msg, RootNode );
     Partage->com_msrv.Thread_run = FALSE;                                                    /* On reboot toute la baraque !! */
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

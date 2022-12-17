@@ -39,7 +39,7 @@
 
 /******************************************************************************************************************************/
 /* Info_init: Initialisation du traitement d'erreur                                                                           */
-/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                                                */
+/* EntrÃ©e: Le niveau de debuggage, l'entete, et le fichier log                                                                */
 /******************************************************************************************************************************/
  static void Info_stop( int code_retour, void *log )
   {
@@ -49,7 +49,7 @@
 
 /******************************************************************************************************************************/
 /* Info_init: Initialisation du traitement d'erreur                                                                           */
-/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                                                */
+/* EntrÃ©e: Le niveau de debuggage, l'entete, et le fichier log                                                                */
 /******************************************************************************************************************************/
  struct LOG *Info_init( gchar *entete, guint debug )
   { struct LOG *log;
@@ -58,7 +58,7 @@
     if (!log) return(NULL);
 
     g_snprintf( log->entete,  sizeof(log->entete), "%s", entete  );
-    log->log_level = debug;
+    log->log_level = (debug ? debug : LOG_INFO);
     on_exit( Info_stop, log );
 
     openlog( log->entete, LOG_CONS | LOG_PID, LOG_USER );
@@ -66,14 +66,17 @@
   }
 /******************************************************************************************************************************/
 /* Info_init: Initialisation du traitement d'erreur                                                                           */
-/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                                                */
+/* EntrÃ©e: Le niveau de debuggage, l'entete, et le fichier log                                                                */
 /******************************************************************************************************************************/
  void Info_change_log_level( struct LOG *log, guint new_log_level )
-  { if (log) log->log_level = new_log_level;
+  { if(!log) return;
+    if(!new_log_level) new_log_level = LOG_DEBUG;
+    log->log_level =  new_log_level;
+    Info_new( log, TRUE, LOG_CRIT, "%s: log_level set to %d", __func__, log->log_level );
   }
 /******************************************************************************************************************************/
-/* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres                                 */
-/* Entrée: le niveau, le texte, et la chaine à afficher                                                                       */
+/* Info_new: on informe le sous systeme syslog en affichant un nombre alÃ©atoire de paramÃ¨tres                                 */
+/* EntrÃ©e: le niveau, le texte, et la chaine Ã  afficher                                                                       */
 /******************************************************************************************************************************/
  void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... )
   { gchar chaine[512], nom_thread[32];

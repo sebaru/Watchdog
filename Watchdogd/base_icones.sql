@@ -45,6 +45,7 @@ INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) 
 ('voyant',       'voyant_local_arret',  'png',  'by_color'      , 100),
 ('voyant',       'voyant_systeme',      'png',  'by_color'      , 100),
 ('hydraulique',  '2d_vanne_auto',       'png',  'by_color'      , 100),
+('hydraulique',  '2d_vanne_manu',       'png',  'by_color'      , 100),
 ('hydraulique',  'goutte_eau',          'png',  'by_color'      , 100),
 ('voyant',       'clef',                'png',  'by_color'      , 100),
 ('voyant',       'croix',               'png',  'by_color'      , 100),
@@ -54,7 +55,6 @@ INSERT INTO icone (`categorie`, `forme`, `extension`, `ihm_affichage`, `layer`) 
 ('chauffage',    'thermometre',         'png',  'by_mode_color' , 100),
 ('sonorisation', 'haut_parleur',        'png',  'by_mode_color' , 100),
 ('bouton',       'bouton',              'none', 'complexe'      , 100),
-('bouton',       'bloc_maintenance',    'none', 'complexe'      , 100),
 ('divers',       'question',            'png',  'static'        , 100),
 ('divers',       'comment',             'none', 'complexe'      , 150),
 ('divers',       'encadre',             'none', 'complexe'      , 50 )

@@ -21,47 +21,6 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- Base de données: `WatchdogDB`
 --
 
--- --------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `processes` (
-  `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
-  `uuid` VARCHAR(37) UNIQUE NOT NULL,
-  `instance` VARCHAR(64) NOT NULL,
-  `name` VARCHAR(64) NOT NULL,
-  `classe` VARCHAR(16) DEFAULT NULL,
-  `version` VARCHAR(32) DEFAULT NULL,
-  `database_version` INT(11) NOT NULL DEFAUT 0,
-  `enable` TINYINT(1) NOT NULL,
-  `started` TINYINT(1) DEFAULT 0,
-  `start_time` DATETIME DEFAULT NOW(),
-  `debug` TINYINT(1) NOT NULL,
-  `description` VARCHAR(128) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
-
--- --------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `instances` (
-  `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
-  `instance` VARCHAR(64) UNIQUE NOT NULL,
-  `is_master` TINYINT(1) NOT NULL DEFAULT 0,
-  `log_msrv` TINYINT(1) NOT NULL DEFAULT 0,
-  `log_db` TINYINT(1) NOT NULL DEFAULT 0,
-  `log_zmq` TINYINT(1) NOT NULL DEFAULT 0,
-  `log_trad` TINYINT(1) NOT NULL DEFAULT 0,
-  `use_subdir` TINYINT(1) NOT NULL DEFAULT 0,
-  `master_host` VARCHAR(64) NOT NULL DEFAULT '',
-  `log_level` INT(11) NOT NULL DEFAULT 6,
-  `start_time` DATETIME DEFAULT NOW(),
-  `database_version` INT(11) NOT NULL DEFAULT 0,
-  `description` VARCHAR(128) NOT NULL DEFAULT '',
-  `version` VARCHAR(128) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;
-
-
---
--- Structure de la table `cameras`
---
-
 CREATE TABLE IF NOT EXISTS `cameras` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `location` VARCHAR(600) NOT NULL,
@@ -92,11 +51,11 @@ CREATE TABLE IF NOT EXISTS `tableau_map` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_BI` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `deletable` TINYINT(1) NOT NULL DEFAULT '1',
+  `deletable` BOOLEAN NOT NULL DEFAULT '1',
   `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` VARCHAR(256] COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `etat` TINYINT(1) NOT NULL DEFAULT 0,
+  `etat` BOOLEAN NOT NULL DEFAULT 0,
   `groupe` INT(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
@@ -111,11 +70,11 @@ CREATE TABLE IF NOT EXISTS `mnemos_BI` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_MONO` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `deletable` TINYINT(1) NOT NULL DEFAULT '1',
+  `deletable` BOOLEAN NOT NULL DEFAULT '1',
   `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` VARCHAR(256] COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
-  `etat` TINYINT(1) NOT NULL DEFAULT 0,
+  `etat` BOOLEAN NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE (`tech_id`,`acronyme`),
   FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -230,7 +189,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `deletable` TINYINT(1) NOT NULL DEFAULT '1',
+  `deletable` BOOLEAN NOT NULL DEFAULT '1',
   `access_level` INT(11) NOT NULL DEFAULT '0',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
@@ -509,8 +468,8 @@ CREATE TABLE IF NOT EXISTS `audit_log` (
   KEY (`username`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
 
-CREATE TABLE IF NOT EXISTS `icone` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `icons` (
+  `icon_id` INT(11) NOT NULL AUTO_INCREMENT,
   `categorie` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,
   `forme` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `extension` VARCHAR(4) NOT NULL DEFAULT 'svg',

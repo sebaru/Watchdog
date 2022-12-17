@@ -16,6 +16,6 @@
      </table>
    </div>
 
-<script src="/js/tech/log.js" type="text/javascript"></script>
+<script src="/js/log.js" type="text/javascript"></script>
 <!-- Container -->
 </div>

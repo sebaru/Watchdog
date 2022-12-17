@@ -70,7 +70,7 @@
       <li><h6 class="card-text">Master: <span id="idConfigMaster">-</span></h6></li>
       <li><h6 class="card-text">Master Host: <span id="idConfigMasterHost">-</span></h6></li>
       <li><h6 class="card-text">Started: <span id="idConfigStarted">-</span></h6></li>
-      <li><h6 class="card-text">Run_as:<span id="idConfigRunAs">-</span></h6></li>
+      <li><h6 class="card-text">Headless:<span id="idConfigHeadless">-</span></h6></li>
       <li><h6 class="card-text">Top: <span id="idConfigTop">-</span></h6></li>
       <!--<h3 class="card-text text-center"><strong>56</h3>-->
       </ul>
@@ -193,6 +193,6 @@
 </div>
 </div>
 
-<script src="/js/tech/dashboard.js" type="text/javascript"></script>
+<script src="/js/dashboard.js" type="text/javascript"></script>
 <!-- Container -->
 </div>

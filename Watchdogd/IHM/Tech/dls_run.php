@@ -15,7 +15,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Entrées TOR"
-                       src="/img/entree.png" /> Entrées TOR</h4>
+                       src="https://static.abls-habitat.fr/img/entree.png" /> Entrées TOR</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableEntreeTOR')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -31,7 +31,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Entrées ANA"
-                       src="/img/entree_analogique.png" /> Entrées ANA</h4>
+                       src="https://static.abls-habitat.fr/img/entree_analogique.png" /> Entrées ANA</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableEntreeANA')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -47,7 +47,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Sorties TOR"
-                       src="/img/sortie.png" /> Sorties TOR</h4>
+                       src="https://static.abls-habitat.fr/img/sortie.png" /> Sorties TOR</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableSortieTOR')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -63,7 +63,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Sorties ANA"
-                       src="/img/sortie_analogique.png" /> Sorties ANA</h4>
+                       src="https://static.abls-habitat.fr/img/sortie_analogique.png" /> Sorties ANA</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableSortieANA')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -79,7 +79,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Registres"
-                       src="/img/calculatrice.png" /> Registres</h4>
+                       src="https://static.abls-habitat.fr/img/calculatrice.png" /> Registres</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableRegistre')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -95,7 +95,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Compteurs d'impulsions"
-                       src="/img/front_montant.png" /> Compteurs d'impulsions</h4>
+                       src="https://static.abls-habitat.fr/img/front_montant.png" /> Compteurs d'impulsions</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableCI')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -111,7 +111,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Compteurs horaires"
-                       src="/img/compteur_horaire.png" /> Compteurs horaires</h4>
+                       src="https://static.abls-habitat.fr/img/compteur_horaire.png" /> Compteurs horaires</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableCH')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -127,7 +127,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Temporisations"
-                       src="/img/sablier.png" /> Temporisations</h4>
+                       src="https://static.abls-habitat.fr/img/sablier.png" /> Temporisations</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableTempo')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -143,7 +143,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Watchdogs"
-                       src="/img/countdown.svg" /> Watchdogs</h4>
+                       src="https://static.abls-habitat.fr/img/countdown.svg" /> Watchdogs</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableWatchdog')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -159,7 +159,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
  <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Messages"
-                       src="/img/message.png" /> Messages</h4>
+                       src="https://static.abls-habitat.fr/img/message.png" /> Messages</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableMessages')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -175,7 +175,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
 <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Monostables"
-                       src="/img/message.png" /> Monostables</h4>
+                       src="https://static.abls-habitat.fr/img/message.png" /> Monostables</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableMONO')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -191,7 +191,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
 <div class="row m-2">
       <h4><img style="width: 30px" data-toggle="tooltip" title="Bistables"
-                       src="/img/message.png" /> Bistables</h4>
+                       src="https://static.abls-habitat.fr/img/message.png" /> Bistables</h4>
      <div class="ml-auto">
         <button type="button" onclick="Dls_run_refresh('idTableBI')" class="btn btn-outline-secondary"><i class="fas fa-redo"></i> Refresh</button>
 			  </div>
@@ -221,4 +221,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/dls_run.js" type="text/javascript"></script>
+<script src="/js/dls_run.js" type="text/javascript"></script>

@@ -138,15 +138,6 @@
                                Config.db_password, Config.db_database, Config.db_port, FALSE ) );
   }
 /******************************************************************************************************************************/
-/* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
-/* Entrée: toutes les infos necessaires a la connexion                                                                        */
-/* Sortie: une structure DB de référence                                                                                      */
-/******************************************************************************************************************************/
- struct DB *Init_ArchDB_SQL ( void )
-  { return( Init_DB_SQL_with ( Partage->com_arch.archdb_hostname, Partage->com_arch.archdb_username,
-                               Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port, FALSE ) );
-  }
-/******************************************************************************************************************************/
 /* SQL_Field_to_Json : Intéègre un MYSQL_FIELD dans une structure JSON                                                        */
 /* Entrée: Le JsonNode et le MYSQL_FIELD                                                                                      */
 /* Sortie: le jsonnode est mis a jour                                                                                         */
@@ -174,8 +165,7 @@
 /******************************************************************************************************************************/
  static gboolean SQL_Select_to_json_node_reel ( gboolean db_arch, JsonNode *RootNode, gchar *array_name, gchar *requete )
   { struct DB *db;
-    if (db_arch) db = Init_ArchDB_SQL ();
-            else db = Init_DB_SQL ();
+    db = Init_DB_SQL ();
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
        return(FALSE);
@@ -252,29 +242,6 @@
 /* Entrée: La DB, la requete                                                                                                  */
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
- gboolean SQL_Arch_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... )
-  { va_list ap;
-
-    va_start( ap, format );
-    gsize taille = g_printf_string_upper_bound (format, ap);
-    va_end ( ap );
-    gchar *chaine = g_try_malloc(taille+1);
-    if (chaine)
-     { va_start( ap, format );
-       g_vsnprintf ( chaine, taille, format, ap );
-       va_end ( ap );
-
-       gboolean retour = SQL_Select_to_json_node_reel ( TRUE, RootNode, array_name, chaine );
-       g_free(chaine);
-       return(retour);
-     }
-    return(FALSE);
-  }
-/******************************************************************************************************************************/
-/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
-/* Entrée: La DB, la requete                                                                                                  */
-/* Sortie: TRUE si pas de souci                                                                                               */
-/******************************************************************************************************************************/
  gboolean SQL_Write ( gchar *requete )
   { struct DB *db = Init_DB_SQL ();
     if (!db)
@@ -338,33 +305,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
-/* Entrée: La DB, la requete                                                                                                  */
-/* Sortie: TRUE si pas de souci                                                                                               */
-/******************************************************************************************************************************/
- gboolean SQL_Arch_Write ( gchar *requete )
-  { struct DB *db = Init_ArchDB_SQL ();
-    if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Init DB FAILED for '%s'", __func__, requete );
-       return(FALSE);
-     }
-
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
-       Libere_DB_SQL ( &db );
-       return(FALSE);
-     }
-    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
-
-    Libere_DB_SQL ( &db );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
 /* Entrée: La DB                                                                                                              */
 /******************************************************************************************************************************/
  void Libere_DB_SQL( struct DB **adr_db )
-  { static struct DLS_AI *ai_nbr_dbrequest = NULL;
+  { /*static struct DLS_AI *ai_nbr_dbrequest = NULL;*/
     struct DB *db, *db_en_cours;
     gboolean found;
     GSList *liste;
@@ -400,7 +345,7 @@
              "Libere_DB_SQL: Deconnexion effective (DB%07d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
-    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, (gdouble)taille, TRUE );
+/*    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, (gdouble)taille, TRUE );*/
   }
 /******************************************************************************************************************************/
 /* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */
@@ -585,7 +530,7 @@ encore:
                    "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
                    "`valeur` FLOAT NOT NULL DEFAULT '0',"
                    "`archivage` INT(11) NOT NULL DEFAULT '2',"
-                   "`in_range` TINYINT(1) NOT NULL DEFAULT '0',"
+                   "`in_range` BOOLEAN NOT NULL DEFAULT '0',"
                    "UNIQUE (`tech_id`,`acronyme`),"
                    "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
@@ -612,7 +557,7 @@ encore:
                    "`image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'syn_maison.png',"
                    "`page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
                    "`access_level` INT(11) NOT NULL DEFAULT '0',"
-                   "`mode_affichage` TINYINT(1) NOT NULL DEFAULT '0',"
+                   "`mode_affichage` BOOLEAN NOT NULL DEFAULT '0',"
                    "FOREIGN KEY (`parent_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
@@ -635,7 +580,7 @@ encore:
                    "`sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '/* Default ! */',"
                    "`errorlog` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No Error',"
                    "`nbr_ligne` INT(11) NOT NULL DEFAULT '0',"
-                   "`debug` TINYINT(1) NOT NULL DEFAULT '0',"
+                   "`debug` BOOLEAN NOT NULL DEFAULT '0',"
                    "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE"
                    ") ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
@@ -705,7 +650,7 @@ encore:
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `histo_msgs` ("
                    "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
                    "`msg_id` INT(11) NOT NULL DEFAULT '0',"
-                   "`alive` TINYINT(1) NULL DEFAULT NULL,"
+                   "`alive` BOOLEAN NULL DEFAULT NULL,"
                    "`nom_ack` VARCHAR(97) COLLATE utf8_unicode_ci DEFAULT NULL,"
                    "`date_create` DATETIME(2) NULL,"
                    "`date_fixe` DATETIME(2) NULL,"
@@ -727,7 +672,7 @@ encore:
     if (Json_has_member ( RootNode, "database_version" ) )
          { database_version = Json_get_int ( RootNode, "database_version" ); }
     else { database_version = 0; }
-    json_node_unref(RootNode);
+    Json_node_unref(RootNode);
 
     Info_new( Config.log, Config.log_db, LOG_NOTICE,
              "%s: Actual Database_Version detected = %05d. Please wait while upgrading.", __func__, database_version );
@@ -764,7 +709,7 @@ encore:
      }
 
     if (database_version < 6097)
-     { SQL_Write_new ("ALTER TABLE mnemos_AI ADD `in_range` TINYINT(1) NOT NULL DEFAULT '0'"); }
+     { SQL_Write_new ("ALTER TABLE mnemos_AI ADD `in_range` BOOLEAN NOT NULL DEFAULT '0'"); }
 /* a prévoir:
        SQL_Write_new ("ALTER TABLE mnemos_BI       CHANGE `id`     `id_mnemos_BI` INT(11) NOT NULL AUTO_INCREMENT" );
        SQL_Write_new ("ALTER TABLE mnemos_MONO     CHANGE `id`     `id_mnemos_MONO` INT(11) NOT NULL AUTO_INCREMENT" );

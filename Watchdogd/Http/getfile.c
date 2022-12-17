@@ -90,7 +90,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
               "%s: File '%s' uploaded with size='%d'", __func__, filename, taille );
 
-    Audit_log ( session, "File '%s' uploaded (size=%d)", filename, taille );
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
@@ -286,6 +285,137 @@
      }
     else if ( g_str_has_suffix (path, ".wav") )
      { soup_message_set_response ( msg, "audio/x-wav", SOUP_MEMORY_TAKE, result, taille_result ); }
+    else
+     { soup_message_set_response ( msg, "text/html; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_traiter_new_file ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                              SoupClientContext *client, gpointer user_data )
+  { gint fd, taille_header, taille_fichier, taille_footer, taille_result;
+    struct stat stat_buf;
+    gchar fichier[80], header[80], footer[80], *result, *new_result;
+    gboolean has_template;
+
+    if (msg->method != SOUP_METHOD_GET)
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+      return;
+     }
+
+    if (g_strrstr(path, "..")) return;
+
+    g_strcanon ( path, "ABCDEFGIHJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz._/", '_' );
+    gchar *path_to_lower = g_utf8_strdown ( path, -1 );
+    gchar **URI = g_strsplit ( path_to_lower, "/", -1 );
+    g_free(path_to_lower);
+
+    if (!URI)
+     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "URI Split Failed" );
+       return;
+     }
+
+    taille_result = taille_header = taille_footer = 0;
+    result = NULL;
+    has_template = FALSE;
+
+    if (!strcasecmp( URI[1], "js"))
+     { g_snprintf ( fichier, sizeof(fichier), "%s/IHM/js/%s", WTD_PKGDATADIR, URI[2] ); }
+    else
+     { g_snprintf ( header, sizeof(header), "%s/IHM/Tech/header.php", WTD_PKGDATADIR );
+       g_snprintf ( footer, sizeof(footer), "%s/IHM/Tech/footer.php", WTD_PKGDATADIR );
+       has_template = TRUE;
+       g_snprintf ( fichier, sizeof(fichier), "%s/IHM/Tech/%s.php", WTD_PKGDATADIR, URI[1] );
+     }
+    g_strfreev(URI);
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s : Serving file %s", __func__, fichier );
+
+/*--------------------------------------------------- LEcture header ---------------------------------------------------------*/
+    if (has_template)
+     { if (stat (header, &stat_buf)==-1)
+        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Header Error Stat" );
+          return;
+        }
+       taille_header = stat_buf.st_size;
+       taille_result += stat_buf.st_size;
+       new_result = g_try_realloc ( result, taille_result );
+       if (!new_result)
+        { g_free(result);
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Header Memory Error" );
+          return;
+        } else result = new_result;
+       fd = open ( header, O_RDONLY );
+       if (fd==-1)
+        { g_free(result);
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Header File Open Error" );
+          return;
+        }
+       read ( fd, result, taille_header );
+       close(fd);
+     }
+
+/*--------------------------------------------------- Lecture fichier --------------------------------------------------------*/
+    if (stat (fichier, &stat_buf)==-1)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : File '%s' not found", __func__, fichier );
+       soup_message_set_status_full ( msg, SOUP_STATUS_NOT_FOUND, "File not found" );
+       g_free(result);
+       return;
+     }
+
+    taille_fichier = stat_buf.st_size;
+    taille_result += stat_buf.st_size;
+    new_result = g_try_realloc ( result, taille_result );
+    if (!new_result)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : File '%s' Realloc error", __func__, fichier );
+       g_free(result);
+       soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error" );
+       return;
+     } else result = new_result;
+
+   fd = open ( fichier, O_RDONLY );
+    if (fd==-1)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : File '%s' open error '%s'", __func__, fichier, strerror(errno) );
+       g_free(result);
+       soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "File Open Error" );
+       return;
+     }
+    read ( fd, result + taille_header, taille_fichier );
+    close(fd);
+
+/*--------------------------------------------------- LEcture footer ---------------------------------------------------------*/
+    if (has_template)
+     { if (stat (footer, &stat_buf)==-1)
+        { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Footer Error Stat" );
+          return;
+        }
+       taille_footer = stat_buf.st_size;
+       taille_result += stat_buf.st_size;
+       new_result = g_try_realloc ( result, taille_result );
+       if (!new_result)
+        { g_free(result);
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Footer Memory Error" );
+          return;
+        } else result = new_result;
+       fd = open ( footer, O_RDONLY );
+       if (fd==-1)
+        { g_free(result);
+          soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Footer File Open Error" );
+          return;
+        }
+       read ( fd, result + taille_header + taille_fichier, taille_footer );
+       close(fd);
+     }
+/*************************************************** Envoi au client **********************************************************/
+    SoupMessageHeaders *headers;
+    g_object_get ( G_OBJECT(msg), "response_headers", &headers, NULL );
+
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+         if ( g_str_has_suffix (path, ".js") )
+     { soup_message_set_response ( msg, "text/javascript; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result );
+       soup_message_headers_append ( headers, "cache-control", "private, max-age=60" );
+     }
     else
      { soup_message_set_response ( msg, "text/html; charset=UTF-8", SOUP_MEMORY_TAKE, result, taille_result ); }
   }

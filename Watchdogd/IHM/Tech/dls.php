@@ -71,4 +71,4 @@
 </div>
 
 
-<script src="/js/tech/dls.js" type="text/javascript"></script>
+<script src="/js/dls.js" type="text/javascript"></script>

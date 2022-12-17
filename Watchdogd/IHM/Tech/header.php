@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="google" content="notranslate">
         <meta name="robots" content="noindex, nofollow">
-        <link rel="icon" href="/img/logo.svg">
+        <link rel="icon" href="https://static.abls-habitat.fr/img/abls.svg">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/fh-3.1.7/r-2.2.5/datatables.min.css"/>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.2/codemirror.min.css">
@@ -172,7 +172,7 @@
 <!----------------------------------------------------------------------------------------------------------------------------->
 <header>
  <nav class="navbar navbar-dark  navbar-expand-lg sticky-top shadow mb-2"> <!-- fixed-top -->
-  <a class="navbar-brand" href="/"><img src="/img/logo.svg" alt="Watchdog Logo" width=50></a>
+  <a class="navbar-brand" href="/"><img src="https://static.abls-habitat.fr/img/abls.svg" alt="Watchdog Logo" width=50></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -186,8 +186,8 @@
           <i class="fas fa-wrench"></i> Configuration
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarCONFIG">
-          <a class="dropdown-item" href="/tech/synoptiques"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
-          <a class="dropdown-item" href="/tech/dls"> <i class="fas fa-code text-primary"></i> <span>Modules D.L.S</span> </a>
+          <a class="dropdown-item" href="https://console.abls-habitat.fr/synoptiques"> <i class="fas fa-image text-danger"></i> <span>Synoptiques</span> </a>
+          <a class="dropdown-item" href="https://console.abls-habitat.fr/dls"> <i class="fas fa-code text-primary"></i> <span>Modules D.L.S</span> </a>
           <a class="dropdown-item" href="/tech/tableau"> <i class="fas fa-chart-line text-secondary"></i> <span>Tableaux</span> </a>
         </div>
       </li>
@@ -198,14 +198,14 @@
           <i class="fas fa-crown"></i> Domaine
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDOMAINE">
-          <a class="dropdown-item" href="/tech/instance"><i class="fas fa-crown text-danger"></i> <span>Instances</span></a>
+          <a class="dropdown-item" href="https://console.abls-habitat.fr/agent"><i class="fas fa-crown text-danger"></i> <span>Instances</span></a>
           <a class="dropdown-item" href="/tech/process"><i class="fas fa-microchip text-primary"></i> <span>Processus</span></a>
-          <a class="dropdown-item" href="/tech/archive"><i class="fas fa-database text-secondary"></i> <span>Archivage</span></a>
+          <a class="dropdown-item" href="https://console.abls-habitat.fr/archive"><i class="fas fa-database text-secondary"></i> <span>Archivage</span></a>
           <a class="dropdown-item" href="/tech/dashboard_courbes"> <i class="fas fa-chart-line text-secondary"></i> <span>Courbes</span> </a>
         </div>
       </li>
 
-      <a class="nav-link rounded" href="/tech/io_config"><i class="fas fa-link"></i> <span>Connecteurs</span></a>
+      <a class="nav-link rounded" href="https://console.abls-habitat.fr/io_config"><i class="fas fa-link"></i> <span>Connecteurs</span></a>
 
     </ul>
 

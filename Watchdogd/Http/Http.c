@@ -46,7 +46,8 @@
     gsize taille;
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if ( !request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
+    if (!request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
+    g_bytes_unref(request_brute);
     return(request);
   }
 /******************************************************************************************************************************/
@@ -59,6 +60,7 @@
     gsize taille;
     g_object_get ( msg, "response-body-data", &reponse_brute, NULL );
     JsonNode *reponse = Json_get_from_string ( g_bytes_get_data ( reponse_brute, &taille ) );
+    g_bytes_unref(reponse_brute);
     return(reponse);
   }
 /******************************************************************************************************************************/
@@ -82,43 +84,104 @@
     return(phrase);
   }
 /******************************************************************************************************************************/
+/* Http_Send_json_response: Envoie le json en paramètre en prenant le lead dessus                                             */
+/* Entrée: le messages, le buffer json                                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Http_Send_json_response ( SoupMessage *msg, JsonNode *RootNode )
+  { gchar *buf = Json_node_to_string ( RootNode );
+    Json_node_unref ( RootNode );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+/******************************************************************************************************************************/
 /* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- gboolean Http_Post_to_global_API ( gchar *URI, gchar *api_tag, JsonNode *RootNode )
-  { gchar query[256];
-    gboolean success = FALSE;
+ void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size )
+  { gchar *origin        = "abls-habitat.fr";
+    gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
+    gchar *domain_secret = Json_get_string ( Config.config, "domain_secret" );
+    gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
+    gchar timestamp[20];
+    g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
 
-    g_snprintf( query, sizeof(query), "%s/%s", Json_get_string ( Config.config, "api_url"), URI );
+    unsigned char hash_bin[EVP_MAX_MD_SIZE];
+    gint md_len;
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(mdctx, domain_uuid,   strlen(domain_uuid));
+    EVP_DigestUpdate(mdctx, agent_uuid,    strlen(agent_uuid));
+    EVP_DigestUpdate(mdctx, domain_secret, strlen(domain_secret));
+    if (buf) EVP_DigestUpdate(mdctx, buf,           buf_size);
+    EVP_DigestUpdate(mdctx, timestamp,     strlen(timestamp));
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
+    gchar signature[64];
+    EVP_EncodeBlock( signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
+
+    SoupMessageHeaders *headers;
+    g_object_get ( msg, "request-headers", &headers, NULL );
+    soup_message_headers_append ( headers, "Origin",           origin );
+    soup_message_headers_append ( headers, "X-ABLS-DOMAIN",    domain_uuid );
+    soup_message_headers_append ( headers, "X-ABLS-AGENT",     agent_uuid );
+    soup_message_headers_append ( headers, "X-ABLS-TIMESTAMP", timestamp );
+    soup_message_headers_append ( headers, "X-ABLS-SIGNATURE", signature );
+  }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode )
+  { gboolean unref_RootNode = FALSE;
+    JsonNode *result = NULL;
+    gchar query[256];
+
+    g_snprintf( query, sizeof(query), "https://%s%s", Json_get_string ( Config.config, "api_url" ), URI );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
-       return(FALSE);
+       return(NULL);
      }
-    Json_node_add_string ( RootNode, "domain_uuid", Config.instance_uuid );
-    Json_node_add_string ( RootNode, "api_tag", api_tag );
+
+    if (!RootNode) { RootNode = Json_node_create(); unref_RootNode = TRUE; }
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
-    gchar *buf = Json_node_to_string ( RootNode );
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-             "%s: Sending to API %s: %s", __func__, query, buf );
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-    /* Async soup_session_queue_message (client->connexion, msg, callback, client);*/
-    soup_session_send_message (connexion, soup_msg); /* SYNC */
+    gchar *buf    = Json_node_to_string ( RootNode );
+    gint buf_size = strlen(buf);
+    if (unref_RootNode) Json_node_unref(RootNode);
+
+    Http_Add_Agent_signature ( soup_msg, buf, buf_size );
+
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending to API %s", __func__, query );
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, buf_size );
+    /* Async soup_session_queue_message (client->Partage->com_msrv.Soup_session, msg, callback, client);*/
+    soup_session_send_message (Partage->com_msrv.API_session, soup_msg); /* SYNC */
 
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: %s Status %d, reason %s", __func__, URI, status_code, reason_phrase );
 
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    gchar nom_fichier[256];
+    g_snprintf ( nom_fichier, sizeof(nom_fichier), "cache-%s", query );
+    g_strcanon ( nom_fichier+6, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYYZ", '_' );
+
     if (status_code!=200)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
-    else { success = TRUE; }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: %s Error %d for '%s': %s\n", __func__, URI, status_code, query, reason_phrase );
+       result = Json_read_from_file ( nom_fichier );
+       if (result) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Using cache for %s", __func__, query );
+     }
+    else
+     { result = Http_Response_Msg_to_Json ( soup_msg );
+       if (Json_has_member ( result, "api_cache" ) && Json_get_bool ( result, "api_cache" ) ) Json_write_to_file ( nom_fichier, result );
+     }
+    g_free(reason_phrase);
     g_object_unref( soup_msg );
-    soup_session_abort ( connexion );
-    return(success);
+    return(result);
  }
 /******************************************************************************************************************************/
 /* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
@@ -126,34 +189,259 @@
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
  JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres )
-  { gchar query[256];
+  { gchar query[512];
     JsonNode *result = NULL;
 
-    if (!parametres) g_snprintf( query, sizeof(query), "%s/%s", Json_get_string ( Config.config, "api_url"), URI );
-                else g_snprintf( query, sizeof(query), "%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
+    if (!parametres) g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
+                else g_snprintf( query, sizeof(query), "https://%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
     if (!soup_msg)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Reading from API %s", __func__, query );
        return(NULL);
      }
 
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
-    soup_session_send_message (connexion, soup_msg);
+    Http_Add_Agent_signature ( soup_msg, NULL, 0 );
 
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
+    soup_session_send_message (Partage->com_msrv.API_session, soup_msg);
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
 
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    gchar nom_fichier[256];
+    g_snprintf ( nom_fichier, sizeof(nom_fichier), "cache-%s", query );
+    g_strcanon ( nom_fichier+6, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYYZ", '_' );
+
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: %s Status %d, reason %s", __func__, URI, status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: %s Error %d for '%s': %s\n", __func__, URI, status_code, query, reason_phrase );
+       result = Json_read_from_file ( nom_fichier );
+       if (result) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Using cache for %s", __func__, query );
+     }
     else
-     { result = Http_Response_Msg_to_Json ( soup_msg ); }
+     { result = Http_Response_Msg_to_Json ( soup_msg );
+       if (Json_has_member ( result, "api_cache" ) && Json_get_bool ( result, "api_cache" ) ) Json_write_to_file ( nom_fichier, result );
+     }
+    g_free(reason_phrase);
     g_object_unref( soup_msg );
-    soup_session_abort ( connexion );
     return(result);
  }
+/******************************************************************************************************************************/
+/* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
+/* Entrées: une structure util, un code confidentiel                                                                          */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ static gboolean Http_check_utilisateur_password( gchar *dbsalt, gchar *dbhash, gchar *pwd )
+  { guchar hash[EVP_MAX_MD_SIZE*2+1], hash_bin[EVP_MAX_MD_SIZE];
+    memset ( hash, 0, sizeof(hash) );
+    gint md_len;
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(mdctx, dbsalt, strlen(dbsalt));
+    EVP_DigestUpdate(mdctx, pwd, strlen(pwd) );
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
+
+    for (gint i=0; i<md_len; i++)
+     { gchar chaine[3];
+       g_snprintf(chaine, sizeof(chaine), "%02x", hash_bin[i] );
+       g_strlcat( hash, chaine, sizeof(hash) );
+     }
+
+    return ( ! memcmp ( hash, dbhash, strlen(dbhash) ) );
+  }
+/******************************************************************************************************************************/
+/* Http_add_cookie: Ajoute un cookie a la reponse                                                                             */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_add_cookie ( SoupMessage *msg, gchar *name, gchar *value, gint life )
+  { SoupCookie *cookie = soup_cookie_new ( name, value, "", "/", life );
+    soup_cookie_set_http_only ( cookie, TRUE );
+    soup_cookie_set_secure ( cookie, TRUE );
+    GSList *liste = g_slist_append ( NULL, cookie );
+    soup_cookies_to_response ( liste, msg );
+    g_slist_free(liste);
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_connect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                    SoupClientContext *client, gpointer user_data )
+  { gchar requete[256], *name;
+
+    if (msg->method != SOUP_METHOD_POST)
+     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+       return;
+     }
+
+    Http_print_request ( server, msg, path, client );
+    JsonNode *request = Http_Msg_to_Json ( msg );
+    if (!request) return;
+
+    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "password" ) &&
+            Json_has_member ( request, "useragent" ) && Json_has_member ( request, "appareil" )
+           )
+       )
+     { Json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    name = Normaliser_chaine ( Json_get_string ( request, "username" ) );                    /* Formatage correct des chaines */
+    if (!name)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+       Json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT username,comment,access_level,enable,salt,hash FROM users WHERE username='%s' LIMIT 1", name );
+    g_free(name);
+
+    struct DB *db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: DB connexion failed for user '%s'", __func__, Json_get_string ( request, "username" ) );
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
+       return;
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: DB request failed for user '%s'",__func__, Json_get_string ( request, "username" ) );
+       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
+       return;
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: User '%s' not found in DB", __func__, Json_get_string ( request, "username" ) );
+       Json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
+       return;
+     }
+
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: User '%s' (%s) found in database.",
+              __func__, db->row[0], db->row[1] );
+
+/*********************************************************** Compte du client *************************************************/
+    if (atoi(db->row[3]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: User '%s' not enabled",
+                 __func__, db->row[0] );
+       Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
+       return;
+     }
+/*********************************************** Authentification du client par login mot de passe ****************************/
+    if ( Http_check_utilisateur_password( db->row[4], db->row[5], Json_get_string ( request, "password" ) ) == FALSE )/* Comparaison MDP */
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Password error for '%s' (%s)",
+                 __func__, db->row[0], db->row[1] );
+       Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
+       return;
+     }
+
+    struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof(struct HTTP_CLIENT_SESSION) );
+    if (!session)
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Session creation Error", __func__ );
+       Json_node_unref(request);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+
+    pthread_mutex_lock( &Partage->com_http.synchro );                                  /* On prend un numéro de session tout neuf */
+    session->id = Partage->com_http.num_session++;
+    pthread_mutex_unlock( &Partage->com_http.synchro );
+
+    g_snprintf( session->username, sizeof(session->username), "%s", db->row[0] );
+    gchar *useragent = Normaliser_chaine ( Json_get_string ( request, "useragent" ) );
+    g_snprintf( session->useragent, sizeof(session->useragent), "%s", useragent );
+    g_free(useragent);
+    gchar *appareil = Normaliser_chaine ( Json_get_string ( request, "appareil" ) );
+    g_snprintf( session->appareil, sizeof(session->appareil), "%s", appareil );
+    g_free(appareil);
+    gchar *temp = g_inet_address_to_string ( g_inet_socket_address_get_address ( G_INET_SOCKET_ADDRESS(soup_client_context_get_remote_address (client) )) );
+    g_snprintf( session->host, sizeof(session->host), "%s", temp );
+    g_free(temp);
+    session->access_level = atoi(db->row[2]);
+    Liberer_resultat_SQL (db);
+    Libere_DB_SQL( &db );
+
+    time(&session->last_request);
+    UUID_New ( session->wtd_session );
+    if (strlen(session->wtd_session) != 36)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
+       g_free(session);
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "UUID Error");
+       return;
+     }
+    Partage->com_http.liste_http_clients = g_slist_append ( Partage->com_http.liste_http_clients, session );
+
+    Http_add_cookie ( msg, "wtd_session", session->wtd_session, 180*SOUP_COOKIE_MAX_AGE_ONE_DAY );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
+              session->username, session->host );
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode == NULL)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       return;
+     }
+                                                                      /* Lancement de la requete de recuperation des messages */
+/*------------------------------------------------------- Dumping status -----------------------------------------------------*/
+    Json_node_add_bool   ( RootNode, "connected", TRUE );
+    Json_node_add_string ( RootNode, "version",  WTD_VERSION );
+    Json_node_add_string ( RootNode, "username", session->username );
+    Json_node_add_string ( RootNode, "appareil", session->appareil );
+    Json_node_add_string ( RootNode, "instance", g_get_host_name() );
+    Json_node_add_bool   ( RootNode, "instance_is_master", Config.instance_is_master );
+    Json_node_add_bool   ( RootNode, "ssl", soup_server_is_https (server) );
+    Json_node_add_int    ( RootNode, "access_level", session->access_level );
+    Json_node_add_string ( RootNode, "wtd_session", session->wtd_session );
+    Json_node_add_string ( RootNode, "message", "Welcome back Home !" );
+    gchar *buf = Json_node_to_string ( RootNode );
+    Json_node_unref ( RootNode );
+/*************************************************** Envoi au client **********************************************************/
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+/******************************************************************************************************************************/
+/* Http_traiter_disconnect: Répond aux requetes sur l'URI disconnect                                                          */
+/* Entrée: les données fournies par la librairie libsoup                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Http_traiter_disconnect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                       SoupClientContext *client, gpointer user_data )
+  { if (msg->method != SOUP_METHOD_PUT)
+     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+		     return;
+     }
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    if (session)
+     { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, session );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: sid '%s' ('%s', level %d) disconnected", __func__,
+                 session->wtd_session, session->username, session->access_level );
+       g_free(session);
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                 "%s: '%d' session left", __func__, g_slist_length(Partage->com_http.liste_http_clients) );
+     }
+    soup_message_set_status (msg, SOUP_STATUS_OK);
+  }
+
 /******************************************************************************************************************************/
 /* Http_destroy_session: Libère une session en paramètre                                                                      */
 /* Entrées: la session                                                                                                        */
@@ -163,24 +451,6 @@
   { while ( session->liste_ws_clients ) Http_ws_destroy_session ( (struct WS_CLIENT_SESSION *)session->liste_ws_clients->data );
     g_slist_free ( session->Liste_bit_cadrans );
     g_free(session);
-  }
-/******************************************************************************************************************************/
-/* Http_Save_and_close_sessions: Sauvegarde les sessions en base de données                                                   */
-/* Entrées: néant                                                                                                             */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_Save_and_close_sessions ( void )
-  { while ( Partage->com_http.liste_http_clients )
-     { struct HTTP_CLIENT_SESSION *session = Partage->com_http.liste_http_clients->data;
-       SQL_Write_new ( "INSERT INTO users_sessions SET id='%d', username='%s', appareil='%s', useragent='%s', "
-                       "wtd_session='%s', host='%s', last_request='%d' "
-                       "ON DUPLICATE KEY UPDATE last_request=VALUES(last_request)",
-                       session->id, session->username, session->appareil, session->useragent,
-                       session->wtd_session, session->host, session->last_request );
-       Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, session );
-       Http_destroy_session(session);
-     }
-    Partage->com_http.liste_http_clients = NULL;
   }
 /******************************************************************************************************************************/
 /* Http_Load_sessions: Charge les sessions en base de données                                                                 */
@@ -215,31 +485,7 @@
     Partage->com_http.num_session = 0;
     if (Json_has_member ( RootNode, "sessions" ))
      { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
-    json_node_unref(RootNode);
-  }
-/******************************************************************************************************************************/
-/* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
-/* Entrées: une structure util, un code confidentiel                                                                          */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- static gboolean Http_check_utilisateur_password( gchar *dbsalt, gchar *dbhash, gchar *pwd )
-  { guchar hash[EVP_MAX_MD_SIZE*2+1], hash_bin[EVP_MAX_MD_SIZE];
-    memset ( hash, 0, sizeof(hash) );
-    gint md_len;
-    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
-    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
-    EVP_DigestUpdate(mdctx, dbsalt, strlen(dbsalt));
-    EVP_DigestUpdate(mdctx, pwd, strlen(pwd) );
-    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
-    EVP_MD_CTX_free(mdctx);
-
-    for (gint i=0; i<md_len; i++)
-     { gchar chaine[3];
-       g_snprintf(chaine, sizeof(chaine), "%02x", hash_bin[i] );
-       g_strlcat( hash, chaine, sizeof(hash) );
-     }
-
-    return ( ! memcmp ( hash, dbhash, strlen(dbhash) ) );
+    Json_node_unref(RootNode);
   }
 /******************************************************************************************************************************/
 /* Http_rechercher_session: Recherche une session dans la liste des session                                                   */
@@ -277,19 +523,6 @@
      }
     soup_cookies_free(cookies);
     return(result);
-  }
-/******************************************************************************************************************************/
-/* Http_add_cookie: Ajoute un cookie a la reponse                                                                             */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_add_cookie ( SoupMessage *msg, gchar *name, gchar *value, gint life )
-  { SoupCookie *cookie = soup_cookie_new ( name, value, "", "/", life );
-    soup_cookie_set_http_only ( cookie, TRUE );
-    soup_cookie_set_secure ( cookie, TRUE );
-    GSList *liste = g_slist_append ( NULL, cookie );
-    soup_cookies_to_response ( liste, msg );
-    g_slist_free(liste);
   }
 /******************************************************************************************************************************/
 /* Http_print_request: affiche les données relatives à une requete                                                            */
@@ -349,185 +582,7 @@
     Json_node_add_bool   ( RootNode, "Thread_run", Partage->com_msrv.Thread_run );
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_disconnect: Répond aux requetes sur l'URI disconnect                                                          */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_traiter_disconnect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                       SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_PUT)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (session)
-     { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, session );
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: sid '%s' ('%s', level %d) disconnected", __func__,
-                 session->wtd_session, session->username, session->access_level );
-       g_free(session);
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: '%d' session left", __func__, g_slist_length(Partage->com_http.liste_http_clients) );
-     }
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_traiter_connect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                    SoupClientContext *client, gpointer user_data )
-  { gchar requete[256], *name;
-
-    if (msg->method != SOUP_METHOD_POST)
-     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-       return;
-     }
-
-    Http_print_request ( server, msg, path, client );
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "password" ) &&
-            Json_has_member ( request, "useragent" ) && Json_has_member ( request, "appareil" )
-           )
-       )
-     { json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    name = Normaliser_chaine ( Json_get_string ( request, "username" ) );                    /* Formatage correct des chaines */
-    if (!name)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
-       json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT username,comment,access_level,enable,salt,hash FROM users WHERE username='%s' LIMIT 1", name );
-    g_free(name);
-
-    struct DB *db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: DB connexion failed for user '%s'", __func__, Json_get_string ( request, "username" ) );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
-       return;
-     }
-
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: DB request failed for user '%s'",__func__, Json_get_string ( request, "username" ) );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
-       return;
-     }
-
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: User '%s' not found in DB", __func__, Json_get_string ( request, "username" ) );
-       json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
-       return;
-     }
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: User '%s' (%s) found in database.",
-              __func__, db->row[0], db->row[1] );
-
-/*********************************************************** Compte du client *************************************************/
-    if (atoi(db->row[3]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: User '%s' not enabled",
-                 __func__, db->row[0] );
-       Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
-       return;
-     }
-/*********************************************** Authentification du client par login mot de passe ****************************/
-    if ( Http_check_utilisateur_password( db->row[4], db->row[5], Json_get_string ( request, "password" ) ) == FALSE )/* Comparaison MDP */
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Password error for '%s' (%s)",
-                 __func__, db->row[0], db->row[1] );
-       Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
-       return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof(struct HTTP_CLIENT_SESSION) );
-    if (!session)
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Session creation Error", __func__ );
-       json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    pthread_mutex_lock( &Partage->com_http.synchro );                                  /* On prend un numéro de session tout neuf */
-    session->id = Partage->com_http.num_session++;
-    pthread_mutex_unlock( &Partage->com_http.synchro );
-
-    g_snprintf( session->username, sizeof(session->username), "%s", db->row[0] );
-    gchar *useragent = Normaliser_chaine ( Json_get_string ( request, "useragent" ) );
-    g_snprintf( session->useragent, sizeof(session->useragent), "%s", useragent );
-    g_free(useragent);
-    gchar *appareil = Normaliser_chaine ( Json_get_string ( request, "appareil" ) );
-    g_snprintf( session->appareil, sizeof(session->appareil), "%s", appareil );
-    g_free(appareil);
-    gchar *temp = g_inet_address_to_string ( g_inet_socket_address_get_address ( G_INET_SOCKET_ADDRESS(soup_client_context_get_remote_address (client) )) );
-    g_snprintf( session->host, sizeof(session->host), "%s", temp );
-    g_free(temp);
-    session->access_level = atoi(db->row[2]);
-    Liberer_resultat_SQL (db);
-    Libere_DB_SQL( &db );
-
-    time(&session->last_request);
-    UUID_New ( session->wtd_session );
-    if (strlen(session->wtd_session) != 36)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
-       g_free(session);
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "UUID Error");
-       return;
-     }
-    Partage->com_http.liste_http_clients = g_slist_append ( Partage->com_http.liste_http_clients, session );
-
-    Http_add_cookie ( msg, "wtd_session", session->wtd_session, 180*SOUP_COOKIE_MAX_AGE_ONE_DAY );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
-              session->username, session->host );
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-                                                                      /* Lancement de la requete de recuperation des messages */
-/*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    Json_node_add_bool   ( RootNode, "connected", TRUE );
-    Json_node_add_string ( RootNode, "version",  WTD_VERSION );
-    Json_node_add_string ( RootNode, "username", session->username );
-    Json_node_add_string ( RootNode, "appareil", session->appareil );
-    Json_node_add_string ( RootNode, "instance", g_get_host_name() );
-    Json_node_add_bool   ( RootNode, "instance_is_master", Config.instance_is_master );
-    Json_node_add_bool   ( RootNode, "ssl", soup_server_is_https (server) );
-    Json_node_add_int    ( RootNode, "access_level", session->access_level );
-    Json_node_add_string ( RootNode, "wtd_session", session->wtd_session );
-    Json_node_add_string ( RootNode, "message", "Welcome back Home !" );
-    gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -581,7 +636,7 @@
 
     if (SQL_Select_to_json_node ( RootNode, NULL, "SELECT COUNT(*) AS recordsTotal FROM dictionnaire LIMIT %d", length )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        g_free(search);
        return;
      }
@@ -591,7 +646,7 @@
                                   "LIMIT %d OFFSET %d",
                                   search, search, search, length, start )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        g_free(search);
        return;
      }
@@ -601,25 +656,75 @@
                                   "LIMIT %d OFFSET %d",
                                   search, search, search, length, start )==FALSE)
      { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       json_node_unref ( RootNode );
+       Json_node_unref ( RootNode );
        g_free(search);
        return;
      }
     g_free(search);
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
-/* Run_process: Thread principal                                                                                               */
-/* Entrée: une structure PROCESS                                                                                            */
+/* HTTP_Handle_request: Repond aux requests reçues                                                                            */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void HTTP_Handle_request_CB ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                      SoupClientContext *client, gpointer user_data )
+  { SoupMessageHeaders *headers;
+    g_object_get ( G_OBJECT(msg), SOUP_MESSAGE_RESPONSE_HEADERS, &headers, NULL );
+    soup_message_headers_append ( headers, "Cache-Control", "no-store, must-revalidate" );
+    soup_message_headers_append ( headers, "Access-Control-Allow-Origin", "*" );
+    soup_message_headers_append ( headers, "Access-Control-Allow-Methods", "*" );
+    soup_message_headers_append ( headers, "Access-Control-Allow-Headers", "content-type, authorization, X-ABLS-DOMAIN" );
+
+/*---------------------------------------------------- OPTIONS ---------------------------------------------------------------*/
+    if (msg->method == SOUP_METHOD_OPTIONS)
+     { soup_message_headers_append ( headers, "Access-Control-Max-Age", "86400" );
+       soup_message_set_status (msg, SOUP_STATUS_OK );
+       return;
+     }
+/*------------------------------------------------------ GET -----------------------------------------------------------------*/
+
+    if (Config.installed == FALSE)
+     { if (msg->method == SOUP_METHOD_GET)
+        {      if (!strcasecmp ( path, "/install" ))   Http_traiter_install ( server, msg, path, query, client, user_data );
+          else if (!strcasecmp ( path, "/status" ))    Http_traiter_status  ( server, msg, path, query, client, user_data );
+          else soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
+        }
+       else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
+     }
+    else if (msg->method == SOUP_METHOD_GET)
+     {      if (!strcasecmp ( path, "/" ))           Http_traiter_status     ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/dls/run" ))    Http_traiter_dls_run    ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/status" ))     Http_traiter_status     ( server, msg, path, query, client, user_data );
+       else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
+       /*else { Http_traiter_new_file ( server, msg, path, query, client, user_data ); return; }*/
+     }
+    else if (msg->method == SOUP_METHOD_POST)
+     {      if (!strcasecmp ( path, "/dls/run/set" ))  Http_traiter_dls_run_set   ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/dls/acquitter")) Http_traiter_dls_acquitter ( server, msg, path, query, client, user_data );
+     }
+    else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
+    soup_message_set_status (msg, SOUP_STATUS_OK );
+  }
+/******************************************************************************************************************************/
+/* Run_HTTP: Thread principal                                                                                                 */
+/* Entrée: une structure PROCESS                                                                                              */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_Start_API ( void )
+ void Run_HTTP ( void )
   { GError *error = NULL;
+    static gint last_pulse = 0;
+
+    prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
+    Partage->com_http.Thread_run = TRUE;                                                                /* Le thread tourne ! */
+    Info_new( Config.log, Partage->com_http.Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
     SoupServer *socket = Partage->com_http.socket = soup_server_new( "server-header", "Watchdogd Ex-API Server", NULL);
     if (!socket)
@@ -651,81 +756,21 @@
        return;
      }
 
+    soup_server_add_handler ( socket, "/api/dls/status" ,    Http_traiter_dls_status, NULL, NULL );
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/list",       Http_traiter_dls_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/source",     Http_traiter_dls_source, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/del",        Http_traiter_dls_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/status" ,    Http_traiter_dls_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/run/set" ,   Http_traiter_dls_run_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/run" ,       Http_traiter_dls_run, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/debug" ,     Http_traiter_dls_debug, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/undebug",    Http_traiter_dls_undebug, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/start" ,     Http_traiter_dls_start, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/stop" ,      Http_traiter_dls_stop, NULL, NULL );
+
     soup_server_add_handler ( socket, "/api/dls/acquitter",  Http_traiter_dls_acquitter, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/compil" ,    Http_traiter_dls_compil, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/dls/set" ,       Http_traiter_dls_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/validate",Http_traiter_mnemos_validate, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/tech_id", Http_traiter_mnemos_tech_id, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/list",    Http_traiter_mnemos_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/mnemos/set",     Http_traiter_mnemos_set, NULL, NULL );
 
-    soup_server_add_handler ( socket, "/api/map",            Http_traiter_map, NULL, NULL );
-
-    soup_server_add_handler ( socket, "/api/syn/list",       Http_traiter_syn_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/del",        Http_traiter_syn_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/get",        Http_traiter_syn_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/set",        Http_traiter_syn_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/syn/ack",        Http_traiter_syn_ack, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/save",       Http_traiter_syn_save, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/horloge/get",    Http_traiter_horloge_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/horloge/ticks/set", Http_traiter_horloge_ticks_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/horloge/ticks/del", Http_traiter_horloge_ticks_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/horloge/ticks/list",Http_traiter_horloge_ticks_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/list",   Http_traiter_tableau_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/del",    Http_traiter_tableau_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/set",    Http_traiter_tableau_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/map/list", Http_traiter_tableau_map_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/map/del",  Http_traiter_tableau_map_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/tableau/map/set",  Http_traiter_tableau_map_set, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
+    soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
 
-    soup_server_add_handler ( socket, "/api/archive/set",          Http_traiter_archive_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/get",          Http_traiter_archive_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/status",       Http_traiter_archive_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/table_status", Http_traiter_archive_table_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/del",          Http_traiter_archive_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/clear",        Http_traiter_archive_clear, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/purge",        Http_traiter_archive_purge, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/archive/testdb",       Http_traiter_archive_testdb, NULL, NULL );
-
-    soup_server_add_handler ( socket, "/api/process/reload", Http_traiter_process_reload, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/enable", Http_traiter_process_enable, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/debug",  Http_traiter_process_debug, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/list",   Http_traiter_process_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/config", Http_traiter_process_config, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/process/send",   Http_traiter_process_send, NULL, NULL );
-
-    soup_server_add_handler ( socket, "/api/instance/list",  Http_traiter_instance_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/instance/set",   Http_traiter_instance_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/instance/reload_icons",
-                                                             Http_traiter_instance_reload_icons, NULL, NULL );
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/log/get",        Http_traiter_log_get, NULL, NULL );
     soup_server_add_handler ( socket, "/api/bus",            Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
     soup_server_add_handler ( socket, "/api/search",         Http_traiter_search, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/users/list",     Http_traiter_users_list, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/users/set",      Http_traiter_users_set, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/users/get",      Http_traiter_users_get, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/users/add",      Http_traiter_users_add, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/users/del",      Http_traiter_users_del, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/users/kill",     Http_traiter_users_kill, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/users/sessions", Http_traiter_users_sessions, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/histo/ack",      Http_traiter_histo_ack, NULL, NULL );
     soup_server_add_handler ( socket, "/api/upload",         Http_traiter_upload, NULL, NULL );
     soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
     if (Config.instance_is_master==TRUE)
@@ -777,15 +822,15 @@
        return;
      }
 
-    if (Config.instance_is_master==TRUE)
-     {/* soup_server_add_handler ( socket, "/inputs", Http_traiter_inputs, NULL, NULL );
-       soup_server_add_handler ( socket, "/outputs", Http_traiter_inputs, NULL, NULL );
-    */ }
-    soup_server_add_handler ( socket, "/install", Http_traiter_install, NULL, NULL );
+    soup_server_add_handler ( socket, "/" , HTTP_Handle_request_CB, NULL, NULL );
 
-    /*static gchar *protocols[] = { "live-io", NULL };
-    soup_server_add_websocket_handler ( socket, "/websocket" , NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
-*/
+    if (Config.instance_is_master)
+     { soup_server_add_handler ( socket, "/bus", Http_traiter_bus, NULL, NULL );
+
+       static gchar *protocols[] = { "live-bus", NULL };
+       soup_server_add_websocket_handler ( socket, "/ws_bus" , NULL, protocols, Http_traiter_open_websocket_for_slaves_CB, NULL, NULL );
+     }
+
     if (!soup_server_listen_all (socket, 5559, SOUP_SERVER_LISTEN_HTTPS, &error))
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer Listen Failed '%s' !", __func__, error->message );
        g_error_free(error);
@@ -796,50 +841,48 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO,
               "%s: HTTP SoupServer SSL Listen OK on port %d !", __func__, 5559 );
 
-  }
+    while(Partage->com_http.Thread_run == TRUE)
+     { sched_yield();
+       usleep(1000);
+       Http_Envoyer_les_cadrans ();
 
-/******************************************************************************************************************************/
-/* Http_Send_websocket: Envoie les informations aux clients connectés                                                         */
-/* Entrée: néant                                                                                                              */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_Send_web_socket ( void )
-  { static gint last_pulse = 0;
-    Http_Envoyer_les_cadrans ();
-
-    if ( Partage->top > last_pulse + 50 )
-     { last_pulse = Partage->top;
-       JsonNode *pulse = Json_node_create();
-       if (pulse)
-        { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
-          Http_ws_send_to_all ( pulse );
-          json_node_unref(pulse);
-        }
-       pthread_mutex_lock( &Partage->com_http.synchro );
-       GSList *liste = Partage->com_http.liste_http_clients;
-       while(liste)
-        { struct HTTP_CLIENT_SESSION *client = liste->data;
-          liste = g_slist_next ( liste );
-          if (client->last_request + 864000 < Partage->top )
-           { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, client );
-             Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
-             Http_destroy_session ( client );
+       if ( Partage->top > last_pulse + 50 )
+        { last_pulse = Partage->top;
+          JsonNode *pulse = Json_node_create();
+          if (pulse)
+           { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
+             Http_ws_send_to_all ( pulse );
+             Json_node_unref(pulse);
            }
+          pthread_mutex_lock( &Partage->com_http.synchro );
+          GSList *liste = Partage->com_http.liste_http_clients;
+          while(liste)
+           { struct HTTP_CLIENT_SESSION *client = liste->data;
+             liste = g_slist_next ( liste );
+             if (client->last_request + 864000 < Partage->top )
+              { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, client );
+                Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
+                Http_destroy_session ( client );
+              }
+           }
+          pthread_mutex_unlock( &Partage->com_http.synchro );
         }
-       pthread_mutex_unlock( &Partage->com_http.synchro );
+
+       if (Partage->com_http.loop) g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
      }
 
-    if (Partage->com_http.loop) g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
-  }
-/******************************************************************************************************************************/
-/* Http_Stop_API: Arrete les service d'API de l'instance                                                                      */
-/* Entrée: néant                                                                                                              */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_Stop_API ( void )
-  { if (Partage->com_http.socket) soup_server_disconnect ( Partage->com_http.socket );          /* Arret du serveur WebSocket */
-    if (Partage->com_http.local_socket) soup_server_disconnect ( Partage->com_http.local_socket );
     if (Partage->com_http.loop) g_main_loop_unref( Partage->com_http.loop );
-    Http_Save_and_close_sessions();
+    if (Partage->com_http.socket)
+     { soup_server_disconnect ( Partage->com_http.socket );                                     /* Arret du serveur WebSocket */
+       g_object_unref(Partage->com_http.socket);
+     }
+    if (Partage->com_http.local_socket)
+     { soup_server_disconnect ( Partage->com_http.local_socket );
+       g_object_unref(Partage->com_http.local_socket);
+     }
+
+    Info_new( Config.log, Partage->com_http.Thread_debug, LOG_NOTICE, "%s: HTTP Down (%p)", __func__, pthread_self() );
+    Partage->com_http.TID = 0;                                                /* On indique au master que le thread est mort. */
+    pthread_exit(GINT_TO_POINTER(0));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

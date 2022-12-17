@@ -20,4 +20,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/search.js" type="text/javascript"></script>
+<script src="/js/search.js" type="text/javascript"></script>

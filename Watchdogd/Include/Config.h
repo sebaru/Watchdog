@@ -35,10 +35,9 @@
  extern struct CONFIG Config;                                /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
   struct CONFIG
-  { JsonNode *config;                                                        /* imported from /etc/fr-abls-habitat-agent.conf */
-    gchar instance_uuid[37];                                                                     /* Instance unique du thread */
+  { JsonNode *config;                                                           /* imported from /etc/abls-habitat-agent.conf */
     gchar config_file[80];                                        /* Nom du fichier dont est issu les informations ci dessous */
-    gchar run_as [ 40 ];                                                            /* Nom du user sur lequel tourne Watchdog */
+    gboolean headless;                                                                          /* Headless instance or not ? */
 
     gint  db_port;
     gchar db_hostname[ TAILLE_DB_HOST+1 ];                                                /* Nom du host de la base de donnes */
@@ -50,12 +49,12 @@
     gchar home [ TAILLE_HOME+1 ];                                                              /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
-    gchar master_host[ TAILLE_DB_HOST+1 ];
+    gchar master_hostname[ 32 ];
     guint    log_level;                                                                       /* Niveau de debug du programme */
-    gboolean log_msrv;                                                                                /* TRUE si log_override */
-    gboolean log_arch;                                                                                /* TRUE si log_override */
+    gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
+    gboolean log_bus;                                                                                      /* TRUE si log_bus */
+    gboolean log_arch;                                                                                 /* TRUE si log_archive */
     gboolean log_db;                                                                              /* TRUE si log des acces DB */
-    gboolean log_zmq;                                                                            /* TRUE si log des acces ZMQ */
     gboolean log_trad;                                                                    /* TRUE si log des compilations DLS */
     gboolean single;                                                                                /* Demarrage des thread ? */
     struct LOG *log;                                                                             /* Pour l'affichage des logs */
@@ -69,15 +68,8 @@
  #define DEFAUT_PROCESS_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
 
 /******************************************* Prototypes de fonctions **************************************/
- extern gboolean Lire_config ( void );
+ extern void Lire_config ( void );
  extern void Print_config ( void );
- extern gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
- extern gboolean Modifier_configDB_int ( gchar *nom_thread, gchar *nom, gint valeur );
- extern gboolean Creer_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
- extern gboolean Creer_configDB_int ( gchar *nom_thread, gchar *nom, gint valeur );
- extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread );
- extern gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur );
- extern gchar *Recuperer_configDB_by_nom ( gchar *nom_thread, gchar *nom_param );
 #endif
 
 /*--------------------------------------------------------------------------------------------------------*/

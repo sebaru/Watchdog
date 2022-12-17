@@ -29,9 +29,11 @@
  #define _JSON_H_
 
  #include <json-glib/json-glib.h>
+ #include <jwt.h>
 
 /************************************************ Définitions des prototypes **************************************************/
  extern JsonNode *Json_node_create ( void );
+ extern void Json_node_unref( JsonNode *RootNode );
  extern void Json_node_add_string ( JsonNode *RootNode, gchar *name, gchar *chaine );
  extern void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur );
  extern void Json_node_add_int ( JsonNode *RootNode, gchar *name, gint64 valeur );
@@ -52,5 +54,6 @@
  extern JsonNode *Json_get_object_as_node ( JsonNode *query, gchar *chaine );
  extern gboolean Json_has_member ( JsonNode *query, gchar *chaine );
  extern JsonNode *Json_read_from_file ( gchar *filename );
+ extern gboolean Json_write_to_file ( gchar *filename, JsonNode *RootNode );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

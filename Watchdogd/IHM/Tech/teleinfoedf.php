@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
  <div class="row m-2">
-   <div class="col-auto"><h3><img src="/img/linky.jpg" style="width:80px" alt="Teleinfo E.D.F"> Configuration des modules Téléinfo EDF</h3></div>
+   <div class="col-auto"><h3><img src="https://static.abls-habitat.fr/img/linky.jpg" style="width:80px" alt="Teleinfo E.D.F"> Configuration des modules Téléinfo EDF</h3></div>
 
    <div class ="ml-auto btn-group align-items-start">
         <button type="button" onclick="TELEINFO_Add()" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une connexion</button>
@@ -72,4 +72,4 @@
   </div>
 </div>
 
-<script src="/js/tech/teleinfoedf.js" type="text/javascript"></script>
+<script src="/js/teleinfoedf.js" type="text/javascript"></script>

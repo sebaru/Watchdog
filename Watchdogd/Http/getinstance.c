@@ -58,7 +58,7 @@
     SQL_Select_to_json_node ( RootNode, "instances", "SELECT * FROM instances" );
 
     gchar *buf = Json_node_to_string ( RootNode );
-    json_node_unref ( RootNode );
+    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
     soup_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
@@ -86,14 +86,14 @@
             Json_has_member ( request, "log_msrv" )
            )
        )
-     { json_node_unref(request);
+     { Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gint log_target = Json_get_int ( request, "log_level" );
     if (log_target<3 || log_target>7)
-     { json_node_unref(request);
+     { Json_node_unref(request);
 	      soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais niveau de log");
        return;
      }
@@ -110,7 +110,7 @@
 
     g_free(description);
     g_free(instance);
-    json_node_unref(request);
+    Json_node_unref(request);
 	   soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/

@@ -15,6 +15,6 @@
      </table>
    </div>
 
-<script src="/js/tech/process.js" type="text/javascript"></script>
+<script src="/js/process.js" type="text/javascript"></script>
 <!-- Container -->
 </div>

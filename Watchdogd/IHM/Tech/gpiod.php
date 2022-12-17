@@ -6,7 +6,7 @@
    </div>
 
  <div class="row m-2">
-   <h3><img src="/img/raspberrypi.png" style="width:80px" alt="Configuration GPIOD"> Configuration Gpio/Raspberry</h3>
+   <h3><img src="https://static.abls-habitat.fr/img/raspberrypi.png" style="width:80px" alt="Configuration GPIOD"> Configuration Gpio/Raspberry</h3>
 
    <div class ="ml-auto btn-group align-items-center">
         <button type="button" onclick="Redirect('/tech/command_text')" class="btn btn-primary"><i class="fas fa-directions"></i> Map</button>
@@ -97,4 +97,4 @@
 </div>
 
 
-<script src="/js/tech/gpiod.js" type="text/javascript"></script>
+<script src="/js/gpiod.js" type="text/javascript"></script>

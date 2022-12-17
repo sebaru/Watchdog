@@ -52,14 +52,16 @@
               dout->tech_id, dout->acronyme, reste );
 
     RootNode = Json_node_create ();
-    if (RootNode)
-     { Dls_DO_to_json ( RootNode, dout );
-       Json_node_add_string ( RootNode, "zmq_tag", "SET_DO" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", RootNode );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", RootNode );
-       json_node_unref ( RootNode );
+    if (!RootNode)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+       goto suite_AO;
      }
-    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
+    Dls_DO_to_json ( RootNode, dout );
+    Json_node_add_string ( RootNode, "tag", "SET_DO" );
+    if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( NULL, RootNode );
+
+    Json_node_unref ( RootNode );
+
 
 suite_AO:
     if (!Partage->com_msrv.Liste_AO) return;                                                      /* Si pas de a, on se barre */
@@ -75,10 +77,9 @@ suite_AO:
     RootNode = Json_node_create ();
     if (RootNode)
      { Dls_AO_to_json ( RootNode, ao );
-       Json_node_add_string ( RootNode, "zmq_tag", "SET_AO" );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_slave, g_get_host_name(), "*", RootNode );
-       Zmq_Send_json_node ( Partage->com_msrv.zmq_to_bus,   g_get_host_name(), "*", RootNode );
-       json_node_unref ( RootNode );
+       Json_node_add_string ( RootNode, "tag", "SET_AO" );
+       Http_Send_to_slaves ( NULL, RootNode );
+       Json_node_unref ( RootNode );
      }
     else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
   }

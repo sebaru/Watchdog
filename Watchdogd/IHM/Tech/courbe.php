@@ -5,6 +5,6 @@
      <canvas id="idChartCourbe" class="col"></canvas>
   </div>
 
-<script src="/js/tech/courbe.js" type="text/javascript"></script>
+<script src="/js/courbe.js" type="text/javascript"></script>
 <!-- Container -->
 </div>

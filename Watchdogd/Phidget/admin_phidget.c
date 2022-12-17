@@ -27,7 +27,7 @@
 
  #include "watchdogd.h"
  #include "Phidget.h"
-
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Admin_config : fonction appelé par le thread http lors d'une requete POST sur config PROCESS                               */
 /* Entrée : la librairie, et le Json recu                                                                                     */
@@ -38,7 +38,7 @@
          Json_has_member ( request, "id" ) && Json_has_member ( request, "enable" ) )
      { SQL_Write_new ( "UPDATE %s SET enable='%d' WHERE id='%d'", lib->name, Json_get_bool(request, "enable"),
                        Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__,
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: thread '%s/%s' updated.", __func__,
                  Json_get_string ( request, "uuid" ), Json_get_string ( request, "thread_tech_id" ) );
        soup_message_set_status (msg, SOUP_STATUS_OK);
        return;
@@ -65,12 +65,12 @@
                        "WHERE id='%d'",
                        lib->name, uuid, thread_tech_id, description, hostname, password, serial,
                        Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, thread_tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: thread '%s/%s' updated.", __func__, uuid, thread_tech_id );
      }
     else
      { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', thread_tech_id='%s', description='%s', hostname='%s', password='%s', serial='%s' ",
                        lib->name, uuid, thread_tech_id, description, hostname, password, serial );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, thread_tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: thread '%s/%s' created.", __func__, uuid, thread_tech_id );
      }
 
     g_free(uuid);
@@ -102,7 +102,7 @@
            )
        )
      { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       json_node_unref(request);
+       Json_node_unref(request);
        return;
      }
 
@@ -208,11 +208,11 @@
      }
     else
      {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
-    Dls_recalculer_arbre_comm();/* Calcul de l'arbre de communication car il peut y avoir de nouvelles dependances sur les plugins */
 end:
     g_free(thread_tech_id);
     g_free(acronyme);
     g_free(capteur);
-    json_node_unref(request);
+    Json_node_unref(request);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
+#endif

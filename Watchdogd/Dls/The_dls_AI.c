@@ -28,69 +28,104 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Dls_data_AI_lookup : Recupere la structure AI selon tech_id/acronyme                                                       */
+/* Dls_data_AI_create_by_array : Création d'un AI pour le plugin                                                              */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- static struct DLS_AI *Dls_data_AI_lookup ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
-  { struct DLS_AI *ai;
-    if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
-     { ai = (struct DLS_AI *)*ai_p;
-       return( ai );
-     }
-    if (!tech_id || !acronyme) return(NULL);
-
-    GSList *liste = Partage->Dls_data_AI;
-    while (liste)                                                                               /* A la recherche du message. */
-     { ai = (struct DLS_AI *)liste->data;
-       if ( !strcasecmp( ai->tech_id, tech_id ) && !strcasecmp( ai->acronyme, acronyme ) )
-        { if (ai_p) *ai_p = (gpointer)ai;                                           /* Sauvegarde pour acceleration si besoin */
-          return(ai);
-        }
-       liste = g_slist_next(liste);
-     }
-
-    ai = g_try_malloc0 ( sizeof(struct DLS_AI) );
-    if (!ai)
+ void Dls_data_AI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data )
+  { struct DLS_PLUGIN *plugin = user_data;
+    gchar *tech_id  = Json_get_string ( element, "tech_id" );
+    gchar *acronyme = Json_get_string ( element, "acronyme" );
+    struct DLS_AI *bit = g_try_malloc0 ( sizeof(struct DLS_AI) );
+    if (!bit)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
-       return(NULL);
+       return;
      }
-    g_snprintf( ai->acronyme, sizeof(ai->acronyme), "%s", acronyme );
-    g_snprintf( ai->tech_id,  sizeof(ai->tech_id),  "%s", tech_id );
-    pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: adding AI '%s:%s'", __func__, tech_id, acronyme );
-    return(ai);
+    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
+    g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
+    g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
+    bit->valeur   = Json_get_double ( element, "valeur"   );
+    bit->in_range = Json_get_bool   ( element, "in_range" );
+    if (!strcasecmp ( tech_id, "SYS" ) ) bit->archivage = 2;            /* Si AI du plugin SYS, on archive toutes les minutes */
+    plugin->Dls_data_AI = g_slist_prepend ( plugin->Dls_data_AI, bit );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
+              "%s: Create bit DLS_AI '%s:%s'=%f (%s)", __func__, bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_lookup_AI : Recherche un CH dans les plugins DLS                                                                  */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ struct DLS_AI *Dls_data_lookup_AI ( gchar *tech_id, gchar *acronyme )
+  { if (!(tech_id && acronyme)) return(NULL);
+    GSList *plugins = Partage->com_dls.Dls_plugins;
+    while (plugins)
+     { struct DLS_PLUGIN *plugin = plugins->data;
+       if (!strcasecmp( plugin->tech_id, tech_id ))
+        { GSList *liste = plugin->Dls_data_AI;
+          while (liste)
+           { struct DLS_AI *bit = liste->data;
+             if ( !strcasecmp ( bit->acronyme, acronyme ) ) return(bit);
+             liste = g_slist_next(liste);
+           }
+        }
+       plugins = g_slist_next(plugins);
+     }
+    return(NULL);
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gdouble Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
-  { struct DLS_AI *ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
-    if (!ai) return(0.0);
-    return( ai->valeur );
+ gdouble Dls_data_get_AI ( struct DLS_AI *bit )
+  { if (!bit) return(0.0);
+    return( bit->valeur );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_AI_inrange ( struct DLS_AI *bit )
+  { if (!bit) return(FALSE);
+    return( bit->in_range );
   }
 /******************************************************************************************************************************/
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, gdouble valeur, gboolean in_range )
-  { struct DLS_AI *ai;
-    ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
-    if (!ai) return;
-    if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
-
-    ai->valeur  = valeur;
-    ai->in_range = in_range;
+ void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range )
+  { if (!bit) return;
+    bit->valeur   = valeur;
+    bit->in_range = in_range;
+    Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "%s: Changing DLS_AI '%s:%s'=%d", __func__, bit->tech_id, bit->acronyme, valeur );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
-/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/* Dls_AI_to_json : Formate un bit au format JSON                                                                             */
+/* Entrées: le JsonNode et le bit                                                                                             */
+/* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_AI_inrange ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
-  { struct DLS_AI *ai = Dls_data_AI_lookup ( tech_id, acronyme, ai_p );
-    if (!ai) return(FALSE);
-    return( ai->in_range );
+ void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit )
+  { Json_node_add_string ( element, "tech_id",      bit->tech_id );
+    Json_node_add_string ( element, "acronyme",     bit->acronyme );
+    Json_node_add_double ( element, "valeur",       bit->valeur );
+    Json_node_add_string ( element, "unite",        bit->unite );
+    Json_node_add_int    ( element, "in_range",     bit->in_range );
+    Json_node_add_int    ( element, "last_arch",    bit->last_arch );
+    Json_node_add_int    ( element, "archivage",    bit->archivage );
+  }
+/******************************************************************************************************************************/
+/* Dls_all_AI_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
+  { JsonArray *RootArray = array;
+    GSList *liste = plugin->Dls_data_AI;
+    while ( liste )
+     { struct DLS_AI *bit = liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_AI_to_json ( element, bit );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+     }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -30,10 +30,10 @@
  #include <mysql.h>
  #include "Erreur.h"
 
- #define TAILLE_DB_HOST           30
- #define TAILLE_DB_USERNAME       30
- #define TAILLE_DB_PASSWORD       48
- #define TAILLE_DB_DATABASE       20
+ #define TAILLE_DB_HOST           32
+ #define TAILLE_DB_USERNAME       64
+ #define TAILLE_DB_PASSWORD       64
+ #define TAILLE_DB_DATABASE       64
 
  struct DB
   { MYSQL *mysql;
@@ -62,8 +62,6 @@
  extern gboolean SQL_Write ( gchar *requete );
  extern gboolean SQL_Writes ( gchar *requete );
  extern gboolean SQL_Write_new( gchar *format, ... );
- extern gboolean SQL_Arch_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... );
- extern gboolean SQL_Arch_Write ( gchar *requete );
  extern gchar *SQL_Read_from_file ( gchar *file );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

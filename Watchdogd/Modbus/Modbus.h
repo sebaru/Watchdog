@@ -108,14 +108,11 @@
     guint date_next_eana;                                            /* Utilisé pour gérer les interrogations des bornes EANA */
     gboolean do_check_eana;                                                           /* Interrogation des bornes EANA ou non */
     gboolean request;                                    /* Une requete a-t'elle été envoyée, et donc en attente de réponse ? */
-    gint last_top;                                                                           /* Nombre de requete par seconde */
-    gint nbr_request;                                                                        /* Nombre de requete par seconde */
-    gint nbr_request_par_sec;                                                                /* Nombre de requete par seconde */
-    gint delai;                                                  /* delai d'attente pour limiter le nb de request par seconde */
     struct TRAME_MODBUS_REPONSE response;
-    JsonNode *AI_root, **AI;                                                           /* Tableau dynamique de mapping des DI */
-    JsonNode *DI_root, **DI;                                                           /* Tableau dynamique de mapping des DI */
-    JsonNode *DO_root, **DO;                                                           /* Tableau dynamique de mapping des DO */
+    JsonNode **AI;                                                                                /* Tableau dynamique des AI */
+    JsonNode **AO;                                                                                /* Tableau dynamique des AO */
+    JsonNode **DI;                                                                                /* Tableau dynamique des DI */
+    JsonNode **DO;                                                                                /* Tableau dynamique des DO */
     gpointer *MSG_AI_OUT_OF_RANGE;                                             /* Tableau dynamique d'accès aux bits internes */
     gpointer bit_comm;                                                                       /* Bit interne d'etat de la comm */
   };

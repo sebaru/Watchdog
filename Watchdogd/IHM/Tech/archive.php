@@ -97,4 +97,4 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/archive.js" type="text/javascript"></script>
+<script src="/js/archive.js" type="text/javascript"></script>

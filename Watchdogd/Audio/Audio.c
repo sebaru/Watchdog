@@ -37,33 +37,11 @@
  #include "Audio.h"
 
 /******************************************************************************************************************************/
-/* Audio_Creer_DB : Creation de la table du thread                                                                            */
-/* Entrée: le pointeur sur la PROCESS                                                                                         */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Audio_Creer_DB ( struct PROCESS *lib )
-  { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-             "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
-
-    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                    "`date_create` datetime NOT NULL DEFAULT NOW(),"
-                    "`uuid` varchar(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`language` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`device` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-
-    Process_set_database_version ( lib, 1 );
-  }
-/******************************************************************************************************************************/
 /* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                                               */
 /* Entrée : le nom du fichier wav                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static gboolean Jouer_wav_by_file ( struct SUBPROCESS *module, gchar *texte )
+ static gboolean Jouer_wav_by_file ( struct THREAD *module, gchar *texte )
   { gint fd_cible, pid;
     gchar fichier[80];
 
@@ -71,40 +49,40 @@
     fd_cible = open ( fichier, O_RDONLY, 0 );
     if (fd_cible < 0 && Config.instance_is_master == FALSE)
      { gchar chaine[80];
-       g_snprintf(chaine, sizeof(chaine), "wget https://%s:5560/audio/%s.wav -O %s", Config.master_host, texte, fichier );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
+       g_snprintf(chaine, sizeof(chaine), "wget https://%s:5560/audio/%s.wav -O %s", Config.master_hostname, texte, fichier );
+       Info_new( Config.log, module->Thread_debug, LOG_WARNING,
                  "%s: '%s' not found trying down from master '%s'", __func__, fichier, chaine );
        system(chaine);
        fd_cible = open ( fichier, O_RDONLY, 0 );
        if (fd_cible < 0)
-        { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+        { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                     "%s: '%s' not found (even after download)", __func__, fichier );
           return(FALSE);
         }
      }
     else if (fd_cible < 0 && Config.instance_is_master == TRUE)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: '%s' not found", __func__, fichier );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s' not found", __func__, fichier );
        return(FALSE);
      }
     else close (fd_cible);
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: Envoi d'un wav %s", __func__, fichier );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: Envoi d'un wav %s", __func__, fichier );
     pid = fork();
     if (pid<0)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: APLAY '%s' fork failed pid=%d", __func__, fichier, pid );
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: APLAY '%s' fork failed pid=%d", __func__, fichier, pid );
        return(FALSE);
      }
     else if (!pid)
      { execlp( "aplay", "aplay", "--device", Json_get_string ( module->config, "device" ), fichier, NULL );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: APLAY '%s' exec failed pid=%d", __func__, fichier, pid );
+       Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: APLAY '%s' exec failed pid=%d", __func__, fichier, pid );
        _exit(0);
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+     { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
                 "%s: APLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
        waitpid(pid, NULL, 0 );
      }
-    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: APLAY '%s' finished pid=%d", __func__, fichier, pid );
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: APLAY '%s' finished pid=%d", __func__, fichier, pid );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -112,82 +90,85 @@
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
 /******************************************************************************************************************************/
- gboolean Jouer_google_speech ( struct SUBPROCESS *module, gchar *audio_libelle )
+ gboolean Jouer_google_speech ( struct THREAD *module, gchar *audio_libelle )
   { gint pid;
 
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: Send '%s'", __func__, audio_libelle );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Send '%s'", __func__, audio_libelle );
     pid = fork();
     if (pid<0)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                  "%s: '%s' fork failed pid=%d (%s)", __func__, audio_libelle, pid, strerror(errno) );
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "Wtd_play_google.sh", "Wtd_play_google", Json_get_string ( module->config, "language" ), audio_libelle,
+     { Info_new( Config.log, module->Thread_debug, LOG_INFO,
+                 "%s: Running Wtd_play_google.sh %s %s %s", __func__,
+                 Json_get_string ( module->config, "language" ), audio_libelle, Json_get_string ( module->config, "device" ) );
+
+       execlp( "Wtd_play_google.sh", "Wtd_play_google", Json_get_string ( module->config, "language" ), audio_libelle,
                                                         Json_get_string ( module->config, "device" ), NULL );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+       Info_new( Config.log, module->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, audio_libelle, pid, strerror( errno ) );
        _exit(0);
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
+     { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
                 "%s: '%s' waiting to finish pid=%d", __func__, audio_libelle, pid );
        waitpid(pid, NULL, 0 );
      }
-    Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: Wtd_play_google %s '%s' %s finished pid=%d", __func__,
+    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: Wtd_play_google %s '%s' %s finished pid=%d", __func__,
               Json_get_string ( module->config, "language" ), audio_libelle,
               Json_get_string ( module->config, "device" ), pid );
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct AUDIO_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct AUDIO_VARS) );
     struct AUDIO_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_ALL", "Profil Audio: All Hps Enabled" );
-    Mnemo_auto_create_DI ( FALSE, thread_tech_id, "P_NONE", "Profil audio: All Hps disabled" );
+    vars->p_all  = Mnemo_create_thread_DI ( module, "P_ALL", "Profil Audio: All Hps Enabled" );
+    vars->p_none = Mnemo_create_thread_DI ( module, "P_NONE", "Profil Audio: All Hps disabled" );
 
-    gboolean retour = Jouer_google_speech( module, "Instance démarrée !" );
-    SubProcess_send_comm_to_master_new ( module, retour );
+    gboolean retour = Jouer_google_speech( module, "Module audio démarré !" );
+    Thread_send_comm_to_master ( module, retour );
     vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
-    while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
-     { usleep(100000);
-       sched_yield();
-
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
+    while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /******************************************************************************************************************************/
-       JsonNode *request;
-       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
-        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if ( !strcasecmp( zmq_tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
-               Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "acronyme" ) &&
+       while ( module->WS_messages )
+        { pthread_mutex_lock ( &module->synchro );
+          JsonNode *request = module->WS_messages->data;
+          module->WS_messages = g_slist_remove ( module->WS_messages, request );
+          pthread_mutex_unlock ( &module->synchro );
+          gchar *tag = Json_get_string ( request, "tag" );
+          if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
+               Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
                Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
                strcasecmp( Json_get_string( request, "audio_profil" ), "P_NONE" ) )
-           { gchar *thread_tech_id       = Json_get_string ( request, "thread_tech_id" );
-             gchar *acronyme      = Json_get_string ( request, "acronyme" );
-             gchar *audio_profil  = Json_get_string ( request, "audio_profil" );
-             gchar *audio_libelle = Json_get_string ( request, "audio_libelle" );
-             gchar *libelle       = Json_get_string ( request, "libelle" );
-             gint typologie = Json_get_int ( request, "typologie" );
+           { gchar *tech_id        = Json_get_string ( request, "tech_id" );
+             gchar *acronyme       = Json_get_string ( request, "acronyme" );
+             gchar *audio_profil   = Json_get_string ( request, "audio_profil" );
+             gchar *audio_libelle  = Json_get_string ( request, "audio_libelle" );
+             gchar *libelle        = Json_get_string ( request, "libelle" );
+             gint typologie        = Json_get_int ( request, "typologie" );
 
-             Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
-                       "%s: Recu message '%s:%s' (audio_profil=%s)", __func__, thread_tech_id, acronyme, audio_profil );
+             Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
+                       "%s: %s: Recu message '%s:%s' (audio_profil=%s)", __func__, thread_tech_id, tech_id, acronyme, audio_profil );
 
-             if ( vars->diffusion_enabled == FALSE &&
-                  ! (typologie == MSG_ALERTE || typologie == MSG_DANGER)
+             if ( vars->diffusion_enabled == FALSE && ! (typologie == MSG_ALERTE || typologie == MSG_DANGER)
                 )                                                               /* Bit positionné quand arret diffusion audio */
-              { Info_new( Config.log, module->lib->Thread_debug, LOG_WARNING,
-                          "%s: Envoi audio inhibé. Dropping '%s:%s'", __func__, thread_tech_id, acronyme );
+              { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
+                          "%s: %s: Envoi audio inhibé. Dropping '%s:%s'", __func__, thread_tech_id, tech_id, acronyme );
               }
              else
-              { Envoyer_commande_dls_data( "AUDIO", audio_profil );                   /* Pos. du profil audio via interne */
+              { Http_Post_to_local_BUS_CDE ( module, thread_tech_id, "P_ALL" );                  /* Pos. du profil audio via interne */
 
                 if (vars->last_audio + AUDIO_JINGLE < Partage->top)                            /* Si Pas de message depuis xx */
                  { Jouer_wav_by_file( module, "jingle"); }                                          /* On balance le jingle ! */
@@ -195,58 +176,31 @@
 
                 if (strlen(audio_libelle))                  /* Si audio_libelle, le jouer, sinon jouer le libelle tout court) */
                  { gboolean retour = Jouer_google_speech( module, audio_libelle );
-                   SubProcess_send_comm_to_master_new ( module, retour );
+                   Thread_send_comm_to_master ( module, retour );
                  }
                 else
                  { gboolean retour = Jouer_google_speech( module, libelle );
-                   SubProcess_send_comm_to_master_new ( module, retour );
+                   Thread_send_comm_to_master ( module, retour );
                  }
-                Envoyer_commande_dls_data( "AUDIO", "P_NONE" );                              /* Bit de fin d'emission message */
+                Http_Post_to_local_BUS_CDE ( module, thread_tech_id, "P_NONE" );                    /* Bit de fin d'emission message */
               }
            }
-          else if ( !strcasecmp( zmq_tag, "DISABLE" ) )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s : Diffusion disabled by master", __func__ );
+          else if ( !strcasecmp( tag, "DISABLE" ) )
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Diffusion disabled by master", __func__, thread_tech_id );
              vars->diffusion_enabled = FALSE;
            }
-          else if ( !strcasecmp( zmq_tag, "ENABLE" ) )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s : Diffusion enabled by master", __func__ );
+          else if ( !strcasecmp( tag, "ENABLE" ) )
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Diffusion enabled by master", __func__, thread_tech_id );
              vars->diffusion_enabled = TRUE;
            }
-          else if ( !strcasecmp( zmq_tag, "TEST" ) )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s : Test de diffusion", __func__ );
+          else if ( !strcasecmp( tag, "TEST" ) )
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Test de diffusion", __func__, thread_tech_id );
              Jouer_google_speech( module, "Ceci est un test de diffusion audio" );
            }
-          json_node_unref ( request );
+          Json_node_unref ( request );
         }
      }
 
-    SubProcess_end(module);
-  }
-/******************************************************************************************************************************/
-/* Run_process: Run du Process                                                                                                */
-/* Entrée: la structure PROCESS associée                                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_process ( struct PROCESS *lib )
-  {
-reload:
-    Audio_Creer_DB ( lib );                                                                    /* Création de la DB du thread */
-    Thread_init ( "audio", "USER", lib, WTD_VERSION, "Manage Audio System" );
-
-    lib->config = Json_node_create();
-    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
-
-    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
-    while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
-    Process_Unload_all_subprocess ( lib );
-
-    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
-       lib->Thread_reload = FALSE;
-       goto reload;
-     }
-
-    Thread_end ( lib );
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

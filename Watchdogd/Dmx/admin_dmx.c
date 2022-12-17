@@ -28,6 +28,7 @@
  #include "watchdogd.h"
  #include "Dmx.h"
 
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Admin_config : fonction appelé par le thread http lors d'une requete POST sur config PROCESS                               */
 /* Entrée : la librairie, et le Json recu                                                                                     */
@@ -51,12 +52,12 @@
                        "WHERE id='%d'",
                        lib->name, uuid, tech_id, description, device,
                        Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' updated.", __func__, uuid, tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: thread '%s/%s' updated.", __func__, uuid, tech_id );
      }
     else
      { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', description='%s', device='%s'",
                        lib->name, uuid, tech_id, description, device );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: subprocess '%s/%s' created.", __func__, uuid, tech_id );
+       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: thread '%s/%s' created.", __func__, uuid, tech_id );
      }
 
     g_free(uuid);
@@ -67,3 +68,4 @@
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
+#endif

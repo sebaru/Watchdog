@@ -36,18 +36,14 @@
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
  #include "Json.h"
- #include "Process.h"
+ #include "Dls.h"
+ #include "Thread.h"
  #include "Db.h"
  #include "config.h"
- #include "Dls.h"
  #include "Http.h"
  #include "Config.h"
  #include "Archive.h"
- #include "Message_DB.h"
- #include "Histo_DB.h"
  #include "Synoptiques_DB.h"
- #include "Proto_traductionDLS.h"
- #include "Zmq.h"
  #include "Mnemonique_DB.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */
@@ -66,18 +62,17 @@
  struct COM_MSRV                                                            /* Communication entre DLS et le serveur Watchdog */
   { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
+    pthread_t TID_api_sync;                                                                          /* Identifiant du thread */
+    pthread_t TID_arch_sync;                                                                         /* Identifiant du thread */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
-    struct ZMQUEUE *zmq_to_bus;                                                      /* Message Queue des evenements Watchdog */
-    union
-     { struct ZMQUEUE *zmq_to_slave;                                                         /* Message Queue vers les slaves */
-       struct ZMQUEUE *zmq_to_master;
-     };
-
-    GSList *Librairies;                                                        /* Liste des librairies chargées pour Watchdog */
+    GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
+    SoupSession *API_session;
+    SoupWebsocketConnection *API_websocket;
+    GSList *API_ws_messages;                                                             /* Liste des messages recue de l'API */
     gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
   };
 
@@ -85,7 +80,6 @@
   { gint  taille_partage;
     gchar version[16];
     time_t start_time;                                                                         /* Date de start de l'instance */
-    void *zmq_ctx;                                                    /* Contexte d'échange inter-thread et message queue ZMQ */
     guint top;                                                                         /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                                        /* Top de chien de garde des plugins DLS */
     guint audit_bit_interne_per_sec;
@@ -97,25 +91,15 @@
     struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_HTTP com_http;                                                                       /* Zone mémoire pour HTTP */
-    struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
+
+    pthread_mutex_t archive_liste_sync;                                                   /* Bit de synchronisation processus */
+    GSList *archive_liste;                                                                /* liste de struct ARCHDB a traiter */
+    gint archive_liste_taille;
 
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
-
-    GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
-    GSList *Dls_data_MONO;                                                                           /* Liste des monostables */
-    GSList *Dls_data_BI;                                                                               /* Liste des bistables */
-    GSList *Dls_data_DI;                                                                  /* Liste des entrees dynamiques TOR */
-    GSList *Dls_data_DO;                                                                  /* Liste des sorties dynamiques TOR */
-    GSList *Dls_data_AI;                                                                  /* Liste des entrees dynamiques ANA */
-    GSList *Dls_data_AO;                                                                  /* Liste des sorties dynamiques ANA */
-    GSList *Dls_data_MSG;                                                                               /* Liste des messages */
-    GSList *Dls_data_CI;                                                                  /* Liste des compteurs d'impulsions */
-    GSList *Dls_data_CH;                                                                      /* Liste des compteurs horaires */
-    GSList *Dls_data_VISUEL;                                                                    /* Liste des visuels (bits I) */
-    GSList *Dls_data_REGISTRE;                                                                /* Liste des registres (bits R) */
-    GSList *Dls_data_WATCHDOG;                                                                /* Liste des registres (bits R) */
+    JsonNode *HORLOGE_ticks;                                                           /* Liste des horloges ticks a dérouler */
   };
 
 /************************************************ Définitions des prototypes **************************************************/
@@ -124,34 +108,20 @@
  extern struct PARTAGE *Shm_init ( void );                                                                      /* Dans shm.c */
  extern gboolean Shm_stop ( struct PARTAGE *partage );
 
- extern void Stopper_fils ( void );                                                                         /* Dans process.c */
- extern gboolean Demarrer_dls ( void );
- extern gboolean Demarrer_arch ( void );
- extern void Charger_librairies ( void );
- extern void Decharger_librairies ( void );
- extern gboolean Process_start ( struct PROCESS *lib );
- extern gboolean Process_stop ( struct PROCESS *lib );
- extern gboolean Process_reload_by_uuid ( gchar *uuid );
- extern gboolean Process_set_debug ( gchar *uuid, gboolean debug );
- extern void Process_set_database_version ( struct PROCESS *lib, gint version );
- extern void Thread_init ( gchar *pr_name, gchar *classe, struct PROCESS *lib, gchar *version, gchar *description );
- extern void Thread_end ( struct PROCESS *lib );
- extern JsonNode *Thread_Listen_to_master ( struct PROCESS *lib );
- extern JsonNode *SubProcess_Listen_to_master_new ( struct SUBPROCESS *module );
- extern void SubProcess_send_comm_to_master_new ( struct SUBPROCESS *module, gboolean etat );
- extern void Process_Load_one_subprocess (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
- extern void Process_Unload_all_subprocess ( struct PROCESS *lib );
- extern void SubProcess_init ( struct SUBPROCESS *module, gint sizeof_vars );
- extern void SubProcess_end ( struct SUBPROCESS *module );
-
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 
- extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
  extern void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max );
 
- extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
+ extern void API_Send_ARCHIVE ( void );                                                                     /* Dans api_xxx.c */
+ extern void API_Clear_ARCHIVE ( void );
+ extern void API_Send_visuels ( void );
+ extern void API_Send_MSGS ( void );
+ extern void Run_api_sync ( void );
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
+
+ extern gboolean MSRV_Map_to_thread ( JsonNode *key );
+ extern gboolean MSRV_Map_from_thread ( JsonNode *key );
 
  extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
  extern void UUID_Load ( gchar *thread, gchar *target );

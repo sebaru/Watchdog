@@ -15,37 +15,37 @@
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#idTabEntreeTor">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Entrées TOR"
-                       src="/img/entree.png" />Entrées TOR</a></li>
+                       src="https://static.abls-habitat.fr/img/entree.png" />Entrées TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabEntreeAna">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Entrées ANA"
-                       src="/img/entree_analogique.png" />Entrées ANA</a></li>
+                       src="https://static.abls-habitat.fr/img/entree_analogique.png" />Entrées ANA</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieTor">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Sorties TOR"
-                       src="/img/sortie.png" />Sorties TOR</a></li>
+                       src="https://static.abls-habitat.fr/img/sortie.png" />Sorties TOR</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabSortieAna">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Sorties ANA"
-                       src="/img/sortie_analogique.png" />Sorties ANA</a></li>
+                       src="https://static.abls-habitat.fr/img/sortie_analogique.png" />Sorties ANA</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabRegistre">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Registres"
-                       src="/img/calculatrice.png" />Registres</a></li>
+                       src="https://static.abls-habitat.fr/img/calculatrice.png" />Registres</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabCptImp">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Compteurs d'impulsion"
-                       src="/img/front_montant.png" />Compteurs d'impulsion</a></li>
+                       src="https://static.abls-habitat.fr/img/front_montant.png" />Compteurs d'impulsion</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabCptH">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Compteurs horaire"
-                       src="/img/compteur_horaire.png" />Compteurs horaire</a></li>
+                       src="https://static.abls-habitat.fr/img/compteur_horaire.png" />Compteurs horaire</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabTempo">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Temporisations"
-                       src="/img/sablier.png" />Tempos</a></li>
+                       src="https://static.abls-habitat.fr/img/sablier.png" />Tempos</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabHorloge">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Horloges"
-                       src="/img/bit_horloge.png" /> Horloges</a></li>
+                       src="https://static.abls-habitat.fr/img/bit_horloge.png" /> Horloges</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabWatchdog">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Watchdogs"
-                       src="/img/countdown.svg" /> Watchdogs</a></li>
+                       src="https://static.abls-habitat.fr/img/countdown.svg" /> Watchdogs</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#idTabMessage">
                   <img class="wtd-img-bit-interne" data-toggle="tooltip" title="Messages"
-                       src="/img/message.png" /> Messages</a></li>
+                       src="https://static.abls-habitat.fr/img/message.png" /> Messages</a></li>
           </ul>
 
 <div class="tab-content">
@@ -153,5 +153,5 @@
 <!-- Container -->
 </div>
 
-<script src="/js/tech/common_tech.js" type="text/javascript"></script>
-<script src="/js/tech/mnemos.js" type="text/javascript"></script>
+<script src="/js/common_tech.js" type="text/javascript"></script>
+<script src="/js/mnemos.js" type="text/javascript"></script>

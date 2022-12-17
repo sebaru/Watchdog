@@ -18,12 +18,12 @@
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
     else if (etat.mode=="default")                                                                         /* si mode inconnu */
      { etat.cligno = false;
-       target = "/img/question.png";
+       target = "https://static.abls-habitat.fr/img/question.png";
        Changer_img_src ( idimage, target );
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
-     { target = "/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension;
+     { target = "https://static.abls-habitat.fr/img/"+visuel.forme+"_"+etat.mode+"."+visuel.extension;
        Changer_img_src ( idimage, target );
        $("#"+idimage).removeClass("wtd-img-grayscale");
      }
@@ -52,7 +52,7 @@
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
-     { target = "/img/"+visuel.forme+"_"+etat.color+"."+visuel.extension;
+     { target = "https://static.abls-habitat.fr/img/"+visuel.forme+"_"+etat.color+"."+visuel.extension;
        Changer_img_src ( idimage, target );
        $("#"+idimage).removeClass("wtd-img-grayscale");
      }
@@ -81,12 +81,12 @@
 /*-------------------------------------------------- Visuel si pas de comm ---------------------------------------------------*/
     else if (etat.mode=="default")                                                                         /* si mode inconnu */
      { etat.cligno = false;
-       target = "/img/question.png";
+       target = "https://static.abls-habitat.fr/img/question.png";
        Changer_img_src ( idimage, target );
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
-     { target = "/img/"+visuel.forme+"_"+etat.mode+"_"+etat.color+"."+visuel.extension;
+     { target = "https://static.abls-habitat.fr/img/"+visuel.forme+"_"+etat.mode+"_"+etat.color+"."+visuel.extension;
        Changer_img_src ( idimage, target );
        $("#"+idimage).removeClass("wtd-img-grayscale");
      }
@@ -115,7 +115,7 @@
      }
 /*-------------------------------------------------- Visuel mode inline ------------------------------------------------------*/
     else
-     { target = "/img/"+visuel.forme+"."+visuel.extension;
+     { target = "https://static.abls-habitat.fr/img/"+visuel.forme+"."+visuel.extension;
        Changer_img_src ( idimage, target );
        $("#"+idimage).removeClass("wtd-img-grayscale");
      }

@@ -41,37 +41,16 @@
   };
 
 /******************************************************************************************************************************/
-/* Radio_Creer_DB : Creation de la database du process                                                                        */
-/* Entrée: le pointeur sur la structure PROCESS                                                                               */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Radio_Creer_DB ( struct PROCESS *lib )
-  {
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-             "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
-
-    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-
-    Process_set_database_version ( lib, 1 );
-  }
-/******************************************************************************************************************************/
 /* Stopper_radio : Stop la diffusion radiophonique en cours                                                                   */
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Stopper_radio ( struct SUBPROCESS *module )
+ static void Stopper_radio ( struct THREAD *module )
   { struct RADIO_VARS *vars = module->vars;
     if (vars->radio_pid>0)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: Sending kill to radio pid %d", __func__, vars->radio_pid );
+     { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: Sending kill to radio pid %d", __func__, vars->radio_pid );
        kill(vars->radio_pid, SIGTERM);
-       Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: Waiting for pid %d termination", __func__, vars->radio_pid );
+       Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: Waiting for pid %d termination", __func__, vars->radio_pid );
        waitpid(vars->radio_pid, NULL, 0);
      }
     vars->radio_pid = 0;
@@ -81,90 +60,63 @@
 /* Entrée : le nom du fichier wav                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static gboolean Jouer_radio ( struct SUBPROCESS *module, gchar *radio )
+ static gboolean Jouer_radio ( struct THREAD *module, gchar *radio )
   { struct RADIO_VARS *vars = module->vars;
     Stopper_radio( module );
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: Starting playing radio %s", __func__, radio );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Starting playing radio %s", __func__, radio );
     vars->radio_pid = fork();
     if (vars->radio_pid<0)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                 "%s: CVLC '%s' fork failed pid=%d", __func__, radio, vars->radio_pid );
        return(FALSE);
      }
     else if (!vars->radio_pid)
      { execlp( "cvlc", "cvlc", radio, NULL );
-       Info_new( Config.log, module->lib->Thread_debug, LOG_ERR, "%s: CVLC '%s' exec failed pid=%d", __func__, radio, vars->radio_pid );
+       Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: CVLC '%s' exec failed pid=%d", __func__, radio, vars->radio_pid );
        _exit(0);
      }
     else
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: CVLC '%s' is playing pid=%d", __func__, radio, vars->radio_pid );
+     { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: CVLC '%s' is playing pid=%d", __func__, radio, vars->radio_pid );
      }
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct RADIO_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct RADIO_VARS) );
     /*struct RADIO_VARS *vars = module->vars;*/
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
 
-    SubProcess_send_comm_to_master_new ( module, TRUE );
+    Thread_send_comm_to_master ( module, TRUE );
 
-    while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
-     { usleep(100000);
-       sched_yield();
-
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
-/******************************************************* Ecoute du master *****************************************************/
-       JsonNode *request;
-       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
-        { gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );
-          if ( !strcasecmp( zmq_tag, "PLAY_RADIO" ) )
+    while(module->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
+/****************************************************** Ecoute du master ******************************************************/
+       while ( module->WS_messages )
+        { pthread_mutex_lock ( &module->synchro );
+          JsonNode *request = module->WS_messages->data;
+          module->WS_messages = g_slist_remove ( module->WS_messages, request );
+          pthread_mutex_unlock ( &module->synchro );
+          gchar *tag = Json_get_string ( request, "tag" );
+          if ( !strcasecmp( tag, "PLAY_RADIO" ) )
            { gchar *radio = Json_get_string ( request, "radio" );
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Diffusing %s", __func__, tech_id, radio );
+             Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Diffusing %s", __func__, tech_id, radio );
              Jouer_radio ( module, radio );
            }
-          else if ( !strcasecmp( zmq_tag, "STOP_RADIO" ) )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Stopping radio", __func__, tech_id );
+          else if ( !strcasecmp( tag, "STOP_RADIO" ) )
+           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Stopping radio", __func__, tech_id );
              Stopper_radio( module );
            }
           else
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG, "%s: %s: zmq_tag '%s' not for this thread", __func__, tech_id, zmq_tag ); }
-          json_node_unref(request);
+           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: tag '%s' not for this thread", __func__, tech_id, tag ); }
+          Json_node_unref(request);
         }
      }
     Stopper_radio( module );
-    SubProcess_end(module);
-  }
-/******************************************************************************************************************************/
-/* Run_process: Run du Process                                                                                                */
-/* Entrée: la structure PROCESS associée                                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_process ( struct PROCESS *lib )
-  {
-reload:
-    Radio_Creer_DB ( lib );                                                                    /* Création de la DB du thread */
-    Thread_init ( "radio", "USER", lib, WTD_VERSION, "Manage RADIO Module" );
-
-    lib->config = Json_node_create();
-    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
-
-    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );   /* Chargement des modules */
-    while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
-    Process_Unload_all_subprocess ( lib );
-
-    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
-       lib->Thread_reload = FALSE;
-       goto reload;
-     }
-
-    Thread_end ( lib );
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

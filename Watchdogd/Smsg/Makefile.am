@@ -6,7 +6,7 @@
 SUBDIRS=
 
 lib_LTLIBRARIES                      = libwatchdog-server-smsg.la
-libwatchdog_server_smsg_la_SOURCES    = Sms.c Sms.h admin_sms.c
+libwatchdog_server_smsg_la_SOURCES    = Sms.c Sms.h
 
 libwatchdog_server_smsg_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 gammu json-glib-1.0 libsoup-2.4` \
                                     `mysql_config --libs` \

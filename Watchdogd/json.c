@@ -30,10 +30,10 @@
  #include <string.h>
  #include <unistd.h>
  #include <fcntl.h>
-
  #include <glib.h>
 
  #include "watchdogd.h"
+
 /******************************************************************************************************************************/
 /* Json_create: Prepare un RootNode pour creer un nouveau buffer json                                                         */
 /* Entrée: néant                                                                                                              */
@@ -127,7 +127,10 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Json_node_foreach_array_element ( JsonNode *RootNode, gchar *nom, JsonArrayForeach fonction, gpointer data )
-  { json_array_foreach_element ( Json_get_array ( RootNode, nom ), fonction, data ); }
+  { JsonArray *array = Json_get_array ( RootNode, nom );
+    if (array) { json_array_foreach_element ( array, fonction, data ); }
+          else { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Array is null for '%s'", __func__, nom ); }
+  }
 /******************************************************************************************************************************/
 /* Json_node_to_string: transforme un JsonNode en string                                                                      */
 /* Entrée: le JsonNode a convertir                                                                                            */
@@ -154,7 +157,7 @@
     return(json_object_get_string_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
-/* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
+/* Json_get_double: Recupere le double dont le nom est en parametre                                                           */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
@@ -164,7 +167,7 @@
     return(json_object_get_double_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
-/* Json_get_string: Recupere la chaine de caractere dont le nom est en parametre                                              */
+/* Json_get_bool: Recupere le booleen dont le nom est en parametre                                                            */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
@@ -214,7 +217,7 @@
     return(json_object_get_member ( object, chaine ));
   }
 /******************************************************************************************************************************/
-/* Json_get_int: Recupere l'entier dont le nom est en parametre                                                               */
+/* Json_has_member: Test la presence d'un membre dans le noeud                                                                */
 /* Entrée: la query, le nom du parametre                                                                                      */
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
@@ -223,6 +226,13 @@
     if (!object) { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Object is null for '%s'", __func__, chaine );  return(FALSE); }
     return( json_object_has_member ( object, chaine ) && !json_object_get_null_member ( object, chaine ) );
   }
+/******************************************************************************************************************************/
+/* Json_node_unref: Libère un noeud Joson                                                                                     */
+/* Entrée: le noeud json                                                                                                      */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_node_unref( JsonNode *RootNode )
+  { if (RootNode) json_node_unref ( RootNode ); }
 /******************************************************************************************************************************/
 /* Json_read_from_file: Recupere un ficher et le lit au format Json                                                           */
 /* Entrée: le nom de fichier                                                                                                  */
@@ -236,7 +246,7 @@
     if (!content) return(NULL);
 
     gint fd = open ( filename, O_RDONLY );
-    if (!fd)
+    if (fd<0)
      { g_free(content);
        return(NULL);
      }
@@ -250,5 +260,31 @@
     JsonNode *node = Json_get_from_string ( content );
     g_free(content);
     return(node);
+  }
+/******************************************************************************************************************************/
+/* Json_write_to_file: Sauvegarde un JsonNode dans un fichier                                                                 */
+/* Entrée: le nom de fichier et le buffer Json                                                                                */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Json_write_to_file ( gchar *filename, JsonNode *RootNode )
+  { unlink ( filename );
+    gint fd = creat ( filename, S_IWUSR | S_IRUSR );
+    if (fd<0)
+     { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Creat %s to write Failed: %s", __func__, filename, strerror(errno) ); return(FALSE); }
+
+    gchar *buf = Json_node_to_string ( RootNode );
+    if (!buf)
+     { close(fd);
+       Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Json to Buf failed, writing to %s", __func__, filename );
+       return(FALSE);
+     }
+    gint taille = strlen(buf);
+    if (write ( fd, buf, taille ) != taille)
+     { Info_new ( Config.log, Config.log_msrv, LOG_ERR, "%s: Error writing %d bytes to %s: %s", __func__, taille, filename, strerror(errno) );
+       close(fd);
+       return(FALSE);
+     }
+    close(fd);
+    return(TRUE);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

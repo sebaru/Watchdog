@@ -39,32 +39,10 @@
  #include "Teleinfo.h"
 
 /******************************************************************************************************************************/
-/* Teleinfo_Creer_DB : Creation de la database du process                                                                     */
-/* Entrée: le pointeur sur la structure PROCESS                                                                               */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Teleinfo_Creer_DB ( struct PROCESS *lib )
-  {
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-             "%s: Database_Version detected = '%05d'.", __func__, lib->database_version );
-
-    SQL_Write_new ( "CREATE TABLE IF NOT EXISTS `%s` ("
-                    "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
-                    "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                    "`uuid` VARCHAR(37) COLLATE utf8_unicode_ci NOT NULL,"
-                    "`thread_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',"
-                    "`description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "`port` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',"
-                    "FOREIGN KEY (`uuid`) REFERENCES `processes` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE"
-                    ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;", lib->name );
-
-    Process_set_database_version ( lib, 1 );
-  }
-/******************************************************************************************************************************/
 /* Init_teleinfo: Initialisation de la ligne TELEINFO                                                                         */
 /* Sortie: l'identifiant de la connexion                                                                                      */
 /******************************************************************************************************************************/
- static int Init_teleinfo ( struct SUBPROCESS *module )
+ static int Init_teleinfo ( struct THREAD *module )
   { struct termios oldtio;
     int fd;
 
@@ -73,7 +51,7 @@
 
     fd = open( port, O_RDONLY | O_NOCTTY | O_NONBLOCK | O_CLOEXEC );
     if (fd<0)
-     { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                "%s: %s: Impossible d'ouvrir le port teleinfo '%s', erreur %d", __func__, thread_tech_id, port, fd );
        return(-1);
      }
@@ -86,9 +64,9 @@
     oldtio.c_cc[VMIN]     = 0;
     tcsetattr(fd, TCSANOW, &oldtio);
     tcflush(fd, TCIOFLUSH);
-    Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: Ouverture port teleinfo okay %s", __func__, port );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Ouverture port teleinfo okay %s", __func__, port );
 
-    SubProcess_send_comm_to_master_new ( module, TRUE );
+    Thread_send_comm_to_master ( module, TRUE );
     return(fd);
   }
 /******************************************************************************************************************************/
@@ -96,27 +74,27 @@
 /* Entrée: la trame a recue                                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Processer_trame( struct SUBPROCESS *module )
+ static void Processer_trame( struct THREAD *module )
   { struct TELEINFO_VARS *vars = module->vars;
 
-         if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Adco,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { Zmq_Send_AI_to_master ( module, vars->Isous, atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Base,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Hchc,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Hchp,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { Zmq_Send_AI_to_master ( module, vars->Iinst, atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Imax,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { Zmq_Send_AI_to_master ( module, vars->Papp,  atof(vars->buffer + 5), TRUE ); }
+         if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Adco,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { Http_Post_to_local_BUS_AI ( module, vars->Isous, atof(vars->buffer + 6), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Base,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Hchc,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Hchp,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { Http_Post_to_local_BUS_AI ( module, vars->Iinst, atof(vars->buffer + 6), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Imax,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Papp,  atof(vars->buffer + 5), TRUE ); }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     vars->last_view = Partage->top;
   }
 /******************************************************************************************************************************/
-/* Run_subprocess: Prend en charge un des sous process du thread                                                              */
-/* Entrée: la structure SUBPROCESS associée                                                                                   */
+/* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
+/* Entrée: la structure THREAD associée                                                                                   */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Run_subprocess ( struct SUBPROCESS *module )
-  { SubProcess_init ( module, sizeof(struct TELEINFO_VARS) );
+ void Run_thread ( struct THREAD *module )
+  { Thread_init ( module, sizeof(struct TELEINFO_VARS) );
     struct TELEINFO_VARS *vars = module->vars;
     gint retval, nbr_octet_lu;
     struct timeval tv;
@@ -124,49 +102,49 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    vars->Adco  = Mnemo_create_subprocess_AI ( module, "ADCO",  "N° d’identification du compteur", "numéro", ARCHIVE_1_JOUR );
-    vars->Isous = Mnemo_create_subprocess_AI ( module, "ISOUS", "Intensité EDF souscrite ", "A", ARCHIVE_1_MIN );
-    vars->Base  = Mnemo_create_subprocess_AI ( module, "BASE",  "Index option BASE", "Wh", ARCHIVE_1_MIN );
-    vars->Hchc  = Mnemo_create_subprocess_AI ( module, "HCHC",  "Index heures creuses", "Wh", ARCHIVE_1_MIN );
-    vars->Hchp  = Mnemo_create_subprocess_AI ( module, "HCHP",  "Index heures pleines", "Wh", ARCHIVE_1_MIN );
-    vars->Iinst = Mnemo_create_subprocess_AI ( module, "IINST", "Intensité EDF instantanée", "A", ARCHIVE_1_MIN );
-    vars->Imax  = Mnemo_create_subprocess_AI ( module, "IMAX",  "Intensité EDF maximale", "A", ARCHIVE_1_MIN );
-    vars->Papp  = Mnemo_create_subprocess_AI ( module, "PAPP",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+    vars->Adco  = Mnemo_create_thread_AI ( module, "ADCO",  "N° d’identification du compteur", "numéro", ARCHIVE_1_JOUR );
+    vars->Isous = Mnemo_create_thread_AI ( module, "ISOUS", "Intensité EDF souscrite ", "A", ARCHIVE_1_MIN );
+    vars->Base  = Mnemo_create_thread_AI ( module, "BASE",  "Index option BASE", "Wh", ARCHIVE_1_MIN );
+    vars->Hchc  = Mnemo_create_thread_AI ( module, "HCHC",  "Index heures creuses", "Wh", ARCHIVE_1_MIN );
+    vars->Hchp  = Mnemo_create_thread_AI ( module, "HCHP",  "Index heures pleines", "Wh", ARCHIVE_1_MIN );
+    vars->Iinst = Mnemo_create_thread_AI ( module, "IINST", "Intensité EDF instantanée", "A", ARCHIVE_1_MIN );
+    vars->Imax  = Mnemo_create_thread_AI ( module, "IMAX",  "Intensité EDF maximale", "A", ARCHIVE_1_MIN );
+    vars->Papp  = Mnemo_create_thread_AI ( module, "PAPP",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
 
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
     vars->mode = TINFO_RETRING;
-    while(module->lib->Thread_run == TRUE && module->lib->Thread_reload == FALSE)            /* On tourne tant que necessaire */
-     { usleep(1);
-       sched_yield();
-
-       SubProcess_send_comm_to_master_new ( module, module->comm_status );         /* Périodiquement envoie la comm au master */
-/***************************************************** Ecoute du master *******************************************************/
-       JsonNode *request;
-       while ( (request = SubProcess_Listen_to_master_new ( module ) ) != NULL)
-        { /*gchar *zmq_tag = Json_get_string ( request, "zmq_tag" );*/
-          json_node_unref(request);
+    while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
+     { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
+/****************************************************** Ecoute du master ******************************************************/
+       while ( module->WS_messages )
+        { pthread_mutex_lock ( &module->synchro );
+          JsonNode *message = module->WS_messages->data;
+          module->WS_messages = g_slist_remove ( module->WS_messages, message );
+          pthread_mutex_unlock ( &module->synchro );
+          gchar *tag = Json_get_string ( message, "tag" );
+          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: tag '%s' not for this thread", __func__, thread_tech_id, tag );
+          Json_node_unref(message);
         }
-
 /************************************************* Traitement opérationnel ****************************************************/
        if (vars->mode == TINFO_WAIT_BEFORE_RETRY)
         { if ( vars->date_next_retry <= Partage->top )
            { vars->mode = TINFO_RETRING;
              vars->date_next_retry = 0;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, thread_tech_id );
+             Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, thread_tech_id );
            }
         }
        else if (vars->mode == TINFO_RETRING)
         { vars->fd = Init_teleinfo( module );
           if (vars->fd<0)                                                               /* On valide l'acces aux ports */
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                        "%s: %s: Init TELEINFO failed. Re-trying in %ds", __func__, thread_tech_id, TINFO_RETRY_DELAI/10 );
              vars->mode = TINFO_WAIT_BEFORE_RETRY;
              vars->date_next_retry = Partage->top + TINFO_RETRY_DELAI;
            }
           else
            { vars->mode = TINFO_CONNECTED;
-             Info_new( Config.log, module->lib->Thread_debug, LOG_INFO, "%s: %s: Acces TELEINFO FD=%d", __func__, thread_tech_id, vars->fd );
+             Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Acces TELEINFO FD=%d", __func__, thread_tech_id, vars->fd );
            }
         }
        if (vars->mode != TINFO_CONNECTED) continue;
@@ -186,17 +164,13 @@
                 Processer_trame( module );
                 nbr_octet_lu = 0;
                 memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
-                SubProcess_send_comm_to_master_new ( module, TRUE );
+                Thread_send_comm_to_master ( module, TRUE );
               }
              else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)                        /* Encore en dessous de la limite ? */
-              { /* Info_new( Config.log, module->lib->Thread_debug, LOG_DEBUG,
-                         "Run_process: Get one char : %d, %c (pos %d)",
-                          vars->buffer[nbr_octet_lu], vars->buffer[nbr_octet_lu], nbr_octet_lu );*/
-                nbr_octet_lu += cpt;                                                     /* Preparation du prochain caractere */
-              }
+              { nbr_octet_lu += cpt; }                                                   /* Preparation du prochain caractere */
              else { nbr_octet_lu = 0;                                                              /* Depassement de tampon ! */
                     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
-                    Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+                    Info_new( Config.log, module->Thread_debug, LOG_ERR,
                              "%s: %s: BufferOverflow, dropping trame (nbr_octet_lu=%d, cpt=%d, taille buffer=%d)",
                               __func__, thread_tech_id, nbr_octet_lu, cpt, TAILLE_BUFFER_TELEINFO  );
                   }
@@ -208,13 +182,13 @@
           gint retour;
           retour = fstat( vars->fd, &buf );
           if (retour == -1)
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                       "%s: %s: Fstat Error (%s), closing connexion and re-trying in %ds", __func__, thread_tech_id,
                        strerror(errno), TINFO_RETRY_DELAI/10 );
              closing = TRUE;
            }
           else if ( buf.st_nlink < 1 )
-           { Info_new( Config.log, module->lib->Thread_debug, LOG_ERR,
+           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
                       "%s: %s: USB device disappeared. Closing connexion and re-trying in %ds", __func__, thread_tech_id, TINFO_RETRY_DELAI/10 );
              closing = TRUE;
            }
@@ -222,48 +196,21 @@
            { close(vars->fd);
              vars->mode = TINFO_WAIT_BEFORE_RETRY;
              vars->date_next_retry = Partage->top + TINFO_RETRY_DELAI;
-             SubProcess_send_comm_to_master_new ( module, FALSE );
+             Thread_send_comm_to_master ( module, FALSE );
            }
         }
      }
     close(vars->fd);                                                                          /* Fermeture de la connexion FD */
 
-    json_node_unref ( vars->Adco );
-    json_node_unref ( vars->Isous );
-    json_node_unref ( vars->Base );
-    json_node_unref ( vars->Hchc );
-    json_node_unref ( vars->Hchp );
-    json_node_unref ( vars->Iinst );
-    json_node_unref ( vars->Imax );
-    json_node_unref ( vars->Papp );
+    Json_node_unref ( vars->Adco );
+    Json_node_unref ( vars->Isous );
+    Json_node_unref ( vars->Base );
+    Json_node_unref ( vars->Hchc );
+    Json_node_unref ( vars->Hchp );
+    Json_node_unref ( vars->Iinst );
+    Json_node_unref ( vars->Imax );
+    Json_node_unref ( vars->Papp );
 
-    SubProcess_end(module);
-  }
-/******************************************************************************************************************************/
-/* Run_process: Run du Process                                                                                                */
-/* Entrée: la structure PROCESS associée                                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Run_process ( struct PROCESS *lib )
-  {
-reload:
-    Teleinfo_Creer_DB ( lib );                                                                 /* Création de la DB du thread */
-    Thread_init ( "teleinfoedf", "I/O", lib, WTD_VERSION, "Manage TELEINFOEDF Sensors" );
-
-    lib->config = Json_node_create();
-    if(lib->config) SQL_Select_to_json_node ( lib->config, "subprocess", "SELECT * FROM %s WHERE uuid='%s'", lib->name, lib->uuid );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: %d subprocess to load", __func__, Json_get_int ( lib->config, "nbr_subprocess" ) );
-
-    Json_node_foreach_array_element ( lib->config, "subprocess", Process_Load_one_subprocess, lib );/* Chargement des modules */
-    while( lib->Thread_run == TRUE && lib->Thread_reload == FALSE) sleep(1);                 /* On tourne tant que necessaire */
-    Process_Unload_all_subprocess ( lib );
-
-    if (lib->Thread_run == TRUE && lib->Thread_reload == TRUE)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
-       lib->Thread_reload = FALSE;
-       goto reload;
-     }
-
-    Thread_end ( lib );
+    Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

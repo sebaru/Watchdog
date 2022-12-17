@@ -3,11 +3,10 @@
 #* Projet WatchDog version 3.0       Gestion d'habitat                      mar 11 avr 2009 15:48:08 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS= 
+SUBDIRS=
 
 lib_LTLIBRARIES     = libwatchdog-server-audio.la
-libwatchdog_server_audio_la_SOURCES    = Audio.c Audio.h admin_audio.c
-
+libwatchdog_server_audio_la_SOURCES    = Audio.c Audio.h
 
 libwatchdog_server_audio_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
                                        `mysql_config --libs` \

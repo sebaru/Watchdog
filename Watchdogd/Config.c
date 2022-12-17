@@ -39,7 +39,7 @@
 /* Entrée: le nom de fichier à lire                                                                                           */
 /* Sortie: La structure mémoire est à jour                                                                                    */
 /******************************************************************************************************************************/
- gboolean Lire_config ( void )
+ void Lire_config ( void )
   { GError *error = NULL;
     gchar *chaine;
     GKeyFile *gkf;
@@ -47,15 +47,21 @@
 
     memset ( &Config, 0, sizeof(struct CONFIG) );
 
-    Config.config = Json_read_from_file ( "/etc/fr-abls-habitat-agent.conf" );
-    if (!Config.config) Config.config = Json_node_create();
+    Config.config = Json_read_from_file ( "/etc/abls-habitat-agent.conf" );
+    if (!Config.config)
+     { Config.config = Json_node_create();
+       Config.installed = FALSE;
+       return;
+     }
+    Config.installed = TRUE;
+
     if (!Json_has_member ( Config.config, "domain_uuid"   )) Json_node_add_string ( Config.config, "domain_uuid",   "default" );
     if (!Json_has_member ( Config.config, "domain_secret" )) Json_node_add_string ( Config.config, "domain_secret", "default" );
-    if (!Json_has_member ( Config.config, "api_url" ))       Json_node_add_string ( Config.config, "api_url", "https://api.abls-habitat.fr" );
+    if (!Json_has_member ( Config.config, "api_url" ))       Json_node_add_string ( Config.config, "api_url", "api.abls-habitat.fr" );
+    if (!Json_has_member ( Config.config, "install_time"  )) Json_node_add_string ( Config.config, "install_time", "1980-10-22 02:50:00" );
 
-    g_snprintf( Config.master_host,   sizeof(Config.master_host),   "localhost" );
-    g_snprintf( Config.run_as,        sizeof(Config.run_as),        "%s", g_get_user_name() );
-    g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", DEFAUT_PROCESS_DIR   );
+    g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "localhost" );
+    g_snprintf( Config.librairie_dir,   sizeof(Config.librairie_dir),   "%s", DEFAUT_PROCESS_DIR   );
 
     Config.instance_is_master = TRUE;
     Config.db_port            = DEFAUT_DB_PORT;
@@ -73,14 +79,10 @@
     if (!g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error))
      { printf("Unable to parse config file %s, error %s\n", Config.config_file, error->message );
        g_error_free( error );
-       return(FALSE);
+       return;
      }
 /******************************************************* Partie GLOBAL ********************************************************/
     printf("Using config file %s.\n", Config.config_file );
-
-    chaine = g_key_file_get_string ( gkf, "GLOBAL", "run_as", NULL );
-    if (chaine)
-     { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", chaine ); g_free(chaine); }
 
     chaine = g_key_file_get_string ( gkf, "GLOBAL", "library_dir", NULL );
     if (chaine)
@@ -109,7 +111,6 @@
 /******************************************************** Partie LOG **********************************************************/
     Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
     g_key_file_free(gkf);
-    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Print_config: Affichage (enfin log) la config actuelle en parametre                                                        */
@@ -119,176 +120,27 @@
   {
     if (!Config.log) return;
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config run_as               %s", Config.run_as );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_zmq              %d", Config.log_zmq );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_trad             %d", Config.log_trad );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config debug                %d", Config.log_msrv );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master host          %s", Config.master_host );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db hostname          %s", Config.db_hostname );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          *******" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
-  }
-/******************************************************************************************************************************/
-/* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
-/* Entrée: le thread, le nom du parametre, sa valeur                                                                          */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Creer_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
-  { gchar requete[512];
-    gboolean retour;
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-               "INSERT IGNORE INTO %s SET instance_id='%s',nom_thread='%s',nom='%s', valeur='%s' ",
-               NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom, valeur
-              );
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return(retour);
-  }
-/******************************************************************************************************************************/
-/* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
-/* Entrée: le thread, le nom du parametre, sa valeur                                                                          */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Creer_configDB_int ( gchar *nom_thread, gchar *nom, gint valeur )
-  { gchar requete[512];
-    gboolean retour;
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-               "INSERT IGNORE INTO %s SET instance_id='%s',nom_thread='%s',nom='%s', valeur='%d' ",
-               NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom, valeur
-              );
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return(retour);
-  }
-/******************************************************************************************************************************/
-/* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
-/* Entrée: le thread, le nom du parametre, sa valeur                                                                          */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
-  { return ( SQL_Write_new( "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
-                            "('%s','%s','%s','%s') ON DUPLICATE KEY UPDATE valeur='%s';",
-                            NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom, valeur, valeur
-                          ) );
-  }
-/******************************************************************************************************************************/
-/* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
-/* Entrée: le thread, le nom du parametre, sa valeur                                                                          */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Modifier_configDB_int ( gchar *nom_thread, gchar *nom, gint valeur )
-  { return ( SQL_Write_new( "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
-                            "('%s','%s','%s','%d') ON DUPLICATE KEY UPDATE valeur='%d';",
-                            NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom, valeur, valeur
-                          ) );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée                                   */
-/* Entrée: une database de retour et le nom de l'instance_id                                                                  */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread )
-  { gchar requete[512];
-    gboolean retour;
-    struct DB *db;
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT nom,valeur"
-                " FROM %s"
-                " WHERE instance_id = '%s' AND nom_thread LIKE '%s' ORDER BY nom,valeur",
-                NOM_TABLE_CONFIG, g_get_host_name(), nom_thread
-              );
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_configDB: DB connexion failed" );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée                                   */
-/* Entrée: une database de retour et le nom de l'instance_id                                                                  */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gchar *Recuperer_configDB_by_nom ( gchar *nom_thread, gchar *nom_param )
-  { gchar requete[512], *valeur = NULL;
-    gboolean retour;
-    struct DB *db;
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT valeur FROM %s"
-                " WHERE instance_id = '%s' AND nom_thread LIKE '%s' AND nom LIKE '%s' ORDER BY nom,valeur",
-                NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom_param
-              );
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(NULL);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE)
-     { Libere_DB_SQL (&db);
-       return(NULL);
-     }
-
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if (db->row) { valeur = g_strdup ( db->row[0] ); }
-    Liberer_resultat_SQL (db);
-    Libere_DB_SQL( &db );
-    return(valeur);
-  }
-/******************************************************************************************************************************/
-/* Recuperer_configDB_suite: Continue la récupération des paramètres de configuration dans la base                            */
-/* Entrée: une database                                                                                                       */
-/* Sortie: FALSE si plus d'enregistrement                                                                                     */
-/******************************************************************************************************************************/
- gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur )
-  { struct DB *db;
-
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    *nom =  db->row[0];
-    *valeur = db->row[1];
-    return(TRUE);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_uuid          %s", Json_get_string ( Config.config, "domain_uuid" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_secret        *******" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config agent_uuid           %s", Json_get_string ( Config.config, "agent_uuid" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config api_url              %s", Json_get_string ( Config.config, "api_url" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config headless             %d", Config.headless );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_bus              %d", Config.log_bus );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_trad             %d", Config.log_trad );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_msrv             %d", Config.log_msrv );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Config.master_hostname );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
