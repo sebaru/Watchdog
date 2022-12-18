@@ -237,7 +237,7 @@
          &single,           0, "Don't start thread", NULL },
        { "link",           'l', POPT_ARG_NONE,
          &link,             0, "Link to API", NULL },
-       { "api",            'A', POPT_ARG_STRING,
+       { "api-url",        'A', POPT_ARG_STRING,
          &api_url,          0, "API Url (default is api.abls-habitat.fr)", NULL },
        { "domain-uuid",    'D', POPT_ARG_STRING,
          &domain_uuid,      0, "Domain to link to (mandatory)", NULL },
