@@ -693,8 +693,7 @@
 
     if (Config.installed == FALSE)
      { if (msg->method == SOUP_METHOD_GET)
-        {      if (!strcasecmp ( path, "/install" ))   Http_traiter_install ( server, msg, path, query, client, user_data );
-          else if (!strcasecmp ( path, "/status" ))    Http_traiter_status  ( server, msg, path, query, client, user_data );
+        {      if (!strcasecmp ( path, "/status" ))    Http_traiter_status  ( server, msg, path, query, client, user_data );
           else soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
         }
        else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
