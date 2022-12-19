@@ -141,7 +141,8 @@
        Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
        Partage->com_dls.HORLOGE_ticks = api_result;
        pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: HORLOGE ticks loaded.", __func__ );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %03d HORLOGE ticks loaded.", __func__,
+                 Json_get_int ( Partage->com_dls.HORLOGE_ticks, "nbr_horloges" ) );
      }
     else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for HORLOGE TICKS failed.", __func__ );
   }
