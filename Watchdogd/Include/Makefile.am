@@ -6,7 +6,6 @@
 noinst_HEADERS    = Db.h Erreur.h \
                     Config.h Http.h \
                     Json.h Thread.h \
-                    Synoptiques_DB.h  \
                     watchdogd.h Dls.h \
                     Archive.h
 

@@ -43,7 +43,6 @@
  #include "Http.h"
  #include "Config.h"
  #include "Archive.h"
- #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */

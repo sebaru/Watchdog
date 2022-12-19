@@ -12,7 +12,7 @@ Watchdogd_SOURCES = Watchdogd.c thread.c Archive.c Erreur.c \
                     db.c Mnemonique.c \
                     distrib_Events.c \
                     api_sync.c api_MSGxxx.c api_Ixxx.c mail.c uuid.c \
-                    Synoptiques.c Syn_visuels.c Syn_comment.c Syn_cadran.c
+                    Synoptiques.c Syn_cadran.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
                     Http/libwatchdog-http.la
