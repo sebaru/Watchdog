@@ -204,21 +204,6 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* MSRV_Load_horloge_ticks: Charge les horloges depuis l'API                                                                  */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Les horloges sont directement stockées dans la structure partagée                                                  */
-/******************************************************************************************************************************/
- void MSRV_Load_horloge_ticks ( void )
-  { JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/load", NULL );
-    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-     { Json_node_unref ( Partage->HORLOGE_ticks );
-       Partage->HORLOGE_ticks = api_result;
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: HORLOGE ticks loaded.", __func__ );
-     }
-    else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for HORLOGE TICKS failed.", __func__ );
-  }
-
-/******************************************************************************************************************************/
 /* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
 /* Entrée: argc, argv                                                                                                         */
 /* Sortie: -1 si erreur, 0 si ok                                                                                              */
@@ -651,7 +636,6 @@
     if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
     if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
     Json_node_unref ( Partage->Maps_root );
-    Json_node_unref ( Partage->HORLOGE_ticks );
 
 /************************************************* Dechargement des mutex *****************************************************/
 

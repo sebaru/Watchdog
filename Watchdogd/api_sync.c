@@ -89,6 +89,7 @@
         }
      }
     else if ( !strcasecmp( agent_tag, "REMAP") && Config.instance_is_master == TRUE) MSRV_Remap();
+    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") && Config.instance_is_master == TRUE) Dls_Load_horloge_ticks();
     else if ( !strcasecmp( agent_tag, "DLS_COMPIL") && Config.instance_is_master == TRUE)
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DLS_COMPIL: wrong parameters", __func__ );
