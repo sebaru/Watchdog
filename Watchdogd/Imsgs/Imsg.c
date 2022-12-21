@@ -271,28 +271,34 @@ end_message:
   { struct THREAD *module = userdata;
     struct IMSGS_VARS *vars = module->vars;
     const char *type, *from;
-    type = xmpp_stanza_get_type ( stanza );
-    from = xmpp_stanza_get_from ( stanza );
-    if (type && !strcmp(type,"unavailable") ) Imsgs_Sauvegarder_statut_contact ( module, from, FALSE );
-    else Imsgs_Sauvegarder_statut_contact ( module, from, TRUE );
 
-    if (type && !strcmp(type,"subscribe"))                            /* Demande de souscription de la part d'un utilisateur */
-     { xmpp_stanza_t *pres;
-       pres = xmpp_presence_new(vars->ctx);
-       xmpp_stanza_set_to  ( pres, from );
-       xmpp_stanza_set_type( pres, "subscribed" );
-       xmpp_send(vars->conn, pres);
-       xmpp_stanza_release(pres);
-       pres = xmpp_presence_new(vars->ctx);
-       xmpp_stanza_set_to  ( pres, Json_get_string ( module->config, "jabberid" ) );
-       xmpp_stanza_set_type( pres, "subscribe" );
-       xmpp_send(vars->conn, pres);
-       xmpp_stanza_release(pres);
-     }
     gchar *buf; size_t buflen;
     xmpp_stanza_to_text ( stanza, &buf, &buflen );
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: Received Stanza '%s'", __func__, buf );
     xmpp_free(vars->ctx, buf);
+
+    type = xmpp_stanza_get_type ( stanza );
+    from = xmpp_stanza_get_from ( stanza );
+
+    if (type)
+     { if (!strcmp(type,"unavailable")) Imsgs_Sauvegarder_statut_contact ( module, from, FALSE );
+       else Imsgs_Sauvegarder_statut_contact ( module, from, TRUE );
+
+       if (!strcmp(type,"subscribe"))                                  /* Demande de souscription de la part d'un utilisateur */
+        { xmpp_stanza_t *pres;
+          pres = xmpp_presence_new(vars->ctx);
+          xmpp_stanza_set_to  ( pres, from );
+          xmpp_stanza_set_type( pres, "subscribed" );
+          xmpp_send(vars->conn, pres);
+          xmpp_stanza_release(pres);
+          pres = xmpp_presence_new(vars->ctx);
+          xmpp_stanza_set_to  ( pres, from );
+          xmpp_stanza_set_type( pres, "subscribe" );
+          xmpp_send(vars->conn, pres);
+          xmpp_stanza_release(pres);
+          Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Sending 'subscribe' to '%s'", __func__, from );
+        }
+     }
 
     return(1);
   }
