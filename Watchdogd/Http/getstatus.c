@@ -63,7 +63,7 @@
     Json_node_add_string ( RootNode, "instance_name",   g_get_host_name() );
     Json_node_add_bool   ( RootNode, "is_master",       Json_get_bool   ( Config.config, "is_master" ) );
     Json_node_add_string ( RootNode, "domain_uuid",     Json_get_string ( Config.config, "domain_uuid" ) );
-    Json_node_add_string ( RootNode, "agent_uuid",   Json_get_string ( Config.config, "agent_uuid" ) );
+    Json_node_add_string ( RootNode, "agent_uuid",      Json_get_string ( Config.config, "agent_uuid" ) );
     Json_node_add_string ( RootNode, "api_url",         Json_get_string ( Config.config, "api_url" ) );
     Json_node_add_string ( RootNode, "master_hostname", Json_get_string ( Config.config, "master_hostname" ) );
     Json_node_add_string ( RootNode, "headless",        Json_get_string ( Config.config, "headless" ) );
@@ -89,14 +89,6 @@
     num = g_slist_length( Partage->com_msrv.liste_msg );                                       /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Json_node_add_int  ( RootNode, "length_msg", num );
-
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT * FROM db_status");
-    Json_node_add_int    ( RootNode, "nbr_sessions", g_slist_length(Partage->com_http.liste_http_clients) );
-
-    Json_node_add_string ( RootNode, "db_username", Config.db_username );
-    Json_node_add_string ( RootNode, "db_hostname", Config.db_hostname );
-    Json_node_add_int    ( RootNode, "db_port",     Config.db_port );
-    Json_node_add_string ( RootNode, "db_database", Config.db_database );
 
     Json_node_add_int    ( RootNode, "archive_liste_taille", Partage->archive_liste_taille );
 
