@@ -43,6 +43,7 @@
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
+    g_snprintf( bit->unite,    sizeof(bit->unite),    "%s", Json_get_string ( element, "unite" ) );
     bit->valeur   = Json_get_double ( element, "valeur"   );
     bit->in_range = Json_get_bool   ( element, "in_range" );
     if (!strcasecmp ( tech_id, "SYS" ) ) bit->archivage = 2;            /* Si AI du plugin SYS, on archive toutes les minutes */
