@@ -44,9 +44,9 @@
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     g_snprintf( bit->unite,    sizeof(bit->unite),    "%s", Json_get_string ( element, "unite" ) );
-    bit->valeur   = Json_get_double ( element, "valeur"   );
-    bit->in_range = Json_get_bool   ( element, "in_range" );
-    if (!strcasecmp ( tech_id, "SYS" ) ) bit->archivage = 2;            /* Si AI du plugin SYS, on archive toutes les minutes */
+    bit->archivage = Json_get_int    ( element, "archivage" );
+    bit->valeur    = Json_get_double ( element, "valeur"    );
+    bit->in_range  = Json_get_bool   ( element, "in_range"  );
     plugin->Dls_data_AI = g_slist_prepend ( plugin->Dls_data_AI, bit );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
               "%s: Create bit DLS_AI '%s:%s'=%f (%s)", __func__, bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
