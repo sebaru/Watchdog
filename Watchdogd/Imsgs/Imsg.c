@@ -39,9 +39,9 @@
   { struct IMSGS_VARS *vars = module->vars;
     xmpp_stanza_t *stanza = xmpp_message_new ( vars->ctx, "normal", dest, NULL );
     xmpp_message_set_body ( stanza, message );
-    xmpp_send ( vars->conn , stanza ) ;
+    xmpp_send ( vars->conn, stanza ) ;
     xmpp_stanza_release ( stanza );
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: Send '%s' to '%s'", __func__, dest, message );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: Send '%s' to '%s'", __func__, message, dest );
   }
 /******************************************************************************************************************************/
 /* Imsgs_Envoi_message_to_all_available : Envoi un message aux contacts disponibles                                           */
@@ -108,6 +108,10 @@
     gchar *message    = xmpp_message_get_body ( stanza );
     if (!message)
      { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': From '%s' -> Error: message is NULL", __func__, thread_tech_id, from );
+       gchar *buf; size_t buflen;
+       xmpp_stanza_to_text ( stanza, &buf, &buflen );
+       Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': From '%s' -> Received Stanza '%s'", __func__, thread_tech_id, from, buf );
+       xmpp_free(vars->ctx, buf);
        return(1);
      }
 
@@ -219,26 +223,13 @@ end_message:
     return(1);
   }
 /******************************************************************************************************************************/
-/* Imsgs_Sauvegarder_statut_contact : Sauvegarde en mémoire le statut du contact en parametre                                 */
-/* Entrée: le contact et le statut                                                                                            */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Imsgs_Sauvegarder_statut_contact ( struct THREAD *module, const gchar *jabber_id, gboolean available )
-  { gchar hostonly[80], *ptr;
-
-    g_snprintf( hostonly, sizeof(hostonly), "%s", jabber_id );
-    ptr = strstr( hostonly, "/" );
-    if (ptr) *ptr=0;
-
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
-              "%s : jabber_id %s -> Availability updated to %d.", __func__, jabber_id, available );
-  }
-/******************************************************************************************************************************/
 /* Imsgs_set_presence: Défini le statut présenté aux partenaires                                                              */
 /* Entrée : le statut au format chaine de caratères                                                                           */
 /******************************************************************************************************************************/
   static void Imsgs_set_presence ( struct THREAD *module, const char *status_to_send )
   { struct IMSGS_VARS *vars = module->vars;
+    gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
+
     xmpp_stanza_t *pres = xmpp_presence_new(vars->ctx);
 
     xmpp_stanza_t *show = xmpp_stanza_new(vars->ctx);
@@ -257,7 +248,7 @@ end_message:
 
     gchar *buf; size_t buflen;
     xmpp_stanza_to_text ( pres, &buf, &buflen );
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
+    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': '%s'", __func__, thread_tech_id, buf );
     xmpp_free(vars->ctx, buf);
 
     xmpp_send(vars->conn, pres);
@@ -271,12 +262,18 @@ end_message:
   { struct THREAD *module = userdata;
     struct IMSGS_VARS *vars = module->vars;
     const char *type, *from;
+    gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
+
     type = xmpp_stanza_get_type ( stanza );
     from = xmpp_stanza_get_from ( stanza );
-    if (type && !strcmp(type,"unavailable") ) Imsgs_Sauvegarder_statut_contact ( module, from, FALSE );
-    else Imsgs_Sauvegarder_statut_contact ( module, from, TRUE );
 
-    if (type && !strcmp(type,"subscribe"))                            /* Demande de souscription de la part d'un utilisateur */
+    gchar *buf; size_t buflen;
+    xmpp_stanza_to_text ( stanza, &buf, &buflen );
+    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' -> Received Stanza '%s'", __func__, thread_tech_id, from, buf );
+    xmpp_free(vars->ctx, buf);
+
+
+    if (type && !strcmp(type,"subscribe"))                             /* Demande de souscription de la part d'un utilisateur */
      { xmpp_stanza_t *pres;
        pres = xmpp_presence_new(vars->ctx);
        xmpp_stanza_set_to  ( pres, from );
@@ -284,15 +281,12 @@ end_message:
        xmpp_send(vars->conn, pres);
        xmpp_stanza_release(pres);
        pres = xmpp_presence_new(vars->ctx);
-       xmpp_stanza_set_to  ( pres, Json_get_string ( module->config, "jabberid" ) );
+       xmpp_stanza_set_to  ( pres, from );
        xmpp_stanza_set_type( pres, "subscribe" );
        xmpp_send(vars->conn, pres);
        xmpp_stanza_release(pres);
+       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': Sending 'subscribe' to '%s'", __func__, thread_tech_id, from );
      }
-    gchar *buf; size_t buflen;
-    xmpp_stanza_to_text ( stanza, &buf, &buflen );
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s'", __func__, buf );
-    xmpp_free(vars->ctx, buf);
 
     return(1);
   }
@@ -384,7 +378,7 @@ reconnect:
              Imsgs_Envoi_message_to_all_available ( module, chaine );
            }
           else if ( !strcasecmp( tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
-          else Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': tag '%s' not for this thread", __func__, jabber_id, tag );
+          else Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': tag '%s' not for this thread", __func__, thread_tech_id, tag );
           Json_node_unref(request);
         }
      }                                                                                         /* Fin du while partage->arret */

@@ -46,8 +46,9 @@
 
     g_snprintf( query, sizeof(query), "https://%s:5559/bus", Config.master_hostname );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
-    g_object_set ( G_OBJECT(connexion), "ssl-strict", FALSE, NULL );
+    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 0, "timeout", 2, "ssl-strict", FALSE,
+                                                            "user-agent", "Abls-habitat Agent", NULL );
+
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
      { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: MSG Error Sending to %s", __func__, query );
@@ -201,13 +202,13 @@ end:
                  "%s: SET_WATCHDOG for: '%s:%s'=%d", __func__, thread_tech_id,
                  Json_get_string ( request, "acronyme" ), Json_get_int ( request, "consigne" ) );
        struct DLS_WATCHDOG *bit = Dls_data_lookup_WATCHDOG ( thread_tech_id, Json_get_string ( request, "acronyme" ) );
-       Dls_data_set_WATCHDOG ( NULL, bit, Json_get_int ( request, "consigne" ) );
+       if (bit) Dls_data_set_WATCHDOG ( NULL, bit, Json_get_int ( request, "consigne" ) );
      }
 /************************************ Positionne une valeur d'une Entrée Analogique *******************************************/
     else if ( !strcasecmp( tag, "SET_AI") )
      { if (! (Json_has_member ( request, "thread_acronyme" ) &&
               Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
-              Json_has_member ( request, "unite" )
+              Json_has_member ( request, "unite" ) && Json_has_member ( request, "archivage" )
              )
           )
         { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_AI: wrong parameters from '%s'", __func__, thread_tech_id );
@@ -229,8 +230,12 @@ end:
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
        struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
-       Dls_data_set_AI ( NULL, bit,
-                         Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
+       if (bit)
+        { Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
+          bit->archivage = Json_get_int ( request, "archivage" );
+          g_snprintf ( bit->unite,   sizeof(bit->unite),   Json_get_string ( request, "unite" ) );
+          g_snprintf ( bit->libelle, sizeof(bit->libelle), Json_get_string ( request, "libelle" ) );
+        }
      }
 /************************************ Réaction sur SET_CDE ********************************************************************/
     else if ( !strcasecmp( tag, "SET_CDE") )
@@ -270,7 +275,7 @@ end:
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
                  Json_get_bool ( request, "etat" ) );
        struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
-       Dls_data_set_DI ( NULL, bit, Json_get_bool ( request, "etat" ) );
+       if (bit) Dls_data_set_DI ( NULL, bit, Json_get_bool ( request, "etat" ) );
      }
 /************************************ Réaction sur GET_DO *********************************************************************/
     else if ( !strcasecmp( tag, "GET_DO") )

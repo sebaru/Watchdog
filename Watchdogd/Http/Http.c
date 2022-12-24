@@ -188,12 +188,19 @@
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres )
+ JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... )
   { gchar query[512];
+    va_list ap;
     JsonNode *result = NULL;
 
-    if (!parametres) g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
-                else g_snprintf( query, sizeof(query), "https://%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
+    if (format)
+     { gchar parametres[128];
+       va_start( ap, format );
+       g_vsnprintf ( parametres, sizeof(parametres), format, ap );
+       va_end ( ap );
+       g_snprintf( query, sizeof(query), "https://%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
+     }
+    else g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
 /********************************************************* Envoi de la requete ************************************************/
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
     if (!soup_msg)
@@ -405,6 +412,7 @@
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_node_add_bool   ( RootNode, "connected", TRUE );
     Json_node_add_string ( RootNode, "version",  WTD_VERSION );
+    Json_node_add_string ( RootNode, "branche",  WTD_BRANCHE );
     Json_node_add_string ( RootNode, "username", session->username );
     Json_node_add_string ( RootNode, "appareil", session->appareil );
     Json_node_add_string ( RootNode, "instance", g_get_host_name() );
@@ -692,8 +700,7 @@
 
     if (Config.installed == FALSE)
      { if (msg->method == SOUP_METHOD_GET)
-        {      if (!strcasecmp ( path, "/install" ))   Http_traiter_install ( server, msg, path, query, client, user_data );
-          else if (!strcasecmp ( path, "/status" ))    Http_traiter_status  ( server, msg, path, query, client, user_data );
+        {      if (!strcasecmp ( path, "/status" ))    Http_traiter_status  ( server, msg, path, query, client, user_data );
           else soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
         }
        else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }

@@ -341,9 +341,7 @@
  static struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id )
   { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Starting import of plugin '%s'", __func__, tech_id );
 
-    gchar parametre[64];
-    g_snprintf(parametre, sizeof(parametre), "tech_id=%s", tech_id );
-    JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", parametre );
+    JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", "tech_id=%s", tech_id );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: '%s': API Error.", __func__, tech_id );
        return(NULL);
@@ -500,8 +498,9 @@
     Json_node_foreach_array_element ( api_result, "plugins", Dls_Importer_un_plugin_by_array, NULL );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: %03d plugins loaded in %03.1fs", __func__,
               Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0 );
-    Dls_plugins_remap_all_alias();
     Json_node_unref ( api_result );
+    Dls_plugins_remap_all_alias();
+    Dls_Load_horloge_ticks();
   }
 /******************************************************************************************************************************/
 /* Dls_Reseter_un_plugin: Recharge un plugin par tech_id                                                                      */
@@ -521,6 +520,7 @@
     else Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: '%s': error when resetting", __func__, tech_id );
     Dls_plugins_remap_all_alias();
     pthread_mutex_unlock( &Partage->com_dls.synchro );
+    Dls_Load_horloge_ticks();
   }
 /******************************************************************************************************************************/
 /* Decharger_plugins: Decharge tous les plugins DLS                                                                           */

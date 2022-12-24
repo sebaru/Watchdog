@@ -128,5 +128,23 @@
 /* Sortie: Les horloges sont directement pilotées dans la structure DLS_DATA                                                  */
 /******************************************************************************************************************************/
  void Dls_data_activer_horloge ( void )
-  { Json_node_foreach_array_element ( Partage->HORLOGE_ticks, "horloges", Dls_data_activer_une_horloge, NULL ); }
+  { Json_node_foreach_array_element ( Partage->com_dls.HORLOGE_ticks, "horloges", Dls_data_activer_une_horloge, NULL ); }
+/******************************************************************************************************************************/
+/* Dls_Load_horloge_ticks: Charge les horloges depuis l'API                                                                   */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Les horloges sont directement stockées dans la structure partagée                                                  */
+/******************************************************************************************************************************/
+ void Dls_Load_horloge_ticks ( void )
+  { JsonNode *api_result = Http_Get_from_global_API ( "/run/horloges", NULL );
+    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+     { pthread_mutex_lock ( &Partage->com_dls.synchro_data );
+       Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
+       Partage->com_dls.HORLOGE_ticks = api_result;
+       pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %03d HORLOGE ticks loaded.", __func__,
+                 Json_get_int ( Partage->com_dls.HORLOGE_ticks, "nbr_horloges" ) );
+     }
+    else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for HORLOGE TICKS failed.", __func__ );
+  }
+
 /*----------------------------------------------------------------------------------------------------------------------------*/

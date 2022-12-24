@@ -66,9 +66,11 @@
           exit(0);
         }
      }
-    else if ( !strcasecmp( agent_tag, "THREAD_START") ) { Thread_Start_one_thread ( NULL, 0, request, NULL ); }
-    else if ( !strcasecmp( agent_tag, "THREAD_STOP") )  { Thread_Stop_one_thread ( request ); }
-    else if ( !strcasecmp( agent_tag, "THREAD_SEND") )  { Thread_Push_API_message ( request ); }
+    else if ( !strcasecmp( agent_tag, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
+    else if ( !strcasecmp( agent_tag, "THREAD_RESTART") ) { Thread_Stop_one_thread ( request );
+                                                            Thread_Start_one_thread ( NULL, 0, request, NULL );
+                                                          }
+    else if ( !strcasecmp( agent_tag, "THREAD_SEND") )    { Thread_Push_API_message ( request ); }
     else if ( !strcasecmp( agent_tag, "AGENT_SET") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
@@ -89,6 +91,7 @@
         }
      }
     else if ( !strcasecmp( agent_tag, "REMAP") && Config.instance_is_master == TRUE) MSRV_Remap();
+    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") && Config.instance_is_master == TRUE) Dls_Load_horloge_ticks();
     else if ( !strcasecmp( agent_tag, "DLS_COMPIL") && Config.instance_is_master == TRUE)
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DLS_COMPIL: wrong parameters", __func__ );

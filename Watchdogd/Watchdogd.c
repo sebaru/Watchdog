@@ -204,36 +204,32 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* MSRV_Load_horloge_ticks: Charge les horloges depuis l'API                                                                  */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Les horloges sont directement stockées dans la structure partagée                                                  */
-/******************************************************************************************************************************/
- void MSRV_Load_horloge_ticks ( void )
-  { JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/load", NULL );
-    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-     { Json_node_unref ( Partage->HORLOGE_ticks );
-       Partage->HORLOGE_ticks = api_result;
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: HORLOGE ticks loaded.", __func__ );
-     }
-    else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for HORLOGE TICKS failed.", __func__ );
-  }
-
-/******************************************************************************************************************************/
 /* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
 /* Entrée: argc, argv                                                                                                         */
 /* Sortie: -1 si erreur, 0 si ok                                                                                              */
 /******************************************************************************************************************************/
  static void Lire_ligne_commande( int argc, char *argv[] )
-  { gint help = 0, log_level = -1, single = 0, version = 0;
+  { gint help = 0, log_level = -1, single = 0, version = 0, link = 0;
+    gchar *api_url = NULL, *domain_uuid = NULL, *domain_secret = NULL, *agent_uuid_src = NULL;
     struct poptOption Options[]=
-     { { "version",    'v', POPT_ARG_NONE,
+     { { "version",        'v', POPT_ARG_NONE,
          &version,          0, "Display Version Number", NULL },
-       { "debug",      'd', POPT_ARG_INT,
+       { "debug",          'd', POPT_ARG_INT,
          &log_level,      0, "Debug level", "LEVEL" },
-       { "help",       'h', POPT_ARG_NONE,
+       { "help",           'h', POPT_ARG_NONE,
          &help,             0, "Help", NULL },
-       { "single",     's', POPT_ARG_NONE,
+       { "single",         's', POPT_ARG_NONE,
          &single,           0, "Don't start thread", NULL },
+       { "link",           'l', POPT_ARG_NONE,
+         &link,             0, "Link to API", NULL },
+       { "api-url",        'A', POPT_ARG_STRING,
+         &api_url,          0, "API Url (default is api.abls-habitat.fr)", NULL },
+       { "domain-uuid",    'D', POPT_ARG_STRING,
+         &domain_uuid,      0, "Domain to link to (mandatory)", NULL },
+       { "domain-secret",  'S', POPT_ARG_STRING,
+         &domain_secret,    0, "Domain secret (mandatory)", NULL },
+       { "agent-uuid",     'U', POPT_ARG_STRING,
+         &agent_uuid_src,   0, "Agent UUID (default is to create a new one)", NULL },
        POPT_TABLEEND
      };
     poptContext context;
@@ -260,6 +256,56 @@
        exit(EXIT_OK);
      }
 
+/*--------------------------------------------------------- Creation du fichier de config ------------------------------------*/
+    if (link)
+     { if (getuid()!=0)
+        { printf(" You should be root to link to API\n" );
+          exit(EXIT_OK);
+        }
+
+       if ( !domain_uuid )
+        { printf(" You need 'domain_uuid' to link to API\n" );
+          exit(EXIT_OK);
+        }
+
+       if ( !domain_secret )
+        { printf(" You need 'domain_secret' to link to API\n" );
+          exit(EXIT_OK);
+        }
+
+       if ( !api_url ) api_url = "https://api.abls-habitat.fr";
+       if ( g_str_has_prefix ( api_url, "https://" ) ) api_url+=8;
+       if ( g_str_has_prefix ( api_url, "http://"  ) ) api_url+=7;
+       if ( g_str_has_prefix ( api_url, "wss://"   ) ) api_url+=6;
+       if ( g_str_has_prefix ( api_url, "ws://"    ) ) api_url+=5;
+       if (strlen(api_url)==0) api_url = "api.abls-habitat.fr";
+
+       gchar agent_uuid[37];
+       if ( agent_uuid_src ) g_snprintf( agent_uuid, sizeof(agent_uuid), "%s", agent_uuid_src );
+       else UUID_New ( agent_uuid );
+/******************************************* Création fichier de config *******************************************************/
+       JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_string( RootNode, "domain_uuid", domain_uuid );
+          Json_node_add_string( RootNode, "domain_secret", domain_secret );
+          Json_node_add_string( RootNode, "agent_uuid", agent_uuid );
+          Json_node_add_string( RootNode, "api_url", api_url );
+          Json_node_add_string( RootNode, "product", "agent" );
+          Json_node_add_string( RootNode, "vendor", "abls-habitat.fr" );
+          time_t t = time(NULL);
+          struct tm *temps = localtime( &t );
+          if (temps)
+           { gchar date[64];
+             strftime( date, sizeof(date), "%F %T", temps );
+             Json_node_add_string( RootNode, "install_time", date );
+           }
+          Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );
+          Json_node_unref(RootNode);
+          printf(" Config file created, you can restart.\n" );
+        }
+       else { printf ("Writing config failed: Memory Error.\n" ); }
+       exit(EXIT_OK);
+     }
     if (single)          Config.single      = TRUE;                                            /* Demarrage en mode single ?? */
     if (log_level!=-1)   Config.log_level   = log_level;
     fflush(0);
@@ -398,7 +444,8 @@
 
     Lire_config();                                                     /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
     Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s", WTD_VERSION );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s, branche '%s'", WTD_VERSION, WTD_BRANCHE );
+    Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
 
     Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
     if (!Partage)
@@ -408,21 +455,12 @@
      }
 
     if ( Config.installed == FALSE )                                                    /* Si le fichier de conf n'existe pas */
-     { Partage->com_msrv.Thread_run = TRUE;                                          /* On dit au maitre que le thread tourne */
-       if (!Demarrer_http())                                                                                /* Démarrage HTTP */
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ );
-          sleep(5);
-          error_code = EXIT_FAILURE;
-          goto second_stage_end;
-        }
-       while(Partage->com_msrv.Thread_run == TRUE) sleep(1);                              /* On tourne tant que l'on a besoin */
-       Stopper_fils();
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Agent %s Installed", WTD_VERSION );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Agent %s is not installed. Please run with --link.", WTD_VERSION );
        goto second_stage_end;
      }
 
 /************************************************* Init libsoup session *******************************************************/
-    Partage->com_msrv.API_session = soup_session_new_with_options( "idle_timeout", 0, "timeout", 120, "ssl-strict", TRUE,
+    Partage->com_msrv.API_session = soup_session_new_with_options( "idle_timeout", 0, "timeout", 10, "ssl-strict", TRUE,
                                                                    "user-agent", "Abls-habitat Agent", NULL );
 
 /************************************************* Test Connexion to Global API ***********************************************/
@@ -443,6 +481,7 @@
      { Json_node_add_int    ( RootNode, "start_time", time(NULL) );
        Json_node_add_string ( RootNode, "agent_hostname", g_get_host_name() );
        Json_node_add_string ( RootNode, "version", WTD_VERSION );
+       Json_node_add_string ( RootNode, "branche", WTD_BRANCHE );
        Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/agent/start", RootNode );
@@ -470,7 +509,6 @@
 /******************************************************* Drop privileges ******************************************************/
     if (!Drop_privileges()) { sleep(5); goto second_stage_end; }
 
-    Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
     Print_config();
 
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );              /* Verification de l'unicité du processus */
@@ -598,7 +636,6 @@
     if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
     if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
     Json_node_unref ( Partage->Maps_root );
-    Json_node_unref ( Partage->HORLOGE_ticks );
 
 /************************************************* Dechargement des mutex *****************************************************/
 

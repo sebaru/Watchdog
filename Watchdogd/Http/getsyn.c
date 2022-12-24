@@ -425,7 +425,7 @@
 /******************************************************************************************************************************/
  static void Http_add_etat_visuel_to_json ( JsonArray *array, guint index, JsonNode *element, gpointer user_data)
   { struct DLS_VISUEL *dls_visuel = Dls_data_lookup_VISUEL ( Json_get_string(element, "tech_id"), Json_get_string(element, "acronyme") );
-    Dls_VISUEL_to_json ( element, dls_visuel );
+    if (dls_visuel) Dls_VISUEL_to_json ( element, dls_visuel );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_syn_show: Fourni une list JSON des elements d'un synoptique                                                   */

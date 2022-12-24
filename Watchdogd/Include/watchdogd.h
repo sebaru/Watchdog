@@ -43,7 +43,6 @@
  #include "Http.h"
  #include "Config.h"
  #include "Archive.h"
- #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */
@@ -99,7 +98,6 @@
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
-    JsonNode *HORLOGE_ticks;                                                           /* Liste des horloges ticks a dérouler */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

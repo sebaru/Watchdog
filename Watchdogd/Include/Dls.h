@@ -138,6 +138,7 @@
     GSList *Reset_Dls_BI_Edge_down;                                             /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
     GSList *HORLOGE_actives;                                         /* liste des HORLOGE actives au moment du tour programme */
+    JsonNode *HORLOGE_ticks;                                                           /* Liste des horloges ticks a dérouler */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
@@ -247,8 +248,10 @@
                                                                                                     /* Dans The_dls_HORLOGE.c */
  extern void Dls_data_clear_HORLOGE ();
  extern void Dls_data_activer_horloge ( void );
+ extern void Dls_Load_horloge_ticks ( void );
                                                                                                      /* Dans The_dls_VISUEL.c */
- void Dls_data_VISUEL_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
+ extern void Dls_data_VISUEL_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
+ extern void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit );
 
                                                                                                     /* Dans The_dls_MESSAGE.c */
  extern void Dls_data_MESSAGE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
