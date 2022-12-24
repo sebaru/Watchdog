@@ -46,7 +46,9 @@
 
     g_snprintf( query, sizeof(query), "https://%s:5559/bus", Config.master_hostname );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
+    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 0, "timeout", 2, "ssl-strict", FALSE,
+                                                            "user-agent", "Abls-habitat Agent", NULL );
+
     g_object_set ( G_OBJECT(connexion), "ssl-strict", FALSE, NULL );
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
