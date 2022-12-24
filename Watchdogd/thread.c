@@ -407,16 +407,7 @@
        return;
      }
 
-    JsonNode *RootNode = Json_node_create();
-    Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-    if(!RootNode)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: '%s': Thread: Memory Error. Unloading.", __func__, thread_tech_id );
-       dlclose( module->dl_handle );
-       g_free(module);
-       return;
-     }
-    module->config = Http_Post_to_global_API ( "/run/thread/get_config", RootNode );
-    Json_node_unref(RootNode);
+    module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
     if (module->config && Json_get_int ( module->config, "api_status" ) == SOUP_STATUS_OK)
      { module->Thread_debug = Json_get_bool ( module->config, "debug" );
        module->Thread_run   = Json_get_bool ( module->config, "enable" );

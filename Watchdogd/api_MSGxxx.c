@@ -99,9 +99,7 @@
     struct timeval tv;
     struct tm *temps;
 
-    gchar parametre[128];
-    g_snprintf ( parametre, sizeof(parametre), "tech_id=%s&acronyme=%s", msg->tech_id, msg->acronyme );
-    JsonNode *histo = Http_Get_from_global_API ( "/run/message", parametre );
+    JsonNode *histo = Http_Get_from_global_API ( "/run/message", "tech_id=%s&acronyme=%s", msg->tech_id, msg->acronyme );
     if (histo == NULL || Json_get_int ( histo, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for /run/message failed. Dropping message.", __func__ );
        return(NULL);

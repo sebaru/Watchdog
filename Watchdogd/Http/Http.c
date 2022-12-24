@@ -188,12 +188,19 @@
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *parametres )
+ JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... )
   { gchar query[512];
+    va_list ap;
     JsonNode *result = NULL;
 
-    if (!parametres) g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
-                else g_snprintf( query, sizeof(query), "https://%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
+    if (format)
+     { gchar parametres[128];
+       va_start( ap, format );
+       g_vsnprintf ( parametres, sizeof(parametres), format, ap );
+       va_end ( ap );
+       g_snprintf( query, sizeof(query), "https://%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
+     }
+    else g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
 /********************************************************* Envoi de la requete ************************************************/
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
     if (!soup_msg)

@@ -341,9 +341,7 @@
  static struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id )
   { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Starting import of plugin '%s'", __func__, tech_id );
 
-    gchar parametre[64];
-    g_snprintf(parametre, sizeof(parametre), "tech_id=%s", tech_id );
-    JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", parametre );
+    JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", "tech_id=%s", tech_id );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: '%s': API Error.", __func__, tech_id );
        return(NULL);
