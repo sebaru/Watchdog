@@ -378,7 +378,7 @@ reconnect:
              Imsgs_Envoi_message_to_all_available ( module, chaine );
            }
           else if ( !strcasecmp( tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
-          else Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': tag '%s' not for this thread", __func__, jabber_id, tag );
+          else Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': tag '%s' not for this thread", __func__, thread_tech_id, tag );
           Json_node_unref(request);
         }
      }                                                                                         /* Fin du while partage->arret */
