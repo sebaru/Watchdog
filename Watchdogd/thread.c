@@ -54,6 +54,15 @@
  void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { Http_Post_to_local_BUS_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
+       JsonNode *RootNode = Json_node_create();
+       if (RootNode)
+        { Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
+          Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+          Json_node_add_bool   ( RootNode, "io_comm", module->comm_status );
+          JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/heartbeat", RootNode );
+          Json_node_unref ( api_result );
+          Json_node_unref ( RootNode );
+        }
        module->comm_next_update = Partage->top + 600;                                                   /* Toutes les minutes */
        module->comm_status = etat;
      }

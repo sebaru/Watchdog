@@ -49,7 +49,6 @@
     SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 0, "timeout", 2, "ssl-strict", FALSE,
                                                             "user-agent", "Abls-habitat Agent", NULL );
 
-    g_object_set ( G_OBJECT(connexion), "ssl-strict", FALSE, NULL );
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
      { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: MSG Error Sending to %s", __func__, query );
