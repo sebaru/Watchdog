@@ -380,11 +380,11 @@
     gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
 
     if (!Json_has_member ( element, "thread_classe" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_classe' in Json", __func__ ); return; }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'thread_classe' for starting '%s'", __func__, thread_tech_id ); return; }
     gchar *thread_classe  = Json_get_string ( element, "thread_classe" );
 
     if (!Json_has_member ( element, "agent_uuid" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'agent_uuid' in Json", __func__ ); return; }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: no 'agent_uuid' for starting '%s'", __func__, thread_tech_id ); return; }
     gchar *agent_uuid  = Json_get_string ( element, "agent_uuid" );
 
     if (strcmp ( agent_uuid, Json_get_string ( Config.config, "agent_uuid" ) ))

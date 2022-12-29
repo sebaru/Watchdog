@@ -200,7 +200,7 @@
     static gchar buffer[80];
     gint retour_read;
 
-    gchar *thread_tech_id        = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *name           = Json_get_string ( module->config, "name" );
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", name, nom_var );
