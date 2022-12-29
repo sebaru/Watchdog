@@ -561,7 +561,8 @@ end_user:
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     vars->sending_is_disabled = FALSE;                                               /* A l'init, l'envoi de SMS est autorisé */
-    vars->ai_nbr_sms = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyés", "sms", ARCHIVE_1_HEURE );
+    vars->ai_nbr_sms        = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyés", "sms", ARCHIVE_1_HEURE );
+    vars->ai_signal_quality = Mnemo_create_thread_AI ( module, "SIGNAL_QUALITY", "Qualité du signal", "%", ARCHIVE_1_HEURE );
     vars->nbr_sms = 0;
     gint next_try = 0;
     Envoyer_smsg_gsm_text ( module, "SMS System is running" );
@@ -602,6 +603,9 @@ end_user:
 /****************************************************** Lecture de SMS ********************************************************/
        if (module->comm_status == TRUE)
         { if (Lire_sms_gsm(module)==FALSE) { Smsg_disconnect(module); }
+          GSM_SignalQuality sig;
+          GSM_GetSignalQuality( vars->gammu_machine, &sig );
+          Http_Post_to_local_BUS_AI ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
         }
      }
     Smsg_disconnect(module);
