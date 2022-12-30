@@ -384,61 +384,61 @@
      {
 /******************************************************************************************************************************/
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.dls_top_5hz, TRUE );
-          Dls_data_set_BI   ( NULL, Partage->com_dls.dls_flipflop_5hz,
-                             !Dls_data_get_BI ( Partage->com_dls.dls_flipflop_5hz) );
+        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz, TRUE );
+          Dls_data_set_BI   ( NULL, Partage->com_dls.sys_flipflop_5hz,
+                             !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_5hz) );
           last_top_5hz = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.dls_top_2hz, TRUE );
-          Dls_data_set_BI   ( NULL, Partage->com_dls.dls_flipflop_2hz,
-                             !Dls_data_get_BI ( Partage->com_dls.dls_flipflop_2hz) );
+        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_2hz, TRUE );
+          Dls_data_set_BI   ( NULL, Partage->com_dls.sys_flipflop_2hz,
+                             !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_2hz) );
           last_top_2hz = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.dls_top_1sec, TRUE );
-          Dls_data_set_BI   ( NULL, Partage->com_dls.dls_flipflop_1sec,
-                             !Dls_data_get_BI ( Partage->com_dls.dls_flipflop_1sec) );
+        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1sec, TRUE );
+          Dls_data_set_BI   ( NULL, Partage->com_dls.sys_flipflop_1sec,
+                             !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_1sec) );
           last_top_1sec = Partage->top;
 
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
-          Dls_data_set_AI ( NULL, Partage->com_dls.dls_bit_per_sec, (gdouble)Partage->audit_bit_interne_per_sec_hold, TRUE );
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_bit_per_sec, (gdouble)Partage->audit_bit_interne_per_sec_hold, TRUE );
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          Dls_data_set_AI ( NULL, Partage->com_dls.dls_tour_per_sec, (gdouble)Partage->audit_tour_dls_per_sec_hold, TRUE );
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_tour_per_sec, (gdouble)Partage->audit_tour_dls_per_sec_hold, TRUE );
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Dls_data_set_AI ( NULL, Partage->com_dls.dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE );        /* historique */
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_wait, (gdouble)Partage->com_dls.temps_sched, TRUE );     /* historique */
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_2sec>=20)                                                           /* Toutes les 2 secondes */
-        { Dls_data_set_BI ( NULL, Partage->com_dls.dls_flipflop_2sec,
-                           !Dls_data_get_BI ( Partage->com_dls.dls_flipflop_2sec) );
+        { Dls_data_set_BI ( NULL, Partage->com_dls.sys_flipflop_2sec,
+                           !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_2sec) );
           last_top_2sec = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.dls_top_5sec, TRUE );
+        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
           last_top_5sec = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_10sec>=100)                                                        /* Toutes les 10 secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.dls_top_10sec, TRUE );
+        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
           last_top_10sec = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.dls_top_1min, TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.dls_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.dls_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
+        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Dls_data_activer_horloge();
           last_top_1min = Partage->top;

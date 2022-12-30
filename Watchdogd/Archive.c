@@ -135,6 +135,7 @@
         }
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
+       Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_archive_queue, 1.0*Partage->archive_liste_taille, TRUE );
      }
 
     ARCH_Clear();                                                   /* Suppression des enregistrements restants dans la liste */
