@@ -95,13 +95,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Modbus_Get_DO_from_master ( struct THREAD *module )
-  { gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-
-    JsonNode *RootNode = Json_node_create();
-    Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-    Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe") );
-/******************************************************* Récupère les Outputs *************************************************/
-    JsonNode *result = Http_Post_to_local_BUS ( module, "GET_DO", NULL );
+  { JsonNode *result = Http_Get_from_local_BUS ( module, "GET_DO" );
     if (result && Json_has_member ( result, "douts" ) )
      { Json_node_foreach_array_element ( result, "douts", Modbus_SET_DO_by_array, module ); }
     Json_node_unref ( result );

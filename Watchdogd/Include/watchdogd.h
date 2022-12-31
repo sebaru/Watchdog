@@ -131,7 +131,8 @@
  extern gint Http_Msg_status_code ( SoupMessage *msg );
  extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
  extern void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size );
- extern void Http_Send_json_response ( SoupMessage *msg, JsonNode *RootNode );
+ extern gboolean Http_Check_Agent_signature ( gchar *path, SoupMessage *msg );
+ extern void Http_Send_json_response ( SoupMessage *msg, gint code, gchar *message, JsonNode *RootNode );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

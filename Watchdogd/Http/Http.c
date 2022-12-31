@@ -517,11 +517,21 @@
        /*else { Http_traiter_new_file ( server, msg, path, query, client, user_data ); return; }*/
      }
     else if (msg->method == SOUP_METHOD_POST)
-     {      if (!strcasecmp ( path, "/dls/run/set" ))  Http_traiter_dls_run_set   ( server, msg, path, query, client, user_data );
-       else if (!strcasecmp ( path, "/dls/acquitter")) Http_traiter_dls_acquitter ( server, msg, path, query, client, user_data );
+     { JsonNode *request = Http_Msg_to_Json ( msg );
+       if (!request)
+        { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Parsing Request Failed", NULL );
+          return;
+        }
+            if (!strcasecmp ( path, "/dls/run/set" ))      Http_traiter_dls_run_set       ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/dls/run/acquitter")) Http_traiter_dls_run_acquitter ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/set_di"))            Http_traiter_set_di_post       ( server, msg, path, request );
+       else if (!strcasecmp ( path, "/set_ai"))            Http_traiter_set_ai_post       ( server, msg, path, request );
+       else if (!strcasecmp ( path, "/set_cde"))           Http_traiter_set_cde_post      ( server, msg, path, request );
+       else if (!strcasecmp ( path, "/set_watchdog"))      Http_traiter_set_watchdog_post ( server, msg, path, request );
+       else Http_Send_json_response (msg, SOUP_STATUS_NOT_FOUND, "Not found", NULL );
+       Json_node_unref ( request );
      }
-    else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
-    soup_message_set_status (msg, SOUP_STATUS_OK );
+    else { Http_Send_json_response (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Method not implemented", NULL ); return; }
   }
 /******************************************************************************************************************************/
 /* Run_HTTP: Thread principal                                                                                                 */
@@ -570,16 +580,12 @@
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
 
-    soup_server_add_handler ( socket, "/api/dls/acquitter",  Http_traiter_dls_acquitter, NULL, NULL );
-
     soup_server_add_handler ( socket, "/api/syn/save",       Http_traiter_syn_save, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
 
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/bus",            Http_traiter_bus, NULL, NULL );
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/search",         Http_traiter_search, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
     soup_server_add_handler ( socket, "/api/upload",         Http_traiter_upload, NULL, NULL );
     soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
@@ -635,9 +641,7 @@
     soup_server_add_handler ( socket, "/" , HTTP_Handle_request_CB, NULL, NULL );
 
     if (Config.instance_is_master)
-     { soup_server_add_handler ( socket, "/bus", Http_traiter_bus, NULL, NULL );
-
-       static gchar *protocols[] = { "live-bus", NULL };
+     { static gchar *protocols[] = { "live-bus", NULL };
        soup_server_add_websocket_handler ( socket, "/ws_bus" , NULL, protocols, Http_traiter_open_websocket_for_slaves_CB, NULL, NULL );
      }
 

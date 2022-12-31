@@ -412,8 +412,8 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_dls_acquitter ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                   SoupClientContext *client, gpointer user_data )
+ void Http_traiter_dls_run_acquitter ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                       SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;

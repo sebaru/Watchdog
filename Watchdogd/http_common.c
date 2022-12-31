@@ -74,6 +74,84 @@
     return(phrase);
   }
 /******************************************************************************************************************************/
+/* Http_Check_Agent_Signature: Vérifie qu'un message est correctement signé                                                   */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: TRUE si OK                                                                                                         */
+/******************************************************************************************************************************/
+ gboolean Http_Check_Agent_signature ( gchar *path, SoupMessage *msg )
+  { SoupMessageHeaders *headers;
+    g_object_get ( msg, "request-headers", &headers, NULL );
+    if (!headers)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s': No headers provided. Access Denied.", __func__, path );
+       soup_message_set_status ( msg, SOUP_STATUS_UNAUTHORIZED );
+       return(FALSE);
+     }
+
+    gchar *origin      = soup_message_headers_get_one ( headers, "Origin" );
+    if (!origin)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, Origin Header is missing", __func__, path );
+       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       return(FALSE);
+     }
+
+    gchar *domain_uuid = soup_message_headers_get_one ( headers, "X-ABLS-DOMAIN" );
+    if (!domain_uuid)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-DOMAIN Header is missing", __func__, path );
+       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       return(FALSE);
+     }
+
+    gchar *agent_uuid  = soup_message_headers_get_one ( headers, "X-ABLS-AGENT" );
+    if (!agent_uuid)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-AGENT Header is missing", __func__, path );
+       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       return(FALSE);
+     }
+
+    gchar *timestamp = soup_message_headers_get_one ( headers, "X-ABLS-TIMESTAMP" );
+    if (!timestamp)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-TIMESTAMP Header is missing", __func__, path );
+       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       return(FALSE);
+     }
+
+    gchar *signature   = soup_message_headers_get_one ( headers, "X-ABLS-SIGNATURE" );
+    if (!signature)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-SIGNATURE Header is missing", __func__, path );
+       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       return(FALSE);
+     }
+
+    GBytes *gbytes_body;
+    gsize taille_body;
+    g_object_get ( msg, "request-body-data", &gbytes_body, NULL );
+    gchar *request_body  = g_bytes_get_data ( gbytes_body, &taille_body );
+    gchar *domain_secret = Json_get_string ( Config.config, "domain_secret" );
+
+    unsigned char hash_bin[EVP_MAX_MD_SIZE];
+    gint md_len;
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(mdctx, domain_uuid,   strlen(domain_uuid));
+    EVP_DigestUpdate(mdctx, agent_uuid,    strlen(agent_uuid));
+    EVP_DigestUpdate(mdctx, domain_secret, strlen(domain_secret));
+    EVP_DigestUpdate(mdctx, request_body,  taille_body);
+    EVP_DigestUpdate(mdctx, timestamp,     strlen(timestamp));
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
+    gchar local_signature[64];
+    EVP_EncodeBlock( local_signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
+
+    gint retour = strcmp ( signature, local_signature );
+    g_bytes_unref(gbytes_body);
+    if (retour)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Forbidden, Wrong signature", __func__, path );
+       soup_message_set_status ( msg, SOUP_STATUS_FORBIDDEN );
+       return(FALSE);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
@@ -93,7 +171,7 @@
     EVP_DigestUpdate(mdctx, domain_uuid,   strlen(domain_uuid));
     EVP_DigestUpdate(mdctx, agent_uuid,    strlen(agent_uuid));
     EVP_DigestUpdate(mdctx, domain_secret, strlen(domain_secret));
-    if (buf) EVP_DigestUpdate(mdctx, buf,           buf_size);
+    if (buf) EVP_DigestUpdate(mdctx, buf,  buf_size);
     EVP_DigestUpdate(mdctx, timestamp,     strlen(timestamp));
     EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
     EVP_MD_CTX_free(mdctx);
@@ -113,11 +191,14 @@
 /* Entrée: le messages, le buffer json                                                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Send_json_response ( SoupMessage *msg, JsonNode *RootNode )
-  { gchar *buf = Json_node_to_string ( RootNode );
+ void Http_Send_json_response ( SoupMessage *msg, gint code, gchar *message, JsonNode *RootNode )
+  { if (!RootNode)
+     { if ( (RootNode = Json_node_create() ) == NULL ) return; }
+
+    gchar *buf = Json_node_to_string ( RootNode );
     Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_message_set_status_full (msg, code, message);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
