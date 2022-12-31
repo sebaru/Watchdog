@@ -513,6 +513,7 @@
        else if (!strcasecmp ( path, "/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, client, user_data );
        else if (!strcasecmp ( path, "/dls/run" ))    Http_traiter_dls_run    ( server, msg, path, query, client, user_data );
        else if (!strcasecmp ( path, "/status" ))     Http_traiter_status     ( server, msg, path, query, client, user_data );
+       else if (!strcasecmp ( path, "/get_do" ))     Http_traiter_get_do     ( server, msg, path, query );
        else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
        /*else { Http_traiter_new_file ( server, msg, path, query, client, user_data ); return; }*/
      }
