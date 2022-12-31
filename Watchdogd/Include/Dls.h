@@ -180,7 +180,7 @@
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Reseter_un_plugin ( gchar *tech_id );
  extern void Dls_foreach_plugins ( gpointer user_data, void (*do_plugin) (gpointer user_data, struct DLS_PLUGIN *) );
- extern void Dls_acquitter_plugin ( gchar *tech_id );
+ extern void Dls_Acquitter_plugin ( gchar *tech_id );
  struct DLS_PLUGIN *Dls_get_plugin_by_tech_id ( gchar *tech_id );
  extern void Dls_run_archivage ( gpointer user_data, struct DLS_PLUGIN *plugin );
 

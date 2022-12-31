@@ -111,7 +111,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Dls_start_plugin_reel: Demarre le plugin en parametre                                                                      */
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -597,11 +597,11 @@
           else Dls_foreach_plugins ( tech_id, Dls_Undebug_plugin_reel );
   }
 /******************************************************************************************************************************/
-/* Dls_acquitter_plugin_reel: Acquitte le synoptique si il est en parametre                                                   */
+/* Dls_Acquitter_plugin_reel: Acquitte le plugin DLS en parametre                                                             */
 /* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Dls_acquitter_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
+ static void Dls_Acquitter_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = user_data;
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { Info_new( Config.log, plugin->vars.debug, LOG_NOTICE,
@@ -614,6 +614,6 @@
 /* Entrée: l'ID du plugin                                                                                                     */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- void Dls_acquitter_plugin ( gchar *tech_id )
-  { Dls_foreach_plugins ( tech_id, Dls_acquitter_plugin_reel ); }
+ void Dls_Acquitter_plugin ( gchar *tech_id )
+  { Dls_foreach_plugins ( tech_id, Dls_Acquitter_plugin_reel ); }
 /*----------------------------------------------------------------------------------------------------------------------------*/

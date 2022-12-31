@@ -428,8 +428,7 @@
        return;
      }
 
-    Dls_acquitter_plugin ( Json_get_string ( request, "tech_id" ) );
-    /*Audit_log ( session, "DLS '%s' acquitté", Json_get_string ( request, "tech_id" ) );*/
+    Dls_Acquitter_plugin ( Json_get_string ( request, "tech_id" ) );
     Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
