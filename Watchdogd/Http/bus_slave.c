@@ -205,6 +205,7 @@ end:
            } else Json_node_unref ( element );
           liste = g_slist_next ( liste );
         }
+       Info_new( Config.log, Config.log_bus, LOG_INFO,  "%s: GET_DO done for '%s'", __func__, thread_tech_id );
      }
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "There are DO", Response );
   }
