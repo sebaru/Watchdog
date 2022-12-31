@@ -37,53 +37,6 @@
  #include "watchdogd.h"
  #include "Http.h"
 /******************************************************************************************************************************/
-/* Http_Send_json_response: Envoie le json en paramètre en prenant le lead dessus                                             */
-/* Entrée: le messages, le buffer json                                                                                        */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_Send_json_response ( SoupMessage *msg, JsonNode *RootNode )
-  { gchar *buf = Json_node_to_string ( RootNode );
-    Json_node_unref ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
-/* Entrée: le messages                                                                                                        */
-/* Sortie: le Json                                                                                                            */
-/******************************************************************************************************************************/
- void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size )
-  { gchar *origin        = "abls-habitat.fr";
-    gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
-    gchar *domain_secret = Json_get_string ( Config.config, "domain_secret" );
-    gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
-    gchar timestamp[20];
-    g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
-
-    unsigned char hash_bin[EVP_MAX_MD_SIZE];
-    gint md_len;
-    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
-    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
-    EVP_DigestUpdate(mdctx, domain_uuid,   strlen(domain_uuid));
-    EVP_DigestUpdate(mdctx, agent_uuid,    strlen(agent_uuid));
-    EVP_DigestUpdate(mdctx, domain_secret, strlen(domain_secret));
-    if (buf) EVP_DigestUpdate(mdctx, buf,           buf_size);
-    EVP_DigestUpdate(mdctx, timestamp,     strlen(timestamp));
-    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
-    EVP_MD_CTX_free(mdctx);
-    gchar signature[64];
-    EVP_EncodeBlock( signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
-
-    SoupMessageHeaders *headers;
-    g_object_get ( msg, "request-headers", &headers, NULL );
-    soup_message_headers_append ( headers, "Origin",           origin );
-    soup_message_headers_append ( headers, "X-ABLS-DOMAIN",    domain_uuid );
-    soup_message_headers_append ( headers, "X-ABLS-AGENT",     agent_uuid );
-    soup_message_headers_append ( headers, "X-ABLS-TIMESTAMP", timestamp );
-    soup_message_headers_append ( headers, "X-ABLS-SIGNATURE", signature );
-  }
-/******************************************************************************************************************************/
 /* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
 /* Entrées: une structure util, un code confidentiel                                                                          */
 /* Sortie: FALSE si erreur                                                                                                    */
