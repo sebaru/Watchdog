@@ -115,6 +115,8 @@
  extern void API_Send_visuels ( void );
  extern void API_Send_MSGS ( void );
  extern void Run_api_sync ( void );
+ extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
+ extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 
@@ -123,5 +125,11 @@
 
  extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
  extern void UUID_Load ( gchar *thread, gchar *target );
+
+ extern JsonNode *Http_Msg_to_Json ( SoupMessage *msg );                                                /* Dans http_common.c */
+ extern JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg );
+ extern gint Http_Msg_status_code ( SoupMessage *msg );
+ extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -84,17 +84,12 @@
   };
 
 /*************************************************** Définitions des prototypes ***********************************************/
- extern JsonNode *Http_Msg_to_Json ( SoupMessage *msg );                                                       /* Dans http.c */
- extern JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg );
- extern gint Http_Msg_status_code ( SoupMessage *msg );
- extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
+
  extern struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupMessage *msg );
  extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client );
  extern gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level );
  extern void Http_Formater_cadran( struct HTTP_CADRAN *cadran );
  extern void Run_HTTP ( void );
- extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
- extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
 
  extern void Http_traiter_status  ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data );

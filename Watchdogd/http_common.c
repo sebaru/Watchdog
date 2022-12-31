@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/http.c        Fonctions communes de gestion des requetes HTTP                                                    */
+/* Watchdogd/http_common.c        Fonctions communes de gestion des requetes HTTP                                             */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    30.12.2020 22:03:58 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * http.c
+ * http_common.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2020 - Sebastien Lefevre

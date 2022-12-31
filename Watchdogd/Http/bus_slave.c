@@ -33,6 +33,50 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
+ JsonNode *Http_Get_from_local_BUS ( struct THREAD *module, gchar *tag )
+  { JsonNode *retour = NULL;
+    if (!module) return(NULL);
+
+    gchar query[256];
+    g_snprintf( query, sizeof(query), "https://%s:5559/bus?thread_tech_id=%s&tag=%s",
+                Config.master_hostname, Json_get_string ( module->config, "thread_tech_id" ), tag );
+/********************************************************* Envoi de la requete ************************************************/
+    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 0, "timeout", 2, "ssl-strict", FALSE,
+                                                            "user-agent", "Abls-habitat Agent", NULL );
+
+    SoupMessage *soup_msg  = soup_message_new ( "GET", query );
+    if (!soup_msg)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: MSG Error Sending to %s", __func__, query );
+       goto end;
+     }
+/*    Json_node_add_string ( RootNode, "domain_uuid", Json_get_string ( Config.config, "domain_uuid" ) );*/
+ /*   Json_node_add_int ( RootNode, "request_time", time(NULL) );*/
+
+/*    gchar *buf = Json_node_to_string ( RootNode );*/
+    /*Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: Sending to %s: %s", __func__, query, buf );*/
+    /*soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );*/
+    /* Async soup_session_queue_message (client->connexion, msg, callback, client);*/
+    soup_session_send_message (connexion, soup_msg); /* SYNC */
+
+    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
+    gint   status_code   = Http_Msg_status_code(soup_msg);
+
+    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    if (status_code!=200)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
+    else { retour = Http_Response_Msg_to_Json ( soup_msg ); }
+    g_free(reason_phrase);
+    g_object_unref( soup_msg );
+end:
+    soup_session_abort ( connexion );
+    g_object_unref( connexion );
+    return(retour);
+  }
+/******************************************************************************************************************************/
+/* Http_Post_to_local_BUS: Envoie un message a l'API local                                                                    */
+/* Entrée: la socket, le tag, le message, sa longueur                                                                         */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
  JsonNode *Http_Post_to_local_BUS ( struct THREAD *module, gchar *tag, JsonNode *RootNode )
   { gchar query[256];
     JsonNode *retour = NULL;

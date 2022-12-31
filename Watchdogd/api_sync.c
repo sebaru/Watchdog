@@ -35,6 +35,109 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode )
+  { gboolean unref_RootNode = FALSE;
+    JsonNode *result = NULL;
+    gchar query[256];
+
+    g_snprintf( query, sizeof(query), "https://%s%s", Json_get_string ( Config.config, "api_url" ), URI );
+/********************************************************* Envoi de la requete ************************************************/
+    SoupMessage *soup_msg  = soup_message_new ( "POST", query );
+    if (!soup_msg)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Sending to API %s", __func__, query );
+       return(NULL);
+     }
+
+    if (!RootNode) { RootNode = Json_node_create(); unref_RootNode = TRUE; }
+    Json_node_add_int ( RootNode, "request_time", time(NULL) );
+
+    gchar *buf    = Json_node_to_string ( RootNode );
+    gint buf_size = strlen(buf);
+    if (unref_RootNode) Json_node_unref(RootNode);
+
+    Http_Add_Agent_signature ( soup_msg, buf, buf_size );
+
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending to API %s", __func__, query );
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, buf_size );
+    /* Async soup_session_queue_message (client->Partage->com_msrv.Soup_session, msg, callback, client);*/
+    soup_session_send_message (Partage->com_msrv.API_session, soup_msg); /* SYNC */
+
+    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
+    gint   status_code   = Http_Msg_status_code(soup_msg);
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: %s Status %d, reason %s", __func__, URI, status_code, reason_phrase );
+
+    gchar nom_fichier[256];
+    g_snprintf ( nom_fichier, sizeof(nom_fichier), "cache-%s", query );
+    g_strcanon ( nom_fichier+6, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYYZ", '_' );
+
+    if (status_code!=200)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: %s Error %d for '%s': %s\n", __func__, URI, status_code, query, reason_phrase );
+       result = Json_read_from_file ( nom_fichier );
+       if (result) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Using cache for %s", __func__, query );
+     }
+    else
+     { result = Http_Response_Msg_to_Json ( soup_msg );
+       if (Json_has_member ( result, "api_cache" ) && Json_get_bool ( result, "api_cache" ) ) Json_write_to_file ( nom_fichier, result );
+     }
+    g_free(reason_phrase);
+    g_object_unref( soup_msg );
+    return(result);
+ }
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... )
+  { gchar query[512];
+    va_list ap;
+    JsonNode *result = NULL;
+
+    if (format)
+     { gchar parametres[128];
+       va_start( ap, format );
+       g_vsnprintf ( parametres, sizeof(parametres), format, ap );
+       va_end ( ap );
+       g_snprintf( query, sizeof(query), "https://%s/%s?%s", Json_get_string ( Config.config, "api_url"), URI, parametres );
+     }
+    else g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
+/********************************************************* Envoi de la requete ************************************************/
+    SoupMessage *soup_msg  = soup_message_new ( "GET", query );
+    if (!soup_msg)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Wrong URI Reading from API %s", __func__, query );
+       return(NULL);
+     }
+
+    Http_Add_Agent_signature ( soup_msg, NULL, 0 );
+
+    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
+    soup_session_send_message (Partage->com_msrv.API_session, soup_msg);
+    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
+    gint   status_code   = Http_Msg_status_code(soup_msg);
+
+    gchar nom_fichier[256];
+    g_snprintf ( nom_fichier, sizeof(nom_fichier), "cache-%s", query );
+    g_strcanon ( nom_fichier+6, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYYZ", '_' );
+
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: %s Status %d, reason %s", __func__, URI, status_code, reason_phrase );
+    if (status_code!=200)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: %s Error %d for '%s': %s\n", __func__, URI, status_code, query, reason_phrase );
+       result = Json_read_from_file ( nom_fichier );
+       if (result) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Using cache for %s", __func__, query );
+     }
+    else
+     { result = Http_Response_Msg_to_Json ( soup_msg );
+       if (Json_has_member ( result, "api_cache" ) && Json_get_bool ( result, "api_cache" ) ) Json_write_to_file ( nom_fichier, result );
+     }
+    g_free(reason_phrase);
+    g_object_unref( soup_msg );
+    return(result);
+ }
+/******************************************************************************************************************************/
 /* API_handle_API_messages: Traite les messages recue de l'API                                                               */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
