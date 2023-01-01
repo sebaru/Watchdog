@@ -38,8 +38,7 @@
     if (!module) return(NULL);
 
     gchar query[256];
-    g_snprintf( query, sizeof(query), "https://%s:5559/%s?thread_tech_id=%s",
-                Config.master_hostname, uri, Json_get_string ( module->config, "thread_tech_id" ) );
+    g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 0, "timeout", 2, "ssl-strict", FALSE,
                                                             "user-agent", "Abls-habitat Agent", NULL );
@@ -50,7 +49,7 @@
        goto end;
      }
 
-    Http_Add_Agent_signature ( soup_msg, NULL, 0 );
+    Http_Add_Thread_signature ( module, soup_msg, NULL, 0 );
     soup_session_send_message (connexion, soup_msg); /* SYNC */
 
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
@@ -95,7 +94,7 @@ end:
     gchar *buf = Json_node_to_string ( RootNode );
     gint buf_size = strlen(buf);
     Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: Sending to %s: %s", __func__, query, buf );
-    Http_Add_Agent_signature ( soup_msg, buf, buf_size );
+    Http_Add_Thread_signature ( module, soup_msg, buf, buf_size );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, buf_size );
     /* Async soup_session_queue_message (client->connexion, msg, callback, client);*/
     soup_session_send_message (connexion, soup_msg); /* SYNC */
@@ -186,9 +185,8 @@ end:
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  void Http_traiter_get_do ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query )
-  { if (!Http_Check_Agent_signature ( path, msg )) return;
-
-    gchar *thread_tech_id = g_hash_table_lookup ( query, "thread_tech_id" );
+  { gchar *thread_tech_id;
+    if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id) { Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL ); return; }
 
     JsonNode *Response = Json_node_create();
@@ -215,14 +213,14 @@ end:
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  void Http_traiter_set_watchdog_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
-  { if (!Http_Check_Agent_signature ( path, msg )) return;
-
-    if ( !Json_has_member ( request, "thread_tech_id" ) )
+  { gchar *thread_tech_id;
+    if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
+    if (!thread_tech_id)
      { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
        Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for path %s", __func__, path );
        return;
      }
-    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+
     if (! (Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "consigne" ) ) )
      { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_WATCHDOG: wrong parameters from '%s'", __func__, thread_tech_id );
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
@@ -243,14 +241,13 @@ end:
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  void Http_traiter_set_cde_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
-  { if (!Http_Check_Agent_signature ( path, msg )) return;
-
-    if ( !Json_has_member ( request, "thread_tech_id" ) )
+  { gchar *thread_tech_id;
+    if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
+    if (!thread_tech_id)
      { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
        Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for path %s", __func__, path );
        return;
      }
-    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
 
     if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
      { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_CDE: wrong parameters from '%s'", __func__, thread_tech_id );
@@ -270,14 +267,13 @@ end:
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  void Http_traiter_set_ai_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
-  { if (!Http_Check_Agent_signature ( path, msg )) return;
-
-    if ( !Json_has_member ( request, "thread_tech_id" ) )
+  { gchar *thread_tech_id;
+    if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
+    if (!thread_tech_id)
      { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
        Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for path %s", __func__, path );
        return;
      }
-    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
 
     if (! (Json_has_member ( request, "thread_acronyme" ) &&
            Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
@@ -317,14 +313,13 @@ end:
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  void Http_traiter_set_di_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
-  { if (!Http_Check_Agent_signature ( path, msg )) return;
-
-    if ( !Json_has_member ( request, "thread_tech_id" ) )
+  { gchar *thread_tech_id;
+    if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
+    if (!thread_tech_id)
      { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
        Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for path %s", __func__, path );
        return;
      }
-    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
 
     if (! (Json_has_member ( request, "thread_acronyme" ) &&
            Json_has_member ( request, "etat" )&& Json_has_member ( request, "libelle" )
