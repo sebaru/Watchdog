@@ -46,7 +46,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_REGISTRE *bit = g_try_malloc0 ( sizeof(struct DLS_REGISTRE) );
     if (!bit)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
@@ -55,8 +55,8 @@
     bit->valeur    = Json_get_double ( element, "valeur" );
     bit->archivage = Json_get_int    ( element, "archivage" );
     plugin->Dls_data_REGISTRE = g_slist_prepend ( plugin->Dls_data_REGISTRE, bit );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-              "%s: Create bit DLS_REGISTRE '%s:%s'=%f (%s)", __func__, bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+              "Create bit DLS_REGISTRE '%s:%s'=%f (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_REGISTRE: Recherche un REGISTRE dans les plugins DLS                                                       */
@@ -88,8 +88,8 @@
   { if (!reg) return;
     if (valeur != reg->valeur)
      { reg->valeur = valeur;
-       Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "%s: ligne %04d: Changing DLS_REGISTRE '%s:%s'=%f", __func__,
+       Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_REGISTRE '%s:%s'=%f",
                  (vars ? vars->num_ligne : -1), reg->tech_id, reg->acronyme, reg->valeur );
        Partage->audit_bit_interne_per_sec++;
      }

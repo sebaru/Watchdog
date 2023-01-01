@@ -42,16 +42,16 @@
 
     gint num = Json_get_int ( element, "num" );
     if (num >= vars->num_lines)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                 "%s: GPIO%02d is out of range (>=%d)", __func__, num, vars->num_lines );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "GPIO%02d is out of range (>=%d)", num, vars->num_lines );
        return;
      }
 
     vars->lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
     vars->lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );
     vars->lignes[num].gpio_ligne     = gpiod_chip_get_line( vars->chip, num );
-    Info_new( Config.log, module->Thread_debug, LOG_INFO,
-              "%s: Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d", __func__,
+    Info_new( __func__, module->Thread_debug, LOG_INFO,
+              "Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d",
               num, vars->lignes[num].mode_inout, vars->lignes[num].mode_activelow );
 
     if (vars->lignes[num].mode_inout==0)
@@ -66,12 +66,12 @@
     if (Json_has_member ( element, "tech_id" ) && Json_has_member ( element, "acronyme" ))
      { g_snprintf ( vars->lignes[num].tech_id,  sizeof(vars->lignes[num].tech_id),  Json_get_string ( element, "tech_id" ) );
        g_snprintf ( vars->lignes[num].acronyme, sizeof(vars->lignes[num].acronyme), Json_get_string ( element, "acronyme" ) );
-       Info_new( Config.log, module->Thread_debug, LOG_INFO,
-                 "%s: GPIO%02d mappé sur '%s:%s'", __func__, num, vars->lignes[num].tech_id, vars->lignes[num].acronyme );
+       Info_new( __func__, module->Thread_debug, LOG_INFO,
+                 "GPIO%02d mappé sur '%s:%s'", num, vars->lignes[num].tech_id, vars->lignes[num].acronyme );
        vars->lignes[num].mapped = TRUE;
      }
     else
-     { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: GPIO%02d not mapped", __func__, num );
+     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "GPIO%02d not mapped", num );
        vars->lignes[num].mapped = FALSE;
      }
   }
@@ -108,14 +108,14 @@
 
     vars->chip = gpiod_chip_open_lookup("gpiochip0");
     if (!vars->chip)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Error while loading chip 'gpiochip0'", __func__, tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Error while loading chip 'gpiochip0'", tech_id );
        goto end;
      }
-    else Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: chip 'gpiochip0' loaded", __func__, tech_id );
+    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: chip 'gpiochip0' loaded", tech_id );
 
     vars->num_lines = gpiod_chip_num_lines(vars->chip);
     if (vars->num_lines > GPIOD_MAX_LINE) vars->num_lines = GPIOD_MAX_LINE;
-    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: found %d lines", __func__, tech_id, vars->num_lines );
+    Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: found %d lines", tech_id, vars->num_lines );
 
     for (gint cpt=0; cpt<vars->num_lines; cpt++)                                                        /* Valeurs par défaut */
      { SQL_Write_new ( "INSERT IGNORE INTO `gpiod_IO` SET gpiod_id=%d, num='%d', mode_inout='0', mode_activelow='0'",
@@ -124,15 +124,15 @@
 
     vars->lignes = g_try_malloc0 ( sizeof( struct GPIOD_LIGNE ) * vars->num_lines );
     if (!vars->lignes)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Memory Error while loading lignes", __func__, tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory Error while loading lignes", tech_id );
        goto end;
      }
 
     if ( Charger_tous_gpio( module ) == FALSE )                                                         /* Chargement des I/O */
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Error while loading GPIO -> stop", __func__, tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Error while loading GPIO -> stop", tech_id );
        goto end;                                                                                /* Le thread ne tourne plus ! */
      }
-    else Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: %d GPIO Lines loaded", __func__, tech_id, vars->num_lines );
+    else Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: %d GPIO Lines loaded", tech_id, vars->num_lines );
 
     gint last_top = 0, nbr_tour_par_sec = 0, nbr_tour = 0;                        /* Limitation du nombre de tour par seconde */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
@@ -152,7 +152,7 @@
              if (etat != vars->lignes[cpt].etat) /* Détection de changement */
               { vars->lignes[cpt].etat = etat;
                 /*if (vars->lignes[cpt].mapped) Http_Post_to_local_BUS_DI ( module, vars->lignes[cpt].tech_id, vars->lignes[cpt].acronyme, etat );*/
-                Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: INPUT: GPIO%02d = %d", __func__, tech_id, cpt, etat );
+                Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: INPUT: GPIO%02d = %d", tech_id, cpt, etat );
                 break;
               }
            }
@@ -168,17 +168,17 @@
 
           if ( !strcasecmp( tag, "SET_DO" ) )
            { if (!Json_has_member ( request, "tech_id"))
-              { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: requete mal formée manque tech_id", __func__, tech_id ); }
+              { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: requete mal formée manque tech_id", tech_id ); }
              else if (!Json_has_member ( request, "acronyme" ))
-              { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: requete mal formée manque acronyme", __func__, tech_id ); }
+              { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: requete mal formée manque acronyme", tech_id ); }
              else if (!Json_has_member ( request, "etat" ))
-              { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: requete mal formée manque etat", __func__, tech_id ); }
+              { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: requete mal formée manque etat", tech_id ); }
              else
               { gchar *target_tech_id  = Json_get_string ( request, "tech_id" );
                 gchar *target_acronyme = Json_get_string ( request, "acronyme" );
                 gboolean etat   = Json_get_bool   ( request, "etat" );
 
-                Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Recu SET_DO from bus: %s:%s",
+                Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: %s: Recu SET_DO from bus: %s:%s",
                           __func__, tech_id, target_tech_id, target_acronyme );
 
                 for ( gint cpt = 0; cpt < vars->num_lines; cpt++ )
@@ -186,7 +186,7 @@
                        !strcasecmp ( vars->lignes[cpt].tech_id, target_tech_id ) &&
                        !strcasecmp ( vars->lignes[cpt].acronyme, target_acronyme )
                       )
-                    { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: OUTPUT: GPIO%02d = %d", __func__, tech_id, cpt, etat );
+                    { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: OUTPUT: GPIO%02d = %d", tech_id, cpt, etat );
                       gpiod_line_set_value ( vars->lignes[cpt].gpio_ligne, (vars->lignes[cpt].mode_activelow ? !etat : etat) );
                       break;
                     }

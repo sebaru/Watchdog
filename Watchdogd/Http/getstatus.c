@@ -53,7 +53,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
 	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -92,6 +92,6 @@
 
     Json_node_add_int    ( RootNode, "archive_liste_taille", Partage->archive_liste_taille );
 
-    Http_Send_json_response ( msg, RootNode );
+    Http_Send_json_response ( msg, SOUP_STATUS_OK, "Status OK", RootNode );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

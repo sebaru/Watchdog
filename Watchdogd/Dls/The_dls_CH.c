@@ -46,7 +46,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_CH *bit = g_try_malloc0 ( sizeof(struct DLS_CH) );
     if (!bit)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
@@ -56,8 +56,8 @@
     bit->etat   = Json_get_bool ( element, "etat" );
     if (!strcasecmp ( tech_id, "SYS" ) ) bit->archivage = 2;            /* Si CH du plugin SYS, on archive toutes les minutes */
     plugin->Dls_data_CH = g_slist_prepend ( plugin->Dls_data_CH, bit );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-              "%s: Create bit DLS_CH '%s:%s'=%d (%s)", __func__, bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+              "Create bit DLS_CH '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_CH: Recherche un CH dans les plugins DLS                                                                   */
@@ -115,8 +115,8 @@
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
-             Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                       "%s: ligne %04d: Changing DLS_CH '%s:%s'=%d", __func__,
+             Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                       "ligne %04d: Changing DLS_CH '%s:%s'=%d",
                        (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
              Partage->audit_bit_interne_per_sec++;
            }

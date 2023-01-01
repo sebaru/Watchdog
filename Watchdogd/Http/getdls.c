@@ -103,7 +103,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *dls_status = Json_node_create ();
     if (dls_status == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -412,8 +412,8 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_dls_acquitter ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                   SoupClientContext *client, gpointer user_data )
+ void Http_traiter_dls_run_acquitter ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+                                       SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_POST)
      {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
@@ -428,8 +428,7 @@
        return;
      }
 
-    Dls_acquitter_plugin ( Json_get_string ( request, "tech_id" ) );
-    /*Audit_log ( session, "DLS '%s' acquitté", Json_get_string ( request, "tech_id" ) );*/
+    Dls_Acquitter_plugin ( Json_get_string ( request, "tech_id" ) );
     Json_node_unref(request);
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }

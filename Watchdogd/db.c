@@ -48,7 +48,7 @@
     comment = g_try_malloc0( (2*g_utf8_strlen(pre_comment, -1))*6 + 1 );                  /* Au pire, ts les car sont doublés */
                                                                                                       /* *6 pour gerer l'utf8 */
     if (!comment)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Normaliser_chaine: memory error %s", pre_comment );
+     { Info_new( __func__, Config.log_db, LOG_WARNING, "Normaliser_chaine: memory error %s", pre_comment );
        return(NULL);
      }
     source = pre_comment;
@@ -91,13 +91,13 @@
 
     db = (struct DB *)g_try_malloc0( sizeof(struct DB) );
     if (!db)                                                                              /* Si probleme d'allocation mémoire */
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Memory error", __func__ );
+     { Info_new( __func__, Config.log_db, LOG_ERR, "Memory error" );
        return(NULL);
      }
 
     db->mysql = mysql_init(NULL);
     if (!db->mysql)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Mysql_init failed (%s)", __func__,
+     { Info_new( __func__, Config.log_db, LOG_ERR, "Mysql_init failed (%s)",
                               (char *) mysql_error(db->mysql)  );
        g_free(db);
        return (NULL);
@@ -109,8 +109,8 @@
     mysql_options( db->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &timeout );                         /* Timeout en cas de non reponse */
     mysql_options( db->mysql, MYSQL_SET_CHARSET_NAME, (void *)"utf8" );
     if ( ! mysql_real_connect( db->mysql, host, username, password, database, port, NULL, (multi_statements ? CLIENT_MULTI_STATEMENTS : 0) ) )
-     { Info_new( Config.log, Config.log_db, LOG_ERR,
-                 "%s: mysql_real_connect failed (%s)", __func__,
+     { Info_new( __func__, Config.log_db, LOG_ERR,
+                 "mysql_real_connect failed (%s)",
                  (char *) mysql_error(db->mysql)  );
        mysql_close( db->mysql );
        g_free(db);
@@ -123,8 +123,8 @@
     Partage->com_db.Liste = g_slist_prepend ( Partage->com_db.Liste, db );
     taille = g_slist_length ( Partage->com_db.Liste );
     pthread_mutex_unlock ( &Partage->com_db.synchro );
-    Info_new( Config.log, Config.log_db, LOG_DEBUG,
-              "%s: Database Connection OK with %s@%s:%d on %s (DB%07d). Nbr_requete_en_cours=%d", __func__,
+    Info_new( __func__, Config.log_db, LOG_DEBUG,
+              "Database Connection OK with %s@%s:%d on %s (DB%07d). Nbr_requete_en_cours=%d",
                username, host, port, database, db->id, taille );
     return(db);
   }
@@ -167,12 +167,12 @@
   { struct DB *db;
     db = Init_DB_SQL ();
     if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Init DB FAILED for '%s'", __func__, requete );
+     { Info_new( __func__, Config.log_db, LOG_WARNING, "Init DB FAILED for '%s'", requete );
        return(FALSE);
      }
 
     if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+     { Info_new( __func__, Config.log_db, LOG_ERR, "FAILED (%s) for '%s'", (char *)mysql_error(db->mysql), requete );
        Libere_DB_SQL ( &db );
        if (array_name)
         { gchar chaine[80];
@@ -182,11 +182,11 @@
         }
        return(FALSE);
      }
-    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+    else Info_new( __func__, Config.log_db, LOG_DEBUG, "DB OK for '%s'", requete );
 
     db->result = mysql_store_result ( db->mysql );
     if ( ! db->result )
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: store_result failed (%s)", __func__, (char *) mysql_error(db->mysql) );
+     { Info_new( __func__, Config.log_db, LOG_WARNING, "store_result failed (%s)", (char *) mysql_error(db->mysql) );
        db->nbr_result = 0;
      }
     if (array_name)
@@ -245,16 +245,16 @@
  gboolean SQL_Write ( gchar *requete )
   { struct DB *db = Init_DB_SQL ();
     if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Init DB FAILED for '%s'", __func__, requete );
+     { Info_new( __func__, Config.log_db, LOG_ERR, "Init DB FAILED for '%s'", requete );
        return(FALSE);
      }
 
     if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+     { Info_new( __func__, Config.log_db, LOG_ERR, "FAILED (%s) for '%s'", (char *)mysql_error(db->mysql), requete );
        Libere_DB_SQL ( &db );
        return(FALSE);
      }
-    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+    else Info_new( __func__, Config.log_db, LOG_DEBUG, "DB OK for '%s'", requete );
 
     Libere_DB_SQL ( &db );
     return(TRUE);
@@ -290,16 +290,16 @@
   { struct DB *db = Init_DB_SQL_with ( Config.db_hostname, Config.db_username,
                                        Config.db_password, Config.db_database, Config.db_port, TRUE );
     if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Init DB FAILED for '%s'", __func__, requete );
+     { Info_new( __func__, Config.log_db, LOG_ERR, "Init DB FAILED for '%s'", requete );
        return(FALSE);
      }
 
     if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: FAILED (%s) for '%s'", __func__, (char *)mysql_error(db->mysql), requete );
+     { Info_new( __func__, Config.log_db, LOG_ERR, "FAILED (%s) for '%s'", (char *)mysql_error(db->mysql), requete );
        Libere_DB_SQL ( &db );
        return(FALSE);
      }
-    else Info_new( Config.log, Config.log_db, LOG_DEBUG, "%s: DB OK for '%s'", __func__, requete );
+    else Info_new( __func__, Config.log_db, LOG_DEBUG, "DB OK for '%s'", requete );
 
     Libere_DB_SQL ( &db );
     return(TRUE);
@@ -328,7 +328,7 @@
     pthread_mutex_unlock ( &Partage->com_db.synchro );
 
     if (!found)
-     { Info_new( Config.log, Config.log_db, LOG_CRIT,
+     { Info_new( __func__, Config.log_db, LOG_CRIT,
                 "Libere_DB_SQL: DB Free Request not in list ! DB%07d, request=%s",
                  db->id, db->requete );
        return;
@@ -341,7 +341,7 @@
     Partage->com_db.Liste = g_slist_remove ( Partage->com_db.Liste, db );
     taille = g_slist_length ( Partage->com_db.Liste );
     pthread_mutex_unlock ( &Partage->com_db.synchro );
-    Info_new( Config.log, Config.log_db, LOG_DEBUG,
+    Info_new( __func__, Config.log_db, LOG_DEBUG,
              "Libere_DB_SQL: Deconnexion effective (DB%07d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
@@ -357,17 +357,17 @@
     if (!db) return(FALSE);
 
     if (db->free==FALSE)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING,
+     { Info_new( __func__, Config.log_db, LOG_WARNING,
                 "Lancer_requete_SQL (DB%07d): Reste un result a FREEer!", db->id );
      }
 
     g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                                      /* Save for later use */
-    Info_new( Config.log, Config.log_db, LOG_DEBUG,
+    Info_new( __func__, Config.log_db, LOG_DEBUG,
              "Lancer_requete_SQL (DB%07d): NEW    (%s)", db->id, requete );
     top = Partage->top;
     if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "%s: (DB%07d): FAILED (%s) for '%s'", __func__, db->id, (char *)mysql_error(db->mysql), requete );
+     { Info_new( __func__, Config.log_db, LOG_WARNING,
+                "(DB%07d): FAILED (%s) for '%s'", db->id, (char *)mysql_error(db->mysql), requete );
        return(FALSE);
      }
 
@@ -375,8 +375,8 @@
      { db->result = mysql_store_result ( db->mysql );
        db->free = FALSE;
        if ( ! db->result )
-        { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                   "%s: (DB%07d): store_result failed (%s)", __func__, db->id, (char *) mysql_error(db->mysql) );
+        { Info_new( __func__, Config.log_db, LOG_WARNING,
+                   "(DB%07d): store_result failed (%s)", db->id, (char *) mysql_error(db->mysql) );
           db->nbr_result = 0;
         }
        else
@@ -384,7 +384,7 @@
           db->nbr_result = mysql_num_rows ( db->result );
         }
      }
-    Info_new( Config.log, Config.log_db, LOG_DEBUG,
+    Info_new( __func__, Config.log_db, LOG_DEBUG,
              "Lancer_requete_SQL (DB%07d): OK in %05.1fs", db->id, (Partage->top - top)/10.0 );
     return(TRUE);
   }
@@ -435,7 +435,7 @@ encore:
  void Print_SQL_status ( void )
   { GSList *liste;
     pthread_mutex_lock ( &Partage->com_db.synchro );
-    Info_new( Config.log, Config.log_db, LOG_DEBUG,
+    Info_new( __func__, Config.log_db, LOG_DEBUG,
              "Print_SQL_status: %03d running connexions",
               g_slist_length(Partage->com_db.Liste) );
 
@@ -443,7 +443,7 @@ encore:
     while ( liste )
      { struct DB *db;
        db = (struct DB *)liste->data;
-       Info_new( Config.log, Config.log_db, LOG_DEBUG,
+       Info_new( __func__, Config.log_db, LOG_DEBUG,
                 "Print_SQL_status: Connexion DB%07d (db->free=%d) requete %s",
                  db->id, db->free, db->requete );
        liste = g_slist_next( liste );
@@ -457,29 +457,29 @@ encore:
 /******************************************************************************************************************************/
  gchar *SQL_Read_from_file ( gchar *file )
   { struct stat stat_buf;
-    Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Loading DB %s", __func__, file );
+    Info_new( __func__, Config.log_db, LOG_NOTICE, "Loading DB %s", file );
     gchar filename[256];
     g_snprintf ( filename, sizeof(filename), "%s/%s", WTD_PKGDATADIR, file );
 
     if (stat ( filename, &stat_buf)==-1)
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Stat DB Error for %s", __func__, filename );
+     { Info_new( __func__, Config.log_db, LOG_NOTICE, "Stat DB Error for %s", filename );
        return(FALSE);
      }
 
     gchar *db_content = g_try_malloc0 ( stat_buf.st_size+1 );
     if (!db_content)
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Memory DB Error for %s", __func__, filename );
+     { Info_new( __func__, Config.log_db, LOG_NOTICE, "Memory DB Error for %s", filename );
        return(FALSE);
      }
 
     gint fd = open ( filename, O_RDONLY );
     if (!fd)
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Open DB Error for %s", __func__, filename );
+     { Info_new( __func__, Config.log_db, LOG_NOTICE, "Open DB Error for %s", filename );
        g_free(db_content);
        return(FALSE);
      }
     if (read ( fd, db_content, stat_buf.st_size ) != stat_buf.st_size)
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: Read DB Error for %s", __func__, filename );
+     { Info_new( __func__, Config.log_db, LOG_NOTICE, "Read DB Error for %s", filename );
        g_free(db_content);
        return(FALSE);
      }
@@ -496,8 +496,8 @@ encore:
     struct DB *db;
 
     if (Config.instance_is_master != TRUE)                                                  /* Do not update DB if not master */
-     { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "%s: Instance is not master. Don't update schema.", __func__ );
+     { Info_new( __func__, Config.log_db, LOG_WARNING,
+                "Instance is not master. Don't update schema." );
        return;
      }
 
@@ -664,7 +664,7 @@ encore:
 
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "%s: Memory error. Don't update schema.", __func__ );
+     { Info_new( __func__, Config.log_db, LOG_WARNING, "Memory error. Don't update schema." );
        return;
      }
     SQL_Select_to_json_node ( RootNode, NULL, "SELECT database_version FROM instances WHERE instance='%s'", g_get_host_name() );
@@ -674,12 +674,12 @@ encore:
     else { database_version = 0; }
     Json_node_unref(RootNode);
 
-    Info_new( Config.log, Config.log_db, LOG_NOTICE,
-             "%s: Actual Database_Version detected = %05d. Please wait while upgrading.", __func__, database_version );
+    Info_new( __func__, Config.log_db, LOG_NOTICE,
+             "Actual Database_Version detected = %05d. Please wait while upgrading.", database_version );
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: DB connexion failed", __func__ );
+     { Info_new( __func__, Config.log_db, LOG_ERR, "DB connexion failed" );
        return;
      }
 
@@ -770,8 +770,8 @@ fin:
     Libere_DB_SQL(&db);
 
     if (SQL_Write_new ( "UPDATE instances SET database_version='%d' WHERE instance='%s'", database_version, g_get_host_name() ))
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %d OK", __func__, database_version ); }
+     { Info_new( __func__, Config.log_db, LOG_NOTICE, "updating Database_version to %d OK", database_version ); }
     else
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %d FAILED", __func__, database_version ); }
+     { Info_new( __func__, Config.log_db, LOG_NOTICE, "updating Database_version to %d FAILED", database_version ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

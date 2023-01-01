@@ -45,15 +45,15 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_WATCHDOG *bit = g_try_malloc0 ( sizeof(struct DLS_WATCHDOG) );
     if (!bit)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_WATCHDOG = g_slist_prepend ( plugin->Dls_data_WATCHDOG, bit );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-              "%s: Create bit DLS_WATCHDOG '%s:%s' (%s)", __func__, bit->tech_id, bit->acronyme, bit->libelle );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+              "Create bit DLS_WATCHDOG '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_WATCHDOG: Recherche un WATCHDOG dans les plugins DLS                                                       */
@@ -84,8 +84,8 @@
  void Dls_data_set_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_WATCHDOG *bit, gint consigne )
   { if (!bit) return;
     bit->top = Partage->top + consigne;
-    Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-              "%s: ligne %04d: Changing DLS_WATCHDOG '%s:%s'=%d", __func__,
+    Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "ligne %04d: Changing DLS_WATCHDOG '%s:%s'=%d",
               (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, consigne );
     Partage->audit_bit_interne_per_sec++;
   }

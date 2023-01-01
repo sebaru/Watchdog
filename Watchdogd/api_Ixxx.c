@@ -50,8 +50,8 @@
     while (Partage->com_msrv.liste_visuel && Partage->com_msrv.Thread_run == TRUE && nb_enreg<100)
      { struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
        Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                "%s: Send VISUEL %s:%s mode=%s, color=%s, cligno=%d.", __func__,
+       Info_new( __func__, Config.log_msrv, LOG_INFO,
+                "Send VISUEL %s:%s mode=%s, color=%s, cligno=%d.",
                  visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->cligno
                );
        JsonNode *element = Json_node_create ();
@@ -68,11 +68,11 @@
     JsonNode *api_result = Http_Post_to_global_API ( "/run/visuels/set", RootNode );
     if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
      { gint nbr_saved = Json_get_int ( api_result, "nbr_visuels_saved" );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Traitement de %05d visuel(s) en %06.1fs. Reste %05d.", __func__,
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %05d visuel(s) en %06.1fs. Reste %05d.",
                  nbr_saved, (Partage->top-top)/10.0, reste );
      }
     else
-     { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: API Error. Reste %05d", __func__, reste ); }
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error. Reste %05d", reste ); }
     Json_node_unref ( RootNode );
     Json_node_unref ( api_result );
   }

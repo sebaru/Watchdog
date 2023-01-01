@@ -65,7 +65,7 @@
     Http_Post_to_local_BUS_AI ( module, vars->Output_hz, 0.0, FALSE );
     Http_Post_to_local_BUS_AI ( module, vars->Output_voltage, 0.0, FALSE );
 
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s disconnected (host='%s')", __func__, thread_tech_id, host );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s disconnected (host='%s')", thread_tech_id, host );
     Thread_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
@@ -85,75 +85,75 @@
     gchar *admin_password = Json_get_string ( module->config, "admin_password" );
 
     if ( (connexion = upscli_connect( &vars->upsconn, host, UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                "%s: %s: connexion refused by ups (host '%s' -> %s)", __func__, thread_tech_id, host,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                "%s: connexion refused by ups (host '%s' -> %s)", thread_tech_id, host,
                  (char *)upscli_strerror(&vars->upsconn) );
        return(FALSE);
      }
 
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
-              "%s: %s connected (host='%s')", __func__, thread_tech_id, host );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE,
+              "%s connected (host='%s')", thread_tech_id, host );
 /********************************************************* UPSDESC ************************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", name );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                "%s: %s: Sending GET UPSDESC failed (%s)", __func__, thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                "%s: Sending GET UPSDESC failed (%s)", thread_tech_id,
                 (char *)upscli_strerror(&vars->upsconn) );
      }
     else
      { if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                   "%s: %s: Reading GET UPSDESC failed (%s)", __func__, thread_tech_id,
+        { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                   "%s: Reading GET UPSDESC failed (%s)", thread_tech_id,
                    (char *)upscli_strerror(&vars->upsconn) );
         }
        else
         { gchar description[128];
           g_snprintf( description, sizeof(description), "%s", buffer + strlen(name) + 10 );
           description [ strlen(description) - 1 ] = 0; /* supprime les " du début/fin */
-          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Reading GET UPSDESC %s", __func__, thread_tech_id, description );
+          Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Reading GET UPSDESC %s", thread_tech_id, description );
         }
      }
 /**************************************************** USERNAME ****************************************************************/
     g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", admin_username );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                "%s: %s: Sending USERNAME failed %s", __func__, thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                "%s: Sending USERNAME failed %s", thread_tech_id,
                 (char *)upscli_strerror(&vars->upsconn) );
      }
     else
      { if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                   "%s: %s: Reading USERNAME failed %s", __func__, thread_tech_id,
+        { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                   "%s: Reading USERNAME failed %s", thread_tech_id,
                    (char *)upscli_strerror(&vars->upsconn) );
         }
        else
-        { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-                   "%s: %s: Reading USERNAME %s", __func__, thread_tech_id, buffer );
+        { Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+                   "%s: Reading USERNAME %s", thread_tech_id, buffer );
         }
      }
 
 /******************************************************* PASSWORD *************************************************************/
     g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", admin_password );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                "%s: %s: Sending PASSWORD failed %s", __func__, thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                "%s: Sending PASSWORD failed %s", thread_tech_id,
                 (char *)upscli_strerror(&vars->upsconn) );
      }
     else
      { if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                   "%s: %s: Reading PASSWORD failed %s", __func__, thread_tech_id,
+        { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                   "%s: Reading PASSWORD failed %s", thread_tech_id,
                    (char *)upscli_strerror(&vars->upsconn) );
         }
        else
-        { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-                   "%s: %s: Reading PASSWORD %s", __func__, thread_tech_id, buffer );
+        { Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+                   "%s: Reading PASSWORD %s", thread_tech_id, buffer );
         }
      }
 
     vars->date_next_connexion = 0;
     vars->started = TRUE;
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s up and running (host='%s')", __func__, thread_tech_id, host );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s up and running (host='%s')", thread_tech_id, host );
     Thread_send_comm_to_master ( module, TRUE );
     return(TRUE);
   }
@@ -172,23 +172,23 @@
     gchar *name    = Json_get_string ( module->config, "name" );
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", name, nom_cmd );
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s'", __func__, thread_tech_id, buffer );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending '%s'", thread_tech_id, buffer );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                 "%s: %s: Sending INSTCMD failed with error '%s' for '%s'", __func__, thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                 "%s: Sending INSTCMD failed with error '%s' for '%s'", thread_tech_id,
                  (char *)upscli_strerror(&vars->upsconn), buffer );
        Deconnecter_UPS ( module );
        return;
      }
 
     if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                "%s: %s: Reading INSTCMD result failed (%s) error %s", __func__, thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                "%s: Reading INSTCMD result failed (%s) error %s", thread_tech_id,
                  nom_cmd, (char *)upscli_strerror(&vars->upsconn) );
        Deconnecter_UPS ( module );
        return;
      }
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending '%s' OK", __func__, thread_tech_id, nom_cmd );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending '%s' OK", thread_tech_id, nom_cmd );
   }
 /******************************************************************************************************************************/
 /* Onduleur_get_var: Recupere une valeur de la variable en parametre                                                          */
@@ -200,32 +200,32 @@
     static gchar buffer[80];
     gint retour_read;
 
-    gchar *thread_tech_id        = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *name           = Json_get_string ( module->config, "name" );
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", name, nom_var );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                "%s: %s: Sending GET VAR failed (%s) error=%s", __func__, thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                "%s: Sending GET VAR failed (%s) error=%s", thread_tech_id,
                 buffer, (char *)upscli_strerror(&vars->upsconn) );
        Deconnecter_UPS ( module );
        return(NULL);
      }
 
     retour_read = upscli_readline( &vars->upsconn, buffer, sizeof(buffer) );
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-             "%s: %s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", __func__, thread_tech_id,
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+             "%s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", thread_tech_id,
               nom_var, retour_read, upscli_upserror(&vars->upsconn), buffer );
     if ( retour_read == -1 )
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                "%s: %s: Reading GET VAR result failed (%s) error=%s", __func__, thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                "%s: Reading GET VAR result failed (%s) error=%s", thread_tech_id,
                  nom_var, (char *)upscli_strerror(&vars->upsconn) );
        return(NULL);
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
-     { Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-                "%s: %s: Reading GET VAR %s OK = %s", __func__, thread_tech_id, nom_var, buffer );
+     { Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+                "%s: Reading GET VAR %s OK = %s", thread_tech_id, nom_var, buffer );
        return(buffer + 6 + strlen(name) + strlen(nom_var));
      }
 
@@ -233,8 +233,8 @@
      { return(NULL);                                                         /* Variable not supported... is not an error ... */
      }
 
-    Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-             "%s: %s: Reading GET VAR %s Failed : error %s (buffer %s)", __func__, thread_tech_id,
+    Info_new( __func__, module->Thread_debug, LOG_WARNING,
+             "%s: Reading GET VAR %s Failed : error %s (buffer %s)", thread_tech_id,
               nom_var, (char *)upscli_strerror(&vars->upsconn), buffer );
     Deconnecter_UPS ( module );
     vars->date_next_connexion = Partage->top + UPS_RETRY;
@@ -309,17 +309,17 @@
     gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
     if (!msg_thread_tech_id)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque msg_thread_tech_id", __func__, thread_tech_id ); }
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': requete mal formée manque msg_thread_tech_id", thread_tech_id ); }
     else if (!msg_thread_acronyme)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque msg_thread_acronyme", __func__, thread_tech_id ); }
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': requete mal formée manque msg_thread_acronyme", thread_tech_id ); }
     else if (strcasecmp (msg_thread_tech_id, thread_tech_id))
-     { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: '%s': Pas pour nous", __func__, thread_tech_id ); }
+     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': Pas pour nous", thread_tech_id ); }
     else if (!Json_has_member ( msg, "etat" ))
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': requete mal formée manque etat", __func__, thread_tech_id ); }
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': requete mal formée manque etat", thread_tech_id ); }
     else
      { gboolean etat = Json_get_bool ( msg, "etat" );
        pthread_mutex_lock ( &module->synchro );
-       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: '%s': SET_DO '%s:%s'/'%s:%s'=%d", __func__,
+       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': SET_DO '%s:%s'/'%s:%s'=%d",
                  thread_tech_id, msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
        if (etat)
         { if (!strcasecmp(msg_thread_acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );
@@ -391,13 +391,13 @@
        if ( Partage->top >= vars->date_next_connexion )                               /* Si attente retente, on change de ups */
         { if ( ! vars->started )                                                                 /* Communication OK ou non ? */
            { if ( ! Connecter_ups( module ) )                                                 /* Demande de connexion a l'ups */
-              { Info_new( Config.log, module->Thread_debug, LOG_WARNING, "%s: %s: Module DOWN", __func__, thread_tech_id );
+              { Info_new( __func__, module->Thread_debug, LOG_WARNING, "%s: Module DOWN", thread_tech_id );
                 Deconnecter_UPS ( module );                                               /* Sur erreur, on deconnecte le ups */
                 vars->date_next_connexion = Partage->top + UPS_RETRY;
               }
            }
           else
-           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Interrogation ups", __func__, thread_tech_id );
+           { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Interrogation ups", thread_tech_id );
              if ( Interroger_ups ( module ) == FALSE )
               { Deconnecter_UPS ( module );
                 vars->date_next_connexion = Partage->top + UPS_RETRY;                            /* On retente dans longtemps */

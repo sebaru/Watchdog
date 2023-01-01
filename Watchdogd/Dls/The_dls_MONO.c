@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_MONO *bit = g_try_malloc0 ( sizeof(struct DLS_MONO) );
     if (!bit)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
@@ -53,8 +53,8 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_MONO = g_slist_prepend ( plugin->Dls_data_MONO, bit );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-              "%s: Create bit DLS_MONO '%s:%s'=%d (%s)", __func__, bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+              "Create bit DLS_MONO '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_MONO: Recherche un MONO dans les plugins DLS                                                                   */
@@ -87,8 +87,8 @@
     if (valeur == FALSE) { mono->etat = FALSE; }
     else
      { if (mono->etat == FALSE)
-        { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "%s: ligne %04d: Changing DLS_MONO '%s:%s'=1", __func__,
+        { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "ligne %04d: Changing DLS_MONO '%s:%s'=1",
                     (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
           Partage->audit_bit_interne_per_sec++;
         }

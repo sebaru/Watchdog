@@ -51,8 +51,8 @@
 
     fd = open( port, O_RDONLY | O_NOCTTY | O_NONBLOCK | O_CLOEXEC );
     if (fd<0)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-               "%s: %s: Impossible d'ouvrir le port teleinfo '%s', erreur %d", __func__, thread_tech_id, port, fd );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+               "%s: Impossible d'ouvrir le port teleinfo '%s', erreur %d", thread_tech_id, port, fd );
        return(-1);
      }
     memset(&oldtio, 0, sizeof(oldtio) );
@@ -64,7 +64,7 @@
     oldtio.c_cc[VMIN]     = 0;
     tcsetattr(fd, TCSANOW, &oldtio);
     tcflush(fd, TCIOFLUSH);
-    Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: Ouverture port teleinfo okay %s", __func__, port );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Ouverture port teleinfo okay %s", port );
 
     Thread_send_comm_to_master ( module, TRUE );
     return(fd);
@@ -123,7 +123,7 @@
           module->WS_messages = g_slist_remove ( module->WS_messages, message );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( message, "tag" );
-          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: tag '%s' not for this thread", __func__, thread_tech_id, tag );
+          Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", thread_tech_id, tag );
           Json_node_unref(message);
         }
 /************************************************* Traitement opérationnel ****************************************************/
@@ -131,20 +131,20 @@
         { if ( vars->date_next_retry <= Partage->top )
            { vars->mode = TINFO_RETRING;
              vars->date_next_retry = 0;
-             Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Retrying Connexion.", __func__, thread_tech_id );
+             Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Retrying Connexion.", thread_tech_id );
            }
         }
        else if (vars->mode == TINFO_RETRING)
         { vars->fd = Init_teleinfo( module );
           if (vars->fd<0)                                                               /* On valide l'acces aux ports */
-           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                       "%s: %s: Init TELEINFO failed. Re-trying in %ds", __func__, thread_tech_id, TINFO_RETRY_DELAI/10 );
+           { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                       "%s: Init TELEINFO failed. Re-trying in %ds", thread_tech_id, TINFO_RETRY_DELAI/10 );
              vars->mode = TINFO_WAIT_BEFORE_RETRY;
              vars->date_next_retry = Partage->top + TINFO_RETRY_DELAI;
            }
           else
            { vars->mode = TINFO_CONNECTED;
-             Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Acces TELEINFO FD=%d", __func__, thread_tech_id, vars->fd );
+             Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Acces TELEINFO FD=%d", thread_tech_id, vars->fd );
            }
         }
        if (vars->mode != TINFO_CONNECTED) continue;
@@ -170,7 +170,7 @@
               { nbr_octet_lu += cpt; }                                                   /* Preparation du prochain caractere */
              else { nbr_octet_lu = 0;                                                              /* Depassement de tampon ! */
                     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
-                    Info_new( Config.log, module->Thread_debug, LOG_ERR,
+                    Info_new( __func__, module->Thread_debug, LOG_ERR,
                              "%s: %s: BufferOverflow, dropping trame (nbr_octet_lu=%d, cpt=%d, taille buffer=%d)",
                               __func__, thread_tech_id, nbr_octet_lu, cpt, TAILLE_BUFFER_TELEINFO  );
                   }
@@ -182,14 +182,14 @@
           gint retour;
           retour = fstat( vars->fd, &buf );
           if (retour == -1)
-           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                      "%s: %s: Fstat Error (%s), closing connexion and re-trying in %ds", __func__, thread_tech_id,
+           { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                      "%s: Fstat Error (%s), closing connexion and re-trying in %ds", thread_tech_id,
                        strerror(errno), TINFO_RETRY_DELAI/10 );
              closing = TRUE;
            }
           else if ( buf.st_nlink < 1 )
-           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                      "%s: %s: USB device disappeared. Closing connexion and re-trying in %ds", __func__, thread_tech_id, TINFO_RETRY_DELAI/10 );
+           { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                      "%s: USB device disappeared. Closing connexion and re-trying in %ds", thread_tech_id, TINFO_RETRY_DELAI/10 );
              closing = TRUE;
            }
           if (closing == TRUE)

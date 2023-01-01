@@ -147,21 +147,22 @@
     guint temps_sched;                                          /* Delai d'attente DLS pour assurer 100 tours max par seconde */
     gboolean Top_check_horaire;                                                    /* True le controle horaire est réalisable */
 
-    struct DLS_BI *dls_flipflop_5hz;
-    struct DLS_BI *dls_flipflop_2hz;
-    struct DLS_BI *dls_flipflop_1sec;
-    struct DLS_BI *dls_flipflop_2sec;
-    struct DLS_MONO *dls_top_5hz;
-    struct DLS_MONO *dls_top_2hz;
-    struct DLS_MONO *dls_top_1sec;
-    struct DLS_MONO *dls_top_5sec;
-    struct DLS_MONO *dls_top_10sec;
-    struct DLS_MONO *dls_top_1min;
-    struct DLS_AI *dls_bit_per_sec;
-    struct DLS_AI *dls_tour_per_sec;
-    struct DLS_AI *dls_wait;
-    struct DLS_AI *dls_nbr_msg_queue;
-    struct DLS_AI *dls_nbr_visuel_queue;
+    struct DLS_BI *sys_flipflop_5hz;
+    struct DLS_BI *sys_flipflop_2hz;
+    struct DLS_BI *sys_flipflop_1sec;
+    struct DLS_BI *sys_flipflop_2sec;
+    struct DLS_MONO *sys_top_5hz;
+    struct DLS_MONO *sys_top_2hz;
+    struct DLS_MONO *sys_top_1sec;
+    struct DLS_MONO *sys_top_5sec;
+    struct DLS_MONO *sys_top_10sec;
+    struct DLS_MONO *sys_top_1min;
+    struct DLS_AI *sys_bit_per_sec;
+    struct DLS_AI *sys_tour_per_sec;
+    struct DLS_AI *sys_wait;
+    struct DLS_AI *sys_nbr_msg_queue;
+    struct DLS_AI *sys_nbr_visuel_queue;
+    struct DLS_AI *sys_nbr_archive_queue;
 
     gboolean next_bit_alerte;
     gboolean bit_alerte;
@@ -179,7 +180,7 @@
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Reseter_un_plugin ( gchar *tech_id );
  extern void Dls_foreach_plugins ( gpointer user_data, void (*do_plugin) (gpointer user_data, struct DLS_PLUGIN *) );
- extern void Dls_acquitter_plugin ( gchar *tech_id );
+ extern void Dls_Acquitter_plugin ( gchar *tech_id );
  struct DLS_PLUGIN *Dls_get_plugin_by_tech_id ( gchar *tech_id );
  extern void Dls_run_archivage ( gpointer user_data, struct DLS_PLUGIN *plugin );
 

@@ -52,12 +52,12 @@
                        "WHERE id='%d'",
                        lib->name, uuid, tech_id, description, device,
                        Json_get_int ( request, "id" ) );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: thread '%s/%s' updated.", __func__, uuid, tech_id );
+       Info_new( __func__, lib->Thread_debug, LOG_NOTICE, "thread '%s/%s' updated.", uuid, tech_id );
      }
     else
      { SQL_Write_new ( "INSERT INTO %s SET uuid='%s', tech_id='%s', description='%s', device='%s'",
                        lib->name, uuid, tech_id, description, device );
-       Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: thread '%s/%s' created.", __func__, uuid, tech_id );
+       Info_new( __func__, lib->Thread_debug, LOG_NOTICE, "thread '%s/%s' created.", uuid, tech_id );
      }
 
     g_free(uuid);

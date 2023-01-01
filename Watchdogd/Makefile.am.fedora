@@ -8,7 +8,7 @@ SUBDIRS = Include Dls Http Smsg Modbus Audio Onduleur TeleinfoEDF Radio Dmx Imsg
 bin_SCRIPTS = Wtd_set_volume.sh Wtd_play_google.sh
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c thread.c Archive.c Erreur.c \
-                    shm.c json.c Config.c \
+                    shm.c json.c Config.c http_common.c \
                     db.c Mnemonique.c \
                     distrib_Events.c \
                     api_sync.c api_MSGxxx.c api_Ixxx.c mail.c uuid.c \

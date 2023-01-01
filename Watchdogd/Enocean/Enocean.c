@@ -87,13 +87,13 @@
     g_snprintf( Cfg_enocean.port, sizeof(Cfg_enocean.port), "%s", DEFAUT_PORT_ENOCEAN );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+     { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                 "Enocean_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,                     /* Print Config */
+     { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_INFO,                     /* Print Config */
                 "Enocean_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_enocean.port, sizeof(Cfg_enocean.port), "%s", valeur ); }
@@ -102,7 +102,7 @@
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_enocean.lib->Thread_debug = TRUE;  }
        else
-        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
+        { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
                    "Enocean_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
         }
      }
@@ -118,7 +118,7 @@
 
     fd = open( Cfg_enocean.port, O_RDWR | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+     { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                "Init_enocean: Impossible d'ouvrir le port enocean %s, erreur %d (%s)",
                 Cfg_enocean.port, fd, strerror(errno) );
        return(-1);
@@ -133,7 +133,7 @@
        oldtio.c_cc[VMIN]     = 0;
        tcsetattr(fd, TCSANOW, &oldtio);
        tcflush(fd, TCIOFLUSH);
-       Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
+       Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
                  "Init_enocean: Ouverture port enocean okay %s", Cfg_enocean.port );
      }
     return(fd);
@@ -160,7 +160,7 @@
            module->enocean.a_min == num_a
           )
         { gint cpt;
-          Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+          Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
               "Enocean_envoyer_sortie: Envoi de A(%03d)=%d au module ids=%02d %02d %02d %02d unit %02d",
                num_a, A(num_a), module->enocean.id1, module->enocean.id2,
                module->enocean.id3, module->enocean.id4, module->enocean.unitcode );
@@ -180,7 +180,7 @@
            { gint retour;
              retour = write ( Cfg_enocean.fd, &trame_send_AC, trame_send_AC[0] + 1 );
              if (retour == -1)
-              { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+              { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                          "Enocean_envoyer_sortie: Write Error for A(%03d) : %s", num_a, strerror(errno) );
               }
            }
@@ -227,7 +227,7 @@
   { gchar *action, *button = "unknown", chaine[128];
 
     if (trame->data[0] == 0xD2)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+     { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                 "Processer_trame_ERP1: Received VLD" );
      }
     else if (trame->data[0] == 0xF6)                                                      /* RPS Telegram */
@@ -253,12 +253,12 @@
                    button, action );
 /*       Send_Event( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 0 );*/
 
-       Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
+       Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_INFO,
                  "Processer_trame_ERP1: New_Event : %s", chaine );
        return(TRUE);
      }
     else if (trame->data[0] == 0xA5)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+     { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                 "Processer_trame_ERP1: Received RADIO_ERP1-4BS" );
      }
     return(FALSE);
@@ -274,12 +274,12 @@
     memset( chaine, 0, sizeof(chaine) );
     for (cpt=0; cpt<trame->data_length_lsb+trame->optional_data_length; cpt++)
      { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }/* Mise en forme au format HEX */
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+    Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
              "Processer_trame: Received RADIO_ERP1-%s", chaine );
 
     if (trame->packet_type == 1 && Processer_trame_ERP1 ( trame )) return;                  /* RADIO_ERP1 */
 
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+    Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
              "Processer_trame: Unmanaged telegram: packet type %0X - %02X-%02X-%02X",
               trame->packet_type, trame->data[0], trame->data[1], trame->data[2] );
   }
@@ -295,7 +295,7 @@
     pthread_mutex_unlock( &Cfg_enocean.lib->synchro );
 
     if (taille > 150)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+     { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                 "Enocean_Gerer_sortie: DROP (taille>150)  id=%d", num_a );
        return;
      }
@@ -325,7 +325,7 @@
        return(1);
      }
     Cfg_enocean.comm_status = ENOCEAN_DISCONNECT;                                /* Disconnect sur erreur */
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+    Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_ERR,
              "Enocean_select: Error %d (%s)", errno, strerror(errno) );
     return(-1);
   }
@@ -341,7 +341,7 @@
     Cfg_enocean.lib->TID = pthread_self();                               /* Sauvegarde du TID pour le pere */
     Enocean_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
 
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
+    Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
               "Run_process: Demarrage . . . TID = %p", pthread_self() );
     Cfg_enocean.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
@@ -349,7 +349,7 @@
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage ENOCEAN sensors" );
 
     if (!Cfg_enocean.enable)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
+     { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
                 "Run_process: Thread is not enabled in config. Shutting Down %p",
                  pthread_self() );
        goto end;
@@ -363,12 +363,12 @@
        sched_yield();
 
        if (lib->Thread_reload == TRUE)
-        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_process: recu signal SIGUSR1" );
+        { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_process: recu signal SIGUSR1" );
           lib->Thread_reload = FALSE;
         }
 
        if (Cfg_enocean.reload == TRUE)
-        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_process: Reloading in progress" );
+        { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_process: Reloading in progress" );
           Cfg_enocean.reload = FALSE;
         }
 
@@ -377,7 +377,7 @@
            { Cfg_enocean.fd = Init_enocean();
              if (Cfg_enocean.fd<0)                                         /* On valide l'acces aux ports */
               { Cfg_enocean.comm_status = ENOCEAN_DISCONNECT; }
-             else { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
+             else { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_INFO,
                              "Run_process: ENOCEAN FileDescriptor = %d opened", Cfg_enocean.fd );
                     Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                   }
@@ -390,7 +390,7 @@
              cpt = read( Cfg_enocean.fd, &sync, 1 );
              if (cpt>0)
               { if (sync==0x55) Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_HEADER;
-                else Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                else Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                               "Run_process: Wrong SYNC Byte (%02X). Dropping Frame", sync );
                 Cfg_enocean.nbr_oct_lu = 0;
               }
@@ -401,7 +401,7 @@
            { gint cpt;
              if (Cfg_enocean.date_last_view + ENOCEAN_TRAME_TIMEOUT <= Partage->top)
               { Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
-                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                          "Run_process: Timeout wating for HEADER. Dropping Frame" );
                 break;
               }
@@ -413,7 +413,7 @@
 
                 if (Cfg_enocean.nbr_oct_lu == ENOCEAN_HEADER_LENGTH)
                  { if (Trame.crc_header != Enocean_crc_header( &Trame ))    /* Vérification du CRC Header */
-                    { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                    { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                                "Run_process: Wrong CRC HEADER. Dropping Frame" );
                       Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                     }
@@ -422,7 +422,7 @@
                                              + Trame.data_length_lsb
                                              + Trame.optional_data_length+1; /* On compte le CRC de fin ! */
                       if (Cfg_enocean.index_bute > sizeof(Trame))
-                       { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+                       { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                                   "Run_process: Trame too long (%d / %d max), can't handle, dropping",
                                    Cfg_enocean.index_bute, sizeof(Trame) );
                          Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
@@ -438,7 +438,7 @@
            { gint cpt;
              if (Cfg_enocean.date_last_view + ENOCEAN_TRAME_TIMEOUT <= Partage->top)
               { Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
-                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                          "Run_process: Timeout wating for DATA. Dropping Frame" );
                 break;
               }
@@ -450,7 +450,7 @@
 
                 if (Cfg_enocean.nbr_oct_lu == Cfg_enocean.index_bute)         /* Vérification du CRC Data */
                  { if ( ((unsigned char *)&Trame)[Cfg_enocean.index_bute-1] != Enocean_crc_data( &Trame ) )
-                    { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                    { Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                                "Run_process: Wrong CRC DATA. Dropping Frame" );
                       Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                     }
@@ -468,7 +468,7 @@
               { close(Cfg_enocean.fd);
                 Cfg_enocean.fd = 0;
               }
-             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+             Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                       "Run_process: ENOCEAN Disconnected. Re-Trying in %d sec...",
                        ENOCEAN_RECONNECT_DELAY/10 );
              Cfg_enocean.date_retry_connect = Partage->top + ENOCEAN_RECONNECT_DELAY;
@@ -491,7 +491,7 @@
           pthread_mutex_lock( &Cfg_enocean.lib->synchro );                                /* lockage futex */
           num_a = GPOINTER_TO_INT(Cfg_enocean.Liste_sortie->data);               /* Recuperation du numero */
           Cfg_enocean.Liste_sortie = g_slist_remove ( Cfg_enocean.Liste_sortie, GINT_TO_POINTER(num_a) );
-          Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
+          Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_INFO,
                    "Run_enocean: Reste a traiter %d",
                     g_slist_length(Cfg_enocean.Liste_sortie) );
           pthread_mutex_unlock( &Cfg_enocean.lib->synchro );
@@ -505,7 +505,7 @@
 /*    Decharger_tous_enocean ();*/
     close(Cfg_enocean.fd);                                                 /* Fermeture de la connexion FD */
 end:
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
+    Info_new( __func__, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
               "Run_process: Down . . . TID = %p", pthread_self() );
     Cfg_enocean.lib->Thread_run = FALSE;                                     /* Le thread ne tourne plus ! */
     Cfg_enocean.lib->TID = 0;                              /* On indique au master que le thread est mort. */

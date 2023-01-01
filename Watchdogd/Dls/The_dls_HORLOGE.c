@@ -45,15 +45,15 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_HORLOGE *bit = g_try_malloc0 ( sizeof(struct DLS_HORLOGE) );
     if (!bit)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_HORLOGE = g_slist_prepend ( plugin->Dls_data_HORLOGE, bit );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-              "%s: Create bit DLS_HORLOGE '%s:%s' (%s)", __func__, bit->tech_id, bit->acronyme, bit->libelle );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+              "Create bit DLS_HORLOGE '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_HORLOGE: Recherche un HORLOGE dans les plugins DLS                                                         */
@@ -119,7 +119,7 @@
        gchar *acronyme = Json_get_string ( element, "acronyme" );
        struct DLS_HORLOGE *bit = Dls_data_lookup_HORLOGE ( tech_id, acronyme );
        if (bit) Partage->com_dls.HORLOGE_actives = g_slist_append ( Partage->com_dls.HORLOGE_actives, bit );
-       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise à un de l'horloge %s:%s", __func__, tech_id, acronyme );
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Mise à un de l'horloge %s:%s", tech_id, acronyme );
      }
   }
 /******************************************************************************************************************************/
@@ -141,10 +141,10 @@
        Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
        Partage->com_dls.HORLOGE_ticks = api_result;
        pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: %03d HORLOGE ticks loaded.", __func__,
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "%03d HORLOGE ticks loaded.",
                  Json_get_int ( Partage->com_dls.HORLOGE_ticks, "nbr_horloges" ) );
      }
-    else Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for HORLOGE TICKS failed.", __func__ );
+    else Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for HORLOGE TICKS failed." );
   }
 
 /*----------------------------------------------------------------------------------------------------------------------------*/

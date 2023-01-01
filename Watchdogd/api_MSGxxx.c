@@ -88,7 +88,7 @@
        g_snprintf( libelle, taille_max, "%s", result );
        memset ( suffixe, 0, sizeof(suffixe) );
      }
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Message parsé final: %s", __func__, libelle );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Message parsé final: %s", libelle );
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
@@ -101,7 +101,7 @@
 
     JsonNode *histo = Http_Get_from_global_API ( "/run/message", "tech_id=%s&acronyme=%s", msg->tech_id, msg->acronyme );
     if (histo == NULL || Json_get_int ( histo, "api_status" ) != SOUP_STATUS_OK)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for /run/message failed. Dropping message.", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for /run/message failed. Dropping message." );
        return(NULL);
      }
 
@@ -157,8 +157,8 @@
        event = Partage->com_msrv.liste_msg->data;                                            /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                "%s: Handle MSG'%s:%s'=%d, Reste a %d a traiter", __func__,
+       Info_new( __func__, Config.log_msrv, LOG_INFO,
+                "Handle MSG'%s:%s'=%d, Reste a %d a traiter",
                  event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
 
        if (event->etat == 1)
@@ -193,8 +193,8 @@
      { JsonNode *histo = Liste_Histo_to_send->data;
        JsonNode *api_result = Http_Post_to_global_API ( "/run/histo", histo );
        if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Post for /run/histo failed. Retry %04d MSGS in 60 seconds.",
-                    __func__, g_slist_length(Liste_Histo_to_send) );
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Post '%s:%s' for /run/histo failed. Retry %04d MSGS in 60 seconds.",
+                    __func__, Json_get_string ( histo, "tech_id"), Json_get_string ( histo, "acronyme" ), g_slist_length(Liste_Histo_to_send) );
           next_try = Partage->top + 600;
           break;
         }

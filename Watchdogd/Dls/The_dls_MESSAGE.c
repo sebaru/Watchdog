@@ -45,15 +45,15 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_MESSAGE *bit = g_try_malloc0 ( sizeof(struct DLS_MESSAGE) );
     if (!bit)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_MESSAGE = g_slist_prepend ( plugin->Dls_data_MESSAGE, bit );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-              "%s: Create bit DLS_MESSAGE '%s:%s'=%d", __func__, bit->tech_id, bit->acronyme, bit->etat );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+              "Create bit DLS_MESSAGE '%s:%s'=%d", bit->tech_id, bit->acronyme, bit->etat );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_MESSAGE: Recherche un MESSAGE dans les plugins DLS                                                         */
@@ -90,8 +90,8 @@
           msg->etat_update = TRUE;
           event = (struct DLS_MESSAGE_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
           if (!event)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "%s: malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
+           { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
+                      "malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", msg->tech_id, msg->acronyme );
            }
           else
            { event->etat = FALSE;                                                       /* Recopie de l'état dans l'evenement */
@@ -102,8 +102,8 @@
            }
           event = (struct DLS_MESSAGE_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
           if (!event)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "%s: malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
+           { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
+                      "malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", msg->tech_id, msg->acronyme );
            }
           else
            { event->etat = TRUE;                                                        /* Recopie de l'état dans l'evenement */
@@ -121,15 +121,15 @@
        if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
 
        if ( msg->changes > 5 && !(Partage->top % 50) )              /* Si persistence d'anomalie on prévient toutes les 5 sec */
-        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: last_change trop tot for DLS_MSG '%s:%s' !", __func__,
+        { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "last_change trop tot for DLS_MSG '%s:%s' !",
                     msg->tech_id, msg->acronyme );
         }
        else
         { struct DLS_MESSAGE_EVENT *event;
           event = (struct DLS_MESSAGE_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
           if (!event)
-           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "%s: malloc Event failed. Memory error for MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
+           { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
+                      "malloc Event failed. Memory error for MSG'%s:%s'", msg->tech_id, msg->acronyme );
            }
           else
            { event->etat = etat;                                                        /* Recopie de l'état dans l'evenement */
@@ -139,8 +139,8 @@
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
            }
 
-          Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "%s: ligne %04d: Changing DLS_MSG '%s:%s'=%d", __func__,
+          Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "ligne %04d: Changing DLS_MSG '%s:%s'=%d",
                     (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme, msg->etat );
           msg->changes++;
           msg->last_change = Partage->top;

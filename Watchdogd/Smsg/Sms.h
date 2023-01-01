@@ -36,6 +36,7 @@
     GSM_StateMachine *gammu_machine;
     INI_Section *gammu_cfg;
     JsonNode *ai_nbr_sms;
+    JsonNode *ai_signal_quality;
     guint nbr_sms;
   };
 

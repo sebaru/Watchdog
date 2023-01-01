@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -31,17 +31,12 @@
  #include <glib.h>
  #include <sys/syslog.h>                                                   /* Pour les niveaux de LOG_xxx */
 
- #define TAILLE_ENTETE_LOG   40
- struct LOG { char entete [TAILLE_ENTETE_LOG+1];
-              guint log_level;
-            };
-
  #define  fonction_entre(); { printf("Entre dans la fonction %s\n", __FUNCTION__ ); }
  #define  fonction_sort();  { printf("Sort de la fonction %s\n", __FUNCTION__ ); }
- 
- extern struct LOG *Info_init( gchar *entete, guint debug );
- extern void Info_change_log_level( struct LOG *log, guint debug );
- extern void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... );
+
+ extern void Info_init( guint debug );
+ extern void Info_change_log_level( guint debug );
+ extern void Info_new( gchar *function, gboolean override, guint level, gchar *format, ... );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
