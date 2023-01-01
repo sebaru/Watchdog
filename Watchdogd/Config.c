@@ -118,7 +118,6 @@
 /******************************************************************************************************************************/
  void Print_config ( void )
   {
-    if (!Config.log) return;
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db hostname          %s", Config.db_hostname );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );

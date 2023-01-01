@@ -57,7 +57,6 @@
     gboolean log_db;                                                                              /* TRUE si log des acces DB */
     gboolean log_trad;                                                                    /* TRUE si log des compilations DLS */
     gboolean single;                                                                                /* Demarrage des thread ? */
-    struct LOG *log;                                                                             /* Pour l'affichage des logs */
   };
 
  #define DEFAUT_DB_HOST                 "localhost"          /* Ne pas depasser TAILLE_DB_HOST caracteres */

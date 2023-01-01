@@ -443,7 +443,7 @@
     umask(022);                                                                              /* Masque de creation de fichier */
 
     Lire_config();                                                     /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
-    Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
+    Info_init( LOG_INFO );                                               /* Init msgs d'erreurs, par défaut, en mode LOG_INFO */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Start %s, branche '%s'", WTD_VERSION, WTD_BRANCHE );
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
 
@@ -503,7 +503,7 @@
        if (master_hostname) g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "%s", master_hostname );
                        else g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "nomasterhost" );
 
-       Info_change_log_level ( Config.log, Json_get_int ( api_result, "log_level" ) );
+       Info_change_log_level ( Json_get_int ( api_result, "log_level" ) );
        Json_node_unref ( api_result );
      }
 /******************************************************* Drop privileges ******************************************************/

@@ -185,8 +185,8 @@
        Config.log_bus    = Json_get_bool ( request, "log_bus" );
        Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
        gboolean headless = Json_get_bool ( request, "headless" );
-       Info_change_log_level ( Config.log, Json_get_int ( request, "log_level" ) );
-       Info_new( __func__, Config.log_msrv, LOG_CRIT, "AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d",
+       Info_change_log_level ( Json_get_int ( request, "log_level" ) );
+       Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d",
                  Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
        if (Config.headless != headless)
         { Partage->com_msrv.Thread_run = FALSE;
