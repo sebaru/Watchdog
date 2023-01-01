@@ -72,7 +72,7 @@
                  nbr_saved, (Partage->top-top)/10.0, reste );
      }
     else
-     { Info_new( __func__, Config.log_arch, LOG_ERR, "API Error. Reste %05d", reste ); }
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error. Reste %05d", reste ); }
     Json_node_unref ( RootNode );
     Json_node_unref ( api_result );
   }

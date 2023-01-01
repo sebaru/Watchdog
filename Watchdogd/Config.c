@@ -108,8 +108,6 @@
     if (chaine)
      { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
 
-/******************************************************** Partie LOG **********************************************************/
-    Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
     g_key_file_free(gkf);
   }
 /******************************************************************************************************************************/

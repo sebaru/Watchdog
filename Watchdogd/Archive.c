@@ -42,7 +42,7 @@
  void Ajouter_arch( gchar *tech_id, gchar *acronyme, gdouble valeur )
   { if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
 
-    Info_new( __func__, Config.log_arch, LOG_DEBUG, "Add Arch in list: '%s:%s'=%f", tech_id, acronyme, valeur );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Add Arch in list: '%s:%s'=%f", tech_id, acronyme, valeur );
     struct timeval tv;
     JsonNode *arch = Json_node_create ();
     if (!arch) return;
