@@ -37,6 +37,17 @@
 
  #include "Erreur.h"
 
+ static gchar *level_to_string[] =
+  { "EMERG",
+    "ALERT",
+    "CRIT",
+    "ERR",
+    "WARNING",
+    "NOTICE",
+    "INFO",
+    "DEBUG"
+  };
+
 /******************************************************************************************************************************/
 /* Info_init: Initialisation du traitement d'erreur                                                                           */
 /* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                                                */
@@ -78,16 +89,17 @@
 /* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres                                 */
 /* Entrée: le niveau, le texte, et la chaine à afficher                                                                       */
 /******************************************************************************************************************************/
- void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... )
+ void Info_new( struct LOG *log, gboolean override, guint level, gchar *format, ... )
   { gchar chaine[512], nom_thread[32];
     va_list ap;
 
-    if ( log != NULL && (override == TRUE || (priority <= log->log_level)) )                      /* LOG_EMERG = 0, DEBUG = 7 */
+    if ( log != NULL && (override == TRUE || (level <= log->log_level)) )                      /* LOG_EMERG = 0, DEBUG = 7 */
      { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
-       g_snprintf( chaine, sizeof(chaine), "{ \"thread\":\"%s\", \"message\":\"%s\" }", nom_thread, format );
+       g_snprintf( chaine, sizeof(chaine), "{ \"thread\": \"%s\", \"level\": \"%s\", \"message\": \"%s\" }",
+                   nom_thread, level_to_string[level], format );
 
        va_start( ap, format );
-       vsyslog ( priority, chaine, ap );
+       vsyslog ( level, chaine, ap );
        va_end ( ap );
      }
   }

@@ -108,16 +108,16 @@
        return(FALSE);
      }
 
-    gchar *timestamp = soup_message_headers_get_one ( headers, "X-ABLS-TIMESTAMP" );
-    if (!timestamp)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-TIMESTAMP Header is missing", __func__, path );
+    gchar *thread_tech_id = *thread_tech_id_p = soup_message_headers_get_one ( headers, "X-ABLS-THREAD-TECH-ID" );
+    if (!thread_tech_id)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-THREAD-TECH-ID Header is missing", __func__, path );
        soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
        return(FALSE);
      }
 
-    gchar *thread_tech_id = *thread_tech_id_p = soup_message_headers_get_one ( headers, "X-ABLS-THREAD-TECH-ID" );
-    if (!thread_tech_id)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-THREAD-TECH-ID Header is missing", __func__, path );
+    gchar *timestamp = soup_message_headers_get_one ( headers, "X-ABLS-TIMESTAMP" );
+    if (!timestamp)
+     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-TIMESTAMP Header is missing", __func__, path );
        soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
        return(FALSE);
      }
