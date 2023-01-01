@@ -39,7 +39,7 @@
     g_snprintf( fichier, sizeof(fichier), "WTDMail_XXXXXX" );
     fd = mkstemp ( fichier );
     if (fd==-1)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: mkstemp failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "mkstemp failed" );
        return(FALSE);
      }
 
@@ -51,7 +51,7 @@
                                         "\n", sujet, dest );
 
     if (write ( fd, chaine, strlen(chaine) ) < 0)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: writing header failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "writing header failed" );
        close(fd);
        return(FALSE);
      }
@@ -59,20 +59,20 @@
 
     gchar *headers = "<html><body>\n";
     if (write ( fd, headers, strlen(headers) ) < 0)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: writing header failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "writing header failed" );
        close(fd);
        return(FALSE);
      }
 
     if (write ( fd, body, strlen(body) ) < 0)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: writing body failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "writing body failed" );
        close(fd);
        return(FALSE);
      }
 
     gchar *suffixe = "</body></html>";
     if (write ( fd, suffixe, strlen(suffixe) ) < 0)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: writing suffixe failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "writing suffixe failed" );
        close(fd);
        return(FALSE);
      }
@@ -80,7 +80,7 @@
 
     g_snprintf ( commande, sizeof(commande), "cat %s | sendmail -t", fichier );
     system(commande);
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: mail '%s' sent to '%s'", __func__, sujet, dest );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "mail '%s' sent to '%s'", sujet, dest );
     unlink(fichier);
     return(TRUE);
   }

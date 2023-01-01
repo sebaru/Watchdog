@@ -50,7 +50,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -129,26 +129,26 @@
     if (!Http_check_session( msg, session, 6 )) return;
 
     if ( !Config.instance_is_master )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Instance is not master. Ignoring.", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Instance is not master. Ignoring." );
        return;
      }
 
-    Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Reloading Icons DB", __func__ );
+    Info_new( __func__, TRUE, LOG_NOTICE, "Reloading Icons DB" );
 
     gchar *requete = SQL_Read_from_file ( "base_icones.sql" );
     if (!requete)
      { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "DB Icones Read Error" );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Icons DB Error.", __func__ );
+       Info_new( __func__, TRUE, LOG_NOTICE, "Icons DB Error." );
        return;
      }
 
     if (!SQL_Writes ( requete ))
      { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "DB Icones SQL Error" );
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Icons DB Error.", __func__ );
+       Info_new( __func__, TRUE, LOG_NOTICE, "Icons DB Error." );
      }
     else
      { soup_message_set_status (msg, SOUP_STATUS_OK);
-       Info_new( Config.log, TRUE, LOG_NOTICE, "%s: Icons DB Loaded.", __func__ );
+       Info_new( __func__, TRUE, LOG_NOTICE, "Icons DB Loaded." );
      }
     g_free(requete);
   }

@@ -119,28 +119,28 @@
  void Print_config ( void )
   {
     if (!Config.log) return;
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db hostname          %s", Config.db_hostname );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          *******" );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_uuid          %s", Json_get_string ( Config.config, "domain_uuid" ) );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config domain_secret        *******" );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config agent_uuid           %s", Json_get_string ( Config.config, "agent_uuid" ) );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config api_url              %s", Json_get_string ( Config.config, "api_url" ) );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config headless             %d", Config.headless );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_bus              %d", Config.log_bus );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_trad             %d", Config.log_trad );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_msrv             %d", Config.log_msrv );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Config.master_hostname );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db hostname          %s", Config.db_hostname );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db password          *******" );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config domain_uuid          %s", Json_get_string ( Config.config, "domain_uuid" ) );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config domain_secret        *******" );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config agent_uuid           %s", Json_get_string ( Config.config, "agent_uuid" ) );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config api_url              %s", Json_get_string ( Config.config, "api_url" ) );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config headless             %d", Config.headless );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_bus              %d", Config.log_bus );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_trad             %d", Config.log_trad );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_msrv             %d", Config.log_msrv );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Config.master_hostname );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

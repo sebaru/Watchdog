@@ -35,7 +35,7 @@
  #include <sys/prctl.h>
  #include <stdarg.h>
 
- #include "Erreur.h"
+ #include "watchdogd.h"
 
  static gchar *level_to_string[] =
   { "EMERG",
@@ -54,7 +54,7 @@
 /******************************************************************************************************************************/
  static void Info_stop( int code_retour, void *log )
   {
-    Info_new( log, TRUE, LOG_NOTICE, "End of logs" );
+    Info_new( __func__, TRUE, LOG_NOTICE, "End of logs" );
     g_free(log);
   }
 
@@ -83,20 +83,20 @@
   { if(!log) return;
     if(!new_log_level) new_log_level = LOG_DEBUG;
     log->log_level =  new_log_level;
-    Info_new( log, TRUE, LOG_CRIT, "%s: log_level set to %d", __func__, log->log_level );
+    Info_new( __func__, TRUE, LOG_CRIT, "log_level set to %d", log->log_level );
   }
 /******************************************************************************************************************************/
 /* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres                                 */
 /* Entrée: le niveau, le texte, et la chaine à afficher                                                                       */
 /******************************************************************************************************************************/
- void Info_new( struct LOG *log, gboolean override, guint level, gchar *format, ... )
+ void Info_new( gchar *function, gboolean override, guint level, gchar *format, ... )
   { gchar chaine[512], nom_thread[32];
     va_list ap;
 
-    if ( log != NULL && (override == TRUE || (level <= log->log_level)) )                      /* LOG_EMERG = 0, DEBUG = 7 */
+    if ( override == TRUE || (level <= Config.log->log_level) )                                   /* LOG_EMERG = 0, DEBUG = 7 */
      { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
-       g_snprintf( chaine, sizeof(chaine), "{ \"thread\": \"%s\", \"level\": \"%s\", \"message\": \"%s\" }",
-                   nom_thread, level_to_string[level], format );
+       g_snprintf( chaine, sizeof(chaine), "{ \"thread\": \"%s\", \"function\": \"%s\", \"level\": \"%s\", \"message\": \"%s\" }",
+                   nom_thread, function, level_to_string[level], format );
 
        va_start( ap, format );
        vsyslog ( level, chaine, ap );

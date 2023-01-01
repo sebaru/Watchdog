@@ -45,7 +45,7 @@
 
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
     if (!soup_msg)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: MSG Error Sending to %s", __func__, query );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
        goto end;
      }
 
@@ -55,9 +55,9 @@
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
 
-    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    Info_new( __func__, Config.log_bus, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
     else { retour = Http_Response_Msg_to_Json ( soup_msg ); }
     g_free(reason_phrase);
     g_object_unref( soup_msg );
@@ -87,13 +87,13 @@ end:
 
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: MSG Error Sending to %s", __func__, query );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
        goto end;
      }
 
     gchar *buf = Json_node_to_string ( RootNode );
     gint buf_size = strlen(buf);
-    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: Sending to %s: %s", __func__, query, buf );
+    Info_new( __func__, Config.log_bus, LOG_DEBUG, "Sending to %s: %s", query, buf );
     Http_Add_Thread_signature ( module, soup_msg, buf, buf_size );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, buf_size );
     /* Async soup_session_queue_message (client->connexion, msg, callback, client);*/
@@ -102,9 +102,9 @@ end:
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code(soup_msg);
 
-    Info_new( Config.log, Config.log_bus, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    Info_new( __func__, Config.log_bus, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: Error %d for '%s': %s\n", __func__, status_code, query, reason_phrase ); }
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
     else retour = TRUE;
     g_free(reason_phrase);
     g_object_unref( soup_msg );
@@ -203,7 +203,7 @@ end:
            } else Json_node_unref ( element );
           liste = g_slist_next ( liste );
         }
-       Info_new( Config.log, Config.log_bus, LOG_INFO,  "%s: GET_DO done for '%s'", __func__, thread_tech_id );
+       Info_new( __func__, Config.log_bus, LOG_INFO,  "GET_DO done for '%s'", thread_tech_id );
      }
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "There are DO", Response );
   }
@@ -217,19 +217,19 @@ end:
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
      { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for path %s", __func__, path );
+       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
        return;
      }
 
     if (! (Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "consigne" ) ) )
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_WATCHDOG: wrong parameters from '%s'", __func__, thread_tech_id );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: wrong parameters from '%s'", thread_tech_id );
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        Json_node_unref(request);
        return;
      }
 
-    Info_new( Config.log, Config.log_bus, LOG_INFO,
-              "%s: SET_WATCHDOG for: '%s:%s'=%d", __func__, thread_tech_id,
+    Info_new( __func__, Config.log_bus, LOG_INFO,
+              "SET_WATCHDOG for: '%s:%s'=%d", thread_tech_id,
               Json_get_string ( request, "acronyme" ), Json_get_int ( request, "consigne" ) );
     struct DLS_WATCHDOG *bit = Dls_data_lookup_WATCHDOG ( thread_tech_id, Json_get_string ( request, "acronyme" ) );
     if (bit) Dls_data_set_WATCHDOG ( NULL, bit, Json_get_int ( request, "consigne" ) );
@@ -245,18 +245,18 @@ end:
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
      { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for path %s", __func__, path );
+       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
        return;
      }
 
     if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_CDE: wrong parameters from '%s'", __func__, thread_tech_id );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_CDE: wrong parameters from '%s'", thread_tech_id );
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        Json_node_unref(request);
        return;
      }
-    Info_new( Config.log, Config.log_bus, LOG_INFO,
-              "%s: SET_CDE from '%s': '%s:%s'=1", __func__, thread_tech_id,
+    Info_new( __func__, Config.log_bus, LOG_INFO,
+              "SET_CDE from '%s': '%s:%s'=1", thread_tech_id,
               Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
     Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "CDE set", NULL );
@@ -271,7 +271,7 @@ end:
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
      { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for path %s", __func__, path );
+       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
        return;
      }
 
@@ -280,7 +280,7 @@ end:
            Json_has_member ( request, "unite" ) && Json_has_member ( request, "archivage" )
           )
        )
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_AI: wrong parameters from '%s'", __func__, thread_tech_id );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_AI: wrong parameters from '%s'", thread_tech_id );
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        Json_node_unref(request);
        return;
@@ -294,8 +294,8 @@ end:
      { tech_id  = Json_get_string ( request, "tech_id" );
        acronyme = Json_get_string ( request, "acronyme" );
      }
-    Info_new( Config.log, Config.log_bus, LOG_INFO,
-              "%s: SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d)", __func__,
+    Info_new( __func__, Config.log_bus, LOG_INFO,
+              "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
     struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
@@ -317,7 +317,7 @@ end:
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
      { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: thread_tech_id missing for path %s", __func__, path );
+       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
        return;
      }
 
@@ -325,7 +325,7 @@ end:
            Json_has_member ( request, "etat" )&& Json_has_member ( request, "libelle" )
           )
        )
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: SET_DI: wrong parameters from '%s'", __func__, thread_tech_id );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI: wrong parameters from '%s'", thread_tech_id );
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
@@ -338,8 +338,8 @@ end:
      { tech_id  = Json_get_string ( request, "tech_id" );
        acronyme = Json_get_string ( request, "acronyme" );
      }
-    Info_new( Config.log, Config.log_bus, LOG_INFO,
-              "%s: SET_DI from '%s': '%s:%s/'%s:%s'=%d", __func__,
+    Info_new( __func__, Config.log_bus, LOG_INFO,
+              "SET_DI from '%s': '%s:%s/'%s:%s'=%d",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_bool ( request, "etat" ) );
     struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );

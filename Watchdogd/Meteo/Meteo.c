@@ -47,8 +47,8 @@
     gchar *code_insee = Json_get_string ( module->config, "code_insee" );
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/ephemeride/0?token=%s&insee=%s", token, code_insee );
 
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-             "%s: Starting getting data for code_insee '%s'", __func__, code_insee );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+             "Starting getting data for code_insee '%s'", code_insee );
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
@@ -58,9 +58,9 @@
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code ( soup_msg );
 
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", __func__, status_code, reason_phrase );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: Error: %s\n", __func__, reason_phrase );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error: %s\n", reason_phrase );
        Thread_send_comm_to_master ( module, FALSE );
      }
     else
@@ -74,14 +74,14 @@
        if ( sscanf ( sunrise, "%d:%d", &heure, &minute ) == 2)
         { Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunrise );
           Mnemo_create_thread_HORLOGE_tick ( module, vars->sunrise, heure, minute );
-          Info_new( Config.log, module->Thread_debug, LOG_INFO,
-                   "%s: %s -> sunrise at %02d:%02d", __func__, city_name, heure, minute );
+          Info_new( __func__, module->Thread_debug, LOG_INFO,
+                   "%s -> sunrise at %02d:%02d", city_name, heure, minute );
         }
        if ( sscanf ( sunset, "%d:%d", &heure, &minute ) == 2)
         { Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunset );
           Mnemo_create_thread_HORLOGE_tick ( module, vars->sunset, heure, minute );
-          Info_new( Config.log, module->Thread_debug, LOG_INFO,
-                   "%s: %s ->  sunset at %02d:%02d", __func__, city_name, heure, minute );
+          Info_new( __func__, module->Thread_debug, LOG_INFO,
+                   "%s ->  sunset at %02d:%02d", city_name, heure, minute );
         }
        Json_node_unref ( response );
        Thread_send_comm_to_master ( module, TRUE );
@@ -102,8 +102,8 @@
     gint day       = Json_get_int ( element, "day" );
     gint temp_min  = Json_get_int ( element, "tmin" );
     gint temp_max  = Json_get_int ( element, "tmax" );
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-              "%s: day %02d -> temp_min=%02d, temp_max=%02d", __func__, day, temp_min, temp_max );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+              "day %02d -> temp_min=%02d, temp_max=%02d", day, temp_min, temp_max );
 
     Http_Post_to_local_BUS_AI ( module, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
     Http_Post_to_local_BUS_AI ( module, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
@@ -129,8 +129,8 @@
     gchar *code_insee = Json_get_string ( module->config, "code_insee" );
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/forecast/daily?token=%s&insee=%s", token, code_insee );
 
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-             "%s: %s: Starting getting data for code_insee '%s'", __func__, thread_tech_id, code_insee );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+             "%s: Starting getting data for code_insee '%s'", thread_tech_id, code_insee );
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
@@ -140,9 +140,9 @@
     gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
     gint   status_code   = Http_Msg_status_code ( soup_msg );
 
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Status %d, reason %s", __func__, thread_tech_id, status_code, reason_phrase );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Error: %s\n", __func__, thread_tech_id, reason_phrase ); }
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Error: %s\n", thread_tech_id, reason_phrase ); }
     else
      { JsonNode *response = Http_Response_Msg_to_Json ( soup_msg );
        Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module );
@@ -204,7 +204,7 @@
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
 
-          Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: tag '%s' not for this thread", __func__, thread_tech_id, tag );
+          Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", thread_tech_id, tag );
           Json_node_unref(request);
         }
 /****************************************************** Connexion ! ***********************************************************/

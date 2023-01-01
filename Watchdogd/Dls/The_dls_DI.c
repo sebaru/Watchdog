@@ -37,7 +37,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_DI *bit = g_try_malloc0 ( sizeof(struct DLS_DI) );
     if (!bit)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
@@ -45,8 +45,8 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_DI = g_slist_prepend ( plugin->Dls_data_DI, bit );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-              "%s: Create bit DLS_DI '%s:%s'=%d (%s)", __func__, bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+              "Create bit DLS_DI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_DI: Recherche un DI dans les plugins DLS                                                                   */
@@ -102,7 +102,7 @@
   { if (!bit) return;
 
     if (bit->etat != valeur)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_DI '%s:%s'=%d up %d down %d",
+     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_DI '%s:%s'=%d up %d down %d",
                  __func__, bit->tech_id, bit->acronyme, valeur, bit->edge_up, bit->edge_down );
        if (valeur == TRUE) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up, bit );
                       else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, bit );

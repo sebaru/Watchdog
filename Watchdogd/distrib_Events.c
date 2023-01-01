@@ -48,12 +48,12 @@
     reste = g_slist_length(Partage->com_msrv.Liste_DO);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_DO '%s':'%s' to Slave/Bus (reste %d)", __func__,
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending SET_DO '%s':'%s' to Slave/Bus (reste %d)",
               dout->tech_id, dout->acronyme, reste );
 
     RootNode = Json_node_create ();
     if (!RootNode)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
        goto suite_AO;
      }
     Dls_DO_to_json ( RootNode, dout );
@@ -71,7 +71,7 @@ suite_AO:
     reste = g_slist_length(Partage->com_msrv.Liste_AO);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending SET_AO '%s':'%s' = %f to Slave/Bus (reste %d)", __func__,
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending SET_AO '%s':'%s' = %f to Slave/Bus (reste %d)",
               ao->tech_id, ao->acronyme, ao->valeur, reste );
 
     RootNode = Json_node_create ();
@@ -81,6 +81,6 @@ suite_AO:
        Http_Send_to_slaves ( NULL, RootNode );
        Json_node_unref ( RootNode );
      }
-    else { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ ); }
+    else { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

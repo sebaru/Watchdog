@@ -44,8 +44,8 @@
     struct SMS_VARS *vars = module->vars;
     if (status==0) { vars->gammu_send_status = ERR_NONE; }
     else vars->gammu_send_status = ERR_UNKNOWN;
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-              "%s: status = %d, vars->gammu_send_status=%d", __func__, status, vars->gammu_send_status );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+              "status = %d, vars->gammu_send_status=%d", status, vars->gammu_send_status );
   }
 /******************************************************************************************************************************/
 /* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */
@@ -59,13 +59,13 @@
     if (GSM_IsConnected(vars->gammu_machine))
      { error = GSM_TerminateConnection(vars->gammu_machine);                                  /* Terminate connection */
        if (error != ERR_NONE)
-        { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                   "%s: %s: TerminateConnection Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
+        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                   "%s: TerminateConnection Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
         }
      }
     GSM_FreeStateMachine(vars->gammu_machine);                                                 /* Free up used memory */
     vars->gammu_machine = NULL;
-    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Disconnected", __func__, thread_tech_id );
+    Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Disconnected", thread_tech_id );
     Thread_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
@@ -78,26 +78,26 @@
     GSM_Error error;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Trying to connect", __func__, thread_tech_id );
+    Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Trying to connect", thread_tech_id );
 
     GSM_InitLocales(NULL);
     if ( (vars->gammu_machine = GSM_AllocStateMachine()) == NULL )                         /* Allocates state machine */
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: AllocStateMachine Error", __func__, thread_tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: AllocStateMachine Error", thread_tech_id );
        return(FALSE);
      }
 
     error = GSM_FindGammuRC(&vars->gammu_cfg, NULL);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                 "%s: %s: FindGammuRC Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: FindGammuRC Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
      }
 
     error = GSM_ReadConfig(vars->gammu_cfg, GSM_GetConfig(vars->gammu_machine, 0), 0);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                "%s: %s: ReadConfig Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                "%s: ReadConfig Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
      }
@@ -107,8 +107,8 @@
 
     error = GSM_InitConnection(vars->gammu_machine, 1);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                 "%s: %s: InitConnection Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: InitConnection Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
      }
@@ -117,8 +117,8 @@
     gchar constructeur[64];
     error = GSM_GetManufacturer(vars->gammu_machine, constructeur);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                 "%s: %s: GSM_GetManufacturer Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: GSM_GetManufacturer Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
      }
@@ -126,14 +126,14 @@
     gchar model[64];
     error = GSM_GetModel(vars->gammu_machine, model);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                 "%s: %s: GSM_GetModel Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: GSM_GetModel Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
      }
 
-    Info_new( Config.log, module->Thread_debug, LOG_INFO,
-              "%s: %s: Connection OK with '%s/%s'", __func__, thread_tech_id, constructeur, model );
+    Info_new( __func__, module->Thread_debug, LOG_INFO,
+              "%s: Connection OK with '%s/%s'", thread_tech_id, constructeur, model );
     Thread_send_comm_to_master ( module, TRUE );
     return(TRUE);
   }
@@ -152,12 +152,12 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (module->comm_status == FALSE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: COMM is FALSE", __func__, thread_tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: COMM is FALSE", thread_tech_id );
        return(FALSE);
      }
 
     if (!telephone)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: telephone is NULL", __func__, thread_tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: telephone is NULL", thread_tech_id );
        return(FALSE);
      }
 
@@ -181,22 +181,22 @@
     PhoneSMSC.Location = 1;                                                                    /* We need to know SMSC number */
     error = GSM_GetSMSC(vars->gammu_machine, &PhoneSMSC);
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                "%s: %s: GetSMSC Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                "%s: GetSMSC Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
      }
 
     CopyUnicodeString(sms.SMSC.Number, PhoneSMSC.Number);                                       /* Set SMSC number in message */
 
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG,
-              "%s: %s: Try to send to %s (%s)", __func__, thread_tech_id, telephone, libelle );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+              "%s: Try to send to %s (%s)", thread_tech_id, telephone, libelle );
 
     vars->gammu_send_status = ERR_TIMEOUT;
     error = GSM_SendSMS(vars->gammu_machine, &sms);                                                        /* Send message */
     if (error != ERR_NONE)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                 "%s: %s: SendSMS Failed (%s)", __func__, thread_tech_id, GSM_ErrorString(error) );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: SendSMS Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
        Smsg_disconnect(module);
        return(FALSE);
      }
@@ -207,13 +207,13 @@
      { GSM_ReadDevice(vars->gammu_machine, TRUE); }
 
     if (vars->gammu_send_status == ERR_NONE)
-     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
-                 "%s: %s: Envoi SMS Ok to %s (%s)", __func__, thread_tech_id, telephone, libelle );
+     { Info_new( __func__, module->Thread_debug, LOG_NOTICE,
+                 "%s: Envoi SMS Ok to %s (%s)", thread_tech_id, telephone, libelle );
        vars->nbr_sms++;
        return(TRUE);
      }
-    Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-             "%s: %s: Envoi SMS Nok to %s (%s) -> error '%s'", __func__, thread_tech_id, telephone, libelle, GSM_ErrorString(error) );
+    Info_new( __func__, module->Thread_debug, LOG_WARNING,
+             "%s: Envoi SMS Nok to %s (%s) -> error '%s'", thread_tech_id, telephone, libelle, GSM_ErrorString(error) );
     return(FALSE);
   }
 /******************************************************************************************************************************/
@@ -274,7 +274,7 @@
 /********************************************************* Envoi de la requete ************************************************/
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( method, query );
-    Info_new ( Config.log, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
+    Info_new ( __func__, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
     soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, body, strlen(body) );
     SoupMessageHeaders *headers;
     g_object_get ( G_OBJECT(soup_msg), "request_headers", &headers, NULL );
@@ -289,14 +289,14 @@
     gint status_code;
 
     g_object_get ( soup_msg, "status-code", &status_code, "reason-phrase", &reason_phrase, "response-body-data", &response_brute, NULL );
-    Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: Status %d, reason %s", __func__, thread_tech_id, status_code, reason_phrase );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
     if (status_code!=200)
      { gsize taille;
        gchar *error = g_bytes_get_data ( response_brute, &taille );
-       Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Error: %s\n", __func__, thread_tech_id, error );
+       Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Error: %s\n", thread_tech_id, error );
        g_free(error);
      }
-    else Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: '%s' sent to '%s'", __func__, thread_tech_id, libelle, telephone );
+    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, telephone );
     g_object_unref( soup_msg );
     soup_session_abort ( connexion );
   }
@@ -311,14 +311,14 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (vars->sending_is_disabled == TRUE)                                   /* Si envoi désactivé, on sort de suite de la fonction */
-     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending is disabled. Dropping message", __func__, thread_tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending is disabled. Dropping message", thread_tech_id );
        return;
      }
 
 /********************************************* Chargement des informations en bases *******************************************/
     JsonNode *UsersNode = Http_Get_from_global_API ( "/run/users/wanna_be_notified", NULL );
     if (!UsersNode || Json_get_int ( UsersNode, "api_status" ) != 200)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USERS from API", __func__, thread_tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USERS from API", thread_tech_id );
        return;
      }
 
@@ -328,18 +328,18 @@
      { JsonNode *user = recipients->data;
        gchar *user_phone = Json_get_string ( user, "phone" );
        if (!user_phone)
-        { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                    "%s: %s: Warning: User %s does not have an Phone number", __func__, thread_tech_id, Json_get_string ( user, "email" ) );
+        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                    "%s: Warning: User %s does not have an Phone number", thread_tech_id, Json_get_string ( user, "email" ) );
         }
        else if (!strlen(user_phone))
-        { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                    "%s: %s: Warning: User %s has an empty Phone number", __func__, thread_tech_id, Json_get_string ( user, "email" ) );
+        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                    "%s: Warning: User %s has an empty Phone number", thread_tech_id, Json_get_string ( user, "email" ) );
         }
        else switch (sms_notification)
         { case MESSAGE_SMS_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
-                { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                            "%s: %s: Error sending with GSM. Falling back to OVH", __func__, thread_tech_id );
+                { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                            "%s: Error sending with GSM. Falling back to OVH", thread_tech_id );
                   Envoi_sms_ovh( module, msg, user_phone );
                 }
                break;
@@ -394,7 +394,7 @@
 
     JsonNode *RootNode = Json_node_create();
     if ( RootNode == NULL )
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Memory Error for '%s'", __func__, thread_tech_id, from );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory Error for '%s'", thread_tech_id, from );
        return;
      }
     Json_node_add_string ( RootNode, "phone", from );
@@ -402,25 +402,25 @@
     JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt_cde", RootNode );
     Json_node_unref ( RootNode );
     if (!UserNode || Json_get_int ( UserNode, "api_status" ) != 200)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
        goto end_user;
      }
 
     if ( !Json_has_member ( UserNode, "email" ) )
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                "%s: %s: %s is not an known user. Dropping command '%s'...", __func__, thread_tech_id, from, texte );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                "%s: %s is not an known user. Dropping command '%s'...", thread_tech_id, from, texte );
        goto end_user;
      }
 
     if ( !Json_has_member ( UserNode, "can_send_txt_cde" ) || Json_get_bool ( UserNode, "can_send_txt_cde" ) == FALSE )
-     { Info_new( Config.log, module->Thread_debug, LOG_WARNING,
-                "%s: %s: %s ('%s') is not allowed to send txt_cde. Dropping command '%s'...", __func__, thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                "%s: %s ('%s') is not allowed to send txt_cde. Dropping command '%s'...", thread_tech_id,
                 from, Json_get_string ( UserNode, "email" ), texte );
        goto end_user;
      }
 
     if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
-     { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Ping Received from '%s'. Sending Pong", __func__, thread_tech_id, from );
+     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Ping Received from '%s'. Sending Pong", thread_tech_id, from );
        Envoyer_smsg_gsm_text ( module, "Pong !" );
        goto end_user;
      }
@@ -428,20 +428,20 @@
     if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
      { vars->sending_is_disabled = TRUE;
        Envoyer_smsg_gsm_text ( module, "Sending SMS is off !" );
-       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is DISABLED by '%s'", __func__, thread_tech_id, from );
+       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending SMS is DISABLED by '%s'", thread_tech_id, from );
        goto end_user;
      }
 
     if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
      { Envoyer_smsg_gsm_text ( module, "Sending SMS is on !" );
-       Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending SMS is ENABLED by '%s'", __func__, thread_tech_id, from );
+       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending SMS is ENABLED by '%s'", thread_tech_id, from );
        vars->sending_is_disabled = FALSE;
        goto end_user;
      }
 
     RootNode = Json_node_create();
     if ( RootNode == NULL )
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: MapNode Error for '%s'", __func__, thread_tech_id, from );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: MapNode Error for '%s'", thread_tech_id, from );
        goto end_user;
      }
     Json_node_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
@@ -450,12 +450,12 @@
     JsonNode *MapNode = Http_Post_to_global_API ( "/run/mapping/search_txt", RootNode );
     Json_node_unref ( RootNode );
     if (!MapNode || Json_get_int ( MapNode, "api_status" ) != 200)
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: %s: Could not get USER from API for '%s'", __func__, thread_tech_id, from );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
        goto end_map;
      }
 
     if ( Json_has_member ( MapNode, "nbr_results" ) == FALSE )
-     { Info_new( Config.log, module->Thread_debug, LOG_ERR, "%s: '%s': Error searching Database for '%s'", __func__, thread_tech_id, texte );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Error searching Database for '%s'", thread_tech_id, texte );
        Envoyer_smsg_gsm_text ( module, "Error searching Database .. Sorry .." );
        goto end_map;
      }
@@ -476,7 +476,7 @@
              gchar *tech_id         = Json_get_string ( element, "tech_id" );
              gchar *acronyme        = Json_get_string ( element, "acronyme" );
              gchar *libelle         = Json_get_string ( element, "libelle" );
-             Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' -> '%s:%s' - %s", __func__,
+             Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': From '%s' map found for '%s' -> '%s:%s' - %s",
                        thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
              Envoyer_smsg_gsm_text ( module, thread_acronyme );                                 /* Envoi des différents choix */
              results = g_list_next(results);
@@ -488,7 +488,7 @@
           gchar *tech_id         = Json_get_string ( element, "tech_id" );
           gchar *acronyme        = Json_get_string ( element, "acronyme" );
           gchar *libelle         = Json_get_string ( element, "libelle" );
-          Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: '%s': From '%s' map found for '%s' (%s)-> '%s:%s' - %s", __func__,
+          Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': From '%s' map found for '%s' (%s)-> '%s:%s' - %s",
                     thread_tech_id, from, Json_get_string( UserNode, "email" ), thread_acronyme, tech_id, acronyme, libelle );
           Http_Post_to_local_BUS_CDE ( module, tech_id, acronyme );
           gchar chaine[256];
@@ -529,22 +529,22 @@ end_user:
           g_snprintf( texte, sizeof(texte), "%s", DecodeUnicodeConsole(sms.SMS[i].Text) );
           sms.SMS[0].Folder = 0;/* https://github.com/gammu/gammu/blob/ed2fec4a382e7ac4b5dfc92f5b10811f76f4817e/gammu/message.c */
           if (sms.SMS[i].State == SMS_UnRead)                                /* Pour tout nouveau message, nous le processons */
-           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE,
-                      "%s: %s: Recu '%s' from '%s' Location %d/%d Folder %d !", __func__,
+           { Info_new( __func__, module->Thread_debug, LOG_NOTICE,
+                      "%s: Recu '%s' from '%s' Location %d/%d Folder %d !",
                        thread_tech_id, texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder );
              Traiter_commande_sms ( module, from, texte );
            }
           error = GSM_DeleteSMS( vars->gammu_machine, &sms.SMS[i] );
           if (error != ERR_NONE)
-           { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                      "%s: %s: Delete '%s' from '%s' Location %d/%d Folder %d Failed ('%s')!", __func__,
+           { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                      "%s: Delete '%s' from '%s' Location %d/%d Folder %d Failed ('%s')!",
                        thread_tech_id, texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder, GSM_ErrorString(error) );
            }
          }
       }
      else if (error != ERR_EMPTY)
-      { Info_new( Config.log, module->Thread_debug, LOG_ERR,
-                  "%s: %s: Error Reading SMS: '%s' !", __func__, thread_tech_id, GSM_ErrorString(error) );
+      { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                  "%s: Error Reading SMS: '%s' !", thread_tech_id, GSM_ErrorString(error) );
       }
     if ( (error == ERR_NONE) || (error == ERR_EMPTY) ) { return(TRUE); }
     return(FALSE);
@@ -579,7 +579,7 @@ end_user:
           gchar *tag = Json_get_string ( message, "tag" );
           if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
                Json_get_int ( message, "sms_notification" ) != MESSAGE_SMS_NONE )
-           { Info_new( Config.log, module->Thread_debug, LOG_NOTICE, "%s: %s: Sending msg '%s:%s' (%s)", __func__, thread_tech_id,
+           { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
                        Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
                        Json_get_string ( message, "libelle" ) );
 
@@ -589,14 +589,14 @@ end_user:
           else if ( !strcasecmp ( tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
           else if ( !strcasecmp ( tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
           else
-           { Info_new( Config.log, module->Thread_debug, LOG_DEBUG, "%s: %s: tag '%s' not for this thread", __func__, thread_tech_id, tag ); }
+           { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", thread_tech_id, tag ); }
           Json_node_unref(message);
         }
 /****************************************************** Tentative de connexion ************************************************/
        if (module->comm_status == FALSE && Partage->top >= next_try )
         { if (Smsg_connect(module)==FALSE)
            { next_try = Partage->top + 300;
-             Info_new( Config.log, module->Thread_debug, LOG_INFO, "%s: %s: Connect failed, trying in 30s", __func__, thread_tech_id );
+             Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Connect failed, trying in 30s", thread_tech_id );
            }
         }
 

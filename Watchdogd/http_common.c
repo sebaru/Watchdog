@@ -82,49 +82,49 @@
   { SoupMessageHeaders *headers;
     g_object_get ( msg, "request-headers", &headers, NULL );
     if (!headers)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s': No headers provided. Access Denied.", __func__, path );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s': No headers provided. Access Denied.", path );
        soup_message_set_status ( msg, SOUP_STATUS_UNAUTHORIZED );
        return(FALSE);
      }
 
     gchar *origin      = soup_message_headers_get_one ( headers, "Origin" );
     if (!origin)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, Origin Header is missing", __func__, path );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, Origin Header is missing", path );
        soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
        return(FALSE);
      }
 
     gchar *domain_uuid = soup_message_headers_get_one ( headers, "X-ABLS-DOMAIN" );
     if (!domain_uuid)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-DOMAIN Header is missing", __func__, path );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-DOMAIN Header is missing", path );
        soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
        return(FALSE);
      }
 
     gchar *agent_uuid  = soup_message_headers_get_one ( headers, "X-ABLS-AGENT" );
     if (!agent_uuid)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-AGENT Header is missing", __func__, path );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-AGENT Header is missing", path );
        soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
        return(FALSE);
      }
 
     gchar *thread_tech_id = *thread_tech_id_p = soup_message_headers_get_one ( headers, "X-ABLS-THREAD-TECH-ID" );
     if (!thread_tech_id)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-THREAD-TECH-ID Header is missing", __func__, path );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-THREAD-TECH-ID Header is missing", path );
        soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
        return(FALSE);
      }
 
     gchar *timestamp = soup_message_headers_get_one ( headers, "X-ABLS-TIMESTAMP" );
     if (!timestamp)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-TIMESTAMP Header is missing", __func__, path );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-TIMESTAMP Header is missing", path );
        soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
        return(FALSE);
      }
 
     gchar *signature   = soup_message_headers_get_one ( headers, "X-ABLS-SIGNATURE" );
     if (!signature)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Bad Request, X-ABLS-SIGNATURE Header is missing", __func__, path );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-SIGNATURE Header is missing", path );
        soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
        return(FALSE);
      }
@@ -153,7 +153,7 @@
     gint retour = strcmp ( signature, local_signature );
     g_bytes_unref(gbytes_body);
     if (retour)
-     { Info_new( Config.log, Config.log_bus, LOG_ERR, "%s: '%s' -> Forbidden, Wrong signature", __func__, path );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Forbidden, Wrong signature", path );
        soup_message_set_status ( msg, SOUP_STATUS_FORBIDDEN );
        return(FALSE);
      }

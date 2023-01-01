@@ -80,17 +80,17 @@
 /******************************************************************************************************************************/
  static void Http_ws_on_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
   { struct WS_CLIENT_SESSION *client = user_data;
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Message received !", __func__ );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Message received !" );
     gsize taille;
 
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON) !" );
        return;
      }
 
     if (!Json_has_member ( response, "zmq_tag" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'zmq_tag') !", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (no 'zmq_tag') !" );
        Json_node_unref(response);
        return;
      }
@@ -99,7 +99,7 @@
 
     if(!strcasecmp(zmq_tag,"CONNECT"))
      { if ( ! (Json_has_member( response, "wtd_session") ))
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket without wtd_session !", __func__ ); }
+        { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket without wtd_session !" ); }
        else
         { gchar *wtd_session = Json_get_string ( response, "wtd_session");
           GSList *liste = Partage->com_http.liste_http_clients;
@@ -110,7 +110,7 @@
                 pthread_mutex_lock( &Partage->com_http.synchro );
                 http_session->liste_ws_clients = g_slist_prepend ( http_session->liste_ws_clients, client );
                 pthread_mutex_unlock( &Partage->com_http.synchro );
-                Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: session found for '%s' !", __func__, http_session->username );
+                Info_new( __func__, Config.log_msrv, LOG_WARNING, "session found for '%s' !", http_session->username );
                 break;
               }
              liste = g_slist_next ( liste );
@@ -119,7 +119,7 @@
      }
 
     if (!client->http_session)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Not authorized !", __func__ ); }
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Not authorized !" ); }
     Json_node_unref(response);
   }
 /******************************************************************************************************************************/
@@ -213,7 +213,7 @@
        pthread_mutex_unlock( &Partage->com_http.synchro );
        g_slist_free ( client->Liste_bit_visuels );
      }
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Session closed !", __func__ );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Session closed !" );
     g_object_unref(client->connexion);
     g_free(client);
   }
@@ -227,7 +227,7 @@
     Http_ws_destroy_session ( client );
   }
  static void Http_ws_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
+  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Error received %p!", self );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_websocket: Traite une requete websocket                                                                       */
@@ -236,11 +236,11 @@
 /******************************************************************************************************************************/
  void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
                                               SoupClientContext *context, gpointer user_data)
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Opened %p state %d!", __func__, connexion,
+  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Opened %p state %d!", connexion,
               soup_websocket_connection_get_state (connexion) );
     struct WS_CLIENT_SESSION *client = g_try_malloc0( sizeof(struct WS_CLIENT_SESSION) );
     if(!client)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: WebSocket Memory error. Closing !", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Memory error. Closing !" );
        return;
      }
     client->connexion = connexion;
@@ -258,22 +258,22 @@
 /******************************************************************************************************************************/
  static void Http_ws_on_slave_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
   { struct HTTP_WS_SESSION *slave = user_data;
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Message received !", __func__ );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Message received !" );
     gsize taille;
 
     JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
     if (!response)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (not JSON) !", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON) !" );
        return;
      }
 
     if (!Json_has_member ( response, "tag" ))
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: WebSocket Message Dropped (no 'tag') !", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (no 'tag') !" );
        Json_node_unref(response);
        return;
      }
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: receive tag '%s'  !", __func__, Json_get_string ( response, "tag" ) );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "receive tag '%s'  !", Json_get_string ( response, "tag" ) );
 
     Json_node_unref(response);
   }
@@ -286,7 +286,7 @@
   { pthread_mutex_lock( &Partage->com_http.synchro );
     Partage->com_http.Slaves = g_slist_remove ( Partage->com_http.Slaves, slave );
     pthread_mutex_unlock( &Partage->com_http.synchro );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Session closed !", __func__ );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Session closed !" );
     g_object_unref(slave->connexion);
     g_free(slave);
   }
@@ -300,7 +300,7 @@
     Http_ws_destroy_slave_session ( slave );
   }
  static void Http_ws_on_slave_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Error received %p!", __func__, self );
+  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Error received %p!", self );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_open_websocket_slaves_CB: Traite une requete websocket depuis les slaves                                      */
@@ -309,11 +309,11 @@
 /******************************************************************************************************************************/
  void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
                                                   SoupClientContext *context, gpointer user_data)
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Opened %p state %d!", __func__, connexion,
+  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Opened %p state %d!", connexion,
               soup_websocket_connection_get_state (connexion) );
     struct HTTP_WS_SESSION *slave = g_try_malloc0( sizeof(struct HTTP_WS_SESSION) );
     if(!slave)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: WebSocket Memory error. Closing !", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Memory error. Closing !" );
        return;
      }
     slave->connexion = connexion;
@@ -326,6 +326,6 @@
     Partage->com_http.Slaves = g_slist_prepend ( Partage->com_http.Slaves, slave );
     pthread_mutex_unlock( &Partage->com_http.synchro );
     g_object_ref(connexion);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: WebSocket Listening", __func__ );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Listening" );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

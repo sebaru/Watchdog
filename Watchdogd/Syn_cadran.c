@@ -49,15 +49,15 @@
 /******************************************** Préparation de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
     if ( !acro )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING,
+                "Normalisation acro impossible. Mnemo NOT added nor modified." );
        return(FALSE);
      }
 
     forme      = Normaliser_chaine ( forme_src );                                            /* Formatage correct des chaines */
     if ( !forme )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation forme impossible. Mnemo NOT added nor modified.", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING,
+                "Normalisation forme impossible. Mnemo NOT added nor modified." );
        g_free(acro);
        return(FALSE);
      }

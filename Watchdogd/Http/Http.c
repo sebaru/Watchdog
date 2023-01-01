@@ -102,7 +102,7 @@
 
     name = Normaliser_chaine ( Json_get_string ( request, "username" ) );                    /* Formatage correct des chaines */
     if (!name)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Normalisation impossible" );
        Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
@@ -114,14 +114,14 @@
 
     struct DB *db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: DB connexion failed for user '%s'", __func__, Json_get_string ( request, "username" ) );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR,
+                "DB connexion failed for user '%s'", Json_get_string ( request, "username" ) );
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
      }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( __func__, Config.log_msrv, LOG_ERR,
                 "%s: DB request failed for user '%s'",__func__, Json_get_string ( request, "username" ) );
        soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
@@ -131,19 +131,19 @@
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: User '%s' not found in DB", __func__, Json_get_string ( request, "username" ) );
+       Info_new( __func__, Config.log_msrv, LOG_WARNING,
+                "User '%s' not found in DB", Json_get_string ( request, "username" ) );
        Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: User '%s' (%s) found in database.",
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "%s: User '%s' (%s) found in database.",
               __func__, db->row[0], db->row[1] );
 
 /*********************************************************** Compte du client *************************************************/
     if (atoi(db->row[3]) != 1)                                                 /* Est-ce que son compte est toujours actif ?? */
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: User '%s' not enabled",
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "%s: User '%s' not enabled",
                  __func__, db->row[0] );
        Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
@@ -153,7 +153,7 @@
      }
 /*********************************************** Authentification du client par login mot de passe ****************************/
     if ( Http_check_utilisateur_password( db->row[4], db->row[5], Json_get_string ( request, "password" ) ) == FALSE )/* Comparaison MDP */
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Password error for '%s' (%s)",
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "%s: Password error for '%s' (%s)",
                  __func__, db->row[0], db->row[1] );
        Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
@@ -166,7 +166,7 @@
     if (!session)
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Session creation Error", __func__ );
+       Info_new( __func__, Config.log_msrv, LOG_ERR, "Session creation Error" );
        Json_node_unref(request);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
@@ -193,7 +193,7 @@
     time(&session->last_request);
     UUID_New ( session->wtd_session );
     if (strlen(session->wtd_session) != 36)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SID Parse Error (%d)", __func__, strlen(session->wtd_session) );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "SID Parse Error (%d)", strlen(session->wtd_session) );
        g_free(session);
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "UUID Error");
        return;
@@ -201,13 +201,13 @@
     Partage->com_http.liste_http_clients = g_slist_append ( Partage->com_http.liste_http_clients, session );
 
     Http_add_cookie ( msg, "wtd_session", session->wtd_session, 180*SOUP_COOKIE_MAX_AGE_ONE_DAY );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: User '%s:%s' connected", __func__,
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "User '%s:%s' connected",
               session->username, session->host );
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -244,11 +244,11 @@
     struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
     if (session)
      { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, session );
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: sid '%s' ('%s', level %d) disconnected", __func__,
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "sid '%s' ('%s', level %d) disconnected",
                  session->wtd_session, session->username, session->access_level );
        g_free(session);
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "%s: '%d' session left", __func__, g_slist_length(Partage->com_http.liste_http_clients) );
+       Info_new( __func__, Config.log_msrv, LOG_DEBUG,
+                 "'%d' session left", g_slist_length(Partage->com_http.liste_http_clients) );
      }
     soup_message_set_status (msg, SOUP_STATUS_OK);
   }
@@ -342,7 +342,7 @@
 /******************************************************************************************************************************/
  struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client )
   { struct HTTP_CLIENT_SESSION *session = Http_rechercher_session_by_msg ( msg );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: sid '%s' (%s@%s, Level %d) : '%s'", __func__,
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "sid '%s' (%s@%s, Level %d) : '%s'",
               (session ? session->wtd_session : "none"),
               (session ? session->username : "none"), soup_client_context_get_host(client),
               (session ? session->access_level : -1), path
@@ -383,7 +383,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -425,7 +425,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s : JSon RootNode creation failed", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
        soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
@@ -545,11 +545,11 @@
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
     Partage->com_http.Thread_run = TRUE;                                                                /* Le thread tourne ! */
-    Info_new( Config.log, Partage->com_http.Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+    Info_new( __func__, Partage->com_http.Thread_debug, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
 
     SoupServer *socket = Partage->com_http.socket = soup_server_new( "server-header", "Watchdogd Ex-API Server", NULL);
     if (!socket)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer new Failed !" );
        return;
      }
 
@@ -557,8 +557,8 @@
     if ( stat ( HTTP_DEFAUT_FILE_CERT, &sbuf ) == -1 ||                                           /* Test présence du fichier */
          stat ( HTTP_DEFAUT_FILE_KEY, &sbuf ) == -1 )                                             /* Test présence du fichier */
      { gchar chaine[256];
-       Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: unable to load '%s' and '%s' (error '%s'). Generating new ones.", __func__,
+       Info_new( __func__, Config.log_msrv, LOG_ERR,
+                "unable to load '%s' and '%s' (error '%s'). Generating new ones.",
                  HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, strerror(errno) );
        g_snprintf( chaine, sizeof(chaine),
                    "openssl req -subj '/C=FR/ST=FRANCE/O=ABLS-HABITAT/OU=PRODUCTION/CN=Watchdog Server on %s' -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -out '%s' -keyout '%s'",
@@ -567,11 +567,11 @@
      }
 
     if (soup_server_set_ssl_cert_file ( socket, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error ))
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: SSL Loaded with '%s' and '%s'", __func__,
+     { Info_new( __func__, Config.log_msrv, LOG_INFO, "SSL Loaded with '%s' and '%s'",
                  HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
                   __func__, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
        g_error_free(error);
        return;
@@ -596,14 +596,14 @@
      }
 
     if (!soup_server_listen_all (socket, HTTP_DEFAUT_TCP_PORT, SOUP_SERVER_LISTEN_HTTPS, &error))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer Listen Failed '%s' !", __func__, error->message );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer Listen Failed '%s' !", error->message );
        g_error_free(error);
        soup_server_disconnect(socket);
        Partage->com_http.socket = NULL;
        return;
      }
-    Info_new( Config.log, Config.log_msrv, LOG_INFO,
-              "%s: HTTP SoupServer SSL Listen OK on port %d !", __func__, HTTP_DEFAUT_TCP_PORT );
+    Info_new( __func__, Config.log_msrv, LOG_INFO,
+              "HTTP SoupServer SSL Listen OK on port %d !", HTTP_DEFAUT_TCP_PORT );
 
     Partage->com_http.loop = g_main_loop_new (NULL, TRUE);
     Http_Load_sessions ();
@@ -612,15 +612,15 @@
 /********************************************* New API ************************************************************************/
     socket = Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API Server", NULL);
     if (!socket)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer new Failed !", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer new Failed !" );
        return;
      }
 
     if ( stat ( HTTP_DEFAUT_FILE_CERT, &sbuf ) == -1 ||                                           /* Test présence du fichier */
          stat ( HTTP_DEFAUT_FILE_KEY, &sbuf ) == -1 )                                             /* Test présence du fichier */
      { gchar chaine[256];
-       Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: unable to load '%s' and '%s' (error '%s'). Generating new ones.", __func__,
+       Info_new( __func__, Config.log_msrv, LOG_ERR,
+                "unable to load '%s' and '%s' (error '%s'). Generating new ones.",
                  HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, strerror(errno) );
        g_snprintf( chaine, sizeof(chaine),
                    "openssl req -subj '/C=FR/ST=FRANCE/O=ABLS-HABITAT/OU=PRODUCTION/CN=Abls-Habitat Agent on %s' -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -out '%s' -keyout '%s'",
@@ -629,11 +629,11 @@
      }
 
     if (soup_server_set_ssl_cert_file ( socket, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error ))
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: SSL Loaded with '%s' and '%s'", __func__,
+     { Info_new( __func__, Config.log_msrv, LOG_INFO, "SSL Loaded with '%s' and '%s'",
                  HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
                   __func__, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
        g_error_free(error);
        return;
@@ -647,14 +647,14 @@
      }
 
     if (!soup_server_listen_all (socket, 5559, SOUP_SERVER_LISTEN_HTTPS, &error))
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: SoupServer Listen Failed '%s' !", __func__, error->message );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer Listen Failed '%s' !", error->message );
        g_error_free(error);
        soup_server_disconnect(socket);
        Partage->com_http.local_socket = NULL;
        return;
      }
-    Info_new( Config.log, Config.log_msrv, LOG_INFO,
-              "%s: HTTP SoupServer SSL Listen OK on port %d !", __func__, 5559 );
+    Info_new( __func__, Config.log_msrv, LOG_INFO,
+              "HTTP SoupServer SSL Listen OK on port %d !", 5559 );
 
     while(Partage->com_http.Thread_run == TRUE)
      { sched_yield();
@@ -676,7 +676,7 @@
              liste = g_slist_next ( liste );
              if (client->last_request + 864000 < Partage->top )
               { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, client );
-                Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Session '%s' out of time", __func__, client->wtd_session );
+                Info_new( __func__, Config.log_msrv, LOG_INFO, "Session '%s' out of time", client->wtd_session );
                 Http_destroy_session ( client );
               }
            }
@@ -696,7 +696,7 @@
        g_object_unref(Partage->com_http.local_socket);
      }
 
-    Info_new( Config.log, Partage->com_http.Thread_debug, LOG_NOTICE, "%s: HTTP Down (%p)", __func__, pthread_self() );
+    Info_new( __func__, Partage->com_http.Thread_debug, LOG_NOTICE, "HTTP Down (%p)", pthread_self() );
     Partage->com_http.TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

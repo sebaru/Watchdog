@@ -42,7 +42,7 @@
  void Ajouter_arch( gchar *tech_id, gchar *acronyme, gdouble valeur )
   { if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
 
-    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: '%s:%s'=%f", __func__, tech_id, acronyme, valeur );
+    Info_new( __func__, Config.log_arch, LOG_DEBUG, "Add Arch in list: '%s:%s'=%f", tech_id, acronyme, valeur );
     struct timeval tv;
     JsonNode *arch = Json_node_create ();
     if (!arch) return;
@@ -69,7 +69,7 @@
     gint save_nbr = Partage->archive_liste_taille;
     g_slist_foreach ( Partage->archive_liste, (GFunc) Json_node_unref, NULL );
     pthread_mutex_unlock( &Partage->archive_liste_sync );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Clear %05d archive(s)", __func__, save_nbr );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Clear %05d archive(s)", save_nbr );
  }
 /******************************************************************************************************************************/
 /* Run_arch_sync: Envoi les archives a l'API                                                                                  */
@@ -78,7 +78,7 @@
  void Run_arch_sync ( void )
   { prctl(PR_SET_NAME, "W-ARCHSYNC", 0, 0, 0 );
 
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
 
     gint cpt_1_minute = Partage->top + 600;
     gint max_enreg = ARCHIVE_MAX_ENREG_TO_API;
@@ -89,7 +89,7 @@
         }
 
        if (!Partage->archive_liste) { sleep(2); continue; }
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Begin %05d archive(s)", __func__, Partage->archive_liste_taille );
+       Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Begin %05d archive(s)", Partage->archive_liste_taille );
        gint top            = Partage->top;
        gint nb_enreg       = 0;                                            /* Au début aucun enregistrement est passé a la DB */
        JsonNode *RootNode  = Json_node_create();
@@ -107,7 +107,7 @@
        pthread_mutex_unlock( &Partage->archive_liste_sync );
 
        Json_node_add_int ( RootNode, "nbr_archives", nb_enreg );
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Sending %05d archive(s).", __func__, nb_enreg );
+       Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending %05d archive(s).", nb_enreg );
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/archive/save", RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
@@ -123,13 +123,13 @@
            }
           pthread_mutex_unlock( &Partage->archive_liste_sync );
 
-          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Traitement de %05d archive(s) en %06.1fs. Reste %05d", __func__,
+          Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %05d archive(s) en %06.1fs. Reste %05d",
                     Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, Partage->archive_liste_taille );
           max_enreg = max_enreg * 10;
           if (max_enreg>ARCHIVE_MAX_ENREG_TO_API) max_enreg = ARCHIVE_MAX_ENREG_TO_API;
         }
        else
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Error. Reste %05d.", __func__, Partage->archive_liste_taille );
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error. Reste %05d.", Partage->archive_liste_taille );
           max_enreg = max_enreg / 10;
           if (max_enreg==0) max_enreg = 1;
         }
@@ -139,7 +139,7 @@
      }
 
     ARCH_Clear();                                                   /* Suppression des enregistrements restants dans la liste */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

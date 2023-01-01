@@ -58,39 +58,39 @@
        if (Partage->com_msrv.Thread_run != TRUE) return;
 
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Timer: Partage->top = 0 !!", __func__ ); }
+        { Info_new( __func__, Config.log_msrv, LOG_INFO, "Timer: Partage->top = 0 !!" ); }
 
        Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
        if (Partage->top_cdg_plugin_dls>200)                                         /* Si pas de réponse D.L.S en 20 secondes */
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CDG plugin DLS !!", __func__ );
+        { Info_new( __func__, Config.log_msrv, LOG_INFO, "CDG plugin DLS !!" );
           Partage->top_cdg_plugin_dls = 0;
         }
        return;
      }
 
     prctl(PR_GET_NAME, chaine, 0, 0, 0 );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: handled by %s", __func__, chaine );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "handled by %s", chaine );
 
     switch (num)
      { case SIGQUIT:
-       case SIGINT:  Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGINT" );
+       case SIGINT:  Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGINT" );
                      Partage->com_msrv.Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
                      break;
-       case SIGTERM: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGTERM" );
+       case SIGTERM: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGTERM" );
                      Partage->com_msrv.Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
                      break;
-       case SIGABRT: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGABRT" );
+       case SIGABRT: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGABRT" );
                      break;
-       case SIGCHLD: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGCHLD" );
+       case SIGCHLD: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGCHLD" );
                      break;
-       case SIGPIPE: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGPIPE" ); break;
-       case SIGBUS:  Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGBUS" ); break;
-       case SIGIO:   Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGIO" ); break;
-       case SIGUSR1: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR1" );
+       case SIGPIPE: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGPIPE" ); break;
+       case SIGBUS:  Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGBUS" ); break;
+       case SIGIO:   Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGIO" ); break;
+       case SIGUSR1: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGUSR1" );
                      break;
-       case SIGUSR2: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR2" );
+       case SIGUSR2: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGUSR2" );
                      break;
-       default: Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Recu signal %d", num ); break;
+       default: Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Recu signal %d", num ); break;
      }
   }
 /******************************************************************************************************************************/
@@ -102,14 +102,14 @@
     if (!node2) return(1);
     gchar *ttech_id_1 = Json_get_string ( node1, "thread_tech_id" );
     gchar *ttech_id_2 = Json_get_string ( node2, "thread_tech_id" );
-    if (!ttech_id_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ttech_id1 is NULL", __func__ ); return(-1); }
-    if (!ttech_id_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ttech_id2 is NULL", __func__ ); return(1); }
+    if (!ttech_id_1) { Info_new( __func__, Config.log_msrv, LOG_ERR, "ttech_id1 is NULL" ); return(-1); }
+    if (!ttech_id_2) { Info_new( __func__, Config.log_msrv, LOG_ERR, "ttech_id2 is NULL" ); return(1); }
     gint result = strcasecmp ( ttech_id_1, ttech_id_2 );
     if (result) return(result);
     gchar *tacronyme_1 = Json_get_string ( node1, "thread_acronyme" );
     gchar *tacronyme_2 = Json_get_string ( node2, "thread_acronyme" );
-    if (!tacronyme_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tacronyme1 is NULL", __func__ ); return(-1); }
-    if (!tacronyme_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tacronyme2 is NULL", __func__ ); return(1); }
+    if (!tacronyme_1) { Info_new( __func__, Config.log_msrv, LOG_ERR, "tacronyme1 is NULL" ); return(-1); }
+    if (!tacronyme_2) { Info_new( __func__, Config.log_msrv, LOG_ERR, "tacronyme2 is NULL" ); return(1); }
     return( strcasecmp ( tacronyme_1, tacronyme_2 ) );
   }
 /******************************************************************************************************************************/
@@ -121,14 +121,14 @@
     if (!node2) return(1);
     gchar *tech_id_1 = Json_get_string ( node1, "tech_id" );
     gchar *tech_id_2 = Json_get_string ( node2, "tech_id" );
-    if (!tech_id_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tech_id1 is NULL", __func__ ); return(-1); }
-    if (!tech_id_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: tech_id2 is NULL", __func__ ); return(1); }
+    if (!tech_id_1) { Info_new( __func__, Config.log_msrv, LOG_ERR, "tech_id1 is NULL" ); return(-1); }
+    if (!tech_id_2) { Info_new( __func__, Config.log_msrv, LOG_ERR, "tech_id2 is NULL" ); return(1); }
     gint result = strcasecmp ( tech_id_1, tech_id_2 );
     if (result) return(result);
     gchar *acronyme_1 = Json_get_string ( node1, "acronyme" );
     gchar *acronyme_2 = Json_get_string ( node2, "acronyme" );
-    if (!acronyme_1) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: acronyme1 is NULL", __func__ ); return(-1); }
-    if (!acronyme_2) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: acronyme2 is NULL", __func__ ); return(1); }
+    if (!acronyme_1) { Info_new( __func__, Config.log_msrv, LOG_ERR, "acronyme1 is NULL" ); return(-1); }
+    if (!acronyme_2) { Info_new( __func__, Config.log_msrv, LOG_ERR, "acronyme2 is NULL" ); return(1); }
     return( strcasecmp ( acronyme_1, acronyme_2 ) );
   }
 /******************************************************************************************************************************/
@@ -137,7 +137,7 @@
 /******************************************************************************************************************************/
  gboolean MSRV_Map_to_thread ( JsonNode *key )
   { if (!Partage->Maps_to_thread)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Mapping is not done. Could not map '%s:%s' to thread.",
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Mapping is not done. Could not map '%s:%s' to thread.",
                  __func__, Json_get_string ( key, "tech_id" ), Json_get_string ( key, "acronyme" ) );
        return(FALSE);
      }
@@ -155,7 +155,7 @@
 /******************************************************************************************************************************/
  gboolean MSRV_Map_from_thread ( JsonNode *key )
   { if (!Partage->Maps_from_thread)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Mapping is not done. Could not map '%s:%s' from thread.",
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Mapping is not done. Could not map '%s:%s' from thread.",
                  __func__, Json_get_string ( key, "thread_tech_id" ), Json_get_string ( key, "thread_acronyme" ) );
        return(FALSE);
      }
@@ -319,22 +319,22 @@
   { struct passwd *pwd;
 
     if (getuid())
-     { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
-                "%s: Error, running user is not 'root' Could not drop privileges.", __func__, getuid(), strerror(errno) );
+     { Info_new( __func__, Config.log_msrv, LOG_CRIT,
+                "Error, running user is not 'root' Could not drop privileges.", getuid(), strerror(errno) );
        return(FALSE);
      }
 
     if (Config.headless)
      { pwd = getpwnam ( "watchdog" );
        if (!pwd)
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
-                    "%s: 'watchdog' user not found while Headless, creating.", __func__ );
+        { Info_new( __func__, Config.log_msrv, LOG_CRIT,
+                    "'watchdog' user not found while Headless, creating." );
           system("useradd -m -c 'WatchdogServer' watchdog" );
         }
        pwd = getpwnam ( "watchdog" );
        if (!pwd)
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
-                   "%s: Creation of user 'watchdog' failed (%s). Stopping.", __func__, strerror(errno) );
+        { Info_new( __func__, Config.log_msrv, LOG_CRIT,
+                   "Creation of user 'watchdog' failed (%s). Stopping.", strerror(errno) );
           return(FALSE);
         }
        system("loginctl enable-linger watchdog");                       /* Enable lingering for dbus and pipewire for example */
@@ -343,23 +343,23 @@
      { gchar *session;
        uid_t active_session;
        if (sd_seat_get_active(	"seat0",	&session,	&active_session) < 0)
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
-                    "%s: seat_get_active failed (%s). Waiting 5s.", __func__, strerror (errno) );
+        { Info_new( __func__, Config.log_msrv, LOG_CRIT,
+                    "seat_get_active failed (%s). Waiting 5s.", strerror (errno) );
           return(FALSE);
         }
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                "%s: session found = '%s' for user '%d'", __func__, session, active_session );
+       Info_new( __func__, Config.log_msrv, LOG_INFO,
+                "session found = '%s' for user '%d'", session, active_session );
        pwd = getpwuid ( active_session );
        if (!pwd)
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
-                   "%s: Error when searching seat user. Stopping.", __func__ );
+        { Info_new( __func__, Config.log_msrv, LOG_CRIT,
+                   "Error when searching seat user. Stopping." );
           return(FALSE);
         }
      }
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Target User '%s' (uid %d) found.\n", __func__, pwd->pw_name, pwd->pw_uid );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.\n", pwd->pw_name, pwd->pw_uid );
 
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-             "%s: Dropping from root to '%s' (%d).\n", __func__, pwd->pw_name, pwd->pw_uid );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE,
+             "Dropping from root to '%s' (%d).\n", pwd->pw_name, pwd->pw_uid );
 
     /* setting groups */
     gid_t *grp_list = NULL;
@@ -389,7 +389,7 @@
 
     if (nbr_group)
      { if (setgroups ( nbr_group, grp_list )==-1)
-        { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot SetGroups for user '%s' (%s)\n",
+        { Info_new( __func__, Config.log_msrv, LOG_CRIT, "%s: Error, cannot SetGroups for user '%s' (%s)\n",
                     __func__, pwd->pw_name, strerror(errno) );
           g_free(grp_list);
           return(FALSE);
@@ -398,13 +398,13 @@
      }
 
     if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                  /* On drop les privilèges */
-     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREgid for user '%s' (%s)\n",
+     { Info_new( __func__, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREgid for user '%s' (%s)\n",
                  __func__, pwd->pw_name, strerror(errno) );
        return(FALSE);
      }
 
     if (setreuid ( pwd->pw_uid, pwd->pw_uid )==-1)                                                  /* On drop les privilèges */
-     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREuid for user '%s' (%s)\n",
+     { Info_new( __func__, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREuid for user '%s' (%s)\n",
                  __func__, pwd->pw_name, strerror(errno) );
        return(FALSE);
      }
@@ -418,13 +418,13 @@
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), "%s/Dls", Config.home );
        mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Created Dls '%s' directory'", __func__, chaine );
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "Created Dls '%s' directory'", chaine );
      }
 
     if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
-     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "%s: Chdir %s failed\n", __func__, Config.home ); exit(EXIT_ERREUR); }
+     { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Chdir %s successfull. PID=%d\n", __func__, Config.home, getpid() ); }
+     { Info_new( __func__, Config.log_msrv, LOG_INFO, "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -444,18 +444,18 @@
 
     Lire_config();                                                     /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
     Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start %s, branche '%s'", WTD_VERSION, WTD_BRANCHE );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Start %s, branche '%s'", WTD_VERSION, WTD_BRANCHE );
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
 
     Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
     if (!Partage)
-     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" );
+     { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" );
        error_code = EXIT_FAILURE;
        goto first_stage_end;
      }
 
     if ( Config.installed == FALSE )                                                    /* Si le fichier de conf n'existe pas */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Agent %s is not installed. Please run with --link.", WTD_VERSION );
+     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Agent %s is not installed. Please run with --link.", WTD_VERSION );
        goto second_stage_end;
      }
 
@@ -466,11 +466,11 @@
 /************************************************* Test Connexion to Global API ***********************************************/
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
     if (API)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Connected with API %s", __func__, Json_get_string ( API, "version" ) );
+     { Info_new( __func__, Config.log_msrv, LOG_INFO, "Connected with API %s", Json_get_string ( API, "version" ) );
        Json_node_unref ( API );
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connection to Global API FAILED. Sleep 5s and stopping.", __func__ );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Connection to Global API FAILED. Sleep 5s and stopping." );
        sleep(5);
        error_code = EXIT_FAILURE;
        goto second_stage_end;
@@ -487,9 +487,9 @@
        JsonNode *api_result = Http_Post_to_global_API ( "/run/agent/start", RootNode );
        Json_node_unref ( RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: API Request for AGENT START OK.", __func__ ); }
+        { Info_new( __func__, Config.log_msrv, LOG_INFO, "API Request for AGENT START OK." ); }
        else
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: API Request for AGENT START failed. Sleep 5s and stopping.", __func__ );
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for AGENT START failed. Sleep 5s and stopping." );
           sleep(5);
           error_code = EXIT_FAILURE;
           goto second_stage_end;
@@ -513,12 +513,12 @@
 
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );              /* Verification de l'unicité du processus */
     if (fd_lock<0)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Lock file creation failed: %s/%s.", __func__, Config.home, VERROU_SERVEUR );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Lock file creation failed: %s/%s.", Config.home, VERROU_SERVEUR );
        error_code = EXIT_FAILURE;
        goto second_stage_end;
      }
     if (flock( fd_lock, LOCK_EX | LOCK_NB )<0)                                         /* Creation d'un verrou sur le fichier */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Cannot lock %s/%s. Probably another daemon is running : %s.", __func__,
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot lock %s/%s. Probably another daemon is running : %s.",
                  Config.home, VERROU_SERVEUR, strerror(errno) );
        error_code = EXIT_FAILURE;
        goto third_stage_end;
@@ -526,7 +526,7 @@
     fcntl(fd_lock, F_SETFD, FD_CLOEXEC );                                                           /* Set close on exec flag */
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );                                /* Enregistrement du pid au cas ou */
     if (write( fd_lock, strpid, strlen(strpid) )<0)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Cannot write PID on %s/%s (%s).", __func__,
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot write PID on %s/%s (%s).",
                  Config.home, VERROU_SERVEUR, strerror(errno) );
        error_code = EXIT_FAILURE;
        goto third_stage_end;
@@ -545,24 +545,24 @@
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
 /********************************************* Active les threads principaux **************************************************/
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Debut boucle sans fin" );
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
 
     if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb HTTP", __func__ ); }
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb HTTP" ); }
     if (!Demarrer_api_sync())                                                                           /* Démarrage API_SYNC */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb API_SYNC", __func__ ); }
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb API_SYNC" ); }
     if (!Demarrer_arch_sync())                                                                         /* Démarrage ARCH_SYNC */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb ARCH_SYNC", __func__ ); }
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single)                                                                             /* Si demarrage des thread */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: NOT starting threads (single mode=true)", __func__ ); }
+     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
     else
      { if (!Config.installed)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: NOT starting threads (Instance is not installed)", __func__ ); }
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "NOT starting threads (Instance is not installed)" ); }
        else
         { if (Config.instance_is_master)                                                                  /* Démarrage D.L.S. */
-           { if (!Demarrer_dls()) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Pb DLS", __func__ );
+           { if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
              MSRV_Remap();                                                 /* Mappage des bits avant de charger les thread IO */
            }
           Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
@@ -598,7 +598,7 @@
     gint cpt_1_minute  = Partage->top + 600;
 
     sleep(1);
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Starting Main Thread", __func__ );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Main Thread" );
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
@@ -628,7 +628,7 @@
         }
      }
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "fin boucle sans fin" );
 
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
@@ -659,7 +659,7 @@ second_stage_end:
 
 first_stage_end:
     if (Config.config) Json_node_unref ( Config.config );
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Stopped", __func__ );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Stopped" );
     return(error_code);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

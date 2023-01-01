@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_BI *bit = g_try_malloc0 ( sizeof(struct DLS_BI) );
     if (!bit)
-     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory error for '%s:%s'", __func__, tech_id, acronyme );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
@@ -53,8 +53,8 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = bit->next_etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_BI = g_slist_prepend ( plugin->Dls_data_BI, bit );
-    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO,
-              "%s: Create bit DLS_BI '%s:%s'=%d (%s)", __func__, bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+              "Create bit DLS_BI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_BI : Recherche un CH dans les plugins DLS                                                                  */
@@ -84,8 +84,8 @@
  void Dls_data_set_BI ( struct DLS_TO_PLUGIN *vars, struct DLS_BI *bi, gboolean valeur )
   { if (!bi) return;
     if (bi->next_etat != valeur)
-     { Info_new( Config.log, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "%s: ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d", __func__,
+     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d",
                  (vars ? vars->num_ligne : -1), bi->tech_id, bi->acronyme, valeur, bi->edge_up, bi->edge_down );
        Partage->audit_bit_interne_per_sec++;
        bi->next_etat = valeur;
