@@ -278,13 +278,15 @@
        Info_new ( __func__, Config.log_msrv, LOG_ERR, "Json to Buf failed, writing to %s", filename );
        return(FALSE);
      }
+    gboolean retour = FALSE;
     gint taille = strlen(buf);
     if (write ( fd, buf, taille ) != taille)
      { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Error writing %d bytes to %s: %s", taille, filename, strerror(errno) );
        close(fd);
-       return(FALSE);
-     }
+       retour = FALSE;
+     } else retour = TRUE;
     close(fd);
-    return(TRUE);
+    g_free(buf);
+    return(retour);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

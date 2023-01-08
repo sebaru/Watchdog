@@ -238,8 +238,6 @@
 /******************************************************************************************************************************/
  void Thread_end ( struct THREAD *module )
   { Thread_send_comm_to_master ( module, FALSE );
-    if (module->vars) g_free(module->vars);
-    Json_node_unref ( module->IOs );
     if (module->Master_websocket && soup_websocket_connection_get_state (module->Master_websocket) == SOUP_WEBSOCKET_STATE_OPEN)
      { soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
        while ( module->Master_websocket ) sched_yield();
@@ -247,8 +245,10 @@
     soup_session_abort ( module->Master_session );
     g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
     g_slist_free ( module->WS_messages );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' is DOWN",
-              __func__, Json_get_string ( module->config, "thread_tech_id") );
+    if (module->vars) { g_free(module->vars); module->vars   = NULL; }
+    Json_node_unref ( module->IOs );          module->IOs    = NULL;
+    Json_node_unref ( module->config );       module->config = NULL;
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
     pthread_exit(0);
   }
 /******************************************************************************************************************************/
@@ -363,7 +363,6 @@
     pthread_mutex_destroy( &module->synchro );
                                                                              /* Destruction de l'entete associé dans la GList */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': Unloaded", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_unref ( module->config );
     g_free( module );
   }
 /******************************************************************************************************************************/
@@ -423,6 +422,7 @@
      }
     else
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': GET_CONFIG from API Failed. Unloading.", thread_tech_id );
+       Json_node_unref ( module->config );
        dlclose( module->dl_handle );
        g_free(module);
        return;

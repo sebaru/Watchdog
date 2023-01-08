@@ -200,7 +200,7 @@
           results = g_list_next(results);
         }
        g_list_free(Results);
-     }
+     } else { Json_node_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
@@ -490,6 +490,7 @@
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "API Request for AGENT START OK." ); }
        else
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for AGENT START failed. Sleep 5s and stopping." );
+          Json_node_unref ( api_result );
           sleep(5);
           error_code = EXIT_FAILURE;
           goto second_stage_end;

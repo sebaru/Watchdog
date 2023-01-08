@@ -195,6 +195,7 @@
        if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Post '%s:%s' for /run/histo failed. Retry %04d MSGS in 60 seconds.",
                     __func__, Json_get_string ( histo, "tech_id"), Json_get_string ( histo, "acronyme" ), g_slist_length(Liste_Histo_to_send) );
+          Json_node_unref ( api_result );
           next_try = Partage->top + 600;
           break;
         }

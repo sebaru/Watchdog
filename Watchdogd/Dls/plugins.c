@@ -103,6 +103,7 @@
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
                  "API Request for DLS CREATE failed. '%s' not created.", tech_id );
+       Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
        return(FALSE);
      }
@@ -344,6 +345,7 @@
     JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", "tech_id=%s", tech_id );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': API Error.", tech_id );
+       Json_node_unref ( api_result );
        return(NULL);
      }
 
@@ -493,6 +495,7 @@
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/plugins", NULL );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "API Request for /run/dls/plugins failed. No plugin loaded." );
+       Json_node_unref ( api_result );
        return;
      }
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "API Request for /run/dls/plugins OK." );

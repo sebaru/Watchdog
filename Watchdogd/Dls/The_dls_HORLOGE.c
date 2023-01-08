@@ -144,7 +144,10 @@
        Info_new( __func__, Config.log_msrv, LOG_INFO, "%03d HORLOGE ticks loaded.",
                  Json_get_int ( Partage->com_dls.HORLOGE_ticks, "nbr_horloges" ) );
      }
-    else Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for HORLOGE TICKS failed." );
+    else
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for HORLOGE TICKS failed." );
+       Json_node_unref ( api_result );
+     }
   }
 
 /*----------------------------------------------------------------------------------------------------------------------------*/
