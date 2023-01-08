@@ -8,6 +8,9 @@ ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
 RestartSec=2
 Nice=10
+MemoryHigh=1G
+MemoryMax=2G
+MemorySwapMax=1M
 
 [Install]
 WantedBy=multi-user.target
