@@ -199,6 +199,7 @@
           next_try = Partage->top + 600;
           break;
         }
+       Json_node_unref ( api_result );
        Liste_Histo_to_send = g_slist_remove ( Liste_Histo_to_send, histo );
        Json_node_unref ( histo );
      }

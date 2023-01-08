@@ -284,17 +284,11 @@
     soup_message_headers_append ( headers, "X-Ovh-Timestamp",   timestamp );
     soup_session_send_message (connexion, soup_msg);
 
-    GBytes *response_brute;
-    gchar *reason_phrase;
-    gint status_code;
-
-    g_object_get ( soup_msg, "status-code", &status_code, "reason-phrase", &reason_phrase, "response-body-data", &response_brute, NULL );
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
+    gint status_code = Http_Msg_status_code ( soup_msg );
     if (status_code!=200)
-     { gsize taille;
-       gchar *error = g_bytes_get_data ( response_brute, &taille );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Error: %s\n", thread_tech_id, error );
-       g_free(error);
+     { gchar *reason_phrase = Http_Msg_reason_phrase ( soup_msg );
+       Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
+       g_free(reason_phrase);
      }
     else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, telephone );
     g_object_unref( soup_msg );

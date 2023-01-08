@@ -347,12 +347,11 @@
                     "seat_get_active failed (%s). Waiting 5s.", strerror (errno) );
           return(FALSE);
         }
-       Info_new( __func__, Config.log_msrv, LOG_INFO,
-                "session found = '%s' for user '%d'", session, active_session );
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "session found = '%s' for user '%d'", session, active_session );
+       g_free(session);
        pwd = getpwuid ( active_session );
        if (!pwd)
-        { Info_new( __func__, Config.log_msrv, LOG_CRIT,
-                   "Error when searching seat user. Stopping." );
+        { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error when searching seat user. Stopping." );
           return(FALSE);
         }
      }
@@ -465,16 +464,14 @@
 
 /************************************************* Test Connexion to Global API ***********************************************/
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
-    if (API)
-     { Info_new( __func__, Config.log_msrv, LOG_INFO, "Connected with API %s", Json_get_string ( API, "version" ) );
-       Json_node_unref ( API );
-     }
-    else
+    if (!API)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Connection to Global API FAILED. Sleep 5s and stopping." );
        sleep(5);
        error_code = EXIT_FAILURE;
        goto second_stage_end;
      }
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Connected with API %s", Json_get_string ( API, "version" ) );
+    Json_node_unref ( API );
 /************************************************* Tell Global API thread is UP ***********************************************/
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
