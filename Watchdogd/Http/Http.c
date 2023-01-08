@@ -492,7 +492,6 @@
     soup_message_headers_append ( headers, "Access-Control-Allow-Origin", "*" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Methods", "*" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Headers", "content-type, authorization, X-ABLS-DOMAIN" );
-
 /*---------------------------------------------------- OPTIONS ---------------------------------------------------------------*/
     if (msg->method == SOUP_METHOD_OPTIONS)
      { soup_message_headers_append ( headers, "Access-Control-Max-Age", "86400" );

@@ -91,7 +91,7 @@ end:
        goto end;
      }
 
-    gchar *buf = Json_node_to_string ( RootNode );
+    gchar *buf    = Json_node_to_string ( RootNode );
     gint buf_size = strlen(buf);
     Info_new( __func__, Config.log_bus, LOG_DEBUG, "Sending to %s: %s", query, buf );
     Http_Add_Thread_signature ( module, soup_msg, buf, buf_size );

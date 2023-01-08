@@ -39,6 +39,7 @@
     g_object_get ( msg, "request-body-data", &request_brute, NULL );
     JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
     if (!request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
+    g_bytes_unref (request_brute);
     return(request);
   }
 /******************************************************************************************************************************/
@@ -51,6 +52,7 @@
     gsize taille;
     g_object_get ( msg, "response-body-data", &reponse_brute, NULL );
     JsonNode *reponse = Json_get_from_string ( g_bytes_get_data ( reponse_brute, &taille ) );
+    g_bytes_unref (reponse_brute);
     return(reponse);
   }
 /******************************************************************************************************************************/
