@@ -34,6 +34,7 @@
  #include <stdlib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
+ #include <sys/resource.h>
  #include <semaphore.h>
  #include <locale.h>
  #include <math.h>
@@ -416,7 +417,7 @@
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_wait, (gdouble)Partage->com_dls.temps_sched, TRUE );     /* historique */
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE ); /* historique */
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_2sec>=20)                                                           /* Toutes les 2 secondes */
@@ -439,6 +440,9 @@
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
           Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
           Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
+          struct rusage conso;
+          getrusage ( RUSAGE_SELF, &conso );
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Dls_data_activer_horloge();
           last_top_1min = Partage->top;

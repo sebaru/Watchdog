@@ -159,10 +159,11 @@
     struct DLS_MONO *sys_top_1min;
     struct DLS_AI *sys_bit_per_sec;
     struct DLS_AI *sys_tour_per_sec;
-    struct DLS_AI *sys_wait;
+    struct DLS_AI *sys_dls_wait;
     struct DLS_AI *sys_nbr_msg_queue;
     struct DLS_AI *sys_nbr_visuel_queue;
     struct DLS_AI *sys_nbr_archive_queue;
+    struct DLS_AI *sys_maxrss;
 
     gboolean next_bit_alerte;
     gboolean bit_alerte;

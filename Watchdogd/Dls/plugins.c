@@ -435,7 +435,7 @@
     g_list_free(Thread_tech_ids);
     Json_node_unref(api_result);
 
-    if (!strcasecmp ( tech_id, "SYS" ) )
+    if (!strcasecmp ( tech_id, "SYS" ) )     /* mutex lock non necessaire car si reset, c'est locké par Dls_Reseter_un_plugin */
      { Partage->com_dls.sys_flipflop_5hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
        Partage->com_dls.sys_flipflop_2hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
        Partage->com_dls.sys_flipflop_1sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
@@ -448,10 +448,11 @@
        Partage->com_dls.sys_top_1min          = Dls_data_lookup_MONO ( "SYS", "TOP_1MIN" );
        Partage->com_dls.sys_bit_per_sec       = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
        Partage->com_dls.sys_tour_per_sec      = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
-       Partage->com_dls.sys_wait              = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
+       Partage->com_dls.sys_dls_wait          = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
        Partage->com_dls.sys_nbr_msg_queue     = Dls_data_lookup_AI   ( "SYS", "NBR_MSG_QUEUE" );
        Partage->com_dls.sys_nbr_visuel_queue  = Dls_data_lookup_AI   ( "SYS", "NBR_VISUEL_QUEUE" );
        Partage->com_dls.sys_nbr_archive_queue = Dls_data_lookup_AI   ( "SYS", "NBR_ARCHIVE_QUEUE" );
+       Partage->com_dls.sys_maxrss            = Dls_data_lookup_AI   ( "SYS", "MAXRSS" );
      }
 
     plugin->vars.dls_osyn_acquit             = Dls_data_lookup_DI   ( plugin->tech_id, "OSYN_ACQUIT" );
