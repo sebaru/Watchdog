@@ -85,7 +85,7 @@
  void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
                             gchar *mode, gchar *color, gboolean cligno, gchar *libelle )
   { if (!visu) return;
-    if ( strcmp ( visu->mode, mode ) || strcmp( visu->color, color ) || visu->cligno != cligno || strcmp ( visu->libelle, libelle ) )
+    if ( strcmp ( visu->mode, mode ) || strcmp( visu->color, color ) || visu->cligno != cligno )
      { if ( visu->last_change + 50 <= Partage->top )                                 /* Si pas de change depuis plus de 5 sec */
         { visu->changes = 0; }
 
