@@ -42,7 +42,7 @@
   { JsonNode *RootNode  = Json_node_create();
     if (!RootNode) return;
     JsonArray *visuels = Json_node_add_array ( RootNode, "visuels" );
-    if (!visuels) return;
+    if (!visuels) { Json_node_unref ( RootNode ); return; }
 
     gint top = Partage->top;
     gint nb_enreg = 0;

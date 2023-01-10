@@ -80,7 +80,7 @@
     va_list ap;
 
     if ( override == TRUE || (level <= Config.log_level) )                                        /* LOG_EMERG = 0, DEBUG = 7 */
-     { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
+     { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0 );
        g_snprintf( chaine, sizeof(chaine), "{ \"level\": \"%s\", \"thread\": \"%s\", \"function\": \"%s\", \"message\": \"%s\" }",
                    level_to_string[level], nom_thread, function, format );
 

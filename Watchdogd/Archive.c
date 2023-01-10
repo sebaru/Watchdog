@@ -99,7 +99,6 @@
        GSList *liste = Partage->archive_liste;
        while (liste && Partage->com_msrv.Thread_run == TRUE && nb_enreg<max_enreg)
         { JsonNode *arch = liste->data;                                                               /* Recuperation du arch */
-          json_node_ref ( arch );
           Json_array_add_element ( archives, arch );
           nb_enreg++;                        /* Permet de limiter a au plus 500 enregistrements histoire de limiter la famine */
           liste = g_slist_next(liste);
