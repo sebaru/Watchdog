@@ -40,7 +40,7 @@
     gchar query[256];
     g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 0, "timeout", 2, "ssl-strict", FALSE,
+    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 60, "timeout", 2, "ssl-strict", FALSE,
                                                             "user-agent", "Abls-habitat Agent", NULL );
 
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
@@ -82,7 +82,7 @@ end:
 
     g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 0, "timeout", 2, "ssl-strict", FALSE,
+    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 60, "timeout", 2, "ssl-strict", FALSE,
                                                             "user-agent", "Abls-habitat Agent", NULL );
 
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );

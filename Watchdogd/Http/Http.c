@@ -264,41 +264,6 @@
     g_free(session);
   }
 /******************************************************************************************************************************/
-/* Http_Load_sessions: Charge les sessions en base de données                                                                 */
-/* Entrées: néant                                                                                                             */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_Load_one_session ( JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { struct HTTP_CLIENT_SESSION *session = g_try_malloc0( sizeof ( struct HTTP_CLIENT_SESSION ) );
-    if (!session) return;
-    g_snprintf( session->username,    sizeof(session->username),    "%s", Json_get_string ( element, "username" ) );
-    g_snprintf( session->appareil,    sizeof(session->appareil),    "%s", Json_get_string ( element, "appareil" ) );
-    g_snprintf( session->useragent,   sizeof(session->useragent),   "%s", Json_get_string ( element, "useragent" ) );
-    g_snprintf( session->wtd_session, sizeof(session->wtd_session), "%s", Json_get_string ( element, "wtd_session" ) );
-    g_snprintf( session->host,        sizeof(session->host),        "%s", Json_get_string ( element, "host" ) );
-    session->id           = Json_get_int ( element, "id" );
-    session->access_level = Json_get_int ( element, "access_level" );
-    session->last_request = Json_get_int ( element, "last_request" );
-    Partage->com_http.liste_http_clients = g_slist_prepend ( Partage->com_http.liste_http_clients, session );
-    if (session->id >= Partage->com_http.num_session) Partage->com_http.num_session = session->id+1;            /* Calcul du MAX du num session */
-  }
-/******************************************************************************************************************************/
-/* Http_Load_sessions: Charge les sessions en base de données                                                                 */
-/* Entrées: néant                                                                                                             */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_Load_sessions ( void )
-  { JsonNode *RootNode = Json_node_create();
-    SQL_Select_to_json_node ( RootNode, "sessions", "SELECT session.*, user.access_level "
-                                                    "FROM users_sessions AS session "
-                                                    "INNER JOIN users AS user ON session.username = user.username"
-                            );
-    Partage->com_http.num_session = 0;
-    if (Json_has_member ( RootNode, "sessions" ))
-     { Json_node_foreach_array_element ( RootNode, "sessions", Http_Load_one_session, NULL ); }
-    Json_node_unref(RootNode);
-  }
-/******************************************************************************************************************************/
 /* Http_rechercher_session: Recherche une session dans la liste des session                                                   */
 /* Entrée: le message libsoup                                                                                                 */
 /* Sortie: la session, ou NULL si pas trouvé                                                                                  */
@@ -601,12 +566,9 @@
        Partage->com_http.socket = NULL;
        return;
      }
-    Info_new( __func__, Config.log_msrv, LOG_INFO,
-              "HTTP SoupServer SSL Listen OK on port %d !", HTTP_DEFAUT_TCP_PORT );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "HTTP SoupServer SSL Listen OK on port %d !", HTTP_DEFAUT_TCP_PORT );
 
     Partage->com_http.loop = g_main_loop_new (NULL, TRUE);
-    Http_Load_sessions ();
-
 
 /********************************************* New API ************************************************************************/
     socket = Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API Server", NULL);
@@ -652,8 +614,7 @@
        Partage->com_http.local_socket = NULL;
        return;
      }
-    Info_new( __func__, Config.log_msrv, LOG_INFO,
-              "HTTP SoupServer SSL Listen OK on port %d !", 5559 );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "HTTP SoupServer SSL Listen OK on port %d !", 5559 );
 
     while(Partage->com_http.Thread_run == TRUE)
      { sched_yield();

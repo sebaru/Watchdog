@@ -459,7 +459,7 @@
      }
 
 /************************************************* Init libsoup session *******************************************************/
-    Partage->com_msrv.API_session = soup_session_new_with_options( "idle_timeout", 0, "timeout", 10, "ssl-strict", TRUE,
+    Partage->com_msrv.API_session = soup_session_new_with_options( "idle_timeout", 60, "timeout", 10, "ssl-strict", TRUE,
                                                                    "user-agent", "Abls-habitat Agent", NULL );
 
 /************************************************* Test Connexion to Global API ***********************************************/
