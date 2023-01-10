@@ -97,7 +97,7 @@
     bit->valeur   = valeur;
     bit->in_range = in_range;
     Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-              "Changing DLS_AI '%s:%s'=%d", bit->tech_id, bit->acronyme, valeur );
+              "Changing DLS_AI '%s:%s'=%f", bit->tech_id, bit->acronyme, bit->valeur );
   }
 /******************************************************************************************************************************/
 /* Dls_AI_to_json : Formate un bit au format JSON                                                                             */
