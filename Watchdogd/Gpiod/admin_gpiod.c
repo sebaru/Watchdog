@@ -34,17 +34,17 @@
 /* Entrée : un JSon Builder                                                                                                   */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_gpiod_status ( struct PROCESS *Lib, SoupMessage *msg )
+ static void Admin_json_gpiod_status ( struct PROCESS *Lib, SoupServerMessage *msg )
   {
     if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Lib->Thread_debug, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
@@ -57,7 +57,7 @@
     gchar *buf = Json_node_to_string ( RootNode );
     Json_node_unref(RootNode);
 /*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
@@ -65,9 +65,9 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_gpiod_set ( struct PROCESS *Lib, SoupMessage *msg )
+ static void Admin_json_gpiod_set ( struct PROCESS *Lib, SoupServerMessage *msg )
   { if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -78,7 +78,7 @@
             Json_has_member ( request, "mode_inout" ) && Json_has_member ( request, "mode_activelow" ) &&
             Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" )
            ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        Json_node_unref(request);
        return;
      }
@@ -98,7 +98,7 @@
     g_free(tech_id);
     g_free(acronyme);
 
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK);
 
     while ( Lib->Thread_run == TRUE);                              /* Attente reboot du process */
   }
@@ -107,14 +107,14 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- void Admin_json ( struct PROCESS *lib, SoupMessage *msg, const char *path, GHashTable *query, gint access_level )
+ void Admin_json ( struct PROCESS *lib, SoupServerMessage *msg, const char *path, GHashTable *query, gint access_level )
   { if (access_level < 6)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
+     { soup_server_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Pas assez de privileges");
        return;
      }
          if (!strcasecmp(path, "/status")) { Admin_json_gpiod_status ( lib, msg ); }
     else if (!strcasecmp(path, "/set"))    { Admin_json_gpiod_set ( lib, msg ); }
-    else soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+    else soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 #endif

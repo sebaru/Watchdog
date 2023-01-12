@@ -40,7 +40,7 @@
                        Json_get_int ( request, "id" ) );
        Info_new( __func__, lib->Thread_debug, LOG_NOTICE, "thread '%s/%s' updated.",
                  Json_get_string ( request, "uuid" ), Json_get_string ( request, "thread_tech_id" ) );
-       soup_message_set_status (msg, SOUP_STATUS_OK);
+       soup_server_message_set_status (msg, SOUP_STATUS_OK);
        return;
      }
 
@@ -49,7 +49,7 @@
             Json_has_member ( request, "password" ) && Json_has_member ( request, "serial" )
            )
         )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
@@ -80,16 +80,16 @@
     g_free(password);
     g_free(serial);
 
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Admin_json_phidget_map_set: ajoute un mapping dans la base de données Phidget                                              */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Admin_json_phidget_map_set ( struct PROCESS *Lib, SoupMessage *msg )
+ static void Admin_json_phidget_map_set ( struct PROCESS *Lib, SoupServerMessage *msg )
   { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -101,7 +101,7 @@
             Json_has_member ( request, "hub_id" ) && Json_has_member ( request, "port" )
            )
        )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        Json_node_unref(request);
        return;
      }
@@ -144,8 +144,8 @@
                            "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
                            hub_id, port, phidget_classe, capteur
                          ))
-          { soup_message_set_status (msg, SOUP_STATUS_OK); }
-       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+          { soup_server_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_server_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
     else if (! strcasecmp( classe, "DO" ) )
      { SQL_Write_new ( "UPDATE mnemos_DO SET map_thread='PHIDGET', map_thread_tech_id=NULL "
@@ -164,15 +164,15 @@
                            "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
                            hub_id, port, phidget_classe, capteur
                          ))
-          { soup_message_set_status (msg, SOUP_STATUS_OK); }
-       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+          { soup_server_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_server_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
     else if (! strcasecmp( classe, "AI" ) )
      { if ( ! (Json_has_member ( request, "intervalle" ) && Json_has_member ( request, "min" ) &&
                Json_has_member ( request, "max" ) && Json_has_member ( request, "unite" ) &&
                Json_has_member ( request, "map_question_vocale" ) && Json_has_member ( request, "map_reponse_vocale" )
           ) )
-        { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+        { soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
           goto end;
         }
 
@@ -203,11 +203,11 @@
                            "classe=VALUES(classe),capteur=VALUES(capteur), port=VALUES(port), hub_id=VALUES(hub_id)",
                            hub_id, port, Json_get_int( request, "intervalle" ), phidget_classe, capteur, thread_tech_id, acronyme
                          ))
-          { soup_message_set_status (msg, SOUP_STATUS_OK); }
-       else soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
+          { soup_server_message_set_status (msg, SOUP_STATUS_OK); }
+       else soup_server_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" );
      }
     else
-     {	soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
+     {	soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Classe inconnue");  }
 end:
     g_free(thread_tech_id);
     g_free(acronyme);

@@ -28,106 +28,59 @@
  #include <glib.h>
 
  #include "watchdogd.h"
-/******************************************************************************************************************************/
-/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
-/* Entrée: le messages                                                                                                        */
-/* Sortie: le Json                                                                                                            */
-/******************************************************************************************************************************/
- JsonNode *Http_Msg_to_Json ( SoupMessage *msg )
-  { GBytes *request_brute;
-    gsize taille;
-    g_object_get ( msg, "request-body-data", &request_brute, NULL );
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( request_brute, &taille ) );
-    if (!request) { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Not a JSON request"); }
-    g_bytes_unref (request_brute);
-    return(request);
-  }
-/******************************************************************************************************************************/
-/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
-/* Entrée: le messages                                                                                                        */
-/* Sortie: le Json                                                                                                            */
-/******************************************************************************************************************************/
- JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg )
-  { GBytes *reponse_brute;
-    gsize taille;
-    g_object_get ( msg, "response-body-data", &reponse_brute, NULL );
-    JsonNode *reponse = Json_get_from_string ( g_bytes_get_data ( reponse_brute, &taille ) );
-    g_bytes_unref (reponse_brute);
-    return(reponse);
-  }
-/******************************************************************************************************************************/
-/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
-/* Entrée: le messages                                                                                                        */
-/* Sortie: le Json                                                                                                            */
-/******************************************************************************************************************************/
- gint Http_Msg_status_code ( SoupMessage *msg )
-  { gint status;
-    g_object_get ( msg, "status-code", &status, NULL );
-    return(status);
-  }
-/******************************************************************************************************************************/
-/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
-/* Entrée: le messages                                                                                                        */
-/* Sortie: le Json                                                                                                            */
-/******************************************************************************************************************************/
- gchar *Http_Msg_reason_phrase ( SoupMessage *msg )
-  { gchar *phrase;
-    g_object_get ( msg, "reason-phrase", &phrase, NULL );
-    return(phrase);
-  }
+
 /******************************************************************************************************************************/
 /* Http_Check_Thread_signature: Vérifie qu'un message est correctement signé par le thread                                    */
 /* Entrée: le messages                                                                                                        */
 /* Sortie: TRUE si OK                                                                                                         */
 /******************************************************************************************************************************/
- gboolean Http_Check_Thread_signature ( gchar *path, SoupMessage *msg, gchar **thread_tech_id_p )
-  { SoupMessageHeaders *headers;
-    g_object_get ( msg, "request-headers", &headers, NULL );
+ gboolean Http_Check_Thread_signature ( gchar *path, SoupServerMessage *msg, gchar **thread_tech_id_p )
+  { SoupMessageHeaders *headers = soup_server_message_get_request_headers ( msg );
     if (!headers)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s': No headers provided. Access Denied.", path );
-       soup_message_set_status ( msg, SOUP_STATUS_UNAUTHORIZED );
+       Http_Send_json_response ( msg, SOUP_STATUS_UNAUTHORIZED, NULL, NULL );
        return(FALSE);
      }
 
     gchar *origin      = soup_message_headers_get_one ( headers, "Origin" );
     if (!origin)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, Origin Header is missing", path );
-       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
        return(FALSE);
      }
 
     gchar *domain_uuid = soup_message_headers_get_one ( headers, "X-ABLS-DOMAIN" );
     if (!domain_uuid)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-DOMAIN Header is missing", path );
-       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
        return(FALSE);
      }
 
     gchar *agent_uuid  = soup_message_headers_get_one ( headers, "X-ABLS-AGENT" );
     if (!agent_uuid)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-AGENT Header is missing", path );
-       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
        return(FALSE);
      }
 
     gchar *thread_tech_id = *thread_tech_id_p = soup_message_headers_get_one ( headers, "X-ABLS-THREAD-TECH-ID" );
     if (!thread_tech_id)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-THREAD-TECH-ID Header is missing", path );
-       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
        return(FALSE);
      }
 
     gchar *timestamp = soup_message_headers_get_one ( headers, "X-ABLS-TIMESTAMP" );
     if (!timestamp)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-TIMESTAMP Header is missing", path );
-       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
        return(FALSE);
      }
 
     gchar *signature   = soup_message_headers_get_one ( headers, "X-ABLS-SIGNATURE" );
     if (!signature)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-SIGNATURE Header is missing", path );
-       soup_message_set_status ( msg, SOUP_STATUS_BAD_REQUEST );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
        return(FALSE);
      }
 
@@ -156,7 +109,7 @@
     g_bytes_unref(gbytes_body);
     if (retour)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Forbidden, Wrong signature", path );
-       soup_message_set_status ( msg, SOUP_STATUS_FORBIDDEN );
+       Http_Send_json_response ( msg, SOUP_STATUS_FORBIDDEN, NULL, NULL );
        return(FALSE);
      }
     return(TRUE);
@@ -190,8 +143,7 @@
     gchar signature[64];
     EVP_EncodeBlock( signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
 
-    SoupMessageHeaders *headers;
-    g_object_get ( msg, "request-headers", &headers, NULL );
+    SoupMessageHeaders *headers = soup_message_get_request_headers ( msg );
     soup_message_headers_append ( headers, "Origin",                origin );
     soup_message_headers_append ( headers, "X-ABLS-DOMAIN",         domain_uuid );
     soup_message_headers_append ( headers, "X-ABLS-AGENT",          agent_uuid );
@@ -226,8 +178,7 @@
     gchar signature[64];
     EVP_EncodeBlock( signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
 
-    SoupMessageHeaders *headers;
-    g_object_get ( msg, "request-headers", &headers, NULL );
+    SoupMessageHeaders *headers = soup_message_get_request_headers ( msg );
     soup_message_headers_append ( headers, "Origin",           origin );
     soup_message_headers_append ( headers, "X-ABLS-DOMAIN",    domain_uuid );
     soup_message_headers_append ( headers, "X-ABLS-AGENT",     agent_uuid );
@@ -235,18 +186,93 @@
     soup_message_headers_append ( headers, "X-ABLS-SIGNATURE", signature );
   }
 /******************************************************************************************************************************/
+/* Http_Send_json_request_to_API: Envoie une requete sur la connexion et attend la reponse                                     */
+/* Entrée: les données envoyer                                                                                                */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Send_json_request_from_agent ( SoupSession *session, SoupMessage *soup_msg, JsonNode *RootNode )
+  {
+    if (RootNode)
+     { gchar *buffer = Json_node_to_string ( RootNode );
+       gint   taille = strlen(buffer);
+       Http_Add_Agent_signature ( soup_msg, buffer, taille );
+       GBytes *body  = g_bytes_new ( buffer, taille );
+       g_free(buffer);
+       soup_message_set_request_body_from_bytes ( soup_msg, "application/json; charset=UTF-8", body );
+       g_bytes_unref ( body );
+     } else Http_Add_Agent_signature ( soup_msg, NULL, 0 );
+
+    GError *error = NULL;
+    GBytes *response = soup_session_send_and_read ( session, soup_msg, NULL, &error ); /* SYNC */
+
+    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code   = soup_message_get_status(soup_msg);
+
+    if (error)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Error '%s'", g_uri_to_string(soup_message_get_uri(soup_msg)), error->message );
+       g_error_free ( error );
+     }
+
+    JsonNode *ResponseNode;
+    if (status_code==200) { gsize taille; ResponseNode = Json_get_from_string ( g_bytes_get_data ( response, &taille ) ); }
+    else
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code,
+                 g_uri_to_string(soup_message_get_uri(soup_msg)), reason_phrase );
+       ResponseNode = NULL;
+     }
+    g_bytes_unref (response);
+    return(ResponseNode);
+  }
+/******************************************************************************************************************************/
+/* Http_Send_json_request_to_API: Envoie une requete sur la connexion et attend la reponse                                     */
+/* Entrée: les données envoyer                                                                                                */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupSession *session, SoupMessage *soup_msg, JsonNode *RootNode )
+  {
+    if (RootNode)
+     { gchar *buffer = Json_node_to_string ( RootNode );
+       gint   taille = strlen(buffer);
+       Http_Add_Thread_signature ( module, soup_msg, buffer, taille );
+       GBytes *body  = g_bytes_new ( buffer, taille );
+       g_free(buffer);
+       soup_message_set_request_body_from_bytes ( soup_msg, "application/json; charset=UTF-8", body );
+       g_bytes_unref ( body );
+     } else Http_Add_Thread_signature ( module, soup_msg, NULL, 0 );
+
+    GError *error = NULL;
+    GBytes *response = soup_session_send_and_read ( session, soup_msg, NULL, &error ); /* SYNC */
+
+    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code   = soup_message_get_status(soup_msg);
+
+    if (error)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Error '%s'", g_uri_to_string(soup_message_get_uri(soup_msg)), error->message );
+       g_error_free ( error );
+     }
+
+    JsonNode *ResponseNode;
+    if (status_code==200) { gsize taille; ResponseNode = Json_get_from_string ( g_bytes_get_data ( response, &taille ) ); }
+    else
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code,
+                 g_uri_to_string(soup_message_get_uri(soup_msg)), reason_phrase );
+       ResponseNode = NULL;
+     }
+    g_bytes_unref (response);
+    return(ResponseNode);
+  }
+/******************************************************************************************************************************/
 /* Http_Send_json_response: Envoie le json en paramètre en prenant le lead dessus                                             */
-/* Entrée: le messages, le buffer json                                                                                        */
+/* Entrée: le message, le buffer json, le code retour                                                                         */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Send_json_response ( SoupMessage *msg, gint code, gchar *message, JsonNode *RootNode )
-  { if (!RootNode)
-     { if ( (RootNode = Json_node_create() ) == NULL ) return; }
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    Json_node_unref ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status_full (msg, code, message);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+ void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode )
+  { soup_server_message_set_status( msg, code, message );
+    if (!RootNode) soup_server_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
+    else
+     { gchar *buf = Json_node_to_string ( RootNode );
+       soup_server_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+       Json_node_unref ( RootNode );
+     }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

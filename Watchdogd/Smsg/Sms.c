@@ -242,8 +242,6 @@
     gchar libelle[128];
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
     Json_node_add_string( RootNode, "message", libelle );
-    gchar *body = Json_node_to_string( RootNode );
-    Json_node_unref(RootNode);
 
     gchar *method = "POST";
     g_snprintf( query, sizeof(query), "https://eu.api.ovh.com/1.0/sms/%s/jobs", Json_get_string ( module->config, "ovh_service_name" ) );
@@ -251,10 +249,12 @@
     g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
 
 /******************************************************* Calcul signature *****************************************************/
+    gchar *body = Json_node_to_string( RootNode );
     g_snprintf( clair, sizeof(clair), "%s+%s+%s+%s+%s+%s",
                 Json_get_string ( module->config, "ovh_application_secret" ),
                 Json_get_string ( module->config, "ovh_consumer_key" ),
                 method, query, body, timestamp );
+    g_free(body);
 
     mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
     EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
@@ -275,20 +275,19 @@
     SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( method, query );
     Info_new ( __func__, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, body, strlen(body) );
-    SoupMessageHeaders *headers;
-    g_object_get ( G_OBJECT(soup_msg), "request_headers", &headers, NULL );
+    SoupMessageHeaders *headers = soup_message_get_request_headers( soup_msg );
     soup_message_headers_append ( headers, "X-Ovh-Application", Json_get_string ( module->config, "ovh_application_key" ) );
     soup_message_headers_append ( headers, "X-Ovh-Consumer",    Json_get_string ( module->config, "ovh_consumer_key" ) );
     soup_message_headers_append ( headers, "X-Ovh-Signature",   signature );
     soup_message_headers_append ( headers, "X-Ovh-Timestamp",   timestamp );
-    soup_session_send_message (connexion, soup_msg);
+    JsonNode *response = Http_Send_json_request_from_thread ( module, connexion, soup_msg, RootNode );
+    Json_node_unref ( response );
+    Json_node_unref ( RootNode );
 
-    gint status_code = Http_Msg_status_code ( soup_msg );
+    gint status_code = soup_message_get_status ( soup_msg );
     if (status_code!=200)
-     { gchar *reason_phrase = Http_Msg_reason_phrase ( soup_msg );
+     { gchar *reason_phrase = soup_message_get_reason_phrase ( soup_msg );
        Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
-       g_free(reason_phrase);
      }
     else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, telephone );
     g_object_unref( soup_msg );

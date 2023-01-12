@@ -65,29 +65,26 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Http_add_cookie ( SoupMessage *msg, gchar *name, gchar *value, gint life )
-  { SoupCookie *cookie = soup_cookie_new ( name, value, "", "/", life );
-    soup_cookie_set_http_only ( cookie, TRUE );
-    soup_cookie_set_secure ( cookie, TRUE );
-    GSList *liste = g_slist_append ( NULL, cookie );
-    soup_cookies_to_response ( liste, msg );
-    g_slist_free(liste);
+ static void Http_add_cookie ( SoupServerMessage *msg, gchar *name, gchar *value, gint life )
+  { gchar chaine[256];
+    g_snprintf( chaine, sizeof(chaine), "%s=%s", name, value );
+    SoupMessageHeaders *response_headers = soup_server_message_get_response_headers (msg);
+    soup_message_headers_replace (response_headers, "Set-Cookie", chaine );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_connect: Répond aux requetes sur l'URI connect                                                                */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Http_traiter_connect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                    SoupClientContext *client, gpointer user_data )
+ static void Http_traiter_connect ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
   { gchar requete[256], *name;
 
-    if (msg->method != SOUP_METHOD_POST)
-     { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+    if (soup_server_message_get_method(msg) != SOUP_METHOD_POST)
+     { soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED, NULL);
        return;
      }
 
-    Http_print_request ( server, msg, path, client );
+    Http_print_request ( server, msg, path );
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
@@ -96,7 +93,7 @@
            )
        )
      { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
@@ -104,7 +101,7 @@
     if (!name)
      { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Normalisation impossible" );
        Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
@@ -116,14 +113,14 @@
     if (!db)
      { Info_new( __func__, Config.log_msrv, LOG_ERR,
                 "DB connexion failed for user '%s'", Json_get_string ( request, "username" ) );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
+       soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
      }
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Info_new( __func__, Config.log_msrv, LOG_ERR,
                 "%s: DB request failed for user '%s'",__func__, Json_get_string ( request, "username" ) );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
+       soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "DB Error");
        return;
      }
 
@@ -134,7 +131,7 @@
        Info_new( __func__, Config.log_msrv, LOG_WARNING,
                 "User '%s' not found in DB", Json_get_string ( request, "username" ) );
        Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
+       soup_server_message_set_status (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
 
@@ -148,7 +145,7 @@
        Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
        Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
+       soup_server_message_set_status (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
 /*********************************************** Authentification du client par login mot de passe ****************************/
@@ -158,7 +155,7 @@
        Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
        Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
+       soup_server_message_set_status (msg, SOUP_STATUS_FORBIDDEN, "Acces interdit !");
        return;
      }
 
@@ -168,7 +165,7 @@
        Libere_DB_SQL( &db );
        Info_new( __func__, Config.log_msrv, LOG_ERR, "Session creation Error" );
        Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
@@ -183,9 +180,7 @@
     gchar *appareil = Normaliser_chaine ( Json_get_string ( request, "appareil" ) );
     g_snprintf( session->appareil, sizeof(session->appareil), "%s", appareil );
     g_free(appareil);
-    gchar *temp = g_inet_address_to_string ( g_inet_socket_address_get_address ( G_INET_SOCKET_ADDRESS(soup_client_context_get_remote_address (client) )) );
-    g_snprintf( session->host, sizeof(session->host), "%s", temp );
-    g_free(temp);
+    g_snprintf( session->host, sizeof(session->host), "inconnu" );
     session->access_level = atoi(db->row[2]);
     Liberer_resultat_SQL (db);
     Libere_DB_SQL( &db );
@@ -195,7 +190,7 @@
     if (strlen(session->wtd_session) != 36)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "SID Parse Error (%d)", strlen(session->wtd_session) );
        g_free(session);
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "UUID Error");
+       soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "UUID Error");
        return;
      }
     Partage->com_http.liste_http_clients = g_slist_append ( Partage->com_http.liste_http_clients, session );
@@ -208,7 +203,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
@@ -224,24 +219,20 @@
     Json_node_add_int    ( RootNode, "access_level", session->access_level );
     Json_node_add_string ( RootNode, "wtd_session", session->wtd_session );
     Json_node_add_string ( RootNode, "message", "Welcome back Home !" );
-    gchar *buf = Json_node_to_string ( RootNode );
-    Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+    Http_Send_json_response ( msg, SOUP_STATUS_OK, "application/json; charset=UTF-8", RootNode );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_disconnect: Répond aux requetes sur l'URI disconnect                                                          */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Http_traiter_disconnect ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                       SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_PUT)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+ static void Http_traiter_disconnect ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
+  { if (soup_server_message_get_method(msg) != SOUP_METHOD_PUT)
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED, NULL);
 		     return;
      }
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
     if (session)
      { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, session );
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "sid '%s' ('%s', level %d) disconnected",
@@ -250,7 +241,7 @@
        Info_new( __func__, Config.log_msrv, LOG_DEBUG,
                  "'%d' session left", g_slist_length(Partage->com_http.liste_http_clients) );
      }
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK, NULL);
   }
 
 /******************************************************************************************************************************/
@@ -268,36 +259,29 @@
 /* Entrée: le message libsoup                                                                                                 */
 /* Sortie: la session, ou NULL si pas trouvé                                                                                  */
 /******************************************************************************************************************************/
- struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupMessage *msg )
+ struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupServerMessage *msg )
   { struct HTTP_CLIENT_SESSION *result = NULL;
-    GSList *cookies, *liste;
 
     if ( Config.instance_is_master == FALSE )
      { static struct HTTP_CLIENT_SESSION Slave_session = { -1, "system_user", "internal device", "Watchdog Server", "none", "no_sid", 9, 0 };
        return(&Slave_session);
      }
 
-    cookies = soup_cookies_from_request(msg);
-    liste = cookies;
-    while ( liste )
-     { SoupCookie *cookie = liste->data;
-       const char *name = soup_cookie_get_name (cookie);
-       if (!strcmp(name,"wtd_session"))
-        { gchar *wtd_session = soup_cookie_get_value(cookie);
-          GSList *clients = Partage->com_http.liste_http_clients;
-          while(clients)
-           { struct HTTP_CLIENT_SESSION *session = clients->data;
-             if (!strcmp(session->wtd_session, wtd_session))
-              { result = session;
-                break;
-              }
-             clients = g_slist_next ( clients );
+    const char *cookies_char = soup_message_headers_get_list ( soup_server_message_get_request_headers ( msg ), "Cookie" );
+    SoupCookie *cookie = soup_cookie_parse ( cookies_char, NULL );
+    const char *name = soup_cookie_get_name (cookie);
+    if (!strcmp(name,"wtd_session"))
+     { gchar *wtd_session = soup_cookie_get_value(cookie);
+       GSList *clients = Partage->com_http.liste_http_clients;
+       while(clients)
+        { struct HTTP_CLIENT_SESSION *session = clients->data;
+          if (!strcmp(session->wtd_session, wtd_session))
+           { result = session;
+             break;
            }
+           clients = g_slist_next ( clients );
         }
-       if (result) break;
-       liste = g_slist_next(liste);
      }
-    soup_cookies_free(cookies);
     return(result);
   }
 /******************************************************************************************************************************/
@@ -305,11 +289,11 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupMessage *msg, const char *path, SoupClientContext *client )
+ struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupServerMessage *msg, const char *path )
   { struct HTTP_CLIENT_SESSION *session = Http_rechercher_session_by_msg ( msg );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "sid '%s' (%s@%s, Level %d) : '%s'",
               (session ? session->wtd_session : "none"),
-              (session ? session->username : "none"), soup_client_context_get_host(client),
+              (session ? session->username : "none"), soup_server_message_get_remote_host(msg),
               (session ? session->access_level : -1), path
             );
     return(session);
@@ -319,15 +303,15 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- gboolean Http_check_session ( SoupMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level )
+ gboolean Http_check_session ( SoupServerMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level )
   { if (!session)
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Not Connected");
+     { soup_server_message_set_status (msg, SOUP_STATUS_FORBIDDEN, "Not Connected");
        return(FALSE);
      }
 
     time(&session->last_request);
     if (session->access_level>=min_access_level) return(TRUE);
-    soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Session Level forbidden");
+    soup_server_message_set_status (msg, SOUP_STATUS_FORBIDDEN, "Session Level forbidden");
     return(FALSE);
   }
 /******************************************************************************************************************************/
@@ -335,43 +319,38 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Http_traiter_ping ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                 SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+ static void Http_traiter_ping ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
+  { if (soup_server_message_get_method(msg) != SOUP_METHOD_GET)
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED, NULL);
 		     return;
      }
 
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
     if (!Http_check_session( msg, session, 0 )) return;
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_node_add_string ( RootNode, "response", "pong" );
     Json_node_add_bool   ( RootNode, "Thread_run", Partage->com_msrv.Thread_run );
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    Json_node_unref ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+    Http_Send_json_response (msg, SOUP_STATUS_OK, NULL, RootNode );
   }
+#warning a migrer coté API
+#ifdef bouh
 /******************************************************************************************************************************/
 /* Http_Traiter_users_kill: Kill une session utilisateur                                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
- void Http_traiter_search ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                            SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+ void Http_traiter_search ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
+  { if (soup_server_message_get_method(msg) != SOUP_METHOD_GET)
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -383,7 +362,7 @@
     if (!search_string) { search = g_strdup (""); }
                    else { search = Normaliser_chaine ( search_string ); }
     if (!search)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Memory Error");
+     { soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Memory Error");
        return;
      }
 
@@ -391,7 +370,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
@@ -411,7 +390,7 @@
 
 
     if (SQL_Select_to_json_node ( RootNode, NULL, "SELECT COUNT(*) AS recordsTotal FROM dictionnaire LIMIT %d", length )==FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        Json_node_unref ( RootNode );
        g_free(search);
        return;
@@ -421,7 +400,7 @@
                                   "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
                                   "LIMIT %d OFFSET %d",
                                   search, search, search, length, start )==FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        Json_node_unref ( RootNode );
        g_free(search);
        return;
@@ -431,7 +410,7 @@
                                   "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
                                   "LIMIT %d OFFSET %d",
                                   search, search, search, length, start )==FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
        Json_node_unref ( RootNode );
        g_free(search);
        return;
@@ -441,54 +420,66 @@
     gchar *buf = Json_node_to_string ( RootNode );
     Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+  }
+#endif
+/******************************************************************************************************************************/
+/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: le Json                                                                                                            */
+/******************************************************************************************************************************/
+ JsonNode *Http_Msg_to_Json ( SoupServerMessage *msg )
+  { gsize taille;
+    SoupMessageBody *body = soup_server_message_get_request_body ( msg );
+    GBytes *buffer        = soup_message_body_flatten ( body );
+
+    JsonNode *request     = Json_get_from_string ( g_bytes_get_data ( buffer, &taille ) );
+    g_bytes_unref(buffer);
+    return(request);
   }
 /******************************************************************************************************************************/
 /* HTTP_Handle_request: Repond aux requests reçues                                                                            */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void HTTP_Handle_request_CB ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                      SoupClientContext *client, gpointer user_data )
-  { SoupMessageHeaders *headers;
-    g_object_get ( G_OBJECT(msg), SOUP_MESSAGE_RESPONSE_HEADERS, &headers, NULL );
+ static void HTTP_Handle_request_CB ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
+  { SoupMessageHeaders *headers = soup_server_message_get_request_headers ( msg );
     soup_message_headers_append ( headers, "Cache-Control", "no-store, must-revalidate" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Origin", "*" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Methods", "*" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Headers", "content-type, authorization, X-ABLS-DOMAIN" );
 /*---------------------------------------------------- OPTIONS ---------------------------------------------------------------*/
-    if (msg->method == SOUP_METHOD_OPTIONS)
+    if (soup_server_message_get_method(msg) == SOUP_METHOD_OPTIONS)
      { soup_message_headers_append ( headers, "Access-Control-Max-Age", "86400" );
-       soup_message_set_status (msg, SOUP_STATUS_OK );
+       Http_Send_json_response (msg, SOUP_STATUS_OK, NULL, NULL );
        return;
      }
 /*------------------------------------------------------ GET -----------------------------------------------------------------*/
 
     if (Config.installed == FALSE)
-     { if (msg->method == SOUP_METHOD_GET)
-        {      if (!strcasecmp ( path, "/status" ))    Http_traiter_status  ( server, msg, path, query, client, user_data );
-          else soup_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
+     { if (soup_server_message_get_method(msg) == SOUP_METHOD_GET)
+        {      if (!strcasecmp ( path, "/status" ))    Http_traiter_status  ( server, msg, path, query, user_data );
+          else soup_server_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
         }
-       else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
+       else { Http_Send_json_response (msg, SOUP_STATUS_NOT_IMPLEMENTED, NULL, NULL ); return; }
      }
-    else if (msg->method == SOUP_METHOD_GET)
-     {      if (!strcasecmp ( path, "/" ))           Http_traiter_status     ( server, msg, path, query, client, user_data );
-       else if (!strcasecmp ( path, "/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, client, user_data );
-       else if (!strcasecmp ( path, "/dls/run" ))    Http_traiter_dls_run    ( server, msg, path, query, client, user_data );
-       else if (!strcasecmp ( path, "/status" ))     Http_traiter_status     ( server, msg, path, query, client, user_data );
+    else if (soup_server_message_get_method(msg) == SOUP_METHOD_GET)
+     {      if (!strcasecmp ( path, "/" ))           Http_traiter_status     ( server, msg, path, query, user_data );
+       else if (!strcasecmp ( path, "/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, user_data );
+       else if (!strcasecmp ( path, "/dls/run" ))    Http_traiter_dls_run    ( server, msg, path, query, user_data );
+       else if (!strcasecmp ( path, "/status" ))     Http_traiter_status     ( server, msg, path, query, user_data );
        else if (!strcasecmp ( path, "/get_do" ))     Http_traiter_get_do     ( server, msg, path, query );
-       else { soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED ); return; }
-       /*else { Http_traiter_new_file ( server, msg, path, query, client, user_data ); return; }*/
+       else { Http_Send_json_response (msg, SOUP_STATUS_NOT_IMPLEMENTED, NULL, NULL ); return; }
      }
-    else if (msg->method == SOUP_METHOD_POST)
+    else if (soup_server_message_get_method(msg) == SOUP_METHOD_POST)
      { JsonNode *request = Http_Msg_to_Json ( msg );
        if (!request)
-        { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Parsing Request Failed", NULL );
+        { Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, "Parsing Request Failed", NULL );
           return;
         }
-            if (!strcasecmp ( path, "/dls/run/set" ))      Http_traiter_dls_run_set       ( server, msg, path, query, client, user_data );
-       else if (!strcasecmp ( path, "/dls/run/acquitter")) Http_traiter_dls_run_acquitter ( server, msg, path, query, client, user_data );
+            if (!strcasecmp ( path, "/dls/run/set" ))      Http_traiter_dls_run_set       ( server, msg, path, query, user_data );
+       else if (!strcasecmp ( path, "/dls/run/acquitter")) Http_traiter_dls_run_acquitter ( server, msg, path, query, user_data );
        else if (!strcasecmp ( path, "/set_di"))            Http_traiter_set_di_post       ( server, msg, path, request );
        else if (!strcasecmp ( path, "/set_ai"))            Http_traiter_set_ai_post       ( server, msg, path, request );
        else if (!strcasecmp ( path, "/set_cde"))           Http_traiter_set_cde_post      ( server, msg, path, request );
@@ -511,12 +502,6 @@
     Partage->com_http.Thread_run = TRUE;                                                                /* Le thread tourne ! */
     Info_new( __func__, Partage->com_http.Thread_debug, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
 
-    SoupServer *socket = Partage->com_http.socket = soup_server_new( "server-header", "Watchdogd Ex-API Server", NULL);
-    if (!socket)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer new Failed !" );
-       return;
-     }
-
     struct stat sbuf;
     if ( stat ( HTTP_DEFAUT_FILE_CERT, &sbuf ) == -1 ||                                           /* Test présence du fichier */
          stat ( HTTP_DEFAUT_FILE_KEY, &sbuf ) == -1 )                                             /* Test présence du fichier */
@@ -530,16 +515,21 @@
        system( chaine );
      }
 
-    if (soup_server_set_ssl_cert_file ( socket, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error ))
-     { Info_new( __func__, Config.log_msrv, LOG_INFO, "SSL Loaded with '%s' and '%s'",
-                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
-     }
-    else
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
-                  __func__, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
+		  GTlsCertificate *cert = g_tls_certificate_new_from_files (HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error);
+	  	if (error)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
+                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
        g_error_free(error);
        return;
      }
+
+    SoupServer *socket = Partage->com_http.socket = soup_server_new( "server-header", "Watchdogd Ex-API Server", "tls-certificate", cert, NULL);
+		  g_object_unref (cert);
+    if (!socket)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer new Failed !" );
+       return;
+     }
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "SSL Loaded with '%s' and '%s'", HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
 
     soup_server_add_handler ( socket, "/api/dls/status" ,    Http_traiter_dls_status, NULL, NULL );
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
@@ -552,8 +542,6 @@
     soup_server_add_handler ( socket, "/api/status",         Http_traiter_status, NULL, NULL );
     soup_server_add_handler ( socket, "/api/ping",           Http_traiter_ping, NULL, NULL );
     soup_server_add_handler ( socket, "/api/histo/alive",    Http_traiter_histo_alive, NULL, NULL );
-    soup_server_add_handler ( socket, "/api/upload",         Http_traiter_upload, NULL, NULL );
-    soup_server_add_handler ( socket, "/",                   Http_traiter_file, NULL, NULL );
     if (Config.instance_is_master==TRUE)
      { static gchar *protocols[] = { "live-motifs", NULL };
        soup_server_add_websocket_handler ( socket, "/api/live-motifs", NULL, protocols, Http_traiter_open_websocket_motifs_CB, NULL, NULL );
@@ -571,34 +559,21 @@
     Partage->com_http.loop = g_main_loop_new (NULL, TRUE);
 
 /********************************************* New API ************************************************************************/
-    socket = Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API Server", NULL);
+		  cert = g_tls_certificate_new_from_files (HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error);
+	  	if (error)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
+                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
+       g_error_free(error);
+       return;
+     }
+
+    socket = Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API Server", "tls-certificate", cert, NULL);
+		  g_object_unref (cert);
     if (!socket)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer new Failed !" );
        return;
      }
-
-    if ( stat ( HTTP_DEFAUT_FILE_CERT, &sbuf ) == -1 ||                                           /* Test présence du fichier */
-         stat ( HTTP_DEFAUT_FILE_KEY, &sbuf ) == -1 )                                             /* Test présence du fichier */
-     { gchar chaine[256];
-       Info_new( __func__, Config.log_msrv, LOG_ERR,
-                "unable to load '%s' and '%s' (error '%s'). Generating new ones.",
-                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, strerror(errno) );
-       g_snprintf( chaine, sizeof(chaine),
-                   "openssl req -subj '/C=FR/ST=FRANCE/O=ABLS-HABITAT/OU=PRODUCTION/CN=Abls-Habitat Agent on %s' -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -out '%s' -keyout '%s'",
-                   g_get_host_name(), HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
-       system( chaine );
-     }
-
-    if (soup_server_set_ssl_cert_file ( socket, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error ))
-     { Info_new( __func__, Config.log_msrv, LOG_INFO, "SSL Loaded with '%s' and '%s'",
-                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
-     }
-    else
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
-                  __func__, HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
-       g_error_free(error);
-       return;
-     }
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "SSL Loaded with '%s' and '%s'", HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
 
     soup_server_add_handler ( socket, "/" , HTTP_Handle_request_CB, NULL, NULL );
 

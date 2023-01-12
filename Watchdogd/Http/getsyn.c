@@ -38,20 +38,14 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_syn_clic ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                              SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+ void Http_traiter_syn_clic ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
+  { struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
     if (!Http_check_session( msg, session, 0 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        Json_node_unref(request);
        return;
      }
@@ -63,138 +57,7 @@
     g_free(tech_id);
     g_free(acronyme);
 /*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Http_traiter_syn_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                              SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    if (SQL_Select_to_json_node ( RootNode, "synoptiques",
-                                 "SELECT syn.*, psyn.page as ppage, psyn.libelle AS plibelle, psyn.syn_id AS pid, "
-                                         "(SELECT COUNT(*) FROM dls WHERE dls.syn_id=syn.syn_id) AS dls_count, "
-                                         "(SELECT COUNT(*) FROM syns AS sub_syn WHERE syn.syn_id=sub_syn.parent_id) AS subsyn_count "
-                                 "FROM syns AS syn "
-                                 "INNER JOIN syns AS psyn ON psyn.syn_id=syn.parent_id "
-                                 "WHERE syn.access_level<='%d' ORDER BY syn.page", session->access_level ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       Json_node_unref ( RootNode );
-       return;
-     }
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    Json_node_unref ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Http_traiter_syn_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                             SoupClientContext *client, gpointer user_data )
-  { gchar chaine[256];
-
-    if (msg->method != SOUP_METHOD_DELETE)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-
-    if ( ! (Json_has_member ( request, "syn_id" ) ) )
-     { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-    gint syn_id = Json_get_int ( request, "syn_id" );
-    Json_node_unref(request);
-
-    if (syn_id==1)
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Syn 1 can not be deleted");
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "DELETE from syns WHERE id=%d AND access_level<='%d'",
-               syn_id, (session ? session->access_level : 10));
-    if (SQL_Write (chaine)==FALSE)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Delete Error");
-       return;
-     }
-
-/*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Http_traiter_syn_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                            SoupClientContext *client, gpointer user_data )
-  { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
-    if (!Http_check_session( msg, session, 6 )) return;
-
-    gint syn_id;
-    gchar *syn_id_src = g_hash_table_lookup ( query, "syn_id" );
-    if (syn_id_src) { syn_id = atoi (syn_id_src); }
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       return;
-     }
-
-/************************************************ Préparation du buffer JSON **************************************************/
-    JsonNode *RootNode = Json_node_create ();
-    if (RootNode == NULL)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
-       return;
-     }
-
-    if (SQL_Select_to_json_node ( RootNode, NULL,
-                                 "SELECT s.*, ps.page AS ppage "
-                                 "FROM syns AS s "
-                                 "INNER JOIN syns AS ps ON s.parent_id = ps.syn_id "
-                                 "WHERE s.syn_id=%d AND s.access_level<=%d ORDER BY s.page", syn_id, session->access_level ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
-       Json_node_unref ( RootNode );
-       return;
-     }
-
-    gchar *buf = Json_node_to_string ( RootNode );
-    Json_node_unref ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+    Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
   }
 /******************************************************************************************************************************/
 /* Http_get_syn_save_un_visuel: Enregistre un motif en base de données                                                        */
@@ -299,14 +162,8 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_syn_save ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                              SoupClientContext *client, gpointer user_data )
-  { if ( msg->method != SOUP_METHOD_POST )
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+ void Http_traiter_syn_save ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
+  { struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
     if (!Http_check_session( msg, session, 6 )) return;
     JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
@@ -432,16 +289,10 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_syn_show ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                              SoupClientContext *client, gpointer user_data )
+ void Http_traiter_syn_show ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
   { gint syn_id;
 
-    if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
     if (!Http_check_session( msg, session, 0 )) return;
 
     gchar *syn_id_src = g_hash_table_lookup ( query, "syn_id" );
@@ -452,20 +303,20 @@
 /*-------------------------------------------------- Test autorisation d'accès -----------------------------------------------*/
     JsonNode *result = Json_node_create();
     if (!result)
-     { soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+     { soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
     SQL_Select_to_json_node ( result, NULL, "SELECT access_level,libelle FROM syns WHERE syn_id=%d", syn_id );
     if ( !(Json_has_member ( result, "access_level" ) && Json_has_member ( result, "libelle" )) )
      { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Syn '%d' unknown", syn_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_NOT_FOUND, "Syn not found");
+       soup_server_message_set_status (msg, SOUP_STATUS_NOT_FOUND, "Syn not found");
        Json_node_unref ( result );
        return;
      }
 
     if (session->access_level < Json_get_int ( result, "access_level" ))
-     { soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Access Denied");
+     { soup_server_message_set_status (msg, SOUP_STATUS_FORBIDDEN, "Access Denied");
        Json_node_unref ( result );
        return;
      }
@@ -473,7 +324,7 @@
 /*---------------------------------------------- Envoi les données -----------------------------------------------------------*/
     JsonNode *synoptique = Json_node_create();
     if (!synoptique)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        return;
      }
 
@@ -490,7 +341,7 @@
     if (SQL_Select_to_json_node ( synoptique, NULL,
                                  "SELECT * FROM syns WHERE syn_id='%d' AND access_level<='%d'",
                                   syn_id, session->access_level) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
      }
@@ -500,7 +351,7 @@
                                  "SELECT s.* FROM syns AS s INNER JOIN syns as s2 ON s.parent_id=s2.syn_id "
                                  "WHERE s2.syn_id='%d' AND s.syn_id!=1 AND s.access_level<='%d'",
                                  syn_id, session->access_level) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
      }
@@ -514,7 +365,7 @@
                                     "INNER JOIN syns as syn ON pass.syn_cible_id=syn.syn_id "
                                     "WHERE pass.syn_id=%d AND syn.access_level<=%d",
                                      syn_id, session->access_level ) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+        { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
         }
@@ -526,7 +377,7 @@
                                      "INNER JOIN syns as syn ON lien.syn_id=syn.syn_id "
                                      "WHERE lien.syn_id=%d AND syn.access_level<=%d",
                                      syn_id, session->access_level ) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+        { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
         }
@@ -538,7 +389,7 @@
                                     "INNER JOIN syns as syn ON rectangle.syn_id=syn.syn_id "
                                     "WHERE rectangle.syn_id=%d AND syn.access_level<=%d",
                                     syn_id, session->access_level ) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+        { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
         }
@@ -550,7 +401,7 @@
                                     "INNER JOIN syns as syn ON comment.syn_id=syn.syn_id "
                                     "WHERE comment.syn_id=%d AND syn.access_level<=%d",
                                     syn_id, session->access_level ) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+        { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
         }
@@ -562,7 +413,7 @@
                                  "INNER JOIN syns as syn ON cam.syn_id=syn.syn_id "
                                  "WHERE cam.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
      }
@@ -575,7 +426,7 @@
                                  "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
                                  "WHERE syn.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
      }
@@ -587,7 +438,7 @@
                                  "INNER JOIN syns as syn ON tableau.syn_id=syn.syn_id "
                                  "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
      }
@@ -598,7 +449,7 @@
                                  "INNER JOIN syns as syn ON tableau.syn_id=syn.syn_id "
                                  "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
      }
@@ -619,7 +470,7 @@
                                     "WHERE (s.syn_id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d' "
                                     "ORDER BY layer",
                                      syn_id, session->access_level, session->access_level, syn_id) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+        { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
         }
@@ -636,7 +487,7 @@
                                     "WHERE s.syn_id='%d' AND s.access_level<=%d AND m.access_level<=%d "
                                     "ORDER BY layer",
                                     syn_id, session->access_level, session->access_level) == FALSE)
-        { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+        { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
         }
@@ -651,15 +502,11 @@
                                  "INNER JOIN syns as syn ON dls.syn_id=syn.syn_id "
                                  "WHERE dls.syn_id=%d AND syn.access_level<=%d",
                                  syn_id, session->access_level ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
      }
 
-    gchar *buf = Json_node_to_string ( synoptique );
-    Json_node_unref(synoptique);
-/*************************************************** Envoi au client **********************************************************/
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+    Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, synoptique );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

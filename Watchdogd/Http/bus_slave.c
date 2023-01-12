@@ -34,13 +34,12 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  JsonNode *Http_Get_from_local_BUS ( struct THREAD *module, gchar *uri )
-  { JsonNode *retour = NULL;
-    if (!module) return(NULL);
+  { if (!module) return(NULL);
 
     gchar query[256];
     g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 60, "timeout", 2, "ssl-strict", FALSE,
+    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 60, "timeout", 2,
                                                             "user-agent", "Abls-habitat Agent", NULL );
 
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
@@ -49,22 +48,19 @@
        goto end;
      }
 
-    Http_Add_Thread_signature ( module, soup_msg, NULL, 0 );
-    soup_session_send_message (connexion, soup_msg); /* SYNC */
+    JsonNode *response = Http_Send_json_request_from_agent (connexion, soup_msg, NULL); /* SYNC */
 
-    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
-    gint   status_code   = Http_Msg_status_code(soup_msg);
+    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code   = soup_message_get_status(soup_msg);
 
     Info_new( __func__, Config.log_bus, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
     if (status_code!=200)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
-    else { retour = Http_Response_Msg_to_Json ( soup_msg ); }
-    g_free(reason_phrase);
     g_object_unref( soup_msg );
 end:
     soup_session_abort ( connexion );
     g_object_unref( connexion );
-    return(retour);
+    return(response);
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS: Envoie un message a l'API local                                                                    */
@@ -82,31 +78,25 @@ end:
 
     g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 60, "timeout", 2, "ssl-strict", FALSE,
+    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 60, "timeout", 2,
                                                             "user-agent", "Abls-habitat Agent", NULL );
-
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
        goto end;
      }
+    g_signal_connect ( G_OBJECT(soup_msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
 
-    gchar *buf    = Json_node_to_string ( RootNode );
-    gint buf_size = strlen(buf);
-    Info_new( __func__, Config.log_bus, LOG_DEBUG, "Sending to %s: %s", query, buf );
-    Http_Add_Thread_signature ( module, soup_msg, buf, buf_size );
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, buf_size );
-    /* Async soup_session_queue_message (client->connexion, msg, callback, client);*/
-    soup_session_send_message (connexion, soup_msg); /* SYNC */
+    JsonNode *response = Http_Send_json_request_from_thread ( module, connexion, soup_msg, NULL); /* SYNC */
+    Json_node_unref( response );
 
-    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
-    gint   status_code   = Http_Msg_status_code(soup_msg);
+    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code   = soup_message_get_status(soup_msg);
 
     Info_new( __func__, Config.log_bus, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
     if (status_code!=200)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
     else retour = TRUE;
-    g_free(reason_phrase);
     g_object_unref( soup_msg );
 end:
     soup_session_abort ( connexion );
@@ -184,7 +174,7 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_get_do ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query )
+ void Http_traiter_get_do ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id) { Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL ); return; }
@@ -212,7 +202,7 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_set_watchdog_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
+ void Http_traiter_set_watchdog_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
@@ -223,7 +213,7 @@ end:
 
     if (! (Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "consigne" ) ) )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: wrong parameters from '%s'", thread_tech_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        Json_node_unref(request);
        return;
      }
@@ -240,7 +230,7 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_set_cde_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
+ void Http_traiter_set_cde_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
@@ -251,7 +241,7 @@ end:
 
     if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_CDE: wrong parameters from '%s'", thread_tech_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        Json_node_unref(request);
        return;
      }
@@ -266,7 +256,7 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_set_ai_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
+ void Http_traiter_set_ai_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
@@ -281,7 +271,7 @@ end:
           )
        )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_AI: wrong parameters from '%s'", thread_tech_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        Json_node_unref(request);
        return;
      }
@@ -312,7 +302,7 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_set_di_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
+ void Http_traiter_set_di_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
@@ -326,7 +316,7 @@ end:
           )
        )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI: wrong parameters from '%s'", thread_tech_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        return;
      }
 

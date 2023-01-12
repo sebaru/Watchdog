@@ -134,6 +134,13 @@
     Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': WebSocket to Master connected", thread_tech_id );
   }
 /******************************************************************************************************************************/
+/* Http_Accept_certificate: appelé pour vérifier le certificat TLS présenté par le serveur                                    */
+/* Entrée: Le certificat                                                                                                      */
+/* Sortie: booléen                                                                                                            */
+/******************************************************************************************************************************/
+ gboolean Http_Accept_certificate ( SoupMessage* self, GTlsCertificate* tls_peer_certificate, GTlsCertificateFlags tls_peer_errors, gpointer user_data )
+  { return(TRUE); }
+/******************************************************************************************************************************/
 /* Thread_ws_bus_init: appelé par chaque thread pour demarrer le websocket vers le master                                     */
 /* Entrée: La thread                                                                                                          */
 /* Sortie: néant                                                                                                              */
@@ -144,18 +151,15 @@
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error: Already UP.", thread_tech_id );
        return;
      }
-
     module->Master_session = soup_session_new();
-    g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );
+    /*g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );*/
     static gchar *protocols[] = { "live-bus", NULL };
     gchar chaine[256];
     g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
-    SoupMessage *query   = soup_message_new ( "GET", chaine );
-    GCancellable *cancel = g_cancellable_new();
-    soup_session_websocket_connect_async ( module->Master_session, query,
-                                           NULL, protocols, cancel, Thread_ws_on_master_connected, module );
-    g_object_unref(query);
-    g_object_unref(cancel);
+    SoupMessage *msg = soup_message_new ( "GET", chaine );
+    g_signal_connect ( G_OBJECT(msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
+    soup_session_websocket_connect_async ( module->Master_session, msg, NULL, protocols, 0, NULL, Thread_ws_on_master_connected, module );
+    g_object_unref(msg);
   }
 /******************************************************************************************************************************/
 /* Thread_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                                   */

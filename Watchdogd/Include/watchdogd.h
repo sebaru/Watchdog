@@ -126,14 +126,14 @@
  extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
  extern void UUID_Load ( gchar *thread, gchar *target );
 
- extern JsonNode *Http_Msg_to_Json ( SoupMessage *msg );                                                /* Dans http_common.c */
- extern JsonNode *Http_Response_Msg_to_Json ( SoupMessage *msg );
- extern gint Http_Msg_status_code ( SoupMessage *msg );
- extern gchar *Http_Msg_reason_phrase ( SoupMessage *msg );
- extern void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size );
+ extern void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size );                  /* Dans http_common.c */
  extern void Http_Add_Thread_signature ( struct THREAD *module, SoupMessage *msg, gchar *buf, gint buf_size );
- extern gboolean Http_Check_Thread_signature ( gchar *path, SoupMessage *msg, gchar **thread_tech_id_p );
- extern void Http_Send_json_response ( SoupMessage *msg, gint code, gchar *message, JsonNode *RootNode );
+ extern gboolean Http_Accept_certificate ( SoupMessage* self, GTlsCertificate* tls_peer_certificate, GTlsCertificateFlags tls_peer_errors, gpointer user_data );
+ extern gboolean Http_Check_Thread_signature ( gchar *path, SoupServerMessage *msg, gchar **thread_tech_id_p );
+ extern JsonNode *Http_Send_json_request_from_agent ( SoupSession *session, SoupMessage *soup_msg, JsonNode *RootNode );
+ extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupSession *session,
+                                                      SoupMessage *soup_msg, JsonNode *RootNode );
+ extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

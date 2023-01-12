@@ -234,8 +234,8 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
-                                              SoupClientContext *context, gpointer user_data)
+ void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
+                                              SoupWebsocketConnection* connexion, gpointer user_data )
   { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Opened %p state %d!", connexion,
               soup_websocket_connection_get_state (connexion) );
     struct WS_CLIENT_SESSION *client = g_try_malloc0( sizeof(struct WS_CLIENT_SESSION) );
@@ -244,7 +244,6 @@
        return;
      }
     client->connexion = connexion;
-    client->context   = context;
     g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_on_message), client );
     g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_closed), client );
     g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_error), client );
@@ -307,8 +306,8 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupWebsocketConnection *connexion, const char *path,
-                                                  SoupClientContext *context, gpointer user_data)
+ void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
+                                                  SoupWebsocketConnection* connexion, gpointer user_data )
   { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Opened %p state %d!", connexion,
               soup_websocket_connection_get_state (connexion) );
     struct HTTP_WS_SESSION *slave = g_try_malloc0( sizeof(struct HTTP_WS_SESSION) );
@@ -317,7 +316,6 @@
        return;
      }
     slave->connexion = connexion;
-    slave->context   = context;
     g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_on_slave_message), slave );
     g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_slave_closed), slave );
     g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_slave_error), slave );
