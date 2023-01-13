@@ -41,6 +41,7 @@
 /******************************************************************************************************************************/
  void Ajouter_arch( gchar *tech_id, gchar *acronyme, gdouble valeur )
   { if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
+    if (Partage->com_msrv.Thread_run  == FALSE) return;
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Add Arch in list: '%s:%s'=%f", tech_id, acronyme, valeur );
     struct timeval tv;
