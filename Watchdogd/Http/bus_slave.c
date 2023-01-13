@@ -39,16 +39,13 @@
     gchar query[256];
     g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 60, "timeout", 2,
-                                                            "user-agent", "Abls-habitat Agent", NULL );
-
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
     if (!soup_msg)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
        goto end;
      }
 
-    JsonNode *response = Http_Send_json_request_from_agent (connexion, soup_msg, NULL); /* SYNC */
+    JsonNode *response = Http_Send_json_request_from_thread ( module, module->Master_session, soup_msg, NULL); /* SYNC */
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status(soup_msg);
@@ -58,8 +55,6 @@
      { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
     g_object_unref( soup_msg );
 end:
-    soup_session_abort ( connexion );
-    g_object_unref( connexion );
     return(response);
   }
 /******************************************************************************************************************************/
@@ -78,8 +73,6 @@ end:
 
     g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 60, "timeout", 2,
-                                                            "user-agent", "Abls-habitat Agent", NULL );
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
@@ -87,7 +80,7 @@ end:
      }
     g_signal_connect ( G_OBJECT(soup_msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
 
-    JsonNode *response = Http_Send_json_request_from_thread ( module, connexion, soup_msg, NULL); /* SYNC */
+    JsonNode *response = Http_Send_json_request_from_thread ( module, module->Master_session, soup_msg, RootNode ); /* SYNC */
     Json_node_unref( response );
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
@@ -95,12 +88,10 @@ end:
 
     Info_new( __func__, Config.log_bus, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
-    else retour = TRUE;
+         { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
+    else { retour = TRUE; }
     g_object_unref( soup_msg );
 end:
-    soup_session_abort ( connexion );
-    g_object_unref( connexion );
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -214,7 +205,6 @@ end:
     if (! (Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "consigne" ) ) )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: wrong parameters from '%s'", thread_tech_id );
        Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
-       Json_node_unref(request);
        return;
      }
 
@@ -242,7 +232,6 @@ end:
     if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_CDE: wrong parameters from '%s'", thread_tech_id );
        Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
-       Json_node_unref(request);
        return;
      }
     Info_new( __func__, Config.log_bus, LOG_INFO,
@@ -272,7 +261,6 @@ end:
        )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_AI: wrong parameters from '%s'", thread_tech_id );
        Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
-       Json_node_unref(request);
        return;
      }
 
@@ -334,6 +322,6 @@ end:
               Json_get_bool ( request, "etat" ) );
     struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
     if (bit) Dls_data_set_DI ( NULL, bit, Json_get_bool ( request, "etat" ) );
-    Http_Send_json_response ( msg, SOUP_STATUS_OK, "AI set", NULL );
+    Http_Send_json_response ( msg, SOUP_STATUS_OK, "DI set", NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
