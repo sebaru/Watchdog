@@ -124,12 +124,18 @@
      }
     GError *error = NULL;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+
     module->Master_websocket = soup_session_websocket_connect_finish ( module->Master_session, res, &error );
     if (error)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error: %s.", thread_tech_id, error->message );
        g_error_free (error);
        return;
      }
+    if (!module->Master_websocket)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error.", thread_tech_id );
+       return;
+     }
+
     /*g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );*/
     g_object_set ( G_OBJECT(module->Master_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
     g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(Thread_ws_on_master_message_CB), module );
@@ -155,7 +161,7 @@
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error: Already UP.", thread_tech_id );
        return;
      }
-    module->Master_session = soup_session_new();
+
     static gchar *protocols[] = { "live-bus", NULL };
     gchar chaine[256];
     g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
@@ -223,6 +229,15 @@
         }
      }
 
+    module->Master_session = soup_session_new();
+    soup_session_set_user_agent   ( module->Master_session, "Abls-habitat Agent" );
+    soup_session_set_timeout      ( module->Master_session, 10 );
+    soup_session_set_idle_timeout ( module->Master_session, 10 );
+#warning a virer
+    SoupLogger *log = soup_logger_new (SOUP_LOGGER_LOG_MINIMAL);
+    soup_session_add_feature ( module->Master_session, (SoupSessionFeature *)log );
+    g_object_unref ( log );
+
 /******************************************************* Ecoute du Master *****************************************************/
     Thread_ws_bus_init( module );
 
@@ -249,11 +264,13 @@
      { soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
        while ( module->Master_websocket ) sched_yield();
      }
+
     soup_session_abort ( module->Master_session );
+    g_object_unref ( module->Master_session ); module->Master_session = NULL;
     g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
-    g_slist_free ( module->WS_messages );
-    if (module->vars) { g_free(module->vars); module->vars   = NULL; }
-    Json_node_unref ( module->IOs );          module->IOs    = NULL;
+    g_slist_free ( module->WS_messages );      module->WS_messages = NULL;
+    if (module->vars) { g_free(module->vars);  module->vars   = NULL; }
+    Json_node_unref ( module->IOs );           module->IOs    = NULL;
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
     sleep(1);                       /* le temps d'un appel libsoup a Thread_ws_on_master_connected si Operation was cancelled */
     pthread_exit(0);
