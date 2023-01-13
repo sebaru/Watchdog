@@ -84,10 +84,12 @@
        return(FALSE);
      }
 
-    GBytes *gbytes_body;
     gsize taille_body;
-    g_object_get ( msg, "request-body-data", &gbytes_body, NULL );
-    gchar *request_body  = g_bytes_get_data ( gbytes_body, &taille_body );
+    SoupMessageBody *body = soup_server_message_get_request_body ( msg );
+    GBytes *buffer        = soup_message_body_flatten ( body );
+    gchar *request_body   = g_bytes_get_data ( buffer, &taille_body );
+    g_bytes_unref(buffer);
+
     gchar *domain_secret = Json_get_string ( Config.config, "domain_secret" );
 
     unsigned char hash_bin[EVP_MAX_MD_SIZE];
@@ -106,7 +108,6 @@
     EVP_EncodeBlock( local_signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
 
     gint retour = strcmp ( signature, local_signature );
-    g_bytes_unref(gbytes_body);
     if (retour)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Forbidden, Wrong signature", path );
        Http_Send_json_response ( msg, SOUP_STATUS_FORBIDDEN, NULL, NULL );
@@ -196,8 +197,7 @@
      { gchar *buffer = Json_node_to_string ( RootNode );
        gint   taille = strlen(buffer);
        Http_Add_Agent_signature ( soup_msg, buffer, taille );
-       GBytes *body  = g_bytes_new ( buffer, taille );
-       g_free(buffer);
+       GBytes *body  = g_bytes_new_take ( buffer, taille );
        soup_message_set_request_body_from_bytes ( soup_msg, "application/json; charset=UTF-8", body );
        g_bytes_unref ( body );
      } else Http_Add_Agent_signature ( soup_msg, NULL, 0 );
@@ -209,22 +209,28 @@
     gint   status_code   = soup_message_get_status(soup_msg);
 
     if (error)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Error '%s'", g_uri_to_string(soup_message_get_uri(soup_msg)), error->message );
+     { gchar *uri = g_uri_to_string(soup_message_get_uri(soup_msg));
+       Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Error '%s'", uri, error->message );
+       g_free(uri);
        g_error_free ( error );
      }
 
-    JsonNode *ResponseNode;
-    if (status_code==200) { gsize taille; ResponseNode = Json_get_from_string ( g_bytes_get_data ( response, &taille ) ); }
+    JsonNode *ResponseNode = NULL;
+    if (status_code==200)
+     { gsize taille;
+       gchar *buffer = g_bytes_get_data ( response, &taille );
+       if (taille && buffer) ResponseNode = Json_get_from_string ( buffer );
+     }
     else
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code,
-                 g_uri_to_string(soup_message_get_uri(soup_msg)), reason_phrase );
-       ResponseNode = NULL;
+     { gchar *uri = g_uri_to_string(soup_message_get_uri(soup_msg));
+       Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, uri, reason_phrase );
+       g_free(uri);
      }
     g_bytes_unref (response);
     return(ResponseNode);
   }
 /******************************************************************************************************************************/
-/* Http_Send_json_request_to_API: Envoie une requete sur la connexion et attend la reponse                                     */
+/* Http_Send_json_request_from_thread: Envoie une requete sur la connexion et attend la reponse                               */
 /* Entrée: les données envoyer                                                                                                */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
@@ -234,8 +240,7 @@
      { gchar *buffer = Json_node_to_string ( RootNode );
        gint   taille = strlen(buffer);
        Http_Add_Thread_signature ( module, soup_msg, buffer, taille );
-       GBytes *body  = g_bytes_new ( buffer, taille );
-       g_free(buffer);
+       GBytes *body  = g_bytes_new_take ( buffer, taille );
        soup_message_set_request_body_from_bytes ( soup_msg, "application/json; charset=UTF-8", body );
        g_bytes_unref ( body );
      } else Http_Add_Thread_signature ( module, soup_msg, NULL, 0 );
@@ -247,16 +252,22 @@
     gint   status_code   = soup_message_get_status(soup_msg);
 
     if (error)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Error '%s'", g_uri_to_string(soup_message_get_uri(soup_msg)), error->message );
+     { gchar *uri = g_uri_to_string(soup_message_get_uri(soup_msg));
+       Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Error '%s'", uri, error->message );
+       g_free(uri);
        g_error_free ( error );
      }
 
-    JsonNode *ResponseNode;
-    if (status_code==200) { gsize taille; ResponseNode = Json_get_from_string ( g_bytes_get_data ( response, &taille ) ); }
+    JsonNode *ResponseNode = NULL;
+    if (status_code==200)
+     { gsize taille;
+       gchar *buffer = g_bytes_get_data ( response, &taille );
+       if (taille && buffer) ResponseNode = Json_get_from_string ( buffer );
+     }
     else
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code,
-                 g_uri_to_string(soup_message_get_uri(soup_msg)), reason_phrase );
-       ResponseNode = NULL;
+     { gchar *uri = g_uri_to_string(soup_message_get_uri(soup_msg));
+       Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, uri, reason_phrase );
+       g_free(uri);
      }
     g_bytes_unref (response);
     return(ResponseNode);
