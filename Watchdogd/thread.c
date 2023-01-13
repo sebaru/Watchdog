@@ -118,10 +118,14 @@
 /******************************************************************************************************************************/
  static void Thread_ws_on_master_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
   { struct THREAD *module = user_data;
+    if (!module || !module->config)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "module or module->config is null." );
+       return;
+     }
     GError *error = NULL;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     module->Master_websocket = soup_session_websocket_connect_finish ( module->Master_session, res, &error );
-    if (!module->Master_websocket)                                                                   /* No limit on incoming packet ! */
+    if (error)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error: %s.", thread_tech_id, error->message );
        g_error_free (error);
        return;
@@ -152,7 +156,6 @@
        return;
      }
     module->Master_session = soup_session_new();
-    /*g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );*/
     static gchar *protocols[] = { "live-bus", NULL };
     gchar chaine[256];
     g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
@@ -251,13 +254,13 @@
     g_slist_free ( module->WS_messages );
     if (module->vars) { g_free(module->vars); module->vars   = NULL; }
     Json_node_unref ( module->IOs );          module->IOs    = NULL;
-    Json_node_unref ( module->config );       module->config = NULL;
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
+    sleep(1);                       /* le temps d'un appel libsoup a Thread_ws_on_master_connected si Operation was cancelled */
     pthread_exit(0);
   }
 /******************************************************************************************************************************/
 /* Decharger_librairies: Decharge toutes les librairies                                                                       */
-/* EntrÃée: Rien                                                                                                               */
+/* EntrÃée: Rien                                                                                                              */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Decharger_librairies ( void )
@@ -343,7 +346,7 @@
 
     struct THREAD *module = NULL;
     pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    GSList *liste = Partage->com_msrv.Threads;                                                 /* Envoie une commande d'arret */
     while(liste)
      { struct THREAD *search_module = liste->data;
        if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
@@ -367,6 +370,7 @@
     pthread_mutex_destroy( &module->synchro );
                                                                              /* Destruction de l'entete associé dans la GList */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': Unloaded", Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_node_unref ( module->config );
     g_free( module );
   }
 /******************************************************************************************************************************/
@@ -435,6 +439,7 @@
     pthread_attr_t attr;                                                       /* Attribut de mutex pour parametrer le module */
     if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_attr_init failed. Unloading.", thread_tech_id );
+       Json_node_unref ( module->config );
        dlclose( module->dl_handle );
        g_free(module);
        return;
@@ -442,6 +447,7 @@
 
     if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )                       /* On le laisse joinable au boot */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_setdetachstate failed. Unloading.", thread_tech_id );
+       Json_node_unref ( module->config );
        dlclose( module->dl_handle );
        g_free(module);
        return;
@@ -454,6 +460,7 @@
 
     if ( module->Thread_run && pthread_create( &module->TID, &attr, (void *)module->Run_thread, module ) )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_create failed. Unloading.", thread_tech_id );
+       Json_node_unref ( module->config );
        dlclose( module->dl_handle );
        g_free(module);
        return;
