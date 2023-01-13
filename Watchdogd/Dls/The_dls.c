@@ -476,6 +476,11 @@
        usleep(Partage->com_dls.temps_sched);
        sched_yield();
      }
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG, "Waiting for Liste_msg empty" );
+    while ( Partage->com_msrv.liste_msg ) sleep(1);                    /* Attente traitement de la file de message vers l'api */
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG, "Waiting for Liste_visuel empty" );
+    while ( Partage->com_msrv.liste_visuel ) sleep(1);                /* Attente traitement de la file des visuels vers l'api */
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG, "Unloading all Plugins" );
     Dls_Decharger_plugins();                                                                  /* Dechargement des modules DLS */
     Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "DLS Down (%p)", pthread_self() );
