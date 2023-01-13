@@ -234,8 +234,7 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void API_on_API_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { g_object_unref(Partage->com_msrv.API_websocket);
-    Partage->com_msrv.API_websocket = NULL;
+  { Partage->com_msrv.API_websocket = NULL;
     Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Close. Reboot Needed!" );
     /* Partage->com_msrv.Thread_run = FALSE; */
   }
@@ -323,6 +322,9 @@ end:
        sched_yield();
      }
     API_ws_end();
+    g_slist_free    ( Partage->com_msrv.liste_visuel ); Partage->com_msrv.liste_visuel = NULL;
+    g_slist_foreach ( Partage->com_msrv.liste_msg, (GFunc)g_free, NULL );
+    g_slist_free    ( Partage->com_msrv.liste_msg ); Partage->com_msrv.liste_msg    = NULL;
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
