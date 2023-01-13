@@ -272,7 +272,6 @@
     g_snprintf( signature, sizeof(signature), "$1$%s", hash_string );
 
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg = soup_message_new ( method, query );
     Info_new ( __func__, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
     SoupMessageHeaders *headers = soup_message_get_request_headers( soup_msg );
@@ -280,7 +279,7 @@
     soup_message_headers_append ( headers, "X-Ovh-Consumer",    Json_get_string ( module->config, "ovh_consumer_key" ) );
     soup_message_headers_append ( headers, "X-Ovh-Signature",   signature );
     soup_message_headers_append ( headers, "X-Ovh-Timestamp",   timestamp );
-    JsonNode *response = Http_Send_json_request_from_thread ( module, connexion, soup_msg, RootNode );
+    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, RootNode );
     Json_node_unref ( response );
     Json_node_unref ( RootNode );
 
@@ -291,7 +290,6 @@
      }
     else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, telephone );
     g_object_unref( soup_msg );
-    soup_session_abort ( connexion );
   }
 /******************************************************************************************************************************/
 /* Smsg_send_to_all_authorized_recipients : Envoi à tous les portables autorisés                                              */

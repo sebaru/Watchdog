@@ -311,14 +311,12 @@
     Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, dls_run );
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Http_traiter_dls_run_set: Set un bit interne                                                                               */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_dls_run_set ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
-  { JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
+ void Http_traiter_dls_run_set ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
+  { if (!request) return;
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
             Json_has_member ( request, "classe" ) && Json_has_member ( request, "valeur" )
            )
@@ -379,28 +377,24 @@
        Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
      }
     else soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Wrong Class" );
-    Json_node_unref(request);
     g_free(tech_id);
     g_free(acronyme);
     g_free(classe);
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
+/* Http_traiter_dls_run_acquitter: Acquitte un dls                                                                            */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_dls_run_acquitter ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
-  { JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
+ void Http_traiter_dls_run_acquitter ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
+  { if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { Json_node_unref(request);
-       soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     Dls_Acquitter_plugin ( Json_get_string ( request, "tech_id" ) );
-    Json_node_unref(request);
     Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

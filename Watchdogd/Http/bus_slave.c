@@ -45,7 +45,7 @@
        goto end;
      }
 
-    JsonNode *response = Http_Send_json_request_from_thread ( module, module->Master_session, soup_msg, NULL); /* SYNC */
+    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL); /* SYNC */
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status(soup_msg);
@@ -76,11 +76,11 @@ end:
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
-       goto end;
+       return(FALSE);
      }
     g_signal_connect ( G_OBJECT(soup_msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
 
-    JsonNode *response = Http_Send_json_request_from_thread ( module, module->Master_session, soup_msg, RootNode ); /* SYNC */
+    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, RootNode ); /* SYNC */
     Json_node_unref( response );
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
@@ -91,7 +91,6 @@ end:
          { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
     else { retour = TRUE; }
     g_object_unref( soup_msg );
-end:
     return(retour);
   }
 /******************************************************************************************************************************/

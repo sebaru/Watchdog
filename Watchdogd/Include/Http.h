@@ -92,8 +92,8 @@
  extern void Http_traiter_status  ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_dls_status ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_dls_run    ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_dls_run_set ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_dls_run_acquitter ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
+ extern void Http_traiter_dls_run_set ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
+ extern void Http_traiter_dls_run_acquitter ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
 
  extern void Http_traiter_set_di_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
  extern void Http_traiter_set_ai_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );

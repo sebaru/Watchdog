@@ -431,9 +431,9 @@
 /******************************************************************************************************************************/
  JsonNode *Http_Msg_to_Json ( SoupServerMessage *msg )
   { gsize taille;
+
     SoupMessageBody *body = soup_server_message_get_request_body ( msg );
     GBytes *buffer        = soup_message_body_flatten ( body );
-
     JsonNode *request     = Json_get_from_string ( g_bytes_get_data ( buffer, &taille ) );
     g_bytes_unref(buffer);
     return(request);
@@ -478,8 +478,8 @@
         { Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, "Parsing Request Failed", NULL );
           return;
         }
-            if (!strcasecmp ( path, "/dls/run/set" ))      Http_traiter_dls_run_set       ( server, msg, path, query, user_data );
-       else if (!strcasecmp ( path, "/dls/run/acquitter")) Http_traiter_dls_run_acquitter ( server, msg, path, query, user_data );
+            if (!strcasecmp ( path, "/dls/run/set" ))      Http_traiter_dls_run_set       ( server, msg, path, request );
+       else if (!strcasecmp ( path, "/dls/run/acquitter")) Http_traiter_dls_run_acquitter ( server, msg, path, request );
        else if (!strcasecmp ( path, "/set_di"))            Http_traiter_set_di_post       ( server, msg, path, request );
        else if (!strcasecmp ( path, "/set_ai"))            Http_traiter_set_ai_post       ( server, msg, path, request );
        else if (!strcasecmp ( path, "/set_cde"))           Http_traiter_set_cde_post      ( server, msg, path, request );

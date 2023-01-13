@@ -91,7 +91,7 @@
        return(NULL);
      }
 
-    SoupSession *session = soup_session_new_with_options( "user-agent", "Abls-habitat Agent", NULL );
+    SoupSession *session = soup_session_new_with_options( "user-agent", "Abls-habitat Agent", "max-conns", 10, NULL );
     JsonNode *ResponseNode = Http_Send_json_request_from_agent ( session, soup_msg, NULL );
     g_object_unref ( session );
 

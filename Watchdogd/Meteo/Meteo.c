@@ -46,14 +46,12 @@
     gchar *code_insee = Json_get_string ( module->config, "code_insee" );
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/ephemeride/0?token=%s&insee=%s", token, code_insee );
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
-             "Starting getting data for code_insee '%s'", code_insee );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Start getting data for code_insee '%s'", code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
-    SoupMessage *soup_msg  = soup_message_new ( "GET", query );
-    JsonNode *response = Http_Send_json_request_from_thread ( module, connexion, soup_msg, NULL );
-    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
-    gint   status_code   = soup_message_get_status ( soup_msg );
+    SoupMessage *soup_msg = soup_message_new ( "GET", query );
+    JsonNode *response    = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
+    gchar *reason_phrase  = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code    = soup_message_get_status ( soup_msg );
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
     if (status_code!=200) Thread_send_comm_to_master ( module, FALSE );
@@ -80,7 +78,6 @@
      }
     Json_node_unref ( response );
     g_object_unref( soup_msg );
-    soup_session_abort ( connexion );
   }
 /******************************************************************************************************************************/
 /* Meteo_update_forecast: Met a jour le forecast auprès de meteoconcept                                                       */
@@ -124,18 +121,17 @@
     Info_new( __func__, module->Thread_debug, LOG_DEBUG,
              "%s: Starting getting data for code_insee '%s'", thread_tech_id, code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
-    JsonNode *response = Http_Send_json_request_from_thread ( module, connexion, soup_msg, NULL );
+    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status ( soup_msg );
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
-    if (status_code==200) Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module );
-    Json_node_unref ( response );
     g_object_unref( soup_msg );
-    soup_session_abort ( connexion );
+
+    if (status_code==200) { Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module ); }
+    Json_node_unref ( response );
   }
 /******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */

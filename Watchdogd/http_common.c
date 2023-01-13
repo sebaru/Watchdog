@@ -234,7 +234,7 @@
 /* Entrée: les données envoyer                                                                                                */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupSession *session, SoupMessage *soup_msg, JsonNode *RootNode )
+ JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode )
   {
     if (RootNode)
      { gchar *buffer = Json_node_to_string ( RootNode );
@@ -246,7 +246,7 @@
      } else Http_Add_Thread_signature ( module, soup_msg, NULL, 0 );
 
     GError *error = NULL;
-    GBytes *response = soup_session_send_and_read ( session, soup_msg, NULL, &error ); /* SYNC */
+    GBytes *response = soup_session_send_and_read ( module->Master_session, soup_msg, NULL, &error ); /* SYNC */
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status(soup_msg);
