@@ -148,7 +148,7 @@
     gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %d", thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
-    /*Http_Post_to_local_BUS_DI( canal->module, canal->map_tech_id, canal->map_acronyme, (valeur !=0 ? TRUE : FALSE) );*/
+    /*Http_Post_thread_DI_to_local_BUS( canal->module, canal->map_tech_id, canal->map_acronyme, (valeur !=0 ? TRUE : FALSE) );*/
   }
 /******************************************************************************************************************************/
 /* Phidget_AnalogAttach: Appelé quand un canal analogique est en cours d'attachement                                          */
