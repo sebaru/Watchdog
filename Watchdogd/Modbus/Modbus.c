@@ -834,7 +834,7 @@
                       }
                      default : new_valeur=0.0; new_in_range=FALSE;
                    }
-                  Http_Post_to_local_BUS_AI ( module, vars->AI[cpt], new_valeur, new_in_range );
+                  Http_Post_thread_AI_to_local_BUS ( module, vars->AI[cpt], new_valeur, new_in_range );
                 }
              }
             vars->mode = MODBUS_SET_DO;

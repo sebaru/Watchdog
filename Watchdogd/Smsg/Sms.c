@@ -345,7 +345,7 @@
      }
     g_list_free(recipients);
     Json_node_unref ( UsersNode );
-    Http_Post_to_local_BUS_AI ( module, vars->ai_nbr_sms, vars->nbr_sms, TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->ai_nbr_sms, vars->nbr_sms, TRUE );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -596,7 +596,7 @@ end_user:
         { if (Lire_sms_gsm(module)==FALSE) { Smsg_disconnect(module); }
           GSM_SignalQuality sig;
           GSM_GetSignalQuality( vars->gammu_machine, &sig );
-          Http_Post_to_local_BUS_AI ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
+          Http_Post_thread_AI_to_local_BUS ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
         }
      }
     Smsg_disconnect(module);

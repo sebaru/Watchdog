@@ -112,28 +112,29 @@ end:
      }
   }
 /******************************************************************************************************************************/
-/* Http_Post_to_local_BUS_AI: Envoie le bit AI au master                                                                      */
-/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                           */
+/* Http_Post_thread_AI_to_local_BUS: Envoie le bit AI au master                                                                      */
+/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_AI ( struct THREAD *module, JsonNode *ai, gdouble valeur, gboolean in_range )
+ void Http_Post_thread_AI_to_local_BUS ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
   { if (!module) return;
     gboolean update = FALSE;
-    if (!Json_has_member ( ai, "valeur" )) { update = TRUE; }
+    if (!Json_has_member ( thread_ai, "valeur" )) { update = TRUE; }
     else
-     { gdouble  old_valeur   = Json_get_double ( ai, "valeur" );
-       gboolean old_in_range = Json_get_bool   ( ai, "in_range" );
+     { gdouble  old_valeur   = Json_get_double ( thread_ai, "valeur" );
+       gboolean old_in_range = Json_get_bool   ( thread_ai, "in_range" );
        if ( old_valeur != valeur || old_in_range != in_range ) update = TRUE;
      }
     if (update)
-     { Json_node_add_double ( ai, "valeur", valeur );
-       Json_node_add_bool   ( ai, "in_range", in_range );
-       Http_Post_to_local_BUS ( module, "SET_AI", ai );
+     { Json_node_add_double ( thread_ai, "valeur", valeur );
+       Json_node_add_bool   ( thread_ai, "in_range", in_range );
+       if (Config.instance_is_master == TRUE) Dls_data_set_AI_from_thread_ai ( thread_ai );
+       else Http_Post_to_local_BUS ( module, "SET_AI", thread_ai );
      }
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */
-/* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Http_Post_to_local_BUS_CDE ( struct THREAD *module, gchar *tech_id, gchar *acronyme )
@@ -247,40 +248,11 @@ end:
  void Http_traiter_set_ai_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
-    if (!thread_tech_id)
-     { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
-       return;
-     }
 
-    if (! (Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
-           Json_has_member ( request, "unite" ) && Json_has_member ( request, "archivage" )
-          )
-       )
+    if ( Dls_data_set_AI_from_thread_ai ( request ) == FALSE )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_AI: wrong parameters from '%s'", thread_tech_id );
        Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        return;
-     }
-
-    gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-    gchar *tech_id         = thread_tech_id;
-    gchar *acronyme        = thread_acronyme;
-
-    if (MSRV_Map_from_thread ( request ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) )
-     { tech_id  = Json_get_string ( request, "tech_id" );
-       acronyme = Json_get_string ( request, "acronyme" );
-     }
-    Info_new( __func__, Config.log_bus, LOG_INFO,
-              "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d)",
-              thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-              Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
-    struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
-    if (bit)
-     { Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-       bit->archivage = Json_get_int ( request, "archivage" );
-       g_snprintf ( bit->unite,   sizeof(bit->unite),   Json_get_string ( request, "unite" ) );
-       g_snprintf ( bit->libelle, sizeof(bit->libelle), Json_get_string ( request, "libelle" ) );
      }
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "AI set", NULL );
   }

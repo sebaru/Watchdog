@@ -100,6 +100,43 @@
               "Changing DLS_AI '%s:%s'=%f", bit->tech_id, bit->acronyme, bit->valeur );
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_AI_from_thread_ai: Positionne une AI dans DLS depuis une AI 'thread'                                          */
+/* Entrées: la structure JSON                                                                                                 */
+/* Sortie : TRUE si OK, sinon FALSE                                                                                           */
+/******************************************************************************************************************************/
+ gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request )
+  { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
+           Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
+           Json_has_member ( request, "unite" ) && Json_has_member ( request, "archivage" ) &&
+           Json_has_member ( request, "libelle" )
+          )
+       ) return(FALSE);
+
+    gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
+    gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
+    gchar *libelle         = Json_get_string ( request, "libelle" );
+    gchar *tech_id         = thread_tech_id;
+    gchar *acronyme        = thread_acronyme;
+
+    if (MSRV_Map_from_thread ( request ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) )
+     { tech_id  = Json_get_string ( request, "tech_id" );
+       acronyme = Json_get_string ( request, "acronyme" );
+     }
+    Info_new( __func__, Config.log_bus, LOG_INFO,
+              "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
+              thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
+              Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ),
+              Json_get_bool ( request, "in_range" ), libelle );
+    struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
+    if (bit)
+     { Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
+       bit->archivage = Json_get_int ( request, "archivage" );
+       g_snprintf ( bit->unite,   sizeof(bit->unite),   Json_get_string ( request, "unite" ) );
+       g_snprintf ( bit->libelle, sizeof(bit->libelle), Json_get_string ( request, "libelle" ) );
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Dls_AI_to_json : Formate un bit au format JSON                                                                             */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
