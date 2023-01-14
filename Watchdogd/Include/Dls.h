@@ -262,5 +262,6 @@
                                                                                                    /* Dans The_dls_WATCHDOG.c */
  extern void Dls_data_WATCHDOG_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_WATCHDOG_to_json ( JsonNode *element, struct DLS_WATCHDOG *bit );
+ extern gboolean Dls_data_set_WATCHDOG_from_thread_watchdog ( JsonNode *request );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

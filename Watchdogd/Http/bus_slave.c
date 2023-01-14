@@ -148,18 +148,19 @@ end:
     Json_node_unref(body);
   }
 /******************************************************************************************************************************/
-/* Http_Post_to_local_BUS_WATCHDOG: Envoie le bit WATCHDOG au master selon le status                                          */
-/* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Http_Post_WATCHDOG_to_local_BUS: Envoie le bit WATCHDOG au master selon le status                                          */
+/* Entrée: la structure THREAD, le tech_id, l'acronyme, la consigne                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_WATCHDOG ( struct THREAD *module, gchar *acronyme, gint consigne )
+ void Http_Post_thread_WATCHDOG_to_local_BUS ( struct THREAD *module, gchar *thread_acronyme, gint consigne )
   { if (!module) return;
-    JsonNode *body = Json_node_create ();
-    if(!body) return;
-    Json_node_add_string ( body, "acronyme", acronyme );
-    Json_node_add_int    ( body, "consigne", consigne );
-    Http_Post_to_local_BUS ( module, "SET_WATCHDOG", body );
-    Json_node_unref(body);
+    JsonNode *thread_watchdog = Json_node_create ();
+    if(!thread_watchdog) return;
+    Json_node_add_string ( thread_watchdog, "thread_acronyme", thread_acronyme );
+    Json_node_add_int    ( thread_watchdog, "consigne", consigne );
+    if (Config.instance_is_master == TRUE) Dls_data_set_WATCHDOG_from_thread_watchdog ( thread_watchdog );
+    else Http_Post_to_local_BUS ( module, "SET_WATCHDOG", thread_watchdog );
+    Json_node_unref(thread_watchdog);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_get_do: Donne les DO au thread appelant                                                                       */
@@ -203,17 +204,11 @@ end:
        return;
      }
 
-    if (! (Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "consigne" ) ) )
+    if ( Dls_data_set_WATCHDOG_from_thread_watchdog ( request ) == FALSE )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: wrong parameters from '%s'", thread_tech_id );
        Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        return;
      }
-
-    Info_new( __func__, Config.log_bus, LOG_INFO,
-              "SET_WATCHDOG for: '%s:%s'=%d", thread_tech_id,
-              Json_get_string ( request, "acronyme" ), Json_get_int ( request, "consigne" ) );
-    struct DLS_WATCHDOG *bit = Dls_data_lookup_WATCHDOG ( thread_tech_id, Json_get_string ( request, "acronyme" ) );
-    if (bit) Dls_data_set_WATCHDOG ( NULL, bit, Json_get_int ( request, "consigne" ) );
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "WATCHDOG set", NULL );
   }
 /******************************************************************************************************************************/

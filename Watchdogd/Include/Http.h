@@ -116,7 +116,7 @@
  extern void Http_Post_to_local_BUS_DI ( struct THREAD *module, JsonNode *di, gboolean etat );
  extern void Http_Post_thread_AI_to_local_BUS ( struct THREAD *module, JsonNode *ai, gdouble valeur, gboolean in_range );
  extern void Http_Post_to_local_BUS_CDE ( struct THREAD *module, gchar *tech_id, gchar *acronyme );
- extern void Http_Post_to_local_BUS_WATCHDOG ( struct THREAD *module, gchar *acronyme, gint consigne );
+ extern void Http_Post_thread_WATCHDOG_to_local_BUS ( struct THREAD *module, gchar *acronyme, gint consigne );
 
  extern void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
                                                          SoupWebsocketConnection* connection, gpointer user_data );
