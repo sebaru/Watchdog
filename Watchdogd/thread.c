@@ -203,6 +203,8 @@
  gboolean Thread_every_hour ( struct THREAD *module )
   { if (Partage->top >= module->hour_top + 36000)                                                    /* Toutes les 1 secondes */
      { module->hour_top = Partage->top;
+#warning waiting for https://github.com/GNOME/libsoup/commit/d20c6601664624116f3dc43f21c7ec4a186cf8d3 before removing
+       soup_session_abort ( module->Master_session );
        return(TRUE);
      }
     return(FALSE);
