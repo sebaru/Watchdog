@@ -94,25 +94,26 @@ end:
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Http_Post_to_local_BUS_DI: Envoie le bit DI au master                                                                      */
-/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                           */
+/* Http_Post_thread_DI_to_local_BUS: Envoie le bit DI au master                                                               */
+/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_DI ( struct THREAD *module, JsonNode *di, gboolean etat )
+ void Http_Post_thread_DI_to_local_BUS ( struct THREAD *module, JsonNode *thread_di, gboolean etat )
   { if (!module) return;
     gboolean update = FALSE;
-    if (!Json_has_member ( di, "etat" )) { update = TRUE; }
+    if (!Json_has_member ( thread_di, "etat" )) { update = TRUE; }
     else
-     { gboolean old_etat = Json_get_bool ( di, "etat" );
+     { gboolean old_etat = Json_get_bool ( thread_di, "etat" );
        if ( old_etat != etat ) update = TRUE;
      }
     if (update)
-     { Json_node_add_bool ( di, "etat", etat );
-       Http_Post_to_local_BUS ( module, "SET_DI", di );
+     { Json_node_add_bool ( thread_di, "etat", etat );
+       if (Config.instance_is_master == TRUE) Dls_data_set_DI_from_thread_di ( thread_di );
+       else Http_Post_to_local_BUS ( module, "SET_DI", thread_di );
      }
   }
 /******************************************************************************************************************************/
-/* Http_Post_thread_AI_to_local_BUS: Envoie le bit AI au master                                                                      */
+/* Http_Post_thread_AI_to_local_BUS: Envoie le bit AI au master                                                               */
 /* Entrée: la structure THREAD, le json associé, l'etat attentu                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -264,35 +265,12 @@ end:
  void Http_traiter_set_di_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
-    if (!thread_tech_id)
-     { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
-       return;
-     }
 
-    if (! (Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "etat" )&& Json_has_member ( request, "libelle" )
-          )
-       )
+    if ( Dls_data_set_DI_from_thread_di ( request ) == FALSE )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI: wrong parameters from '%s'", thread_tech_id );
        Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        return;
      }
-
-    gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-    gchar *tech_id         = thread_tech_id;
-    gchar *acronyme        = thread_acronyme;
-
-    if (MSRV_Map_from_thread ( request ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) )
-     { tech_id  = Json_get_string ( request, "tech_id" );
-       acronyme = Json_get_string ( request, "acronyme" );
-     }
-    Info_new( __func__, Config.log_bus, LOG_INFO,
-              "SET_DI from '%s': '%s:%s/'%s:%s'=%d",
-              thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-              Json_get_bool ( request, "etat" ) );
-    struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
-    if (bit) Dls_data_set_DI ( NULL, bit, Json_get_bool ( request, "etat" ) );
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "DI set", NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

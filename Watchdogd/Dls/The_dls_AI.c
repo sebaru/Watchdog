@@ -122,8 +122,7 @@
      { tech_id  = Json_get_string ( request, "tech_id" );
        acronyme = Json_get_string ( request, "acronyme" );
      }
-    Info_new( __func__, Config.log_bus, LOG_INFO,
-              "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
+    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ),
               Json_get_bool ( request, "in_range" ), libelle );
