@@ -105,7 +105,7 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_set_WATCHDOG_from_thread_watchdog ( JsonNode *request )
   { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "consigne" ) && Json_has_member ( request, "libelle" )
+           Json_has_member ( request, "consigne" )
           )
        ) return(FALSE);
 
