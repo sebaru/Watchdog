@@ -91,7 +91,7 @@
        return(NULL);
      }
 
-    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( Partage->com_msrv.API_session, , soup_msg, NULL );
+    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( Partage->com_msrv.API_session, soup_msg, NULL );
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status(soup_msg);
