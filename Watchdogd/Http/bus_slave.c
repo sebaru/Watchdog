@@ -78,6 +78,7 @@ end:
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
        return(FALSE);
      }
+    g_object_set ( soup_msg, "http-version", SOUP_HTTP_1_0, NULL );
     g_signal_connect ( G_OBJECT(soup_msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
 
     JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, RootNode ); /* SYNC */

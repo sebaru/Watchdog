@@ -278,12 +278,12 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode )
-  { soup_server_message_set_status( msg, code, message );
-    if (!RootNode) soup_server_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
+  { if (!RootNode) soup_server_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
     else
      { gchar *buf = Json_node_to_string ( RootNode );
        soup_server_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
        Json_node_unref ( RootNode );
      }
+    soup_server_message_set_status( msg, code, message );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
