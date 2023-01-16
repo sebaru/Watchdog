@@ -12,6 +12,7 @@ Nice=10
 MemoryHigh=3G
 MemoryMax=4G
 MemorySwapMax=2G
+LimitNOFILE=10000000
 
 [Install]
 WantedBy=multi-user.target
