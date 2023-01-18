@@ -262,6 +262,7 @@
  struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupServerMessage *msg )
   { struct HTTP_CLIENT_SESSION *result = NULL;
 
+     if (!Partage->com_http.liste_http_clients) return(NULL);
      struct HTTP_CLIENT_SESSION *session = Partage->com_http.liste_http_clients->data;
      return(session);
 
