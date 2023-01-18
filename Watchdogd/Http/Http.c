@@ -262,6 +262,10 @@
  struct HTTP_CLIENT_SESSION *Http_rechercher_session_by_msg ( SoupServerMessage *msg )
   { struct HTTP_CLIENT_SESSION *result = NULL;
 
+     struct HTTP_CLIENT_SESSION *session = Partage->com_http.liste_http_clients->data;
+     return(session);
+
+
     if ( Config.instance_is_master == FALSE )
      { static struct HTTP_CLIENT_SESSION Slave_session = { -1, "system_user", "internal device", "Watchdog Server", "none", "no_sid", 9, 0 };
        return(&Slave_session);
