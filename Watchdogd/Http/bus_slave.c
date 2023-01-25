@@ -282,7 +282,10 @@ end:
     if(!thread_watchdog) return;
     Json_node_add_string ( thread_watchdog, "thread_acronyme", thread_acronyme );
     Json_node_add_int    ( thread_watchdog, "consigne", consigne );
-    if (Config.instance_is_master == TRUE) Dls_data_set_WATCHDOG_from_thread_watchdog ( thread_watchdog );
+    if (Config.instance_is_master == TRUE)
+     { Json_node_add_string ( thread_watchdog, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+       Dls_data_set_WATCHDOG_from_thread_watchdog ( thread_watchdog );
+     }
     else Http_Post_to_local_BUS ( module, "SET_WATCHDOG", thread_watchdog );
     Json_node_unref(thread_watchdog);
   }
