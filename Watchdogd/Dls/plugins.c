@@ -327,12 +327,14 @@
 /* Sortie : les alias sont mappés                                                                                             */
 /******************************************************************************************************************************/
  static void Dls_plugins_remap_all_alias ( void )
-  { GSList *liste = Partage->com_dls.Dls_plugins;
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    GSList *liste = Partage->com_dls.Dls_plugins;
     while (liste)
      { struct DLS_PLUGIN *plugin = liste->data;
        if (plugin->remap_all_alias) plugin->remap_all_alias();
        liste = g_slist_next(liste);
      }
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_Importer_un_plugin: Ajoute ou Recharge un plugin dans la liste des plugins                                             */
@@ -515,7 +517,6 @@
  void Dls_Reseter_un_plugin ( gchar *tech_id )
   { struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( tech_id );
     if (found) Dls_Export_Data_to_API ( found );      /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
-    pthread_mutex_lock( &Partage->com_dls.synchro );
     struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( tech_id );
     if (dls)
      { Reseter_all_bit_interne ( dls );
@@ -524,7 +525,6 @@
      }
     else Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "'%s': error when resetting", tech_id );
     Dls_plugins_remap_all_alias();
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
     Dls_Load_horloge_ticks();
   }
 /******************************************************************************************************************************/
