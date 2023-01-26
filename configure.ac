@@ -21,7 +21,6 @@ AC_PROG_MAKE_SET
 AC_CONFIG_MACRO_DIR([m4])
 AC_SEARCH_LIBS([strerror],[cposix])
 AM_PROG_CC_C_O
-
 PKG_PROG_PKG_CONFIG
 
 AC_SUBST([systemdsystemunitdir], $($PKG_CONFIG --variable=systemdsystemunitdir systemd) )
@@ -34,6 +33,7 @@ LT_INIT
 
 AM_PATH_GLIB_2_0( 2.2.2 )
 GLIB_GSETTINGS
+PKG_CHECK_MODULES( LIBSOUP, libsoup-3.0 >= 3.3 )
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
