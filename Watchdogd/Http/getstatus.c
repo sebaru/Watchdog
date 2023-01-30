@@ -37,24 +37,18 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- void Http_traiter_status ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                            SoupClientContext *client, gpointer user_data )
+ void Http_traiter_status ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
   { struct tm *temps;
     gchar date[64];
     gint num;
 
-    if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path, client );
+    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-	      soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+	      soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
                                                                       /* Lancement de la requete de recuperation des messages */

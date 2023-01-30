@@ -99,6 +99,28 @@
     return( bit->etat );
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_WATHDOG_from_thread_watchdog: Positionne un Watchdog dans DLS depuis un Watchdog 'thread'                     */
+/* Entrées: la structure JSON                                                                                                 */
+/* Sortie : TRUE si OK, sinon FALSE                                                                                           */
+/******************************************************************************************************************************/
+ gboolean Dls_data_set_WATCHDOG_from_thread_watchdog ( JsonNode *request )
+  { if (!Json_has_member ( request, "thread_tech_id" ))
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: missing thread_tech_id" );  return(FALSE); }
+    if (!Json_has_member ( request, "thread_acronyme" ) )
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: missing thread_acronyme" ); return(FALSE); }
+    if (!Json_has_member ( request, "consigne" ) )
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: missing consigne" );        return(FALSE); }
+
+    gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
+    gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
+    gint consigne          = Json_get_int ( request, "consigne" );
+    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_WATCHDOG for: '%s:%s'=%d",
+              thread_tech_id, thread_acronyme, consigne );
+    struct DLS_WATCHDOG *bit = Dls_data_lookup_WATCHDOG ( thread_tech_id, thread_acronyme );
+    if (bit) Dls_data_set_WATCHDOG ( NULL, bit, consigne );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Dls_DI_to_json : Formate un bit au format JSON                                                                             */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */

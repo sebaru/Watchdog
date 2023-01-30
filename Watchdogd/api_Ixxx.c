@@ -51,8 +51,8 @@
      { struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
        Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
        Info_new( __func__, Config.log_msrv, LOG_INFO,
-                "Send VISUEL %s:%s mode=%s, color=%s, cligno=%d.",
-                 visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->cligno
+                "Send VISUEL %s:%s mode=%s, color=%s, cligno=%d, libelle='%s'",
+                 visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->cligno, visuel->libelle
                );
        JsonNode *element = Json_node_create ();
        Dls_VISUEL_to_json ( element, visuel );

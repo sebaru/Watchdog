@@ -34,15 +34,10 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_traiter_histo_alive ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
-                                 SoupClientContext *client, gpointer user_data)
+ void Http_traiter_histo_alive ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data)
   { gchar critere[32];
-    if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
-		     return;
-     }
 
-    Http_print_request ( server, msg, path, client );
+    Http_print_request ( server, msg, path );
     gpointer syn_id_src = g_hash_table_lookup ( query, "syn_id" );
     if (syn_id_src) g_snprintf( critere, sizeof(critere), "AND syn.syn_id=%d", atoi(syn_id_src) );
     else bzero ( critere, sizeof(critere) );
@@ -51,7 +46,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
@@ -65,15 +60,11 @@
                                   " INNER JOIN syns as syn ON syn.syn_id = dls.syn_id"
                                   " INNER JOIN syns as parent_syn ON parent_syn.syn_id = syn.parent_id"
                                   " WHERE alive = 1 %s ORDER BY histo.date_create DESC", critere ) == FALSE)
-     { soup_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR);
+     { soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL);
        Json_node_unref ( RootNode );
        return;
      }
 
-    gchar *buf = Json_node_to_string ( RootNode );
-    Json_node_unref ( RootNode );
-/*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
-    soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
+    Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, RootNode );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

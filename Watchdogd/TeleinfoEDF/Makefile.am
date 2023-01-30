@@ -12,9 +12,9 @@ AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include
 
 libwatchdog_server_teleinfoedf_la_LDFLAGS = -rdynamic \
-                                            `pkg-config --libs glib-2.0 json-glib-1.0 libsoup-2.4` \
+                                            `pkg-config --libs glib-2.0 json-glib-1.0 libsoup-3.0` \
                                             `mysql_config --libs`
 
-libwatchdog_server_teleinfoedf_la_CFLAGS = `pkg-config --cflags glib-2.0 json-glib-1.0 libsoup-2.4` \
+libwatchdog_server_teleinfoedf_la_CFLAGS = `pkg-config --cflags glib-2.0 json-glib-1.0 libsoup-3.0` \
                                            `mysql_config --cflags`
 

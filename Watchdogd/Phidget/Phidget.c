@@ -63,7 +63,7 @@
      { Info_new( __func__, canal->module->Thread_debug, LOG_ERR,
 		         "%s: Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;", thread_tech_id,
                  canal->map_tech_id, canal->map_acronyme, description, code );
-       /*Http_Post_to_local_BUS_AI ( canal->module, canal->map_tech_id, canal->map_acronyme, 0.0, FALSE );*/
+       /*Http_Post_thread_AI_to_local_BUS ( canal->module, canal->map_tech_id, canal->map_acronyme, 0.0, FALSE );*/
      }
     else if ( !strcmp ( canal->classe, "DigitalInput" ) )
      { Info_new( __func__, canal->module->Thread_debug, LOG_ERR,
@@ -86,7 +86,7 @@
     gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f", thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
-    /*Http_Post_to_local_BUS_AI ( module, canal->ai, valeur, TRUE );*/
+    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
   }
 /******************************************************************************************************************************/
 /* Phidget_onTemperatureSensorChange: Appelé quand un module I/O Temperaute a changé de valeur                                */
@@ -98,7 +98,7 @@
     gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f", thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
-    /*Http_Post_to_local_BUS_AI ( module, canal->ai, valeur, TRUE );*/
+    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
@@ -110,7 +110,7 @@
     gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f", thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
-    /*Http_Post_to_local_BUS_AI ( module, canal->ai, valeur, TRUE );*/
+    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                   */
@@ -123,7 +123,7 @@
     gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f", thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
-    /*Http_Post_to_local_BUS_AI ( module, canal->ai, valeur, TRUE );*/
+    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageRatoiInputChange: Appelé quand un module I/O RatioInput a changé de valeur                                */
@@ -136,7 +136,7 @@
     gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %f", thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
-    /*Http_Post_to_local_BUS_AI ( module, canal->ai, valeur, TRUE );*/
+    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
@@ -148,7 +148,7 @@
     gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
               "%s: '%s':'%s' = %d", thread_tech_id, canal->map_tech_id, canal->map_acronyme, valeur );
-    /*Http_Post_to_local_BUS_DI( canal->module, canal->map_tech_id, canal->map_acronyme, (valeur !=0 ? TRUE : FALSE) );*/
+    /*Http_Post_thread_DI_to_local_BUS( canal->module, canal->map_tech_id, canal->map_acronyme, (valeur !=0 ? TRUE : FALSE) );*/
   }
 /******************************************************************************************************************************/
 /* Phidget_AnalogAttach: Appelé quand un canal analogique est en cours d'attachement                                          */

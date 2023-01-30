@@ -38,7 +38,7 @@
   { if ( ! (Json_has_member ( request, "uuid" ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "description" ) &&
             Json_has_member ( request, "device" )
            ) )
-     { soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
@@ -65,7 +65,7 @@
     g_free(description);
     g_free(device);
 
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 #endif

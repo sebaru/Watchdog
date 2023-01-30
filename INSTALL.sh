@@ -15,7 +15,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y libtool automake autoconf gcc gcc-c++ redhat-rpm-config
   dnf install -y glib2-devel bison flex giflib-devel openssl
   dnf install -y nut-devel mariadb-devel libuuid-devel
-  dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup-devel
+  dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup3-devel
   dnf install -y json-glib-devel gammu-devel
   dnf install -y mpg123 sox libusb-devel libgpiod-devel
   dnf install -y librsvg2-devel
@@ -39,7 +39,8 @@ if [ "$SOCLE" = "fedora" ]
   rm -rf libphidget22*
 
   echo "/usr/local/lib" > /etc/ld.so.conf.d/local.conf
-
+  echo "/usr/local/lib64" >> /etc/ld.so.conf.d/local.conf
+  ldconfig
 fi
 
 
@@ -61,7 +62,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y sox libsox-fmt-all python3-pip mpg123
   apt install -y libjson-glib-dev libgpiod-dev
   apt install -y libgtk-3-dev libgoocanvas-2.0-dev
-  apt install -y libsoup2.4-dev librsvg2-dev alsa-utils libsystemd-dev
+  apt install -y libsoup-3.0-dev librsvg2-dev alsa-utils libsystemd-dev
   pip3 install gTTS-token gTTS --upgrade
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
   apt install -y libphidget22 libphidget22-dev
@@ -75,7 +76,6 @@ make install
 cd ..
 rm -rf watchdogabls
 
-ldconfig
 systemctl daemon-reload
 systemctl start Watchdogd
 #      echo "Pour lancer Watchdog, tapez 'systemctl --user enable Watchdogd-user --now'"

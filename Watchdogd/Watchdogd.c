@@ -459,8 +459,10 @@
      }
 
 /************************************************* Init libsoup session *******************************************************/
-    Partage->com_msrv.API_session = soup_session_new_with_options( "idle_timeout", 60, "timeout", 10, "ssl-strict", TRUE,
-                                                                   "user-agent", "Abls-habitat Agent", NULL );
+    Partage->com_msrv.API_session = soup_session_new();
+    soup_session_set_user_agent   ( Partage->com_msrv.API_session, "Abls-habitat Agent" );
+    soup_session_set_timeout      ( Partage->com_msrv.API_session, 10 );
+    soup_session_set_idle_timeout ( Partage->com_msrv.API_session, 60 );
 
 /************************************************* Test Connexion to Global API ***********************************************/
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
