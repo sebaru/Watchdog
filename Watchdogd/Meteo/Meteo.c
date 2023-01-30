@@ -63,16 +63,14 @@
        gchar *sunrise       = Json_get_string ( ephemeride, "sunrise" );
        gchar *sunset        = Json_get_string ( ephemeride, "sunset" );
        if ( sscanf ( sunrise, "%d:%d", &heure, &minute ) == 2)
-        { Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunrise );
+        { Info_new( __func__, module->Thread_debug, LOG_INFO, "%s -> sunrise at %02d:%02d", city_name, heure, minute );
+          Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunrise );
           Mnemo_create_thread_HORLOGE_tick ( module, vars->sunrise, heure, minute );
-          Info_new( __func__, module->Thread_debug, LOG_INFO,
-                   "%s -> sunrise at %02d:%02d", city_name, heure, minute );
         }
        if ( sscanf ( sunset, "%d:%d", &heure, &minute ) == 2)
-        { Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunset );
+        { Info_new( __func__, module->Thread_debug, LOG_INFO, "%s ->  sunset at %02d:%02d", city_name, heure, minute );
+          Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunset );
           Mnemo_create_thread_HORLOGE_tick ( module, vars->sunset, heure, minute );
-          Info_new( __func__, module->Thread_debug, LOG_INFO,
-                   "%s ->  sunset at %02d:%02d", city_name, heure, minute );
         }
        Thread_send_comm_to_master ( module, TRUE );
      }
