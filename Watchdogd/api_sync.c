@@ -119,6 +119,28 @@
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
+ static void AGENT_upgrade_to ( gchar *branche )
+  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading to '%s' in progress", branche );
+    gint pid = getpid();
+    gint new_pid = fork();
+    if (new_pid<0)
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: erreur Fork" ); }
+    else if (!new_pid)
+     { g_strcanon ( branche, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_", '_' );
+       gchar chaine[256];
+       g_snprintf ( chaine, sizeof(chaine), "git clone -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
+       system(chaine);
+       system("cd temp_src; ./autogen.sh; sudo make install; cd ..; rm -rf temp_src;" );
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
+       kill (pid, SIGTERM);                                                                          /* Stop old processes */
+       exit(0);
+     }
+  }
+/******************************************************************************************************************************/
+/* API_handle_API_messages: Traite les messages recue de l'API                                                               */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void API_handle_API_messages ( void )
   {
     pthread_mutex_lock ( &Partage->com_msrv.synchro );
@@ -135,16 +157,7 @@
      }
     else if ( !strcasecmp( agent_tag, "UPGRADE") )
      { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading in progress" );
-       gint pid = getpid();
-       gint new_pid = fork();
-       if (new_pid<0)
-        { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: erreur Fork" ); }
-       else if (!new_pid)
-        { system("cd SRC; ./autogen.sh; sudo make install; " );
-          Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
-          kill (pid, SIGTERM);                                                                          /* Stop old processes */
-          exit(0);
-        }
+       AGENT_upgrade_to ( WTD_BRANCHE );
      }
     else if ( !strcasecmp( agent_tag, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
     else if ( !strcasecmp( agent_tag, "THREAD_RESTART") ) { Thread_Stop_one_thread ( request );
@@ -162,12 +175,17 @@
        Config.log_bus    = Json_get_bool ( request, "log_bus" );
        Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
        gboolean headless = Json_get_bool ( request, "headless" );
+       gchar *branche    = Json_get_string ( request, "branche" );
        Info_change_log_level ( Json_get_int ( request, "log_level" ) );
        Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d",
                  Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
        if (Config.headless != headless)
-        { Partage->com_msrv.Thread_run = FALSE;
-          Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
+        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
+          Partage->com_msrv.Thread_run = FALSE;
+        }
+       if (strcmp ( WTD_BRANCHE, branche ))
+        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: branche has changed, upgrading and rebooting" );
+          AGENT_upgrade_to ( branche );
         }
      }
     else if ( !strcasecmp( agent_tag, "REMAP") && Config.instance_is_master == TRUE) MSRV_Remap();
