@@ -74,8 +74,6 @@ ALL_LINGUAS=""
 
 AC_CONFIG_FILES([\
 Makefile \
-ClientGTK3/Makefile \
-ClientGTK3/Include/Makefile \
 Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Onduleur/Makefile \
