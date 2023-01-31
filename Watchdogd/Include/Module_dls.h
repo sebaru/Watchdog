@@ -157,7 +157,8 @@
   };
 
  struct DLS_VISUEL
-  { gchar    tech_id[32];
+  { gchar    forme[32];
+    gchar    tech_id[32];
     gchar    acronyme[64];
     gchar    libelle[128];                                                                                    /* Km, h, ° ... */
     gchar    mode[32];
