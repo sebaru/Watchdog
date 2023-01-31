@@ -313,10 +313,10 @@
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = plugin->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
+    liste_bit = plugin->Dls_data_VISUEL;              /* Decharge tous les visuels du module qui ne sont pas des commentaires */
     while(liste_bit)
      { struct DLS_VISUEL *visu = liste_bit->data;
-       Dls_data_set_VISUEL ( &plugin->vars, visu, "resetted", "black", FALSE, "resetted" );
+       if (strcmp(visu->forme, "comment")) Dls_data_set_VISUEL ( &plugin->vars, visu, "resetted", "black", FALSE, "resetted" );
        liste_bit = g_slist_next(liste_bit);
      }
 
