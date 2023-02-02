@@ -449,7 +449,7 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void HTTP_Handle_request_CB ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
-  { SoupMessageHeaders *headers = soup_server_message_get_request_headers ( msg );
+  { SoupMessageHeaders *headers = soup_server_message_get_response_headers ( msg );
     soup_message_headers_append ( headers, "Cache-Control", "no-store, must-revalidate" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Origin", "*" );
     soup_message_headers_append ( headers, "Access-Control-Allow-Methods", "*" );
