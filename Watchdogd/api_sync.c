@@ -188,9 +188,20 @@
           AGENT_upgrade_to ( branche );
         }
      }
-    else if ( !strcasecmp( agent_tag, "REMAP") && Config.instance_is_master == TRUE) MSRV_Remap();
-    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") && Config.instance_is_master == TRUE) Dls_Load_horloge_ticks();
-    else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") && Config.instance_is_master == TRUE)
+    else if (Config.instance_is_master == FALSE) goto end;
+
+    if ( !strcasecmp( agent_tag, "REMAP") ) MSRV_Remap();
+    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
+    else if ( !strcasecmp( agent_tag, "SYN_CLIC") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end; }
+       if ( !Json_has_member ( request, "acronyme" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end; }
+       gchar *tech_id  = Json_get_string ( request, "tech_id" );
+       gchar *acronyme = Json_get_string ( request, "acronyme" );
+       Envoyer_commande_dls_data ( tech_id, acronyme );
+     }
+    else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_ACQUIT: tech_id is missing" );
           goto end;
@@ -198,7 +209,7 @@
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Acquitter_plugin ( plugin_tech_id );
      }
-    else if ( !strcasecmp( agent_tag, "DLS_COMPIL") && Config.instance_is_master == TRUE)
+    else if ( !strcasecmp( agent_tag, "DLS_COMPIL") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
           goto end;
@@ -206,7 +217,7 @@
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Reseter_un_plugin ( plugin_tech_id );
      }
-    else if ( !strcasecmp( agent_tag, "DLS_SET") && Config.instance_is_master == TRUE)
+    else if ( !strcasecmp( agent_tag, "DLS_SET") )
      { if ( ! Json_has_member ( request, "tech_id" )  )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
           goto end;
