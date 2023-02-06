@@ -37,10 +37,10 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_traiter_instance_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_instance_list ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                    SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -51,7 +51,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
@@ -60,7 +60,7 @@
     gchar *buf = Json_node_to_string ( RootNode );
     Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
@@ -68,10 +68,10 @@
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_traiter_instance_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_instance_set ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                        SoupClientContext *client, gpointer user_data)
   { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -87,14 +87,14 @@
            )
        )
      { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gint log_target = Json_get_int ( request, "log_level" );
     if (log_target<3 || log_target>7)
      { Json_node_unref(request);
-	      soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais niveau de log");
+	      soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais niveau de log");
        return;
      }
 
@@ -111,17 +111,17 @@
     g_free(description);
     g_free(instance);
     Json_node_unref(request);
-	   soup_message_set_status (msg, SOUP_STATUS_OK);
+	   soup_server_message_set_status (msg, SOUP_STATUS_OK);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_instance_reload_icons: Met a jour la base d'icones selon base_icones.sql                                      */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_traiter_instance_reload_icons ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_instance_reload_icons ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                            SoupClientContext *client, gpointer user_data)
   { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -137,17 +137,17 @@
 
     gchar *requete = SQL_Read_from_file ( "base_icones.sql" );
     if (!requete)
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "DB Icones Read Error" );
+     { soup_server_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "DB Icones Read Error" );
        Info_new( __func__, TRUE, LOG_NOTICE, "Icons DB Error." );
        return;
      }
 
     if (!SQL_Writes ( requete ))
-     { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "DB Icones SQL Error" );
+     { soup_server_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "DB Icones SQL Error" );
        Info_new( __func__, TRUE, LOG_NOTICE, "Icons DB Error." );
      }
     else
-     { soup_message_set_status (msg, SOUP_STATUS_OK);
+     { soup_server_message_set_status (msg, SOUP_STATUS_OK);
        Info_new( __func__, TRUE, LOG_NOTICE, "Icons DB Loaded." );
      }
     g_free(requete);

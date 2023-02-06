@@ -41,7 +41,6 @@
 /******************************************************************************************************************************/
  JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode )
   { gboolean unref_RootNode = FALSE;
-    JsonNode *result = NULL;
     gchar query[256];
 
     g_snprintf( query, sizeof(query), "https://%s%s", Json_get_string ( Config.config, "api_url" ), URI );
@@ -55,37 +54,18 @@
     if (!RootNode) { RootNode = Json_node_create(); unref_RootNode = TRUE; }
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
-    gchar *buf    = Json_node_to_string ( RootNode );
-    gint buf_size = strlen(buf);
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending to API %s", query );
+    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( Partage->com_msrv.API_session, soup_msg, RootNode );
     if (unref_RootNode) Json_node_unref(RootNode);
 
-    Http_Add_Agent_signature ( soup_msg, buf, buf_size );
-
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending to API %s", query );
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, buf_size );
-    /* Async soup_session_queue_message (client->Partage->com_msrv.Soup_session, msg, callback, client);*/
-    soup_session_send_message (Partage->com_msrv.API_session, soup_msg); /* SYNC */
-
-    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
-    gint   status_code   = Http_Msg_status_code(soup_msg);
+    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code   = soup_message_get_status(soup_msg);
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s Status %d, reason %s", URI, status_code, reason_phrase );
 
-    gchar nom_fichier[256];
-    g_snprintf ( nom_fichier, sizeof(nom_fichier), "cache-%s", query );
-    g_strcanon ( nom_fichier+6, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYYZ", '_' );
-
     if (status_code!=200)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d for '%s': %s\n", URI, status_code, query, reason_phrase );
-       result = Json_read_from_file ( nom_fichier );
-       if (result) Info_new( __func__, Config.log_msrv, LOG_WARNING, "Using cache for %s", query );
-     }
-    else
-     { result = Http_Response_Msg_to_Json ( soup_msg );
-       if (Json_has_member ( result, "api_cache" ) && Json_get_bool ( result, "api_cache" ) ) Json_write_to_file ( nom_fichier, result );
-     }
-    g_free(reason_phrase);
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d for '%s': %s\n", URI, status_code, query, reason_phrase ); }
     g_object_unref( soup_msg );
-    return(result);
+    return(ResponseNode);
  }
 /******************************************************************************************************************************/
 /* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
@@ -95,7 +75,6 @@
  JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... )
   { gchar query[512];
     va_list ap;
-    JsonNode *result = NULL;
 
     if (format)
      { gchar parametres[128];
@@ -112,12 +91,10 @@
        return(NULL);
      }
 
-    Http_Add_Agent_signature ( soup_msg, NULL, 0 );
+    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( Partage->com_msrv.API_session, soup_msg, NULL );
 
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
-    soup_session_send_message (Partage->com_msrv.API_session, soup_msg);
-    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
-    gint   status_code   = Http_Msg_status_code(soup_msg);
+    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code   = soup_message_get_status(soup_msg);
 
     gchar nom_fichier[256];
     g_snprintf ( nom_fichier, sizeof(nom_fichier), "cache-%s", query );
@@ -126,17 +103,39 @@
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s Status %d, reason %s", URI, status_code, reason_phrase );
     if (status_code!=200)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d for '%s': %s\n", URI, status_code, query, reason_phrase );
-       result = Json_read_from_file ( nom_fichier );
-       if (result) Info_new( __func__, Config.log_msrv, LOG_WARNING, "Using cache for %s", query );
+       Json_node_unref ( ResponseNode );
+       ResponseNode = Json_read_from_file ( nom_fichier );
+       if (ResponseNode) Info_new( __func__, Config.log_msrv, LOG_WARNING, "Using cache for %s", query );
      }
     else
-     { result = Http_Response_Msg_to_Json ( soup_msg );
-       if (Json_has_member ( result, "api_cache" ) && Json_get_bool ( result, "api_cache" ) ) Json_write_to_file ( nom_fichier, result );
+     { if (Json_has_member ( ResponseNode, "api_cache" ) && Json_get_bool ( ResponseNode, "api_cache" ) )
+        { Json_write_to_file ( nom_fichier, ResponseNode ); }
      }
-    g_free(reason_phrase);
     g_object_unref( soup_msg );
-    return(result);
+    return(ResponseNode);
  }
+/******************************************************************************************************************************/
+/* API_handle_API_messages: Traite les messages recue de l'API                                                               */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void AGENT_upgrade_to ( gchar *branche )
+  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading to '%s' in progress", branche );
+    gint pid = getpid();
+    gint new_pid = fork();
+    if (new_pid<0)
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: erreur Fork" ); }
+    else if (!new_pid)
+     { g_strcanon ( branche, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_", '_' );
+       gchar chaine[256];
+       g_snprintf ( chaine, sizeof(chaine), "git clone -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
+       system(chaine);
+       system("cd temp_src; ./autogen.sh; sudo make install; cd ..; rm -rf temp_src;" );
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
+       kill (pid, SIGTERM);                                                                          /* Stop old processes */
+       exit(0);
+     }
+  }
 /******************************************************************************************************************************/
 /* API_handle_API_messages: Traite les messages recue de l'API                                                               */
 /* Entrée: les parametres de la libsoup                                                                                       */
@@ -158,16 +157,7 @@
      }
     else if ( !strcasecmp( agent_tag, "UPGRADE") )
      { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading in progress" );
-       gint pid = getpid();
-       gint new_pid = fork();
-       if (new_pid<0)
-        { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: erreur Fork" ); }
-       else if (!new_pid)
-        { system("cd SRC; ./autogen.sh; sudo make install; " );
-          Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
-          kill (pid, SIGTERM);                                                                          /* Stop old processes */
-          exit(0);
-        }
+       AGENT_upgrade_to ( WTD_BRANCHE );
      }
     else if ( !strcasecmp( agent_tag, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
     else if ( !strcasecmp( agent_tag, "THREAD_RESTART") ) { Thread_Stop_one_thread ( request );
@@ -185,17 +175,33 @@
        Config.log_bus    = Json_get_bool ( request, "log_bus" );
        Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
        gboolean headless = Json_get_bool ( request, "headless" );
+       gchar *branche    = Json_get_string ( request, "branche" );
        Info_change_log_level ( Json_get_int ( request, "log_level" ) );
        Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d",
                  Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
        if (Config.headless != headless)
-        { Partage->com_msrv.Thread_run = FALSE;
-          Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
+        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
+          Partage->com_msrv.Thread_run = FALSE;
+        }
+       if (strcmp ( WTD_BRANCHE, branche ))
+        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: branche has changed, upgrading and rebooting" );
+          AGENT_upgrade_to ( branche );
         }
      }
-    else if ( !strcasecmp( agent_tag, "REMAP") && Config.instance_is_master == TRUE) MSRV_Remap();
-    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") && Config.instance_is_master == TRUE) Dls_Load_horloge_ticks();
-    else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") && Config.instance_is_master == TRUE)
+    else if (Config.instance_is_master == FALSE) goto end;
+
+    if ( !strcasecmp( agent_tag, "REMAP") ) MSRV_Remap();
+    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
+    else if ( !strcasecmp( agent_tag, "SYN_CLIC") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end; }
+       if ( !Json_has_member ( request, "acronyme" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end; }
+       gchar *tech_id  = Json_get_string ( request, "tech_id" );
+       gchar *acronyme = Json_get_string ( request, "acronyme" );
+       Envoyer_commande_dls_data ( tech_id, acronyme );
+     }
+    else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_ACQUIT: tech_id is missing" );
           goto end;
@@ -203,7 +209,7 @@
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Acquitter_plugin ( plugin_tech_id );
      }
-    else if ( !strcasecmp( agent_tag, "DLS_COMPIL") && Config.instance_is_master == TRUE)
+    else if ( !strcasecmp( agent_tag, "DLS_COMPIL") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
           goto end;
@@ -211,7 +217,7 @@
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Reseter_un_plugin ( plugin_tech_id );
      }
-    else if ( !strcasecmp( agent_tag, "DLS_SET") && Config.instance_is_master == TRUE)
+    else if ( !strcasecmp( agent_tag, "DLS_SET") )
      { if ( ! Json_has_member ( request, "tech_id" )  )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
           goto end;
@@ -255,8 +261,7 @@ end:
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void API_on_API_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { g_object_unref(Partage->com_msrv.API_websocket);
-    Partage->com_msrv.API_websocket = NULL;
+  { Partage->com_msrv.API_websocket = NULL;
     Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Close. Reboot Needed!" );
     /* Partage->com_msrv.Thread_run = FALSE; */
   }
@@ -292,15 +297,13 @@ end:
   { static gchar *protocols[] = { "live-agent", NULL };
     gchar chaine[256];
     g_snprintf(chaine, sizeof(chaine), "wss://%s/run/websocket", Json_get_string ( Config.config, "api_url" ) );
-    SoupMessage *query = soup_message_new ( "GET", chaine );
-    Http_Add_Agent_signature ( query, NULL, 0 );
+    SoupMessage *soup_msg = soup_message_new ( "GET", chaine );
+    Http_Add_Agent_signature ( soup_msg, NULL, 0 );
 
-    GCancellable *cancel = g_cancellable_new();
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Starting WebSocket connect to %s", chaine );
-    soup_session_websocket_connect_async ( Partage->com_msrv.API_session, query,
-                                           NULL, protocols, cancel, API_on_API_connected, NULL );
-    g_object_unref(query);
-    g_object_unref(cancel);
+    soup_session_websocket_connect_async ( Partage->com_msrv.API_session, soup_msg,
+                                           NULL, protocols, 0, NULL, API_on_API_connected, NULL );
+    g_object_unref(soup_msg);
   }
 /******************************************************************************************************************************/
 /* API_ws_end: appelé pour stopper la websocket vers l'API                                                                   */
@@ -346,6 +349,9 @@ end:
        sched_yield();
      }
     API_ws_end();
+    g_slist_free    ( Partage->com_msrv.liste_visuel ); Partage->com_msrv.liste_visuel = NULL;
+    g_slist_foreach ( Partage->com_msrv.liste_msg, (GFunc)g_free, NULL );
+    g_slist_free    ( Partage->com_msrv.liste_msg ); Partage->com_msrv.liste_msg    = NULL;
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));

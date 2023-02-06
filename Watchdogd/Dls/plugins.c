@@ -103,6 +103,7 @@
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
                  "API Request for DLS CREATE failed. '%s' not created.", tech_id );
+       Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
        return(FALSE);
      }
@@ -312,10 +313,10 @@
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = plugin->Dls_data_VISUEL;                                              /* Decharge tous les visuels du module */
+    liste_bit = plugin->Dls_data_VISUEL;              /* Decharge tous les visuels du module qui ne sont pas des commentaires */
     while(liste_bit)
      { struct DLS_VISUEL *visu = liste_bit->data;
-       Dls_data_set_VISUEL ( &plugin->vars, visu, "resetted", "black", FALSE, "resetted" );
+       if (strcmp(visu->forme, "comment")) Dls_data_set_VISUEL ( &plugin->vars, visu, "resetted", "black", FALSE, "resetted" );
        liste_bit = g_slist_next(liste_bit);
      }
 
@@ -326,12 +327,14 @@
 /* Sortie : les alias sont mappés                                                                                             */
 /******************************************************************************************************************************/
  static void Dls_plugins_remap_all_alias ( void )
-  { GSList *liste = Partage->com_dls.Dls_plugins;
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    GSList *liste = Partage->com_dls.Dls_plugins;
     while (liste)
      { struct DLS_PLUGIN *plugin = liste->data;
        if (plugin->remap_all_alias) plugin->remap_all_alias();
        liste = g_slist_next(liste);
      }
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_Importer_un_plugin: Ajoute ou Recharge un plugin dans la liste des plugins                                             */
@@ -344,6 +347,7 @@
     JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", "tech_id=%s", tech_id );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': API Error.", tech_id );
+       Json_node_unref ( api_result );
        return(NULL);
      }
 
@@ -433,7 +437,7 @@
     g_list_free(Thread_tech_ids);
     Json_node_unref(api_result);
 
-    if (!strcasecmp ( tech_id, "SYS" ) )
+    if (!strcasecmp ( tech_id, "SYS" ) )     /* mutex lock non necessaire car si reset, c'est locké par Dls_Reseter_un_plugin */
      { Partage->com_dls.sys_flipflop_5hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
        Partage->com_dls.sys_flipflop_2hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
        Partage->com_dls.sys_flipflop_1sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
@@ -446,10 +450,11 @@
        Partage->com_dls.sys_top_1min          = Dls_data_lookup_MONO ( "SYS", "TOP_1MIN" );
        Partage->com_dls.sys_bit_per_sec       = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
        Partage->com_dls.sys_tour_per_sec      = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
-       Partage->com_dls.sys_wait              = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
+       Partage->com_dls.sys_dls_wait          = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
        Partage->com_dls.sys_nbr_msg_queue     = Dls_data_lookup_AI   ( "SYS", "NBR_MSG_QUEUE" );
        Partage->com_dls.sys_nbr_visuel_queue  = Dls_data_lookup_AI   ( "SYS", "NBR_VISUEL_QUEUE" );
        Partage->com_dls.sys_nbr_archive_queue = Dls_data_lookup_AI   ( "SYS", "NBR_ARCHIVE_QUEUE" );
+       Partage->com_dls.sys_maxrss            = Dls_data_lookup_AI   ( "SYS", "MAXRSS" );
      }
 
     plugin->vars.dls_osyn_acquit             = Dls_data_lookup_DI   ( plugin->tech_id, "OSYN_ACQUIT" );
@@ -493,6 +498,7 @@
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/plugins", NULL );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "API Request for /run/dls/plugins failed. No plugin loaded." );
+       Json_node_unref ( api_result );
        return;
      }
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "API Request for /run/dls/plugins OK." );
@@ -511,7 +517,6 @@
  void Dls_Reseter_un_plugin ( gchar *tech_id )
   { struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( tech_id );
     if (found) Dls_Export_Data_to_API ( found );      /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
-    pthread_mutex_lock( &Partage->com_dls.synchro );
     struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( tech_id );
     if (dls)
      { Reseter_all_bit_interne ( dls );
@@ -520,7 +525,6 @@
      }
     else Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "'%s': error when resetting", tech_id );
     Dls_plugins_remap_all_alias();
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
     Dls_Load_horloge_ticks();
   }
 /******************************************************************************************************************************/

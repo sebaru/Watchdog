@@ -29,42 +29,156 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Http_Check_Thread_signature: Vérifie qu'un message est correctement signé par le thread                                    */
+/* Entrée: le messages                                                                                                        */
+/* Sortie: TRUE si OK                                                                                                         */
+/******************************************************************************************************************************/
+ gboolean Http_Check_Thread_signature ( gchar *path, SoupServerMessage *msg, gchar **thread_tech_id_p )
+  { SoupMessageHeaders *headers = soup_server_message_get_request_headers ( msg );
+    if (!headers)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s': No headers provided. Access Denied.", path );
+       Http_Send_json_response ( msg, SOUP_STATUS_UNAUTHORIZED, NULL, NULL );
+       return(FALSE);
+     }
+
+    gchar *origin      = soup_message_headers_get_one ( headers, "Origin" );
+    if (!origin)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, Origin Header is missing", path );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
+       return(FALSE);
+     }
+
+    gchar *domain_uuid = soup_message_headers_get_one ( headers, "X-ABLS-DOMAIN" );
+    if (!domain_uuid)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-DOMAIN Header is missing", path );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
+       return(FALSE);
+     }
+
+    gchar *agent_uuid  = soup_message_headers_get_one ( headers, "X-ABLS-AGENT" );
+    if (!agent_uuid)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-AGENT Header is missing", path );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
+       return(FALSE);
+     }
+
+    gchar *thread_tech_id = *thread_tech_id_p = soup_message_headers_get_one ( headers, "X-ABLS-THREAD-TECH-ID" );
+    if (!thread_tech_id)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-THREAD-TECH-ID Header is missing", path );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
+       return(FALSE);
+     }
+
+    gchar *timestamp = soup_message_headers_get_one ( headers, "X-ABLS-TIMESTAMP" );
+    if (!timestamp)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-TIMESTAMP Header is missing", path );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
+       return(FALSE);
+     }
+
+    gchar *signature   = soup_message_headers_get_one ( headers, "X-ABLS-SIGNATURE" );
+    if (!signature)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Bad Request, X-ABLS-SIGNATURE Header is missing", path );
+       Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, NULL, NULL );
+       return(FALSE);
+     }
+
+    gsize taille_body;
+    SoupMessageBody *body = soup_server_message_get_request_body ( msg );
+    GBytes *buffer        = soup_message_body_flatten ( body );
+    gchar *request_body   = g_bytes_get_data ( buffer, &taille_body );
+    g_bytes_unref(buffer);
+
+    gchar *domain_secret = Json_get_string ( Config.config, "domain_secret" );
+
+    unsigned char hash_bin[EVP_MAX_MD_SIZE];
+    gint md_len;
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(mdctx, domain_uuid,    strlen(domain_uuid));
+    EVP_DigestUpdate(mdctx, agent_uuid,     strlen(agent_uuid));
+    EVP_DigestUpdate(mdctx, domain_secret,  strlen(domain_secret));
+    EVP_DigestUpdate(mdctx, thread_tech_id, strlen(thread_tech_id));
+    EVP_DigestUpdate(mdctx, request_body,   taille_body);
+    EVP_DigestUpdate(mdctx, timestamp,      strlen(timestamp));
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
+    gchar local_signature[64];
+    EVP_EncodeBlock( local_signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
+
+    gint retour = strcmp ( signature, local_signature );
+    if (retour)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Forbidden, Wrong signature", path );
+       Http_Send_json_response ( msg, SOUP_STATUS_FORBIDDEN, NULL, NULL );
+       return(FALSE);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Http_Add_Thread_signature: signe une requete d'un thread vers le master                                                    */
+/* Entrée: le message                                                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Http_Add_Thread_signature ( struct THREAD *module, SoupMessage *msg, gchar *buf, gint buf_size )
+  { gchar *origin         = "abls-habitat.fr";
+    gchar *domain_uuid    = Json_get_string ( Config.config,  "domain_uuid" );
+    gchar *domain_secret  = Json_get_string ( Config.config,  "domain_secret" );
+    gchar *agent_uuid     = Json_get_string ( Config.config,  "agent_uuid" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    gchar timestamp[20];
+    g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
+
+    unsigned char hash_bin[EVP_MAX_MD_SIZE];
+    gint md_len;
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
+    EVP_DigestUpdate(mdctx, domain_uuid,    strlen(domain_uuid));
+    EVP_DigestUpdate(mdctx, agent_uuid,     strlen(agent_uuid));
+    EVP_DigestUpdate(mdctx, domain_secret,  strlen(domain_secret));
+    EVP_DigestUpdate(mdctx, thread_tech_id, strlen(thread_tech_id));
+    if (buf) EVP_DigestUpdate(mdctx, buf,   buf_size);
+    EVP_DigestUpdate(mdctx, timestamp,      strlen(timestamp));
+    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
+    EVP_MD_CTX_free(mdctx);
+    gchar signature[64];
+    EVP_EncodeBlock( signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
+
+    SoupMessageHeaders *headers = soup_message_get_request_headers ( msg );
+    soup_message_headers_append ( headers, "Origin",                origin );
+    soup_message_headers_append ( headers, "X-ABLS-DOMAIN",         domain_uuid );
+    soup_message_headers_append ( headers, "X-ABLS-AGENT",          agent_uuid );
+    soup_message_headers_append ( headers, "X-ABLS-THREAD-TECH-ID", thread_tech_id );
+    soup_message_headers_append ( headers, "X-ABLS-TIMESTAMP",      timestamp );
+    soup_message_headers_append ( headers, "X-ABLS-SIGNATURE",      signature );
+  }
+/******************************************************************************************************************************/
 /* Http_Get_from_local_BUS: Envoie un message GET vers le master                                                              */
 /* Entrée: le module source, l'URI cible                                                                                      */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  JsonNode *Http_Get_from_local_BUS ( struct THREAD *module, gchar *uri )
-  { JsonNode *retour = NULL;
-    if (!module) return(NULL);
+  { if (!module) return(NULL);
 
     gchar query[256];
     g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 0, "timeout", 2, "ssl-strict", FALSE,
-                                                            "user-agent", "Abls-habitat Agent", NULL );
-
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
     if (!soup_msg)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
        goto end;
      }
+    g_object_set ( soup_msg, "http-version", SOUP_HTTP_1_0, NULL );
+    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL); /* SYNC */
 
-    Http_Add_Thread_signature ( module, soup_msg, NULL, 0 );
-    soup_session_send_message (connexion, soup_msg); /* SYNC */
-
-    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
-    gint   status_code   = Http_Msg_status_code(soup_msg);
+    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code   = soup_message_get_status(soup_msg);
 
     Info_new( __func__, Config.log_bus, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
     if (status_code!=200)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
-    else { retour = Http_Response_Msg_to_Json ( soup_msg ); }
-    g_free(reason_phrase);
     g_object_unref( soup_msg );
 end:
-    soup_session_abort ( connexion );
-    g_object_unref( connexion );
-    return(retour);
+    return(response);
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS: Envoie un message a l'API local                                                                    */
@@ -82,78 +196,70 @@ end:
 
     g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new_with_options( "idle_timeout", 0, "timeout", 2, "ssl-strict", FALSE,
-                                                            "user-agent", "Abls-habitat Agent", NULL );
-
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
-       goto end;
+       return(FALSE);
      }
+    g_object_set ( soup_msg, "http-version", SOUP_HTTP_1_0, NULL );
+    g_signal_connect ( G_OBJECT(soup_msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
 
-    gchar *buf = Json_node_to_string ( RootNode );
-    gint buf_size = strlen(buf);
-    Info_new( __func__, Config.log_bus, LOG_DEBUG, "Sending to %s: %s", query, buf );
-    Http_Add_Thread_signature ( module, soup_msg, buf, buf_size );
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, buf_size );
-    /* Async soup_session_queue_message (client->connexion, msg, callback, client);*/
-    soup_session_send_message (connexion, soup_msg); /* SYNC */
+    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, RootNode ); /* SYNC */
+    Json_node_unref( response );
 
-    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
-    gint   status_code   = Http_Msg_status_code(soup_msg);
+    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code   = soup_message_get_status(soup_msg);
 
     Info_new( __func__, Config.log_bus, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
     if (status_code!=200)
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
-    else retour = TRUE;
-    g_free(reason_phrase);
+         { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
+    else { retour = TRUE; }
     g_object_unref( soup_msg );
-end:
-    soup_session_abort ( connexion );
-    g_object_unref( connexion );
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Http_Post_to_local_BUS_DI: Envoie le bit DI au master                                                                      */
-/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                           */
+/* Http_Post_thread_DI_to_local_BUS: Envoie le bit DI au master                                                               */
+/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_DI ( struct THREAD *module, JsonNode *di, gboolean etat )
+ void Http_Post_thread_DI_to_local_BUS ( struct THREAD *module, JsonNode *thread_di, gboolean etat )
   { if (!module) return;
     gboolean update = FALSE;
-    if (!Json_has_member ( di, "etat" )) { update = TRUE; }
+    if (!Json_has_member ( thread_di, "etat" )) { update = TRUE; }
     else
-     { gboolean old_etat = Json_get_bool ( di, "etat" );
+     { gboolean old_etat = Json_get_bool ( thread_di, "etat" );
        if ( old_etat != etat ) update = TRUE;
      }
     if (update)
-     { Json_node_add_bool ( di, "etat", etat );
-       Http_Post_to_local_BUS ( module, "SET_DI", di );
+     { Json_node_add_bool ( thread_di, "etat", etat );
+       if (Config.instance_is_master == TRUE) Dls_data_set_DI_from_thread_di ( thread_di );
+       else Http_Post_to_local_BUS ( module, "SET_DI", thread_di );
      }
   }
 /******************************************************************************************************************************/
-/* Http_Post_to_local_BUS_AI: Envoie le bit AI au master                                                                      */
-/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                           */
+/* Http_Post_thread_AI_to_local_BUS: Envoie le bit AI au master                                                               */
+/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_AI ( struct THREAD *module, JsonNode *ai, gdouble valeur, gboolean in_range )
+ void Http_Post_thread_AI_to_local_BUS ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
   { if (!module) return;
     gboolean update = FALSE;
-    if (!Json_has_member ( ai, "valeur" )) { update = TRUE; }
+    if (!Json_has_member ( thread_ai, "valeur" )) { update = TRUE; }
     else
-     { gdouble  old_valeur   = Json_get_double ( ai, "valeur" );
-       gboolean old_in_range = Json_get_bool   ( ai, "in_range" );
+     { gdouble  old_valeur   = Json_get_double ( thread_ai, "valeur" );
+       gboolean old_in_range = Json_get_bool   ( thread_ai, "in_range" );
        if ( old_valeur != valeur || old_in_range != in_range ) update = TRUE;
      }
     if (update)
-     { Json_node_add_double ( ai, "valeur", valeur );
-       Json_node_add_bool   ( ai, "in_range", in_range );
-       Http_Post_to_local_BUS ( module, "SET_AI", ai );
+     { Json_node_add_double ( thread_ai, "valeur", valeur );
+       Json_node_add_bool   ( thread_ai, "in_range", in_range );
+       if (Config.instance_is_master == TRUE) Dls_data_set_AI_from_thread_ai ( thread_ai );
+       else Http_Post_to_local_BUS ( module, "SET_AI", thread_ai );
      }
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */
-/* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Http_Post_to_local_BUS_CDE ( struct THREAD *module, gchar *tech_id, gchar *acronyme )
@@ -166,25 +272,29 @@ end:
     Json_node_unref(body);
   }
 /******************************************************************************************************************************/
-/* Http_Post_to_local_BUS_WATCHDOG: Envoie le bit WATCHDOG au master selon le status                                          */
-/* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                    */
+/* Http_Post_WATCHDOG_to_local_BUS: Envoie le bit WATCHDOG au master selon le status                                          */
+/* Entrée: la structure THREAD, le tech_id, l'acronyme, la consigne                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Http_Post_to_local_BUS_WATCHDOG ( struct THREAD *module, gchar *acronyme, gint consigne )
+ void Http_Post_thread_WATCHDOG_to_local_BUS ( struct THREAD *module, gchar *thread_acronyme, gint consigne )
   { if (!module) return;
-    JsonNode *body = Json_node_create ();
-    if(!body) return;
-    Json_node_add_string ( body, "acronyme", acronyme );
-    Json_node_add_int    ( body, "consigne", consigne );
-    Http_Post_to_local_BUS ( module, "SET_WATCHDOG", body );
-    Json_node_unref(body);
+    JsonNode *thread_watchdog = Json_node_create ();
+    if(!thread_watchdog) return;
+    Json_node_add_string ( thread_watchdog, "thread_acronyme", thread_acronyme );
+    Json_node_add_int    ( thread_watchdog, "consigne", consigne );
+    if (Config.instance_is_master == TRUE)
+     { Json_node_add_string ( thread_watchdog, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+       Dls_data_set_WATCHDOG_from_thread_watchdog ( thread_watchdog );
+     }
+    else Http_Post_to_local_BUS ( module, "SET_WATCHDOG", thread_watchdog );
+    Json_node_unref(thread_watchdog);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_get_do: Donne les DO au thread appelant                                                                       */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_get_do ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query )
+ void Http_traiter_get_do ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id) { Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL ); return; }
@@ -212,7 +322,7 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_set_watchdog_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
+ void Http_traiter_set_watchdog_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
@@ -221,18 +331,11 @@ end:
        return;
      }
 
-    if (! (Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "consigne" ) ) )
+    if ( Dls_data_set_WATCHDOG_from_thread_watchdog ( request ) == FALSE )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: wrong parameters from '%s'", thread_tech_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       Json_node_unref(request);
+       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        return;
      }
-
-    Info_new( __func__, Config.log_bus, LOG_INFO,
-              "SET_WATCHDOG for: '%s:%s'=%d", thread_tech_id,
-              Json_get_string ( request, "acronyme" ), Json_get_int ( request, "consigne" ) );
-    struct DLS_WATCHDOG *bit = Dls_data_lookup_WATCHDOG ( thread_tech_id, Json_get_string ( request, "acronyme" ) );
-    if (bit) Dls_data_set_WATCHDOG ( NULL, bit, Json_get_int ( request, "consigne" ) );
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "WATCHDOG set", NULL );
   }
 /******************************************************************************************************************************/
@@ -240,7 +343,7 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_set_cde_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
+ void Http_traiter_set_cde_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id)
@@ -251,8 +354,7 @@ end:
 
     if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_CDE: wrong parameters from '%s'", thread_tech_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       Json_node_unref(request);
+       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        return;
      }
     Info_new( __func__, Config.log_bus, LOG_INFO,
@@ -266,44 +368,14 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_set_ai_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
+ void Http_traiter_set_ai_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
-    if (!thread_tech_id)
-     { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
-       return;
-     }
 
-    if (! (Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
-           Json_has_member ( request, "unite" ) && Json_has_member ( request, "archivage" )
-          )
-       )
+    if ( Dls_data_set_AI_from_thread_ai ( request ) == FALSE )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_AI: wrong parameters from '%s'", thread_tech_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
-       Json_node_unref(request);
+       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        return;
-     }
-
-    gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-    gchar *tech_id         = thread_tech_id;
-    gchar *acronyme        = thread_acronyme;
-
-    if (MSRV_Map_from_thread ( request ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) )
-     { tech_id  = Json_get_string ( request, "tech_id" );
-       acronyme = Json_get_string ( request, "acronyme" );
-     }
-    Info_new( __func__, Config.log_bus, LOG_INFO,
-              "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d)",
-              thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-              Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ), Json_get_bool ( request, "in_range" ) );
-    struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
-    if (bit)
-     { Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-       bit->archivage = Json_get_int ( request, "archivage" );
-       g_snprintf ( bit->unite,   sizeof(bit->unite),   Json_get_string ( request, "unite" ) );
-       g_snprintf ( bit->libelle, sizeof(bit->libelle), Json_get_string ( request, "libelle" ) );
      }
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "AI set", NULL );
   }
@@ -312,38 +384,15 @@ end:
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_set_di_post ( SoupServer *server, SoupMessage *msg, const char *path, JsonNode *request )
+ void Http_traiter_set_di_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
-    if (!thread_tech_id)
-     { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
-       return;
-     }
 
-    if (! (Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "etat" )&& Json_has_member ( request, "libelle" )
-          )
-       )
+    if ( Dls_data_set_DI_from_thread_di ( request ) == FALSE )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI: wrong parameters from '%s'", thread_tech_id );
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
        return;
      }
-
-    gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-    gchar *tech_id         = thread_tech_id;
-    gchar *acronyme        = thread_acronyme;
-
-    if (MSRV_Map_from_thread ( request ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) )
-     { tech_id  = Json_get_string ( request, "tech_id" );
-       acronyme = Json_get_string ( request, "acronyme" );
-     }
-    Info_new( __func__, Config.log_bus, LOG_INFO,
-              "SET_DI from '%s': '%s:%s/'%s:%s'=%d",
-              thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-              Json_get_bool ( request, "etat" ) );
-    struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
-    if (bit) Dls_data_set_DI ( NULL, bit, Json_get_bool ( request, "etat" ) );
-    Http_Send_json_response ( msg, SOUP_STATUS_OK, "AI set", NULL );
+    Http_Send_json_response ( msg, SOUP_STATUS_OK, "DI set", NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

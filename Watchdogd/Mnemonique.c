@@ -169,6 +169,7 @@
                  Json_get_string ( bit, "tech_id" ), Json_get_string ( bit, "acronyme" ), heure, minute );
      }
     Json_node_unref ( api_result );
+    Json_node_unref ( node );
   }
 /******************************************************************************************************************************/
 /* Mnemo_create_thread_HORLOGE_tick: Créé un tick sur une horloge donnée                                                      */

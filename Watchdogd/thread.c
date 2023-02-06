@@ -53,7 +53,7 @@
 /******************************************************************************************************************************/
  void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
-     { Http_Post_to_local_BUS_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
+     { Http_Post_thread_WATCHDOG_to_local_BUS ( module, "IO_COMM", (etat ? 900 : 0) );
        JsonNode *RootNode = Json_node_create();
        if (RootNode)
         { Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
@@ -118,14 +118,24 @@
 /******************************************************************************************************************************/
  static void Thread_ws_on_master_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
   { struct THREAD *module = user_data;
+    if (!module || !module->config)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "module or module->config is null." );
+       return;
+     }
     GError *error = NULL;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+
     module->Master_websocket = soup_session_websocket_connect_finish ( module->Master_session, res, &error );
-    if (!module->Master_websocket)                                                                   /* No limit on incoming packet ! */
+    if (error)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error: %s.", thread_tech_id, error->message );
        g_error_free (error);
        return;
      }
+    if (!module->Master_websocket)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error.", thread_tech_id );
+       return;
+     }
+
     /*g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );*/
     g_object_set ( G_OBJECT(module->Master_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
     g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(Thread_ws_on_master_message_CB), module );
@@ -133,6 +143,13 @@
     g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(Thread_ws_on_master_error_CB), module );
     Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': WebSocket to Master connected", thread_tech_id );
   }
+/******************************************************************************************************************************/
+/* Http_Accept_certificate: appelé pour vérifier le certificat TLS présenté par le serveur                                    */
+/* Entrée: Le certificat                                                                                                      */
+/* Sortie: booléen                                                                                                            */
+/******************************************************************************************************************************/
+ gboolean Http_Accept_certificate ( SoupMessage* self, GTlsCertificate* tls_peer_certificate, GTlsCertificateFlags tls_peer_errors, gpointer user_data )
+  { return(TRUE); }
 /******************************************************************************************************************************/
 /* Thread_ws_bus_init: appelé par chaque thread pour demarrer le websocket vers le master                                     */
 /* Entrée: La thread                                                                                                          */
@@ -145,17 +162,13 @@
        return;
      }
 
-    module->Master_session = soup_session_new();
-    g_object_set ( G_OBJECT(module->Master_session), "ssl-strict", FALSE, NULL );
     static gchar *protocols[] = { "live-bus", NULL };
     gchar chaine[256];
     g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
-    SoupMessage *query   = soup_message_new ( "GET", chaine );
-    GCancellable *cancel = g_cancellable_new();
-    soup_session_websocket_connect_async ( module->Master_session, query,
-                                           NULL, protocols, cancel, Thread_ws_on_master_connected, module );
-    g_object_unref(query);
-    g_object_unref(cancel);
+    SoupMessage *msg = soup_message_new ( "GET", chaine );
+    g_signal_connect ( G_OBJECT(msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
+    soup_session_websocket_connect_async ( module->Master_session, msg, NULL, protocols, 0, NULL, Thread_ws_on_master_connected, module );
+    g_object_unref(msg);
   }
 /******************************************************************************************************************************/
 /* Thread_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                                   */
@@ -177,7 +190,7 @@
 
 /********************************************************* Toutes les minutes *************************************************/
     if (Partage->top >= module->telemetrie_top+600)                                                     /* Toutes les minutes */
-     { Http_Post_to_local_BUS_AI ( module, module->ai_nbr_tour_par_sec, module->nbr_tour_par_sec, TRUE );
+     { Http_Post_thread_AI_to_local_BUS ( module, module->ai_nbr_tour_par_sec, module->nbr_tour_par_sec, TRUE );
        if (!module->Master_websocket) Thread_ws_bus_init ( module );               /* si perte de la websocket, on reconnecte */
        module->telemetrie_top = Partage->top;
      }
@@ -190,6 +203,8 @@
  gboolean Thread_every_hour ( struct THREAD *module )
   { if (Partage->top >= module->hour_top + 36000)                                                    /* Toutes les 1 secondes */
      { module->hour_top = Partage->top;
+#warning waiting for https://github.com/GNOME/libsoup/commit/d20c6601664624116f3dc43f21c7ec4a186cf8d3 before removing
+       soup_session_abort ( module->Master_session );
        return(TRUE);
      }
     return(FALSE);
@@ -216,6 +231,15 @@
         }
      }
 
+    module->Master_session = soup_session_new();
+    soup_session_set_user_agent   ( module->Master_session, "Abls-habitat Agent" );
+    soup_session_set_timeout      ( module->Master_session, 10 );
+    soup_session_set_idle_timeout ( module->Master_session, 10 );
+#warning a virer
+    SoupLogger *log = soup_logger_new (SOUP_LOGGER_LOG_MINIMAL);
+    soup_session_add_feature ( module->Master_session, (SoupSessionFeature *)log );
+    g_object_unref ( log );
+
 /******************************************************* Ecoute du Master *****************************************************/
     Thread_ws_bus_init( module );
 
@@ -238,22 +262,24 @@
 /******************************************************************************************************************************/
  void Thread_end ( struct THREAD *module )
   { Thread_send_comm_to_master ( module, FALSE );
-    if (module->vars) g_free(module->vars);
-    Json_node_unref ( module->IOs );
     if (module->Master_websocket && soup_websocket_connection_get_state (module->Master_websocket) == SOUP_WEBSOCKET_STATE_OPEN)
      { soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
        while ( module->Master_websocket ) sched_yield();
      }
+
     soup_session_abort ( module->Master_session );
+    g_object_unref ( module->Master_session ); module->Master_session = NULL;
     g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
-    g_slist_free ( module->WS_messages );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' is DOWN",
-              __func__, Json_get_string ( module->config, "thread_tech_id") );
+    g_slist_free ( module->WS_messages );      module->WS_messages = NULL;
+    if (module->vars) { g_free(module->vars);  module->vars   = NULL; }
+    Json_node_unref ( module->IOs );           module->IOs    = NULL;
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
+    sleep(1);                       /* le temps d'un appel libsoup a Thread_ws_on_master_connected si Operation was cancelled */
     pthread_exit(0);
   }
 /******************************************************************************************************************************/
 /* Decharger_librairies: Decharge toutes les librairies                                                                       */
-/* EntrÃée: Rien                                                                                                               */
+/* EntrÃée: Rien                                                                                                              */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Decharger_librairies ( void )
@@ -339,7 +365,7 @@
 
     struct THREAD *module = NULL;
     pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    GSList *liste = Partage->com_msrv.Threads;                                                 /* Envoie une commande d'arret */
     while(liste)
      { struct THREAD *search_module = liste->data;
        if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
@@ -423,6 +449,7 @@
      }
     else
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': GET_CONFIG from API Failed. Unloading.", thread_tech_id );
+       Json_node_unref ( module->config );
        dlclose( module->dl_handle );
        g_free(module);
        return;
@@ -431,6 +458,7 @@
     pthread_attr_t attr;                                                       /* Attribut de mutex pour parametrer le module */
     if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_attr_init failed. Unloading.", thread_tech_id );
+       Json_node_unref ( module->config );
        dlclose( module->dl_handle );
        g_free(module);
        return;
@@ -438,6 +466,7 @@
 
     if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )                       /* On le laisse joinable au boot */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_setdetachstate failed. Unloading.", thread_tech_id );
+       Json_node_unref ( module->config );
        dlclose( module->dl_handle );
        g_free(module);
        return;
@@ -450,6 +479,7 @@
 
     if ( module->Thread_run && pthread_create( &module->TID, &attr, (void *)module->Run_thread, module ) )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_create failed. Unloading.", thread_tech_id );
+       Json_node_unref ( module->config );
        dlclose( module->dl_handle );
        g_free(module);
        return;

@@ -200,7 +200,7 @@
           results = g_list_next(results);
         }
        g_list_free(Results);
-     }
+     } else { Json_node_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
@@ -347,12 +347,11 @@
                     "seat_get_active failed (%s). Waiting 5s.", strerror (errno) );
           return(FALSE);
         }
-       Info_new( __func__, Config.log_msrv, LOG_INFO,
-                "session found = '%s' for user '%d'", session, active_session );
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "session found = '%s' for user '%d'", session, active_session );
+       g_free(session);
        pwd = getpwuid ( active_session );
        if (!pwd)
-        { Info_new( __func__, Config.log_msrv, LOG_CRIT,
-                   "Error when searching seat user. Stopping." );
+        { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error when searching seat user. Stopping." );
           return(FALSE);
         }
      }
@@ -460,21 +459,21 @@
      }
 
 /************************************************* Init libsoup session *******************************************************/
-    Partage->com_msrv.API_session = soup_session_new_with_options( "idle_timeout", 0, "timeout", 10, "ssl-strict", TRUE,
-                                                                   "user-agent", "Abls-habitat Agent", NULL );
+    Partage->com_msrv.API_session = soup_session_new();
+    soup_session_set_user_agent   ( Partage->com_msrv.API_session, "Abls-habitat Agent" );
+    soup_session_set_timeout      ( Partage->com_msrv.API_session, 10 );
+    soup_session_set_idle_timeout ( Partage->com_msrv.API_session, 60 );
 
 /************************************************* Test Connexion to Global API ***********************************************/
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
-    if (API)
-     { Info_new( __func__, Config.log_msrv, LOG_INFO, "Connected with API %s", Json_get_string ( API, "version" ) );
-       Json_node_unref ( API );
-     }
-    else
+    if (!API)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Connection to Global API FAILED. Sleep 5s and stopping." );
        sleep(5);
        error_code = EXIT_FAILURE;
        goto second_stage_end;
      }
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Connected with API %s", Json_get_string ( API, "version" ) );
+    Json_node_unref ( API );
 /************************************************* Tell Global API thread is UP ***********************************************/
     JsonNode *RootNode = Json_node_create();
     if (RootNode)
@@ -490,6 +489,7 @@
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "API Request for AGENT START OK." ); }
        else
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for AGENT START failed. Sleep 5s and stopping." );
+          Json_node_unref ( api_result );
           sleep(5);
           error_code = EXIT_FAILURE;
           goto second_stage_end;

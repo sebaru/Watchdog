@@ -11,12 +11,12 @@ libwatchdog_dls_la_SOURCES = plugins.c heure.c The_dls.c The_dls_archive.c The_d
                              The_dls_REGISTRE.c The_dls_WATCHDOG.c The_dls_HORLOGE.c The_dls_TEMPO.c The_dls_BI.c The_dls_MONO.c \
                              The_dls_VISUEL.c
 
-libwatchdog_dls_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
+libwatchdog_dls_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-3.0` \
                     `mariadb_config --libs` \
                     -rdynamic \
                     -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-libwatchdog_dls_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 json-glib-1.0 libsoup-2.4` \
+libwatchdog_dls_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 json-glib-1.0 libsoup-3.0` \
                             `mariadb_config --cflags`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \

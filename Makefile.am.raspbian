@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-SUBDIRS=Watchdogd ClientGTK3
+SUBDIRS=Watchdogd
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = autogen.sh
 MAINTAINERCLEANFILES = Makefile.in

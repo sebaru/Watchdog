@@ -42,53 +42,40 @@
  static void Meteo_get_ephemeride ( struct THREAD *module )
   { struct METEO_VARS *vars = module->vars;
     gchar query[256];
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *token      = Json_get_string ( module->config, "token" );
     gchar *code_insee = Json_get_string ( module->config, "code_insee" );
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/ephemeride/0?token=%s&insee=%s", token, code_insee );
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
-             "Starting getting data for code_insee '%s'", code_insee );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Start getting data for code_insee '%s'", code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
-    SoupMessage *soup_msg  = soup_message_new ( "GET", query );
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
-    soup_session_send_message (connexion, soup_msg);
-
-    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
-    gint   status_code   = Http_Msg_status_code ( soup_msg );
+    SoupMessage *soup_msg = soup_message_new ( "GET", query );
+    JsonNode *response    = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
+    gchar *reason_phrase  = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code    = soup_message_get_status ( soup_msg );
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
-    if (status_code!=200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error: %s\n", reason_phrase );
-       Thread_send_comm_to_master ( module, FALSE );
-     }
+    if (status_code!=200) Thread_send_comm_to_master ( module, FALSE );
     else
      { gint heure, minute;
-       JsonNode *response   = Http_Response_Msg_to_Json ( soup_msg );
        JsonNode *city       = Json_get_object_as_node ( response, "city" );
        JsonNode *ephemeride = Json_get_object_as_node ( response, "ephemeride" );
        gchar *city_name     = Json_get_string ( city, "name" );
        gchar *sunrise       = Json_get_string ( ephemeride, "sunrise" );
        gchar *sunset        = Json_get_string ( ephemeride, "sunset" );
        if ( sscanf ( sunrise, "%d:%d", &heure, &minute ) == 2)
-        { Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunrise );
+        { Info_new( __func__, module->Thread_debug, LOG_INFO, "%s -> sunrise at %02d:%02d", city_name, heure, minute );
+          Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunrise );
           Mnemo_create_thread_HORLOGE_tick ( module, vars->sunrise, heure, minute );
-          Info_new( __func__, module->Thread_debug, LOG_INFO,
-                   "%s -> sunrise at %02d:%02d", city_name, heure, minute );
         }
        if ( sscanf ( sunset, "%d:%d", &heure, &minute ) == 2)
-        { Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunset );
+        { Info_new( __func__, module->Thread_debug, LOG_INFO, "%s ->  sunset at %02d:%02d", city_name, heure, minute );
+          Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunset );
           Mnemo_create_thread_HORLOGE_tick ( module, vars->sunset, heure, minute );
-          Info_new( __func__, module->Thread_debug, LOG_INFO,
-                   "%s ->  sunset at %02d:%02d", city_name, heure, minute );
         }
-       Json_node_unref ( response );
        Thread_send_comm_to_master ( module, TRUE );
      }
-    g_free(reason_phrase);
+    Json_node_unref ( response );
     g_object_unref( soup_msg );
-    soup_session_abort ( connexion );
   }
 /******************************************************************************************************************************/
 /* Meteo_update_forecast: Met a jour le forecast auprès de meteoconcept                                                       */
@@ -105,17 +92,17 @@
     Info_new( __func__, module->Thread_debug, LOG_DEBUG,
               "day %02d -> temp_min=%02d, temp_max=%02d", day, temp_min, temp_max );
 
-    Http_Post_to_local_BUS_AI ( module, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Proba_pluie[day],      1.0*Json_get_int ( element, "probarain" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Proba_gel[day],        1.0*Json_get_int ( element, "probafrost" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Proba_brouillard[day], 1.0*Json_get_int ( element, "probafog" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Proba_vent_70[day],    1.0*Json_get_int ( element, "probawind70" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Proba_vent_100[day],   1.0*Json_get_int ( element, "probawind100" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Proba_vent_orage[day], 1.0*Json_get_int ( element, "gustx" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Vent_10m[day],         1.0*Json_get_int ( element, "wind10m" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Direction_vent[day],   1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
-    Http_Post_to_local_BUS_AI ( module, vars->Rafale_vent[day],      1.0*Json_get_int ( element, "gust10m" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_pluie[day],      1.0*Json_get_int ( element, "probarain" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_gel[day],        1.0*Json_get_int ( element, "probafrost" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_brouillard[day], 1.0*Json_get_int ( element, "probafog" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_vent_70[day],    1.0*Json_get_int ( element, "probawind70" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_vent_100[day],   1.0*Json_get_int ( element, "probawind100" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_vent_orage[day], 1.0*Json_get_int ( element, "gustx" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Vent_10m[day],         1.0*Json_get_int ( element, "wind10m" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Direction_vent[day],   1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Rafale_vent[day],      1.0*Json_get_int ( element, "gust10m" ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */
@@ -132,25 +119,17 @@
     Info_new( __func__, module->Thread_debug, LOG_DEBUG,
              "%s: Starting getting data for code_insee '%s'", thread_tech_id, code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupSession *connexion = soup_session_new();
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
-    soup_message_set_request ( soup_msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
-    soup_session_send_message (connexion, soup_msg);
+    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
 
-    gchar *reason_phrase = Http_Msg_reason_phrase(soup_msg);
-    gint   status_code   = Http_Msg_status_code ( soup_msg );
+    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
+    gint   status_code   = soup_message_get_status ( soup_msg );
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
-    if (status_code!=200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Error: %s\n", thread_tech_id, reason_phrase ); }
-    else
-     { JsonNode *response = Http_Response_Msg_to_Json ( soup_msg );
-       Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module );
-       Json_node_unref ( response );
-     }
-    g_free(reason_phrase);
     g_object_unref( soup_msg );
-    soup_session_abort ( connexion );
+
+    if (status_code==200) { Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module ); }
+    Json_node_unref ( response );
   }
 /******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */

@@ -240,7 +240,7 @@
 /******************************************************************************************************************************/
  JsonNode *Json_read_from_file ( gchar *filename )
   { struct stat stat_buf;
-    if (stat ( filename, &stat_buf)==-1) return(NULL);
+    if (stat(filename, &stat_buf)==-1) return(NULL);
 
     gchar *content = g_try_malloc0 ( stat_buf.st_size+1 );
     if (!content) return(NULL);
@@ -278,13 +278,14 @@
        Info_new ( __func__, Config.log_msrv, LOG_ERR, "Json to Buf failed, writing to %s", filename );
        return(FALSE);
      }
+    gboolean retour = FALSE;
     gint taille = strlen(buf);
     if (write ( fd, buf, taille ) != taille)
      { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Error writing %d bytes to %s: %s", taille, filename, strerror(errno) );
-       close(fd);
-       return(FALSE);
-     }
+       retour = FALSE;
+     } else retour = TRUE;
     close(fd);
-    return(TRUE);
+    g_free(buf);
+    return(retour);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

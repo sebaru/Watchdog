@@ -77,14 +77,14 @@
  static void Processer_trame( struct THREAD *module )
   { struct TELEINFO_VARS *vars = module->vars;
 
-         if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Adco,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { Http_Post_to_local_BUS_AI ( module, vars->Isous, atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Base,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Hchc,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Hchp,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { Http_Post_to_local_BUS_AI ( module, vars->Iinst, atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Imax,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { Http_Post_to_local_BUS_AI ( module, vars->Papp,  atof(vars->buffer + 5), TRUE ); }
+         if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { Http_Post_thread_AI_to_local_BUS ( module, vars->Adco,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { Http_Post_thread_AI_to_local_BUS ( module, vars->Isous, atof(vars->buffer + 6), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { Http_Post_thread_AI_to_local_BUS ( module, vars->Base,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { Http_Post_thread_AI_to_local_BUS ( module, vars->Hchc,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { Http_Post_thread_AI_to_local_BUS ( module, vars->Hchp,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { Http_Post_thread_AI_to_local_BUS ( module, vars->Iinst, atof(vars->buffer + 6), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { Http_Post_thread_AI_to_local_BUS ( module, vars->Imax,  atof(vars->buffer + 5), TRUE ); }
+    else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { Http_Post_thread_AI_to_local_BUS ( module, vars->Papp,  atof(vars->buffer + 5), TRUE ); }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     vars->last_view = Partage->top;
   }

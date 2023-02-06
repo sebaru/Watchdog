@@ -81,10 +81,10 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_users_set ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_users_set ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -95,7 +95,7 @@
 
     if ( ! (Json_has_member ( request, "username" ) ) )
      { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
@@ -178,8 +178,8 @@
     g_free(username);
 
     if (SQL_Write ( chaine ))
-         { soup_message_set_status ( msg, SOUP_STATUS_OK ); }
-    else { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
+         { soup_server_message_set_status ( msg, SOUP_STATUS_OK ); }
+    else { soup_server_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
 /*************************************************** Envoi au client **********************************************************/
     Json_node_unref(request);
   }
@@ -188,12 +188,12 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_users_add ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_users_add ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
   { gchar chaine[256];
 
     if (msg->method != SOUP_METHOD_POST)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -205,14 +205,14 @@
     if ( ! (Json_has_member ( request, "username" ) && Json_has_member ( request, "email" ) &&
             Json_has_member ( request, "password" ) ) )
      { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
     gchar *salt = Http_user_generate_salt ();
     if (!salt)
      { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Salt Error");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Salt Error");
        return;
      }
 
@@ -220,7 +220,7 @@
     if (!hash)
      { Json_node_unref(request);
        g_free(salt);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Hash Error");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Hash Error");
        return;
      }
 
@@ -231,11 +231,11 @@
     g_free(salt);
     g_free(hash);
     if (SQL_Write ( chaine ))
-         { soup_message_set_status ( msg, SOUP_STATUS_OK );
+         { soup_server_message_set_status ( msg, SOUP_STATUS_OK );
            Audit_log ( session, "User '%s' ('%s') added", username, email );
            Send_mail ( "Bienvenu chez vous !", email, "ceci est un test !" );
          }
-    else { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
+    else { soup_server_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
     g_free(username);
     g_free(email);
 /*************************************************** Envoi au client **********************************************************/
@@ -246,10 +246,10 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_users_del ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_users_del ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_DELETE)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -260,7 +260,7 @@
 
     if ( ! (Json_has_member ( request, "username" ) ) )
      { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
@@ -268,10 +268,10 @@
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
     g_snprintf ( chaine, sizeof(chaine), "DELETE FROM users WHERE username='%s' AND access_level<%d", username, session->access_level );
     if (SQL_Write ( chaine ))
-         { soup_message_set_status ( msg, SOUP_STATUS_OK );
+         { soup_server_message_set_status ( msg, SOUP_STATUS_OK );
            Audit_log ( session, "User '%s' deleted", username );
          }
-    else { soup_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
+    else { soup_server_message_set_status_full ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "SQL Error" ); }
     g_free(username);
 /*************************************************** Envoi au client **********************************************************/
     Json_node_unref(request);
@@ -281,11 +281,11 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
- void Http_traiter_users_kill ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_users_kill ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
   {
     if (msg->method != SOUP_METHOD_DELETE)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -296,7 +296,7 @@
 
     if ( ! (Json_has_member ( request, "id" ) ) )
      { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
@@ -310,26 +310,26 @@
            { Partage->com_http.liste_http_clients = g_slist_remove ( Partage->com_http.liste_http_clients, target );
              Audit_log ( session, "Session '%d' for '%s' on '%s' killed", target->id, target->username, target->appareil );
              g_free(target);
-             soup_message_set_status (msg, SOUP_STATUS_OK );
+             soup_server_message_set_status (msg, SOUP_STATUS_OK );
            }
-          else soup_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Droits insuffisants" );
+          else soup_server_message_set_status_full (msg, SOUP_STATUS_FORBIDDEN, "Droits insuffisants" );
           break;
         }
        liste = g_slist_next ( liste );
      }
 
     Json_node_unref (request);
-    if (!liste) soup_message_set_status_full (msg, SOUP_STATUS_NO_CONTENT, "Session not found" );
+    if (!liste) soup_server_message_set_status_full (msg, SOUP_STATUS_NO_CONTENT, "Session not found" );
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getusers_list: Traite une requete sur l'URI users/list                                                */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- void Http_traiter_users_list ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_users_list ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                 SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -340,7 +340,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
@@ -352,7 +352,7 @@
     gchar *buf = Json_node_to_string ( RootNode );
     Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
@@ -360,10 +360,10 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- void Http_traiter_users_sessions ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_users_sessions ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                     SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_GET)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -373,7 +373,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
@@ -401,7 +401,7 @@
     gchar *buf = Json_node_to_string ( RootNode );
     Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /******************************************************************************************************************************/
@@ -409,10 +409,10 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- void Http_traiter_users_get ( SoupServer *server, SoupMessage *msg, const char *path, GHashTable *query,
+ void Http_traiter_users_get ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query,
                                SoupClientContext *client, gpointer user_data )
   { if (msg->method != SOUP_METHOD_PUT)
-     {	soup_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
+     {	soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED);
 		     return;
      }
 
@@ -423,7 +423,7 @@
 
     if ( ! (Json_has_member ( request, "username" ) ) )
      { Json_node_unref(request);
-       soup_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
     gchar *username = Normaliser_chaine ( Json_get_string ( request, "username" ) );
@@ -433,7 +433,7 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode == NULL)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       soup_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
+       soup_server_message_set_status_full (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
 
@@ -445,7 +445,7 @@
     gchar *buf = Json_node_to_string ( RootNode );
     Json_node_unref ( RootNode );
 /*************************************************** Envoi au client **********************************************************/
-    soup_message_set_status (msg, SOUP_STATUS_OK);
+    soup_server_message_set_status (msg, SOUP_STATUS_OK);
     soup_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

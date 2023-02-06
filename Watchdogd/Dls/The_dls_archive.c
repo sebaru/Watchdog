@@ -53,7 +53,7 @@
        if ( (bit->archivage == 1 && bit->last_arch + 50     <= Partage->top) ||                      /* Toutes les 5 secondes */
             (bit->archivage == 2 && bit->last_arch + 600    <= Partage->top) ||                         /* Toutes les minutes */
             (bit->archivage == 3 && bit->last_arch + 36000  <= Partage->top) ||                          /* Toutes les heures */
-            (bit->archivage == 4 && bit->last_arch + 864000 <= Partage->top)                                /* Tous les jours */
+            (bit->archivage == 4 && bit->last_arch + 864000 <= Partage->top) || bit->last_arch == 0         /* Tous les jours */
           )
         { Ajouter_arch( bit->tech_id, bit->acronyme, (bit->in_range ? bit->valeur : 0.0) );            /* Archivage si besoin */
           bit->last_arch = Partage->top;
@@ -67,7 +67,7 @@
        if ( (bit->archivage == 1 && bit->last_arch + 50     <= Partage->top) ||                      /* Toutes les 5 secondes */
             (bit->archivage == 2 && bit->last_arch + 600    <= Partage->top) ||                         /* Toutes les minutes */
             (bit->archivage == 3 && bit->last_arch + 36000  <= Partage->top) ||                          /* Toutes les heures */
-            (bit->archivage == 4 && bit->last_arch + 864000 <= Partage->top)                                /* Tous les jours */
+            (bit->archivage == 4 && bit->last_arch + 864000 <= Partage->top) || bit->last_arch == 0         /* Tous les jours */
           )
         { Ajouter_arch( bit->tech_id, bit->acronyme, bit->valeur*1.0 );                                /* Archivage si besoin */
           bit->last_arch = Partage->top;
@@ -81,7 +81,7 @@
        if ( (bit->archivage == 1 && bit->last_arch + 50     <= Partage->top) ||                      /* Toutes les 5 secondes */
             (bit->archivage == 2 && bit->last_arch + 600    <= Partage->top) ||                         /* Toutes les minutes */
             (bit->archivage == 3 && bit->last_arch + 36000  <= Partage->top) ||                          /* Toutes les heures */
-            (bit->archivage == 4 && bit->last_arch + 864000 <= Partage->top)                                /* Tous les jours */
+            (bit->archivage == 4 && bit->last_arch + 864000 <= Partage->top) || bit->last_arch == 0         /* Tous les jours */
           )
         { Ajouter_arch( bit->tech_id, bit->acronyme, bit->valeur*1.0 );                                /* Archivage si besoin */
           bit->last_arch = Partage->top;
@@ -95,7 +95,7 @@
        if ( (bit->archivage == 1 && bit->last_arch + 50     <= Partage->top) ||                      /* Toutes les 5 secondes */
             (bit->archivage == 2 && bit->last_arch + 600    <= Partage->top) ||                         /* Toutes les minutes */
             (bit->archivage == 3 && bit->last_arch + 36000  <= Partage->top) ||                          /* Toutes les heures */
-            (bit->archivage == 4 && bit->last_arch + 864000 <= Partage->top)                                /* Tous les jours */
+            (bit->archivage == 4 && bit->last_arch + 864000 <= Partage->top) || bit->last_arch == 0         /* Tous les jours */
           )
         { Ajouter_arch( bit->tech_id, bit->acronyme, bit->valeur );                                    /* Archivage si besoin */
           bit->last_arch = Partage->top;

@@ -159,10 +159,11 @@
     struct DLS_MONO *sys_top_1min;
     struct DLS_AI *sys_bit_per_sec;
     struct DLS_AI *sys_tour_per_sec;
-    struct DLS_AI *sys_wait;
+    struct DLS_AI *sys_dls_wait;
     struct DLS_AI *sys_nbr_msg_queue;
     struct DLS_AI *sys_nbr_visuel_queue;
     struct DLS_AI *sys_nbr_archive_queue;
+    struct DLS_AI *sys_maxrss;
 
     gboolean next_bit_alerte;
     gboolean bit_alerte;
@@ -207,7 +208,7 @@
  extern void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
  extern void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range );
-
+ extern gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request );
                                                                                                          /* Dans The_dls_AO.c */
  extern void Dls_data_AO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
@@ -227,7 +228,7 @@
  extern void Dls_all_DI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
  extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit, gboolean valeur );
-
+ extern gboolean Dls_data_set_DI_from_thread_di ( JsonNode *request );
                                                                                                          /* Dans The_dls_DO.c */
  extern void Dls_data_DO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
@@ -261,5 +262,6 @@
                                                                                                    /* Dans The_dls_WATCHDOG.c */
  extern void Dls_data_WATCHDOG_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_WATCHDOG_to_json ( JsonNode *element, struct DLS_WATCHDOG *bit );
+ extern gboolean Dls_data_set_WATCHDOG_from_thread_watchdog ( JsonNode *request );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

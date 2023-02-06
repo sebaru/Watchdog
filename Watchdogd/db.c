@@ -562,7 +562,7 @@ encore:
                    ") ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
 
     SQL_Write_new ("INSERT IGNORE INTO `syns` (`syn_id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES"
-                   "(1, 1, 'Accueil', 'Defaut Page', 0);");
+                   "(1, 1, 'Accueil', 'DEFAULT_PAGE', 0);");
 
     SQL_Write_new ("CREATE TABLE IF NOT EXISTS `dls` ("
                    "`dls_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
