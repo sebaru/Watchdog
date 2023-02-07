@@ -97,7 +97,7 @@
     bit->valeur   = valeur;
     bit->in_range = in_range;
     Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-              "Changing DLS_AI '%s:%s'=%f", bit->tech_id, bit->acronyme, bit->valeur );
+              "Changing DLS_AI '%s:%s'=%f %s", bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_AI_from_thread_ai: Positionne une AI dans DLS depuis une AI 'thread'                                          */
