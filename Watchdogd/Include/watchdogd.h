@@ -95,6 +95,9 @@
     GSList *archive_liste;                                                                /* liste de struct ARCHDB a traiter */
     gint archive_liste_taille;
 
+    pthread_mutex_t abonnements_synchro;                                                  /* Bit de synchronisation processus */
+    GSList *abonnements;                                                               /* Abonnements aux entrées analogiques */
+
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
@@ -114,6 +117,7 @@
  extern void API_Clear_ARCHIVE ( void );
  extern void API_Send_visuels ( void );
  extern void API_Send_MSGS ( void );
+ extern void API_Send_Abonnements ( void );
  extern void Run_api_sync ( void );
  extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );

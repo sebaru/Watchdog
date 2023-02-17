@@ -539,6 +539,7 @@
     pthread_mutex_init( &Partage->com_dls.synchro_data, NULL );
     pthread_mutex_init( &Partage->archive_liste_sync, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
+    pthread_mutex_init( &Partage->abonnements_synchro, NULL );
 
 /************************************************* Gestion des signaux ********************************************************/
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
@@ -644,6 +645,7 @@
     pthread_mutex_destroy( &Partage->com_dls.synchro_data );
     pthread_mutex_destroy( &Partage->archive_liste_sync );
     pthread_mutex_destroy( &Partage->com_db.synchro );
+    pthread_mutex_destroy( &Partage->abonnements_synchro );
 
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );

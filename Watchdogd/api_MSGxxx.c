@@ -195,8 +195,8 @@
        Liste_Histo_to_send = g_slist_remove ( Liste_Histo_to_send, histo );
        JsonNode *api_result = Http_Post_to_global_API ( "/run/histo", histo );
        if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Post '%s:%s' for /run/histo failed. Retry %04d MSGS in 60 seconds.",
-                    __func__, Json_get_string ( histo, "tech_id"), Json_get_string ( histo, "acronyme" ), g_slist_length(Liste_Histo_to_send) );
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Post '%s:%s' for /run/histo failed. Retry %04d MSGS in 60 seconds.",
+                    Json_get_string ( histo, "tech_id"), Json_get_string ( histo, "acronyme" ), g_slist_length(Liste_Histo_to_send) );
           Json_node_unref ( api_result );
           Json_node_unref ( histo );
           next_try = Partage->top + 600;

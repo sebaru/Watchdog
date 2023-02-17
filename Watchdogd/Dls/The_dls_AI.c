@@ -132,6 +132,14 @@
        bit->archivage = Json_get_int ( request, "archivage" );
        g_snprintf ( bit->unite,   sizeof(bit->unite),   Json_get_string ( request, "unite" ) );
        g_snprintf ( bit->libelle, sizeof(bit->libelle), Json_get_string ( request, "libelle" ) );
+       if (bit->abonnement)
+        { JsonNode *RootNode = Json_node_create();
+          Json_node_add_string ( RootNode, "classe", "AI" );
+          Dls_AI_to_json ( RootNode, bit );
+          pthread_mutex_lock ( &Partage->abonnements_synchro );
+          Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
+          pthread_mutex_unlock ( &Partage->abonnements_synchro );
+        }
      }
     return(TRUE);
   }
