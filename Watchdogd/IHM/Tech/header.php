@@ -28,7 +28,7 @@
                         }
         .courbe-dashboard { height: 300px; }
 
-        .wtd-synoptique-preview { height: 80px; }
+        .wtd-synoptique-preview { height: 80px; cursor: pointer; }
         .wtd-img-bit-interne { width: 40px; }
         .wtd-img-connecteur  { object-fit: contain; height: 196px; padding: 10px; }
       </style>

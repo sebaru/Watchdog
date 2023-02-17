@@ -88,12 +88,14 @@
   { if (!visu) return;
     if (Partage->com_msrv.Thread_run == FALSE) return;
     if ( strcmp ( visu->mode, mode ) || strcmp( visu->color, color ) || visu->cligno != cligno )
-     { if ( visu->last_change + 50 <= Partage->top )                                 /* Si pas de change depuis plus de 5 sec */
-        { visu->changes = 0; }
+     { if ( visu->last_change_reset + 50 <= Partage->top )                 /* Reset compteur de changes toutes les 5 secondes */
+        { visu->changes = 0;
+          visu->last_change_reset = Partage->top;
+        }
 
        if ( visu->changes <= 10 )                                                          /* Si moins de 10 changes en 5 sec */
         { if ( visu->changes == 10 )                                                /* Est-ce le dernier change avant blocage */
-           { g_snprintf( visu->mode,  sizeof(visu->mode),  "hors_comm" ); }
+           { g_snprintf( visu->mode,  sizeof(visu->mode),  "disabled" ); }
           else { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
                  g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
                  g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
@@ -101,7 +103,6 @@
                  visu->cligno  = cligno;
                }
 
-          visu->last_change = Partage->top;                                                             /* Date de la photo ! */
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );

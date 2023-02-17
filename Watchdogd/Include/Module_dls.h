@@ -63,6 +63,7 @@
     guint   last_arch;                                                                         /* Date de la derniere archive */
     guint   in_range;
     guint   archivage;
+    gboolean abonnement;
    };
 
  struct DLS_AO
@@ -164,8 +165,8 @@
     gchar    mode[32];
     gchar    color[16];
     gboolean cligno;
-    gint     last_change;
     gint     changes;
+    gint     last_change_reset;
   };
 
  struct DLS_MESSAGE

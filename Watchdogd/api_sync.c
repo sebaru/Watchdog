@@ -217,6 +217,28 @@
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Reseter_un_plugin ( plugin_tech_id );
      }
+    else if ( !strcasecmp( agent_tag, "ABONNER") )
+     { if ( !Json_has_member ( request, "cadrans" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "ABONNER: cadrans is missing" );
+          goto end;
+        }
+       pthread_mutex_lock ( &Partage->com_dls.synchro_data );
+       GList *Cadrans = json_array_get_elements ( Json_get_array ( request, "cadrans" ) );
+       GList *cadrans = Cadrans;
+       while(cadrans)
+        { JsonNode *cadran = cadrans->data;
+          gint classe      = Json_get_int    ( cadran, "classe" );
+          gchar *tech_id   = Json_get_string ( cadran, "tech_id" );
+          gchar *acronyme  = Json_get_string ( cadran, "acronyme" );
+          if (classe == MNEMO_ENTREE_ANA)
+           { struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
+             if (ai) ai->abonnement = TRUE;
+           }
+          cadrans = g_list_next(cadrans);
+        }
+       g_list_free(Cadrans);
+       pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
+     }
     else if ( !strcasecmp( agent_tag, "DLS_SET") )
      { if ( ! Json_has_member ( request, "tech_id" )  )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
