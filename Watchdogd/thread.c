@@ -233,10 +233,6 @@
     soup_session_set_user_agent   ( module->Master_session, "Abls-habitat Agent" );
     soup_session_set_timeout      ( module->Master_session, 10 );
     soup_session_set_idle_timeout ( module->Master_session, 10 );
-#warning a virer
-    SoupLogger *log = soup_logger_new (SOUP_LOGGER_LOG_MINIMAL);
-    soup_session_add_feature ( module->Master_session, (SoupSessionFeature *)log );
-    g_object_unref ( log );
 
 /******************************************************* Ecoute du Master *****************************************************/
     Thread_ws_bus_init( module );
