@@ -128,7 +128,7 @@
     else if (!new_pid)
      { g_strcanon ( branche, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_", '_' );
        gchar chaine[256];
-       g_snprintf ( chaine, sizeof(chaine), "git clone -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
+       g_snprintf ( chaine, sizeof(chaine), "git clone --depth 1 -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
        system(chaine);
        system("cd temp_src; ./autogen.sh; sudo make install; cd ..; rm -rf temp_src;" );
        Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
