@@ -85,15 +85,14 @@
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status(soup_msg);
 
+    JsonNode *ResponseNode = NULL;
     if (error)
      { gchar *uri = g_uri_to_string(soup_message_get_uri(soup_msg));
        Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Error '%s'", uri, error->message );
        g_free(uri);
        g_error_free ( error );
      }
-
-    JsonNode *ResponseNode = NULL;
-    if (status_code==200)
+    else if (status_code==200)
      { gsize taille;
        gchar *buffer = g_bytes_get_data ( response, &taille );
        if (taille && buffer) ResponseNode = Json_get_from_string ( buffer );
