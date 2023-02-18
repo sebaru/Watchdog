@@ -101,7 +101,8 @@
 
     JsonNode *histo = Http_Get_from_global_API ( "/run/message", "tech_id=%s&acronyme=%s", msg->tech_id, msg->acronyme );
     if (histo == NULL || Json_get_int ( histo, "api_status" ) != SOUP_STATUS_OK)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for /run/message failed. Dropping message." );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for /run/message '%s:%s' failed. Dropping message.",
+                 msg->tech_id, msg->acronyme );
        Json_node_unref ( histo );
        return(NULL);
      }
@@ -172,8 +173,14 @@
                 Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
                 Http_ws_send_to_all( histo );
                 Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
-              } else Json_node_unref(histo);
-           }
+              }
+             else
+              { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
+                          Json_get_int ( histo, "rate_limit" ), event->msg->tech_id, event->msg->acronyme );
+                Json_node_unref(histo);
+              }
+           } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg on to histo",
+                            event->msg->tech_id, event->msg->acronyme );
         }
        else if (event->etat == 0)
         { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );
@@ -183,7 +190,8 @@
              Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
              Http_ws_send_to_all( histo );
              Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
-           }
+           } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
+                            event->msg->tech_id, event->msg->acronyme );
         }
        g_free(event);
      }
