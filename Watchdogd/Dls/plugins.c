@@ -357,12 +357,6 @@
        return(NULL);
      }
 
-    if ( !Json_has_member ( api_result, "enable" ) || Json_get_bool ( api_result, "enable" ) == FALSE )
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s': Not enabled.", tech_id );
-       Json_node_unref(api_result);
-       return(NULL);
-     }
-
     Dls_Save_CodeC_to_disk ( tech_id, Json_get_string ( api_result, "codec" ) );
     Dls_Compiler_source_dls ( tech_id );
 
