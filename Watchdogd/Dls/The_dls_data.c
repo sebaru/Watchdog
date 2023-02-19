@@ -86,7 +86,7 @@
     else Dls_foreach_plugins ( CHArray, Dls_all_CH_to_json );
     Json_node_add_int ( RootNode, "nbr_mnemos_CH", json_array_get_length ( CHArray ) );
 
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
+    JsonNode *api_result = Http_Post_to_global_API ( Partage->com_dls.dls_api_session, "/run/mnemos/save", RootNode );
     if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
                  "'%s': Save %d BI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_BI" ) );

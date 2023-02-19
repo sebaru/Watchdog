@@ -307,7 +307,7 @@
      }
 
 /********************************************* Chargement des informations en bases *******************************************/
-    JsonNode *UsersNode = Http_Get_from_global_API ( "/run/users/wanna_be_notified", NULL );
+    JsonNode *UsersNode = Http_Get_from_global_API ( module->API_session, "/run/users/wanna_be_notified", NULL );
     if (!UsersNode || Json_get_int ( UsersNode, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USERS from API", thread_tech_id );
        return;
@@ -390,7 +390,7 @@
      }
     Json_node_add_string ( RootNode, "phone", from );
 
-    JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt_cde", RootNode );
+    JsonNode *UserNode = Http_Post_to_global_API ( module->API_session, "/run/user/can_send_txt_cde", RootNode );
     Json_node_unref ( RootNode );
     if (!UserNode || Json_get_int ( UserNode, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
@@ -438,7 +438,7 @@
     Json_node_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
     Json_node_add_string ( RootNode, "thread_acronyme", texte );
 
-    JsonNode *MapNode = Http_Post_to_global_API ( "/run/mapping/search_txt", RootNode );
+    JsonNode *MapNode = Http_Post_to_global_API ( module->API_session, "/run/mapping/search_txt", RootNode );
     Json_node_unref ( RootNode );
     if (!MapNode || Json_get_int ( MapNode, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );

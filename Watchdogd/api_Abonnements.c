@@ -40,7 +40,7 @@
        Partage->abonnements = g_slist_remove ( Partage->abonnements, RootNode );
        pthread_mutex_unlock( &Partage->abonnements_synchro );
 
-       JsonNode *api_result = Http_Post_to_global_API ( "/run/abonnement", RootNode );
+       JsonNode *api_result = Http_Post_to_global_API ( Partage->API_Sync_session, "/run/abonnement", RootNode );
        if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Post '%s:%s' for /run/abonnemnent failed. Retry %04d enregs in 60 seconds.",
                     Json_get_string ( RootNode, "tech_id"), Json_get_string ( RootNode, "acronyme" ), g_slist_length(Partage->abonnements) );

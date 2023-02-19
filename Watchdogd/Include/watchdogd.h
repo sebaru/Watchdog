@@ -69,7 +69,6 @@
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
-    SoupSession *API_session;
     SoupWebsocketConnection *API_websocket;
     GSList *API_ws_messages;                                                             /* Liste des messages recue de l'API */
     gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
@@ -95,6 +94,8 @@
     GSList *archive_liste;                                                                /* liste de struct ARCHDB a traiter */
     gint archive_liste_taille;
 
+    SoupSession *API_Msrv_session;
+    SoupSession *API_Sync_session;
     pthread_mutex_t abonnements_synchro;                                                  /* Bit de synchronisation processus */
     GSList *abonnements;                                                               /* Abonnements aux entrées analogiques */
 
@@ -119,8 +120,8 @@
  extern void API_Send_MSGS ( void );
  extern void API_Send_Abonnements ( void );
  extern void Run_api_sync ( void );
- extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
- extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
+ extern JsonNode *Http_Post_to_global_API ( SoupSession *session, gchar *URI, JsonNode *RootNode );
+ extern JsonNode *Http_Get_from_global_API ( SoupSession *session, gchar *URI, gchar *format, ... );
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 

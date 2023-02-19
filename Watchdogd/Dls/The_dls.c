@@ -369,6 +369,7 @@
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
     Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
+    Partage->com_dls.dls_api_session = soup_session_new();
 
     Dls_Importer_plugins();                                                    /* Chargement des modules dls avec compilation */
 
@@ -477,6 +478,7 @@
        sched_yield();
      }
     Dls_Decharger_plugins();                                                                  /* Dechargement des modules DLS */
+    g_object_unref ( Partage->com_dls.dls_api_session );
     Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "DLS Down (%p)", pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */

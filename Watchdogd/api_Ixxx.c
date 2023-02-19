@@ -65,7 +65,7 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Json_node_add_int ( RootNode, "nbr_visuels", nb_enreg );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/visuels/set", RootNode );
+    JsonNode *api_result = Http_Post_to_global_API ( Partage->API_Sync_session, "/run/visuels/set", RootNode );
     if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
      { gint nbr_saved = Json_get_int ( api_result, "nbr_visuels_saved" );
        Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %05d visuel(s) en %06.1fs. Reste %05d.",

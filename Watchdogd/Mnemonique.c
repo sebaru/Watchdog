@@ -50,7 +50,7 @@
     Json_node_add_string ( node, "libelle", libelle );
     Json_node_add_string ( node, "unite", unite );
     Json_node_add_int    ( node, "archivage", archivage );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/ai", node );
+    JsonNode *api_result = Http_Post_to_global_API ( module->API_session, "/run/thread/add/ai", node );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
                  "%s: Could not add AI %s to API", thread_tech_id, thread_acronyme );
@@ -72,7 +72,7 @@
     Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
     Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
     Json_node_add_string ( node, "libelle", libelle );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/di", node );
+    JsonNode *api_result = Http_Post_to_global_API ( module->API_session, "/run/thread/add/di", node );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
                  "%s: Could not add DI %s to API", thread_tech_id, thread_acronyme );
@@ -94,7 +94,7 @@
     Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
     Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
     Json_node_add_string ( node, "libelle", libelle );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/do", node );
+    JsonNode *api_result = Http_Post_to_global_API ( module->API_session, "/run/thread/add/do", node );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
                  "%s: Could not add DO %s to API", thread_tech_id, thread_acronyme );
@@ -118,7 +118,7 @@
     Json_node_add_string ( node, "libelle", libelle );
     Json_node_add_string ( node, "unite", unite );
     Json_node_add_int    ( node, "archivage", archivage );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/ao", node );
+    JsonNode *api_result = Http_Post_to_global_API ( module->API_session, "/run/thread/add/ao", node );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
                  "%s: Could not add AO %s to API", thread_tech_id, thread_acronyme );
@@ -140,7 +140,7 @@
     Json_node_add_string ( node, "tech_id", tech_id );
     Json_node_add_string ( node, "acronyme", acronyme );
     Json_node_add_string ( node, "libelle", libelle );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/add", node );
+    JsonNode *api_result = Http_Post_to_global_API ( module->API_session, "/run/horloge/add", node );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
                  "%s: Could not add HORLOGE %s to API", tech_id, acronyme );
@@ -162,7 +162,7 @@
     Json_node_add_string ( node, "acronyme", Json_get_string ( bit, "acronyme" ) );
     Json_node_add_int    ( node, "heure", heure );
     Json_node_add_int    ( node, "minute", minute );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/add/tick", node );
+    JsonNode *api_result = Http_Post_to_global_API ( module->API_session, "/run/horloge/add/tick", node );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
                  "%s: Could not add HORLOGE tick %s:%d:%d to API",
@@ -179,7 +179,7 @@
  void Mnemo_delete_thread_HORLOGE_tick ( struct THREAD *module, JsonNode *bit )
   { if (!bit) return;
     Json_node_add_string ( bit, "classe", "HORLOGE" );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/del/tick", bit );
+    JsonNode *api_result = Http_Post_to_global_API ( module->API_session, "/run/horloge/del/tick", bit );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
                  "%s: Could not DEL HORLOGE tick for '%s'",
@@ -200,7 +200,7 @@
     Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
     Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
     Json_node_add_string ( node, "libelle", libelle );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/watchdog", node );
+    JsonNode *api_result = Http_Post_to_global_API ( module->API_session, "/run/thread/add/watchdog", node );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
                  "%s: Could not add WATCHDOG %s to API", thread_tech_id, thread_acronyme );

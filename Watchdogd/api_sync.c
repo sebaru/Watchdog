@@ -39,7 +39,7 @@
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode )
+ JsonNode *Http_Post_to_global_API ( SoupSession *session, gchar *URI, JsonNode *RootNode )
   { gboolean unref_RootNode = FALSE;
     gchar query[256];
 
@@ -55,7 +55,7 @@
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending to API %s", query );
-    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( Partage->com_msrv.API_session, soup_msg, RootNode );
+    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( session, soup_msg, RootNode );
     if (unref_RootNode) Json_node_unref(RootNode);
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
@@ -72,7 +72,7 @@
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... )
+ JsonNode *Http_Get_from_global_API ( SoupSession *session, gchar *URI, gchar *format, ... )
   { gchar query[512];
     va_list ap;
 
@@ -91,7 +91,7 @@
        return(NULL);
      }
 
-    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( Partage->com_msrv.API_session, soup_msg, NULL );
+    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( session, soup_msg, NULL );
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status(soup_msg);
@@ -297,7 +297,7 @@ end:
 /******************************************************************************************************************************/
  static void API_on_API_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
   { GError *error = NULL;
-    Partage->com_msrv.API_websocket = soup_session_websocket_connect_finish ( Partage->com_msrv.API_session, res, &error );
+    Partage->com_msrv.API_websocket = soup_session_websocket_connect_finish ( Partage->API_Sync_session, res, &error );
     if (!Partage->com_msrv.API_websocket)                                                    /* No limit on incoming packet ! */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket error: %s.", error->message );
        g_error_free (error);
@@ -323,7 +323,7 @@ end:
     Http_Add_Agent_signature ( soup_msg, NULL, 0 );
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Starting WebSocket connect to %s", chaine );
-    soup_session_websocket_connect_async ( Partage->com_msrv.API_session, soup_msg,
+    soup_session_websocket_connect_async ( Partage->API_Sync_session, soup_msg,
                                            NULL, protocols, 0, NULL, API_on_API_connected, NULL );
     g_object_unref(soup_msg);
   }
@@ -350,7 +350,7 @@ end:
   { prctl(PR_SET_NAME, "W-APISYNC", 0, 0, 0 );
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
-
+    Partage->API_Sync_session = soup_session_new();
 /***************************************** WebSocket Connect to API ************************************************************/
     API_ws_init();
     gint cpt_1_minute = Partage->top + 600;
@@ -379,7 +379,7 @@ end:
     g_slist_free    ( Partage->com_msrv.liste_visuel ); Partage->com_msrv.liste_visuel = NULL;
     g_slist_foreach ( Partage->com_msrv.liste_msg, (GFunc)g_free, NULL );
     g_slist_free    ( Partage->com_msrv.liste_msg ); Partage->com_msrv.liste_msg    = NULL;
-
+    g_object_unref(Partage->API_Sync_session);
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

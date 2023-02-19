@@ -99,7 +99,7 @@
     struct timeval tv;
     struct tm *temps;
 
-    JsonNode *histo = Http_Get_from_global_API ( "/run/message", "tech_id=%s&acronyme=%s", msg->tech_id, msg->acronyme );
+    JsonNode *histo = Http_Get_from_global_API ( Partage->API_Sync_session, "/run/message", "tech_id=%s&acronyme=%s", msg->tech_id, msg->acronyme );
     if (histo == NULL || Json_get_int ( histo, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for /run/message '%s:%s' failed. Dropping message.",
                  msg->tech_id, msg->acronyme );
@@ -201,7 +201,7 @@
     while (Liste_Histo_to_send && next_try <= Partage->top)
      { JsonNode *histo = Liste_Histo_to_send->data;
        Liste_Histo_to_send = g_slist_remove ( Liste_Histo_to_send, histo );
-       JsonNode *api_result = Http_Post_to_global_API ( "/run/histo", histo );
+       JsonNode *api_result = Http_Post_to_global_API ( Partage->API_Sync_session, "/run/histo", histo );
        if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Post '%s:%s' for /run/histo failed. Retry %04d MSGS in 60 seconds.",
                     Json_get_string ( histo, "tech_id"), Json_get_string ( histo, "acronyme" ), g_slist_length(Liste_Histo_to_send) );

@@ -121,6 +121,7 @@
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
+    SoupSession *dls_api_session;
     GSList *Dls_plugins;                                                                             /* Liste d'execution DLS */
 
     GSList *Set_Dls_DI_Edge_up;                                                /* liste des DIxxx a activer au debut tour prg */
