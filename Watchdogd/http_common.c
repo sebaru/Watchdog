@@ -95,11 +95,12 @@
     else if (status_code==200)
      { gsize taille;
        gchar *buffer = g_bytes_get_data ( response, &taille );
+       Info_new( __func__, Config.log_bus, LOG_DEBUG, "Received %d bytes : %s", taille, buffer );
        if (taille && buffer) ResponseNode = Json_get_from_string ( buffer );
      }
     else
      { gchar *uri = g_uri_to_string(soup_message_get_uri(soup_msg));
-       Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, uri, reason_phrase );
+       Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s", status_code, uri, reason_phrase );
        g_free(uri);
      }
     g_bytes_unref (response);
@@ -133,14 +134,15 @@
        Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: Error '%s'", uri, error->message );
        g_free(uri);
        g_error_free ( error );
-     } else if (status_code==200)
+     }
+    else if (status_code==200)
      { gsize taille;
        gchar *buffer = g_bytes_get_data ( response, &taille );
        if (taille && buffer) ResponseNode = Json_get_from_string ( buffer );
      }
     else
      { gchar *uri = g_uri_to_string(soup_message_get_uri(soup_msg));
-       Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, uri, reason_phrase );
+       Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s", status_code, uri, reason_phrase );
        g_free(uri);
      }
     g_bytes_unref (response);
