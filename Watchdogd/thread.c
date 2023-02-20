@@ -439,7 +439,7 @@
        return;
      }
 
-    module->config = Http_Get_from_global_API ( module->API_session, "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
+    module->config = Http_Get_from_global_API ( Partage->API_Msrv_session, "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
     if (module->config && Json_get_int ( module->config, "api_status" ) == SOUP_STATUS_OK)
      { module->Thread_debug = Json_get_bool ( module->config, "debug" );
        module->Thread_run   = Json_get_bool ( module->config, "enable" );
