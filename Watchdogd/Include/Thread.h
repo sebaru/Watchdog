@@ -40,11 +40,10 @@
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
-    SoupSession *API_session;
+    SoupSession *Soup_session;
     JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
-    SoupSession *Master_session;
     SoupWebsocketConnection *Master_websocket;
     GSList *WS_messages;
     JsonNode *ai_nbr_tour_par_sec;                                                                        /* Tour par seconde */

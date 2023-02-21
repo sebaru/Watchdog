@@ -189,7 +189,7 @@
     Partage->Maps_from_thread = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_thread );
     Partage->Maps_to_thread   = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_local );
 
-    Partage->Maps_root = Http_Post_to_global_API ( Partage->API_Msrv_session, "/run/mapping/list", NULL );
+    Partage->Maps_root = Http_Post_to_global_API ( "/run/mapping/list", NULL );
     if (Partage->Maps_root && Json_get_int ( Partage->Maps_root, "api_status" ) == SOUP_STATUS_OK)
      { GList *Results = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "mappings" ) );
        GList *results = Results;
@@ -458,14 +458,8 @@
        goto second_stage_end;
      }
 
-/************************************************* Init libsoup session *******************************************************/
-    Partage->API_Msrv_session = soup_session_new();
-    soup_session_set_user_agent   ( Partage->API_Msrv_session, "Abls-habitat Agent" );
-    soup_session_set_timeout      ( Partage->API_Msrv_session, 60 );
-    soup_session_set_idle_timeout ( Partage->API_Msrv_session, 60 );
-
 /************************************************* Test Connexion to Global API ***********************************************/
-    JsonNode *API = Http_Get_from_global_API ( Partage->API_Msrv_session, "status", NULL );
+    JsonNode *API = Http_Get_from_global_API ( "status", NULL );
     if (!API)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Connection to Global API FAILED. Sleep 5s and stopping." );
        sleep(5);
@@ -483,7 +477,7 @@
        Json_node_add_string ( RootNode, "branche", WTD_BRANCHE );
        Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
 
-       JsonNode *api_result = Http_Post_to_global_API ( Partage->API_Msrv_session, "/run/agent/start", RootNode );
+       JsonNode *api_result = Http_Post_to_global_API ( "/run/agent/start", RootNode );
        Json_node_unref ( RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "API Request for AGENT START OK." ); }
@@ -654,9 +648,6 @@ third_stage_end:
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
 second_stage_end:
-    soup_session_abort ( Partage->API_Msrv_session );
-    g_object_unref( Partage->API_Msrv_session );
-    Partage->API_Msrv_session = NULL;
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
 first_stage_end:

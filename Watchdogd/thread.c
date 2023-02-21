@@ -59,7 +59,7 @@
         { Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
           Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
           Json_node_add_bool   ( RootNode, "io_comm", module->comm_status );
-          JsonNode *api_result = Http_Post_to_global_API ( module->API_session, "/run/thread/heartbeat", RootNode );
+          JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/heartbeat", RootNode );
           Json_node_unref ( api_result );
           Json_node_unref ( RootNode );
         }
@@ -125,7 +125,7 @@
     GError *error = NULL;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    module->Master_websocket = soup_session_websocket_connect_finish ( module->Master_session, res, &error );
+    module->Master_websocket = soup_session_websocket_connect_finish ( module->Soup_session, res, &error );
     if (error)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error: %s.", thread_tech_id, error->message );
        g_error_free (error);
@@ -167,7 +167,7 @@
     g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
     SoupMessage *msg = soup_message_new ( "GET", chaine );
     g_signal_connect ( G_OBJECT(msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
-    soup_session_websocket_connect_async ( module->Master_session, msg, NULL, protocols, 0, NULL, Thread_ws_on_master_connected, module );
+    soup_session_websocket_connect_async ( module->Soup_session, msg, NULL, protocols, 0, NULL, Thread_ws_on_master_connected, module );
     g_object_unref(msg);
   }
 /******************************************************************************************************************************/
@@ -228,14 +228,7 @@
           Thread_end ( module );                            /* Pas besoin de return : Thread_end fait un pthread_exit */
         }
      }
-
-    module->Master_session = soup_session_new();
-    soup_session_set_user_agent   ( module->Master_session, "Abls-habitat Thread" );
-    soup_session_set_timeout      ( module->Master_session, 10 );
-    soup_session_set_idle_timeout ( module->Master_session, 10 );
-
-    module->API_session = soup_session_new();
-    soup_session_set_user_agent   ( module->API_session, "Abls-habitat Thread" );
+    module->Soup_session = HTTP_New_session ( "Abls-habitat Thread" );
 /******************************************************* Ecoute du Master *****************************************************/
     Thread_ws_bus_init( module );
 
@@ -263,9 +256,7 @@
        while ( module->Master_websocket ) sched_yield();
      }
 
-    soup_session_abort ( module->Master_session );
-    g_object_unref ( module->Master_session ); module->Master_session = NULL;
-    g_object_unref ( module->API_session );    module->API_session = NULL;
+    Json_node_unref ( module->Soup_session );  module->Soup_session = NULL;
     g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
     g_slist_free ( module->WS_messages );      module->WS_messages = NULL;
     if (module->vars) { g_free(module->vars);  module->vars   = NULL; }
@@ -439,7 +430,7 @@
        return;
      }
 
-    module->config = Http_Get_from_global_API ( Partage->API_Msrv_session, "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
+    module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
     if (module->config && Json_get_int ( module->config, "api_status" ) == SOUP_STATUS_OK)
      { module->Thread_debug = Json_get_bool ( module->config, "debug" );
        module->Thread_run   = Json_get_bool ( module->config, "enable" );
@@ -500,7 +491,7 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_librairies ( void )
-  { JsonNode *api_result = Http_Post_to_global_API ( Partage->API_Msrv_session, "/run/thread/load", NULL );
+  { JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/load", NULL );
     if (!api_result) { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Error for /run/thread LOAD",__func__ ); return; }
 
     if (Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)                                /* Chargement des modules */

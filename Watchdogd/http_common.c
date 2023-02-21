@@ -30,6 +30,18 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* HTTP_New_session: créé une nouvelle session libsoup                                                                        */
+/* Entrée: le message                                                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ SoupSession *HTTP_New_session ( gchar *user_agent )
+  { SoupSession *session = soup_session_new ();
+    soup_session_set_user_agent   ( session, user_agent );
+    soup_session_set_timeout      ( session, 60 );
+    soup_session_set_idle_timeout ( session, 60 );
+    return(session);
+  }
+/******************************************************************************************************************************/
 /* Http_Add_Agent_signature: signe une requete d'un agent vers l'API Cloud                                                    */
 /* Entrée: le message                                                                                                         */
 /* Sortie: néant                                                                                                              */
@@ -68,7 +80,7 @@
 /* Entrée: les données envoyer                                                                                                */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- JsonNode *Http_Send_json_request_from_agent ( SoupSession *session, SoupMessage *soup_msg, JsonNode *RootNode )
+ JsonNode *Http_Send_json_request_from_agent ( SoupMessage *soup_msg, JsonNode *RootNode )
   {
     if (RootNode)
      { gchar *buffer = Json_node_to_string ( RootNode );
@@ -80,6 +92,7 @@
      } else Http_Add_Agent_signature ( soup_msg, NULL, 0 );
 
     GError *error = NULL;
+    SoupSession *session = HTTP_New_session ( "Abls-Habitat Agent" );
     GBytes *response = soup_session_send_and_read ( session, soup_msg, NULL, &error ); /* SYNC */
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
@@ -104,6 +117,7 @@
        g_free(uri);
      }
     g_bytes_unref (response);
+    g_object_unref ( session );
     return(ResponseNode);
   }
 /******************************************************************************************************************************/
@@ -123,7 +137,8 @@
      } else Http_Add_Thread_signature ( module, soup_msg, NULL, 0 );
 
     GError *error = NULL;
-    GBytes *response = soup_session_send_and_read ( module->Master_session, soup_msg, NULL, &error ); /* SYNC */
+    SoupSession *session = HTTP_New_session ( "Abls-Habitat Thread" );
+    GBytes *response = soup_session_send_and_read ( module->Soup_session, soup_msg, NULL, &error ); /* SYNC */
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status(soup_msg);
@@ -147,6 +162,7 @@
      }
     g_bytes_unref (response);
     return(ResponseNode);
+    g_object_unref ( session );
   }
 /******************************************************************************************************************************/
 /* Http_Send_json_response: Envoie le json en paramètre en prenant le lead dessus                                             */

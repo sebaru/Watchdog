@@ -39,7 +39,7 @@
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- JsonNode *Http_Post_to_global_API ( SoupSession *session, gchar *URI, JsonNode *RootNode )
+ JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode )
   { gboolean unref_RootNode = FALSE;
     gchar query[256];
 
@@ -55,7 +55,9 @@
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending to API %s", query );
-    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( session, soup_msg, RootNode );
+
+    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( soup_msg, RootNode );
+
     if (unref_RootNode) Json_node_unref(RootNode);
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
@@ -72,7 +74,7 @@
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
- JsonNode *Http_Get_from_global_API ( SoupSession *session, gchar *URI, gchar *format, ... )
+ JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... )
   { gchar query[512];
     va_list ap;
 
@@ -91,7 +93,7 @@
        return(NULL);
      }
 
-    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( session, soup_msg, NULL );
+    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( soup_msg, NULL );
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status(soup_msg);
@@ -115,7 +117,7 @@
     return(ResponseNode);
  }
 /******************************************************************************************************************************/
-/* API_handle_API_messages: Traite les messages recue de l'API                                                               */
+/* AGENT_upgrade_to: Upgrade un agent sur la branche en parametre                                                             */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -350,8 +352,8 @@ end:
   { prctl(PR_SET_NAME, "W-APISYNC", 0, 0, 0 );
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
-    Partage->API_Sync_session = soup_session_new();
 /***************************************** WebSocket Connect to API ************************************************************/
+    Partage->API_Sync_session = HTTP_New_session( "Abls-habitat SYNC Agent" );
     API_ws_init();
     gint cpt_1_minute = Partage->top + 600;
     while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
@@ -379,7 +381,7 @@ end:
     g_slist_free    ( Partage->com_msrv.liste_visuel ); Partage->com_msrv.liste_visuel = NULL;
     g_slist_foreach ( Partage->com_msrv.liste_msg, (GFunc)g_free, NULL );
     g_slist_free    ( Partage->com_msrv.liste_msg ); Partage->com_msrv.liste_msg    = NULL;
-    g_object_unref(Partage->API_Sync_session);
+    g_object_unref (  Partage->API_Sync_session );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

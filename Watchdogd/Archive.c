@@ -80,7 +80,6 @@
   { prctl(PR_SET_NAME, "W-ARCHSYNC", 0, 0, 0 );
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
-    SoupSession *API_Arch_session = soup_session_new();
 
     gint cpt_1_minute = Partage->top + 600;
     gint max_enreg = ARCHIVE_MAX_ENREG_TO_API;
@@ -111,7 +110,7 @@
        Json_node_add_int ( RootNode, "nbr_archives", nb_enreg );
        Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending %05d archive(s).", nb_enreg );
 
-       JsonNode *api_result = Http_Post_to_global_API ( API_Arch_session, "/run/archive/save", RootNode );
+       JsonNode *api_result = Http_Post_to_global_API ( "/run/archive/save", RootNode );
        if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
         { gint nbr_saved = Json_get_int ( api_result, "nbr_archives_saved" );
 
@@ -141,7 +140,6 @@
      }
 
     ARCH_Clear();                                                   /* Suppression des enregistrements restants dans la liste */
-    g_object_unref ( API_Arch_session );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

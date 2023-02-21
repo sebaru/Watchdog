@@ -94,7 +94,6 @@
     GSList *archive_liste;                                                                /* liste de struct ARCHDB a traiter */
     gint archive_liste_taille;
 
-    SoupSession *API_Msrv_session;
     SoupSession *API_Sync_session;
     pthread_mutex_t abonnements_synchro;                                                  /* Bit de synchronisation processus */
     GSList *abonnements;                                                               /* Abonnements aux entrées analogiques */
@@ -120,8 +119,8 @@
  extern void API_Send_MSGS ( void );
  extern void API_Send_Abonnements ( void );
  extern void Run_api_sync ( void );
- extern JsonNode *Http_Post_to_global_API ( SoupSession *session, gchar *URI, JsonNode *RootNode );
- extern JsonNode *Http_Get_from_global_API ( SoupSession *session, gchar *URI, gchar *format, ... );
+ extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
+ extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 
@@ -132,8 +131,9 @@
  extern void UUID_Load ( gchar *thread, gchar *target );
 
  extern void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size );                  /* Dans http_common.c */
+ extern SoupSession *HTTP_New_session ( gchar *user_agent );
  extern gboolean Http_Accept_certificate ( SoupMessage* self, GTlsCertificate* tls_peer_certificate, GTlsCertificateFlags tls_peer_errors, gpointer user_data );
- extern JsonNode *Http_Send_json_request_from_agent ( SoupSession *session, SoupMessage *soup_msg, JsonNode *RootNode );
+ extern JsonNode *Http_Send_json_request_from_agent ( SoupMessage *soup_msg, JsonNode *RootNode );
  extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode );
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
 

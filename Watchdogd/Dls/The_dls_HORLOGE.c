@@ -135,7 +135,7 @@
 /* Sortie: Les horloges sont directement stockées dans la structure partagée                                                  */
 /******************************************************************************************************************************/
  void Dls_Load_horloge_ticks ( void )
-  { JsonNode *api_result = Http_Get_from_global_API ( Partage->com_dls.dls_api_session, "/run/horloges", NULL );
+  { JsonNode *api_result = Http_Get_from_global_API ( "/run/horloges", NULL );
     if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
      { pthread_mutex_lock ( &Partage->com_dls.synchro_data );
        Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
