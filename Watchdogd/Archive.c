@@ -124,8 +124,8 @@
            }
           pthread_mutex_unlock( &Partage->archive_liste_sync );
 
-          Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %05d archive(s) en %06.1fs. Reste %05d",
-                    Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, Partage->archive_liste_taille );
+          Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %05d archive(s) en %06.1fs (max %d). Reste %05d",
+                    Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, max_enreg, Partage->archive_liste_taille );
           max_enreg = max_enreg + 10;
           if (max_enreg>ARCHIVE_MAX_ENREG_TO_API) max_enreg = ARCHIVE_MAX_ENREG_TO_API;
         }

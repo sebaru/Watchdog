@@ -438,7 +438,7 @@
   { gsize taille;
 
     SoupMessageBody *body = soup_server_message_get_request_body ( msg );
-    GBytes *buffer        = soup_message_body_flatten ( body );
+    GBytes *buffer        = soup_message_body_flatten ( body );                                    /* Add \0 to end of buffer */
     JsonNode *request     = Json_get_from_string ( g_bytes_get_data ( buffer, &taille ) );
     g_bytes_unref(buffer);
     return(request);

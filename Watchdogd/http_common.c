@@ -107,9 +107,13 @@
      }
     else if (status_code==200)
      { gsize taille;
-       gchar *buffer = g_bytes_get_data ( response, &taille );
-       Info_new( __func__, Config.log_bus, LOG_DEBUG, "Received %d bytes : %s", taille, buffer );
-       if (taille && buffer) ResponseNode = Json_get_from_string ( buffer );
+       gchar *buffer_unsafe = g_bytes_get_data ( response, &taille );
+       gchar *buffer_safe   = g_try_malloc0 ( taille + 1 );
+       if (buffer_safe)
+        { memcpy ( buffer_safe, buffer_unsafe, taille );                                        /* Copy with \0 end of string */
+          if (taille && buffer_safe) ResponseNode = Json_get_from_string ( buffer_safe );
+          g_free(buffer_safe);
+        }
      }
     else
      { gchar *uri = g_uri_to_string(soup_message_get_uri(soup_msg));
@@ -152,8 +156,13 @@
      }
     else if (status_code==200)
      { gsize taille;
-       gchar *buffer = g_bytes_get_data ( response, &taille );
-       if (taille && buffer) ResponseNode = Json_get_from_string ( buffer );
+       gchar *buffer_unsafe = g_bytes_get_data ( response, &taille );
+       gchar *buffer_safe   = g_try_malloc0 ( taille + 1 );
+       if (buffer_safe)
+        { memcpy ( buffer_safe, buffer_unsafe, taille );                                        /* Copy with \0 end of string */
+          if (taille && buffer_safe) ResponseNode = Json_get_from_string ( buffer_safe );
+          g_free(buffer_safe);
+        }
      }
     else
      { gchar *uri = g_uri_to_string(soup_message_get_uri(soup_msg));

@@ -198,6 +198,7 @@
 
 /******************************************************* Envoi à l'API ********************************************************/
     static gint next_try = 0;
+    gint cpt=0;
     while (Liste_Histo_to_send && next_try <= Partage->top)
      { JsonNode *histo = Liste_Histo_to_send->data;
        Liste_Histo_to_send = g_slist_remove ( Liste_Histo_to_send, histo );
@@ -209,9 +210,10 @@
           Json_node_unref ( histo );
           next_try = Partage->top + 600;
           break;
-        }
+        } else cpt++;
        Json_node_unref ( api_result );
        Json_node_unref ( histo );
      }
+    if (cpt) Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%d MSGS sent to API", cpt );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
