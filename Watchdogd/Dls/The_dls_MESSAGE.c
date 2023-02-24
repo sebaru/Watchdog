@@ -81,42 +81,10 @@
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gboolean update, gboolean etat )
+ void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gboolean etat )
   { if (!msg) return;
-    if ( update )
-     { if (etat == FALSE) { msg->etat_update = FALSE; }
-       else if (msg->etat == TRUE && msg->etat_update == FALSE)
-        { struct DLS_MESSAGE_EVENT *event;
-          msg->etat_update = TRUE;
-          event = (struct DLS_MESSAGE_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
-          if (!event)
-           { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", msg->tech_id, msg->acronyme );
-           }
-          else
-           { event->etat = FALSE;                                                       /* Recopie de l'état dans l'evenement */
-             event->msg  = msg;
-             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
-             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-             pthread_mutex_unlock( &Partage->com_msrv.synchro );
-           }
-          event = (struct DLS_MESSAGE_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
-          if (!event)
-           { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", msg->tech_id, msg->acronyme );
-           }
-          else
-           { event->etat = TRUE;                                                        /* Recopie de l'état dans l'evenement */
-             event->msg  = msg;
-             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
-             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-             pthread_mutex_unlock( &Partage->com_msrv.synchro );
-           }
-        }
-     }
-    else if ( msg->etat != etat )
+    if ( msg->etat != etat )
      { msg->etat = etat;
-       if (etat) msg->etat_update = TRUE;
 
        if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
 

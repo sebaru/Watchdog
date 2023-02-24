@@ -365,7 +365,7 @@
     else if ( !strcasecmp ( classe, "MSG" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
        struct DLS_MESSAGE *bit = Dls_data_lookup_MESSAGE ( tech_id, acronyme );
-       Dls_data_set_MESSAGE ( NULL, bit, FALSE, valeur );
+       Dls_data_set_MESSAGE ( NULL, bit, valeur );
        /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
      }
