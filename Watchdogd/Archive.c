@@ -126,13 +126,13 @@
 
           Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %05d archive(s) en %06.1fs. Reste %05d",
                     Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, Partage->archive_liste_taille );
-          max_enreg = max_enreg * 10;
+          max_enreg = max_enreg + 10;
           if (max_enreg>ARCHIVE_MAX_ENREG_TO_API) max_enreg = ARCHIVE_MAX_ENREG_TO_API;
         }
        else
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error. Reste %05d.", Partage->archive_liste_taille );
-          max_enreg = max_enreg / 10;
-          if (max_enreg==0) max_enreg = 1;
+        { max_enreg = 10;
+          Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error. Reste %05d. Reduce max_enreg to 10.",
+                    Partage->archive_liste_taille, max_enreg );
         }
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
