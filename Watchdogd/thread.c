@@ -256,9 +256,9 @@
        while ( module->Master_websocket ) sched_yield();
      }
 
-    Json_node_unref ( module->Soup_session );  module->Soup_session = NULL;
+    g_object_unref  ( module->Soup_session );  module->Soup_session = NULL;
     g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
-    g_slist_free ( module->WS_messages );      module->WS_messages = NULL;
+    g_slist_free    ( module->WS_messages );   module->WS_messages = NULL;
     if (module->vars) { g_free(module->vars);  module->vars   = NULL; }
     Json_node_unref ( module->IOs );           module->IOs    = NULL;
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
