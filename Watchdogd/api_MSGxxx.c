@@ -199,7 +199,7 @@
 /******************************************************* Envoi à l'API ********************************************************/
     static gint next_try = 0;
     gint cpt=0, top = Partage->top;
-    while (Liste_Histo_to_send && next_try <= Partage->top)
+    while (Liste_Histo_to_send && next_try <= Partage->top && cpt<10)
      { JsonNode *histo = Liste_Histo_to_send->data;
        Liste_Histo_to_send = g_slist_remove ( Liste_Histo_to_send, histo );
        JsonNode *api_result = Http_Post_to_global_API ( "/run/histo", histo );
