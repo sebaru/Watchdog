@@ -154,7 +154,9 @@
  void API_Send_MSGS ( void )
   { struct DLS_MESSAGE_EVENT *event;
 
-    while (Partage->com_msrv.liste_msg)
+#warning a migrer en tant que thread autonome
+    gint cpt=0;
+    while (Partage->com_msrv.liste_msg && cpt<10)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
        event = Partage->com_msrv.liste_msg->data;                                            /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
@@ -194,11 +196,13 @@
                             event->msg->tech_id, event->msg->acronyme );
         }
        g_free(event);
+       cpt++;
      }
 
 /******************************************************* Envoi à l'API ********************************************************/
     static gint next_try = 0;
-    gint cpt=0, top = Partage->top;
+    gint top = Partage->top;
+    cpt = 0;
     while (Liste_Histo_to_send && next_try <= Partage->top && cpt<10)
      { JsonNode *histo = Liste_Histo_to_send->data;
        Liste_Histo_to_send = g_slist_remove ( Liste_Histo_to_send, histo );
