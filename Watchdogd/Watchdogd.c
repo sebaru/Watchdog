@@ -427,6 +427,144 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* MSRV_Agent_upgrade_to: Upgrade un agent sur la branche en parametre                                                        */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_Agent_upgrade_to ( gchar *branche )
+  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading to '%s' in progress", branche );
+    gint pid = getpid();
+    gint new_pid = fork();
+    if (new_pid<0)
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: erreur Fork" ); }
+    else if (!new_pid)
+     { g_strcanon ( branche, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_", '_' );
+       gchar chaine[256];
+       g_snprintf ( chaine, sizeof(chaine), "git clone --depth 1 -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
+       system(chaine);
+       system("cd temp_src; ./autogen.sh; sudo make install; cd ..; rm -rf temp_src;" );
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
+       kill (pid, SIGTERM);                                                                          /* Stop old processes */
+       exit(0);
+     }
+  }
+/******************************************************************************************************************************/
+/* MSRV_handle_API_messages: Traite les messages recue de l'API                                                               */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_handle_API_messages ( void )
+  {
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    JsonNode *request = Partage->com_msrv.API_ws_messages->data;
+    Partage->com_msrv.API_ws_messages = g_slist_remove ( Partage->com_msrv.API_ws_messages, request );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+
+    gchar *agent_tag = Json_get_string ( request, "agent_tag" );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "receive agent_tag '%s' !", agent_tag );
+
+         if ( !strcasecmp( agent_tag, "RESET") )
+     { Partage->com_msrv.Thread_run = FALSE;
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "RESET: Stopping in progress" );
+     }
+    else if ( !strcasecmp( agent_tag, "UPGRADE") )
+     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading in progress" );
+       MSRV_Agent_upgrade_to ( WTD_BRANCHE );
+     }
+    else if ( !strcasecmp( agent_tag, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
+    else if ( !strcasecmp( agent_tag, "THREAD_RESTART") ) { Thread_Stop_one_thread ( request );
+                                                            Thread_Start_one_thread ( NULL, 0, request, NULL );
+                                                          }
+    else if ( !strcasecmp( agent_tag, "THREAD_SEND") )    { Thread_Push_API_message ( request ); }
+    else if ( !strcasecmp( agent_tag, "AGENT_SET") )
+     { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
+               Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
+             )
+          )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "AGENT_SET: wrong parameters" );
+          goto end;
+        }
+       Config.log_bus    = Json_get_bool ( request, "log_bus" );
+       Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
+       gboolean headless = Json_get_bool ( request, "headless" );
+       gchar *branche    = Json_get_string ( request, "branche" );
+       Info_change_log_level ( Json_get_int ( request, "log_level" ) );
+       Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d",
+                 Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
+       if (Config.headless != headless)
+        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
+          Partage->com_msrv.Thread_run = FALSE;
+        }
+       if (strcmp ( WTD_BRANCHE, branche ))
+        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: branche has changed, upgrading and rebooting" );
+          MSRV_Agent_upgrade_to ( branche );
+        }
+     }
+    else if (Config.instance_is_master == FALSE) goto end;
+
+    if ( !strcasecmp( agent_tag, "REMAP") ) MSRV_Remap();
+    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
+    else if ( !strcasecmp( agent_tag, "SYN_CLIC") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end; }
+       if ( !Json_has_member ( request, "acronyme" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end; }
+       gchar *tech_id  = Json_get_string ( request, "tech_id" );
+       gchar *acronyme = Json_get_string ( request, "acronyme" );
+       Envoyer_commande_dls_data ( tech_id, acronyme );
+     }
+    else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_ACQUIT: tech_id is missing" );
+          goto end;
+        }
+       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
+       Dls_Acquitter_plugin ( plugin_tech_id );
+     }
+    else if ( !strcasecmp( agent_tag, "DLS_COMPIL") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
+          goto end;
+        }
+       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
+       Dls_Reseter_un_plugin ( plugin_tech_id );
+     }
+    else if ( !strcasecmp( agent_tag, "ABONNER") )
+     { if ( !Json_has_member ( request, "cadrans" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "ABONNER: cadrans is missing" );
+          goto end;
+        }
+       pthread_mutex_lock ( &Partage->com_dls.synchro_data );
+       GList *Cadrans = json_array_get_elements ( Json_get_array ( request, "cadrans" ) );
+       GList *cadrans = Cadrans;
+       while(cadrans)
+        { JsonNode *cadran = cadrans->data;
+          gint classe      = Json_get_int    ( cadran, "classe" );
+          gchar *tech_id   = Json_get_string ( cadran, "tech_id" );
+          gchar *acronyme  = Json_get_string ( cadran, "acronyme" );
+          if (classe == MNEMO_ENTREE_ANA)
+           { struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
+             if (ai) ai->abonnement = TRUE;
+           }
+          cadrans = g_list_next(cadrans);
+        }
+       g_list_free(Cadrans);
+       pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
+     }
+    else if ( !strcasecmp( agent_tag, "DLS_SET") )
+     { if ( ! Json_has_member ( request, "tech_id" )  )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
+          goto end;
+        }
+       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
+       if (Json_has_member ( request, "debug"  )) Dls_Debug_plugin   ( plugin_tech_id, Json_get_bool ( request, "debug" ) );
+       if (Json_has_member ( request, "enable" )) Dls_Activer_plugin ( plugin_tech_id, Json_get_bool ( request, "enable" ) );
+     }
+
+end:
+    Json_node_unref(request);
+  }
+/******************************************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                                              */
 /* Entrée: argc, argv                                                                                                         */
 /* Sortie: -1 si erreur, 0 si ok                                                                                              */
@@ -611,6 +749,8 @@
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 
+/*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
+          if (Partage->com_msrv.API_ws_messages) MSRV_handle_API_messages();
           usleep(1000);
           sched_yield();
         }
@@ -618,7 +758,10 @@
     else
      { prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
-        { usleep(1000);
+        {
+/*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
+          if (Partage->com_msrv.API_ws_messages) MSRV_handle_API_messages();
+          usleep(1000);
           sched_yield();
         }
      }

@@ -154,7 +154,6 @@
  void API_Send_MSGS ( void )
   { struct DLS_MESSAGE_EVENT *event;
 
-#warning a migrer en tant que thread autonome
     gint cpt=0;
     while (Partage->com_msrv.liste_msg && cpt<10)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
