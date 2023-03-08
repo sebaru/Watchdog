@@ -539,14 +539,16 @@
        GList *cadrans = Cadrans;
        while(cadrans)
         { JsonNode *cadran = cadrans->data;
-          gint classe      = Json_get_int    ( cadran, "classe" );
+          gchar *classe    = Json_get_string ( cadran, "classe" );
           gchar *tech_id   = Json_get_string ( cadran, "tech_id" );
           gchar *acronyme  = Json_get_string ( cadran, "acronyme" );
-          Info_new( __func__, Config.log_msrv, LOG_INFO, "Abonnement au bit '%s:%s'", tech_id, acronyme );
-          if (classe == MNEMO_ENTREE_ANA)
-           { struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
-             if (ai) ai->abonnement = TRUE;
-           }
+          if (classe && tech_id && acronyme)
+           { if (!strcasecmp ( classe, "AI" ))
+              { struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
+                if (ai) ai->abonnement = TRUE;
+                Info_new( __func__, Config.log_msrv, LOG_INFO, "Abonnement au bit '%s:%s'", tech_id, acronyme );
+              } else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Abonnement: bit '%s:%s' inconnu", tech_id, acronyme );
+           } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
           cadrans = g_list_next(cadrans);
         }
        g_list_free(Cadrans);
