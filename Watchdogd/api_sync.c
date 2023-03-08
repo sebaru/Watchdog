@@ -224,7 +224,6 @@
        if (Partage->com_msrv.liste_visuel) API_Send_visuels ();                                /* Traitement des I dynamiques */
 /*---------------------------------------------- Report des messages ---------------------------------------------------------*/
        if (Partage->com_msrv.liste_msg) API_Send_MSGS();
-
 /*---------------------------------------------- Report des abonnements ------------------------------------------------------*/
        if (Partage->abonnements) API_Send_Abonnements();
 

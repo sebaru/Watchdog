@@ -542,6 +542,7 @@
           gint classe      = Json_get_int    ( cadran, "classe" );
           gchar *tech_id   = Json_get_string ( cadran, "tech_id" );
           gchar *acronyme  = Json_get_string ( cadran, "acronyme" );
+          Info_new( __func__, Config.log_msrv, LOG_INFO, "Abonnement au bit '%s:%s'", tech_id, acronyme );
           if (classe == MNEMO_ENTREE_ANA)
            { struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
              if (ai) ai->abonnement = TRUE;
