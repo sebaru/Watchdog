@@ -137,7 +137,7 @@
 /* Sortie: un nouveau buffer                                                                                                  */
 /******************************************************************************************************************************/
  gchar *Json_node_to_string ( JsonNode *RootNode )
-  { return ( json_to_string ( RootNode, TRUE ) );
+  { return ( json_to_string ( RootNode, FALSE ) );
   }
 /******************************************************************************************************************************/
 /* Json_get_from_stirng: Recupere l'object de plus haut niveau dans une chaine JSON                                           */

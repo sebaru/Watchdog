@@ -112,7 +112,7 @@
     Json_node_add_string ( RootNode, "acronyme", bit->acronyme );
     Json_node_add_double ( RootNode, "valeur",   bit->valeur );
     Json_node_add_string ( RootNode, "unite",    bit->unite );
-    Json_node_add_int    ( RootNode, "in_range", bit->in_range );
+    Json_node_add_bool   ( RootNode, "in_range", bit->in_range );
     Json_node_add_string ( RootNode, "libelle",  bit->libelle );
     pthread_mutex_lock ( &Partage->abonnements_synchro );
     Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
@@ -134,6 +134,7 @@
     gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
     gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
     gchar *libelle         = Json_get_string ( request, "libelle" );
+    gchar *unite           = Json_get_string ( request, "unite" );
     gchar *tech_id         = thread_tech_id;
     gchar *acronyme        = thread_acronyme;
 
@@ -143,14 +144,14 @@
      }
     Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-              Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ),
+              Json_get_double ( request, "valeur" ), unite,
               Json_get_bool ( request, "in_range" ), libelle );
     struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
     if (bit)
      { Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        bit->archivage = Json_get_int ( request, "archivage" );
-       g_snprintf ( bit->unite,   sizeof(bit->unite),   Json_get_string ( request, "unite" ) );
-       g_snprintf ( bit->libelle, sizeof(bit->libelle), Json_get_string ( request, "libelle" ) );
+       g_snprintf ( bit->unite,   sizeof(bit->unite),   unite );
+       g_snprintf ( bit->libelle, sizeof(bit->libelle), libelle );
        if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );
      }
     return(TRUE);
@@ -166,7 +167,7 @@
     Json_node_add_string ( element, "acronyme",  bit->acronyme );
     Json_node_add_double ( element, "valeur",    bit->valeur );
     Json_node_add_string ( element, "unite",     bit->unite );
-    Json_node_add_int    ( element, "in_range",  bit->in_range );
+    Json_node_add_bool   ( element, "in_range",  bit->in_range );
     Json_node_add_int    ( element, "last_arch", bit->last_arch );
     Json_node_add_int    ( element, "archivage", bit->archivage );
   }
