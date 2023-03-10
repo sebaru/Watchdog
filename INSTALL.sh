@@ -17,7 +17,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y nut-devel mariadb-devel libuuid-devel
   dnf install -y popt-devel libsoup3-devel gtts
   dnf install -y json-glib-devel gammu-devel
-  dnf install -y mpg123 sox libusb-devel libgpiod-devel
+  dnf install -y mpg123 sox libusb1-devel libgpiod-devel
   dnf install -y librsvg2-devel libstrophe-devel libphidget22-devel
   dnf install -y git systemd-devel libjwt-devel
 
