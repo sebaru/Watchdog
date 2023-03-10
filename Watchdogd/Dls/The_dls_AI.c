@@ -113,6 +113,7 @@
     Json_node_add_double ( RootNode, "valeur",   bit->valeur );
     Json_node_add_string ( RootNode, "unite",    bit->unite );
     Json_node_add_int    ( RootNode, "in_range", bit->in_range );
+    Json_node_add_string ( RootNode, "libelle",  bit->libelle );
     pthread_mutex_lock ( &Partage->abonnements_synchro );
     Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
     pthread_mutex_unlock ( &Partage->abonnements_synchro );
