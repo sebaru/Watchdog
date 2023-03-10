@@ -209,6 +209,7 @@
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
  extern void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range );
  extern gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request );
+ extern void Dls_cadran_send_AI_to_API ( struct DLS_AI *bit );
                                                                                                          /* Dans The_dls_AO.c */
  extern void Dls_data_AO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );

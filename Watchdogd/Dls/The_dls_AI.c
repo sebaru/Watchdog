@@ -100,6 +100,24 @@
               "Changing DLS_AI '%s:%s'=%f %s", bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
   }
 /******************************************************************************************************************************/
+/* Dls_cadran_send_AI_to_API: Ennvoi une AI à l'API pour affichage des cadrans                                                */
+/* Entrées: la structure DLs_AI                                                                                               */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_cadran_send_AI_to_API ( struct DLS_AI *bit )
+  { if (!bit) return;
+    JsonNode *RootNode = Json_node_create();
+    Json_node_add_string ( RootNode, "classe",   "AI" );
+    Json_node_add_string ( RootNode, "tech_id",  bit->tech_id );
+    Json_node_add_string ( RootNode, "acronyme", bit->acronyme );
+    Json_node_add_double ( RootNode, "valeur",   bit->valeur );
+    Json_node_add_string ( RootNode, "unite",    bit->unite );
+    Json_node_add_int    ( RootNode, "in_range", bit->in_range );
+    pthread_mutex_lock ( &Partage->abonnements_synchro );
+    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
+    pthread_mutex_unlock ( &Partage->abonnements_synchro );
+  }
+/******************************************************************************************************************************/
 /* Dls_data_set_AI_from_thread_ai: Positionne une AI dans DLS depuis une AI 'thread'                                          */
 /* Entrées: la structure JSON                                                                                                 */
 /* Sortie : TRUE si OK, sinon FALSE                                                                                           */
@@ -132,14 +150,7 @@
        bit->archivage = Json_get_int ( request, "archivage" );
        g_snprintf ( bit->unite,   sizeof(bit->unite),   Json_get_string ( request, "unite" ) );
        g_snprintf ( bit->libelle, sizeof(bit->libelle), Json_get_string ( request, "libelle" ) );
-       if (bit->abonnement)
-        { JsonNode *RootNode = Json_node_create();
-          Json_node_add_string ( RootNode, "classe", "AI" );
-          Dls_AI_to_json ( RootNode, bit );
-          pthread_mutex_lock ( &Partage->abonnements_synchro );
-          Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-          pthread_mutex_unlock ( &Partage->abonnements_synchro );
-        }
+       if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );
      }
     return(TRUE);
   }
@@ -149,13 +160,14 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit )
-  { Json_node_add_string ( element, "tech_id",      bit->tech_id );
-    Json_node_add_string ( element, "acronyme",     bit->acronyme );
-    Json_node_add_double ( element, "valeur",       bit->valeur );
-    Json_node_add_string ( element, "unite",        bit->unite );
-    Json_node_add_int    ( element, "in_range",     bit->in_range );
-    Json_node_add_int    ( element, "last_arch",    bit->last_arch );
-    Json_node_add_int    ( element, "archivage",    bit->archivage );
+  { Json_node_add_string ( element, "classe",    "AI" );
+    Json_node_add_string ( element, "tech_id",   bit->tech_id );
+    Json_node_add_string ( element, "acronyme",  bit->acronyme );
+    Json_node_add_double ( element, "valeur",    bit->valeur );
+    Json_node_add_string ( element, "unite",     bit->unite );
+    Json_node_add_int    ( element, "in_range",  bit->in_range );
+    Json_node_add_int    ( element, "last_arch", bit->last_arch );
+    Json_node_add_int    ( element, "archivage", bit->archivage );
   }
 /******************************************************************************************************************************/
 /* Dls_all_AI_to_json: Transforme tous les bits en JSON                                                                       */

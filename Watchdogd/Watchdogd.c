@@ -545,7 +545,10 @@
           if (classe && tech_id && acronyme)
            { if (!strcasecmp ( classe, "AI" ))
               { struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
-                if (ai) ai->abonnement = TRUE;
+                if (ai)
+                 { ai->abonnement = TRUE;
+                   Dls_cadran_send_AI_to_API ( ai );                     /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
                 Info_new( __func__, Config.log_msrv, LOG_INFO, "Abonnement au bit '%s:%s'", tech_id, acronyme );
               } else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Abonnement: bit '%s:%s' inconnu", tech_id, acronyme );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
