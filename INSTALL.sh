@@ -13,30 +13,13 @@ if [ "$SOCLE" = "fedora" ]
   echo "Installing Fedora dependencies"
   dnf update -y
   dnf install -y libtool automake autoconf gcc gcc-c++ redhat-rpm-config
-  dnf install -y glib2-devel bison flex giflib-devel openssl
+  dnf install -y glib2-devel bison flex openssl
   dnf install -y nut-devel mariadb-devel libuuid-devel
-  dnf install -y gtk3-devel goocanvas2-devel popt-devel libsoup3-devel
+  dnf install -y popt-devel libsoup3-devel gtts
   dnf install -y json-glib-devel gammu-devel
   dnf install -y mpg123 sox libusb-devel libgpiod-devel
-  dnf install -y librsvg2-devel
+  dnf install -y librsvg2-devel libstrophe-devel libphidget22-devel
   dnf install -y git systemd-devel libjwt-devel
-
-  git clone https://github.com/strophe/libstrophe.git
-  cd libstrophe
-  ./bootstrap.sh
-  ./configure
-  make
-  make install
-  cd ..
-  rm -rf libstrophe
-
-  curl -fsSL https://www.phidgets.com/downloads/phidget22/libraries/linux/libphidget22.tar.gz | tar xvz
-  cd libphidget22-*
-  ./configure
-  make
-  make install
-  cd ..
-  rm -rf libphidget22*
 
   echo "/usr/local/lib" > /etc/ld.so.conf.d/local.conf
   echo "/usr/local/lib64" >> /etc/ld.so.conf.d/local.conf
