@@ -49,7 +49,7 @@
     bit->in_range  = Json_get_bool   ( element, "in_range"  );
     plugin->Dls_data_AI = g_slist_prepend ( plugin->Dls_data_AI, bit );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
-              "Create bit DLS_AI '%s:%s'=%f (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
+              "Create bit DLS_AI '%s:%s'=%f %s (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_AI : Recherche un CH dans les plugins DLS                                                                  */
@@ -150,8 +150,8 @@
     if (bit)
      { Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
        bit->archivage = Json_get_int ( request, "archivage" );
-       g_snprintf ( bit->unite,   sizeof(bit->unite),   unite );
-       g_snprintf ( bit->libelle, sizeof(bit->libelle), libelle );
+       g_snprintf ( bit->unite,   sizeof(bit->unite),   "%s", unite );
+       g_snprintf ( bit->libelle, sizeof(bit->libelle), "%s", libelle );
        if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );
      }
     return(TRUE);
