@@ -331,7 +331,7 @@
     GSList *liste = Partage->com_dls.Dls_plugins;
     while (liste)
      { struct DLS_PLUGIN *plugin = liste->data;
-       if (plugin->remap_all_alias) plugin->remap_all_alias();
+       if (plugin->remap_all_alias) plugin->remap_all_alias(&plugin->vars);
        liste = g_slist_next(liste);
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );

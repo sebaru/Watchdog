@@ -87,7 +87,7 @@
     void (*go)(struct DLS_TO_PLUGIN *);                                                   /* Fonction de traitement du module */
     gdouble conso;                                                                       /* Consommation temporelle du plugin */
     gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
-    void (*remap_all_alias)(void);                                                                   /* Set all Alias to NULL */
+    void (*remap_all_alias)(struct DLS_TO_PLUGIN *);                                                 /* Set all Alias to NULL */
     struct DLS_TO_PLUGIN vars;
     GSList *Arbre_Comm;                         /* Liste tech_id des dependances du module pour le calcul de sa communication */
   };
