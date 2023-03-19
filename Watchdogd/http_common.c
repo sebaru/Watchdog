@@ -111,7 +111,7 @@
        gchar *buffer_safe   = g_try_malloc0 ( taille + 1 );
        if (buffer_safe)
         { memcpy ( buffer_safe, buffer_unsafe, taille );                                        /* Copy with \0 end of string */
-          if (taille && buffer_safe) ResponseNode = Json_get_from_string ( buffer_safe );
+          if (taille) ResponseNode = Json_get_from_string ( buffer_safe );
           g_free(buffer_safe);
         }
      }
@@ -160,7 +160,7 @@
        gchar *buffer_safe   = g_try_malloc0 ( taille + 1 );
        if (buffer_safe)
         { memcpy ( buffer_safe, buffer_unsafe, taille );                                        /* Copy with \0 end of string */
-          if (taille && buffer_safe) ResponseNode = Json_get_from_string ( buffer_safe );
+          if (taille) ResponseNode = Json_get_from_string ( buffer_safe );
           g_free(buffer_safe);
         }
      }
@@ -170,8 +170,8 @@
        g_free(uri);
      }
     g_bytes_unref (response);
-    return(ResponseNode);
     g_object_unref ( session );
+    return(ResponseNode);
   }
 /******************************************************************************************************************************/
 /* Http_Send_json_response: Envoie le json en paramètre en prenant le lead dessus                                             */

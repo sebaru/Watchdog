@@ -167,8 +167,9 @@
        g_error_free (error);
        return;
      }
-    g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(2048000), NULL );
-    g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
+    soup_websocket_connection_set_keepalive_interval ( Partage->com_msrv.API_websocket, 30 );
+    soup_websocket_connection_set_max_incoming_payload_size ( Partage->com_msrv.API_websocket, 2048000 );
+
     g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(API_on_API_message_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(API_on_API_close_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(API_on_API_error_CB), NULL );
@@ -239,7 +240,7 @@
     g_slist_free    ( Partage->com_msrv.liste_visuel ); Partage->com_msrv.liste_visuel = NULL;
     g_slist_foreach ( Partage->com_msrv.liste_msg, (GFunc)g_free, NULL );
     g_slist_free    ( Partage->com_msrv.liste_msg ); Partage->com_msrv.liste_msg    = NULL;
-    g_object_unref (  Partage->API_Sync_session );
+    g_object_unref  ( Partage->API_Sync_session );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

@@ -136,8 +136,7 @@
        return;
      }
 
-    /*g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );*/
-    g_object_set ( G_OBJECT(module->Master_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
+    soup_websocket_connection_set_keepalive_interval ( module->Master_websocket, 30 );
     g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(Thread_ws_on_master_message_CB), module );
     g_signal_connect ( module->Master_websocket, "closed",  G_CALLBACK(Thread_ws_on_master_close_CB), module );
     g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(Thread_ws_on_master_error_CB), module );
