@@ -462,14 +462,7 @@
      }
 /*------------------------------------------------------ GET -----------------------------------------------------------------*/
 
-    if (Config.installed == FALSE)
-     { if (soup_server_message_get_method(msg) == SOUP_METHOD_GET)
-        {      if (!strcasecmp ( path, "/status" ))    Http_traiter_status  ( server, msg, path, query, user_data );
-          else soup_server_message_set_redirect ( msg, SOUP_STATUS_TEMPORARY_REDIRECT, "/install" );
-        }
-       else { Http_Send_json_response (msg, SOUP_STATUS_NOT_IMPLEMENTED, NULL, NULL ); return; }
-     }
-    else if (soup_server_message_get_method(msg) == SOUP_METHOD_GET)
+    if (soup_server_message_get_method(msg) == SOUP_METHOD_GET)
      {      if (!strcasecmp ( path, "/" ))           Http_traiter_status     ( server, msg, path, query, user_data );
        else if (!strcasecmp ( path, "/status" ))     Http_traiter_status     ( server, msg, path, query, user_data );
        else if (!strcasecmp ( path, "/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, user_data );

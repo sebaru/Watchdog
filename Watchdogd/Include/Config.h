@@ -45,7 +45,6 @@
     gchar db_database[ TAILLE_DB_DATABASE+1 ];                                              /* Chemin d'acces aux DB watchdog */
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                                              /* Mot de passe de connexion ODBC */
 
-    gboolean installed;                                                                    /* TRUE si la config a pu etre lue */
     gchar home [ TAILLE_HOME+1 ];                                                              /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */

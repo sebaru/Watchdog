@@ -48,16 +48,20 @@
     memset ( &Config, 0, sizeof(struct CONFIG) );
 
     Config.config = Json_read_from_file ( "/etc/abls-habitat-agent.conf" );
-    if (!Config.config)
-     { Config.config = Json_node_create();
-       Config.installed = FALSE;
-       return;
-     }
-    Config.installed = TRUE;
+    if (!Config.config) Config.config = Json_node_create();
 
-    if (!Json_has_member ( Config.config, "domain_uuid"   )) Json_node_add_string ( Config.config, "domain_uuid",   "default" );
+    chaine = getenv ( "ABLS_DOMAIN_UUID" );
+    if (chaine) Json_node_add_string ( Config.config, "domain_uuid", chaine );
+    if (!Json_has_member ( Config.config, "domain_uuid"   )) Json_node_add_string ( Config.config, "domain_uuid",  "default" );
+
+    chaine = getenv ( "ABLS_DOMAIN_SECRET" );
+    if (chaine) Json_node_add_string ( Config.config, "domain_secret", chaine );
     if (!Json_has_member ( Config.config, "domain_secret" )) Json_node_add_string ( Config.config, "domain_secret", "default" );
+
+    chaine = getenv ( "ABLS_API_URL" );
+    if (chaine) Json_node_add_string ( Config.config, "api_url", chaine );
     if (!Json_has_member ( Config.config, "api_url" ))       Json_node_add_string ( Config.config, "api_url", "api.abls-habitat.fr" );
+
     if (!Json_has_member ( Config.config, "install_time"  )) Json_node_add_string ( Config.config, "install_time", "1980-10-22 02:50:00" );
 
     g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "localhost" );

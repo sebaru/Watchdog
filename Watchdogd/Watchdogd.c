@@ -597,11 +597,6 @@ end:
        goto first_stage_end;
      }
 
-    if ( Config.installed == FALSE )                                                    /* Si le fichier de conf n'existe pas */
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Agent %s is not installed. Please run with --link.", WTD_VERSION );
-       goto second_stage_end;
-     }
-
 /************************************************* Test Connexion to Global API ***********************************************/
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
     if (!API)
@@ -697,15 +692,11 @@ end:
     if (Config.single)                                                                             /* Si demarrage des thread */
      { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
     else
-     { if (!Config.installed)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "NOT starting threads (Instance is not installed)" ); }
-       else
-        { if (Config.instance_is_master)                                                                  /* Démarrage D.L.S. */
-           { if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
-             MSRV_Remap();                                                 /* Mappage des bits avant de charger les thread IO */
-           }
-          Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
+     { if (Config.instance_is_master)                                                                     /* Démarrage D.L.S. */
+        { if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
+          MSRV_Remap();                                                    /* Mappage des bits avant de charger les thread IO */
         }
+       Charger_librairies();                                                  /* Chargement de toutes les librairies Watchdog */
      }
 
 /*************************************** Mise en place de la gestion des signaux **********************************************/
