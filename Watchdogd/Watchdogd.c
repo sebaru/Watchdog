@@ -589,6 +589,9 @@ end:
     Info_init( LOG_INFO );                                               /* Init msgs d'erreurs, par défaut, en mode LOG_INFO */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Start %s, branche '%s'", WTD_VERSION, WTD_BRANCHE );
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config domain_uuid: %s", Json_get_string ( Config.config, "domain_uuid" ) );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config agent_uuid : %s", Json_get_string ( Config.config, "agent_uuid" ) );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config api_url    : %s", Json_get_string ( Config.config, "api_url" ) );
 
     Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
     if (!Partage)
