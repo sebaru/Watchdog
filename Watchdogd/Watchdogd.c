@@ -557,6 +557,27 @@
        g_list_free(Cadrans);
        pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
      }
+    else if ( !strcasecmp( agent_tag, "DESABONNER") )
+     { if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "classe" )) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DESABONNER: cadran is missing" );
+          goto end;
+        }
+       pthread_mutex_lock ( &Partage->com_dls.synchro_data );
+       gchar *classe    = Json_get_string ( request, "classe" );
+       gchar *tech_id   = Json_get_string ( request, "tech_id" );
+       gchar *acronyme  = Json_get_string ( request, "acronyme" );
+       if (classe && tech_id && acronyme)
+        { if (!strcasecmp ( classe, "AI" ))
+           { struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
+             if (ai)
+              { ai->abonnement = FALSE;
+                Dls_cadran_send_AI_to_API ( ai );                     /* Envoi la valeur a date pour update cadran sur ihm */
+              }
+             Info_new( __func__, Config.log_msrv, LOG_INFO, "Désabonnement au bit '%s:%s'", tech_id, acronyme );
+           } else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Désabonnement: bit '%s:%s' inconnu", tech_id, acronyme );
+        } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
+       pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
+     }
     else if ( !strcasecmp( agent_tag, "DLS_SET") )
      { if ( ! Json_has_member ( request, "tech_id" )  )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
