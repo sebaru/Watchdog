@@ -351,6 +351,7 @@
 
     if (!(plugin->enable && plugin->go)) return;                      /* si plugin a l'arret, on considère que la comm est OK */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
+    if(plugin->vars.resetted && plugin->init_visuels) plugin->init_visuels(&plugin->vars);
     gettimeofday( &tv_avant, NULL );
     plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
     gettimeofday( &tv_apres, NULL );

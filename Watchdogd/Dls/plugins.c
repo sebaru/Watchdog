@@ -248,6 +248,14 @@
        return(FALSE);
      }
 
+    plugin->init_visuels = dlsym( plugin->handle, "init_visuels" );                               /* Recherche de la fonction */
+    if (!plugin->init_visuels)
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING,
+                "'%s' does not provide init_visuels function", plugin->tech_id );
+       dlclose( plugin->handle );
+       plugin->handle = NULL;
+       return(FALSE);
+     }
 /*------------------------------------------------------- Init des variables -------------------------------------------------*/
     plugin->conso = 0.0;
     if (plugin->enable) plugin->start_date = time(NULL);
@@ -312,14 +320,6 @@
        Dls_data_set_WATCHDOG ( &plugin->vars, wtd, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
-
-    liste_bit = plugin->Dls_data_VISUEL;              /* Decharge tous les visuels du module qui ne sont pas des commentaires */
-    while(liste_bit)
-     { struct DLS_VISUEL *visu = liste_bit->data;
-       if (strcmp(visu->forme, "comment")) Dls_data_set_VISUEL ( &plugin->vars, visu, "resetted", "black", FALSE, "resetted" );
-       liste_bit = g_slist_next(liste_bit);
-     }
-
   }
 /******************************************************************************************************************************/
 /* Dls_plugins_remap_all_alias: remap les alias d'un plugin donné                                                             */
