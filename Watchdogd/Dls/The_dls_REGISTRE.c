@@ -137,6 +137,7 @@
     Json_node_add_double ( element, "valeur",    bit->valeur );
     Json_node_add_string ( element, "unite",     bit->unite );
     Json_node_add_int    ( element, "archivage", bit->archivage );
+    Json_node_add_string ( element, "libelle",   bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_all_REGISTRE_to_json: Transforme tous les bits en JSON                                                                 */

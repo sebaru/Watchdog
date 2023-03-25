@@ -54,7 +54,7 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     g_snprintf( bit->unite,    sizeof(bit->unite),    "%s", Json_get_string ( element, "unite" ) );
     bit->valeur    = Json_get_int ( element, "valeur" );
-    bit->multi     = Json_get_int ( element, "multi" );
+    bit->multi     = Json_get_double ( element, "multi" );
     bit->archivage = Json_get_int ( element, "archivage" );
     bit->etat      = Json_get_bool ( element, "etat" );
     plugin->Dls_data_CI = g_slist_prepend ( plugin->Dls_data_CI, bit );
@@ -148,6 +148,7 @@
     Json_node_add_string ( element, "unite",     bit->unite );
     Json_node_add_bool   ( element, "etat",      bit->etat );
     Json_node_add_int    ( element, "archivage", bit->archivage );
+    Json_node_add_string ( element, "libelle",   bit->libelle );
   };
 /******************************************************************************************************************************/
 /* Dls_all_CI_to_json: Transforme tous les bits en JSON                                                                       */
