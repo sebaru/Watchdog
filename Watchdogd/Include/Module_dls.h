@@ -144,6 +144,7 @@
     gboolean etat;
     gint    archivage;
     guint   last_arch;
+    gboolean abonnement;
   };
 
  struct DLS_CH
@@ -155,6 +156,7 @@
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
     guint old_top;                                                                         /* Date de debut du comptage du CH */
     gboolean etat;
+    gboolean abonnement;
   };
 
  struct DLS_VISUEL

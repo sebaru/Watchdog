@@ -103,6 +103,7 @@
           if (cpt_imp->val_en_cours1>=ratio)
            { cpt_imp->valeur++;
              cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
+             if (cpt_imp->abonnement) Dls_cadran_send_CI_to_API ( cpt_imp );
              Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                        "ligne %04d: Changing DLS_CI '%s:%s'=%d",
                        (vars ? vars->num_ligne : -1), cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
@@ -121,19 +122,32 @@
     return( cpt_imp->valeur );
   }
 /******************************************************************************************************************************/
+/* Dls_cadran_send_CI_to_API: Ennvoi un CI à l'API pour affichage des cadrans                                                 */
+/* Entrées: la structure DLs_AI                                                                                               */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_cadran_send_CI_to_API ( struct DLS_CI *bit )
+  { if (!bit) return;
+    JsonNode *RootNode = Json_node_create();
+    Dls_CI_to_json ( RootNode, bit );
+    pthread_mutex_lock ( &Partage->abonnements_synchro );
+    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
+    pthread_mutex_unlock ( &Partage->abonnements_synchro );
+  }
+/******************************************************************************************************************************/
 /* Dls_CI_to_json : Formate un CI au format JSON                                                                              */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_CI_to_json ( JsonNode *element, struct DLS_CI *bit )
-  { Json_node_add_string ( element, "tech_id",   bit->tech_id );
+  { Json_node_add_string ( element, "classe",   "CI" );
+    Json_node_add_string ( element, "tech_id",   bit->tech_id );
     Json_node_add_string ( element, "acronyme",  bit->acronyme );
     Json_node_add_int    ( element, "valeur",    bit->valeur );
     Json_node_add_double ( element, "multi",     bit->multi );
     Json_node_add_string ( element, "unite",     bit->unite );
     Json_node_add_bool   ( element, "etat",      bit->etat );
     Json_node_add_int    ( element, "archivage", bit->archivage );
-    Json_node_add_int    ( element, "last_arch", bit->last_arch );
   };
 /******************************************************************************************************************************/
 /* Dls_all_CI_to_json: Transforme tous les bits en JSON                                                                       */

@@ -342,7 +342,7 @@
     else /* When not headless */
      { gchar *session;
        uid_t active_session;
-       if (sd_seat_get_active(	"seat0",	&session,	&active_session) < 0)
+       if (sd_seat_get_active( "seat0", &session, &active_session) < 0)
         { Info_new( __func__, Config.log_msrv, LOG_CRIT,
                     "seat_get_active failed (%s). Waiting 5s.", strerror (errno) );
           return(FALSE);
@@ -543,13 +543,27 @@
           gchar *tech_id   = Json_get_string ( cadran, "tech_id" );
           gchar *acronyme  = Json_get_string ( cadran, "acronyme" );
           if (classe && tech_id && acronyme)
-           { if (!strcasecmp ( classe, "AI" ))
-              { struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
-                if (ai)
-                 { ai->abonnement = TRUE;
-                   Dls_cadran_send_AI_to_API ( ai );                     /* Envoi la valeur a date pour update cadran sur ihm */
+           { Info_new( __func__, Config.log_msrv, LOG_INFO, "Abonnement au bit '%s:%s'", tech_id, acronyme );
+             if (!strcasecmp ( classe, "AI" ))
+              { struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_AI_to_API ( bit );       /* Envoi la valeur a date pour update cadran sur ihm */
                  }
-                Info_new( __func__, Config.log_msrv, LOG_INFO, "Abonnement au bit '%s:%s'", tech_id, acronyme );
+              }
+             else if (!strcasecmp ( classe, "CH" ))
+              { struct DLS_CH *bit = Dls_data_lookup_CH ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_CH_to_API ( bit );       /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
+              }
+             else if (!strcasecmp ( classe, "CI" ))
+              { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_CI_to_API ( bit );       /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
               } else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Abonnement: bit '%s:%s' inconnu", tech_id, acronyme );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
           cadrans = g_list_next(cadrans);

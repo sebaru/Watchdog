@@ -197,12 +197,13 @@
  extern void Dls_data_CI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_CI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_CI_to_json ( JsonNode *element, struct DLS_CI *bit );
+ extern void Dls_cadran_send_CI_to_API ( struct DLS_CI *bit );
 
                                                                                                          /* Dans The_dls_CH.c */
  extern void Dls_data_CH_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_CH_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_CH_to_json ( JsonNode *element, struct DLS_CH *bit );
-
+ extern void Dls_cadran_send_CH_to_API ( struct DLS_CH *bit );
                                                                                                          /* Dans The_dls_AI.c */
  extern void Dls_data_AI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
