@@ -88,6 +88,7 @@
   { if (!reg) return;
     if (valeur != reg->valeur)
      { reg->valeur = valeur;
+       if (reg->abonnement) Dls_cadran_send_REGISTRE_to_API ( reg );
        Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_REGISTRE '%s:%s'=%f",
                  (vars ? vars->num_ligne : -1), reg->tech_id, reg->acronyme, reg->valeur );
@@ -112,17 +113,30 @@
     return( reg->valeur );
   }
 /******************************************************************************************************************************/
+/* Dls_cadran_send_REGISTRE_to_API: Ennvoi un registre à l'API pour affichage des cadrans                                     */
+/* Entrées: la structure DLs_AI                                                                                               */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_cadran_send_REGISTRE_to_API ( struct DLS_REGISTRE *bit )
+  { if (!bit) return;
+    JsonNode *RootNode = Json_node_create();
+    Dls_REGISTRE_to_json ( RootNode, bit );
+    pthread_mutex_lock ( &Partage->abonnements_synchro );
+    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
+    pthread_mutex_unlock ( &Partage->abonnements_synchro );
+  }
+/******************************************************************************************************************************/
 /* Dls_REGISTRE_to_json : Formate un bit au format JSON                                                                       */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_REGISTRE_to_json ( JsonNode *element, struct DLS_REGISTRE *bit )
-  { Json_node_add_string ( element, "tech_id",   bit->tech_id );
+  { Json_node_add_string ( element, "classe",   "REGISTRE" );
+    Json_node_add_string ( element, "tech_id",   bit->tech_id );
     Json_node_add_string ( element, "acronyme",  bit->acronyme );
     Json_node_add_double ( element, "valeur",    bit->valeur );
     Json_node_add_string ( element, "unite",     bit->unite );
     Json_node_add_int    ( element, "archivage", bit->archivage );
-    Json_node_add_int    ( element, "last_arch", bit->last_arch );
   }
 /******************************************************************************************************************************/
 /* Dls_all_REGISTRE_to_json: Transforme tous les bits en JSON                                                                 */

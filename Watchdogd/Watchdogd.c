@@ -548,23 +548,31 @@
               { struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
                 if (bit)
                  { bit->abonnement = TRUE;
-                   Dls_cadran_send_AI_to_API ( bit );       /* Envoi la valeur a date pour update cadran sur ihm */
+                   Dls_cadran_send_AI_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
                  }
               }
              else if (!strcasecmp ( classe, "CH" ))
               { struct DLS_CH *bit = Dls_data_lookup_CH ( tech_id, acronyme );
                 if (bit)
                  { bit->abonnement = TRUE;
-                   Dls_cadran_send_CH_to_API ( bit );       /* Envoi la valeur a date pour update cadran sur ihm */
+                   Dls_cadran_send_CH_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
                  }
               }
              else if (!strcasecmp ( classe, "CI" ))
               { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
                 if (bit)
                  { bit->abonnement = TRUE;
-                   Dls_cadran_send_CI_to_API ( bit );       /* Envoi la valeur a date pour update cadran sur ihm */
+                   Dls_cadran_send_CI_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
                  }
-              } else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Abonnement: bit '%s:%s' inconnu", tech_id, acronyme );
+              }
+             else if (!strcasecmp ( classe, "REGISTRE" ))
+              { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_REGISTRE_to_API ( bit );              /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
+              }
+             else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Abonnement: bit '%s:%s' inconnu", tech_id, acronyme );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
           cadrans = g_list_next(cadrans);
         }
@@ -581,11 +589,24 @@
        gchar *tech_id   = Json_get_string ( request, "tech_id" );
        gchar *acronyme  = Json_get_string ( request, "acronyme" );
        if (classe && tech_id && acronyme)
-        { if (!strcasecmp ( classe, "AI" ))
-           { struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
-             if (ai) ai->abonnement = FALSE;
-             Info_new( __func__, Config.log_msrv, LOG_INFO, "Désabonnement au bit '%s:%s'", tech_id, acronyme );
-           } else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Désabonnement: bit '%s:%s' inconnu", tech_id, acronyme );
+        { Info_new( __func__, Config.log_msrv, LOG_INFO, "Désabonnement au bit '%s:%s'", tech_id, acronyme );
+          if (!strcasecmp ( classe, "AI" ))
+           { struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else if (!strcasecmp ( classe, "CI" ))
+           { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else if (!strcasecmp ( classe, "CH" ))
+           { struct DLS_CH *bit = Dls_data_lookup_CH ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else if (!strcasecmp ( classe, "REGISTRE" ))
+           { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Désabonnement: bit '%s:%s' inconnu", tech_id, acronyme );
         } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
        pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
      }
