@@ -272,8 +272,7 @@
        return(FALSE);
      }
 
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE,
-              "'%s' dlopened (%s)", plugin->tech_id, plugin->shortname );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s' dlopened (%s)", plugin->tech_id, plugin->shortname );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -331,7 +330,7 @@
     GSList *liste = Partage->com_dls.Dls_plugins;
     while (liste)
      { struct DLS_PLUGIN *plugin = liste->data;
-       if (plugin->remap_all_alias) plugin->remap_all_alias(&plugin->vars);
+       if (plugin->handle && plugin->remap_all_alias) plugin->remap_all_alias(&plugin->vars);
        liste = g_slist_next(liste);
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );

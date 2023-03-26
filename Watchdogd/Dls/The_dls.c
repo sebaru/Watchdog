@@ -349,11 +349,11 @@
     Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok,  bit_comm_module );
     Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs, !bit_comm_module );
 
-    if (!(plugin->enable && plugin->go)) return;                      /* si plugin a l'arret, on considère que la comm est OK */
+    if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
     if(plugin->vars.resetted && plugin->init_visuels) plugin->init_visuels(&plugin->vars);
     gettimeofday( &tv_avant, NULL );
-    plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
+    plugin->go( &plugin->vars );                                                                        /* On appel le plugin */
     gettimeofday( &tv_apres, NULL );
     plugin->conso+=Chrono( &tv_avant, &tv_apres );
     plugin->vars.resetted = FALSE;
