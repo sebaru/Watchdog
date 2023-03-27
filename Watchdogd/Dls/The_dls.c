@@ -351,6 +351,7 @@
 
     if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
     if (!plugin->enable) return;                                            /* si plugin a l'arret, on n'éxécute pas non plus */
+    if (!plugin->go)     return;                                          /* si pas de fonction GO, on n'éxécute pas non plus */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
     if(plugin->vars.resetted && plugin->init_visuels) plugin->init_visuels(&plugin->vars);
     gettimeofday( &tv_avant, NULL );
