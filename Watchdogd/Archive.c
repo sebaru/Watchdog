@@ -131,8 +131,8 @@
         }
        else
         { max_enreg = 10;
-          Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error. Reste %05d. Reduce max_enreg to 10.",
-                    Partage->archive_liste_taille, max_enreg );
+          Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error when sending %d enregs. Reste %05d. Reduce max_enreg to %d.",
+                    nb_enreg, Partage->archive_liste_taille, max_enreg );
         }
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );

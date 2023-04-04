@@ -326,14 +326,12 @@
 /* Sortie : les alias sont mappés                                                                                             */
 /******************************************************************************************************************************/
  static void Dls_plugins_remap_all_alias ( void )
-  { pthread_mutex_lock( &Partage->com_dls.synchro );
-    GSList *liste = Partage->com_dls.Dls_plugins;
+  { GSList *liste = Partage->com_dls.Dls_plugins;
     while (liste)
      { struct DLS_PLUGIN *plugin = liste->data;
        if (plugin->handle && plugin->remap_all_alias) plugin->remap_all_alias(&plugin->vars);
        liste = g_slist_next(liste);
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_Importer_un_plugin: Ajoute ou Recharge un plugin dans la liste des plugins                                             */
@@ -369,7 +367,7 @@
           plugin->debug  = Json_get_bool ( api_result, "debug" );
           plugin->enable = Json_get_bool ( api_result, "enable" );
           pthread_mutex_lock( &Partage->com_dls.synchro );
-          Partage->com_dls.Dls_plugins = g_slist_append( Partage->com_dls.Dls_plugins, plugin );          /* Ajout a la liste */
+          Partage->com_dls.Dls_plugins = g_slist_append( Partage->com_dls.Dls_plugins, plugin );          /* Ajout à la liste */
           pthread_mutex_unlock( &Partage->com_dls.synchro );
         }
      }
@@ -378,6 +376,9 @@
        Json_node_unref(api_result);
        return(NULL);
      }
+
+/******* On stoppe D.L.S pour éviter l'usage de bits prealablement defini dans d'autres plugins pointant vers celui-la ********/
+    pthread_mutex_lock( &Partage->com_dls.synchro );
 
     if (plugin->Dls_data_CI) { g_slist_free_full ( plugin->Dls_data_CI, (GDestroyNotify) g_free ); plugin->Dls_data_CI = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_CI", Dls_data_CI_create_by_array, plugin );
@@ -418,19 +419,9 @@
     if (plugin->Dls_data_TEMPO) { g_slist_free_full ( plugin->Dls_data_TEMPO, (GDestroyNotify) g_free ); plugin->Dls_data_TEMPO = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_TEMPO", Dls_data_TEMPO_create_by_array, plugin );
 
-    if (plugin->Thread_tech_ids) { g_slist_free_full ( plugin->Thread_tech_ids, (GDestroyNotify) g_free ); plugin->Thread_tech_ids = NULL; }
+    Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */
 
-    GList *Thread_tech_ids = json_array_get_elements ( Json_get_array ( api_result, "thread_tech_ids" ) );
-    GList *thread_tech_ids = Thread_tech_ids;
-    while(thread_tech_ids)
-     { JsonNode *element = thread_tech_ids->data;
-       plugin->Thread_tech_ids = g_slist_append ( plugin->Thread_tech_ids, Json_get_string ( element, "thread_tech_id" ) );
-       thread_tech_ids = g_list_next(thread_tech_ids);
-     }
-    g_list_free(Thread_tech_ids);
-    Json_node_unref(api_result);
-
-    if (!strcasecmp ( tech_id, "SYS" ) )     /* mutex lock non necessaire car si reset, c'est locké par Dls_Reseter_un_plugin */
+    if (!strcasecmp ( tech_id, "SYS" ) )                                    /* Mapping des bits internes pour le plugin "SYS" */
      { Partage->com_dls.sys_flipflop_5hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
        Partage->com_dls.sys_flipflop_2hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
        Partage->com_dls.sys_flipflop_1sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
@@ -469,6 +460,20 @@
     plugin->vars.dls_msg_comm_ok             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_OK" );
     plugin->vars.dls_msg_comm_hs             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_HS" );
 
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+/****************************************** Calcul des Thread_tech_ids de dependances *****************************************/
+    if (plugin->Thread_tech_ids) { g_slist_free_full ( plugin->Thread_tech_ids, (GDestroyNotify) g_free ); plugin->Thread_tech_ids = NULL; }
+
+    GList *Thread_tech_ids = json_array_get_elements ( Json_get_array ( api_result, "thread_tech_ids" ) );
+    GList *thread_tech_ids = Thread_tech_ids;
+    while(thread_tech_ids)
+     { JsonNode *element = thread_tech_ids->data;
+       plugin->Thread_tech_ids = g_slist_append ( plugin->Thread_tech_ids, Json_get_string ( element, "thread_tech_id" ) );
+       thread_tech_ids = g_list_next(thread_tech_ids);
+     }
+    g_list_free(Thread_tech_ids);
+    Json_node_unref(api_result);
+
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
 
@@ -499,8 +504,6 @@
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%03d plugins loaded in %03.1fs",
               Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0 );
     Json_node_unref ( api_result );
-    Dls_plugins_remap_all_alias();
-    Dls_Load_horloge_ticks();
   }
 /******************************************************************************************************************************/
 /* Dls_Reseter_un_plugin: Recharge un plugin par tech_id                                                                      */
@@ -517,7 +520,6 @@
        Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s': resetted", tech_id );
      }
     else Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "'%s': error when resetting", tech_id );
-    Dls_plugins_remap_all_alias();
     Dls_Load_horloge_ticks();
   }
 /******************************************************************************************************************************/

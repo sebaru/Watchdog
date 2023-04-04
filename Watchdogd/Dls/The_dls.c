@@ -374,6 +374,7 @@
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
     Dls_Importer_plugins();                                                    /* Chargement des modules dls avec compilation */
+    Dls_Load_horloge_ticks();                                                                /* Chargement des ticks horloges */
 
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Wait 20sec to let threads get I/Os" );
     wait=20;
@@ -381,7 +382,6 @@
      { sleep(1); wait--; }        /* attente 20 secondes pour initialisation des bit internes et collection des infos modules */
 
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Starting" );
-    Dls_Load_horloge_ticks();                                                                /* Chargement des ticks horloges */
 
     last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = last_top_10min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
@@ -480,7 +480,7 @@
        sched_yield();
      }
     Dls_Decharger_plugins();                                                                  /* Dechargement des modules DLS */
-    Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
+    Json_node_unref ( Partage->com_dls.HORLOGE_ticks );                                      /* Libération des bits d'horloge */
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "DLS Down (%p)", pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
