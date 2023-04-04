@@ -237,10 +237,7 @@
        sched_yield();
      }
     API_ws_end();
-    g_slist_free    ( Partage->com_msrv.liste_visuel ); Partage->com_msrv.liste_visuel = NULL;
-    g_slist_foreach ( Partage->com_msrv.liste_msg, (GFunc)g_free, NULL );
-    g_slist_free    ( Partage->com_msrv.liste_msg ); Partage->com_msrv.liste_msg    = NULL;
-    g_object_unref  ( Partage->API_Sync_session );
+    g_object_unref ( Partage->API_Sync_session );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

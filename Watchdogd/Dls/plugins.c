@@ -61,14 +61,12 @@
 /******************************************************************************************************************************/
  void Dls_foreach_plugins ( gpointer user_data, void (*do_plugin) (gpointer user_data, struct DLS_PLUGIN *) )
   { GSList *liste;
-    pthread_mutex_lock( &Partage->com_dls.synchro );
     liste = Partage->com_dls.Dls_plugins;
     while (liste)
      { struct DLS_PLUGIN *plugin = liste->data;
        do_plugin( user_data, plugin );
        liste = liste->next;
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_stop_plugin_reel: Stoppe un plugin                                                                                     */
@@ -330,6 +328,45 @@
     while (liste)
      { struct DLS_PLUGIN *plugin = liste->data;
        if (plugin->handle && plugin->remap_all_alias) plugin->remap_all_alias(&plugin->vars);
+       if (!strcasecmp ( plugin->tech_id, "SYS" ) )                         /* Mapping des bits internes pour le plugin "SYS" */
+        { Partage->com_dls.sys_flipflop_5hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
+          Partage->com_dls.sys_flipflop_2hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
+          Partage->com_dls.sys_flipflop_1sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
+          Partage->com_dls.sys_flipflop_2sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2SEC" );
+          Partage->com_dls.sys_top_5hz           = Dls_data_lookup_MONO ( "SYS", "TOP_5HZ" );
+          Partage->com_dls.sys_top_2hz           = Dls_data_lookup_MONO ( "SYS", "TOP_2HZ" );
+          Partage->com_dls.sys_top_1sec          = Dls_data_lookup_MONO ( "SYS", "TOP_1SEC" );
+          Partage->com_dls.sys_top_5sec          = Dls_data_lookup_MONO ( "SYS", "TOP_5SEC" );
+          Partage->com_dls.sys_top_10sec         = Dls_data_lookup_MONO ( "SYS", "TOP_10SEC" );
+          Partage->com_dls.sys_top_1min          = Dls_data_lookup_MONO ( "SYS", "TOP_1MIN" );
+          Partage->com_dls.sys_bit_per_sec       = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
+          Partage->com_dls.sys_tour_per_sec      = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
+          Partage->com_dls.sys_dls_wait          = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
+          Partage->com_dls.sys_nbr_msg_queue     = Dls_data_lookup_AI   ( "SYS", "NBR_MSG_QUEUE" );
+          Partage->com_dls.sys_nbr_visuel_queue  = Dls_data_lookup_AI   ( "SYS", "NBR_VISUEL_QUEUE" );
+          Partage->com_dls.sys_nbr_archive_queue = Dls_data_lookup_AI   ( "SYS", "NBR_ARCHIVE_QUEUE" );
+          Partage->com_dls.sys_maxrss            = Dls_data_lookup_AI   ( "SYS", "MAXRSS" );
+        }
+
+       plugin->vars.dls_osyn_acquit             = Dls_data_lookup_DI   ( plugin->tech_id, "OSYN_ACQUIT" );
+       plugin->vars.dls_comm                    = Dls_data_lookup_MONO ( plugin->tech_id, "COMM" );
+       plugin->vars.dls_memsa_ok                = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_OK" );
+       plugin->vars.dls_memsa_defaut            = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT" );
+       plugin->vars.dls_memsa_defaut_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT_FIXE" );
+       plugin->vars.dls_memsa_alarme            = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME" );
+       plugin->vars.dls_memsa_alarme_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME_FIXE" );
+       plugin->vars.dls_memssb_veille           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_VEILLE" );
+       plugin->vars.dls_memssb_alerte           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE" );
+       plugin->vars.dls_memssb_alerte_fugitive  = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FUGITIVE" );
+       plugin->vars.dls_memssb_alerte_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FIXE" );
+       plugin->vars.dls_memssp_ok               = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_OK" );
+       plugin->vars.dls_memssp_derangement      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT" );
+       plugin->vars.dls_memssp_derangement_fixe = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT_FIXE" );
+       plugin->vars.dls_memssp_danger           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER" );
+       plugin->vars.dls_memssp_danger_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER_FIXE" );
+       plugin->vars.dls_msg_comm_ok             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_OK" );
+       plugin->vars.dls_msg_comm_hs             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_HS" );
+
        liste = g_slist_next(liste);
      }
   }
@@ -366,7 +403,7 @@
           g_snprintf ( plugin->shortname, sizeof(plugin->shortname), "%s", Json_get_string ( api_result, "shortname" ) );
           plugin->debug  = Json_get_bool ( api_result, "debug" );
           plugin->enable = Json_get_bool ( api_result, "enable" );
-          pthread_mutex_lock( &Partage->com_dls.synchro );
+          pthread_mutex_lock( &Partage->com_dls.synchro );                                                   /* On stoppe DLS */
           Partage->com_dls.Dls_plugins = g_slist_append( Partage->com_dls.Dls_plugins, plugin );          /* Ajout à la liste */
           pthread_mutex_unlock( &Partage->com_dls.synchro );
         }
@@ -386,7 +423,20 @@
     if (plugin->Dls_data_CH) { g_slist_free_full ( plugin->Dls_data_CH, (GDestroyNotify) g_free ); plugin->Dls_data_CH = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_CH", Dls_data_CH_create_by_array, plugin );
 
-    if (plugin->Dls_data_DI) { g_slist_free_full ( plugin->Dls_data_DI, (GDestroyNotify) g_free ); plugin->Dls_data_DI = NULL; }
+    if (plugin->Dls_data_DI)
+     { GSList *liste = plugin->Dls_data_DI;
+       while (liste)
+        { Partage->com_dls.Set_Dls_Data           = g_slist_remove ( Partage->com_dls.Set_Dls_Data,           liste->data );
+          Partage->com_dls.Reset_Dls_Data         = g_slist_remove ( Partage->com_dls.Reset_Dls_Data,         liste->data );
+          Partage->com_dls.Set_Dls_DI_Edge_up     = g_slist_remove ( Partage->com_dls.Set_Dls_DI_Edge_up,     liste->data );
+          Partage->com_dls.Reset_Dls_DI_Edge_up   = g_slist_remove ( Partage->com_dls.Reset_Dls_DI_Edge_up,   liste->data );
+          Partage->com_dls.Set_Dls_DI_Edge_down   = g_slist_remove ( Partage->com_dls.Set_Dls_DI_Edge_down,   liste->data );
+          Partage->com_dls.Reset_Dls_DI_Edge_down = g_slist_remove ( Partage->com_dls.Reset_Dls_DI_Edge_down, liste->data );
+          liste = g_slist_next(liste);
+        }
+       g_slist_free_full ( plugin->Dls_data_DI, (GDestroyNotify) g_free );
+       plugin->Dls_data_DI = NULL;
+     }
     Json_node_foreach_array_element ( api_result, "mnemos_DI", Dls_data_DI_create_by_array, plugin );
 
     if (plugin->Dls_data_DO) { g_slist_free_full ( plugin->Dls_data_DO, (GDestroyNotify) g_free ); plugin->Dls_data_DO = NULL; }
@@ -398,10 +448,32 @@
     if (plugin->Dls_data_AO) { g_slist_free_full ( plugin->Dls_data_AO, (GDestroyNotify) g_free ); plugin->Dls_data_AO = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_AO", Dls_data_AO_create_by_array, plugin );
 
-    if (plugin->Dls_data_MONO) { g_slist_free_full ( plugin->Dls_data_MONO, (GDestroyNotify) g_free ); plugin->Dls_data_MONO = NULL; }
+    if (plugin->Dls_data_MONO)
+     { GSList *liste = plugin->Dls_data_MONO;
+       while (liste)
+        { Partage->com_dls.Set_Dls_MONO_Edge_up     = g_slist_remove ( Partage->com_dls.Set_Dls_MONO_Edge_up,     liste->data );
+          Partage->com_dls.Set_Dls_MONO_Edge_down   = g_slist_remove ( Partage->com_dls.Set_Dls_MONO_Edge_down,   liste->data );
+          Partage->com_dls.Reset_Dls_MONO_Edge_up   = g_slist_remove ( Partage->com_dls.Reset_Dls_MONO_Edge_up,   liste->data );
+          Partage->com_dls.Reset_Dls_MONO_Edge_down = g_slist_remove ( Partage->com_dls.Reset_Dls_MONO_Edge_down, liste->data );
+          liste = g_slist_next(liste);
+        }
+       g_slist_free_full ( plugin->Dls_data_MONO, (GDestroyNotify) g_free );
+       plugin->Dls_data_MONO = NULL;
+     }
     Json_node_foreach_array_element ( api_result, "mnemos_MONO", Dls_data_MONO_create_by_array, plugin );
 
-    if (plugin->Dls_data_BI) { g_slist_free_full ( plugin->Dls_data_BI, (GDestroyNotify) g_free ); plugin->Dls_data_BI = NULL; }
+    if (plugin->Dls_data_BI)
+     { GSList *liste = plugin->Dls_data_BI;
+       while (liste)
+        { Partage->com_dls.Set_Dls_BI_Edge_up     = g_slist_remove ( Partage->com_dls.Set_Dls_BI_Edge_up,     liste->data );
+          Partage->com_dls.Set_Dls_BI_Edge_down   = g_slist_remove ( Partage->com_dls.Set_Dls_BI_Edge_down,   liste->data );
+          Partage->com_dls.Reset_Dls_BI_Edge_up   = g_slist_remove ( Partage->com_dls.Reset_Dls_BI_Edge_up,   liste->data );
+          Partage->com_dls.Reset_Dls_BI_Edge_down = g_slist_remove ( Partage->com_dls.Reset_Dls_BI_Edge_down, liste->data );
+          liste = g_slist_next(liste);
+        }
+       g_slist_free_full ( plugin->Dls_data_BI, (GDestroyNotify) g_free );
+       plugin->Dls_data_BI = NULL;
+     }
     Json_node_foreach_array_element ( api_result, "mnemos_BI", Dls_data_BI_create_by_array, plugin );
 
     if (plugin->Dls_data_VISUEL) { g_slist_free_full ( plugin->Dls_data_VISUEL, (GDestroyNotify) g_free ); plugin->Dls_data_VISUEL = NULL; }
@@ -421,44 +493,6 @@
 
     Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */
 
-    if (!strcasecmp ( tech_id, "SYS" ) )                                    /* Mapping des bits internes pour le plugin "SYS" */
-     { Partage->com_dls.sys_flipflop_5hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
-       Partage->com_dls.sys_flipflop_2hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
-       Partage->com_dls.sys_flipflop_1sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
-       Partage->com_dls.sys_flipflop_2sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2SEC" );
-       Partage->com_dls.sys_top_5hz           = Dls_data_lookup_MONO ( "SYS", "TOP_5HZ" );
-       Partage->com_dls.sys_top_2hz           = Dls_data_lookup_MONO ( "SYS", "TOP_2HZ" );
-       Partage->com_dls.sys_top_1sec          = Dls_data_lookup_MONO ( "SYS", "TOP_1SEC" );
-       Partage->com_dls.sys_top_5sec          = Dls_data_lookup_MONO ( "SYS", "TOP_5SEC" );
-       Partage->com_dls.sys_top_10sec         = Dls_data_lookup_MONO ( "SYS", "TOP_10SEC" );
-       Partage->com_dls.sys_top_1min          = Dls_data_lookup_MONO ( "SYS", "TOP_1MIN" );
-       Partage->com_dls.sys_bit_per_sec       = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
-       Partage->com_dls.sys_tour_per_sec      = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
-       Partage->com_dls.sys_dls_wait          = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
-       Partage->com_dls.sys_nbr_msg_queue     = Dls_data_lookup_AI   ( "SYS", "NBR_MSG_QUEUE" );
-       Partage->com_dls.sys_nbr_visuel_queue  = Dls_data_lookup_AI   ( "SYS", "NBR_VISUEL_QUEUE" );
-       Partage->com_dls.sys_nbr_archive_queue = Dls_data_lookup_AI   ( "SYS", "NBR_ARCHIVE_QUEUE" );
-       Partage->com_dls.sys_maxrss            = Dls_data_lookup_AI   ( "SYS", "MAXRSS" );
-     }
-
-    plugin->vars.dls_osyn_acquit             = Dls_data_lookup_DI   ( plugin->tech_id, "OSYN_ACQUIT" );
-    plugin->vars.dls_comm                    = Dls_data_lookup_MONO ( plugin->tech_id, "COMM" );
-    plugin->vars.dls_memsa_ok                = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_OK" );
-    plugin->vars.dls_memsa_defaut            = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT" );
-    plugin->vars.dls_memsa_defaut_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT_FIXE" );
-    plugin->vars.dls_memsa_alarme            = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME" );
-    plugin->vars.dls_memsa_alarme_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME_FIXE" );
-    plugin->vars.dls_memssb_veille           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_VEILLE" );
-    plugin->vars.dls_memssb_alerte           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE" );
-    plugin->vars.dls_memssb_alerte_fugitive  = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FUGITIVE" );
-    plugin->vars.dls_memssb_alerte_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FIXE" );
-    plugin->vars.dls_memssp_ok               = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_OK" );
-    plugin->vars.dls_memssp_derangement      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT" );
-    plugin->vars.dls_memssp_derangement_fixe = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT_FIXE" );
-    plugin->vars.dls_memssp_danger           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER" );
-    plugin->vars.dls_memssp_danger_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER_FIXE" );
-    plugin->vars.dls_msg_comm_ok             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_OK" );
-    plugin->vars.dls_msg_comm_hs             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_HS" );
 
     pthread_mutex_unlock( &Partage->com_dls.synchro );
 /****************************************** Calcul des Thread_tech_ids de dependances *****************************************/

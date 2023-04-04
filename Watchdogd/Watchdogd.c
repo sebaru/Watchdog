@@ -534,7 +534,7 @@
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "ABONNER: cadrans is missing" );
           goto end;
         }
-       pthread_mutex_lock ( &Partage->com_dls.synchro_data );
+       pthread_mutex_lock ( &Partage->com_dls.synchro );
        GList *Cadrans = json_array_get_elements ( Json_get_array ( request, "cadrans" ) );
        GList *cadrans = Cadrans;
        while(cadrans)
@@ -577,14 +577,14 @@
           cadrans = g_list_next(cadrans);
         }
        g_list_free(Cadrans);
-       pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
+       pthread_mutex_unlock ( &Partage->com_dls.synchro );
      }
     else if ( !strcasecmp( agent_tag, "DESABONNER") )
      { if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "classe" )) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DESABONNER: cadran is missing" );
           goto end;
         }
-       pthread_mutex_lock ( &Partage->com_dls.synchro_data );
+       pthread_mutex_lock ( &Partage->com_dls.synchro );
        gchar *classe    = Json_get_string ( request, "classe" );
        gchar *tech_id   = Json_get_string ( request, "tech_id" );
        gchar *acronyme  = Json_get_string ( request, "acronyme" );
@@ -608,7 +608,7 @@
            }
           else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Désabonnement: bit '%s:%s' inconnu", tech_id, acronyme );
         } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
-       pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
+       pthread_mutex_unlock ( &Partage->com_dls.synchro );
      }
     else if ( !strcasecmp( agent_tag, "DLS_SET") )
      { if ( ! Json_has_member ( request, "tech_id" )  )
@@ -725,7 +725,6 @@ end:
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_http.synchro, NULL );
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
-    pthread_mutex_init( &Partage->com_dls.synchro_data, NULL );
     pthread_mutex_init( &Partage->archive_liste_sync, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
     pthread_mutex_init( &Partage->abonnements_synchro, NULL );
@@ -827,12 +826,14 @@ end:
     if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
     if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
     Json_node_unref ( Partage->Maps_root );
+    g_slist_free ( Partage->com_msrv.liste_visuel );
+    g_slist_free_full ( Partage->com_msrv.liste_msg, (GDestroyNotify)g_free );
+    g_slist_free_full ( Partage->abonnements, (GDestroyNotify)Json_node_unref );
 
 /************************************************* Dechargement des mutex *****************************************************/
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
-    pthread_mutex_destroy( &Partage->com_dls.synchro_data );
     pthread_mutex_destroy( &Partage->archive_liste_sync );
     pthread_mutex_destroy( &Partage->com_db.synchro );
     pthread_mutex_destroy( &Partage->abonnements_synchro );
