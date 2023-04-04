@@ -81,15 +81,9 @@
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
 
-    gint cpt_1_minute = Partage->top + 600;
     gint max_enreg = ARCHIVE_MAX_ENREG_TO_API;
     while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
-     { if (cpt_1_minute < Partage->top)                                                      /* Sauvegarde toutes les minutes */
-        { Ajouter_arch ( "SYS", "ARCHIVE_LIST_SIZE", 1.0*Partage->archive_liste_taille );
-          cpt_1_minute += 600;
-        }
-
-       if (!Partage->archive_liste) { sleep(2); continue; }
+     { if (!Partage->archive_liste) { sleep(2); continue; }
        Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Begin %05d archive(s)", Partage->archive_liste_taille );
        gint top            = Partage->top;
        gint nb_enreg       = 0;                                            /* Au début aucun enregistrement est passé a la DB */
@@ -136,7 +130,6 @@
         }
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
-       Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_archive_queue, 1.0*Partage->archive_liste_taille, TRUE );
      }
 
     ARCH_Clear();                                                   /* Suppression des enregistrements restants dans la liste */

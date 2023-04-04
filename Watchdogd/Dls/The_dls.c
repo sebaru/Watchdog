@@ -129,13 +129,13 @@
        Partage->com_dls.Reset_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Reset_Dls_MONO_Edge_down, mono );
        mono->edge_down = TRUE;
      }
-    while( Partage->com_dls.Set_Dls_BI_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
+    while( Partage->com_dls.Set_Dls_BI_Edge_up )                                         /* A-t-on un boolean up a allumer ?? */
      { struct DLS_BI *bi = Partage->com_dls.Set_Dls_BI_Edge_up->data;
        Partage->com_dls.Set_Dls_BI_Edge_up   = g_slist_remove  ( Partage->com_dls.Set_Dls_BI_Edge_up, bi );
        Partage->com_dls.Reset_Dls_BI_Edge_up = g_slist_prepend ( Partage->com_dls.Reset_Dls_BI_Edge_up, bi );
        bi->edge_up = TRUE;
      }
-    while( Partage->com_dls.Set_Dls_BI_Edge_down )                                   /* A-t-on un boolean down a allumer ?? */
+    while( Partage->com_dls.Set_Dls_BI_Edge_down )                                     /* A-t-on un boolean down a allumer ?? */
      { struct DLS_BI *bi = Partage->com_dls.Set_Dls_BI_Edge_down->data;
        Partage->com_dls.Set_Dls_BI_Edge_down   = g_slist_remove  ( Partage->com_dls.Set_Dls_BI_Edge_down, bi );
        Partage->com_dls.Reset_Dls_BI_Edge_down = g_slist_prepend ( Partage->com_dls.Reset_Dls_BI_Edge_down, bi );
@@ -431,6 +431,7 @@
 /******************************************************************************************************************************/
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_archive_queue, 1.0*Partage->archive_liste_taille, TRUE );
           last_top_5sec = Partage->top;
         }
 /******************************************************************************************************************************/
