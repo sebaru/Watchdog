@@ -121,7 +121,6 @@
     plugin->enable = TRUE;
     plugin->conso  = 0.0;
     plugin->start_date = time(NULL);
-    plugin->vars.resetted = FALSE;
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s' started (%s)", plugin->tech_id, plugin->name );
   }
 /******************************************************************************************************************************/
@@ -257,7 +256,7 @@
 /*------------------------------------------------------- Init des variables -------------------------------------------------*/
     plugin->conso = 0.0;
     if (plugin->enable) plugin->start_date = time(NULL);
-                else plugin->start_date = 0;
+                   else plugin->start_date = 0;
     plugin->vars.debug = plugin->debug;                            /* Recopie du champ de debug depuis la DB vers la zone RUN */
 
 /*------------------------------------------------------- Chargement GO ------------------------------------------------------*/
@@ -491,8 +490,9 @@
     if (plugin->Dls_data_TEMPO) { g_slist_free_full ( plugin->Dls_data_TEMPO, (GDestroyNotify) g_free ); plugin->Dls_data_TEMPO = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_TEMPO", Dls_data_TEMPO_create_by_array, plugin );
 
+    if (Dls_Dlopen_plugin ( plugin ) == FALSE)               /* DlOpen before remap (sinon on mappe pas la bonne zone mémoire */
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
     Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */
-
 
     pthread_mutex_unlock( &Partage->com_dls.synchro );
 /****************************************** Calcul des Thread_tech_ids de dependances *****************************************/
@@ -507,9 +507,6 @@
      }
     g_list_free(Thread_tech_ids);
     Json_node_unref(api_result);
-
-    if (Dls_Dlopen_plugin ( plugin ) == FALSE)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
 
     return(plugin);
   }
