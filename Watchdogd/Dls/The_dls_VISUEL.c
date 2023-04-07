@@ -84,31 +84,32 @@
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
-                            gchar *mode, gchar *color, gboolean cligno, gchar *libelle )
+                            gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable )
   { if (!visu) return;
     if (Partage->com_msrv.Thread_run == FALSE) return;
-    if ( strcmp ( visu->mode, mode ) || strcmp( visu->color, color ) || visu->cligno != cligno )
+    if ( strcmp ( visu->mode, mode ) || strcmp( visu->color, color ) || visu->cligno != cligno || visu->disable != disable)
      { if ( visu->last_change_reset + 50 <= Partage->top )                 /* Reset compteur de changes toutes les 5 secondes */
         { visu->changes = 0;
           visu->last_change_reset = Partage->top;
         }
 
        if ( visu->changes <= 10 )                                                          /* Si moins de 10 changes en 5 sec */
-        { if ( visu->changes == 10 )                                                /* Est-ce le dernier change avant blocage */
-           { g_snprintf( visu->mode,  sizeof(visu->mode),  "disabled" ); }
+        { if ( visu->changes == 10 ) { visu->disable = TRUE; }                      /* Est-ce le dernier change avant blocage */
           else { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
                  g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
                  g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
                  Convert_libelle_dynamique ( visu->tech_id, visu->libelle, sizeof(visu->libelle) );
                  visu->cligno  = cligno;
+                 visu->disable = disable;
                }
 
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode %s color %s cligno %d libelle = %s",
-                    (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, visu->mode, visu->color, visu->cligno, visu->libelle );
+                    "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' cligno=%d libelle='%s', disable=%d",
+                    (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
+                     visu->mode, visu->color, visu->cligno, visu->libelle, visu->disable );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
        Partage->audit_bit_interne_per_sec++;
@@ -125,6 +126,7 @@
     Json_node_add_string ( RootNode, "mode",      bit->mode  );
     Json_node_add_string ( RootNode, "color",     bit->color );
     Json_node_add_bool   ( RootNode, "cligno",    bit->cligno );
+    Json_node_add_bool   ( RootNode, "disable",   bit->disable );
     Json_node_add_string ( RootNode, "libelle",   bit->libelle );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

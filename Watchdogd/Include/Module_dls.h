@@ -167,6 +167,7 @@
     gchar    mode[32];
     gchar    color[16];
     gboolean cligno;
+    gboolean disable;
     gint     changes;
     gint     last_change_reset;
   };
@@ -271,7 +272,7 @@
 
  extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
-                                   gchar *mode, gchar *color, gboolean cligno, gchar *libelle );
+                                   gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable );
 
  extern struct DLS_HORLOGE *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );

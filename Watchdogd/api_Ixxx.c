@@ -51,11 +51,12 @@
      { struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
        Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
        Info_new( __func__, Config.log_msrv, LOG_INFO,
-                "Send VISUEL %s:%s mode=%s, color=%s, cligno=%d, libelle='%s'",
-                 visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->cligno, visuel->libelle
+                "Send VISUEL %s:%s mode=%s, color=%s, cligno=%d, libelle='%s', disable=%d",
+                 visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->cligno, visuel->libelle, visuel->disable
                );
        JsonNode *element = Json_node_create ();
        Dls_VISUEL_to_json ( element, visuel );
+#warning A virer une fois full API
        Json_node_add_string ( element, "zmq_tag", "DLS_VISUEL" ); /* A virer une fois full API */
        Http_ws_send_to_all( element ); /* A virer une fois full API */
        Json_array_add_element ( visuels, element );
