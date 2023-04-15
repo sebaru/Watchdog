@@ -37,13 +37,9 @@
  struct PHIDGET_ELEMENT
   { struct THREAD *module; /* Module père de l'élément */
     PhidgetHandle handle;
-    gchar tech_id[32];
     gboolean attached;
+    JsonNode *element;
     gchar capteur[32];
-    gchar classe[32];
-    gint  intervalle;
-    gchar map_tech_id[32];
-    gchar map_acronyme[64];
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

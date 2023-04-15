@@ -6,7 +6,7 @@
 SUBDIRS= 
 
 lib_LTLIBRARIES     = libwatchdog-server-phidget.la
-libwatchdog_server_phidget_la_SOURCES = Phidget.c Phidget.h admin_phidget.c
+libwatchdog_server_phidget_la_SOURCES = Phidget.c Phidget.h
 
 libwatchdog_server_phidget_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libsoup-3.0` \
                                         `mysql_config --libs` -lphidget22 \
