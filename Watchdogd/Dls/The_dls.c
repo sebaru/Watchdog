@@ -433,6 +433,7 @@
 /******************************************************************************************************************************/
        if (Partage->top-last_top_10sec>=100)                                                        /* Toutes les 10 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
+          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_api_socket, (Partage->com_msrv.API_websocket ? TRUE : FALSE) );
           last_top_10sec = Partage->top;
         }
 /******************************************************************************************************************************/

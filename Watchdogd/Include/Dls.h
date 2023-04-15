@@ -155,6 +155,7 @@
     struct DLS_MONO *sys_top_5sec;
     struct DLS_MONO *sys_top_10sec;
     struct DLS_MONO *sys_top_1min;
+    struct DLS_MONO *sys_api_socket;
     struct DLS_AI *sys_bit_per_sec;
     struct DLS_AI *sys_tour_per_sec;
     struct DLS_AI *sys_dls_wait;
