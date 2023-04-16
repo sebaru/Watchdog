@@ -802,7 +802,7 @@
             for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
              { if (vars->DI[cpt])                                                                   /* Si l'entrée est mappée */
                 { gint new_etat = (vars->response.data[ cpt_byte ] & cpt_poid);
-                  Http_Post_thread_DI_to_local_BUS ( module, vars->DI[cpt], new_etat );
+                  Http_Post_thread_DI_to_local_BUS ( module, vars->DI[cpt], (new_etat ? TRUE : FALSE) );
                 }
                cpt_poid = cpt_poid << 1;
                if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
