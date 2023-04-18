@@ -228,7 +228,7 @@
  extern void Dls_data_DI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
- extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit, gboolean valeur );
+ extern void Dls_data_set_DI ( struct DLS_DI *bit, gboolean valeur );
  extern gboolean Dls_data_set_DI_from_thread_di ( JsonNode *request );
                                                                                                          /* Dans The_dls_DO.c */
  extern void Dls_data_DO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );

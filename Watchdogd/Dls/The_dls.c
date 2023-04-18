@@ -89,7 +89,7 @@
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, di );
        Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, di );
-       Dls_data_set_DI ( NULL, di, TRUE );                                                       /* Mise a un du bit d'entrée */
+       Dls_data_set_DI ( di, TRUE );                                                             /* Mise a un du bit d'entrée */
      }
   }
 /******************************************************************************************************************************/
@@ -103,7 +103,7 @@
        Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, di );
-       Dls_data_set_DI ( NULL, di, FALSE );                                                    /* Mise a zero du bit d'entrée */
+       Dls_data_set_DI ( di, FALSE );                                                          /* Mise a zero du bit d'entrée */
      }
   }
 /******************************************************************************************************************************/
