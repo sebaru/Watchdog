@@ -38,8 +38,7 @@
   { struct THREAD *module; /* Module père de l'élément */
     PhidgetHandle handle;
     gboolean attached;
-    JsonNode *element;
-    gchar capteur[32];
+    JsonNode *element; /* Issu du module->config au chargement */
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

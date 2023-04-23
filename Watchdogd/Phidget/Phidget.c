@@ -65,8 +65,7 @@
      { Info_new( __func__, canal->module->Thread_debug, LOG_ERR,
 		         "Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;",
            thread_tech_id, thread_acronyme, description, code );
-       #warning migrate canal to json
-       /*Http_Post_thread_AI_to_local_BUS ( canal->module, canal->map_tech_id, canal->map_acronyme, 0.0, FALSE );*/
+       Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, 0.0, FALSE );
      }
     else
      { Info_new( __func__, canal->module->Thread_debug, LOG_ERR,
@@ -83,9 +82,8 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
-              "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
+    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onTemperatureSensorChange: Appelé quand un module I/O Temperaute a changé de valeur                                */
@@ -96,9 +94,8 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
-              "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
+    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
@@ -109,9 +106,8 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
-              "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
+    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                   */
@@ -123,9 +119,8 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
-              "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
+    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageRatoiInputChange: Appelé quand un module I/O RatioInput a changé de valeur                                */
@@ -137,9 +132,8 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
-              "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    /*Http_Post_thread_AI_to_local_BUS ( module, canal->ai, valeur, TRUE );*/
+    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
@@ -150,9 +144,8 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO,
-              "'%s:%s' = %d", thread_tech_id, thread_acronyme, valeur );
-    /*Http_Post_thread_DI_to_local_BUS( canal->module, canal->map_tech_id, canal->map_acronyme, (valeur !=0 ? TRUE : FALSE) );*/
+    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %d", thread_tech_id, thread_acronyme, valeur );
+    Http_Post_thread_DI_to_local_BUS ( canal->module, canal->element, (valeur ? TRUE : FALSE) );
   }
 /******************************************************************************************************************************/
 /* Phidget_AnalogAttach: Appelé quand un canal analogique est en cours d'attachement                                          */
@@ -291,7 +284,7 @@
  static void Charger_un_AI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct THREAD *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
-    gint serial    = Json_get_int   (module->config, "serial");
+    gint serial    = Json_get_int   ( module->config, "serial" );
     gchar *capteur = Json_get_string( element, "capteur" );
     gint port      = Json_get_int   ( element, "port" );
 
@@ -384,7 +377,7 @@ error:
  static void Charger_un_DI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct THREAD *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
-    gint serial    = Json_get_int   (module->config, "serial");
+    gint serial    = Json_get_int   ( module->config, "serial" );
     gchar *capteur = Json_get_string( element, "capteur" );
     gint port      = Json_get_int   ( element, "port" );
 
@@ -423,7 +416,7 @@ error:
  static void Charger_un_DO (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct THREAD *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
-    gint serial    = Json_get_int   (module->config, "serial");
+    gint serial    = Json_get_int   ( module->config, "serial" );
     gchar *capteur = Json_get_string( element, "capteur" );
     gint port      = Json_get_int   ( element, "port" );
 
@@ -507,7 +500,7 @@ error:
   }
 /******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
-/* Entrée: la structure THREAD associée                                                                                   */
+/* Entrée: la structure THREAD associée                                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct THREAD *module )
