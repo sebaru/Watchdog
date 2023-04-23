@@ -7,7 +7,7 @@
  * The_dls_CI.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
