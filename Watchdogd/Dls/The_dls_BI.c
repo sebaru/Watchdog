@@ -51,7 +51,7 @@
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
-    bit->etat = bit->next_etat = Json_get_bool ( element, "etat" );
+    bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_BI = g_slist_prepend ( plugin->Dls_data_BI, bit );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
               "Create bit DLS_BI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
@@ -83,13 +83,26 @@
 /******************************************************************************************************************************/
  void Dls_data_set_BI ( struct DLS_TO_PLUGIN *vars, struct DLS_BI *bi, gboolean valeur )
   { if (!bi) return;
-    if (bi->next_etat != valeur)
+
+    if (bi->etat != valeur)
+     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d",
+                 (vars ? vars->num_ligne : -1), bi->tech_id, bi->acronyme, valeur, bi->edge_up, bi->edge_down );
+       bi->etat = valeur;
+       if (bi->etat == TRUE)
+        { Partage->com_dls.Set_Dls_BI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_BI_Edge_up, bi ); }
+       else
+        { Partage->com_dls.Set_Dls_BI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_BI_Edge_down, bi ); }
+       Partage->audit_bit_interne_per_sec++;
+     }
+/*    if (bi->next_etat != valeur)
      { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d",
                  (vars ? vars->num_ligne : -1), bi->tech_id, bi->acronyme, valeur, bi->edge_up, bi->edge_down );
        Partage->audit_bit_interne_per_sec++;
        bi->next_etat = valeur;
      }
+*/
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_BI: Remonte l'etat d'un bistable                                                                             */

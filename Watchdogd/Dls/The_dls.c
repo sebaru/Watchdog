@@ -192,7 +192,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Dls_set_all_bool ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { GSList *liste;
+  { /*GSList *liste;
     liste = plugin->Dls_data_MONO;
     while ( liste )
      { struct DLS_MONO *mono = liste->data;
@@ -206,8 +206,9 @@
         }
        mono->next_etat = FALSE;
        liste = g_slist_next(liste);
-     }
+     }*/
 
+/*
     liste = plugin->Dls_data_BI;
     while ( liste )
      { struct DLS_BI *bi = liste->data;
@@ -220,7 +221,7 @@
           bi->etat = bi->next_etat;
         }
        liste = g_slist_next(liste);
-     }
+     }*/
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/

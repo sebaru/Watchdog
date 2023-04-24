@@ -84,15 +84,18 @@
 /******************************************************************************************************************************/
  void Dls_data_set_MONO ( struct DLS_TO_PLUGIN *vars, struct DLS_MONO *mono, gboolean valeur )
   { if(!mono) return;
-    if (valeur == FALSE) { mono->etat = FALSE; }
-    else
-     { if (mono->etat == FALSE)
-        { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "ligne %04d: Changing DLS_MONO '%s:%s'=1",
-                    (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
-          Partage->audit_bit_interne_per_sec++;
-        }
-       mono->next_etat = TRUE;
+    if (mono->etat == TRUE && valeur == FALSE)
+     { mono->etat = FALSE;
+       Partage->com_dls.Set_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_down, mono );
+       Partage->audit_bit_interne_per_sec++;
+     }
+    else if (mono->etat == FALSE && valeur == TRUE)
+     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                "ligne %04d: Changing DLS_MONO '%s:%s'=1",
+                (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
+       mono->etat = TRUE;
+       Partage->com_dls.Set_Dls_MONO_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_up, mono );
+       Partage->audit_bit_interne_per_sec++;
      }
   }
 /******************************************************************************************************************************/
