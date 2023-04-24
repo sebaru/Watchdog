@@ -98,8 +98,6 @@
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gboolean etat;                                                                                      /* Etat actuel du bit */
-#warning a virer
-    /*gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
     gboolean edge_up;
     gboolean edge_down;
   };
@@ -110,8 +108,6 @@
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gint    groupe; /* Groupe 'radio' */
     gboolean etat;                                                                                      /* Etat actuel du bit */
-#warning a virer
-    /*gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
     gboolean edge_up;
     gboolean edge_down;
   };

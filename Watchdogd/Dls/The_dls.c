@@ -187,44 +187,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_set_all_bool : positionne les nouvelles valeur des bits internes                                                       */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Dls_set_all_bool ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { /*GSList *liste;
-    liste = plugin->Dls_data_MONO;
-    while ( liste )
-     { struct DLS_MONO *mono = liste->data;
-       if (mono->etat != mono->next_etat)
-        { if (mono->next_etat == TRUE)
-           { Partage->com_dls.Set_Dls_MONO_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_up, mono ); }
-          else
-           { Partage->com_dls.Set_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_down, mono ); }
-          Partage->audit_bit_interne_per_sec++;
-          mono->etat = mono->next_etat;
-        }
-       mono->next_etat = FALSE;
-       liste = g_slist_next(liste);
-     }*/
-
-/*
-    liste = plugin->Dls_data_BI;
-    while ( liste )
-     { struct DLS_BI *bi = liste->data;
-       if (bi->etat != bi->next_etat)
-        { if (bi->next_etat == TRUE)
-           { Partage->com_dls.Set_Dls_BI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_BI_Edge_up, bi ); }
-          else
-           { Partage->com_dls.Set_Dls_BI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_BI_Edge_down, bi ); }
-          Partage->audit_bit_interne_per_sec++;
-          bi->etat = bi->next_etat;
-        }
-       liste = g_slist_next(liste);
-     }*/
-  }
-/*----------------------------------------------------------------------------------------------------------------------------*/
-/******************************************************************************************************************************/
 /* Dls_data_set_bus : Envoi un message sur le bus système                                                                     */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et les paramètres du message                                  */
 /******************************************************************************************************************************/
@@ -467,7 +429,6 @@
        Partage->com_dls.Top_check_horaire = FALSE;                        /* Controle horaire effectué un fois par minute max */
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
-       Dls_foreach_plugins ( NULL, Dls_set_all_bool );/* Positionne les booleans (mono/bi) selon la valeur calculé par les modules */
        Partage->com_dls.bit_alerte          = Partage->com_dls.next_bit_alerte;
        Partage->com_dls.bit_alerte_fixe     = Partage->com_dls.next_bit_alerte_fixe;
        Partage->com_dls.bit_alerte_fugitive = Partage->com_dls.next_bit_alerte_fugitive;

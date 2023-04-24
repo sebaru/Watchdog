@@ -104,7 +104,7 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_get_MONO ( struct DLS_MONO *mono )
   { if (!mono) return(FALSE);
-    return( mono->etat );
+    return( mono->etat || mono->edge_up ); /* Test 24/04/2023: Etat = etat|edge_up */
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_mono_up: Remonte le front montant d'un boolean                                                                */
