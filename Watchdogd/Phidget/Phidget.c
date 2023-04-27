@@ -276,7 +276,7 @@
 /* Entrée: La structure Json representant l'i/o                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Charger_un_AI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+ static void Charger_un_IO (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct THREAD *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
     gint serial    = Json_get_int   ( module->config, "serial" );
@@ -348,87 +348,19 @@
                                                                 Phidget_onVoltageRatioSensorChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
-    else
-     { Info_new( __func__, module->Thread_debug, LOG_INFO,
-                 "capteur phidget inconnue on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
-       goto error;
-     }
-
-    if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
-    Phidget_setOnAttachHandler((PhidgetHandle)canal->handle, Phidget_onAttachHandler, canal);
-    Phidget_setOnDetachHandler((PhidgetHandle)canal->handle, Phidget_onDetachHandler, canal);
-    if (Phidget_open ((PhidgetHandle)canal->handle) != EPHIDGET_OK) goto error;
-    vars->Liste_sensors = g_slist_prepend ( vars->Liste_sensors, canal );
-    return;
-error:
-    Phidget_print_error(canal);
-    g_free(canal);
-  }
-/******************************************************************************************************************************/
-/* Charger_un_AI: Charge une IO dans la librairie                                                                             */
-/* Entrée: La structure Json representant l'i/o                                                                               */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Charger_un_DI (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct THREAD *module = user_data;
-    struct PHIDGET_VARS *vars = module->vars;
-    gint serial    = Json_get_int   ( module->config, "serial" );
-    gchar *capteur = Json_get_string( element, "capteur" );
-    gint port      = Json_get_int   ( element, "port" );
-
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Loading S/N %d, port '%d', capteur '%s'", serial, port, capteur );
-
-    struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
-    if (!canal)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
-       return;
-     }
-
-    canal->element = element;
-    canal->module  = module;                                                                     /* Sauvegarde du module père */
-
-    if (!strcasecmp(capteur, "DIGITAL-INPUT"))
+    else if (!strcasecmp(capteur, "DIGITAL-INPUT"))
      { if ( PhidgetDigitalInput_create( (PhidgetDigitalInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( PhidgetDigitalInput_setOnStateChangeHandler( (PhidgetDigitalInputHandle)canal->handle, Phidget_onDigitalInputChange, canal ) ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
-
-    if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
-    Phidget_setOnAttachHandler((PhidgetHandle)canal->handle, Phidget_onAttachHandler, canal);
-    Phidget_setOnDetachHandler((PhidgetHandle)canal->handle, Phidget_onDetachHandler, canal);
-    if (Phidget_open ((PhidgetHandle)canal->handle) != EPHIDGET_OK) goto error;
-    vars->Liste_sensors = g_slist_prepend ( vars->Liste_sensors, canal );
-    return;
-error:
-    Phidget_print_error(canal);
-    g_free(canal);
-  }
-/******************************************************************************************************************************/
-/* Charger_un_AI: Charge une IO dans la librairie                                                                             */
-/* Entrée: La structure Json representant l'i/o                                                                               */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Charger_un_DO (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct THREAD *module = user_data;
-    struct PHIDGET_VARS *vars = module->vars;
-    gint serial    = Json_get_int   ( module->config, "serial" );
-    gchar *capteur = Json_get_string( element, "capteur" );
-    gint port      = Json_get_int   ( element, "port" );
-
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Loading S/N %d, port '%d' capteur '%s'", serial, port, capteur );
-
-    struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
-    if (!canal)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
-       return;
-     }
-
-    canal->module  = module;                                                                     /* Sauvegarde du module père */
-    canal->element = element;
-
-    if (!strcasecmp(capteur, "REL2001_0"))
+    else if (!strcasecmp(capteur, "REL2001_0"))
      { if ( PhidgetDigitalOutput_create( (PhidgetDigitalOutputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
+     }
+    else
+     { Info_new( __func__, module->Thread_debug, LOG_INFO,
+                 "capteur phidget inconnue on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
+       goto error;
      }
 
     if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
@@ -517,9 +449,7 @@ error:
      }
 
 /* Chargement des I/O */
-    Json_node_foreach_array_element ( module->config, "AI", Charger_un_AI, module );
-    Json_node_foreach_array_element ( module->config, "DI", Charger_un_DI, module );
-    Json_node_foreach_array_element ( module->config, "DO", Charger_un_DO, module );
+    Json_node_foreach_array_element ( module->config, "IO", Charger_un_IO, module );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
