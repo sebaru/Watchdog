@@ -326,7 +326,12 @@
   { GSList *liste = Partage->com_dls.Dls_plugins;
     while (liste)
      { struct DLS_PLUGIN *plugin = liste->data;
-       if (plugin->handle && plugin->remap_all_alias) plugin->remap_all_alias(&plugin->vars);
+       if (plugin->handle && plugin->remap_all_alias)
+        { plugin->remap_all_alias(&plugin->vars);
+          Info_new( __func__, plugin->debug || Partage->com_dls.Thread_debug, LOG_INFO, "Remapping Alias for '%s' OK", plugin->tech_id );
+        }
+       else Info_new( __func__, plugin->debug || Partage->com_dls.Thread_debug, LOG_ERR, "Remapping Alias for '%s' Failed", plugin->tech_id );
+
        if (!strcasecmp ( plugin->tech_id, "SYS" ) )                         /* Mapping des bits internes pour le plugin "SYS" */
         { Partage->com_dls.sys_flipflop_5hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
           Partage->com_dls.sys_flipflop_2hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
