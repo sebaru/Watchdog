@@ -60,8 +60,7 @@
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
     gchar *classe          = Json_get_string(canal->element, "classe");
 
-    if ( !strcmp ( classe, "VoltageInput" )      || !strcmp ( classe, "PHSensor" ) ||
-         !strcmp ( classe, "TemperatureSensor" ) || !strcmp ( classe, "VoltageRatioInput" ) )
+    if ( !strcmp ( classe, "AI" ) )
      { Info_new( __func__, canal->module->Thread_debug, LOG_ERR,
 		         "Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;",
            thread_tech_id, thread_acronyme, description, code );
@@ -216,11 +215,7 @@
     Phidget_getHubPort( handle, &port );
     Phidget_getChannel( handle, &num_canal );
 
-    if ( !strcmp ( classe, "VoltageInput" ) ||
-         !strcmp ( classe, "PHSensor" ) ||
-         !strcmp ( classe, "TemperatureSensor" ) ||
-         !strcmp ( classe, "VoltageRatioInput" ) )
-     { Phidget_AnalogAttach ( canal ); }
+    if ( !strcmp ( classe, "AI" ) ) { Phidget_AnalogAttach ( canal ); }
 
     Info_new( __func__, canal->module->Thread_debug, LOG_NOTICE,
               "'%s:%s' Phidget S/N '%d' Port '%d' capteur '%s' (canal '%d') attached. %d channels available.",
@@ -355,7 +350,7 @@
      }
     else
      { Info_new( __func__, module->Thread_debug, LOG_INFO,
-                 "classe phidget inconnue on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
+                 "capteur phidget inconnue on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
        goto error;
      }
 
@@ -489,7 +484,7 @@ error:
        gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
        gchar *classe          = Json_get_string(canal->element, "classe");
 
-       if ( !strcasecmp ( classe, "DigitalOutput" ) &&
+       if ( !strcasecmp ( classe, "DO" ) &&
             !strcasecmp ( thread_acronyme, msg_thread_acronyme ) )
         { if ( PhidgetDigitalOutput_setState( (PhidgetDigitalOutputHandle)canal->handle, etat ) != EPHIDGET_OK )
            { Phidget_print_error ( canal ); }
