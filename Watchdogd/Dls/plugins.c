@@ -140,7 +140,7 @@
  static gboolean Dls_Save_CodeC_to_disk ( gchar *tech_id, gchar *codec )
   { gchar source_file[128];
 
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Saving '%s' started", tech_id );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Saving '%s' to disk started", tech_id );
     g_snprintf( source_file, sizeof(source_file), "Dls/%s.c", tech_id );
     unlink(source_file);
     gint id_fichier = open( source_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
@@ -206,7 +206,6 @@
  static gboolean Dls_Dlopen_plugin ( struct DLS_PLUGIN *plugin )
   { gchar nom_fichier_absolu[60];
 
-    if (Partage->com_dls.Thread_run == FALSE) return(FALSE);          /* si l'instance est en cours d'arret, on sort de suite */
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%s.so", plugin->tech_id );
 
     if (plugin->handle)                                                                     /* Si deja chargé, on le décharge */
@@ -216,21 +215,18 @@
                     plugin->tech_id, dlerror(), plugin->shortname );
         }
        plugin->handle = NULL;
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s' unloaded (%s)",
-                 plugin->tech_id, plugin->shortname );
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s' unloaded (%s)", plugin->tech_id, plugin->shortname );
      }
 
     plugin->handle = dlopen( nom_fichier_absolu, RTLD_LOCAL | RTLD_NOW );                   /* Ouverture du fichier librairie */
     if (!plugin->handle)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING,
-                   "'%s': dlopen failed (%s)", plugin->tech_id, dlerror() );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s': dlopen failed (%s)", plugin->tech_id, dlerror() );
        return(FALSE);
      }
 
     plugin->version = dlsym( plugin->handle, "version" );                                         /* Recherche de la fonction */
     if (!plugin->version)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING,
-                "'%s' does not provide version function", plugin->tech_id );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s' does not provide version function", plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
@@ -238,8 +234,7 @@
 
     plugin->remap_all_alias = dlsym( plugin->handle, "remap_all_alias" );                         /* Recherche de la fonction */
     if (!plugin->remap_all_alias)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING,
-                "'%s' does not provide remap_all_alias function", plugin->tech_id );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s' does not provide remap_all_alias function", plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
@@ -247,8 +242,7 @@
 
     plugin->init_visuels = dlsym( plugin->handle, "init_visuels" );                               /* Recherche de la fonction */
     if (!plugin->init_visuels)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING,
-                "'%s' does not provide init_visuels function", plugin->tech_id );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s' does not provide init_visuels function", plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
@@ -262,8 +256,7 @@
 /*------------------------------------------------------- Chargement GO ------------------------------------------------------*/
     plugin->go = dlsym( plugin->handle, "Go" );                                              /* Recherche de la fonction 'Go' */
     if (!plugin->go)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING,
-                 "'%s' failed sur absence GO", plugin->tech_id );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s' failed sur absence GO", plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
@@ -501,6 +494,7 @@
     Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */
 
     pthread_mutex_unlock( &Partage->com_dls.synchro );
+
 /****************************************** Calcul des Thread_tech_ids de dependances *****************************************/
     if (plugin->Thread_tech_ids) { g_slist_free_full ( plugin->Thread_tech_ids, (GDestroyNotify) g_free ); plugin->Thread_tech_ids = NULL; }
 
@@ -591,8 +585,7 @@
        Partage->com_dls.Dls_plugins = g_slist_remove( Partage->com_dls.Dls_plugins, plugin );
        if (plugin->Arbre_Comm) g_slist_free(plugin->Arbre_Comm);
                                                                              /* Destruction de l'entete associé dans la GList */
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "plugin '%s' unloaded (%s)",
-                 plugin->tech_id, plugin->name );
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "plugin '%s' unloaded (%s)", plugin->tech_id, plugin->name );
        g_free( plugin );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
