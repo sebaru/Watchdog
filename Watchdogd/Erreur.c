@@ -38,14 +38,14 @@
  #include "watchdogd.h"
 
  static gchar *level_to_string[] =
-  { "-EMERG-",
-    "-ALERT-",
-    "-CRIT--",
-    "-ERROR-",
+  { "EMERG",
+    "ALERT",
+    "CRIT",
+    "ERROR",
     "WARNING",
-    "-NOTICE",
-    "-INFO--",
-    "-DEBUG-"
+    "NOTICE",
+    "INFO",
+    "DEBUG"
   };
 
 /******************************************************************************************************************************/
@@ -69,7 +69,7 @@
 /******************************************************************************************************************************/
  void Info_change_log_level( guint new_log_level )
   { Config.log_level = (new_log_level ? new_log_level : LOG_INFO);
-    Info_new( __func__, TRUE, LOG_NOTICE, "log_level set to %d (%s)", Config.log_level,  level_to_string[Config.log_level] );
+    Info_new( __func__, TRUE, LOG_NOTICE, "log_level set to %d (%s)", Config.log_level, level_to_string[Config.log_level] );
   }
 /******************************************************************************************************************************/
 /* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres                                 */
@@ -81,8 +81,8 @@
 
     if ( override == TRUE || (level <= Config.log_level) )                                        /* LOG_EMERG = 0, DEBUG = 7 */
      { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0 );
-       g_snprintf( chaine, sizeof(chaine), "{ \"level\": \"%s\", \"thread\": \"%s\", \"function\": \"%s\", \"message\": \"%s\" }",
-                   level_to_string[level], nom_thread, function, format );
+       g_snprintf( chaine, sizeof(chaine), "{ \"thread\": \"%s\", \"function\": \"%s\", \"message\": \"%s\" }",
+                   nom_thread, function, format );
 
        va_start( ap, format );
        vsyslog ( level, chaine, ap );
