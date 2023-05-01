@@ -37,21 +37,6 @@
 
     <body>
 
-  <div id="idToastAlert" class="toast" role="status" style="position: absolute; bottom: 50px; right: 50px; z-index: 99">
-   <div class="toast-header">
-     <i class="fas fa-exclamation-circle"></i>
-     <strong class="mr-auto">Bootstrap</strong>
-     <!--<small>11 mins ago</small>-->
-     <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-       <span aria-hidden="true">&times;</span>
-     </button>
-   </div>
-   <div class="toast-body">
-     Hello, world! This is a toast message.
-   </div>
-</div>
-
-
 <div class="position-fixed" style="bottom: 3rem; right: 3rem; z-index:9999">
   <div id="idToastStatus" data-delay="3000" class="toast hide bg-success" role="status">
    <div class="toast-header">

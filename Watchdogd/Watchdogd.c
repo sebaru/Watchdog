@@ -743,16 +743,17 @@ end:
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb API_SYNC" ); }
     if (!Demarrer_arch_sync())                                                                         /* Démarrage ARCH_SYNC */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
-/***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single)                                                                             /* Si demarrage des thread */
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
-    else
-     { if (Config.instance_is_master)                                                                     /* Démarrage D.L.S. */
-        { if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
-          MSRV_Remap();                                                    /* Mappage des bits avant de charger les thread IO */
-        }
-       Charger_librairies();                                                  /* Chargement de toutes les librairies Watchdog */
+
+/***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
+    if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
+     { Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
+       Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
+       MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
      }
+
+/***************************************** Demarrage des threads builtin et librairies ****************************************/
+    if (Config.single == FALSE) Charger_librairies();                                              /* Si demarrage des thread */
+    else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" );
 
 /*************************************** Mise en place de la gestion des signaux **********************************************/
     sig.sa_handler = Traitement_signaux;                                            /* Gestionnaire de traitement des signaux */
@@ -782,17 +783,17 @@ end:
     gint cpt_5_minutes = Partage->top + 3000;
     gint cpt_1_minute  = Partage->top + 600;
 
-    sleep(1);
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Main Thread" );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
+    sleep(10);
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
+       if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
 
           if (cpt_5_minutes < Partage->top)                                                 /* Update DB toutes les 5 minutes */
-           {
-             cpt_5_minutes += 3000;                                                        /* Sauvegarde toutes les 5 minutes */
+           { cpt_5_minutes += 3000;                                                        /* Sauvegarde toutes les 5 minutes */
            }
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
@@ -806,6 +807,8 @@ end:
           usleep(1000);
           sched_yield();
         }
+       Dls_Decharger_plugins();                                                                  /* Dechargement des modules DLS */
+       Json_node_unref ( Partage->com_dls.HORLOGE_ticks );                                      /* Libération des bits d'horloge */
      }
     else
      { prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );

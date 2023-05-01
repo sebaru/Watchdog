@@ -323,23 +323,12 @@
 /******************************************************************************************************************************/
  void Run_dls ( void )
   { gint last_top_10sec, last_top_5sec, last_top_2sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min, last_top_10min;
-    gint wait;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
     Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
-
-    Dls_Importer_plugins();                                                    /* Chargement des modules dls avec compilation */
-    Dls_Load_horloge_ticks();                                                                /* Chargement des ticks horloges */
-
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Wait 20sec to let threads get I/Os" );
-    wait=20;
-    while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
-     { sleep(1); wait--; }        /* attente 20 secondes pour initialisation des bit internes et collection des infos modules */
-
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Starting" );
 
     last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = last_top_10min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
@@ -456,8 +445,6 @@
     g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_up );
     g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_down );
 
-    Dls_Decharger_plugins();                                                                  /* Dechargement des modules DLS */
-    Json_node_unref ( Partage->com_dls.HORLOGE_ticks );                                      /* Libération des bits d'horloge */
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "DLS Down (%p)", pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
