@@ -40,15 +40,18 @@
   { gchar chaine[512], prefixe[128], tech_id[32], acronyme[64], suffixe[128];
     memset ( suffixe, 0, sizeof(suffixe) );
     while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe ) == 4 )
-     { gchar result[128];
+     { struct DLS_REGISTRE *reg;
+       struct DLS_AI *ai;
+       gchar result[128];
        g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
-       struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
-       if (ai)
+       if ( (ai = Dls_data_lookup_AI ( tech_id, acronyme )) != NULL )
         { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
            { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
           else*/
            { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->valeur, ai->unite ); }
         }
+       else if ( (reg = Dls_data_lookup_REGISTRE ( tech_id, acronyme )) != NULL )
+        { g_snprintf( chaine, sizeof(chaine), "%.02f %s", reg->valeur, reg->unite ); }
        else g_snprintf( chaine, sizeof(chaine), "erreur" );
        g_strlcat ( result, chaine, sizeof(result) );
        g_strlcat ( result, suffixe, sizeof(result) );
