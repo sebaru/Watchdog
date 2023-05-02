@@ -35,10 +35,13 @@
  #include <unistd.h>
  #include <sys/file.h>                                                                /* Gestion des verrous sur les fichiers */
  #include <sys/wait.h>
+ #include <sys/sysinfo.h>
 
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
 
+ static pthread_mutex_t Nbr_compil_mutex;                                       /* Mutex sur le nombre de compil en parallele */
+ static gint Nbr_compil = 0;                                                                /* Nombre de compile en parallele */
 /******************************************************************************************************************************/
 /* Dls_get_plugin_by_tech_id: Recupere le plugin depuis son tech_id                                                           */
 /* Entrée: Le tech_id du plugin a récupérer                                                                                   */
@@ -374,25 +377,27 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id )
-  { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Starting import of plugin '%s'", tech_id );
-
+  { struct DLS_PLUGIN *plugin = NULL;
+    pthread_mutex_lock ( &Nbr_compil_mutex );                   /* Increment le nombre de thread de compilation en parallelle */
+    Nbr_compil++;
+    pthread_mutex_unlock ( &Nbr_compil_mutex );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Starting import of plugin '%s'", tech_id );
+                                                                                 /* Récupère les metadata du plugin à charger */
     JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", "tech_id=%s", tech_id );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': API Error.", tech_id );
-       Json_node_unref ( api_result );
-       return(NULL);
+       goto end;
      }
 
     if ( !Json_has_member ( api_result, "codec" ) )
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': Missing CodeC.", tech_id );
-       Json_node_unref(api_result);
-       return(NULL);
+       goto end;
      }
 
     Dls_Save_CodeC_to_disk ( tech_id, Json_get_string ( api_result, "codec" ) );
     Dls_Compiler_source_dls ( tech_id );
 
-    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
+    plugin = Dls_get_plugin_by_tech_id ( tech_id );                                               /* Plugin deja en mémoire ? */
     if (plugin == NULL)                                                            /* si pas trouvé, on créé l'enregistrement */
      { plugin = g_try_malloc0 ( sizeof (struct DLS_PLUGIN) );
        if (plugin)                                                                              /* Peuplement de la structure */
@@ -408,8 +413,7 @@
      }
     if (!plugin)                                       /* si vraiment on arrive pas a reserver ou trouver la mémoire, on sort */
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s' Memory error", tech_id );
-       Json_node_unref(api_result);
-       return(NULL);
+       goto end;
      }
 
 /******* On stoppe D.L.S pour éviter l'usage de bits prealablement defini dans d'autres plugins pointant vers celui-la ********/
@@ -506,8 +510,12 @@
        thread_tech_ids = g_list_next(thread_tech_ids);
      }
     g_list_free(Thread_tech_ids);
-    Json_node_unref(api_result);
 
+end:
+    Json_node_unref(api_result);
+    pthread_mutex_lock ( &Nbr_compil_mutex ); /* Decremente le compteur de thread (si fonction appelée en mode pthreadècreate */
+    if (Nbr_compil) Nbr_compil--;
+    pthread_mutex_unlock ( &Nbr_compil_mutex );
     return(plugin);
   }
 /******************************************************************************************************************************/
@@ -516,7 +524,15 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Dls_Importer_un_plugin_by_array (JsonArray *array, guint index, JsonNode *element, gpointer user_data)
-  { Dls_Importer_un_plugin ( Json_get_string ( element, "tech_id" ) ); }
+  { pthread_t TID;
+    gchar *tech_id = Json_get_string ( element, "tech_id" );
+
+    while (Nbr_compil >= get_nprocs()) sched_yield();
+    if ( pthread_create( &TID, NULL, (void *)Dls_Importer_un_plugin, tech_id ) )
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': pthread_create failed.", tech_id );
+       return;
+     }
+  }
 /******************************************************************************************************************************/
 /* Dls_Importer_plugins: Importe tous les plugins depuis l'API                                                                */
 /* Entrée: Rien                                                                                                               */
@@ -531,9 +547,13 @@
        return;
      }
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "API Request for /run/dls/plugins OK." );
+
+    pthread_mutexattr_t param;                                                                /* Creation du mutex de synchro */
+    pthread_mutexattr_init( &param );                                                         /* Creation du mutex de synchro */
+    pthread_mutex_init( &Nbr_compil_mutex, &param );
     Json_node_foreach_array_element ( api_result, "plugins", Dls_Importer_un_plugin_by_array, NULL );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%03d plugins loaded in %03.1fs",
-              Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0 );
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%03d plugins loaded in %03.1fs (with %02d proc)",
+              Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0, get_nprocs() );
     Json_node_unref ( api_result );
   }
 /******************************************************************************************************************************/
