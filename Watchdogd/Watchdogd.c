@@ -807,8 +807,6 @@ end:
           usleep(1000);
           sched_yield();
         }
-       Dls_Decharger_plugins();                                                                  /* Dechargement des modules DLS */
-       Json_node_unref ( Partage->com_dls.HORLOGE_ticks );                                      /* Libération des bits d'horloge */
      }
     else
      { prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
@@ -825,6 +823,11 @@ end:
 
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
+
+    if (Config.instance_is_master)                                        /* Dechargement DLS après les threads IO, dls, arch */
+     { Dls_Decharger_plugins();                                                               /* Dechargement des modules DLS */
+       Json_node_unref ( Partage->com_dls.HORLOGE_ticks );                                   /* Libération des bits d'horloge */
+     }
 
     if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
     if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );

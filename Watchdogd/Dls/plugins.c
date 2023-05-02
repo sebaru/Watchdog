@@ -552,6 +552,7 @@ end:
     pthread_mutexattr_init( &param );                                                         /* Creation du mutex de synchro */
     pthread_mutex_init( &Nbr_compil_mutex, &param );
     Json_node_foreach_array_element ( api_result, "plugins", Dls_Importer_un_plugin_by_array, NULL );
+    while (Nbr_compil) sched_yield();                                         /* Tant que des threads de compilation tournent */
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%03d plugins loaded in %03.1fs (with %02d proc)",
               Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0, get_nprocs() );
     Json_node_unref ( api_result );
