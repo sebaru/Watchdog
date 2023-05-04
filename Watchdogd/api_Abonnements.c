@@ -34,7 +34,8 @@
 /******************************************************************************************************************************/
  void API_Send_Abonnements ( void )
   { static gint next_try = 0;
-    while (Partage->abonnements && next_try <= Partage->top)
+    gint cpt = 0;
+    while (Partage->abonnements && next_try <= Partage->top && cpt<100)
      { pthread_mutex_lock( &Partage->abonnements_synchro );                           /* Ajout dans la liste de msg a traiter */
        JsonNode *RootNode   = Partage->abonnements->data;
        Partage->abonnements = g_slist_remove ( Partage->abonnements, RootNode );
@@ -51,6 +52,7 @@
         }
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
+       cpt++;
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
