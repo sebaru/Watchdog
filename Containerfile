@@ -24,13 +24,5 @@ RUN ./autogen.sh
 RUN make install
 RUN ldconfig
 ENV ABLS_IN_A_CONTAINER 1
-ARG ABLS_DOMAIN_UUID=default_domain_uuid
-ENV ABLS_DOMAIN_UUID=$ABLS_DOMAIN_UUID
-ARG ABLS_DOMAIN_SECRET=default_domain_secret
-ENV ABLS_DOMAIN_SECRET=$ABLS_DOMAIN_SECRET
-ARG ABLS_AGENT_UUID=default_agent_uuid
-ENV ABLS_AGENT_UUID=$ABLS_AGENT_UUID
-ARG ABLS_API_URL=api.abls-habitat.fr
-ENV ABLS_API_URL=$ABLS_API_URL
 CMD /usr/local/bin/Watchdogd
 

@@ -292,13 +292,6 @@
           Json_node_add_string( RootNode, "api_url", api_url );
           Json_node_add_string( RootNode, "product", "agent" );
           Json_node_add_string( RootNode, "vendor", "abls-habitat.fr" );
-          time_t t = time(NULL);
-          struct tm *temps = localtime( &t );
-          if (temps)
-           { gchar date[64];
-             strftime( date, sizeof(date), "%F %T", temps );
-             Json_node_add_string( RootNode, "install_time", date );
-           }
           Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );
           Json_node_unref(RootNode);
           printf(" Config file created, you can restart.\n" );

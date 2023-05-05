@@ -59,14 +59,16 @@
     if (!Json_has_member ( Config.config, "domain_secret" )) Json_node_add_string ( Config.config, "domain_secret", "default" );
 
     chaine = getenv ( "ABLS_API_URL" );
+    if ( g_str_has_prefix ( chaine, "https://" ) ) chaine+=8;
+    if ( g_str_has_prefix ( chaine, "http://"  ) ) chaine+=7;
+    if ( g_str_has_prefix ( chaine, "wss://"   ) ) chaine+=6;
+    if ( g_str_has_prefix ( chaine, "ws://"    ) ) chaine+=5;
     if (chaine) Json_node_add_string ( Config.config, "api_url", chaine );
     if (!Json_has_member ( Config.config, "api_url" ))       Json_node_add_string ( Config.config, "api_url", "api.abls-habitat.fr" );
 
     chaine = getenv ( "ABLS_AGENT_UUID" );
     if (chaine) Json_node_add_string ( Config.config, "agent_uuid", chaine );
     if (!Json_has_member ( Config.config, "agent_uuid" ))    Json_node_add_string ( Config.config, "agent_uuid", "default" );
-
-    if (!Json_has_member ( Config.config, "install_time"  )) Json_node_add_string ( Config.config, "install_time", "1980-10-22 02:50:00" );
 
     g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "localhost" );
     g_snprintf( Config.librairie_dir,   sizeof(Config.librairie_dir),   "%s", DEFAUT_PROCESS_DIR   );
@@ -131,7 +133,6 @@
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db password          *******" );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config install_time         %s", Json_get_string ( Config.config, "install_time" ) );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config headless             %d", Config.headless );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
