@@ -481,9 +481,10 @@ error:
         }
      }
 
+    g_slist_foreach ( vars->Liste_sensors, (GFunc) Phidget_close, NULL );
+    PhidgetNet_removeServer( hostname );                                                /* Arrete la connexion au hub phidget */
     g_slist_foreach ( vars->Liste_sensors, (GFunc) g_free, NULL );
     g_slist_free ( vars->Liste_sensors );
-    PhidgetNet_removeServer( hostname );                                                /* Arrete la connexion au hub phidget */
 connect_failed:
     Thread_end(module);
   }
