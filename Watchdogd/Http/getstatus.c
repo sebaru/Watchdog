@@ -42,7 +42,6 @@
     gchar date[64];
     gint num;
 
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
 
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *RootNode = Json_node_create ();

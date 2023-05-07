@@ -107,7 +107,6 @@
  extern void Http_traiter_syn_show ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
                                                      SoupWebsocketConnection* connection, gpointer user_data );
- extern void Http_traiter_histo_alive ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data);
 
  extern JsonNode *Http_Msg_to_Json ( SoupServerMessage *msg );
  extern JsonNode *Http_Get_from_local_BUS ( struct THREAD *module, gchar *uri );

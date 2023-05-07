@@ -256,7 +256,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Http_ws_on_slave_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
-  { struct HTTP_WS_SESSION *slave = user_data;
+  { /*struct HTTP_WS_SESSION *slave = user_data;*/
     Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Message received !" );
     gsize taille;
 
