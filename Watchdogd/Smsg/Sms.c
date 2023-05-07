@@ -314,7 +314,8 @@
      }
 
     gint sms_notification = Json_get_int ( msg, "sms_notification" );
-    GList *recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
+    GList *Recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
+    GList *recipients = Recipients;
     while(recipients)
      { JsonNode *user = recipients->data;
        gchar *user_phone = Json_get_string ( user, "phone" );
@@ -343,7 +344,7 @@
         }
        recipients = g_list_next(recipients);
      }
-    g_list_free(recipients);
+    g_list_free(Recipients);
     Json_node_unref ( UsersNode );
     Http_Post_thread_AI_to_local_BUS ( module, vars->ai_nbr_sms, vars->nbr_sms, TRUE );
   }

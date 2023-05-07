@@ -59,7 +59,8 @@
        return;
      }
 
-    GList *recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
+    GList *Recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
+    GList *recipients = Recipients;
     while(recipients)
      { JsonNode *user = recipients->data;
        gchar *xmpp = Json_get_string ( user, "xmpp" );
@@ -74,7 +75,7 @@
        else Imsgs_Envoi_message_to ( module, xmpp, message );
        recipients = g_list_next(recipients);
      }
-    g_list_free(recipients);
+    g_list_free(Recipients);
     Json_node_unref ( UsersNode );
   }
 /******************************************************************************************************************************/
