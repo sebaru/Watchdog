@@ -103,7 +103,6 @@
  extern void Http_traiter_syn_list ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_syn_del ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_syn_get  ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_syn_save ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_syn_clic ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_syn_show ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,

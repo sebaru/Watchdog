@@ -533,7 +533,6 @@
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
 
-    soup_server_add_handler ( socket, "/api/syn/save",       Http_traiter_syn_save, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/show",       Http_traiter_syn_show, NULL, NULL );
     soup_server_add_handler ( socket, "/api/syn/clic",       Http_traiter_syn_clic, NULL, NULL );
 

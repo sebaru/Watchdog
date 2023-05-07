@@ -158,31 +158,6 @@
                    Json_get_int( element, "id" ) );
  }
 /******************************************************************************************************************************/
-/* Http_Traiter_get_syn: Fourni une list JSON des elements d'un synoptique                                                    */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Http_traiter_syn_save ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
-  { struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
-    if (!Http_check_session( msg, session, 6 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
-    if (!request) return;
-
-    if ( Json_has_member ( request, "visuels" ) )
-     { Json_node_foreach_array_element ( request, "visuels", Http_syn_save_un_visuel, session ); }
-
-    if ( Json_has_member ( request, "cadrans" ) )
-     { Json_node_foreach_array_element ( request, "cadrans", Http_syn_save_un_cadran, session ); }
-
-    if ( Json_has_member ( request, "comments" ) )
-     { Json_node_foreach_array_element ( request, "comments", Http_syn_save_un_comment, session ); }
-
-    if ( Json_has_member ( request, "passerelles" ) )
-     { Json_node_foreach_array_element ( request, "passerelle", Http_syn_save_une_passerelle, session ); }
-
-    Json_node_unref(request);
-  }
-/******************************************************************************************************************************/
 /* Formater_cadran: Formate la structure dédiée cadran pour envoi au client                                                   */
 /* Entrée: un cadran                                                                                                          */
 /* Sortie: une structure prete à l'envoie                                                                                     */
