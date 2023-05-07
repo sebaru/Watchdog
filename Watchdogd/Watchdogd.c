@@ -778,6 +778,7 @@ end:
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
     sleep(10);
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );

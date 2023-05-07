@@ -448,6 +448,13 @@ error:
        goto connect_failed;
      }
 
+    JsonNode *RootNode = Json_node_create ();                                                     /* Envoi de la conf a l'API */
+    if (RootNode)
+     { Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
+       JsonNode *API_result = Http_Post_to_global_API ( "/run/phidget/add/io", RootNode );
+       Json_node_unref ( API_result );
+       Json_node_unref ( RootNode );
+     }
 /* Chargement des I/O */
     Json_node_foreach_array_element ( module->config, "IO", Charger_un_IO, module );
 
@@ -476,7 +483,7 @@ error:
 
     g_slist_foreach ( vars->Liste_sensors, (GFunc) g_free, NULL );
     g_slist_free ( vars->Liste_sensors );
-
+    PhidgetNet_removeServer( hostname );                                                /* Arrete la connexion au hub phidget */
 connect_failed:
     Thread_end(module);
   }

@@ -880,12 +880,11 @@
             JsonNode *RootNode = Json_node_create ();                                             /* Envoi de la conf a l'API */
             if (!RootNode) break;
             Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-            Json_node_add_string ( RootNode, "thread_classe",  Json_get_string( module->config, "thread_classe" ) );
             Json_node_add_int    ( RootNode, "nbr_entree_tor", vars->nbr_entree_tor );
             Json_node_add_int    ( RootNode, "nbr_entree_ana", vars->nbr_entree_ana );
             Json_node_add_int    ( RootNode, "nbr_sortie_tor", vars->nbr_sortie_tor );
             Json_node_add_int    ( RootNode, "nbr_sortie_ana", vars->nbr_sortie_ana );
-            JsonNode *API_result = Http_Post_to_global_API ( "/run/thread/add_io", RootNode );
+            JsonNode *API_result = Http_Post_to_global_API ( "/run/modbus/add/io", RootNode );
             Json_node_unref ( API_result );
             Json_node_unref ( RootNode );
             vars->mode = MODBUS_GET_NBR_AI;

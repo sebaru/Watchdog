@@ -475,14 +475,8 @@
     pthread_mutex_lock ( &Partage->com_msrv.synchro );
     Partage->com_msrv.Threads = g_slist_append ( Partage->com_msrv.Threads, module );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
-    if (module->Thread_run)
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "%s: '%s': thread of class '%s' loaded (enable=1)",
-                 __func__, thread_tech_id, thread_classe );
-     }
-    else
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "%s: '%s': thread of class '%s' not loaded (enable=0)",
-                 __func__, thread_tech_id, thread_classe );
-     }
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread '%s' of class '%s' loaded with enable='%d'",
+              thread_tech_id, thread_classe, module->Thread_run );
   }
 /******************************************************************************************************************************/
 /* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                                             */
