@@ -1,9 +1,9 @@
 ## Allows the user watchdog to execute these commands
-watchdog  ALL=(ALL) NOPASSWD: /usr/sbin/poweroff
-watchdog  ALL=(ALL) NOPASSWD: /usr/bin/make install
-watchdog  ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop Watchdogd
-watchdog  ALL=(ALL) NOPASSWD: /usr/bin/systemctl start Watchdogd
-watchdog  ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart Watchdogd
-watchdog  ALL=(ALL) NOPASSWD: /usr/bin/killall watchdogd
-watchdog  ALL=(ALL) NOPASSWD: /usr/bin/journalctl -f -u Watchdogd
-Defaults:watchdog !requiretty
+%abls  ALL=(ALL) NOPASSWD: /usr/sbin/poweroff
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/make install
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop Watchdogd
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/systemctl start Watchdogd
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart Watchdogd
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/killall Watchdogd
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/journalctl -f -u Watchdogd
+Defaults:%abls !requiretty
