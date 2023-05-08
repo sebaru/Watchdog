@@ -88,23 +88,23 @@
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
     if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d BI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_BI" ) );
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d MONO to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_MONO" ) );
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d REGISTRE to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_REGISTRE" ) );
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d DI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_DI" ) );
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d DO to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_DO" ) );
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d AI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_AI" ) );
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d AO to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_AO" ) );
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d CI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_CI" ) );
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d CH to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_CH" ) );
        Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Saved '%s' DLS_DATA in %04.1fs", plugin->tech_id, (Partage->top-top)/10.0 );
      }

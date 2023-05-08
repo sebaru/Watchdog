@@ -324,7 +324,7 @@
      { struct DLS_PLUGIN *plugin = liste->data;
        if (plugin->handle && plugin->remap_all_alias)
         { plugin->remap_all_alias(&plugin->vars);
-          Info_new( __func__, plugin->debug || Partage->com_dls.Thread_debug, LOG_INFO, "Remapping Alias for '%s' OK", plugin->tech_id );
+          Info_new( __func__, plugin->debug || Partage->com_dls.Thread_debug, LOG_DEBUG, "Remapping Alias for '%s' OK", plugin->tech_id );
         }
        else Info_new( __func__, plugin->debug || Partage->com_dls.Thread_debug, LOG_ERR, "Remapping Alias for '%s' Failed", plugin->tech_id );
 
