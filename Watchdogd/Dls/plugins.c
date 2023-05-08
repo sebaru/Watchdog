@@ -416,15 +416,91 @@
        goto end;
      }
 
-/******* On stoppe D.L.S pour éviter l'usage de bits prealablement defini dans d'autres plugins pointant vers celui-la ********/
+/******* On stoppe D.L.S pour éviter l'usage de bits prealablement definis dans d'autres plugins pointant vers celui-la *******/
     pthread_mutex_lock( &Partage->com_dls.synchro );
+    GSList *source;                                                         /* Utilisé pour la recopie des bits d'abonnements */
 
-    if (plugin->Dls_data_CI) { g_slist_free_full ( plugin->Dls_data_CI, (GDestroyNotify) g_free ); plugin->Dls_data_CI = NULL; }
+/********************************* Chargement des nouveaux CI et recopie des abonnements **************************************/
+    GSList *old_Dls_data_CI = plugin->Dls_data_CI;
+    plugin->Dls_data_CI = NULL;
     Json_node_foreach_array_element ( api_result, "mnemos_CI", Dls_data_CI_create_by_array, plugin );
+    source = old_Dls_data_CI;                                                               /* Recopie des bits d'abonnements */
+    while ( source )
+     { struct DLS_CI *source_bit = source->data;
+       GSList *dest = plugin->Dls_data_CI;
+       while ( dest )
+        { struct DLS_CI *dest_bit = dest->data;
+          if (!strcasecmp ( source_bit->acronyme, dest_bit->acronyme ))
+           { dest_bit->abonnement = source_bit->abonnement;
+             break;
+           }
+          dest = g_slist_next( dest );
+        }
+       source = g_slist_next( source );
+     }
+    g_slist_free_full ( old_Dls_data_CI, (GDestroyNotify) g_free );
 
-    if (plugin->Dls_data_CH) { g_slist_free_full ( plugin->Dls_data_CH, (GDestroyNotify) g_free ); plugin->Dls_data_CH = NULL; }
+/********************************* Chargement des nouveaux CH et recopie des abonnements **************************************/
+    GSList *old_Dls_data_CH = plugin->Dls_data_CH;
+    plugin->Dls_data_CH = NULL;
     Json_node_foreach_array_element ( api_result, "mnemos_CH", Dls_data_CH_create_by_array, plugin );
+    source = old_Dls_data_CH;                                                               /* Recopie des bits d'abonnements */
+    while ( source )
+     { struct DLS_CH *source_bit = source->data;
+       GSList *dest = plugin->Dls_data_CH;
+       while ( dest )
+        { struct DLS_CH *dest_bit = dest->data;
+          if (!strcasecmp ( source_bit->acronyme, dest_bit->acronyme ))
+           { dest_bit->abonnement = source_bit->abonnement;
+             break;
+           }
+          dest = g_slist_next( dest );
+        }
+       source = g_slist_next( source );
+     }
+    g_slist_free_full ( old_Dls_data_CH, (GDestroyNotify) g_free );
 
+/********************************* Chargement des nouveaux REGISTRE et recopie des abonnements ********************************/
+    GSList *old_Dls_data_REGISTRE = plugin->Dls_data_REGISTRE;
+    plugin->Dls_data_REGISTRE = NULL;
+    Json_node_foreach_array_element ( api_result, "mnemos_REGISTRE", Dls_data_REGISTRE_create_by_array, plugin );
+    source = old_Dls_data_REGISTRE;                                                         /* Recopie des bits d'abonnements */
+    while ( source )
+     { struct DLS_REGISTRE *source_bit = source->data;
+       GSList *dest = plugin->Dls_data_REGISTRE;
+       while ( dest )
+        { struct DLS_REGISTRE *dest_bit = dest->data;
+          if (!strcasecmp ( source_bit->acronyme, dest_bit->acronyme ))
+           { dest_bit->abonnement = source_bit->abonnement;
+             break;
+           }
+          dest = g_slist_next( dest );
+        }
+       source = g_slist_next( source );
+     }
+    g_slist_free_full ( old_Dls_data_REGISTRE, (GDestroyNotify) g_free );
+
+/********************************* Chargement des nouveaux AI et recopie des abonnements **************************************/
+    GSList *old_Dls_data_AI = plugin->Dls_data_AI;
+    plugin->Dls_data_AI = NULL;
+    Json_node_foreach_array_element ( api_result, "mnemos_AI", Dls_data_AI_create_by_array, plugin );
+    source = old_Dls_data_AI;                                                               /* Recopie des bits d'abonnements */
+    while ( source )
+     { struct DLS_AI *source_bit = source->data;
+       GSList *dest = plugin->Dls_data_AI;
+       while ( dest )
+        { struct DLS_AI *dest_bit = dest->data;
+          if (!strcasecmp ( source_bit->acronyme, dest_bit->acronyme ))
+           { dest_bit->abonnement = source_bit->abonnement;
+             break;
+           }
+          dest = g_slist_next( dest );
+        }
+       source = g_slist_next( source );
+     }
+    g_slist_free_full ( old_Dls_data_AI, (GDestroyNotify) g_free );
+
+/********************************* Chargement des nouveaux autres bits (sans abonnements) *************************************/
     if (plugin->Dls_data_DI)
      { GSList *liste = plugin->Dls_data_DI;
        while (liste)
@@ -443,9 +519,6 @@
 
     if (plugin->Dls_data_DO) { g_slist_free_full ( plugin->Dls_data_DO, (GDestroyNotify) g_free ); plugin->Dls_data_DO = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_DO", Dls_data_DO_create_by_array, plugin );
-
-    if (plugin->Dls_data_AI) { g_slist_free_full ( plugin->Dls_data_AI, (GDestroyNotify) g_free ); plugin->Dls_data_AI = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_AI", Dls_data_AI_create_by_array, plugin );
 
     if (plugin->Dls_data_AO) { g_slist_free_full ( plugin->Dls_data_AO, (GDestroyNotify) g_free ); plugin->Dls_data_AO = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_AO", Dls_data_AO_create_by_array, plugin );
@@ -483,9 +556,6 @@
 
     if (plugin->Dls_data_MESSAGE) { g_slist_free_full ( plugin->Dls_data_MESSAGE, (GDestroyNotify) g_free ); plugin->Dls_data_MESSAGE = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_MESSAGE", Dls_data_MESSAGE_create_by_array, plugin );
-
-    if (plugin->Dls_data_REGISTRE) { g_slist_free_full ( plugin->Dls_data_REGISTRE, (GDestroyNotify) g_free ); plugin->Dls_data_REGISTRE = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_REGISTRE", Dls_data_REGISTRE_create_by_array, plugin );
 
     if (plugin->Dls_data_WATCHDOG) { g_slist_free_full ( plugin->Dls_data_WATCHDOG, (GDestroyNotify) g_free ); plugin->Dls_data_WATCHDOG = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_WATCHDOG", Dls_data_WATCHDOG_create_by_array, plugin );

@@ -47,7 +47,7 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Thread_send_comm_to_master: Envoi le statut de la comm au master                                                       */
+/* Thread_send_comm_to_master: Envoi le statut de la comm au master                                                           */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
