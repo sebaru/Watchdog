@@ -124,7 +124,6 @@
  extern gboolean Http_check_session ( SoupServerMessage *msg, struct HTTP_CLIENT_SESSION * session, gint min_access_level );
  extern void Http_Envoyer_les_cadrans ( void );
  extern void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client );
- extern void Http_ws_send_to_all ( JsonNode *node );
  extern void Http_ws_send_json_to_slave ( struct HTTP_WS_SESSION *slave, JsonNode *node );
  extern void Http_Send_ping_to_slaves ( void );
  extern void Http_Send_to_slaves ( gchar *target_tech_id, JsonNode *RootNode );

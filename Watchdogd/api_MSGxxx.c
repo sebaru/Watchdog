@@ -174,8 +174,6 @@
               { event->msg->last_on = Partage->top;
                 Json_node_add_string ( histo, "tag", "DLS_HISTO" );
                 Http_Send_to_slaves ( NULL, histo );
-                Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
-                Http_ws_send_to_all( histo );
                 Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
               }
              else
@@ -191,8 +189,6 @@
           if(histo)
            { Json_node_add_string ( histo, "tag", "DLS_HISTO" );
              Http_Send_to_slaves ( NULL, histo );
-             Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
-             Http_ws_send_to_all( histo );
              Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
                             event->msg->tech_id, event->msg->acronyme );

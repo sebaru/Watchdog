@@ -594,12 +594,6 @@
 
        if ( Partage->top > last_pulse + 50 )
         { last_pulse = Partage->top;
-          JsonNode *pulse = Json_node_create();
-          if (pulse)
-           { Json_node_add_string( pulse, "zmq_tag", "PULSE" );
-             Http_ws_send_to_all ( pulse );
-             Json_node_unref(pulse);
-           }
           pthread_mutex_lock( &Partage->com_http.synchro );
           GSList *liste = Partage->com_http.liste_http_clients;
           while(liste)

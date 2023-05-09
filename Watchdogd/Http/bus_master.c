@@ -39,28 +39,6 @@
     g_free(buf);
   }
 /******************************************************************************************************************************/
-/* Http_ws_send_to_all: Envoi d'un buffer a tous les clients connectés à la websocket                                         */
-/* Entrée: Le buffer                                                                                                          */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_ws_send_to_all ( JsonNode *node )
-  { gchar *buf = Json_node_to_string ( node );
-    pthread_mutex_lock( &Partage->com_http.synchro );
-    GSList *sessions = Partage->com_http.liste_http_clients;
-    while ( sessions )
-     { struct HTTP_CLIENT_SESSION *session = sessions->data;
-       GSList *liste_ws = session->liste_ws_clients;
-       while (liste_ws)
-        { struct WS_CLIENT_SESSION *client = liste_ws->data;
-          soup_websocket_connection_send_text ( client->connexion, buf );
-          liste_ws = g_slist_next(liste_ws);
-        }
-       sessions = g_slist_next ( sessions );
-     }
-    pthread_mutex_unlock( &Partage->com_http.synchro );
-    g_free(buf);
-  }
-/******************************************************************************************************************************/
 /* Envoyer_un_cadran: Envoi un update cadran au client                                                                        */
 /* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
 /* Sortie: Néant                                                                                                              */
