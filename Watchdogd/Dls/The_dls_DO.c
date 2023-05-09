@@ -101,7 +101,7 @@
        if (RootNode)
         { Dls_DO_to_json ( RootNode, dout );
           pthread_mutex_lock( &Partage->com_msrv.synchro );                       /* Envoie au MSRV pour dispatch aux threads */
-          Partage->com_msrv.Liste_DO = g_slist_append ( Partage->com_msrv.Liste_DO, dout );
+          Partage->com_msrv.Liste_DO = g_slist_append ( Partage->com_msrv.Liste_DO, RootNode );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
         }
        else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
