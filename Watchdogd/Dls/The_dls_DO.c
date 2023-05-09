@@ -92,10 +92,11 @@
 /******************************************************************************************************************************/
  void Dls_data_set_DO ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *dout, gboolean etat )
   { if (!dout) return;
-     if (dout->etat != etat)
+    if (dout->etat != etat)
      { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
                  (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, etat );
+       dout->etat = etat;
 
        JsonNode *RootNode = Json_node_create ();
        if (RootNode)
@@ -107,7 +108,6 @@
        else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
        Partage->audit_bit_interne_per_sec++;
      }
-    dout->etat = etat;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_bool_up: Remonte le front montant d'un boolean                                                                */
