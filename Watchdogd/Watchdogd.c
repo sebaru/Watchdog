@@ -37,7 +37,6 @@
  #include <sys/file.h>
  #include <sys/types.h>
  #include <grp.h>
- #include <popt.h>
  #include <pthread.h>
  #include <pwd.h>
  #include <systemd/sd-login.h>
@@ -202,106 +201,6 @@
        g_list_free(Results);
      } else { Json_node_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-  }
-/******************************************************************************************************************************/
-/* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
-/* Entrée: argc, argv                                                                                                         */
-/* Sortie: -1 si erreur, 0 si ok                                                                                              */
-/******************************************************************************************************************************/
- static void Lire_ligne_commande( int argc, char *argv[] )
-  { gint help = 0, log_level = -1, single = 0, version = 0, link = 0;
-    gchar *api_url = NULL, *domain_uuid = NULL, *domain_secret = NULL, *agent_uuid_src = NULL;
-    struct poptOption Options[]=
-     { { "version",        'v', POPT_ARG_NONE,
-         &version,          0, "Display Version Number", NULL },
-       { "debug",          'd', POPT_ARG_INT,
-         &log_level,      0, "Debug level", "LEVEL" },
-       { "help",           'h', POPT_ARG_NONE,
-         &help,             0, "Help", NULL },
-       { "single",         's', POPT_ARG_NONE,
-         &single,           0, "Don't start thread", NULL },
-       { "link",           'l', POPT_ARG_NONE,
-         &link,             0, "Link to API", NULL },
-       { "api-url",        'A', POPT_ARG_STRING,
-         &api_url,          0, "API Url (default is api.abls-habitat.fr)", NULL },
-       { "domain-uuid",    'D', POPT_ARG_STRING,
-         &domain_uuid,      0, "Domain to link to (mandatory)", NULL },
-       { "domain-secret",  'S', POPT_ARG_STRING,
-         &domain_secret,    0, "Domain secret (mandatory)", NULL },
-       { "agent-uuid",     'U', POPT_ARG_STRING,
-         &agent_uuid_src,   0, "Agent UUID (default is to create a new one)", NULL },
-       POPT_TABLEEND
-     };
-    poptContext context;
-    int rc;
-
-    context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
-    while ( (rc = poptGetNextOpt( context )) != -1)                                          /* Parse de la ligne de commande */
-     { switch (rc)
-        { case POPT_ERROR_BADOPT: printf( "Option %s is unknown\n", poptBadOption(context, 0) );
-                                  help=1; break;
-          default: printf("Parsing error\n");
-        }
-     }
-
-    if (help)                                                                                 /* Affichage de l'aide en ligne */
-     { poptPrintHelp(context, stdout, 0);
-       poptFreeContext(context);
-       exit(EXIT_OK);
-     }
-    poptFreeContext( context );                                                                         /* Liberation memoire */
-
-    if (version)                                                                            /* Affichage du numéro de version */
-     { printf(" Watchdogd - Version %s\n", WTD_VERSION );
-       exit(EXIT_OK);
-     }
-
-/*--------------------------------------------------------- Creation du fichier de config ------------------------------------*/
-    if (link)
-     { if (getuid()!=0)
-        { printf(" You should be root to link to API\n" );
-          exit(EXIT_OK);
-        }
-
-       if ( !domain_uuid )
-        { printf(" You need 'domain_uuid' to link to API\n" );
-          exit(EXIT_OK);
-        }
-
-       if ( !domain_secret )
-        { printf(" You need 'domain_secret' to link to API\n" );
-          exit(EXIT_OK);
-        }
-
-       if ( !api_url ) api_url = "https://api.abls-habitat.fr";
-       if ( g_str_has_prefix ( api_url, "https://" ) ) api_url+=8;
-       if ( g_str_has_prefix ( api_url, "http://"  ) ) api_url+=7;
-       if ( g_str_has_prefix ( api_url, "wss://"   ) ) api_url+=6;
-       if ( g_str_has_prefix ( api_url, "ws://"    ) ) api_url+=5;
-       if (strlen(api_url)==0) api_url = "api.abls-habitat.fr";
-
-       gchar agent_uuid[37];
-       if ( agent_uuid_src ) g_snprintf( agent_uuid, sizeof(agent_uuid), "%s", agent_uuid_src );
-       else UUID_New ( agent_uuid );
-/******************************************* Création fichier de config *******************************************************/
-       JsonNode *RootNode = Json_node_create ();
-       if (RootNode)
-        { Json_node_add_string( RootNode, "domain_uuid", domain_uuid );
-          Json_node_add_string( RootNode, "domain_secret", domain_secret );
-          Json_node_add_string( RootNode, "agent_uuid", agent_uuid );
-          Json_node_add_string( RootNode, "api_url", api_url );
-          Json_node_add_string( RootNode, "product", "agent" );
-          Json_node_add_string( RootNode, "vendor", "abls-habitat.fr" );
-          Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );
-          Json_node_unref(RootNode);
-          printf(" Config file created, you can restart.\n" );
-        }
-       else { printf ("Writing config failed: Memory Error.\n" ); }
-       exit(EXIT_OK);
-     }
-    if (single)          Config.single      = TRUE;                                            /* Demarrage en mode single ?? */
-    if (log_level!=-1)   Config.log_level   = log_level;
-    fflush(0);
   }
 /******************************************************************************************************************************/
 /* Drop_privileges: Passe sous un autre user que root                                                                         */
@@ -616,10 +515,9 @@ end:
     prctl(PR_SET_NAME, "W-INIT", 0, 0, 0 );
     umask(022);                                                                              /* Masque de creation de fichier */
 
-    Lire_config();                                                     /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
+    Lire_config( argc, argv );                                         /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
     Info_init( LOG_INFO );                                               /* Init msgs d'erreurs, par défaut, en mode LOG_INFO */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Start %s, branche '%s'", WTD_VERSION, WTD_BRANCHE );
-    Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config domain_uuid: %s", Json_get_string ( Config.config, "domain_uuid" ) );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config agent_uuid : %s", Json_get_string ( Config.config, "agent_uuid" ) );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config api_url    : %s", Json_get_string ( Config.config, "api_url" ) );

@@ -65,7 +65,7 @@
  #define DEFAUT_PROCESS_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
 
 /******************************************* Prototypes de fonctions **************************************/
- extern void Lire_config ( void );
+ extern void Lire_config ( int argc, char *argv[] );
  extern void Print_config ( void );
 #endif
 
