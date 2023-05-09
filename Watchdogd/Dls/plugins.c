@@ -285,13 +285,6 @@
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = plugin->Dls_data_MESSAGE;                                             /* Decharge tous les messages du module */
-    while(liste_bit)
-     { struct DLS_MESSAGE *msg = liste_bit->data;
-       Dls_data_set_MESSAGE ( &plugin->vars, msg, FALSE );
-       liste_bit = g_slist_next(liste_bit);
-     }
-
     liste_bit = plugin->Dls_data_MONO;                                             /* Decharge tous les monostables du module */
     while(liste_bit)
      { struct DLS_MONO *mono = liste_bit->data;

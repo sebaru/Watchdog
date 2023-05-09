@@ -36,8 +36,8 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
 
 /******************************************************************************************************************************/
-/* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                        */
-/* Entrée: d'abord le fichier de config, puis l'environnements, puis les options en lignes de commandes                       */
+/* Lire_config : Lit la config Watchdog et remplit la structure mémoire                                                       */
+/* Entrée: d'abord le fichier de config, puis l'environnement, puis les options en ligne de commandes                         */
 /* Sortie: Mise à jour de la structure de configuration                                                                       */
 /******************************************************************************************************************************/
  void Lire_config ( int argc, char *argv[] )
