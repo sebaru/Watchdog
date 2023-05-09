@@ -681,7 +681,6 @@ end:
 
 /*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
           if (Partage->com_msrv.API_ws_messages) MSRV_handle_API_messages();
-          usleep(1000);
           sched_yield();
         }
      }

@@ -38,49 +38,33 @@
 /******************************************************************************************************************************/
  void Gerer_arrive_Axxx_dls ( void )
   { JsonNode *RootNode;
-    gint reste;
+    gint cpt;
 
-    if (!Partage->com_msrv.Liste_DO) goto suite_AO;                                               /* Si pas de a, on se barre */
+    cpt=0;
+    while ( Partage->com_msrv.Liste_DO && cpt < 50 )
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
+       RootNode = Partage->com_msrv.Liste_DO->data;                                               /* Recuperation du numero de a */
+       Partage->com_msrv.Liste_DO = g_slist_remove ( Partage->com_msrv.Liste_DO, RootNode );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-    struct DLS_DO *dout = Partage->com_msrv.Liste_DO->data;                                    /* Recuperation du numero de a */
-    Partage->com_msrv.Liste_DO = g_slist_remove ( Partage->com_msrv.Liste_DO, dout );
-    reste = g_slist_length(Partage->com_msrv.Liste_DO);
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending SET_DO '%s':'%s' to Slave/Bus (reste %d)",
-              dout->tech_id, dout->acronyme, reste );
-
-    RootNode = Json_node_create ();
-    if (!RootNode)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
-       goto suite_AO;
-     }
-    Dls_DO_to_json ( RootNode, dout );
-    Json_node_add_string ( RootNode, "tag", "SET_DO" );
-    if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( NULL, RootNode );
-
-    Json_node_unref ( RootNode );
-
-
-suite_AO:
-    if (!Partage->com_msrv.Liste_AO) return;                                                      /* Si pas de a, on se barre */
-    pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-    struct DLS_AO *ao = Partage->com_msrv.Liste_AO->data;                                      /* Recuperation du numero de a */
-    Partage->com_msrv.Liste_AO = g_slist_remove ( Partage->com_msrv.Liste_AO, ao );
-    reste = g_slist_length(Partage->com_msrv.Liste_AO);
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending SET_AO '%s':'%s' = %f to Slave/Bus (reste %d)",
-              ao->tech_id, ao->acronyme, ao->valeur, reste );
-
-    RootNode = Json_node_create ();
-    if (RootNode)
-     { Dls_AO_to_json ( RootNode, ao );
-       Json_node_add_string ( RootNode, "tag", "SET_AO" );
-       Http_Send_to_slaves ( NULL, RootNode );
+       Json_node_add_string ( RootNode, "tag", "SET_DO" );
+       if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( NULL, RootNode );
        Json_node_unref ( RootNode );
+       cpt++;
      }
-    else { Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" ); }
+
+    cpt=0;
+    while ( Partage->com_msrv.Liste_DO && cpt < 50 )
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
+       RootNode = Partage->com_msrv.Liste_AO->data;                                            /* Recuperation du numero de a */
+       Partage->com_msrv.Liste_AO = g_slist_remove ( Partage->com_msrv.Liste_AO, RootNode );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+
+       Json_node_add_string ( RootNode, "tag", "SET_AO" );
+       if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( NULL, RootNode );
+       Json_node_unref ( RootNode );
+       cpt++;
+     }
+
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -97,9 +97,14 @@
                  "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
                  (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, etat );
 
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                          /* Envoie au MSRV pour dispatch aux threads */
-       Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Dls_DO_to_json ( RootNode, dout );
+          pthread_mutex_lock( &Partage->com_msrv.synchro );                       /* Envoie au MSRV pour dispatch aux threads */
+          Partage->com_msrv.Liste_DO = g_slist_append ( Partage->com_msrv.Liste_DO, dout );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+        }
+       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
        Partage->audit_bit_interne_per_sec++;
      }
     dout->etat = etat;
