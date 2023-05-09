@@ -54,7 +54,7 @@
      }
 
     cpt=0;
-    while ( Partage->com_msrv.Liste_DO && cpt < 50 )
+    while ( Partage->com_msrv.Liste_AO && cpt < 50 )
      { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
        RootNode = Partage->com_msrv.Liste_AO->data;                                            /* Recuperation du numero de a */
        Partage->com_msrv.Liste_AO = g_slist_remove ( Partage->com_msrv.Liste_AO, RootNode );
