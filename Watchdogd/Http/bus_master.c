@@ -29,29 +29,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
-/* Entrée: des infos sur le paquet à envoyer                                                                                  */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_ws_send_to_client ( struct WS_CLIENT_SESSION *client, JsonNode *node )
-  { gchar *buf = Json_node_to_string ( node );
-    soup_websocket_connection_send_text ( client->connexion, buf );
-    g_free(buf);
-  }
-/******************************************************************************************************************************/
-/* Envoyer_un_cadran: Envoi un update cadran au client                                                                        */
-/* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void HTTP_CADRAN_to_json ( JsonNode *node, struct HTTP_CADRAN *http_cadran )
-  { Json_node_add_string ( node, "tech_id",  http_cadran->tech_id );
-    Json_node_add_string ( node, "acronyme", http_cadran->acronyme );
-    Json_node_add_string ( node, "classe",   http_cadran->classe );
-    Json_node_add_bool   ( node, "in_range", http_cadran->in_range );
-    Json_node_add_double ( node, "valeur",   http_cadran->valeur );
-    Json_node_add_string ( node, "unite",    http_cadran->unite );
-  }
-/******************************************************************************************************************************/
 /* Http_ws_on_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket                              */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
@@ -99,41 +76,6 @@
     if (!client->http_session)
      { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Not authorized !" ); }
     Json_node_unref(response);
-  }
-/******************************************************************************************************************************/
-/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_Envoyer_les_cadrans ( void )
-  { pthread_mutex_lock( &Partage->com_http.synchro );
-    GSList *sessions = Partage->com_http.liste_http_clients;
-    while ( sessions )
-     { struct HTTP_CLIENT_SESSION *session = sessions->data;
-       GSList *cadrans = session->Liste_bit_cadrans;
-       while ( cadrans )
-        { struct HTTP_CADRAN *cadran = cadrans->data;
-          if (cadran->last_update + 10 <= Partage->top)
-           { GSList *clients = session->liste_ws_clients;
-             JsonNode *RootNode = Json_node_create();
-             if (RootNode)
-              { Http_Formater_cadran ( cadran );
-                Json_node_add_string ( RootNode, "zmq_tag", "DLS_CADRAN" );
-                HTTP_CADRAN_to_json ( RootNode, cadran );
-                while (clients)
-                 { struct WS_CLIENT_SESSION *client = clients->data;
-                   Http_ws_send_to_client ( client, RootNode );
-                   clients = g_slist_next(clients);
-                 }
-                Json_node_unref( RootNode );
-              }
-             cadran->last_update = Partage->top;
-           }
-          cadrans = g_slist_next(cadrans);
-        }
-       sessions = g_slist_next(sessions);
-     }
-    pthread_mutex_unlock( &Partage->com_http.synchro );
   }
 /******************************************************************************************************************************/
 /* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
