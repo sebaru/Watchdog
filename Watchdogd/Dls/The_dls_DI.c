@@ -131,7 +131,7 @@
      { tech_id  = Json_get_string ( request, "tech_id" );
        acronyme = Json_get_string ( request, "acronyme" );
      }
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI from '%s': '%s:%s/'%s:%s'=%d (%s)",
+    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI from '%s': '%s:%s'/'%s:%s'=%d (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_bool ( request, "etat" ), libelle );
     struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );

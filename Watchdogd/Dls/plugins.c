@@ -211,9 +211,8 @@
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%s.so", plugin->tech_id );
 
-    if (plugin->handle)                                                                     /* Si deja chargé, on le décharge */
-     { if(plugin->go && plugin->enable) { plugin->go = NULL; sleep(1); }      /* Si le plugin tourne, on le sort de la boucle */
-       if (dlclose( plugin->handle ))
+    if (plugin->handle)                                /* Si deja chargé, on le décharge. A ce niveau, dls est stoppé (mutex) */
+     { if (dlclose( plugin->handle ))
         { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s': dlclose error '%s' (%s)",
                     plugin->tech_id, dlerror(), plugin->shortname );
         }

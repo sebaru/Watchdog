@@ -64,5 +64,5 @@ systemctl start Watchdogd
 #      echo "Pour lancer Watchdog, tapez 'systemctl --user enable Watchdogd-user --now'"
 
   echo "Installation terminée.\n"
-  echo "Pour linker l'agent, utilisez Watchdogd --link --domain-uuid 'domain_uuid', --domain-secret 'domain_secret'\n"
+  echo "Pour linker l'agent, utilisez Watchdogd --save --domain-uuid 'domain_uuid', --domain-secret 'domain_secret'\n"
   echo "Ou utiliser la console https://console.abls-habitat.fr/agent/add pour vous guider\n"
