@@ -71,13 +71,77 @@
     return(comment);
   }
 /******************************************************************************************************************************/
-/* Normaliser_as_ascii: S'assure que la chaine en parametre respecte les caracteres d'un tech_id                              */
-/* Entrées: une chaine de caractere                                                                                           */
-/* Sortie: la meme chaine, avec les caracteres interdits remplacés ar '_'                                                     */
+/* Recuperer_ligne_SQL: Renvoie les lignes resultat, une par une                                                              */
+/* Entrée: la DB                                                                                                              */
+/* Sortie: La ligne ou NULL si il n'y en en plus                                                                              */
 /******************************************************************************************************************************/
- gchar *Normaliser_as_ascii( gchar *chaine )
-  { if (!chaine) return(NULL);
-    return ( g_strcanon ( chaine, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_", '_' ) );
+ MYSQL_ROW Recuperer_ligne_SQL ( struct DB *db )
+  { if (!db) return(NULL);
+    db->row = mysql_fetch_row(db->result);
+    return( db->row );
+  }
+/******************************************************************************************************************************/
+/* Liberer_resultat_SQL: Libere la mémoire affectée au resultat SQL                                                           */
+/* Entrée: la DB                                                                                                              */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Liberer_resultat_SQL ( struct DB *db )
+  { if (!db) return;
+encore:
+    while( db->row ) Recuperer_ligne_SQL ( db );
+    mysql_free_result( db->result );
+    if (db->multi_statement)
+     { if (mysql_next_result(db->mysql)==0)
+        { db->result = mysql_store_result(db->mysql);
+          Recuperer_ligne_SQL ( db );
+          goto encore;
+        }
+     }
+    db->result = NULL;
+    db->free = TRUE;
+  }
+/******************************************************************************************************************************/
+/* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
+/* Entrée: La DB                                                                                                              */
+/******************************************************************************************************************************/
+ void Libere_DB_SQL( struct DB **adr_db )
+  { /*static struct DLS_AI *ai_nbr_dbrequest = NULL;*/
+    struct DB *db, *db_en_cours;
+    gboolean found;
+    GSList *liste;
+    gint taille;
+    if ( (!adr_db) || !(*adr_db) ) return;
+
+    db = *adr_db;                                                                       /* Récupération de l'adresse de la db */
+    found = FALSE;
+    pthread_mutex_lock ( &Partage->com_db.synchro );
+    liste = Partage->com_db.Liste;
+    while ( liste )
+     { db_en_cours = (struct DB *)liste->data;
+       if (db_en_cours->id == db->id) found = TRUE;
+       liste = g_slist_next( liste );
+     }
+    pthread_mutex_unlock ( &Partage->com_db.synchro );
+
+    if (!found)
+     { Info_new( __func__, Config.log_db, LOG_CRIT,
+                "Libere_DB_SQL: DB Free Request not in list ! DB%07d, request=%s",
+                 db->id, db->requete );
+       return;
+     }
+
+    if (db->free==FALSE)
+     { Liberer_resultat_SQL ( db ); }
+    mysql_close( db->mysql );
+    pthread_mutex_lock ( &Partage->com_db.synchro );
+    Partage->com_db.Liste = g_slist_remove ( Partage->com_db.Liste, db );
+    taille = g_slist_length ( Partage->com_db.Liste );
+    pthread_mutex_unlock ( &Partage->com_db.synchro );
+    Info_new( __func__, Config.log_db, LOG_DEBUG,
+             "Libere_DB_SQL: Deconnexion effective (DB%07d), Nbr_requete_en_cours=%d", db->id, taille );
+    g_free( db );
+    *adr_db = NULL;
+/*    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, (gdouble)taille, TRUE );*/
   }
 /******************************************************************************************************************************/
 /* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
@@ -238,196 +302,6 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
-/* Entrée: La DB, la requete                                                                                                  */
-/* Sortie: TRUE si pas de souci                                                                                               */
-/******************************************************************************************************************************/
- gboolean SQL_Write ( gchar *requete )
-  { struct DB *db = Init_DB_SQL ();
-    if (!db)
-     { Info_new( __func__, Config.log_db, LOG_ERR, "Init DB FAILED for '%s'", requete );
-       return(FALSE);
-     }
-
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( __func__, Config.log_db, LOG_ERR, "FAILED (%s) for '%s'", (char *)mysql_error(db->mysql), requete );
-       Libere_DB_SQL ( &db );
-       return(FALSE);
-     }
-    else Info_new( __func__, Config.log_db, LOG_DEBUG, "DB OK for '%s'", requete );
-
-    Libere_DB_SQL ( &db );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* SQL_Write_new: Envoie une requete en parametre au serveur de base de données                                               */
-/* Entrée: le format de la requete, ainsi que tous les parametres associés                                                    */
-/******************************************************************************************************************************/
- gboolean SQL_Write_new( gchar *format, ... )
-  { gboolean retour = FALSE;
-    va_list ap;
-
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    va_start( ap, format );
-    gsize taille = g_printf_string_upper_bound (format, ap);
-    va_end ( ap );
-    gchar *chaine = g_try_malloc(taille+1);
-    if (chaine)
-     { va_start( ap, format );
-       g_vsnprintf ( chaine, taille, format, ap );
-       va_end ( ap );
-       retour = SQL_Write ( chaine );
-       g_free(chaine);
-     }
-    return(retour);
-  }
-/******************************************************************************************************************************/
-/* SQL_Select_to_JSON : lance une requete en parametre, sur la structure de reférence                                         */
-/* Entrée: La DB, la requete                                                                                                  */
-/* Sortie: TRUE si pas de souci                                                                                               */
-/******************************************************************************************************************************/
- gboolean SQL_Writes ( gchar *requete )
-  { struct DB *db = Init_DB_SQL_with ( Config.db_hostname, Config.db_username,
-                                       Config.db_password, Config.db_database, Config.db_port, TRUE );
-    if (!db)
-     { Info_new( __func__, Config.log_db, LOG_ERR, "Init DB FAILED for '%s'", requete );
-       return(FALSE);
-     }
-
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( __func__, Config.log_db, LOG_ERR, "FAILED (%s) for '%s'", (char *)mysql_error(db->mysql), requete );
-       Libere_DB_SQL ( &db );
-       return(FALSE);
-     }
-    else Info_new( __func__, Config.log_db, LOG_DEBUG, "DB OK for '%s'", requete );
-
-    Libere_DB_SQL ( &db );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
-/* Entrée: La DB                                                                                                              */
-/******************************************************************************************************************************/
- void Libere_DB_SQL( struct DB **adr_db )
-  { /*static struct DLS_AI *ai_nbr_dbrequest = NULL;*/
-    struct DB *db, *db_en_cours;
-    gboolean found;
-    GSList *liste;
-    gint taille;
-    if ( (!adr_db) || !(*adr_db) ) return;
-
-    db = *adr_db;                                                                       /* Récupération de l'adresse de la db */
-    found = FALSE;
-    pthread_mutex_lock ( &Partage->com_db.synchro );
-    liste = Partage->com_db.Liste;
-    while ( liste )
-     { db_en_cours = (struct DB *)liste->data;
-       if (db_en_cours->id == db->id) found = TRUE;
-       liste = g_slist_next( liste );
-     }
-    pthread_mutex_unlock ( &Partage->com_db.synchro );
-
-    if (!found)
-     { Info_new( __func__, Config.log_db, LOG_CRIT,
-                "Libere_DB_SQL: DB Free Request not in list ! DB%07d, request=%s",
-                 db->id, db->requete );
-       return;
-     }
-
-    if (db->free==FALSE)
-     { Liberer_resultat_SQL ( db ); }
-    mysql_close( db->mysql );
-    pthread_mutex_lock ( &Partage->com_db.synchro );
-    Partage->com_db.Liste = g_slist_remove ( Partage->com_db.Liste, db );
-    taille = g_slist_length ( Partage->com_db.Liste );
-    pthread_mutex_unlock ( &Partage->com_db.synchro );
-    Info_new( __func__, Config.log_db, LOG_DEBUG,
-             "Libere_DB_SQL: Deconnexion effective (DB%07d), Nbr_requete_en_cours=%d", db->id, taille );
-    g_free( db );
-    *adr_db = NULL;
-/*    Dls_data_set_AI ( "SYS", "DB_NBR_REQUEST", (gpointer)&ai_nbr_dbrequest, (gdouble)taille, TRUE );*/
-  }
-/******************************************************************************************************************************/
-/* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */
-/* Entrée: La DB, la requete                                                                                                  */
-/* Sortie: TRUE si pas de souci                                                                                               */
-/******************************************************************************************************************************/
- gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete )
-  { gint top;
-    if (!db) return(FALSE);
-
-    if (db->free==FALSE)
-     { Info_new( __func__, Config.log_db, LOG_WARNING,
-                "Lancer_requete_SQL (DB%07d): Reste un result a FREEer!", db->id );
-     }
-
-    g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                                      /* Save for later use */
-    Info_new( __func__, Config.log_db, LOG_DEBUG,
-             "Lancer_requete_SQL (DB%07d): NEW    (%s)", db->id, requete );
-    top = Partage->top;
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( __func__, Config.log_db, LOG_WARNING,
-                "(DB%07d): FAILED (%s) for '%s'", db->id, (char *)mysql_error(db->mysql), requete );
-       return(FALSE);
-     }
-
-    if ( ! strncmp ( requete, "SELECT", 6 ) )
-     { db->result = mysql_store_result ( db->mysql );
-       db->free = FALSE;
-       if ( ! db->result )
-        { Info_new( __func__, Config.log_db, LOG_WARNING,
-                   "(DB%07d): store_result failed (%s)", db->id, (char *) mysql_error(db->mysql) );
-          db->nbr_result = 0;
-        }
-       else
-        { /*Info( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK" );*/
-          db->nbr_result = mysql_num_rows ( db->result );
-        }
-     }
-    Info_new( __func__, Config.log_db, LOG_DEBUG,
-             "Lancer_requete_SQL (DB%07d): OK in %05.1fs", db->id, (Partage->top - top)/10.0 );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Liberer_resultat_SQL: Libere la mémoire affectée au resultat SQL                                                           */
-/* Entrée: la DB                                                                                                              */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Liberer_resultat_SQL ( struct DB *db )
-  { if (!db) return;
-encore:
-    while( db->row ) Recuperer_ligne_SQL ( db );
-    mysql_free_result( db->result );
-    if (db->multi_statement)
-     { if (mysql_next_result(db->mysql)==0)
-        { db->result = mysql_store_result(db->mysql);
-          Recuperer_ligne_SQL ( db );
-          goto encore;
-        }
-     }
-    db->result = NULL;
-    db->free = TRUE;
-  }
-/******************************************************************************************************************************/
-/* Recuperer_ligne_SQL: Renvoie les lignes resultat, une par une                                                              */
-/* Entrée: la DB                                                                                                              */
-/* Sortie: La ligne ou NULL si il n'y en en plus                                                                              */
-/******************************************************************************************************************************/
- MYSQL_ROW Recuperer_ligne_SQL ( struct DB *db )
-  { if (!db) return(NULL);
-    db->row = mysql_fetch_row(db->result);
-    return( db->row );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_last_ID_SQL: Renvoie le dernier ID inséré                                                                        */
-/* Entrée: la DB                                                                                                              */
-/* Sortie: Le dernier ID                                                                                                      */
-/******************************************************************************************************************************/
- guint Recuperer_last_ID_SQL ( struct DB *db )
-  { if (!db) return(0);
-    return ( mysql_insert_id(db->mysql) );
-  }
-/******************************************************************************************************************************/
 /* Print_SQL_status : permet de logguer le statut SQL                                                                         */
 /* Entrée: néant                                                                                                              */
 /* Sortie: néant                                                                                                              */
@@ -449,329 +323,5 @@ encore:
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock ( &Partage->com_db.synchro );
-  }
-/******************************************************************************************************************************/
-/* SQL_read_from_file : Lance une requete SQL a partir d'un fichier                                                           */
-/* Entrée: le nom de fichier sans le directory                                                                                */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- gchar *SQL_Read_from_file ( gchar *file )
-  { struct stat stat_buf;
-    Info_new( __func__, Config.log_db, LOG_NOTICE, "Loading DB %s", file );
-    gchar filename[256];
-    g_snprintf ( filename, sizeof(filename), "%s/%s", WTD_PKGDATADIR, file );
-
-    if (stat ( filename, &stat_buf)==-1)
-     { Info_new( __func__, Config.log_db, LOG_NOTICE, "Stat DB Error for %s", filename );
-       return(FALSE);
-     }
-
-    gchar *db_content = g_try_malloc0 ( stat_buf.st_size+1 );
-    if (!db_content)
-     { Info_new( __func__, Config.log_db, LOG_NOTICE, "Memory DB Error for %s", filename );
-       return(FALSE);
-     }
-
-    gint fd = open ( filename, O_RDONLY );
-    if (!fd)
-     { Info_new( __func__, Config.log_db, LOG_NOTICE, "Open DB Error for %s", filename );
-       g_free(db_content);
-       return(FALSE);
-     }
-    if (read ( fd, db_content, stat_buf.st_size ) != stat_buf.st_size)
-     { Info_new( __func__, Config.log_db, LOG_NOTICE, "Read DB Error for %s", filename );
-       g_free(db_content);
-       return(FALSE);
-     }
-    close(fd);
-    return(db_content);
-  }
-/******************************************************************************************************************************/
-/* Update_database_schema: Vérifie la connexion et le schéma de la base de données                                            */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Update_database_schema ( void )
-  { gchar requete[4096];
-    struct DB *db;
-
-    if (Config.instance_is_master != TRUE)                                                  /* Do not update DB if not master */
-     { Info_new( __func__, Config.log_db, LOG_WARNING,
-                "Instance is not master. Don't update schema." );
-       return;
-     }
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_DI` ("
-                   "`mnemos_DI_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
-                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
-                   "UNIQUE (`tech_id`,`acronyme`),"
-                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_DO` ("
-                   "`mnemos_DO_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
-                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`etat` BOOLEAN NOT NULL DEFAULT '0',"
-                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
-                   "UNIQUE (`tech_id`,`acronyme`),"
-                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_AI` ("
-                   "`mnemos_AI_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`deletable` BOOLEAN NOT NULL DEFAULT '1',"
-                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
-                   "`valeur` FLOAT NOT NULL DEFAULT '0',"
-                   "`archivage` INT(11) NOT NULL DEFAULT '2',"
-                   "`in_range` BOOLEAN NOT NULL DEFAULT '0',"
-                   "UNIQUE (`tech_id`,`acronyme`),"
-                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mappings` ("
-                   "`mappings_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`classe` VARCHAR(32) NULL DEFAULT NULL,"
-                   "`thread_tech_id` VARCHAR(32) NOT NULL,"
-                   "`thread_acronyme` VARCHAR(64) NOT NULL,"
-                   "`tech_id` VARCHAR(32) NULL DEFAULT NULL,"
-                   "`acronyme` VARCHAR(64) NULL DEFAULT NULL,"
-                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
-                   "UNIQUE (`thread_tech_id`,`thread_acronyme`),"
-                   "UNIQUE (`tech_id`,`acronyme`),"
-                   "UNIQUE (`thread_tech_id`,`thread_acronyme`,`tech_id`,`acronyme`),"
-                   "FOREIGN KEY (`tech_id`,`acronyme`) REFERENCES `mnemos_DI` (`tech_id`,`acronyme`) ON DELETE SET NULL ON UPDATE CASCADE"
-                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci AUTO_INCREMENT=1;");
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `syns` ("
-                   "`syn_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                   "`parent_id` INT(11) NOT NULL,"
-                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`image` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'syn_maison.png',"
-                   "`page` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
-                   "`access_level` INT(11) NOT NULL DEFAULT '0',"
-                   "`mode_affichage` BOOLEAN NOT NULL DEFAULT '0',"
-                   "FOREIGN KEY (`parent_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
-
-    SQL_Write_new ("INSERT IGNORE INTO `syns` (`syn_id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES"
-                   "(1, 1, 'Accueil', 'DEFAULT_PAGE', 0);");
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `dls` ("
-                   "`dls_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                   "`is_thread` tinyint(1) NOT NULL DEFAULT '0',"
-                   "`tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
-                   "`package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'custom',"
-                   "`syn_id` INT(11) NOT NULL DEFAULT '0',"
-                   "`name` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`shortname` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`actif` tinyint(1) NOT NULL DEFAULT '0',"
-                   "`compil_date` DATETIME NOT NULL DEFAULT NOW(),"
-                   "`compil_status` INT(11) NOT NULL DEFAULT '0',"
-                   "`nbr_compil` INT(11) NOT NULL DEFAULT '0',"
-                   "`sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '/* Default ! */',"
-                   "`errorlog` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No Error',"
-                   "`nbr_ligne` INT(11) NOT NULL DEFAULT '0',"
-                   "`debug` BOOLEAN NOT NULL DEFAULT '0',"
-                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
-
-    SQL_Write_new ("INSERT IGNORE INTO `dls` (`dls_id`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES "
-                   "(1, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);");
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `mnemos_VISUEL` ("
-                   "`mnemos_VISUEL_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                   "`forme` VARCHAR(80) NOT NULL DEFAULT 'unknown',"
-                   "`mode`  VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
-                   "`color` VARCHAR(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'gray',"
-                   "`libelle` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`access_level` INT(11) NOT NULL DEFAULT '0',"
-                   "UNIQUE (`tech_id`, `acronyme`),"
-                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
-
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `syns_visuels` ("
-                   "`visuel_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`mnemo_id` INT(11) NOT NULL,"
-                   "`dls_id` INT(11) NOT NULL,"
-                   "`rafraich` INT(11) NOT NULL DEFAULT '0',"
-                   "`posx` INT(11) NOT NULL DEFAULT '0',"
-                   "`posy` INT(11) NOT NULL DEFAULT '0',"
-                   "`larg` INT(11) NOT NULL DEFAULT '0',"
-                   "`haut` INT(11) NOT NULL DEFAULT '0',"
-                   "`angle` INT(11) NOT NULL DEFAULT '0',"
-                   "`scale` FLOAT NOT NULL DEFAULT '1.0',"
-                   "`dialog` INT(11) NOT NULL DEFAULT '0',"
-                   "`gestion` INT(11) NOT NULL DEFAULT '0',"
-                   "`groupe` INT(11) NOT NULL DEFAULT '0',"
-                   "UNIQUE (`dls_id`, `mnemo_id`),"
-                   "FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos_VISUEL` (`mnemos_VISUEL_id`) ON DELETE CASCADE ON UPDATE CASCADE,"
-                   "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`dls_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
-
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `tableau` ("
-                   "`tableau_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`date_create` DATETIME NOT NULL DEFAULT NOW(),"
-                   "`titre` VARCHAR(128) UNIQUE NOT NULL,"
-                   "`syn_id` INT(11) NOT NULL,"
-                   "FOREIGN KEY (`syn_id`) REFERENCES `syns` (`syn_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `msgs` ("
-                   "`msg_id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`deletable` tinyint(1) NOT NULL DEFAULT '1',"
-                   "`tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
-                   "`libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No libelle',"
-                   "`typologie` INT(11) NOT NULL DEFAULT '0',"
-                   "`rate_limit` INT(11) NOT NULL DEFAULT '0',"
-                   "`sms_notification` INT(11) NOT NULL DEFAULT '0',"
-                   "`audio_profil` VARCHAR(80) NOT NULL DEFAULT 'P_NONE',"
-                   "`audio_libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                   "`etat` tinyint(1) NOT NULL DEFAULT '0',"
-                   "`groupe` INT(11) NOT NULL DEFAULT '0',"
-                   "UNIQUE(`tech_id`,`acronyme`),"
-                   "FOREIGN KEY (`tech_id`) REFERENCES `dls` (`tech_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;");
-
-
-    SQL_Write_new ("CREATE TABLE IF NOT EXISTS `histo_msgs` ("
-                   "`id` INT(11) PRIMARY KEY AUTO_INCREMENT,"
-                   "`msg_id` INT(11) NOT NULL DEFAULT '0',"
-                   "`alive` BOOLEAN NULL DEFAULT NULL,"
-                   "`nom_ack` VARCHAR(97) COLLATE utf8_unicode_ci DEFAULT NULL,"
-                   "`date_create` DATETIME(2) NULL,"
-                   "`date_fixe` DATETIME(2) NULL,"
-                   "`date_fin` DATETIME(2) NULL,"
-                   "`libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL,"
-                   "UNIQUE (`msg_id`,`alive`),"
-                   "KEY `date_create` (`date_create`),"
-                   "KEY `alive` (`alive`),"
-                   "FOREIGN KEY (`msg_id`) REFERENCES `msgs` (`msg_id`) ON DELETE CASCADE ON UPDATE CASCADE"
-                   ") ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
-
-    JsonNode *RootNode = Json_node_create();
-    if (!RootNode)
-     { Info_new( __func__, Config.log_db, LOG_WARNING, "Memory error. Don't update schema." );
-       return;
-     }
-    SQL_Select_to_json_node ( RootNode, NULL, "SELECT database_version FROM instances WHERE instance='%s'", g_get_host_name() );
-    gint database_version;
-    if (Json_has_member ( RootNode, "database_version" ) )
-         { database_version = Json_get_int ( RootNode, "database_version" ); }
-    else { database_version = 0; }
-    Json_node_unref(RootNode);
-
-    Info_new( __func__, Config.log_db, LOG_NOTICE,
-             "Actual Database_Version detected = %05d. Please wait while upgrading.", database_version );
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( __func__, Config.log_db, LOG_ERR, "DB connexion failed" );
-       return;
-     }
-
-    if (database_version==0) goto fin;
-
-    if (database_version < 6093)
-     { SQL_Write_new ("ALTER TABLE mnemos_DO       CHANGE `id`     `mnemos_DO_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_DI       CHANGE `id`     `mnemos_DI_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_AI       CHANGE `id`     `mnemos_AI_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_AO       CHANGE `id`     `mnemos_AO_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mappings        CHANGE `id_map` `mappings_id` INT(11) NOT NULL AUTO_INCREMENT" );
-     }
-
-    if (database_version < 6094)
-     { SQL_Write_new ("ALTER TABLE dls             CHANGE `id`     `dls_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE syns            CHANGE `id`     `syn_id` INT(11) NOT NULL AUTO_INCREMENT" );
-     }
-
-    if (database_version < 6096)
-     { SQL_Write_new ("ALTER TABLE mnemos_DO       CHANGE `mnemos_DO_id`     `mnemo_DO_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_DI       CHANGE `mnemos_DI_id`     `mnemo_DI_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_AI       CHANGE `mnemos_AI_id`     `mnemo_AI_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_AO       CHANGE `mnemos_AO_id`     `mnemo_AO_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE msgs            CHANGE `id`     `msg_id` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE histo_msgs      CHANGE `id_msg` `msg_id` INT(11) NOT NULL" );
-       SQL_Write_new ("ALTER TABLE tableau         CHANGE `id`     `tableau_id` INT(11) NOT NULL AUTO_INCREMENT" );
-     }
-
-    if (database_version < 6097)
-     { SQL_Write_new ("ALTER TABLE mnemos_AI ADD `in_range` BOOLEAN NOT NULL DEFAULT '0'"); }
-/* a prévoir:
-       SQL_Write_new ("ALTER TABLE mnemos_BI       CHANGE `id`     `id_mnemos_BI` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_MONO     CHANGE `id`     `id_mnemos_MONO` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_CH       CHANGE `id`     `id_mnemos_CH` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_CI       CHANGE `id`     `id_mnemos_CI` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_HORLOGE  CHANGE `id`     `id_mnemos_HORLOGE` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_Tempos   CHANGE `id`     `id_mnemos_Tempo` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_R        CHANGE `id`     `id_mnemos_R` INT(11) NOT NULL AUTO_INCREMENT" );
-       SQL_Write_new ("ALTER TABLE mnemos_WATCHDOG CHANGE `id`     `id_mnemos_WATCHDOG` INT(11) NOT NULL AUTO_INCREMENT" );
-       "SELECT id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_VISUEL UNION "
-       "SELECT id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
-*/
-
-fin:
-    database_version = 6097;
-
-    g_snprintf( requete, sizeof(requete), "CREATE OR REPLACE VIEW db_status AS SELECT "
-                                          "(SELECT COUNT(*) FROM syns) AS nbr_syns, "
-                                          "(SELECT COUNT(*) FROM syns_visuels) AS nbr_syns_visuels, "
-                                          "(SELECT COUNT(*) FROM syns_liens) AS nbr_syns_liens, "
-                                          "(SELECT COUNT(*) FROM dls) AS nbr_dls, "
-                                          "(SELECT COUNT(*) FROM mnemos_DI) AS nbr_dls_di, "
-                                          "(SELECT COUNT(*) FROM mnemos_DO) AS nbr_dls_do, "
-                                          "(SELECT COUNT(*) FROM mnemos_AI) AS nbr_dls_ai, "
-                                          "(SELECT COUNT(*) FROM mnemos_AO) AS nbr_dls_ao, "
-                                          "(SELECT COUNT(*) FROM mnemos_BI) AS nbr_dls_bi, "
-                                          "(SELECT COUNT(*) FROM mnemos_MONO) AS nbr_dls_mono, "
-                                          "(SELECT SUM(dls.nbr_ligne) FROM dls) AS nbr_dls_lignes, "
-                                          "(SELECT COUNT(*) FROM users) AS nbr_users, "
-                                          "(SELECT COUNT(*) FROM msgs) AS nbr_msgs, "
-                                          "(SELECT COUNT(*) FROM histo_msgs) AS nbr_histo_msgs, "
-                                          "(SELECT COUNT(*) FROM audit_log) AS nbr_audit_log" );
-    Lancer_requete_SQL ( db, requete );
-
-    g_snprintf( requete, sizeof(requete),
-       "CREATE OR REPLACE VIEW dictionnaire AS "
-       "SELECT dls_id,'DLS' AS classe, -1 AS classe_int,tech_id,shortname as acronyme,name as libelle, 'none' as unite FROM dls UNION "
-       "SELECT syn_id,'SYNOPTIQUE' AS classe, -1 AS classe_int,page as tech_id, NULL as acronyme,libelle, 'none' as unite FROM syns UNION "
-       "SELECT mnemo_AI_id,'AI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_AI UNION "
-       "SELECT mnemo_DI_id,'DI' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DI UNION "
-       "SELECT mnemo_DO_id,'DO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_DO UNION "
-       "SELECT mnemo_AO_id,'AO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_AO UNION "
-       "SELECT id,'BI' AS classe, 0 AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_BI UNION "
-       "SELECT id,'MONO' AS classe, 1 AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_MONO UNION "
-       "SELECT id,'CH' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_CH UNION "
-       "SELECT id,'CI' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_CI UNION "
-       "SELECT id,'HORLOGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_HORLOGE UNION "
-       "SELECT id,'TEMPO' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'boolean' as unite FROM mnemos_Tempo UNION "
-       "SELECT id,'REGISTRE' AS classe, %d AS classe_int,tech_id,acronyme,libelle,unite FROM mnemos_R UNION "
-       "SELECT id,'VISUEL' AS classe, -1 AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM mnemos_VISUEL UNION "
-       "SELECT id,'WATCHDOG' AS classe, %d AS classe_int,tech_id,acronyme,libelle, '1/10 secondes' as unite FROM mnemos_WATCHDOG UNION "
-       "SELECT tableau_id,'TABLEAU' AS classe, -1 AS classe_int, NULL AS tech_id, NULL AS acronyme, titre AS libelle, 'none' as unite FROM tableau UNION "
-       "SELECT msg_id,'MESSAGE' AS classe, %d AS classe_int,tech_id,acronyme,libelle, 'none' as unite FROM msgs",
-        MNEMO_ENTREE_ANA, MNEMO_ENTREE, MNEMO_SORTIE, MNEMO_SORTIE_ANA, MNEMO_CPTH, MNEMO_CPT_IMP, MNEMO_HORLOGE,
-        MNEMO_TEMPO, MNEMO_REGISTRE, MNEMO_WATCHDOG, MNEMO_MSG
-      );
-    Lancer_requete_SQL ( db, requete );
-    Libere_DB_SQL(&db);
-
-    if (SQL_Write_new ( "UPDATE instances SET database_version='%d' WHERE instance='%s'", database_version, g_get_host_name() ))
-     { Info_new( __func__, Config.log_db, LOG_NOTICE, "updating Database_version to %d OK", database_version ); }
-    else
-     { Info_new( __func__, Config.log_db, LOG_NOTICE, "updating Database_version to %d FAILED", database_version ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

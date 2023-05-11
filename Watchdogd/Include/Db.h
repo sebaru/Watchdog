@@ -47,21 +47,9 @@
   };
 /************************************* Prototypes de fonctions ********************************************/
  extern gchar *Normaliser_chaine( gchar *pre_comment );
- extern gchar *Normaliser_as_ascii( gchar *chaine );
  extern struct DB *Init_DB_SQL ( void );
- extern struct DB *Init_ArchDB_SQL ( void );
  extern struct DB *Init_DB_SQL_with ( gchar *host, gchar *username, gchar *password, gchar *database, guint port, gboolean multi_statements );
- extern void Libere_DB_SQL( struct DB **adr_db );
- extern gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete );
- extern MYSQL_ROW Recuperer_ligne_SQL ( struct DB *db );
- extern void Liberer_resultat_SQL ( struct DB *db );
- extern guint Recuperer_last_ID_SQL ( struct DB *db );
  extern void Print_SQL_status ( void );
- extern void Update_database_schema ( void );
  extern gboolean SQL_Select_to_json_node ( JsonNode *RootNode, gchar *array_name, gchar *format, ... );
- extern gboolean SQL_Write ( gchar *requete );
- extern gboolean SQL_Writes ( gchar *requete );
- extern gboolean SQL_Write_new( gchar *format, ... );
- extern gchar *SQL_Read_from_file ( gchar *file );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
