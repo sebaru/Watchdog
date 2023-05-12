@@ -317,9 +317,9 @@
     else if (!new_pid)
      { g_strcanon ( branche, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_", '_' );
        gchar chaine[256];
-       g_snprintf ( chaine, sizeof(chaine), "git clone -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
+       g_snprintf ( chaine, sizeof(chaine), "nice -20 git clone -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
        system(chaine);
-       system("cd temp_src; ./autogen.sh; sudo make install; cd ..; rm -rf temp_src;" );
+       system("cd temp_src; nice -20 ./autogen.sh; sudo make install; cd ..; rm -rf temp_src;" );
        Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
        kill (pid, SIGTERM);                                                                             /* Stop old processes */
        exit(0);
@@ -353,6 +353,7 @@
                                                             Thread_Start_one_thread ( NULL, 0, request, NULL );
                                                           }
     else if ( !strcasecmp( agent_tag, "THREAD_SEND") )    { Thread_Push_API_message ( request ); }
+    else if ( !strcasecmp( agent_tag, "THREAD_DEBUG") )   { Thread_Set_debug ( request ); }
     else if ( !strcasecmp( agent_tag, "AGENT_SET") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )

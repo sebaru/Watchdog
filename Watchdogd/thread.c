@@ -338,6 +338,43 @@
     pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
+/* Thread_Set_debug: Modifie le paramètre de debug du thread                                                                  */
+/* Entrée: L'element json decrivant la requete                                                                                */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Thread_Set_debug ( JsonNode *request )
+  { if (!request)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "request not provided" ); return; }
+
+    if (!Json_has_member ( request, "thread_tech_id" ))
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_tech_id' in request" ); return; }
+
+    if (!Json_has_member ( request, "debug" ))
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'debug' in request" ); return; }
+
+    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+
+    struct THREAD *module = NULL;
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    while(liste)
+     { struct THREAD *search_module = liste->data;
+       if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
+        { module = search_module;                                                        /* On demande au thread de s'arreter */
+          break;
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+
+    if (!module)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': thread not found", thread_tech_id ); return; }
+
+    gboolean debug = Json_get_bool ( request, "debug" );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "'%s': debug set to %d", thread_tech_id, debug );
+    module->Thread_debug = debug;
+  }
+/******************************************************************************************************************************/
 /* Thread_Stop_one_thread: Decharge un seul et unique thread                                                                  */
 /* Entrée: Le tech_id du thread                                                                                               */
 /* Sortie: Rien                                                                                                               */
