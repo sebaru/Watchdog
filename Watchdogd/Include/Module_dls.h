@@ -84,7 +84,6 @@
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gint    top;
-    gboolean etat;                                                                                      /* Etat actuel du bit */
   };
 
  struct DLS_HORLOGE

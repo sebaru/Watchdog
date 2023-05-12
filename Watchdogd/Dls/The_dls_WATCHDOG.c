@@ -95,8 +95,7 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_get_WATCHDOG ( struct DLS_WATCHDOG *bit )
   { if (!bit) return(FALSE);
-    bit->etat = (Partage->top < bit->top ? TRUE : FALSE);
-    return( bit->etat );
+    return( (Partage->top < bit->top ? TRUE : FALSE) ); /* False = Compteur échu */
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_WATHDOG_from_thread_watchdog: Positionne un Watchdog dans DLS depuis un Watchdog 'thread'                     */
@@ -128,7 +127,7 @@
  void Dls_WATCHDOG_to_json ( JsonNode *element, struct DLS_WATCHDOG *bit )
   { Json_node_add_string ( element, "tech_id",  bit->tech_id );
     Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat",     bit->etat );
+    Json_node_add_bool   ( element, "etat",     Dls_data_get_WATCHDOG (bit) );
     gint decompte = bit->top - Partage->top;
     Json_node_add_int    ( element, "decompte", (decompte > 0 ? decompte : 0) );
   }
