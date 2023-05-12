@@ -198,22 +198,6 @@
             );
     return(session);
   }
-/******************************************************************************************************************************/
-/* Http_print_request: affiche les données relatives à une requete                                                            */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- gboolean Http_check_session ( SoupServerMessage *msg, struct HTTP_CLIENT_SESSION *session, gint min_access_level )
-  { if (!session)
-     { soup_server_message_set_status (msg, SOUP_STATUS_FORBIDDEN, "Not Connected");
-       return(FALSE);
-     }
-
-    time(&session->last_request);
-    if (session->access_level>=min_access_level) return(TRUE);
-    soup_server_message_set_status (msg, SOUP_STATUS_FORBIDDEN, "Session Level forbidden");
-    return(FALSE);
-  }
 #warning a migrer coté API
 #ifdef bouh
     gpointer search_string = g_hash_table_lookup ( query, "search[value]" );
@@ -342,7 +326,6 @@
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "SSL Loaded with '%s' and '%s'", HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
 
-    soup_server_add_handler ( socket, "/api/dls/status" ,    Http_traiter_dls_status, NULL, NULL );
     soup_server_add_handler ( socket, "/api/connect",        Http_traiter_connect, NULL, NULL );
     soup_server_add_handler ( socket, "/api/disconnect",     Http_traiter_disconnect, NULL, NULL );
 
@@ -402,7 +385,6 @@
     while(Partage->com_http.Thread_run == TRUE)
      { sched_yield();
        usleep(1000);
-       Http_Envoyer_les_cadrans ();
 
        if ( Partage->top > last_pulse + 50 )
         { last_pulse = Partage->top;

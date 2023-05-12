@@ -95,9 +95,6 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_status ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
   {
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
-    if (!Http_check_session( msg, session, 6 )) return;
-
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *dls_status = Json_node_create ();
     if (dls_status == NULL)
@@ -105,7 +102,6 @@
        soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
-                                                                      /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
     JsonArray *plugins = Json_node_add_array ( dls_status, "plugins" );
     Dls_foreach_plugins ( plugins, Http_dls_do_plugin );

@@ -29,26 +29,6 @@
 
  #include "Module_dls.h"
 
- enum
-  { MNEMO_BISTABLE,                                                                   /* Definitions des types de mnemoniques */
-    MNEMO_MONOSTABLE,
-    MNEMO_TEMPO,
-    MNEMO_ENTREE,
-    MNEMO_SORTIE,
-    MNEMO_ENTREE_ANA,
-    MNEMO_SORTIE_ANA,
-    MNEMO_VISUEL,
-    MNEMO_CPTH,
-    MNEMO_CPT_IMP,
-    MNEMO_REGISTRE,
-    MNEMO_HORLOGE,
-    MNEMO_MSG,
-    MNEMO_BUS,
-    MNEMO_DIGITAL_OUTPUT,
-    MNEMO_WATCHDOG,
-    NBR_TYPE_MNEMO
-  };
-
  #define NBR_CARAC_TECHID     32
  #define NBR_CARAC_ACRONYME   64
  #define NBR_CARAC_UNITE      32

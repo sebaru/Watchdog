@@ -39,9 +39,7 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Http_traiter_syn_clic ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
-  { struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
-    if (!Http_check_session( msg, session, 0 )) return;
-    JsonNode *request = Http_Msg_to_Json ( msg );
+  { JsonNode *request = Http_Msg_to_Json ( msg );
     if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
@@ -60,99 +58,6 @@
     Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
   }
 /******************************************************************************************************************************/
-/* Formater_cadran: Formate la structure dédiée cadran pour envoi au client                                                   */
-/* Entrée: un cadran                                                                                                          */
-/* Sortie: une structure prete à l'envoie                                                                                     */
-/******************************************************************************************************************************/
- void Http_Formater_cadran( struct HTTP_CADRAN *cadran )
-  { if (!cadran) return;
-    if ( ! strcmp ( cadran->classe, "AI" ) )
-     { struct DLS_AI *ai = Dls_data_lookup_AI ( cadran->tech_id, cadran->acronyme );
-       if (!ai)                                                  /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; cadran->valeur = 0; }
-       else
-        { cadran->in_range = ai->in_range;
-          cadran->valeur   = ai->valeur;
-          g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ai->unite );
-        }
-     }
-    else if ( !strcmp ( cadran->classe, "CH" ) )
-     { cadran->in_range = TRUE;
-       struct DLS_CH *cpt_h = Dls_data_lookup_CH ( cadran->tech_id, cadran->acronyme );
-       cadran->valeur = (cpt_h ? cpt_h->valeur : 0.0);
-     }
-    else if ( !strcmp ( cadran->classe, "CI" ) )
-     { struct DLS_CI *ci = Dls_data_lookup_CI ( cadran->tech_id, cadran->acronyme );
-       if (!ci)                                                  /* si AI pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; cadran->valeur = 0; }
-       else
-        { cadran->in_range = TRUE;
-          cadran->valeur = ci->valeur * ci->multi;                                                        /* Multiplication ! */
-          g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", ci->unite );
-        }
-     }
-    else if ( !strcmp ( cadran->classe, "REGISTRE" ) )
-     { struct DLS_REGISTRE *registre = Dls_data_lookup_REGISTRE ( cadran->tech_id, cadran->acronyme );
-       if (!registre)                                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; cadran->valeur = 0; }
-       else
-        { cadran->in_range = TRUE;
-          cadran->valeur = registre->valeur;
-          g_snprintf( cadran->unite, sizeof(cadran->unite), "%s", registre->unite );
-        }
-     }
-    else if ( !strcmp ( cadran->classe, "WATCHDOG" ) )
-     { struct DLS_WATCHDOG *wtd = Dls_data_lookup_WATCHDOG ( cadran->tech_id, cadran->acronyme );
-       if (!wtd)                                      /* si Registre pas trouvée, on remonte le nom du cadran en libellé */
-        { cadran->in_range = FALSE; cadran->valeur = 0; }
-       else
-        { cadran->in_range = TRUE;
-          gint gap = wtd->top - Partage->top;
-          if (gap>=0) cadran->valeur = gap/10;
-                 else cadran->valeur = 0;
-          g_snprintf( cadran->unite, sizeof(cadran->unite), "s" );
-        }
-     }
-    else if ( !strcmp ( cadran->classe, "T" ) )
-     { struct DLS_TEMPO *tempo = Dls_data_lookup_TEMPO ( cadran->tech_id, cadran->acronyme );
-       if (!tempo)
-        { cadran->in_range = FALSE; cadran->valeur = 0; }
-       else
-        { cadran->in_range = TRUE;
-          if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON)                     /* Temporisation Retard en train de compter */
-           { cadran->valeur = (tempo->date_on - Partage->top); }
-          else if (tempo->status == DLS_TEMPO_NOT_COUNTING)                  /* Tempo ne compte pas: on affiche la consigne */
-           { cadran->valeur = tempo->delai_on; }
-        }
-      }
-     else { cadran->in_range = FALSE; }
-  }
-/******************************************************************************************************************************/
-/* Http_abonner_cadran: Abonne un client à un cadran particulier                                                              */
-/* Entrées: les données du cadran en Json et la connexion HTTP cliente                                                        */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Http_abonner_cadran (JsonArray *array, guint index, JsonNode *new_cadran, gpointer user_data)
-  { struct HTTP_CLIENT_SESSION *session = user_data;
-    gchar *tech_id  = Json_get_string ( new_cadran, "tech_id" );
-    gchar *acronyme = Json_get_string ( new_cadran, "acronyme" );
-    GSList *liste = session->Liste_bit_cadrans;                                      /* Le cadran est-il déjà dans la liste ? */
-    while(liste)
-     { struct HTTP_CADRAN *cadran=liste->data;
-       if ( !strcasecmp( tech_id, cadran->tech_id ) && !strcasecmp( acronyme, cadran->acronyme ) ) break;
-       liste = g_slist_next(liste);
-     }
-    if (liste) return;                                      /* si le cadran n'est pas trouvé, on l'ajoute à la liste d'abonné */
-    struct HTTP_CADRAN *http_cadran = g_try_malloc0(sizeof(struct HTTP_CADRAN));
-    if (!http_cadran) return;
-    g_snprintf( http_cadran->tech_id,  sizeof(http_cadran->tech_id),  "%s", tech_id  );
-    g_snprintf( http_cadran->acronyme, sizeof(http_cadran->acronyme), "%s", acronyme );
-    g_snprintf( http_cadran->classe,   sizeof(http_cadran->classe),   "%s", Json_get_string( new_cadran, "classe" ) );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "user '%s': Abonné au CADRAN %s:%s",
-              session->username, http_cadran->tech_id, http_cadran->acronyme );
-    session->Liste_bit_cadrans = g_slist_prepend( session->Liste_bit_cadrans, http_cadran );
-  }
-/******************************************************************************************************************************/
 /* Http_add_etat_visuel: Ajoute les états de chaque visuels du tableau                                                        */
 /* Entrées : Le tableau, l'element a compléter                                                                                */
 /* Sortie : Néant                                                                                                             */
@@ -168,9 +73,6 @@
 /******************************************************************************************************************************/
  void Http_traiter_syn_show ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
   { gint syn_id;
-
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
-    if (!Http_check_session( msg, session, 0 )) return;
 
     gchar *syn_id_src = g_hash_table_lookup ( query, "syn_id" );
     if (syn_id_src) { syn_id = atoi (syn_id_src); }
@@ -192,11 +94,6 @@
        return;
      }
 
-    if (session->access_level < Json_get_int ( result, "access_level" ))
-     { soup_server_message_set_status (msg, SOUP_STATUS_FORBIDDEN, "Access Denied");
-       Json_node_unref ( result );
-       return;
-     }
     Json_node_unref ( result );
 /*---------------------------------------------- Envoi les données -----------------------------------------------------------*/
     JsonNode *synoptique = Json_node_create();
@@ -216,8 +113,8 @@
      }
 
     if (SQL_Select_to_json_node ( synoptique, NULL,
-                                 "SELECT * FROM syns WHERE syn_id='%d' AND access_level<='%d'",
-                                  syn_id, session->access_level) == FALSE)
+                                 "SELECT * FROM syns WHERE syn_id='%d'",
+                                  syn_id) == FALSE)
      { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
@@ -226,8 +123,8 @@
 /*-------------------------------------------------- Envoi les data des synoptiques fils -------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "child_syns",
                                  "SELECT s.* FROM syns AS s INNER JOIN syns as s2 ON s.parent_id=s2.syn_id "
-                                 "WHERE s2.syn_id='%d' AND s.syn_id!=1 AND s.access_level<='%d'",
-                                 syn_id, session->access_level) == FALSE)
+                                 "WHERE s2.syn_id='%d' AND s.syn_id!=1",
+                                 syn_id) == FALSE)
      { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
@@ -240,8 +137,8 @@
      { if (SQL_Select_to_json_node ( synoptique, "passerelles",
                                     "SELECT pass.*,syn.page,syn.libelle FROM syns_pass as pass "
                                     "INNER JOIN syns as syn ON pass.syn_cible_id=syn.syn_id "
-                                    "WHERE pass.syn_id=%d AND syn.access_level<=%d",
-                                     syn_id, session->access_level ) == FALSE)
+                                    "WHERE pass.syn_id=%d",
+                                     syn_id ) == FALSE)
         { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
@@ -252,8 +149,8 @@
      { if (SQL_Select_to_json_node ( synoptique, "liens",
                                      "SELECT lien.* FROM syns_liens AS lien "
                                      "INNER JOIN syns as syn ON lien.syn_id=syn.syn_id "
-                                     "WHERE lien.syn_id=%d AND syn.access_level<=%d",
-                                     syn_id, session->access_level ) == FALSE)
+                                     "WHERE lien.syn_id=%d",
+                                     syn_id ) == FALSE)
         { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
@@ -264,8 +161,8 @@
      { if (SQL_Select_to_json_node ( synoptique, "rectangles",
                                     "SELECT rectangle.* FROM syns_rectangles AS rectangle "
                                     "INNER JOIN syns as syn ON rectangle.syn_id=syn.syn_id "
-                                    "WHERE rectangle.syn_id=%d AND syn.access_level<=%d",
-                                    syn_id, session->access_level ) == FALSE)
+                                    "WHERE rectangle.syn_id=%d",
+                                    syn_id ) == FALSE)
         { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
@@ -276,8 +173,8 @@
      { if (SQL_Select_to_json_node ( synoptique, "comments",
                                     "SELECT comment.* FROM syns_comments AS comment "
                                     "INNER JOIN syns as syn ON comment.syn_id=syn.syn_id "
-                                    "WHERE comment.syn_id=%d AND syn.access_level<=%d",
-                                    syn_id, session->access_level ) == FALSE)
+                                    "WHERE comment.syn_id=%d",
+                                    syn_id ) == FALSE)
         { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
@@ -288,8 +185,8 @@
                                  "SELECT cam.*,src.location,src.libelle FROM syns_camerasup AS cam "
                                  "INNER JOIN cameras AS src ON cam.camera_src_id=src.id "
                                  "INNER JOIN syns as syn ON cam.syn_id=syn.syn_id "
-                                 "WHERE cam.syn_id=%d AND syn.access_level<=%d",
-                                 syn_id, session->access_level ) == FALSE)
+                                 "WHERE cam.syn_id=%d",
+                                 syn_id ) == FALSE)
      { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
@@ -301,20 +198,19 @@
                                  "INNER JOIN dls AS dls ON cadran.dls_id=dls.dls_id "
                                  "INNER JOIN syns AS syn ON dls.syn_id=syn.syn_id "
                                  "INNER JOIN dictionnaire AS dico ON (cadran.tech_id=dico.tech_id AND cadran.acronyme=dico.acronyme) "
-                                 "WHERE syn.syn_id=%d AND syn.access_level<=%d",
-                                 syn_id, session->access_level ) == FALSE)
+                                 "WHERE syn.syn_id=%d",
+                                 syn_id ) == FALSE)
      { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
      }
 
-    Json_node_foreach_array_element ( synoptique, "cadrans", Http_abonner_cadran, session );
 /*-------------------------------------------------- Envoi les tableaux de la page -------------------------------------------*/
     if (SQL_Select_to_json_node ( synoptique, "tableaux",
                                  "SELECT tableau.* FROM tableau "
                                  "INNER JOIN syns as syn ON tableau.syn_id=syn.syn_id "
-                                 "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
-                                 syn_id, session->access_level ) == FALSE)
+                                 "WHERE tableau.syn_id=%d",
+                                 syn_id ) == FALSE)
      { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
@@ -324,8 +220,8 @@
                                  "SELECT tableau_map.* FROM tableau_map "
                                  "INNER JOIN tableau ON tableau_map.tableau_id=tableau.tableau_id "
                                  "INNER JOIN syns as syn ON tableau.syn_id=syn.syn_id "
-                                 "WHERE tableau.syn_id=%d AND syn.access_level<=%d",
-                                 syn_id, session->access_level ) == FALSE)
+                                 "WHERE tableau.syn_id=%d",
+                                 syn_id ) == FALSE)
      { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
@@ -344,9 +240,9 @@
                                     "LEFT JOIN dls ON dls.dls_id=v.dls_id "
                                     "LEFT JOIN icone AS i ON i.forme=m.forme "
                                     "LEFT JOIN syns AS s ON dls.syn_id=s.syn_id "
-                                    "WHERE (s.syn_id='%d' AND s.access_level<=%d AND m.access_level<=%d) OR v.syn_id='%d' "
+                                    "WHERE (s.syn_id='%d' AND v.syn_id='%d' "
                                     "ORDER BY layer",
-                                     syn_id, session->access_level, session->access_level, syn_id) == FALSE)
+                                     syn_id, syn_id) == FALSE)
         { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
@@ -361,9 +257,9 @@
                                     "INNER JOIN icone AS i ON i.forme=m.forme "
                                     "INNER JOIN syns AS s ON dls.syn_id=s.syn_id "
                                     "INNER JOIN dls AS dls_owner ON dls_owner.tech_id=m.tech_id "
-                                    "WHERE s.syn_id='%d' AND s.access_level<=%d AND m.access_level<=%d "
+                                    "WHERE s.syn_id='%d' "
                                     "ORDER BY layer",
-                                    syn_id, session->access_level, session->access_level) == FALSE)
+                                    syn_id) == FALSE)
         { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
           Json_node_unref(synoptique);
           return;
@@ -377,8 +273,8 @@
                                  "SELECT DISTINCT horloge.tech_id, dls.name as dls_name FROM mnemos_HORLOGE AS horloge "
                                  "INNER JOIN dls ON dls.tech_id=horloge.tech_id "
                                  "INNER JOIN syns as syn ON dls.syn_id=syn.syn_id "
-                                 "WHERE dls.syn_id=%d AND syn.access_level<=%d",
-                                 syn_id, session->access_level ) == FALSE)
+                                 "WHERE dls.syn_id=%d",
+                                 syn_id ) == FALSE)
      { Http_Send_json_response ( msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, NULL, NULL );
        Json_node_unref(synoptique);
        return;
