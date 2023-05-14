@@ -51,7 +51,7 @@
     while (Partage->com_msrv.liste_visuel && Partage->com_msrv.Thread_run == TRUE && cpt<100)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );
        struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
-       Partage->abonnements = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
+       Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
        Info_new( __func__, Config.log_msrv, LOG_DEBUG,
