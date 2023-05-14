@@ -39,39 +39,38 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void API_Send_visuels ( void )
-  { JsonNode *RootNode  = Json_node_create();
-    if (!RootNode) return;
-    JsonArray *visuels = Json_node_add_array ( RootNode, "visuels" );
-    if (!visuels) { Json_node_unref ( RootNode ); return; }
+  { if (!Partage->com_msrv.API_websocket) return;
 
-    gint top = Partage->top;
-    gint nb_enreg = 0;
-    pthread_mutex_lock( &Partage->com_msrv.synchro );                                                        /* lockage futex */
-    while (Partage->com_msrv.liste_visuel && Partage->com_msrv.Thread_run == TRUE && nb_enreg<100)
-     { struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
-       Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
-       Info_new( __func__, Config.log_msrv, LOG_INFO,
+    gint cpt = 0, top = Partage->top;
+    JsonNode *RootNode  = Json_node_create();
+    if (!RootNode) return;
+    Json_node_add_string ( RootNode, "tag", "visuels" );
+    JsonArray *Visuels = Json_node_add_array ( RootNode, "visuels" );
+    if (!Visuels) { Json_node_unref ( RootNode ); return; }
+
+    while (Partage->com_msrv.liste_visuel && Partage->com_msrv.Thread_run == TRUE && cpt<100)
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );
+       struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
+       Partage->abonnements = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+
+       Info_new( __func__, Config.log_msrv, LOG_DEBUG,
                 "Send VISUEL %s:%s mode=%s, color=%s, cligno=%d, libelle='%s', disable=%d",
                  visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->cligno, visuel->libelle, visuel->disable
                );
        JsonNode *element = Json_node_create ();
        Dls_VISUEL_to_json ( element, visuel );
-       Json_array_add_element ( visuels, element );
-       nb_enreg++;                           /* Permet de limiter a au plus 100 enregistrements histoire de limiter la famine */
+       Json_array_add_element ( Visuels, element );
+       cpt++;
      }
-    gint reste = g_slist_length(Partage->com_msrv.liste_visuel);
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-    Json_node_add_int ( RootNode, "nbr_visuels", nb_enreg );
-    JsonNode *api_result = Http_Post_to_global_API ( "/run/visuels/set", RootNode );
-    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK )
-     { gint nbr_saved = Json_get_int ( api_result, "nbr_visuels_saved" );
-       Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %05d visuel(s) en %06.1fs. Reste %05d.",
-                 nbr_saved, (Partage->top-top)/10.0, reste );
-     }
-    else
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error. Reste %05d", reste ); }
+    gchar *buf = Json_node_to_string ( RootNode );
+    soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
+    g_free(buf);
     Json_node_unref ( RootNode );
-    Json_node_unref ( api_result );
+    if (cpt)
+     { gint reste = g_slist_length(Partage->com_msrv.liste_visuel);
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %03d Visuels to WS_API en %06.1fs. Reste %05d.",
+                 cpt, (Partage->top-top)/10.0, reste );
+     }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -33,25 +33,31 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void API_Send_Abonnements ( void )
-  { gint cpt = 0, top = Partage->top;
+  { if (!Partage->com_msrv.API_websocket) return;
 
+    gint cpt = 0, top = Partage->top;
     JsonNode *RootNode = Json_node_create();
+    if (!RootNode) return;
     Json_node_add_string ( RootNode, "tag", "abonnements" );
-    JsonArray *Array = Json_node_add_array ( RootNode, "abonnements" );
+    JsonArray *Abonnements = Json_node_add_array ( RootNode, "abonnements" );
+    if (!Abonnements) { Json_node_unref ( RootNode ); return; }
 
-    while (Partage->abonnements && cpt<100)
+    while (Partage->abonnements && Partage->com_msrv.Thread_run == TRUE && cpt<100)
      { pthread_mutex_lock( &Partage->abonnements_synchro );                           /* Ajout dans la liste de msg a traiter */
        JsonNode *element = Partage->abonnements->data;
        Partage->abonnements = g_slist_remove ( Partage->abonnements, element );
        pthread_mutex_unlock( &Partage->abonnements_synchro );
-
-       Json_array_add_element ( Array, element );
+       Json_array_add_element ( Abonnements, element );
        cpt++;
      }
     gchar *buf = Json_node_to_string ( RootNode );
     soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
     g_free(buf);
     Json_node_unref ( RootNode );
-    if (cpt) Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %d Abonnements to WS_API in %06.1fs.", cpt, (Partage->top-top)/10.0 );
+    if (cpt)
+     { gint reste = g_slist_length(Partage->abonnements);
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %03d Abonnements to WS_API in %06.1fs. Reste %05d.",
+                 cpt, (Partage->top-top)/10.0, reste );
+     }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
