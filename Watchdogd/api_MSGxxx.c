@@ -33,8 +33,6 @@
 /****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
 
- static GSList *Liste_Histo_to_send = NULL;
-
 /************************************* Converstion du histo dynamique *******************************************************/
  void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max )
   { gchar chaine[512], prefixe[128], tech_id[32], acronyme[64], suffixe[128];
@@ -155,12 +153,18 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void API_Send_MSGS ( void )
-  { struct DLS_MESSAGE_EVENT *event;
+  { if (!Partage->com_msrv.API_websocket) return;
 
-    gint cpt=0;
-    while (Partage->com_msrv.liste_msg && cpt<10)
+    gint cpt = 0, top = Partage->top;
+    JsonNode *RootNode = Json_node_create();
+    if (!RootNode) return;
+    Json_node_add_string ( RootNode, "tag", "histos" );
+    JsonArray *Histos = Json_node_add_array ( RootNode, "histos" );
+    if (!Histos) { Json_node_unref ( RootNode ); return; }
+
+    while (Partage->com_msrv.liste_msg && Partage->com_msrv.Thread_run == TRUE && cpt<100)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
-       event = Partage->com_msrv.liste_msg->data;                                            /* Recuperation du numero de msg */
+       struct DLS_MESSAGE_EVENT *event = Partage->com_msrv.liste_msg->data;                  /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Info_new( __func__, Config.log_msrv, LOG_INFO,
@@ -174,7 +178,7 @@
               { event->msg->last_on = Partage->top;
                 Json_node_add_string ( histo, "tag", "DLS_HISTO" );
                 Http_Send_to_slaves ( NULL, histo );
-                Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
+                Json_array_add_element ( Histos, histo );
               }
              else
               { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
@@ -189,33 +193,21 @@
           if(histo)
            { Json_node_add_string ( histo, "tag", "DLS_HISTO" );
              Http_Send_to_slaves ( NULL, histo );
-             Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
+             Json_array_add_element ( Histos, histo );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
                             event->msg->tech_id, event->msg->acronyme );
         }
        g_free(event);
+       gchar *buf = Json_node_to_string ( RootNode );
+       soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
+       g_free(buf);
        cpt++;
      }
-
-/******************************************************* Envoi à l'API ********************************************************/
-    static gint next_try = 0;
-    gint top = Partage->top;
-    cpt = 0;
-    while (Liste_Histo_to_send && next_try <= Partage->top && cpt<10)
-     { JsonNode *histo = Liste_Histo_to_send->data;
-       Liste_Histo_to_send = g_slist_remove ( Liste_Histo_to_send, histo );
-       JsonNode *api_result = Http_Post_to_global_API ( "/run/histo", histo );
-       if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Post '%s:%s' for /run/histo failed. Retry %04d MSGS in 60 seconds.",
-                    Json_get_string ( histo, "tech_id"), Json_get_string ( histo, "acronyme" ), g_slist_length(Liste_Histo_to_send) );
-          Json_node_unref ( api_result );
-          Json_node_unref ( histo );
-          next_try = Partage->top + 600;
-          break;
-        } else cpt++;
-       Json_node_unref ( api_result );
-       Json_node_unref ( histo );
+    Json_node_unref ( RootNode );
+    if (cpt)
+     { gint reste = g_slist_length(Partage->com_msrv.liste_msg);
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %03d Histos to WS_API in %06.1fs. Reste %05d.",
+                 cpt, (Partage->top-top)/10.0, reste );
      }
-    if (cpt) Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %d MSGS to API in %06.1fs.", cpt, (Partage->top-top)/10.0 );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
