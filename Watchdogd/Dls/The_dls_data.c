@@ -106,7 +106,7 @@
                  "'%s': Save %d CI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_CI" ) );
        Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG,
                  "'%s': Save %d CH to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_CH" ) );
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Saved '%s' DLS_DATA in %04.1fs", plugin->tech_id, (Partage->top-top)/10.0 );
+       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Saved '%s' DLS_DATA in %06.1fs", plugin->tech_id, (Partage->top-top)/10.0 );
      }
     else
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Error when saving '%s' dls_data to API.", plugin->tech_id ); }

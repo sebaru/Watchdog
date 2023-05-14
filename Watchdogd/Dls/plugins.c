@@ -198,7 +198,7 @@
     gint gcc_return_code = WEXITSTATUS(wcode);
     if (gcc_return_code == 1) unlink(target_file);
     Info_new( __func__, Config.log_trad, LOG_DEBUG, "gcc pid %d is down with return code %d", pidgcc, gcc_return_code );
-    Info_new( __func__, Config.log_trad, LOG_INFO, "Compilation of '%s' finished in %05.1fs", tech_id, (Partage->top - top)/10.0 );
+    Info_new( __func__, Config.log_trad, LOG_INFO, "Compilation of '%s' finished in %06.1fs", tech_id, (Partage->top - top)/10.0 );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -615,7 +615,7 @@ end:
     pthread_mutex_init( &Nbr_compil_mutex, &param );
     Json_node_foreach_array_element ( api_result, "plugins", Dls_Importer_un_plugin_by_array, NULL );
     while (Nbr_compil) sched_yield();                                         /* Tant que des threads de compilation tournent */
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%03d plugins loaded in %03.1fs (with %02d proc)",
+    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%03d plugins loaded in %06.1fs (with %02d proc)",
               Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0, get_nprocs() );
     Json_node_unref ( api_result );
   }
