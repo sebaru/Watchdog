@@ -216,6 +216,6 @@
        Json_node_unref ( api_result );
        Json_node_unref ( histo );
      }
-    if (cpt) Info_new( __func__, Config.log_msrv, LOG_INFO, "%d MSGS sent to API in %06.1fs.", cpt, (Partage->top-top)/10.0 );
+    if (cpt) Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %d MSGS to API in %06.1fs.", cpt, (Partage->top-top)/10.0 );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

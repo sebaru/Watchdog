@@ -311,7 +311,10 @@
     if (!plugin->enable) return;                                            /* si plugin a l'arret, on n'éxécute pas non plus */
     if (!plugin->go)     return;                                          /* si pas de fonction GO, on n'éxécute pas non plus */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
-    if(plugin->vars.resetted && plugin->init_visuels) plugin->init_visuels(&plugin->vars);
+    if(plugin->vars.resetted && plugin->init_visuels)
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Send '_START' to '%s', and Init_visuel", plugin->tech_id );
+       plugin->init_visuels(&plugin->vars);
+     }
     gettimeofday( &tv_avant, NULL );
     plugin->go( &plugin->vars );                                                                        /* On appel le plugin */
     gettimeofday( &tv_apres, NULL );
