@@ -34,7 +34,7 @@
 /******************************************************************************************************************************/
  void API_Send_Abonnements ( void )
   { static gint next_try = 0;
-    gint cpt = 0;
+    gint cpt = 0, top = Partage->top;
     while (Partage->abonnements && next_try <= Partage->top && cpt<100)
      { pthread_mutex_lock( &Partage->abonnements_synchro );                           /* Ajout dans la liste de msg a traiter */
        JsonNode *RootNode   = Partage->abonnements->data;
@@ -54,5 +54,6 @@
        Json_node_unref ( RootNode );
        cpt++;
      }
+    if (cpt) Info_new( __func__, Config.log_msrv, LOG_INFO, "%d Abonnements sent to API in %06.1fs.", cpt, (Partage->top-top)/10.0 );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
