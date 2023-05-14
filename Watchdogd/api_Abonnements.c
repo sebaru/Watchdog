@@ -33,27 +33,25 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void API_Send_Abonnements ( void )
-  { static gint next_try = 0;
-    gint cpt = 0, top = Partage->top;
-    while (Partage->abonnements && next_try <= Partage->top && cpt<100)
+  { gint cpt = 0, top = Partage->top;
+
+    JsonNode *RootNode = Json_node_create();
+    Json_node_add_string ( RootNode, "tag", "abonnements" );
+    JsonArray *Array = Json_node_add_array ( RootNode, "abonnements" );
+
+    while (Partage->abonnements && cpt<100)
      { pthread_mutex_lock( &Partage->abonnements_synchro );                           /* Ajout dans la liste de msg a traiter */
-       JsonNode *RootNode   = Partage->abonnements->data;
-       Partage->abonnements = g_slist_remove ( Partage->abonnements, RootNode );
+       JsonNode *element = Partage->abonnements->data;
+       Partage->abonnements = g_slist_remove ( Partage->abonnements, element );
        pthread_mutex_unlock( &Partage->abonnements_synchro );
 
-       JsonNode *api_result = Http_Post_to_global_API ( "/run/abonnement", RootNode );
-       if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Post '%s:%s' for /run/abonnemnent failed. Retry %04d enregs in 60 seconds.",
-                    Json_get_string ( RootNode, "tech_id"), Json_get_string ( RootNode, "acronyme" ), g_slist_length(Partage->abonnements) );
-          Json_node_unref ( api_result );
-          Json_node_unref ( RootNode );
-          next_try = Partage->top + 600;
-          break;
-        }
-       Json_node_unref ( api_result );
-       Json_node_unref ( RootNode );
+       Json_array_add_element ( Array, element );
        cpt++;
      }
-    if (cpt) Info_new( __func__, Config.log_msrv, LOG_INFO, "%d Abonnements sent to API in %06.1fs.", cpt, (Partage->top-top)/10.0 );
+    gchar *buf = Json_node_to_string ( RootNode );
+    soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
+    g_free(buf);
+    Json_node_unref ( RootNode );
+    if (cpt) Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %d Abonnements to WS_API in %06.1fs.", cpt, (Partage->top-top)/10.0 );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
