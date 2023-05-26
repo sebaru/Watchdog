@@ -185,8 +185,11 @@
        return(FALSE);
      }
     else if (!pidgcc)
-     { execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
+     { execlp( "gcc", "gcc",
+               "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
                "-I/usr/lib/i386-linux-gnu/glib-2.0/include", "-I/usr/lib/x86_64-linux-gnu/glib-2.0/include",
+               "-I/usr/include/json-glib-1.0", "-I/usr/include/sysprof-4",
+               "-I/usr/include/libmount", "-I/usr/include/blkid",
                "-shared", "--no-gnu-unique", "-Wno-unused-variable", "-ggdb", "-Wall", "-lwatchdog-dls",
                source_file, "-fPIC", "-o", target_file, NULL );
        _exit(0);

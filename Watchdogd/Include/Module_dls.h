@@ -28,6 +28,7 @@
  #ifndef _MODULE_DLS_H_
  #define _MODULE_DLS_H_
  #include <glib.h>
+ #include <json-glib/json-glib.h>
 
  enum                                                                                  /* différent statut des temporisations */
   { DLS_TEMPO_NOT_COUNTING,                                                                 /* La tempo ne compte pas du tout */
