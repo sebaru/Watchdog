@@ -36,6 +36,22 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Dls_data_MESSAGE_free_one: Libère la mémoire associée à un MESSAGE un plugin                                               */
+/* Entrée : le pointeur vers la structure du message                                                                          */
+/******************************************************************************************************************************/
+ static void Dls_data_MESSAGE_free_one ( struct DLS_MESSAGE *bit )
+  { Json_node_unref ( bit->source_node );
+    g_free(bit);
+  }
+/******************************************************************************************************************************/
+/* Dls_data_MESSAGE_free_all: Libère la mémoire associée aux messages d'un plugin                                             */
+/* Entrée : le pointeur vers le plugin                                                                                        */
+/******************************************************************************************************************************/
+ void Dls_data_MESSAGE_free_all ( struct DLS_PLUGIN *plugin )
+  { if (plugin->Dls_data_MESSAGE) g_slist_free_full ( plugin->Dls_data_MESSAGE, (GDestroyNotify) Dls_data_MESSAGE_free_one );
+    plugin->Dls_data_MESSAGE = NULL;
+  }
+/******************************************************************************************************************************/
 /* Dls_data_MESSAGE_create_by_array : Création d'un MESSAGE pour le plugin                                                    */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
@@ -51,6 +67,7 @@
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     bit->etat = Json_get_bool ( element, "etat" );
+    bit->source_node = json_node_ref ( element );
     plugin->Dls_data_MESSAGE = g_slist_prepend ( plugin->Dls_data_MESSAGE, bit );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
               "Create bit DLS_MESSAGE '%s:%s'=%d", bit->tech_id, bit->acronyme, bit->etat );

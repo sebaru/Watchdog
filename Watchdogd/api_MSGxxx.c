@@ -100,13 +100,7 @@
     struct timeval tv;
     struct tm *temps;
 
-    JsonNode *histo = Http_Get_from_global_API ( "/run/message", "tech_id=%s&acronyme=%s", msg->tech_id, msg->acronyme );
-    if (histo == NULL || Json_get_int ( histo, "api_status" ) != SOUP_STATUS_OK)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for /run/message '%s:%s' failed. Dropping message.",
-                 msg->tech_id, msg->acronyme );
-       Json_node_unref ( histo );
-       return(NULL);
-     }
+    JsonNode *histo = json_node_copy ( msg->source_node );
 
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );

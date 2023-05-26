@@ -170,7 +170,8 @@
   };
 
  struct DLS_MESSAGE
-  { gchar   tech_id[32];
+  { JsonNode *source_node;
+    gchar   tech_id[32];
     gchar   acronyme[64];
     gboolean etat;
     gint groupe;

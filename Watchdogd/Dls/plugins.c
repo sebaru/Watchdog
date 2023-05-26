@@ -546,7 +546,7 @@
     if (plugin->Dls_data_VISUEL) { g_slist_free_full ( plugin->Dls_data_VISUEL, (GDestroyNotify) g_free ); plugin->Dls_data_VISUEL = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_VISUEL", Dls_data_VISUEL_create_by_array, plugin );
 
-    if (plugin->Dls_data_MESSAGE) { g_slist_free_full ( plugin->Dls_data_MESSAGE, (GDestroyNotify) g_free ); plugin->Dls_data_MESSAGE = NULL; }
+    Dls_data_MESSAGE_free_all ( plugin );
     Json_node_foreach_array_element ( api_result, "mnemos_MESSAGE", Dls_data_MESSAGE_create_by_array, plugin );
 
     if (plugin->Dls_data_WATCHDOG) { g_slist_free_full ( plugin->Dls_data_WATCHDOG, (GDestroyNotify) g_free ); plugin->Dls_data_WATCHDOG = NULL; }
@@ -600,8 +600,19 @@ end:
   { pthread_t TID;
     gchar *tech_id = Json_get_string ( element, "tech_id" );
 
+    pthread_attr_t attr;                                                      /* Attribut de thread pour parametrer le module */
+    if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': pthread_attr_init failed.", tech_id );
+       return;
+     }
+
+    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) )                       /* On le laisse joinable au boot */
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': pthread_setdetachstate failed.", tech_id );
+       return;
+     }
+
     while (Nbr_compil >= get_nprocs()) sched_yield();
-    if ( pthread_create( &TID, NULL, Run_Dls_Import_thread, tech_id ) )
+    if ( pthread_create( &TID, &attr, Run_Dls_Import_thread, tech_id ) )
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': pthread_create failed.", tech_id );
        return;
      }
@@ -670,7 +681,7 @@ end:
        if (plugin->Dls_data_TEMPO)    g_slist_free_full ( plugin->Dls_data_TEMPO, (GDestroyNotify) g_free );
        if (plugin->Dls_data_WATCHDOG) g_slist_free_full ( plugin->Dls_data_WATCHDOG, (GDestroyNotify) g_free );
        if (plugin->Dls_data_VISUEL)   g_slist_free_full ( plugin->Dls_data_VISUEL, (GDestroyNotify) g_free );
-       if (plugin->Dls_data_MESSAGE)  g_slist_free_full ( plugin->Dls_data_MESSAGE, (GDestroyNotify) g_free );
+       Dls_data_MESSAGE_free_all ( plugin );
 
        Partage->com_dls.Dls_plugins = g_slist_remove( Partage->com_dls.Dls_plugins, plugin );
        if (plugin->Arbre_Comm) g_slist_free(plugin->Arbre_Comm);
