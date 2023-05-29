@@ -371,7 +371,7 @@
 /* Entrée: le tech_id associé et 'reset' si les dls_data doivent etre resettées                                               */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id, gboolean reset )
+ struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id, gboolean reset )
   { struct DLS_PLUGIN *plugin = NULL;
     pthread_mutex_lock ( &Nbr_compil_mutex );                   /* Increment le nombre de thread de compilation en parallelle */
     Nbr_compil++;
@@ -643,19 +643,6 @@ end:
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%03d plugins loaded in %06.1fs (with %02d proc)",
               Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0, get_nprocs() );
     Json_node_unref ( api_result );
-  }
-/******************************************************************************************************************************/
-/* Dls_Reseter_un_plugin: Recharge un plugin par tech_id                                                                      */
-/* Entrée: Le numéro du plugin a décharger                                                                                    */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Dls_Reseter_un_plugin ( gchar *tech_id )
-  { struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( tech_id );
-    if (found) Dls_Export_Data_to_API ( found );      /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
-    struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( tech_id, TRUE );
-    if (dls) Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s': resetted", tech_id );
-        else Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "'%s': error when resetting", tech_id );
-    Dls_Load_horloge_ticks();
   }
 /******************************************************************************************************************************/
 /* Decharger_plugins: Decharge tous les plugins DLS                                                                           */

@@ -154,11 +154,11 @@
 
 /************************************************ Prototypes de fonctions *****************************************************/
  extern void Dls_Importer_plugins ( void );                                                                 /* Dans plugins.c */
+ extern struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id, gboolean reset );
  extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description );
  extern void Dls_Decharger_plugins ( void );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );
- extern void Dls_Reseter_un_plugin ( gchar *tech_id );
  extern void Dls_foreach_plugins ( gpointer user_data, void (*do_plugin) (gpointer user_data, struct DLS_PLUGIN *) );
  extern void Dls_Acquitter_plugin ( gchar *tech_id );
  struct DLS_PLUGIN *Dls_get_plugin_by_tech_id ( gchar *tech_id );
