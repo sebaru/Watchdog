@@ -399,6 +399,40 @@
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Acquitter_plugin ( plugin_tech_id );
      }
+    else if ( !strcasecmp( agent_tag, "DLS_MNEMO_SET") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_MNEMO_SET: tech_id is missing" );
+          goto end;
+        }
+       if ( !Json_has_member ( request, "acronyme" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_MNEMO_SET: acronyme is missing" );
+          goto end;
+        }
+       if ( !Json_has_member ( request, "archivage" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_MNEMO_SET: archivage is missing" );
+          goto end;
+        }
+       if ( !Json_has_member ( request, "classe" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_MNEMO_SET: classe is missing" );
+          goto end;
+        }
+       gchar *tech_id  = Json_get_string ( request, "tech_id" );
+       gchar *acronyme = Json_get_string ( request, "acronyme" );
+       gchar *classe   = Json_get_string ( request, "classe" );
+       gint  archivage = Json_get_int    ( request, "archivage" );
+       if (!strcasecmp ( classe, "CI" ))
+        { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
+          if (bit) bit->archivage = archivage;
+        }
+       else if (!strcasecmp ( classe, "CH" ))
+        { struct DLS_CH *bit = Dls_data_lookup_CH ( tech_id, acronyme );
+          if (bit) bit->archivage = archivage;
+        }
+       else if (!strcasecmp ( classe, "R" ))
+        { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
+          if (bit) bit->archivage = archivage;
+        }
+     }
     else if ( !strcasecmp( agent_tag, "DLS_COMPIL") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
