@@ -704,10 +704,10 @@ end:
     gint cpt_5_minutes = Partage->top + 3000;
     gint cpt_1_minute  = Partage->top + 600;
 
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
-    sleep(2);
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 20 seconds" );
+    sleep(15);                                                                              /* On laisse les threads demarrer */
     Http_Send_to_slaves ( "SYNC", NULL );                                        /* Synchronisation des IO depuis les threads */
-    sleep(8);
+    sleep(5);
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
 
     if (Config.instance_is_master)
