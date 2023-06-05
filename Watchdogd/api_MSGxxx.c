@@ -168,7 +168,7 @@
        if (event->etat == 1)
         { JsonNode *histo = MSGS_Convert_msg_on_to_histo ( event->msg );
           if (histo)
-           { if (Partage->top >= event->msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
+           { if (Partage->top > event->msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
               { event->msg->last_on = Partage->top;
                 Json_node_add_string ( histo, "tag", "DLS_HISTO" );
                 Http_Send_to_slaves ( NULL, histo );

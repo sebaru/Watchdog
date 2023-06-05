@@ -176,9 +176,7 @@
     gchar   acronyme[64];
     gboolean etat;
     gint groupe;
-    gint last_change;
     gint last_on;
-    gint changes;
   };
 
  struct DLS_REGISTRE
