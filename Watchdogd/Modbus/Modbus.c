@@ -95,7 +95,8 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Modbus_Sync_Output_from_master ( struct THREAD *module )
-  { JsonNode *result = Http_Get_from_local_BUS ( module, "GET_DO" );
+  { Info_new( __func__, module->Thread_debug, LOG_INFO, "Syncing Output from master" );
+    JsonNode *result = Http_Get_from_local_BUS ( module, "GET_DO" );
     if (result && Json_has_member ( result, "douts" ) )
      { Json_node_foreach_array_element ( result, "douts", Modbus_SET_DO_by_array, module ); }
     Json_node_unref ( result );
@@ -107,6 +108,7 @@
 /******************************************************************************************************************************/
  static void Modbus_Sync_Input_to_master ( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
+    Info_new( __func__, module->Thread_debug, LOG_INFO, "Syncing Inputs to master" );
     gint cpt;
 
     for ( cpt = 0; cpt<vars->nbr_entree_tor; cpt++ )
@@ -1077,7 +1079,7 @@
                                              break;
               }
            }
-       }
+        }
      }
     Thread_end(module);
   }
