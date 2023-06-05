@@ -201,9 +201,6 @@
        g_list_free(Results);
      } else { Json_node_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    JsonNode *RootNode = Json_node_create();
-    Http_Send_to_slaves ( "SYNC", RootNode );
-    Json_node_unref ( RootNode );
   }
 /******************************************************************************************************************************/
 /* Drop_privileges: Passe sous un autre user que root                                                                         */
@@ -383,7 +380,10 @@
      }
     else if (Config.instance_is_master == FALSE) goto end;
 
-    if ( !strcasecmp( agent_tag, "REMAP") ) MSRV_Remap();
+    if ( !strcasecmp( agent_tag, "REMAP") )
+     { MSRV_Remap();
+       Http_Send_to_slaves ( "SYNC", NULL );                                     /* Synchronisation des IO depuis les threads */
+     }
     else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
     else if ( !strcasecmp( agent_tag, "SYN_CLIC") )
      { if ( !Json_has_member ( request, "tech_id" ) )
