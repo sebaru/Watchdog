@@ -90,15 +90,39 @@
     Modbus_SET_DO ( module, element );
   }
 /******************************************************************************************************************************/
-/* Modbus_Get_DO_from_master: Récupère les etats des DO depuis le master                                                      */
-/* Entrée: le module et le buffer Josn                                                                                        */
+/* Modbus_Sync_Output_from_master: Synchronise les Output du master vers le wago                                              */
+/* Entrée: le module                                                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Modbus_Get_DO_from_master ( struct THREAD *module )
+ static void Modbus_Sync_Output_from_master ( struct THREAD *module )
   { JsonNode *result = Http_Get_from_local_BUS ( module, "GET_DO" );
     if (result && Json_has_member ( result, "douts" ) )
      { Json_node_foreach_array_element ( result, "douts", Modbus_SET_DO_by_array, module ); }
     Json_node_unref ( result );
+  }
+/******************************************************************************************************************************/
+/* Modbus_Sync_Input_from_master: Synchronise les Inputs vers le master                                                       */
+/* Entrée: le module                                                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Modbus_Sync_Input_to_master ( struct THREAD *module )
+  { struct MODBUS_VARS *vars = module->vars;
+    gint cpt;
+
+    for ( cpt = 0; cpt<vars->nbr_entree_tor; cpt++ )
+     { if (vars->DI[cpt])
+        { gboolean etat = Json_get_bool ( vars->DI[cpt], "etat" );
+          Http_Post_thread_DI_to_local_BUS ( module, vars->DI[cpt], etat );
+        }
+     }
+
+    for ( cpt = 0; cpt<vars->nbr_entree_ana; cpt++ )
+     { if (vars->AI[cpt])
+        { gdouble valeur    = Json_get_double ( vars->AI[cpt], "valeur" );
+          gboolean in_range = Json_get_bool   ( vars->AI[cpt], "in_range" );
+          Http_Post_thread_AI_to_local_BUS ( module, vars->AI[cpt], valeur, in_range );
+        }
+     }
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -669,6 +693,8 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_entree_ana )
               { vars->AI[num] = element;
+                Json_node_add_double ( vars->AI[cpt], "valeur", 0.0 );
+                Json_node_add_bool   ( vars->AI[cpt], "in_range", FALSE );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AI '%s' (%s, %s)",
                           Json_get_string ( vars->AI[num], "thread_acronyme" ),
                           Json_get_string ( vars->AI[num], "libelle" ),
@@ -690,6 +716,7 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_entree_tor )
               { vars->DI[num] = element;
+                Json_node_add_bool ( vars->DI[cpt], "etat", FALSE );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New DI '%s' (%s)",
                           Json_get_string ( vars->DI[num], "thread_acronyme" ),
                           Json_get_string ( vars->DI[num], "libelle" ));
@@ -710,7 +737,7 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_sortie_ana )
               { vars->AO[num] = element;
-                /*Json_node_add_bool   ( vars->AO[num], "etat", FALSE );*/
+                Json_node_add_double ( vars->AO[cpt], "valeur", 0.0 );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AO '%s' (%s)",
                           Json_get_string ( vars->AO[num], "thread_acronyme" ),
                           Json_get_string ( vars->AO[num], "libelle" ));
@@ -720,7 +747,6 @@
         }
        else Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error for AO" );
      }
-    /*Modbus_Get_AO_from_master ( module ); */
 /***************************************************** Mapping des DigitalOutput **********************************************/
     Info_new( __func__, module->Thread_debug, LOG_INFO, "Allocate %d DO", vars->nbr_sortie_tor );
     if(vars->nbr_sortie_tor)
@@ -742,7 +768,7 @@
         }
        else Info_new( __func__, module->Thread_debug, LOG_ERR, " Memory Error for DO" );
      }
-    Modbus_Get_DO_from_master ( module );
+    Modbus_Sync_Output_from_master ( module );
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Module '%s' : io config done",
               Json_get_string ( module->config, "description" ) );
@@ -781,8 +807,10 @@
      { case MODBUS_GET_DI:
             for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
              { if (vars->DI[cpt])                                                                   /* Si l'entrée est mappée */
-                { gint new_etat = (vars->response.data[ cpt_byte ] & cpt_poid);
-                  Http_Post_thread_DI_to_local_BUS ( module, vars->DI[cpt], (new_etat ? TRUE : FALSE) );
+                { gint new_etat_int = (vars->response.data[ cpt_byte ] & cpt_poid);
+                  gboolean new_etat = (new_etat_int ? TRUE : FALSE);
+                  if (new_etat != Json_get_bool ( vars->DI[cpt], "etat" ))
+                   { Http_Post_thread_DI_to_local_BUS ( module, vars->DI[cpt], (new_etat ? TRUE : FALSE) ); }
                 }
                cpt_poid = cpt_poid << 1;
                if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
@@ -814,7 +842,10 @@
                       }
                      default : new_valeur=0.0; new_in_range=FALSE;
                    }
-                  Http_Post_thread_AI_to_local_BUS ( module, vars->AI[cpt], new_valeur, new_in_range );
+                  gdouble  old_valeur   = Json_get_double ( vars->AI[cpt], "valeur" );
+                  gboolean old_in_range = Json_get_bool   ( vars->AI[cpt], "in_range" );
+                  if ( old_valeur != new_valeur || old_in_range != new_in_range )
+                   { Http_Post_thread_AI_to_local_BUS ( module, vars->AI[cpt], new_valeur, new_in_range ); }
                 }
              }
             vars->mode = MODBUS_SET_DO;
@@ -996,6 +1027,11 @@
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
           if ( !strcasecmp (tag, "SET_DO") ) Modbus_SET_DO ( module, request );
+          else if ( !strcasecmp (tag, "SYNC") )
+           { Modbus_Sync_Output_from_master ( module );
+             Modbus_Sync_Input_to_master ( module );
+           }
+
           Json_node_unref ( request );
         }
 /********************************************* Début de l'interrogation du module *********************************************/

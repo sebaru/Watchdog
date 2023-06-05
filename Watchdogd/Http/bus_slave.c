@@ -225,17 +225,9 @@ end:
 /******************************************************************************************************************************/
  void Http_Post_thread_DI_to_local_BUS ( struct THREAD *module, JsonNode *thread_di, gboolean etat )
   { if (!module) return;
-    gboolean update = FALSE;
-    if (!Json_has_member ( thread_di, "etat" )) { update = TRUE; }
-    else
-     { gboolean old_etat = Json_get_bool ( thread_di, "etat" );
-       if ( old_etat != etat ) update = TRUE;
-     }
-    if (update)
-     { Json_node_add_bool ( thread_di, "etat", etat );
-       if (Config.instance_is_master == TRUE) Dls_data_set_DI_from_thread_di ( thread_di );
-       else Http_Post_to_local_BUS ( module, "SET_DI", thread_di );
-     }
+    Json_node_add_bool ( thread_di, "etat", etat );
+    if (Config.instance_is_master == TRUE) Dls_data_set_DI_from_thread_di ( thread_di );
+    else Http_Post_to_local_BUS ( module, "SET_DI", thread_di );
   }
 /******************************************************************************************************************************/
 /* Http_Post_thread_AI_to_local_BUS: Envoie le bit AI au master                                                               */
@@ -244,19 +236,11 @@ end:
 /******************************************************************************************************************************/
  void Http_Post_thread_AI_to_local_BUS ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
   { if (!module) return;
-    gboolean update = FALSE;
-    if (!Json_has_member ( thread_ai, "valeur" )) { update = TRUE; }
-    else
-     { gdouble  old_valeur   = Json_get_double ( thread_ai, "valeur" );
-       gboolean old_in_range = Json_get_bool   ( thread_ai, "in_range" );
-       if ( old_valeur != valeur || old_in_range != in_range ) update = TRUE;
-     }
-    if (update)
-     { Json_node_add_double ( thread_ai, "valeur", valeur );
-       Json_node_add_bool   ( thread_ai, "in_range", in_range );
-       if (Config.instance_is_master == TRUE) Dls_data_set_AI_from_thread_ai ( thread_ai );
-       else Http_Post_to_local_BUS ( module, "SET_AI", thread_ai );
-     }
+
+    Json_node_add_double ( thread_ai, "valeur", valeur );
+    Json_node_add_bool   ( thread_ai, "in_range", in_range );
+    if (Config.instance_is_master == TRUE) Dls_data_set_AI_from_thread_ai ( thread_ai );
+    else Http_Post_to_local_BUS ( module, "SET_AI", thread_ai );
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */

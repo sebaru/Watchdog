@@ -118,6 +118,6 @@
  extern void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client );
  extern void Http_ws_send_json_to_slave ( struct HTTP_WS_SESSION *slave, JsonNode *node );
  extern void Http_Send_ping_to_slaves ( void );
- extern void Http_Send_to_slaves ( gchar *target_tech_id, JsonNode *RootNode );
+ extern void Http_Send_to_slaves ( gchar *tag, JsonNode *RootNode );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -47,8 +47,7 @@
        Partage->com_msrv.Liste_DO = g_slist_remove ( Partage->com_msrv.Liste_DO, RootNode );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-       Json_node_add_string ( RootNode, "tag", "SET_DO" );
-       if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( NULL, RootNode );
+       if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( "SET_DO", RootNode );
        Json_node_unref ( RootNode );
        cpt++;
      }
@@ -60,8 +59,7 @@
        Partage->com_msrv.Liste_AO = g_slist_remove ( Partage->com_msrv.Liste_AO, RootNode );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-       Json_node_add_string ( RootNode, "tag", "SET_AO" );
-       if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( NULL, RootNode );
+       if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( "SET_AO", RootNode );
        Json_node_unref ( RootNode );
        cpt++;
      }

@@ -201,6 +201,9 @@
        g_list_free(Results);
      } else { Json_node_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    JsonNode *RootNode = Json_node_create();
+    Http_Send_to_slaves ( "SYNC", RootNode );
+    Json_node_unref ( RootNode );
   }
 /******************************************************************************************************************************/
 /* Drop_privileges: Passe sous un autre user que root                                                                         */
@@ -702,7 +705,9 @@ end:
     gint cpt_1_minute  = Partage->top + 600;
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
-    sleep(10);
+    sleep(2);
+    Http_Send_to_slaves ( "SYNC", NULL );                                        /* Synchronisation des IO depuis les threads */
+    sleep(8);
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
 
     if (Config.instance_is_master)

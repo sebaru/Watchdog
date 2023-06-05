@@ -194,7 +194,8 @@
                          gchar *target_tech_id, gchar *json_parametre )
   { JsonNode *RootNode = Json_get_from_string ( json_parametre );
     if (RootNode)
-     { Http_Send_to_slaves ( target_tech_id, RootNode );
+     { Json_node_add_string ( RootNode, "thread_tech_id", target_tech_id );
+       Http_Send_to_slaves ( "FROM_DLS", RootNode );
        Json_node_unref(RootNode);
      }
   }
