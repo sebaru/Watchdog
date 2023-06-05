@@ -705,13 +705,13 @@ end:
     gint cpt_1_minute  = Partage->top + 600;
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 20 seconds" );
-    sleep(15);                                                                              /* On laisse les threads demarrer */
-    Http_Send_to_slaves ( "SYNC", NULL );                                        /* Synchronisation des IO depuis les threads */
-    sleep(5);
+    sleep(10);                                                                              /* On laisse les threads demarrer */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
+       Http_Send_to_slaves ( "SYNC", NULL );                                     /* Synchronisation des IO depuis les threads */
+       sleep(5);
        if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
