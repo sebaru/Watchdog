@@ -205,11 +205,9 @@
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", name, nom_var );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
-                "%s: Sending GET VAR failed (%s) error=%s", thread_tech_id,
-                buffer, (char *)upscli_strerror(&vars->upsconn) );
-       Deconnecter_UPS ( module );
-       return(NULL);
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING, "%s: Sending GET VAR failed (%s) error=%s", thread_tech_id,
+                 buffer, (char *)upscli_strerror(&vars->upsconn) );
+       goto end;
      }
 
     retour_read = upscli_readline( &vars->upsconn, buffer, sizeof(buffer) );
@@ -217,10 +215,9 @@
              "%s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", thread_tech_id,
               nom_var, retour_read, upscli_upserror(&vars->upsconn), buffer );
     if ( retour_read == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
-                "%s: Reading GET VAR result failed (%s) error=%s", thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING, "%s: Reading GET VAR result failed (%s) error=%s", thread_tech_id,
                  nom_var, (char *)upscli_strerror(&vars->upsconn) );
-       return(NULL);
+       goto end;
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
@@ -233,9 +230,7 @@
      { return(NULL);                                                         /* Variable not supported... is not an error ... */
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_WARNING,
-             "%s: Reading GET VAR %s Failed : error %s (buffer %s)", thread_tech_id,
-              nom_var, (char *)upscli_strerror(&vars->upsconn), buffer );
+end:
     Deconnecter_UPS ( module );
     vars->date_next_connexion = Partage->top + UPS_RETRY;
     return(NULL);
