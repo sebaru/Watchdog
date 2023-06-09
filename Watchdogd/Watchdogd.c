@@ -382,7 +382,7 @@
 
     if ( !strcasecmp( agent_tag, "REMAP") )
      { MSRV_Remap();
-       Http_Send_to_slaves ( "SYNC", NULL );                                     /* Synchronisation des IO depuis les threads */
+       Http_Send_to_slaves ( "SYNC_IO", NULL );                                  /* Synchronisation des IO depuis les threads */
      }
     else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
     else if ( !strcasecmp( agent_tag, "SYN_CLIC") )
@@ -541,6 +541,7 @@
        if (Json_has_member ( request, "debug"  )) Dls_Debug_plugin   ( plugin_tech_id, Json_get_bool ( request, "debug" ) );
        if (Json_has_member ( request, "enable" )) Dls_Activer_plugin ( plugin_tech_id, Json_get_bool ( request, "enable" ) );
      }
+    else Info_new( __func__, Config.log_msrv, LOG_ERR, "Tag inconnu: %s", agent_tag );
 
 end:
     Json_node_unref(request);
@@ -704,13 +705,13 @@ end:
     gint cpt_5_minutes = Partage->top + 3000;
     gint cpt_1_minute  = Partage->top + 600;
 
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 20 seconds" );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
     sleep(10);                                                                              /* On laisse les threads demarrer */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
-       Http_Send_to_slaves ( "SYNC", NULL );                                     /* Synchronisation des IO depuis les threads */
+       Http_Send_to_slaves ( "SYNC_IO", NULL );                                  /* Synchronisation des IO depuis les threads */
        sleep(5);
        if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
@@ -721,7 +722,7 @@ end:
            }
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
-           { Http_Send_ping_to_slaves();
+           { Http_Send_to_slaves ( "PING", NULL );
              Print_SQL_status();                                                          /* Print SQL status for debugging ! */
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }

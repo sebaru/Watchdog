@@ -1028,8 +1028,8 @@
           module->WS_messages = g_slist_remove ( module->WS_messages, request );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
-          if ( !strcasecmp (tag, "SET_DO") ) Modbus_SET_DO ( module, request );
-          else if ( !strcasecmp (tag, "SYNC") )
+               if ( !strcasecmp (tag, "SET_DO") ) Modbus_SET_DO ( module, request );
+          else if ( !strcasecmp (tag, "SYNC_IO") )
            { Modbus_Sync_Output_from_master ( module );
              Modbus_Sync_Input_to_master ( module );
            }

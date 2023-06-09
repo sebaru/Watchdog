@@ -88,24 +88,6 @@
     g_free(buffer);
   }
 /******************************************************************************************************************************/
-/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_Send_ping_to_slaves ( void )
-  { pthread_mutex_lock( &Partage->com_http.synchro );
-    GSList *liste = Partage->com_http.Slaves;
-    JsonNode *RootNode=Json_node_create();
-    Json_node_add_string ( RootNode, "tag", "PING" );
-    while ( liste )
-     { struct HTTP_WS_SESSION *slave = liste->data;
-       Http_ws_send_json_to_slave ( slave, RootNode );
-       liste = g_slist_next( liste );
-     }
-    Json_node_unref ( RootNode );
-    pthread_mutex_unlock( &Partage->com_http.synchro );
-  }
-/******************************************************************************************************************************/
 /* Http_Send_to_slaves: Envoi un tag aux slaves                                                                               */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
@@ -114,15 +96,18 @@
   { gboolean unref_RootNode = FALSE;
     if (!RootNode) { RootNode = Json_node_create (); unref_RootNode = TRUE; }
     Json_node_add_string ( RootNode, "tag", tag );
+    if (unref_RootNode) Json_node_unref (RootNode);
+    gchar *buffer = Json_node_to_string ( RootNode );
+
     pthread_mutex_lock( &Partage->com_http.synchro );
     GSList *liste = Partage->com_http.Slaves;
     while ( liste )
      { struct HTTP_WS_SESSION *slave = liste->data;
-       Http_ws_send_json_to_slave ( slave, RootNode );
+       soup_websocket_connection_send_text ( slave->connexion, buffer );
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock( &Partage->com_http.synchro );
-    if (unref_RootNode) Json_node_unref (RootNode);
+    g_free(buffer);
   }
 /******************************************************************************************************************************/
 /* Http_ws_destroy_session: Supprime une session WS                                                                           */
