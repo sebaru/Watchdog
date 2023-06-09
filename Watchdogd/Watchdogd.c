@@ -378,7 +378,7 @@
           MSRV_Agent_upgrade_to ( branche );
         }
      }
-    else if (Config.instance_is_master == FALSE) goto end;
+    if (Config.instance_is_master == FALSE) goto end;
 
     if ( !strcasecmp( agent_tag, "REMAP") )
      { MSRV_Remap();
@@ -661,14 +661,14 @@ end:
 
     if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb HTTP" ); }
-    if (!Demarrer_api_sync())                                                                           /* Démarrage API_SYNC */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb API_SYNC" ); }
-    if (!Demarrer_arch_sync())                                                                         /* Démarrage ARCH_SYNC */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
-     { Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
+     { if (!Demarrer_api_sync())                                                                        /* Démarrage API_SYNC */
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb API_SYNC" ); }
+       if (!Demarrer_arch_sync())                                                                      /* Démarrage ARCH_SYNC */
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
+       Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
        Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
        MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
      }
