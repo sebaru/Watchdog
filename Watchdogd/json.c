@@ -62,7 +62,8 @@
 /******************************************************************************************************************************/
  void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur )
   { JsonObject *object = json_node_get_object (RootNode);
-    json_object_set_boolean_member ( object, name, valeur );
+    if (object) { json_object_set_boolean_member ( object, name, valeur ); }
+           else { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Object is null for '%s'=%d", name, valeur ); }
   }
 /******************************************************************************************************************************/
 /* Json_node_add_double: Ajoute un enregistrement name/double dans le RootNode                                                */
