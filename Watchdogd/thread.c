@@ -78,9 +78,11 @@
     Info_new( __func__, Config.log_bus, LOG_DEBUG, "'%s': WebSocket Message received !", thread_tech_id );
     gsize taille;
 
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    gchar *buffer = g_bytes_get_data ( message_brut, &taille );
+    JsonNode *response = Json_get_from_string ( buffer );
     if (!response)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "'%s': WebSocket Message Dropped (not JSON) !", thread_tech_id );
+     { if (taille) buffer[taille-1] = 0;
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': WebSocket Message Dropped (not JSON): %s !", thread_tech_id, buffer );
        return;
      }
 
@@ -601,7 +603,7 @@
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for DLS (%p) to finish", Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;
-    while ( Partage->com_dls.TID != 0 ) pthread_join ( Partage->com_dls.TID, NULL );                       /* Attente fin DLS */
+    while ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                            /* Attente fin DLS */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for API_SYNC (%p) to finish", Partage->com_msrv.TID_api_sync );
@@ -614,7 +616,7 @@
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for HTTP (%p) to finish", Partage->com_http.TID );
     Partage->com_http.Thread_run = FALSE;
-    while ( Partage->com_http.TID != 0 ) sched_yield();                                                    /* Attente fin DLS */
+    while ( Partage->com_http.TID ) pthread_join ( Partage->com_http.Thread_run, NULL );                   /* Attente fin DLS */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, HTTP is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Fin stopper_fils" );
