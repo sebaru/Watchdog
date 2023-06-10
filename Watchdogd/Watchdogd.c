@@ -378,6 +378,7 @@
           MSRV_Agent_upgrade_to ( branche );
         }
      }
+
     if (Config.instance_is_master == FALSE) goto end;
 
     if ( !strcasecmp( agent_tag, "REMAP") )
@@ -541,7 +542,6 @@
        if (Json_has_member ( request, "debug"  )) Dls_Debug_plugin   ( plugin_tech_id, Json_get_bool ( request, "debug" ) );
        if (Json_has_member ( request, "enable" )) Dls_Activer_plugin ( plugin_tech_id, Json_get_bool ( request, "enable" ) );
      }
-    else Info_new( __func__, Config.log_msrv, LOG_ERR, "Tag inconnu: %s", agent_tag );
 
 end:
     Json_node_unref(request);

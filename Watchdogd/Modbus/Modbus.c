@@ -695,8 +695,8 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_entree_ana )
               { vars->AI[num] = element;
-                Json_node_add_double ( vars->AI[cpt], "valeur", 0.0 );
-                Json_node_add_bool   ( vars->AI[cpt], "in_range", FALSE );
+                Json_node_add_double ( vars->AI[num], "valeur", 0.0 );
+                Json_node_add_bool   ( vars->AI[num], "in_range", FALSE );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AI '%s' (%s, %s)",
                           Json_get_string ( vars->AI[num], "thread_acronyme" ),
                           Json_get_string ( vars->AI[num], "libelle" ),
@@ -718,7 +718,7 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_entree_tor )
               { vars->DI[num] = element;
-                Json_node_add_bool ( vars->DI[cpt], "etat", FALSE );
+                Json_node_add_bool ( vars->DI[num], "etat", FALSE );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New DI '%s' (%s)",
                           Json_get_string ( vars->DI[num], "thread_acronyme" ),
                           Json_get_string ( vars->DI[num], "libelle" ));
@@ -739,7 +739,7 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_sortie_ana )
               { vars->AO[num] = element;
-                Json_node_add_double ( vars->AO[cpt], "valeur", 0.0 );
+                Json_node_add_double ( vars->AO[num], "valeur", 0.0 );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AO '%s' (%s)",
                           Json_get_string ( vars->AO[num], "thread_acronyme" ),
                           Json_get_string ( vars->AO[num], "libelle" ));
