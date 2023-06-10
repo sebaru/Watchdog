@@ -98,8 +98,8 @@
   { gboolean unref_RootNode = FALSE;
     if (!RootNode) { RootNode = Json_node_create (); unref_RootNode = TRUE; }
     Json_node_add_string ( RootNode, "tag", tag );
-    if (unref_RootNode) Json_node_unref (RootNode);
     gchar *buffer = Json_node_to_string ( RootNode );
+    if (unref_RootNode) Json_node_unref (RootNode);
 
     pthread_mutex_lock( &Partage->com_http.synchro );
     GSList *liste = Partage->com_http.Slaves;
