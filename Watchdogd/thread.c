@@ -616,7 +616,7 @@
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for HTTP (%p) to finish", Partage->com_http.TID );
     Partage->com_http.Thread_run = FALSE;
-    while ( Partage->com_http.TID ) pthread_join ( Partage->com_http.Thread_run, NULL );                   /* Attente fin DLS */
+    while ( Partage->com_http.TID ) pthread_join ( Partage->com_http.TID, NULL );                          /* Attente fin DLS */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, HTTP is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Fin stopper_fils" );
