@@ -973,6 +973,7 @@
                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
                     );
+            vars->mode = MODBUS_GET_NBR_AI;
             break;
        case MODBUS_GET_NBR_AI:
              { vars->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
