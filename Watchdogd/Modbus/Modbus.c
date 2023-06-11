@@ -1001,7 +1001,6 @@
              { vars->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
                Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Sortie TOR", vars->nbr_sortie_tor );
                Modbus_load_io_config( module );                                                  /* Initialise les IO modules */
-               vars->mode = MODBUS_GET_DI;
                JsonNode *RootNode = Json_node_create ();                                          /* Envoi de la conf a l'API */
                if (!RootNode) break;
                Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
@@ -1012,7 +1011,7 @@
                JsonNode *API_result = Http_Post_to_global_API ( "/run/modbus/add/io", RootNode );
                Json_node_unref ( API_result );
                Json_node_unref ( RootNode );
-               vars->mode = MODBUS_GET_NBR_AI;
+               vars->mode = MODBUS_GET_DI;
              }
             break;
      }
