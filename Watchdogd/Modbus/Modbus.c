@@ -633,14 +633,19 @@
     requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_MULTIPLE_REGISTER;
     requete.adresse        = 0x00;
-    requete.nbr            = htons( vars->nbr_sortie_ana );                                                    /* bit count */
-    requete.data[2]        = (vars->nbr_sortie_ana*2);                                                        /* Byte count */
-    for ( cpt_byte = 3, cpt = 0; cpt<vars->nbr_sortie_ana; cpt++)
-      { /* Attention, parser selon le type de sortie ! (12 bits ? 10 bits ? conversion ??? */
-        requete.data [cpt_byte  ] = 0x30; /*Partage->aa[cpt_a].val_int>>5;*/
-        requete.data [cpt_byte+1] = 0x00; /*(Partage->aa[cpt_a].val_int & 0x1F)<<3;*/
-        cpt_byte += 2;
-      }
+    requete.nbr            = htons( vars->nbr_sortie_ana );                                                      /* bit count */
+    requete.data[2]        = (vars->nbr_sortie_ana*2);                                                          /* Byte count */
+
+    if (vars->AO)
+     { for ( cpt_byte = 3, cpt = 0; cpt<vars->nbr_sortie_ana; cpt++)
+        { if (vars->AO[cpt])
+           { gint val_int = Json_get_int ( vars->AO[cpt], "val_int" );
+             requete.data [cpt_byte  ] =  val_int >> 5;
+             requete.data [cpt_byte+1] = (val_int & 0x1F)<<3;
+             cpt_byte += 2;
+           }
+        }
+     }
 
     gint retour = write ( vars->connexion, &requete, taille+6 );
     if ( retour != taille+6 )                                                                          /* Envoi de la requete */
