@@ -378,9 +378,13 @@
           MSRV_Agent_upgrade_to ( branche );
         }
      }
-    else if (Config.instance_is_master == FALSE) goto end;
 
-    if ( !strcasecmp( agent_tag, "REMAP") ) MSRV_Remap();
+    if (Config.instance_is_master == FALSE) goto end;
+
+    if ( !strcasecmp( agent_tag, "REMAP") )
+     { MSRV_Remap();
+       Http_Send_to_slaves ( "SYNC_IO", NULL );                                  /* Synchronisation des IO depuis les threads */
+     }
     else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
     else if ( !strcasecmp( agent_tag, "SYN_CLIC") )
      { if ( !Json_has_member ( request, "tech_id" ) )
@@ -657,14 +661,14 @@ end:
 
     if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb HTTP" ); }
-    if (!Demarrer_api_sync())                                                                           /* Démarrage API_SYNC */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb API_SYNC" ); }
-    if (!Demarrer_arch_sync())                                                                         /* Démarrage ARCH_SYNC */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
-     { Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
+     { if (!Demarrer_api_sync())                                                                        /* Démarrage API_SYNC */
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb API_SYNC" ); }
+       if (!Demarrer_arch_sync())                                                                      /* Démarrage ARCH_SYNC */
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
+       Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
        Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
        MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
      }
@@ -702,11 +706,13 @@ end:
     gint cpt_1_minute  = Partage->top + 600;
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
-    sleep(10);
+    sleep(10);                                                                              /* On laisse les threads demarrer */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
+       Http_Send_to_slaves ( "SYNC_IO", NULL );                                  /* Synchronisation des IO depuis les threads */
+       sleep(5);
        if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
@@ -716,7 +722,7 @@ end:
            }
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
-           { Http_Send_ping_to_slaves();
+           { Http_Send_to_slaves ( "PING", NULL );
              Print_SQL_status();                                                          /* Print SQL status for debugging ! */
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }

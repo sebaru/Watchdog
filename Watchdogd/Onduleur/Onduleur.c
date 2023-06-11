@@ -91,8 +91,7 @@
        return(FALSE);
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE,
-              "%s connected (host='%s')", thread_tech_id, host );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s connected (host='%s')", thread_tech_id, host );
 /********************************************************* UPSDESC ************************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", name );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
@@ -199,17 +198,16 @@
   { struct UPS_VARS *vars = module->vars;
     static gchar buffer[80];
     gint retour_read;
+    if (!vars->started) return(NULL);
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *name           = Json_get_string ( module->config, "name" );
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", name, nom_var );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
-                "%s: Sending GET VAR failed (%s) error=%s", thread_tech_id,
-                buffer, (char *)upscli_strerror(&vars->upsconn) );
-       Deconnecter_UPS ( module );
-       return(NULL);
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING, "%s: Sending GET VAR failed (%s) error=%s", thread_tech_id,
+                 buffer, (char *)upscli_strerror(&vars->upsconn) );
+       goto end;
      }
 
     retour_read = upscli_readline( &vars->upsconn, buffer, sizeof(buffer) );
@@ -217,10 +215,9 @@
              "%s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", thread_tech_id,
               nom_var, retour_read, upscli_upserror(&vars->upsconn), buffer );
     if ( retour_read == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
-                "%s: Reading GET VAR result failed (%s) error=%s", thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING, "%s: Reading GET VAR result failed (%s) error=%s", thread_tech_id,
                  nom_var, (char *)upscli_strerror(&vars->upsconn) );
-       return(NULL);
+       goto end;
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
@@ -233,11 +230,8 @@
      { return(NULL);                                                         /* Variable not supported... is not an error ... */
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_WARNING,
-             "%s: Reading GET VAR %s Failed : error %s (buffer %s)", thread_tech_id,
-              nom_var, (char *)upscli_strerror(&vars->upsconn), buffer );
+end:
     Deconnecter_UPS ( module );
-    vars->date_next_connexion = Partage->top + UPS_RETRY;
     return(NULL);
   }
 /******************************************************************************************************************************/
@@ -245,7 +239,7 @@
 /* Entrée: identifiants des upss ups                                                                                       */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
- static gboolean Interroger_ups( struct THREAD *module )
+ static void Interroger_ups( struct THREAD *module )
   { struct UPS_VARS *vars = module->vars;
     gchar *reponse;
 
@@ -293,8 +287,6 @@
        Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
        Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
-
-    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Modbus_SET_DO: Met a jour une sortie TOR en fonction du jsonnode en parametre                                              */
@@ -398,11 +390,8 @@
            }
           else
            { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Interrogation ups", thread_tech_id );
-             if ( Interroger_ups ( module ) == FALSE )
-              { Deconnecter_UPS ( module );
-                vars->date_next_connexion = Partage->top + UPS_RETRY;                            /* On retente dans longtemps */
-              }
-             else vars->date_next_connexion = Partage->top + UPS_POLLING;                    /* Update toutes les xx secondes */
+             Interroger_ups ( module );
+             vars->date_next_connexion = Partage->top + UPS_POLLING;                         /* Update toutes les xx secondes */
           }
         }
      }

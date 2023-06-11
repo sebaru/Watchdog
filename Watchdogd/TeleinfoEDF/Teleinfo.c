@@ -202,15 +202,6 @@
      }
     close(vars->fd);                                                                          /* Fermeture de la connexion FD */
 
-    Json_node_unref ( vars->Adco );
-    Json_node_unref ( vars->Isous );
-    Json_node_unref ( vars->Base );
-    Json_node_unref ( vars->Hchc );
-    Json_node_unref ( vars->Hchp );
-    Json_node_unref ( vars->Iinst );
-    Json_node_unref ( vars->Imax );
-    Json_node_unref ( vars->Papp );
-
     Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

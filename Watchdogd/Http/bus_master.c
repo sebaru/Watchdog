@@ -38,9 +38,11 @@
     Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Message received !" );
     gsize taille;
 
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    gchar *buffer = g_bytes_get_data ( message_brut, &taille );
+    JsonNode *response = Json_get_from_string ( buffer );
     if (!response)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON) !" );
+     { if (taille) buffer[taille-1] = 0;
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON): %s !", buffer );
        return;
      }
 
@@ -88,37 +90,26 @@
     g_free(buffer);
   }
 /******************************************************************************************************************************/
-/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
+/* Http_Send_to_slaves: Envoi un tag aux slaves                                                                               */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_Send_ping_to_slaves ( void )
-  { pthread_mutex_lock( &Partage->com_http.synchro );
-    GSList *liste = Partage->com_http.Slaves;
-    JsonNode *RootNode=Json_node_create();
-    Json_node_add_string ( RootNode, "tag", "PING" );
-    while ( liste )
-     { struct HTTP_WS_SESSION *slave = liste->data;
-       Http_ws_send_json_to_slave ( slave, RootNode );
-       liste = g_slist_next( liste );
-     }
-    Json_node_unref ( RootNode );
-    pthread_mutex_unlock( &Partage->com_http.synchro );
-  }
-/******************************************************************************************************************************/
-/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_Send_to_slaves ( gchar *target_tech_id, JsonNode *RootNode )
-  { pthread_mutex_lock( &Partage->com_http.synchro );
+ void Http_Send_to_slaves ( gchar *tag, JsonNode *RootNode )
+  { gboolean unref_RootNode = FALSE;
+    if (!RootNode) { RootNode = Json_node_create (); unref_RootNode = TRUE; }
+    Json_node_add_string ( RootNode, "tag", tag );
+    gchar *buffer = Json_node_to_string ( RootNode );
+    if (unref_RootNode) Json_node_unref (RootNode);
+
+    pthread_mutex_lock( &Partage->com_http.synchro );
     GSList *liste = Partage->com_http.Slaves;
     while ( liste )
      { struct HTTP_WS_SESSION *slave = liste->data;
-       Http_ws_send_json_to_slave ( slave, RootNode );
+       soup_websocket_connection_send_text ( slave->connexion, buffer );
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock( &Partage->com_http.synchro );
+    g_free(buffer);
   }
 /******************************************************************************************************************************/
 /* Http_ws_destroy_session: Supprime une session WS                                                                           */
@@ -179,10 +170,11 @@
   { /*struct HTTP_WS_SESSION *slave = user_data;*/
     Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Message received !" );
     gsize taille;
-
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    gchar *buffer = g_bytes_get_data ( message_brut, &taille );
+    JsonNode *response = Json_get_from_string ( buffer );
     if (!response)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON) !" );
+     { if (taille) buffer[taille-1] = 0;
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON): %s !", buffer );
        return;
      }
 
