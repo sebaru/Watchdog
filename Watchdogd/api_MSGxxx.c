@@ -170,8 +170,7 @@
           if (histo)
            { if (Partage->top > event->msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
               { event->msg->last_on = Partage->top;
-                Json_node_add_string ( histo, "tag", "DLS_HISTO" );
-                Http_Send_to_slaves ( NULL, histo );
+                Http_Send_to_slaves ( "DLS_HISTO", histo );
                 Json_array_add_element ( Histos, histo );
               }
              else
@@ -185,8 +184,7 @@
        else if (event->etat == 0)
         { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );
           if(histo)
-           { Json_node_add_string ( histo, "tag", "DLS_HISTO" );
-             Http_Send_to_slaves ( NULL, histo );
+           { Http_Send_to_slaves ( "DLS_HISTO", histo );
              Json_array_add_element ( Histos, histo );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
                             event->msg->tech_id, event->msg->acronyme );

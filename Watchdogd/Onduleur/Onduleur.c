@@ -91,8 +91,7 @@
        return(FALSE);
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE,
-              "%s connected (host='%s')", thread_tech_id, host );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s connected (host='%s')", thread_tech_id, host );
 /********************************************************* UPSDESC ************************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", name );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
@@ -199,6 +198,7 @@
   { struct UPS_VARS *vars = module->vars;
     static gchar buffer[80];
     gint retour_read;
+    if (!vars->started) return(NULL);
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *name           = Json_get_string ( module->config, "name" );
@@ -216,8 +216,7 @@
              "%s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", thread_tech_id,
               nom_var, retour_read, upscli_upserror(&vars->upsconn), buffer );
     if ( retour_read == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
-                "%s: Reading GET VAR result failed (%s) error=%s", thread_tech_id,
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING, "%s: Reading GET VAR result failed (%s) error=%s", thread_tech_id,
                  nom_var, (char *)upscli_strerror(&vars->upsconn) );
        Deconnecter_UPS ( module );
        return(NULL);

@@ -96,7 +96,7 @@
  extern void Http_traiter_set_ai_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
  extern void Http_traiter_set_cde_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
  extern void Http_traiter_set_watchdog_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
- extern void Http_traiter_get_do ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query );
+ extern void Http_traiter_get_output ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query );
  extern void Http_traiter_syn_clic ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_syn_show ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
  extern void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
@@ -117,7 +117,6 @@
 
  extern void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client );
  extern void Http_ws_send_json_to_slave ( struct HTTP_WS_SESSION *slave, JsonNode *node );
- extern void Http_Send_ping_to_slaves ( void );
- extern void Http_Send_to_slaves ( gchar *target_tech_id, JsonNode *RootNode );
+ extern void Http_Send_to_slaves ( gchar *tag, JsonNode *RootNode );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

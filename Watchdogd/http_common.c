@@ -136,6 +136,7 @@
        gint   taille = strlen(buffer);
        Http_Add_Thread_signature ( module, soup_msg, buffer, taille );
        GBytes *body  = g_bytes_new_take ( buffer, taille );
+       Info_new( __func__, Config.log_bus, LOG_DEBUG, "Sending %s", buffer );
        soup_message_set_request_body_from_bytes ( soup_msg, "application/json; charset=UTF-8", body );
        g_bytes_unref ( body );
      } else Http_Add_Thread_signature ( module, soup_msg, NULL, 0 );
