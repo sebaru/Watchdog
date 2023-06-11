@@ -264,7 +264,7 @@
        else if (!strcasecmp ( path, "/status" ))     Http_traiter_status     ( server, msg, path, query, user_data );
        else if (!strcasecmp ( path, "/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, user_data );
        else if (!strcasecmp ( path, "/dls/run" ))    Http_traiter_dls_run    ( server, msg, path, query, user_data );
-       else if (!strcasecmp ( path, "/get_do" ))     Http_traiter_get_do     ( server, msg, path, query );
+       else if (!strcasecmp ( path, "/get_output" )) Http_traiter_get_output ( server, msg, path, query );
        else { Http_Send_json_response (msg, SOUP_STATUS_NOT_IMPLEMENTED, NULL, NULL ); return; }
      }
     else if (soup_server_message_get_method(msg) == SOUP_METHOD_POST)

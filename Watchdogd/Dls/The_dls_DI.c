@@ -117,7 +117,7 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_set_DI_from_thread_di ( JsonNode *request )
   { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "etat" )&& Json_has_member ( request, "libelle" )
+           Json_has_member ( request, "etat" ) && Json_has_member ( request, "libelle" )
           )
        ) return(FALSE);
 

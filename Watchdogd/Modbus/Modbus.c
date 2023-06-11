@@ -90,15 +90,73 @@
     Modbus_SET_DO ( module, element );
   }
 /******************************************************************************************************************************/
+/* Modbus_SET_AO: Met a jour une sortie ANA en fonction du jsonnode en parametre                                              */
+/* Entrée: le module et le buffer Josn                                                                                        */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Modbus_SET_AO ( struct THREAD *module, JsonNode *msg )
+  { struct MODBUS_VARS *vars = module->vars;
+    gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
+    gchar *msg_thread_tech_id  = Json_get_string ( msg, "thread_tech_id" );
+    gchar *msg_thread_acronyme = Json_get_string ( msg, "thread_acronyme" );
+    gchar *msg_tech_id         = Json_get_string ( msg, "tech_id" );
+    gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
+
+    if (!msg_thread_tech_id)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_tech_id" ); }
+    else if (!msg_thread_acronyme)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_acronyme" ); }
+    else if (strcasecmp (msg_thread_tech_id, thread_tech_id))
+     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Pas pour nous" ); }
+    else if (!Json_has_member ( msg, "valeur" ))
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque etat" ); }
+    else
+     { gdouble valeur = Json_get_double ( msg, "valeur" );
+       pthread_mutex_lock ( &module->synchro );
+       for (gint num=0; num<vars->nbr_sortie_ana; num++)
+        { if ( vars->AO && vars->AO[num] &&
+               !strcasecmp ( Json_get_string(vars->AO[num], "thread_acronyme"), msg_thread_acronyme ) )
+           { gint type_borne = Json_get_int ( vars->AO[num], "type_borne" );
+             gdouble min     = Json_get_int ( vars->AO[num], "min" );
+             gdouble max     = Json_get_int ( vars->AO[num], "max" );
+             if (valeur < min) valeur = min;
+             if (valeur > max) valeur = max;
+             gint new_val_int;
+             switch( type_borne )
+              { case WAGO_750550: new_val_int = (gint) (4095 * (valeur - min) / max); break;
+                default: new_val_int = 0;
+              }
+             Json_node_add_double ( vars->AO[num], "val_int", new_val_int );
+             Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_AO '%s:%s'/'%s:%s'=%f (val_int=%d)",
+                       msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, valeur, new_val_int );
+
+             break;
+           }
+        }
+       pthread_mutex_unlock ( &module->synchro );
+     }
+  }
+/******************************************************************************************************************************/
+/* Modbus_SET_AO_by_array: Initialise les AO recues par le master                                                             */
+/* Entrée: les parametres d'une JsonArrayFonction                                                                             */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Modbus_SET_AO_by_array ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+  { struct THREAD *module = user_data;
+    Modbus_SET_AO ( module, element );
+  }
+/******************************************************************************************************************************/
 /* Modbus_Sync_Output_from_master: Synchronise les Output du master vers le wago                                              */
 /* Entrée: le module                                                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Modbus_Sync_Output_from_master ( struct THREAD *module )
   { Info_new( __func__, module->Thread_debug, LOG_INFO, "Syncing Output from master" );
-    JsonNode *result = Http_Get_from_local_BUS ( module, "GET_DO" );
-    if (result && Json_has_member ( result, "douts" ) )
-     { Json_node_foreach_array_element ( result, "douts", Modbus_SET_DO_by_array, module ); }
+    JsonNode *result = Http_Get_from_local_BUS ( module, "GET_OUTPUT" );
+    if (result)
+     { if (Json_has_member ( result, "douts" ) ) Json_node_foreach_array_element ( result, "douts", Modbus_SET_DO_by_array, module );
+       if (Json_has_member ( result, "aouts" ) ) Json_node_foreach_array_element ( result, "aouts", Modbus_SET_AO_by_array, module );
+     }
     Json_node_unref ( result );
   }
 /******************************************************************************************************************************/
@@ -661,12 +719,17 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( vars->nbr_sortie_ana );                                                    /* bit count */
     requete.data[2]        = (vars->nbr_sortie_ana*2);                                                        /* Byte count */
-    for ( cpt_byte = 3, cpt = 0; cpt<vars->nbr_sortie_ana; cpt++)
-      { /* Attention, parser selon le type de sortie ! (12 bits ? 10 bits ? conversion ??? */
-        requete.data [cpt_byte  ] = 0x30; /*Partage->aa[cpt_a].val_int>>5;*/
-        requete.data [cpt_byte+1] = 0x00; /*(Partage->aa[cpt_a].val_int & 0x1F)<<3;*/
-        cpt_byte += 2;
-      }
+
+    if (vars->AO)
+     { for ( cpt_byte = 3, cpt = 0; cpt<vars->nbr_sortie_ana; cpt++)
+        { if (vars->AO[cpt])
+           { gint val_int = Json_get_int ( vars->AO[cpt], "val_int" );
+             requete.data [cpt_byte  ] =  val_int >> 5;
+             requete.data [cpt_byte+1] = (val_int & 0x1F)<<3;
+             cpt_byte += 2;
+           }
+        }
+     }
 
     gint retour = write ( vars->connexion, &requete, taille+6 );
     if ( retour != taille+6 )                                                                          /* Envoi de la requete */
