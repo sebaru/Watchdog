@@ -53,9 +53,8 @@
  static void Traitement_signaux( int num )
   { char chaine[50];
     if (num == SIGALRM)
-     { Partage->top++;
-       if (Partage->com_msrv.Thread_run != TRUE) return;
-
+     { if (!(Partage && Partage->com_msrv.Thread_run)) return;
+       Partage->top++;
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "Timer: Partage->top = 0 !!" ); }
 
@@ -769,6 +768,12 @@ end:
     pthread_mutex_destroy( &Partage->com_db.synchro );
     pthread_mutex_destroy( &Partage->abonnements_synchro );
 
+/****************************************************** Arret du timer ********************************************************/
+    timer.it_value.tv_sec  = timer.it_interval.tv_sec  = 0;
+    timer.it_value.tv_usec = timer.it_interval.tv_usec = 0;
+    setitimer( ITIMER_REAL, &timer, NULL );
+
+/****************************************************** Arret des signaux *****************************************************/
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
