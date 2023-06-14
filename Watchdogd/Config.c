@@ -172,11 +172,13 @@
     g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", DEFAUT_DB_DATABASE  );
     g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD  );
     g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  );
+
     gkf = g_key_file_new();
 
     g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", "/etc/watchdogd.abls.conf" );
     if (!g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error))
      { printf("Unable to parse config file %s, error %s\n", Config.config_file, error->message );
+       g_key_file_free(gkf);
        g_error_free( error );
        return;
      }

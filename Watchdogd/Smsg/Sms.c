@@ -254,6 +254,7 @@
                 Json_get_string ( module->config, "ovh_application_secret" ),
                 Json_get_string ( module->config, "ovh_consumer_key" ),
                 method, query, body, timestamp );
+    Info_new ( __func__, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
     g_free(body);
 
     mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
@@ -273,7 +274,6 @@
 
 /********************************************************* Envoi de la requete ************************************************/
     SoupMessage *soup_msg = soup_message_new ( method, query );
-    Info_new ( __func__, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
     SoupMessageHeaders *headers = soup_message_get_request_headers( soup_msg );
     soup_message_headers_append ( headers, "X-Ovh-Application", Json_get_string ( module->config, "ovh_application_key" ) );
     soup_message_headers_append ( headers, "X-Ovh-Consumer",    Json_get_string ( module->config, "ovh_consumer_key" ) );
