@@ -30,14 +30,13 @@
 
  #define HTTP_DEFAUT_FILE_CERT         "https_bus_cert.pem"
  #define HTTP_DEFAUT_FILE_KEY          "https_bus_key.pem"
- #define HTTP_DEFAUT_TCP_PORT          5560
+ #define HTTP_DEFAUT_TCP_PORT          5559
 
  struct COM_HTTP                                                                     /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
-    SoupServer *socket;
     SoupServer *local_socket;
     GMainLoop *loop;
     GMainContext *loop_context;
@@ -46,44 +45,12 @@
     gint num_session;
   };
 
- struct WS_CLIENT_SESSION
-  { SoupWebsocketConnection *connexion;
-    GSList *Liste_bit_visuels;
-    struct HTTP_CLIENT_SESSION *http_session;
-  };
-
- struct HTTP_CLIENT_SESSION
-  { gint id;
-    gchar username[32];
-    gchar appareil[32];
-    gchar useragent[128];
-    gchar host[32];
-    gchar wtd_session[42];
-    gint  access_level;
-    GSList *Liste_bit_cadrans;
-    time_t last_request;
-    GSList *liste_ws_clients;
-  };
-
  struct HTTP_WS_SESSION
   { SoupWebsocketConnection *connexion;
   };
 
-/******************************************************************************************************************************/
- struct HTTP_CADRAN
-  { gchar tech_id[32];
-    gchar acronyme[64];
-    gchar unite[32];
-    gchar classe[12];
-    gpointer dls_data;
-    gdouble  valeur;
-    gboolean in_range;
-    gint last_update;
-  };
-
 /*************************************************** Définitions des prototypes ***********************************************/
 
- extern struct HTTP_CLIENT_SESSION *Http_print_request ( SoupServer *server, SoupServerMessage *msg, const char *path );
  extern void Run_HTTP ( void );
 
  extern void Http_traiter_status  ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
@@ -97,10 +64,6 @@
  extern void Http_traiter_set_cde_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
  extern void Http_traiter_set_watchdog_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
  extern void Http_traiter_get_output ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query );
- extern void Http_traiter_syn_clic ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_syn_show ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
-                                                     SoupWebsocketConnection* connection, gpointer user_data );
 
  extern JsonNode *Http_Msg_to_Json ( SoupServerMessage *msg );
  extern JsonNode *Http_Get_from_local_BUS ( struct THREAD *module, gchar *uri );
@@ -115,7 +78,6 @@
  extern void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
                                                          SoupWebsocketConnection* connection, gpointer user_data );
 
- extern void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client );
  extern void Http_ws_send_json_to_slave ( struct HTTP_WS_SESSION *slave, JsonNode *node );
  extern void Http_Send_to_slaves ( gchar *tag, JsonNode *RootNode );
  #endif

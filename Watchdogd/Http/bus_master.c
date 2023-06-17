@@ -29,57 +29,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Http_ws_on_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket                              */
-/* Entrée: les parametres de la libsoup                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_ws_on_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
-  { struct WS_CLIENT_SESSION *client = user_data;
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Message received !" );
-    gsize taille;
-
-    gchar *buffer = g_bytes_get_data ( message_brut, &taille );
-    JsonNode *response = Json_get_from_string ( buffer );
-    if (!response)
-     { if (taille) buffer[taille-1] = 0;
-       Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON): %s !", buffer );
-       return;
-     }
-
-    if (!Json_has_member ( response, "zmq_tag" ))
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (no 'zmq_tag') !" );
-       Json_node_unref(response);
-       return;
-     }
-
-    gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
-
-    if(!strcasecmp(zmq_tag,"CONNECT"))
-     { if ( ! (Json_has_member( response, "wtd_session") ))
-        { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket without wtd_session !" ); }
-       else
-        { gchar *wtd_session = Json_get_string ( response, "wtd_session");
-          GSList *liste = Partage->com_http.liste_http_clients;
-          while ( liste )                                                      /* Recherche de la session HTTP correspondante */
-           { struct HTTP_CLIENT_SESSION *http_session = liste->data;
-             if (!strcmp(http_session->wtd_session, wtd_session))
-              { client->http_session = http_session;
-                pthread_mutex_lock( &Partage->com_http.synchro );
-                http_session->liste_ws_clients = g_slist_prepend ( http_session->liste_ws_clients, client );
-                pthread_mutex_unlock( &Partage->com_http.synchro );
-                Info_new( __func__, Config.log_msrv, LOG_WARNING, "session found for '%s' !", http_session->username );
-                break;
-              }
-             liste = g_slist_next ( liste );
-           }
-        }
-     }
-
-    if (!client->http_session)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Not authorized !" ); }
-    Json_node_unref(response);
-  }
-/******************************************************************************************************************************/
 /* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
@@ -110,56 +59,6 @@
      }
     pthread_mutex_unlock( &Partage->com_http.synchro );
     g_free(buffer);
-  }
-/******************************************************************************************************************************/
-/* Http_ws_destroy_session: Supprime une session WS                                                                           */
-/* Entrée: la WS                                                                                                              */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client )
-  { if (client->http_session)
-     { struct HTTP_CLIENT_SESSION *session = client->http_session;
-       pthread_mutex_lock( &Partage->com_http.synchro );
-       session->liste_ws_clients = g_slist_remove ( session->liste_ws_clients, client );
-       pthread_mutex_unlock( &Partage->com_http.synchro );
-       g_slist_free ( client->Liste_bit_visuels );
-     }
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Session closed !" );
-    g_object_unref(client->connexion);
-    g_free(client);
-  }
-/******************************************************************************************************************************/
-/* Http_ws_on_closed: Traite une deconnexion                                                                                  */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_ws_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { struct WS_CLIENT_SESSION *client = user_data;
-    Http_ws_destroy_session ( client );
-  }
- static void Http_ws_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Error received %p!", self );
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_websocket: Traite une requete websocket                                                                       */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
-                                              SoupWebsocketConnection* connexion, gpointer user_data )
-  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Opened %p state %d!", connexion,
-              soup_websocket_connection_get_state (connexion) );
-    struct WS_CLIENT_SESSION *client = g_try_malloc0( sizeof(struct WS_CLIENT_SESSION) );
-    if(!client)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Memory error. Closing !" );
-       return;
-     }
-    client->connexion = connexion;
-    g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_on_message), client );
-    g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_closed), client );
-    g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_error), client );
-    /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
-    g_object_ref(connexion);
   }
 /******************************************************************************************************************************/
 /* Http_ws_on_slave_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket slave                         */
