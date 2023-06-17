@@ -190,11 +190,11 @@
                             event->msg->tech_id, event->msg->acronyme );
         }
        g_free(event);
-       gchar *buf = Json_node_to_string ( RootNode );
-       soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
-       g_free(buf);
        cpt++;
      }
+    gchar *buf = Json_node_to_string ( RootNode );
+    soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
+    g_free(buf);
     Json_node_unref ( RootNode );
     if (cpt)
      { gint reste = g_slist_length(Partage->com_msrv.liste_msg);
