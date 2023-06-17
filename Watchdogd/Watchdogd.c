@@ -722,7 +722,6 @@ end:
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
            { Http_Send_to_slaves ( "PING", NULL );
-             Print_SQL_status();                                                          /* Print SQL status for debugging ! */
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 

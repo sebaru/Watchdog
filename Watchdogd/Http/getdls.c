@@ -116,14 +116,14 @@
   { GSList *liste;
     JsonArray *array;
 
-    gchar *tech_id_src = g_hash_table_lookup ( query, "tech_id" );
-    gchar *classe_src  = g_hash_table_lookup ( query, "classe" );
-    if (! (tech_id_src && classe_src))
+    gchar *tech_id = g_hash_table_lookup ( query, "tech_id" );
+    gchar *classe  = g_hash_table_lookup ( query, "classe" );
+    if (! (tech_id && classe))
      { soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id_src );
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
     if (!plugin)
      { soup_server_message_set_status (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found");
        return;
@@ -134,9 +134,6 @@
      { soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
-
-    gchar *tech_id = Normaliser_chaine ( tech_id_src );
-    gchar *classe  = Normaliser_chaine ( classe_src );
 
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_node_add_string ( dls_run, "tech_id", tech_id );
@@ -302,8 +299,6 @@
         }
      }
 /*------------------------------------------------------- fin ----------------------------------------------------------------*/
-    g_free(tech_id);
-    g_free(classe);
     Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, dls_run );
   }
 /******************************************************************************************************************************/
@@ -328,9 +323,9 @@
        return;
      }
 
-    gchar *tech_id  = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    gchar *acronyme = Normaliser_chaine ( Json_get_string ( request, "acronyme" ) );
-    gchar *classe   = Normaliser_chaine ( Json_get_string ( request, "classe" ) );
+    gchar *tech_id  = Json_get_string ( request, "tech_id" );
+    gchar *acronyme = Json_get_string ( request, "acronyme" );
+    gchar *classe   = Json_get_string ( request, "classe" );
     if ( !strcasecmp ( classe, "DI" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
        struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
@@ -373,9 +368,6 @@
        Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
      }
     else soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Wrong Class" );
-    g_free(tech_id);
-    g_free(acronyme);
-    g_free(classe);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_dls_run_acquitter: Acquitte un dls                                                                            */

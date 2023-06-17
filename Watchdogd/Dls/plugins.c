@@ -148,7 +148,7 @@
     unlink(source_file);
     gint id_fichier = open( source_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-     { Info_new( __func__, Config.log_trad, LOG_WARNING, "Open file '%s' for write failed (%s)",
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Open file '%s' for write failed (%s)",
                  source_file, strerror(errno) );
        close(id_fichier);
        return(FALSE);
@@ -158,11 +158,11 @@
     gint retour_write = write( id_fichier, codec, taille_codec );
     close(id_fichier);
     if (retour_write<0)
-     { Info_new( __func__, Config.log_trad, LOG_ERR, "Write %d bytes to file '%s' failed (%s)",
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Write %d bytes to file '%s' failed (%s)",
                  taille_codec, source_file, strerror(errno) );
        return(FALSE);
      }
-    Info_new( __func__, Config.log_trad, LOG_DEBUG, "Write %d bytes to file '%s' OK.", taille_codec, source_file );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Write %d bytes to file '%s' OK.", taille_codec, source_file );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -177,11 +177,11 @@
     gint top = Partage->top;
     g_snprintf( source_file, sizeof(source_file), "Dls/%s.c", tech_id );
     g_snprintf( target_file, sizeof(target_file),  "Dls/libdls%s.so", tech_id );
-    Info_new( __func__, Config.log_trad, LOG_DEBUG, "Starting GCC." );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Starting GCC." );
 
     gint pidgcc = fork();
     if (pidgcc<0)
-     { Info_new( __func__, Config.log_trad, LOG_WARNING, "Fils: envoi erreur Fork GCC '%s'", tech_id );
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: envoi erreur Fork GCC '%s'", tech_id );
        return(FALSE);
      }
     else if (!pidgcc)
@@ -195,13 +195,13 @@
        _exit(0);
      }
 
-    Info_new( __func__, Config.log_trad, LOG_DEBUG, "Waiting for gcc to finish pid %d", pidgcc );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Waiting for gcc to finish pid %d", pidgcc );
     gint wcode;
     waitpid(pidgcc, &wcode, 0 );
     gint gcc_return_code = WEXITSTATUS(wcode);
     if (gcc_return_code == 1) unlink(target_file);
-    Info_new( __func__, Config.log_trad, LOG_DEBUG, "gcc pid %d is down with return code %d", pidgcc, gcc_return_code );
-    Info_new( __func__, Config.log_trad, LOG_INFO, "Compilation of '%s' finished in %06.1fs", tech_id, (Partage->top - top)/10.0 );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "gcc pid %d is down with return code %d", pidgcc, gcc_return_code );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Compilation of '%s' finished in %06.1fs", tech_id, (Partage->top - top)/10.0 );
     return(TRUE);
   }
 /******************************************************************************************************************************/

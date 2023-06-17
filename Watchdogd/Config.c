@@ -43,8 +43,6 @@
  void Lire_config ( int argc, char *argv[] )
   { GError *error = NULL;
     gchar *chaine;
-    GKeyFile *gkf;
-    gint num;
 
     memset ( &Config, 0, sizeof(struct CONFIG) );
     g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "localhost" );
@@ -163,53 +161,6 @@
     if (single)          Config.single      = TRUE;                                            /* Demarrage en mode single ?? */
     if (log_level!=-1)   Config.log_level   = log_level;
     fflush(0);
-
-
-#warning to be deleted when removing old code
-    Config.db_port            = DEFAUT_DB_PORT;
-
-    g_snprintf( Config.db_hostname, sizeof(Config.db_hostname), "%s", DEFAUT_DB_HOST  );
-    g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", DEFAUT_DB_DATABASE  );
-    g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD  );
-    g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  );
-
-    gkf = g_key_file_new();
-
-    g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", "/etc/watchdogd.abls.conf" );
-    if (!g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error))
-     { printf("Unable to parse config file %s, error %s\n", Config.config_file, error->message );
-       g_key_file_free(gkf);
-       g_error_free( error );
-       return;
-     }
-/******************************************************* Partie GLOBAL ********************************************************/
-    printf("Using config file %s.\n", Config.config_file );
-
-    chaine = g_key_file_get_string ( gkf, "GLOBAL", "library_dir", NULL );
-    if (chaine)
-     { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", chaine ); g_free(chaine); }
-
-/******************************************************** Partie DATABASE *****************************************************/
-    num           = g_key_file_get_integer ( gkf, "DATABASE", "port", NULL );
-    if (num) Config.db_port = num;
-
-    chaine = g_key_file_get_string ( gkf, "DATABASE", "hostname", NULL );
-    if (chaine)
-     { g_snprintf( Config.db_hostname, sizeof(Config.db_hostname), "%s", chaine ); g_free(chaine); }
-
-    chaine = g_key_file_get_string ( gkf, "DATABASE", "database", NULL );
-    if (chaine)
-     { g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", chaine ); g_free(chaine); }
-
-    chaine = g_key_file_get_string ( gkf, "DATABASE", "password", NULL );
-    if (chaine)
-     { g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", chaine ); g_free(chaine); }
-
-    chaine = g_key_file_get_string ( gkf, "DATABASE", "username", NULL );
-    if (chaine)
-     { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
-
-    g_key_file_free(gkf);
   }
 /******************************************************************************************************************************/
 /* Print_config: Affichage (enfin log) la config actuelle en parametre                                                        */
@@ -218,17 +169,10 @@
  void Print_config ( void )
   {
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db hostname          %s", Config.db_hostname );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db password          *******" );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config headless             %d", Config.headless );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_db               %d", Config.log_db );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_bus              %d", Config.log_bus );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_trad             %d", Config.log_trad );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_msrv             %d", Config.log_msrv );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );

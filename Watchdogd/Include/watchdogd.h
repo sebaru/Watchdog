@@ -35,15 +35,14 @@
  #include <uuid/uuid.h>
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
+ #include "Erreur.h"
  #include "Json.h"
  #include "Dls.h"
  #include "Thread.h"
- #include "Db.h"
  #include "config.h"
  #include "Http.h"
  #include "Config.h"
  #include "Archive.h"
- #include "Mnemonique_DB.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */
 
