@@ -131,7 +131,7 @@
        acronyme = Json_get_string ( request, "acronyme" );
      }
 
-    struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
+    struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
     if (!bit)
      { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_DI from '%s': '%s:%s'/'%s:%s' not found",
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
