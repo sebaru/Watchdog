@@ -292,13 +292,13 @@
      { struct THREAD *module = Partage->com_msrv.Threads->data;
        if (module->dl_handle) dlclose( module->dl_handle );
        pthread_mutex_destroy( &module->synchro );
-       Json_node_unref ( module->config );
 
        pthread_mutex_lock ( &Partage->com_msrv.synchro );
        Partage->com_msrv.Threads = g_slist_remove( Partage->com_msrv.Threads, module );
        pthread_mutex_unlock ( &Partage->com_msrv.synchro );
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': thread unloaded", Json_get_string ( module->config, "thread_tech_id" ) );
+       Json_node_unref ( module->config );
        g_free( module );
      }
 
