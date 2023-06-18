@@ -402,40 +402,6 @@
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Acquitter_plugin ( plugin_tech_id );
      }
-    else if ( !strcasecmp( agent_tag, "DLS_MNEMO_SET") )
-     { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_MNEMO_SET: tech_id is missing" );
-          goto end;
-        }
-       if ( !Json_has_member ( request, "acronyme" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_MNEMO_SET: acronyme is missing" );
-          goto end;
-        }
-       if ( !Json_has_member ( request, "archivage" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_MNEMO_SET: archivage is missing" );
-          goto end;
-        }
-       if ( !Json_has_member ( request, "classe" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_MNEMO_SET: classe is missing" );
-          goto end;
-        }
-       gchar *tech_id  = Json_get_string ( request, "tech_id" );
-       gchar *acronyme = Json_get_string ( request, "acronyme" );
-       gchar *classe   = Json_get_string ( request, "classe" );
-       gint  archivage = Json_get_int    ( request, "archivage" );
-       if (!strcasecmp ( classe, "CI" ))
-        { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
-          if (bit) bit->archivage = archivage;
-        }
-       else if (!strcasecmp ( classe, "CH" ))
-        { struct DLS_CH *bit = Dls_data_lookup_CH ( tech_id, acronyme );
-          if (bit) bit->archivage = archivage;
-        }
-       else if (!strcasecmp ( classe, "R" ))
-        { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
-          if (bit) bit->archivage = archivage;
-        }
-     }
     else if ( !strcasecmp( agent_tag, "DLS_COMPIL") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
@@ -494,6 +460,13 @@
                    Dls_cadran_send_REGISTRE_to_API ( bit );              /* Envoi la valeur a date pour update cadran sur ihm */
                  }
               }
+             else if (!strcasecmp ( classe, "AO" ))
+              { struct DLS_AO *bit = Dls_data_lookup_AO ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_AO_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
+              }
              else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Abonnement: bit '%s:%s' inconnu", tech_id, acronyme );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
           cadrans = g_list_next(cadrans);
@@ -526,6 +499,10 @@
            }
           else if (!strcasecmp ( classe, "REGISTRE" ))
            { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else if (!strcasecmp ( classe, "AO" ))
+           { struct DLS_AO *bit = Dls_data_lookup_AO ( tech_id, acronyme );
              if (bit) bit->abonnement = FALSE;
            }
           else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Désabonnement: bit '%s:%s' inconnu", tech_id, acronyme );

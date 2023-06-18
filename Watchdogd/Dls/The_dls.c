@@ -384,6 +384,7 @@
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
           Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_archive_queue, 1.0*Partage->archive_liste_taille, TRUE );
+          Dls_foreach_plugins ( NULL, Dls_run_archivage );                        /* Archivage au mieux toutes les 5 secondes */
           last_top_5sec = Partage->top;
         }
 /******************************************************************************************************************************/
@@ -417,7 +418,6 @@
        Partage->com_dls.next_bit_alerte_fixe = 0;
        Partage->com_dls.next_bit_alerte_fugitive = 0;
        Dls_foreach_plugins ( NULL, Dls_run_plugin );
-       Dls_foreach_plugins ( NULL, Dls_run_archivage );
 
        Partage->com_dls.Top_check_horaire = FALSE;                        /* Controle horaire effectué un fois par minute max */
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
@@ -427,8 +427,8 @@
        Partage->com_dls.bit_alerte_fugitive = Partage->com_dls.next_bit_alerte_fugitive;
        Dls_data_clear_HORLOGE();
 
-/******************************************** Gestion des 1000 tours DLS par seconde ******************************************/
        pthread_mutex_unlock( &Partage->com_dls.synchro );                      /* Fin de Zone de protection des bits internes */
+/******************************************** Gestion des 1000 tours DLS par seconde ******************************************/
        Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */
        usleep(Partage->com_dls.temps_sched);
        sched_yield();

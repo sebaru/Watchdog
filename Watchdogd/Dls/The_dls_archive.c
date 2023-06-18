@@ -61,6 +61,20 @@
        liste = g_slist_next ( liste );
      }
 
+    liste = plugin->Dls_data_AO;
+    while ( liste )
+     { struct DLS_AO *bit = liste->data;
+       if ( (bit->archivage == 1 && bit->last_arch + 50     <= Partage->top) ||                      /* Toutes les 5 secondes */
+            (bit->archivage == 2 && bit->last_arch + 600    <= Partage->top) ||                         /* Toutes les minutes */
+            (bit->archivage == 3 && bit->last_arch + 36000  <= Partage->top) ||                          /* Toutes les heures */
+            (bit->archivage == 4 && bit->last_arch + 864000 <= Partage->top) || bit->last_arch == 0         /* Tous les jours */
+          )
+        { Ajouter_arch( bit->tech_id, bit->acronyme, bit->valeur );                                    /* Archivage si besoin */
+          bit->last_arch = Partage->top;
+        }
+       liste = g_slist_next ( liste );
+     }
+
     liste = plugin->Dls_data_CI;
     while ( liste )
      { struct DLS_CI *bit = liste->data;

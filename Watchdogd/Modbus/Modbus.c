@@ -803,9 +803,10 @@
              if ( 0 <= num && num < vars->nbr_sortie_ana )
               { vars->AO[num] = element;
                 Json_node_add_double ( vars->AO[num], "valeur", 0.0 );
-                Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AO '%s' (%s)",
+                Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AO '%s' (%s, %s)",
                           Json_get_string ( vars->AO[num], "thread_acronyme" ),
-                          Json_get_string ( vars->AO[num], "libelle" ));
+                          Json_get_string ( vars->AI[num], "libelle" ),
+                          Json_get_string ( vars->AI[num], "unite" ) );
               } else Info_new( __func__, module->Thread_debug, LOG_WARNING, "map AO: num %d out of range '%d'",
                                num, vars->nbr_sortie_ana );
            }

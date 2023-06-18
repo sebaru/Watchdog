@@ -71,13 +71,11 @@
   { gchar   acronyme[64];
     gchar   tech_id[32];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
-    gdouble min; /* a virer */
-    gdouble max;
-    guint   type;                                                                                  /* Type de gestion de l'EA */
     gchar   unite[32];                                                                           /* Km, h, ° ... */
     gdouble valeur;
     guint   archivage;
     guint   last_arch;                                                                         /* Date de la derniere archive */
+    gboolean abonnement;                                                 /* Devons-nous envoyer les valeurs en live à l'API ? */
   };
 
  struct DLS_WATCHDOG

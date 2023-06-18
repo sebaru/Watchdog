@@ -86,7 +86,6 @@
   { if (!ao) return(0.0);
     return( ao->valeur );
   }
-
 /******************************************************************************************************************************/
 /* Met à jour la sortie analogique à partir de sa valeur avant mise a l'echelle                                               */
 /* Sortie : Néant                                                                                                             */
@@ -101,6 +100,20 @@
     Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_AO '%s:%s'=%f",
               (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->valeur );
+    Partage->audit_bit_interne_per_sec++;
+  }
+/******************************************************************************************************************************/
+/* Dls_cadran_send_AO_to_API: Ennvoi une AO à l'API pour affichage des cadrans                                                */
+/* Entrées: la structure DLs_AO                                                                                               */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_cadran_send_AO_to_API ( struct DLS_AO *bit )
+  { if (!bit) return;
+    JsonNode *RootNode = Json_node_create();
+    Dls_AO_to_json ( RootNode, bit );
+    pthread_mutex_lock ( &Partage->abonnements_synchro );
+    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
+    pthread_mutex_unlock ( &Partage->abonnements_synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_AO_to_json: Convertir un AO en JSON                                                                                    */
@@ -108,13 +121,12 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit )
-  { Json_node_add_string ( element, "tech_id",      bit->tech_id );
+  { Json_node_add_string ( element, "classe",       "AO" );
+    Json_node_add_string ( element, "tech_id",      bit->tech_id );
     Json_node_add_string ( element, "acronyme",     bit->acronyme );
     Json_node_add_double ( element, "valeur_brute", bit->valeur );
-    Json_node_add_double ( element, "valeur_min",   bit->min );
-    Json_node_add_double ( element, "valeur_max",   bit->max );
     Json_node_add_double ( element, "valeur",       bit->valeur );
-    Json_node_add_int    ( element, "type",         bit->type );
+    Json_node_add_int    ( element, "archivage",    bit->archivage );
   }
 /******************************************************************************************************************************/
 /* Dls_all_AO_to_json: Transforme tous les bits en JSON                                                                       */

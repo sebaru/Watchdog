@@ -41,8 +41,7 @@
 /* Sortie: Mise à jour de la structure de configuration                                                                       */
 /******************************************************************************************************************************/
  void Lire_config ( int argc, char *argv[] )
-  { GError *error = NULL;
-    gchar *chaine;
+  { gchar *chaine;
 
     memset ( &Config, 0, sizeof(struct CONFIG) );
     g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "localhost" );

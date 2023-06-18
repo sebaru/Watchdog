@@ -194,6 +194,7 @@
  extern void Dls_data_AO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit );
+ extern void Dls_cadran_send_AO_to_API ( struct DLS_AO *bit );
 
                                                                                                       /* Dans The_dls_TEMPO.c */
  extern void Dls_data_TEMPO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );

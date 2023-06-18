@@ -119,16 +119,12 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request )
   { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
-           Json_has_member ( request, "unite" ) && Json_has_member ( request, "archivage" ) &&
-           Json_has_member ( request, "libelle" )
+           Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" )
           )
        ) return(FALSE);
 
     gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
     gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-    gchar *libelle         = Json_get_string ( request, "libelle" );
-    gchar *unite           = Json_get_string ( request, "unite" );
     gchar *tech_id         = thread_tech_id;
     gchar *acronyme        = thread_acronyme;
 
@@ -136,18 +132,21 @@
      { tech_id  = Json_get_string ( request, "tech_id" );
        acronyme = Json_get_string ( request, "acronyme" );
      }
+
+    struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
+    if (!bit)
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_AI from '%s': '%s:%s'/'%s:%s' not found",
+                 thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
+       return(FALSE);
+     }
+
     Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-              Json_get_double ( request, "valeur" ), unite,
-              Json_get_bool ( request, "in_range" ), libelle );
-    struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
-    if (bit)
-     { Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-       bit->archivage = Json_get_int ( request, "archivage" );
-       g_snprintf ( bit->unite,   sizeof(bit->unite),   "%s", unite );
-       g_snprintf ( bit->libelle, sizeof(bit->libelle), "%s", libelle );
-       if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );
-     }
+              Json_get_double ( request, "valeur" ), bit->unite,
+              Json_get_bool ( request, "in_range" ), bit->libelle );
+    Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
+    if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );
+
     return(TRUE);
   }
 /******************************************************************************************************************************/

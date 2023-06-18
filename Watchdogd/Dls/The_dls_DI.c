@@ -117,7 +117,7 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_set_DI_from_thread_di ( JsonNode *request )
   { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "etat" ) && Json_has_member ( request, "libelle" )
+           Json_has_member ( request, "etat" )
           )
        ) return(FALSE);
 
@@ -125,17 +125,23 @@
     gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
     gchar *tech_id         = thread_tech_id;
     gchar *acronyme        = thread_acronyme;
-    gchar *libelle         = Json_get_string ( request, "libelle" );
 
     if (MSRV_Map_from_thread ( request ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) )
      { tech_id  = Json_get_string ( request, "tech_id" );
        acronyme = Json_get_string ( request, "acronyme" );
      }
+
+    struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
+    if (!bit)
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_DI from '%s': '%s:%s'/'%s:%s' not found",
+                 thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
+       return(FALSE);
+     }
+
     Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI from '%s': '%s:%s'/'%s:%s'=%d (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-              Json_get_bool ( request, "etat" ), libelle );
-    struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
-    if (bit) Dls_data_set_DI ( bit, Json_get_bool ( request, "etat" ) );
+              Json_get_bool ( request, "etat" ), bit->libelle );
+    Dls_data_set_DI ( bit, Json_get_bool ( request, "etat" ) );
     return(TRUE);
   }
 /******************************************************************************************************************************/

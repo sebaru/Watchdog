@@ -95,15 +95,6 @@
                  (vars ? vars->num_ligne : -1), reg->tech_id, reg->acronyme, reg->valeur );
        Partage->audit_bit_interne_per_sec++;
      }
-
-    if ( (reg->archivage == 1 && reg->last_arch + 50     <= Partage->top) ||
-         (reg->archivage == 2 && reg->last_arch + 600    <= Partage->top) ||
-         (reg->archivage == 3 && reg->last_arch + 36000  <= Partage->top) ||
-         (reg->archivage == 4 && reg->last_arch + 864000 <= Partage->top)
-       )
-     { Ajouter_arch( reg->tech_id, reg->acronyme, reg->valeur );                                       /* Archivage si besoin */
-       reg->last_arch = Partage->top;
-     }
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_REGISTRE: Remonte la valeur d'un registre                                                                     */

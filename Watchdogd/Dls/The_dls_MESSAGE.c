@@ -118,13 +118,13 @@
           pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Ajout dans la liste de msg a traiter */
           Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
-        } else Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
+        } else Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_ERR,
                          "Memory error for MSG'%s:%s' = 0 (etat)", msg->tech_id, msg->acronyme );
      }
 
     struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );     /* Dans tous les cas, on traite */
     if (!event)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
+     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_ERR,
                 "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
        return;
      }
