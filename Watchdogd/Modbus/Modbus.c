@@ -116,9 +116,9 @@
        for (gint num=0; num<vars->nbr_sortie_ana; num++)
         { if ( vars->AO && vars->AO[num] &&
                !strcasecmp ( Json_get_string(vars->AO[num], "thread_acronyme"), msg_thread_acronyme ) )
-           { gint type_borne = Json_get_int ( vars->AO[num], "type_borne" );
-             gdouble min     = Json_get_int ( vars->AO[num], "min" );
-             gdouble max     = Json_get_int ( vars->AO[num], "max" );
+           { gint type_borne = Json_get_int    ( vars->AO[num], "type_borne" );
+             gdouble min     = Json_get_double ( vars->AO[num], "min" );
+             gdouble max     = Json_get_double ( vars->AO[num], "max" );
              if (valeur < min) valeur = min;
              if (valeur > max) valeur = max;
              gint new_val_int;
@@ -126,10 +126,9 @@
               { case WAGO_750550: new_val_int = (gint) (4095 * (valeur - min) / max); break;
                 default: new_val_int = 0;
               }
-             Json_node_add_double ( vars->AO[num], "val_int", new_val_int );
+             Json_node_add_int ( vars->AO[num], "val_int", new_val_int );
              Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_AO '%s:%s'/'%s:%s'=%f (val_int=%d)",
                        msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, valeur, new_val_int );
-
              break;
            }
         }
@@ -803,6 +802,7 @@
              if ( 0 <= num && num < vars->nbr_sortie_ana )
               { vars->AO[num] = element;
                 Json_node_add_double ( vars->AO[num], "valeur", 0.0 );
+                Json_node_add_int    ( vars->AO[num], "val_int", 0 );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AO '%s' (%s, %s)",
                           Json_get_string ( vars->AO[num], "thread_acronyme" ),
                           Json_get_string ( vars->AI[num], "libelle" ),
