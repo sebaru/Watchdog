@@ -93,6 +93,7 @@
 /******************************************************************************************************************************/
  void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *ao, gdouble valeur )
   { if (!ao) return;
+    if (ao->valeur == valeur) return;
     ao->valeur = valeur;                                                            /* Archive au mieux toutes les 5 secondes */
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
     Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
