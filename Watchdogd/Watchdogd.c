@@ -392,7 +392,8 @@
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end; }
        gchar *tech_id  = Json_get_string ( request, "tech_id" );
        gchar *acronyme = Json_get_string ( request, "acronyme" );
-       Envoyer_commande_dls_data ( tech_id, acronyme );
+       struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
+       Dls_data_set_DI_pulse ( NULL, bit );
      }
     else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") )
      { if ( !Json_has_member ( request, "tech_id" ) )

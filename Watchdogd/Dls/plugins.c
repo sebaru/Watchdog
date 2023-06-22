@@ -726,7 +726,8 @@ end:
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { Info_new( __func__, plugin->vars.debug, LOG_NOTICE,
                  "'%s' acquitté ('%s')", plugin->tech_id, plugin->shortname );
-       Envoyer_commande_dls_data ( plugin->tech_id, "OSYN_ACQUIT" );
+       struct DLS_DI *bit = Dls_data_lookup_DI ( plugin->tech_id, "OSYN_ACQUIT" );
+       Dls_data_set_DI_pulse ( &plugin->vars, bit );
      }
   }
 /******************************************************************************************************************************/

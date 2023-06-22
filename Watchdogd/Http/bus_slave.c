@@ -358,7 +358,8 @@ end:
     Info_new( __func__, Config.log_bus, LOG_INFO,
               "SET_CDE from '%s': '%s:%s'=1", thread_tech_id,
               Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
-    Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
+    struct DLS_DI *bit = Dls_data_lookup_DI ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
+    Dls_data_set_DI_pulse ( NULL, bit );
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "CDE set", NULL );
   }
 /******************************************************************************************************************************/

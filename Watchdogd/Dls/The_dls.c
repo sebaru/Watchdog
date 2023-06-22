@@ -65,19 +65,6 @@
     else return( apres->tv_sec - avant->tv_sec + (apres->tv_usec - avant->tv_usec)/1000000.0 );
   }
 /******************************************************************************************************************************/
-/* Envoyer_commande_dls_data: Gestion des envois de commande DLS via dls_data                                                 */
-/* Entrée/Sortie: rien                                                                                                        */
-/******************************************************************************************************************************/
- void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
-  { struct DLS_DI *di= Dls_data_lookup_DI ( tech_id, acronyme );
-    if (!di) return;
-
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, di );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Mise a un du bit DI '%s:%s' demandée", tech_id, acronyme );
-  }
-/******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */

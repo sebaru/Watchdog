@@ -233,6 +233,7 @@
  extern gboolean Dls_data_get_DI        ( struct DLS_DI *bit );
  extern gboolean Dls_data_get_DI_up     ( struct DLS_DI *bit );
  extern gboolean Dls_data_get_DI_down   ( struct DLS_DI *bit );
+ extern void Dls_data_set_DI_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit );
 
  extern struct DLS_DO *Dls_data_lookup_DO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *bit, gboolean valeur );

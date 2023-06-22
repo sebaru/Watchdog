@@ -166,8 +166,6 @@
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
 
- extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
-
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
 
  extern void Dls_Export_Data_to_API ( struct DLS_PLUGIN *plugin );                                     /* Dans The_Dls_data.c */
