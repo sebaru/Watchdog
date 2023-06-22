@@ -116,9 +116,7 @@
 /******************************************************************************************************************************/
  void Dls_data_set_DI_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit )
   { if (!bit) return;
-    pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bit );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
     Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_NOTICE,
               "Mise a un du bit DI '%s:%s' demandée", bit->tech_id, bit->acronyme );
   }
