@@ -330,11 +330,17 @@
           Partage->com_dls.sys_flipflop_2sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2SEC" );
           Partage->com_dls.sys_api_socket        = Dls_data_lookup_BI   ( "SYS", "API_SOCKET" );
           Partage->com_dls.sys_top_5hz           = Dls_data_lookup_MONO ( "SYS", "TOP_5HZ" );
+          Dls_data_set_MONO ( &plugin->vars, Partage->com_dls.sys_top_5hz, FALSE );        /* Reset des bits TOP au demarrage */
           Partage->com_dls.sys_top_2hz           = Dls_data_lookup_MONO ( "SYS", "TOP_2HZ" );
+          Dls_data_set_MONO ( &plugin->vars, Partage->com_dls.sys_top_2hz, FALSE );
           Partage->com_dls.sys_top_1sec          = Dls_data_lookup_MONO ( "SYS", "TOP_1SEC" );
+          Dls_data_set_MONO ( &plugin->vars, Partage->com_dls.sys_top_1sec, FALSE );
           Partage->com_dls.sys_top_5sec          = Dls_data_lookup_MONO ( "SYS", "TOP_5SEC" );
+          Dls_data_set_MONO ( &plugin->vars, Partage->com_dls.sys_top_5sec, FALSE );
           Partage->com_dls.sys_top_10sec         = Dls_data_lookup_MONO ( "SYS", "TOP_10SEC" );
+          Dls_data_set_MONO ( &plugin->vars, Partage->com_dls.sys_top_10sec, FALSE );
           Partage->com_dls.sys_top_1min          = Dls_data_lookup_MONO ( "SYS", "TOP_1MIN" );
+          Dls_data_set_MONO ( &plugin->vars, Partage->com_dls.sys_top_1min, FALSE );
           Partage->com_dls.sys_bit_per_sec       = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
           Partage->com_dls.sys_tour_per_sec      = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
           Partage->com_dls.sys_dls_wait          = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );

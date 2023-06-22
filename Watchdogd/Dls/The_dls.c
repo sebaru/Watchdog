@@ -322,6 +322,11 @@
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
     last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = last_top_10min = Partage->top;
+    Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_2hz,   FALSE );                /* RaZ des Mono du plugn 'SYS' */
+    Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1sec,  FALSE );
+    Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec,  FALSE );
+    Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, FALSE );
+    Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min,  FALSE );
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      {
        pthread_mutex_lock( &Partage->com_dls.synchro );                               /* Zone de protection des bits internes */
