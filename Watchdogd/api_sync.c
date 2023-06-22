@@ -231,12 +231,23 @@
        if (Partage->abonnements) API_Send_Abonnements();
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { if (Partage->com_msrv.API_websocket == NULL) API_ws_init();                 /* Si websocket closed, try to restart */
+        { if (Partage->com_msrv.API_websocket == NULL) API_ws_init();                  /* Si websocket closed, try to restart */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
-
        usleep(1000);
        sched_yield();
+       if (!Partage->com_msrv.API_websocket) continue;                                   /* Si pas de connexion API, attendre */
+
+/*------------------------------------- Report de tout ce qui a été préparé à l'API ------------------------------------------*/
+       if (Partage->liste_json_to_ws_api)
+        { JsonNode *RootNode = Partage->liste_json_to_ws_api->data;
+          Partage->liste_json_to_ws_api = g_slist_remove ( Partage->liste_json_to_ws_api, RootNode );
+          Partage->liste_json_to_ws_api_size--;
+          gchar *buf = Json_node_to_string ( RootNode );
+          soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
+          g_free(buf);
+          Json_node_unref ( RootNode );
+        }
      }
     API_ws_end();
     g_object_unref ( Partage->API_Sync_session );

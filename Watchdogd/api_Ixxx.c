@@ -39,9 +39,7 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void API_Send_visuels ( void )
-  { if (!Partage->com_msrv.API_websocket) return;
-
-    gint cpt = 0, top = Partage->top;
+  { gint cpt = 0;
     JsonNode *RootNode  = Json_node_create();
     if (!RootNode) return;
     Json_node_add_string ( RootNode, "tag", "visuels" );
@@ -63,14 +61,7 @@
        Json_array_add_element ( Visuels, element );
        cpt++;
      }
-    gchar *buf = Json_node_to_string ( RootNode );
-    soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
-    g_free(buf);
-    Json_node_unref ( RootNode );
-    if (cpt)
-     { gint reste = g_slist_length(Partage->com_msrv.liste_visuel);
-       Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %03d Visuels to WS_API en %06.1fs. Reste %05d.",
-                 cpt, (Partage->top-top)/10.0, reste );
-     }
+    Partage->liste_json_to_ws_api = g_slist_prepend ( Partage->liste_json_to_ws_api, RootNode );
+    Partage->liste_json_to_ws_api_size++;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
