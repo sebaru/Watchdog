@@ -150,27 +150,27 @@
 /******************************************************************************************************************************/
  static void API_on_API_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
   { Partage->com_msrv.API_websocket = NULL;
-    Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Close. Reboot Needed!" );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "WebSocket Close. Reboot Needed!" );
     /* Partage->com_msrv.Thread_run = FALSE; */
   }
  static void API_on_API_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Error received %p!", self );
+  { Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Error received %p!", self );
   }
 /******************************************************************************************************************************/
-/* API_ws_on_API_connected: Termine la creation de la connexion websocket API API et raccorde le signal handler             */
+/* API_ws_on_API_connected: Termine la creation de la connexion websocket API API et raccorde le signal handler               */
 /* Entrée: les variables traditionnelles de libsous                                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void API_on_API_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
   { GError *error = NULL;
     Partage->com_msrv.API_websocket = soup_session_websocket_connect_finish ( Partage->API_Sync_session, res, &error );
-    if (!Partage->com_msrv.API_websocket)                                                    /* No limit on incoming packet ! */
+    if (!Partage->com_msrv.API_websocket)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket error: %s.", error->message );
        g_error_free (error);
        return;
      }
     soup_websocket_connection_set_keepalive_interval ( Partage->com_msrv.API_websocket, 30 );
-    soup_websocket_connection_set_max_incoming_payload_size ( Partage->com_msrv.API_websocket, 2048000 );
+    soup_websocket_connection_set_max_incoming_payload_size ( Partage->com_msrv.API_websocket, 2048000 );/* No limit on incoming packet ! */
 
     g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(API_on_API_message_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(API_on_API_close_CB), NULL );
@@ -189,7 +189,7 @@
     SoupMessage *soup_msg = soup_message_new ( "GET", chaine );
     Http_Add_Agent_signature ( soup_msg, NULL, 0 );
 
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Starting WebSocket connect to %s", chaine );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Starting WebSocket connect to %s", chaine );
     soup_session_websocket_connect_async ( Partage->API_Sync_session, soup_msg,
                                            NULL, protocols, 0, NULL, API_on_API_connected, NULL );
     g_object_unref(soup_msg);
