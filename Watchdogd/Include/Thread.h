@@ -7,7 +7,7 @@
  * thread.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,10 +40,10 @@
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
+    SoupSession *Soup_session;
     JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
-    SoupSession *Master_session;
     SoupWebsocketConnection *Master_websocket;
     GSList *WS_messages;
     JsonNode *ai_nbr_tour_par_sec;                                                                        /* Tour par seconde */
@@ -70,6 +70,7 @@
  extern void Thread_Start_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
  extern void Thread_Stop_one_thread ( JsonNode *element );
  extern void Thread_Push_API_message ( JsonNode *request );
+ extern void Thread_Set_debug ( JsonNode *request );
  extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );
  extern void Thread_loop ( struct THREAD *module );
  extern void Thread_init ( struct THREAD *module, gint sizeof_vars );

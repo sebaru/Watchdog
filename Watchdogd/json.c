@@ -7,7 +7,7 @@
  * json.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2023 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,8 @@
 /******************************************************************************************************************************/
  void Json_node_add_bool ( JsonNode *RootNode, gchar *name, gboolean valeur )
   { JsonObject *object = json_node_get_object (RootNode);
-    json_object_set_boolean_member ( object, name, valeur );
+    if (object) { json_object_set_boolean_member ( object, name, valeur ); }
+           else { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Object is null for '%s'=%d", name, valeur ); }
   }
 /******************************************************************************************************************************/
 /* Json_node_add_double: Ajoute un enregistrement name/double dans le RootNode                                                */
@@ -137,7 +138,7 @@
 /* Sortie: un nouveau buffer                                                                                                  */
 /******************************************************************************************************************************/
  gchar *Json_node_to_string ( JsonNode *RootNode )
-  { return ( json_to_string ( RootNode, TRUE ) );
+  { return ( json_to_string ( RootNode, FALSE ) );
   }
 /******************************************************************************************************************************/
 /* Json_get_from_stirng: Recupere l'object de plus haut niveau dans une chaine JSON                                           */

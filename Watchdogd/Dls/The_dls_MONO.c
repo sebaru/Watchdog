@@ -7,7 +7,7 @@
  * The_dls_MONO.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,15 +84,21 @@
 /******************************************************************************************************************************/
  void Dls_data_set_MONO ( struct DLS_TO_PLUGIN *vars, struct DLS_MONO *mono, gboolean valeur )
   { if(!mono) return;
-    if (valeur == FALSE) { mono->etat = FALSE; }
-    else
-     { if (mono->etat == FALSE)
-        { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "ligne %04d: Changing DLS_MONO '%s:%s'=1",
-                    (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
-          Partage->audit_bit_interne_per_sec++;
-        }
-       mono->next_etat = TRUE;
+    if (mono->etat == TRUE && valeur == FALSE)
+     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                "ligne %04d: Changing DLS_MONO '%s:%s'=0",
+                (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
+       mono->etat = FALSE;
+       Partage->com_dls.Set_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_down, mono );
+       Partage->audit_bit_interne_per_sec++;
+     }
+    else if (mono->etat == FALSE && valeur == TRUE)
+     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                "ligne %04d: Changing DLS_MONO '%s:%s'=1",
+                (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
+       mono->etat = TRUE;
+       Partage->com_dls.Set_Dls_MONO_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_up, mono );
+       Partage->audit_bit_interne_per_sec++;
      }
   }
 /******************************************************************************************************************************/
@@ -101,6 +107,8 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_get_MONO ( struct DLS_MONO *mono )
   { if (!mono) return(FALSE);
+    /* Test 24/04/2023: Etat = etat|edge_up.  */
+    /* 20/06/2023: mauvaise idée. retour arrière + impose set_mono only within one dls */
     return( mono->etat );
   }
 /******************************************************************************************************************************/

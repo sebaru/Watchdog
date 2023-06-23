@@ -7,7 +7,7 @@
  * The_dls_AO.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,13 +86,13 @@
   { if (!ao) return(0.0);
     return( ao->valeur );
   }
-
 /******************************************************************************************************************************/
 /* Met à jour la sortie analogique à partir de sa valeur avant mise a l'echelle                                               */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *ao, gdouble valeur )
   { if (!ao) return;
+    if (ao->valeur == valeur) return;
     ao->valeur = valeur;                                                            /* Archive au mieux toutes les 5 secondes */
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
     Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
@@ -100,6 +100,20 @@
     Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_AO '%s:%s'=%f",
               (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->valeur );
+    Partage->audit_bit_interne_per_sec++;
+  }
+/******************************************************************************************************************************/
+/* Dls_cadran_send_AO_to_API: Ennvoi une AO à l'API pour affichage des cadrans                                                */
+/* Entrées: la structure DLs_AO                                                                                               */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_cadran_send_AO_to_API ( struct DLS_AO *bit )
+  { if (!bit) return;
+    JsonNode *RootNode = Json_node_create();
+    Dls_AO_to_json ( RootNode, bit );
+    pthread_mutex_lock ( &Partage->abonnements_synchro );
+    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
+    pthread_mutex_unlock ( &Partage->abonnements_synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_AO_to_json: Convertir un AO en JSON                                                                                    */
@@ -107,13 +121,12 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit )
-  { Json_node_add_string ( element, "tech_id",      bit->tech_id );
+  { Json_node_add_string ( element, "classe",       "AO" );
+    Json_node_add_string ( element, "tech_id",      bit->tech_id );
     Json_node_add_string ( element, "acronyme",     bit->acronyme );
     Json_node_add_double ( element, "valeur_brute", bit->valeur );
-    Json_node_add_double ( element, "valeur_min",   bit->min );
-    Json_node_add_double ( element, "valeur_max",   bit->max );
     Json_node_add_double ( element, "valeur",       bit->valeur );
-    Json_node_add_int    ( element, "type",         bit->type );
+    Json_node_add_int    ( element, "archivage",    bit->archivage );
   }
 /******************************************************************************************************************************/
 /* Dls_all_AO_to_json: Transforme tous les bits en JSON                                                                       */

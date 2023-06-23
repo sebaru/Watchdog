@@ -7,7 +7,7 @@
  * The_dls_DI.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,17 +98,27 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit, gboolean valeur )
+ void Dls_data_set_DI ( struct DLS_DI *bit, gboolean valeur )
   { if (!bit) return;
 
     if (bit->etat != valeur)
-     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG, "%s: Changing DLS_DI '%s:%s'=%d up %d down %d",
-                 __func__, bit->tech_id, bit->acronyme, valeur, bit->edge_up, bit->edge_down );
-       if (valeur == TRUE) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up, bit );
-                      else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, bit );
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Changing DLS_DI '%s:%s'=%d up %d down %d",
+                 bit->tech_id, bit->acronyme, valeur, bit->edge_up, bit->edge_down );
+       if (valeur) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up,   bit );
+              else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, bit );
        Partage->audit_bit_interne_per_sec++;
      }
     bit->etat = valeur;
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_DI_pulse: Envoi une impulsion sur une DI                                                                      */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_DI_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit )
+  { if (!bit) return;
+    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bit );
+    Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_NOTICE,
+              "Mise a un du bit DI '%s:%s' demandée", bit->tech_id, bit->acronyme );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_DI_from_thread_di: Positionne une DI dans DLS depuis une DI 'thread'                                          */
@@ -117,7 +127,7 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_set_DI_from_thread_di ( JsonNode *request )
   { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "etat" )&& Json_has_member ( request, "libelle" )
+           Json_has_member ( request, "etat" )
           )
        ) return(FALSE);
 
@@ -125,17 +135,23 @@
     gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
     gchar *tech_id         = thread_tech_id;
     gchar *acronyme        = thread_acronyme;
-    gchar *libelle         = Json_get_string ( request, "libelle" );
 
     if (MSRV_Map_from_thread ( request ) && Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) )
      { tech_id  = Json_get_string ( request, "tech_id" );
        acronyme = Json_get_string ( request, "acronyme" );
      }
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI from '%s': '%s:%s/'%s:%s'=%d (%s)",
+
+    struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
+    if (!bit)
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_DI from '%s': '%s:%s'/'%s:%s' not found",
+                 thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
+       return(FALSE);
+     }
+
+    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI from '%s': '%s:%s'/'%s:%s'=%d (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-              Json_get_bool ( request, "etat" ), libelle );
-    struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, Json_get_string ( request, "acronyme" ) );
-    if (bit) Dls_data_set_DI ( NULL, bit, Json_get_bool ( request, "etat" ) );
+              Json_get_bool ( request, "etat" ), bit->libelle );
+    Dls_data_set_DI ( bit, Json_get_bool ( request, "etat" ) );
     return(TRUE);
   }
 /******************************************************************************************************************************/

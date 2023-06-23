@@ -7,7 +7,7 @@
  * getdlslist.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,9 +95,6 @@
 /******************************************************************************************************************************/
  void Http_traiter_dls_status ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data )
   {
-    struct HTTP_CLIENT_SESSION *session = Http_print_request ( server, msg, path );
-    if (!Http_check_session( msg, session, 6 )) return;
-
 /************************************************ Préparation du buffer JSON **************************************************/
     JsonNode *dls_status = Json_node_create ();
     if (dls_status == NULL)
@@ -105,7 +102,6 @@
        soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
-                                                                      /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
     JsonArray *plugins = Json_node_add_array ( dls_status, "plugins" );
     Dls_foreach_plugins ( plugins, Http_dls_do_plugin );
@@ -120,14 +116,14 @@
   { GSList *liste;
     JsonArray *array;
 
-    gchar *tech_id_src = g_hash_table_lookup ( query, "tech_id" );
-    gchar *classe_src  = g_hash_table_lookup ( query, "classe" );
-    if (! (tech_id_src && classe_src))
+    gchar *tech_id = g_hash_table_lookup ( query, "tech_id" );
+    gchar *classe  = g_hash_table_lookup ( query, "classe" );
+    if (! (tech_id && classe))
      { soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
        return;
      }
 
-    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id_src );
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
     if (!plugin)
      { soup_server_message_set_status (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found");
        return;
@@ -138,9 +134,6 @@
      { soup_server_message_set_status (msg, SOUP_STATUS_INTERNAL_SERVER_ERROR, "Memory Error");
        return;
      }
-
-    gchar *tech_id = Normaliser_chaine ( tech_id_src );
-    gchar *classe  = Normaliser_chaine ( classe_src );
 
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     Json_node_add_string ( dls_run, "tech_id", tech_id );
@@ -306,8 +299,6 @@
         }
      }
 /*------------------------------------------------------- fin ----------------------------------------------------------------*/
-    g_free(tech_id);
-    g_free(classe);
     Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, dls_run );
   }
 /******************************************************************************************************************************/
@@ -332,13 +323,13 @@
        return;
      }
 
-    gchar *tech_id  = Normaliser_chaine ( Json_get_string ( request, "tech_id" ) );
-    gchar *acronyme = Normaliser_chaine ( Json_get_string ( request, "acronyme" ) );
-    gchar *classe   = Normaliser_chaine ( Json_get_string ( request, "classe" ) );
+    gchar *tech_id  = Json_get_string ( request, "tech_id" );
+    gchar *acronyme = Json_get_string ( request, "acronyme" );
+    gchar *classe   = Json_get_string ( request, "classe" );
     if ( !strcasecmp ( classe, "DI" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
        struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
-       Dls_data_set_DI ( NULL, bit, valeur );
+       Dls_data_set_DI ( bit, valeur );
        /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
      }
@@ -365,7 +356,7 @@
     else if ( !strcasecmp ( classe, "MSG" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
        struct DLS_MESSAGE *bit = Dls_data_lookup_MESSAGE ( tech_id, acronyme );
-       Dls_data_set_MESSAGE ( NULL, bit, FALSE, valeur );
+       Dls_data_set_MESSAGE ( NULL, bit, valeur );
        /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
        Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
      }
@@ -377,9 +368,6 @@
        Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
      }
     else soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Wrong Class" );
-    g_free(tech_id);
-    g_free(acronyme);
-    g_free(classe);
   }
 /******************************************************************************************************************************/
 /* Http_traiter_dls_run_acquitter: Acquitte un dls                                                                            */

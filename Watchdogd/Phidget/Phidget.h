@@ -7,7 +7,7 @@
  * Phidget.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,13 +37,8 @@
  struct PHIDGET_ELEMENT
   { struct THREAD *module; /* Module père de l'élément */
     PhidgetHandle handle;
-    gchar tech_id[32];
     gboolean attached;
-    gchar capteur[32];
-    gchar classe[32];
-    gint  intervalle;
-    gchar map_tech_id[32];
-    gchar map_acronyme[64];
+    JsonNode *element; /* Issu du module->config au chargement */
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

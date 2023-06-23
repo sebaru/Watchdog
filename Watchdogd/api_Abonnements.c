@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/api_Ixxx.c        Distribution des Visuels à l'API                                                               */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                          lun 10 mai 2004 11:31:17 CEST */
+/* Watchdogd/api_Abonnements.c        Distribution des abonnements l'API                                                      */
+/* Projet WatchDog version 4.0       Gestion d'habitat                                                    17.02.2023 22:05:20 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * api_Ixxx.c
+ * api_Abonnements.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2023 - Sebastien LEFEVRE
@@ -25,40 +25,27 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <glib.h>
- #include <string.h>
- #include <unistd.h>
- #include <time.h>
- #include <sys/prctl.h>
-
-/************************************************** Prototypes de fonctions ***************************************************/
+/****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* API_Send_visuels: Envoi les visuels a l'API                                                                                */
+/* API_Send_Abonnements: Envoi les abonnements à l'API                                                                        */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void API_Send_visuels ( void )
-  { gint cpt = 0;
-    JsonNode *RootNode  = Json_node_create();
+ void API_Send_Abonnements ( void )
+  { JsonNode *RootNode = Json_node_create();
     if (!RootNode) return;
-    Json_node_add_string ( RootNode, "tag", "visuels" );
-    JsonArray *Visuels = Json_node_add_array ( RootNode, "visuels" );
-    if (!Visuels) { Json_node_unref ( RootNode ); return; }
+    Json_node_add_string ( RootNode, "tag", "abonnements" );
+    JsonArray *Abonnements = Json_node_add_array ( RootNode, "abonnements" );
+    if (!Abonnements) { Json_node_unref ( RootNode ); return; }
 
-    while (Partage->com_msrv.liste_visuel && Partage->com_msrv.Thread_run == TRUE && cpt<100)
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );
-       struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
-       Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-       Info_new( __func__, Config.log_msrv, LOG_DEBUG,
-                "Send VISUEL %s:%s mode=%s, color=%s, cligno=%d, libelle='%s', disable=%d",
-                 visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->cligno, visuel->libelle, visuel->disable
-               );
-       JsonNode *element = Json_node_create ();
-       Dls_VISUEL_to_json ( element, visuel );
-       Json_array_add_element ( Visuels, element );
+    gint cpt = 0;
+    while (Partage->abonnements && Partage->com_msrv.Thread_run == TRUE && cpt<100)
+     { pthread_mutex_lock( &Partage->abonnements_synchro );                           /* Ajout dans la liste de msg a traiter */
+       JsonNode *element = Partage->abonnements->data;
+       Partage->abonnements = g_slist_remove ( Partage->abonnements, element );
+       pthread_mutex_unlock( &Partage->abonnements_synchro );
+       Json_array_add_element ( Abonnements, element );
        cpt++;
      }
     Partage->liste_json_to_ws_api = g_slist_prepend ( Partage->liste_json_to_ws_api, RootNode );

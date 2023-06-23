@@ -7,7 +7,7 @@
  * api_MSGxxx.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2023 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,22 +33,23 @@
 /****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
 
- static GSList *Liste_Histo_to_send = NULL;
-
 /************************************* Converstion du histo dynamique *******************************************************/
  void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max )
   { gchar chaine[512], prefixe[128], tech_id[32], acronyme[64], suffixe[128];
     memset ( suffixe, 0, sizeof(suffixe) );
     while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe ) == 4 )
-     { gchar result[128];
+     { struct DLS_REGISTRE *reg;
+       struct DLS_AI *ai;
+       gchar result[128];
        g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
-       struct DLS_AI *ai = Dls_data_lookup_AI ( tech_id, acronyme );
-       if (ai)
+       if ( (ai = Dls_data_lookup_AI ( tech_id, acronyme )) != NULL )
         { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
            { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
           else*/
            { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->valeur, ai->unite ); }
         }
+       else if ( (reg = Dls_data_lookup_REGISTRE ( tech_id, acronyme )) != NULL )
+        { g_snprintf( chaine, sizeof(chaine), "%.02f %s", reg->valeur, reg->unite ); }
        else g_snprintf( chaine, sizeof(chaine), "erreur" );
        g_strlcat ( result, chaine, sizeof(result) );
        g_strlcat ( result, suffixe, sizeof(result) );
@@ -99,12 +100,7 @@
     struct timeval tv;
     struct tm *temps;
 
-    JsonNode *histo = Http_Get_from_global_API ( "/run/message", "tech_id=%s&acronyme=%s", msg->tech_id, msg->acronyme );
-    if (histo == NULL || Json_get_int ( histo, "api_status" ) != SOUP_STATUS_OK)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for /run/message failed. Dropping message." );
-       Json_node_unref ( histo );
-       return(NULL);
-     }
+    JsonNode *histo = json_node_copy ( msg->source_node );
 
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
@@ -151,11 +147,16 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void API_Send_MSGS ( void )
-  { struct DLS_MESSAGE_EVENT *event;
+  { gint cpt = 0;
+    JsonNode *RootNode = Json_node_create();
+    if (!RootNode) return;
+    Json_node_add_string ( RootNode, "tag", "histos" );
+    JsonArray *Histos = Json_node_add_array ( RootNode, "histos" );
+    if (!Histos) { Json_node_unref ( RootNode ); return; }
 
-    while (Partage->com_msrv.liste_msg)
+    while (Partage->com_msrv.liste_msg && Partage->com_msrv.Thread_run == TRUE && cpt<100)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
-       event = Partage->com_msrv.liste_msg->data;                                            /* Recuperation du numero de msg */
+       struct DLS_MESSAGE_EVENT *event = Partage->com_msrv.liste_msg->data;                  /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Info_new( __func__, Config.log_msrv, LOG_INFO,
@@ -165,45 +166,31 @@
        if (event->etat == 1)
         { JsonNode *histo = MSGS_Convert_msg_on_to_histo ( event->msg );
           if (histo)
-           { if (Partage->top >= event->msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
+           { if (Partage->top > event->msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
               { event->msg->last_on = Partage->top;
-                Json_node_add_string ( histo, "tag", "DLS_HISTO" );
-                Http_Send_to_slaves ( NULL, histo );
-                Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
-                Http_ws_send_to_all( histo );
-                Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
-              } else Json_node_unref(histo);
-           }
+                Http_Send_to_slaves ( "DLS_HISTO", histo );
+                Json_array_add_element ( Histos, histo );
+              }
+             else
+              { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
+                          Json_get_int ( histo, "rate_limit" ), event->msg->tech_id, event->msg->acronyme );
+                Json_node_unref(histo);
+              }
+           } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg on to histo",
+                            event->msg->tech_id, event->msg->acronyme );
         }
        else if (event->etat == 0)
         { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );
           if(histo)
-           { Json_node_add_string ( histo, "tag", "DLS_HISTO" );
-             Http_Send_to_slaves ( NULL, histo );
-             Json_node_add_string ( histo, "zmq_tag", "DLS_HISTO" );
-             Http_ws_send_to_all( histo );
-             Liste_Histo_to_send = g_slist_append ( Liste_Histo_to_send, histo );
-           }
+           { Http_Send_to_slaves ( "DLS_HISTO", histo );
+             Json_array_add_element ( Histos, histo );
+           } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
+                            event->msg->tech_id, event->msg->acronyme );
         }
        g_free(event);
+       cpt++;
      }
-
-/******************************************************* Envoi à l'API ********************************************************/
-    static gint next_try = 0;
-    while (Liste_Histo_to_send && next_try <= Partage->top)
-     { JsonNode *histo = Liste_Histo_to_send->data;
-       Liste_Histo_to_send = g_slist_remove ( Liste_Histo_to_send, histo );
-       JsonNode *api_result = Http_Post_to_global_API ( "/run/histo", histo );
-       if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Post '%s:%s' for /run/histo failed. Retry %04d MSGS in 60 seconds.",
-                    __func__, Json_get_string ( histo, "tech_id"), Json_get_string ( histo, "acronyme" ), g_slist_length(Liste_Histo_to_send) );
-          Json_node_unref ( api_result );
-          Json_node_unref ( histo );
-          next_try = Partage->top + 600;
-          break;
-        }
-       Json_node_unref ( api_result );
-       Json_node_unref ( histo );
-     }
+    Partage->liste_json_to_ws_api = g_slist_prepend ( Partage->liste_json_to_ws_api, RootNode );
+    Partage->liste_json_to_ws_api_size++;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

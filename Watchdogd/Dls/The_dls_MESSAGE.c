@@ -7,7 +7,7 @@
  * The_dls_MESSAGE.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,22 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Dls_data_MESSAGE_free_one: Libère la mémoire associée à un MESSAGE un plugin                                               */
+/* Entrée : le pointeur vers la structure du message                                                                          */
+/******************************************************************************************************************************/
+ static void Dls_data_MESSAGE_free_one ( struct DLS_MESSAGE *bit )
+  { Json_node_unref ( bit->source_node );
+    g_free(bit);
+  }
+/******************************************************************************************************************************/
+/* Dls_data_MESSAGE_free_all: Libère la mémoire associée aux messages d'un plugin                                             */
+/* Entrée : le pointeur vers le plugin                                                                                        */
+/******************************************************************************************************************************/
+ void Dls_data_MESSAGE_free_all ( struct DLS_PLUGIN *plugin )
+  { if (plugin->Dls_data_MESSAGE) g_slist_free_full ( plugin->Dls_data_MESSAGE, (GDestroyNotify) Dls_data_MESSAGE_free_one );
+    plugin->Dls_data_MESSAGE = NULL;
+  }
+/******************************************************************************************************************************/
 /* Dls_data_MESSAGE_create_by_array : Création d'un MESSAGE pour le plugin                                                    */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
@@ -51,6 +67,7 @@
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     bit->etat = Json_get_bool ( element, "etat" );
+    bit->source_node = json_node_ref ( element );
     plugin->Dls_data_MESSAGE = g_slist_prepend ( plugin->Dls_data_MESSAGE, bit );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
               "Create bit DLS_MESSAGE '%s:%s'=%d", bit->tech_id, bit->acronyme, bit->etat );
@@ -81,72 +98,42 @@
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gboolean update, gboolean etat )
+ void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gboolean etat )
   { if (!msg) return;
-    if ( update )
-     { if (etat == FALSE) { msg->etat_update = FALSE; }
-       else if (msg->etat == TRUE && msg->etat_update == FALSE)
-        { struct DLS_MESSAGE_EVENT *event;
-          msg->etat_update = TRUE;
-          event = (struct DLS_MESSAGE_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
-          if (!event)
-           { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", msg->tech_id, msg->acronyme );
-           }
-          else
-           { event->etat = FALSE;                                                       /* Recopie de l'état dans l'evenement */
-             event->msg  = msg;
-             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
-             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-             pthread_mutex_unlock( &Partage->com_msrv.synchro );
-           }
-          event = (struct DLS_MESSAGE_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
-          if (!event)
-           { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "malloc Event failed. Memory error for Updating DLS_MSG'%s:%s'", msg->tech_id, msg->acronyme );
-           }
-          else
-           { event->etat = TRUE;                                                        /* Recopie de l'état dans l'evenement */
-             event->msg  = msg;
-             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
-             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-             pthread_mutex_unlock( &Partage->com_msrv.synchro );
-           }
-        }
+    if ( msg->etat == etat ) return;
+
+    msg->etat = etat;                                                                      /* Sauvegarde de l'état du message */
+    Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "ligne %04d: Changing DLS_MSG '%s:%s'=%d",
+              (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme, msg->etat );
+    Partage->audit_bit_interne_per_sec++;
+
+    gint typologie = Json_get_int ( msg->source_node, "typologie" );
+    if ( typologie == MSG_ETAT && msg->etat == 0) return;                   /* Un message d'etat ne peut s'éteindre tout seul */
+    if ( typologie == MSG_ETAT && msg->etat == 1)                       /* Si message d'etat apparait, on eteint le précédent */
+     { struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
+       if (event)
+        { event->etat = FALSE;                                                                        /* On eteint le message */
+          event->msg  = msg;
+          pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Ajout dans la liste de msg a traiter */
+          Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+        } else Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_ERR,
+                         "Memory error for MSG'%s:%s' = 0 (etat)", msg->tech_id, msg->acronyme );
      }
-    else if ( msg->etat != etat )
-     { msg->etat = etat;
-       if (etat) msg->etat_update = TRUE;
 
-       if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
-
-       if ( msg->changes > 5 && !(Partage->top % 50) )              /* Si persistence d'anomalie on prévient toutes les 5 sec */
-        { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "last_change trop tot for DLS_MSG '%s:%s' !",
-                    msg->tech_id, msg->acronyme );
-        }
-       else
-        { struct DLS_MESSAGE_EVENT *event;
-          event = (struct DLS_MESSAGE_EVENT *)g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
-          if (!event)
-           { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
-                      "malloc Event failed. Memory error for MSG'%s:%s'", msg->tech_id, msg->acronyme );
-           }
-          else
-           { event->etat = etat;                                                        /* Recopie de l'état dans l'evenement */
-             event->msg  = msg;
-             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
-             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-             pthread_mutex_unlock( &Partage->com_msrv.synchro );
-           }
-
-          Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "ligne %04d: Changing DLS_MSG '%s:%s'=%d",
-                    (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme, msg->etat );
-          msg->changes++;
-          msg->last_change = Partage->top;
-          Partage->audit_bit_interne_per_sec++;
-        }
+    struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );     /* Dans tous les cas, on traite */
+    if (!event)
+     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_ERR,
+                "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
+       return;
      }
+
+    event->etat = etat;                                                                 /* Recopie de l'état dans l'evenement */
+    event->msg  = msg;
+    pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
+    Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_MESSAGE_to_json : Formate un bit au format JSON                                                                        */

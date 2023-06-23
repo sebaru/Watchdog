@@ -32,4 +32,4 @@ aclocal --force
 automake --add-missing
 autoconf --force
 ./configure
-make -j 16
+make -j `grep -c ^processor /proc/cpuinfo`

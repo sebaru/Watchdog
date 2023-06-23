@@ -7,7 +7,7 @@
  * shm.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2023 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -52,7 +52,7 @@
 /**********************************************************************************************************/
  gboolean Shm_stop ( struct PARTAGE *partage )
   { Info_new( __func__, Config.log_msrv, LOG_INFO, "Shm_stop: freeing memory" );
-    g_free(Partage);
+    g_free(Partage); Partage=NULL;
     return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

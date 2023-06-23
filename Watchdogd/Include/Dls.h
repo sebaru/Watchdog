@@ -6,7 +6,7 @@
  * Dls.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,26 +28,6 @@
   #define _DLS_H_
 
  #include "Module_dls.h"
-
- enum
-  { MNEMO_BISTABLE,                                                                   /* Definitions des types de mnemoniques */
-    MNEMO_MONOSTABLE,
-    MNEMO_TEMPO,
-    MNEMO_ENTREE,
-    MNEMO_SORTIE,
-    MNEMO_ENTREE_ANA,
-    MNEMO_SORTIE_ANA,
-    MNEMO_VISUEL,
-    MNEMO_CPTH,
-    MNEMO_CPT_IMP,
-    MNEMO_REGISTRE,
-    MNEMO_HORLOGE,
-    MNEMO_MSG,
-    MNEMO_BUS,
-    MNEMO_DIGITAL_OUTPUT,
-    MNEMO_WATCHDOG,
-    NBR_TYPE_MNEMO
-  };
 
  #define NBR_CARAC_TECHID     32
  #define NBR_CARAC_ACRONYME   64
@@ -87,7 +67,8 @@
     void (*go)(struct DLS_TO_PLUGIN *);                                                   /* Fonction de traitement du module */
     gdouble conso;                                                                       /* Consommation temporelle du plugin */
     gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
-    void (*remap_all_alias)(void);                                                                   /* Set all Alias to NULL */
+    void (*remap_all_alias)(struct DLS_TO_PLUGIN *);                                                 /* Set all Alias to NULL */
+    void (*init_visuels)(struct DLS_TO_PLUGIN *);                                                    /* Set all Alias to NULL */
     struct DLS_TO_PLUGIN vars;
     GSList *Arbre_Comm;                         /* Liste tech_id des dependances du module pour le calcul de sa communication */
   };
@@ -120,7 +101,6 @@
  struct COM_DLS                                                                      /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
     GSList *Dls_plugins;                                                                             /* Liste d'execution DLS */
 
     GSList *Set_Dls_DI_Edge_up;                                                /* liste des DIxxx a activer au debut tour prg */
@@ -142,8 +122,6 @@
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
-    gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_reload_with_recompil;                       /* TRUE si le thread doit rebooter en recompilant les modules */
     guint temps_sched;                                          /* Delai d'attente DLS pour assurer 100 tours max par seconde */
     gboolean Top_check_horaire;                                                    /* True le controle horaire est réalisable */
 
@@ -151,6 +129,7 @@
     struct DLS_BI *sys_flipflop_2hz;
     struct DLS_BI *sys_flipflop_1sec;
     struct DLS_BI *sys_flipflop_2sec;
+    struct DLS_BI *sys_api_socket;
     struct DLS_MONO *sys_top_5hz;
     struct DLS_MONO *sys_top_2hz;
     struct DLS_MONO *sys_top_1sec;
@@ -160,8 +139,7 @@
     struct DLS_AI *sys_bit_per_sec;
     struct DLS_AI *sys_tour_per_sec;
     struct DLS_AI *sys_dls_wait;
-    struct DLS_AI *sys_nbr_msg_queue;
-    struct DLS_AI *sys_nbr_visuel_queue;
+    struct DLS_AI *sys_nbr_api_enreg_queue;
     struct DLS_AI *sys_nbr_archive_queue;
     struct DLS_AI *sys_maxrss;
 
@@ -175,19 +153,17 @@
 
 /************************************************ Prototypes de fonctions *****************************************************/
  extern void Dls_Importer_plugins ( void );                                                                 /* Dans plugins.c */
+ extern struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id, gboolean reset );
  extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description );
  extern void Dls_Decharger_plugins ( void );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );
- extern void Dls_Reseter_un_plugin ( gchar *tech_id );
  extern void Dls_foreach_plugins ( gpointer user_data, void (*do_plugin) (gpointer user_data, struct DLS_PLUGIN *) );
  extern void Dls_Acquitter_plugin ( gchar *tech_id );
  struct DLS_PLUGIN *Dls_get_plugin_by_tech_id ( gchar *tech_id );
  extern void Dls_run_archivage ( gpointer user_data, struct DLS_PLUGIN *plugin );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
-
- extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
 
@@ -197,22 +173,25 @@
  extern void Dls_data_CI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_CI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_CI_to_json ( JsonNode *element, struct DLS_CI *bit );
+ extern void Dls_cadran_send_CI_to_API ( struct DLS_CI *bit );
 
                                                                                                          /* Dans The_dls_CH.c */
  extern void Dls_data_CH_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_CH_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_CH_to_json ( JsonNode *element, struct DLS_CH *bit );
-
+ extern void Dls_cadran_send_CH_to_API ( struct DLS_CH *bit );
                                                                                                          /* Dans The_dls_AI.c */
  extern void Dls_data_AI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
  extern void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range );
  extern gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request );
+ extern void Dls_cadran_send_AI_to_API ( struct DLS_AI *bit );
                                                                                                          /* Dans The_dls_AO.c */
  extern void Dls_data_AO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit );
+ extern void Dls_cadran_send_AO_to_API ( struct DLS_AO *bit );
 
                                                                                                       /* Dans The_dls_TEMPO.c */
  extern void Dls_data_TEMPO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
@@ -227,7 +206,7 @@
  extern void Dls_data_DI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
- extern void Dls_data_set_DI ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit, gboolean valeur );
+ extern void Dls_data_set_DI ( struct DLS_DI *bit, gboolean valeur );
  extern gboolean Dls_data_set_DI_from_thread_di ( JsonNode *request );
                                                                                                          /* Dans The_dls_DO.c */
  extern void Dls_data_DO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
@@ -257,6 +236,7 @@
 
                                                                                                     /* Dans The_dls_MESSAGE.c */
  extern void Dls_data_MESSAGE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
+ extern void Dls_data_MESSAGE_free_all ( struct DLS_PLUGIN *plugin );
  extern void Dls_MESSAGE_to_json ( JsonNode *element, struct DLS_MESSAGE *bit );
 
                                                                                                    /* Dans The_dls_WATCHDOG.c */

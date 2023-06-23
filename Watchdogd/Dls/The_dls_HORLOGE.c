@@ -7,7 +7,7 @@
  * The_dls_HORLOGE.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,10 +137,10 @@
  void Dls_Load_horloge_ticks ( void )
   { JsonNode *api_result = Http_Get_from_global_API ( "/run/horloges", NULL );
     if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
-     { pthread_mutex_lock ( &Partage->com_dls.synchro_data );
+     { pthread_mutex_lock ( &Partage->com_dls.synchro );
        Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
        Partage->com_dls.HORLOGE_ticks = api_result;
-       pthread_mutex_unlock ( &Partage->com_dls.synchro_data );
+       pthread_mutex_unlock ( &Partage->com_dls.synchro );
        Info_new( __func__, Config.log_msrv, LOG_INFO, "%03d HORLOGE ticks loaded.",
                  Json_get_int ( Partage->com_dls.HORLOGE_ticks, "nbr_horloges" ) );
      }
@@ -149,5 +149,4 @@
        Json_node_unref ( api_result );
      }
   }
-
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -7,7 +7,7 @@
  * Archive.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,6 +98,8 @@
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Send '%s'", audio_libelle );
     gchar *language = Json_get_string ( module->config, "language" );
     gchar *device   = Json_get_string ( module->config, "device" );
+    Info_new( __func__, module->Thread_debug, LOG_INFO,
+              "Running Wtd_play_google.sh %s %s %s", language, audio_libelle, device );
 
     pid = fork();
     if (pid<0)
@@ -106,17 +108,11 @@
        return(FALSE);
      }
     else if (!pid)
-     { Info_new( __func__, module->Thread_debug, LOG_INFO,
-                 "Running Wtd_play_google.sh %s %s %s", language, audio_libelle, device );
-
-       execlp( "Wtd_play_google.sh", "Wtd_play_google", language, audio_libelle, device, NULL );
-       Info_new( __func__, module->Thread_debug, LOG_ERR,
-                "'%s' exec failed pid=%d (%s)", audio_libelle, pid, strerror( errno ) );
+     { execlp( "Wtd_play_google.sh", "Wtd_play_google", language, audio_libelle, device, NULL );
        _exit(0);
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
-             "'%s' waiting to finish pid=%d", audio_libelle, pid );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s' waiting to finish pid=%d", audio_libelle, pid );
     waitpid(pid, NULL, 0 );
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Wtd_play_google %s '%s' %s finished pid=%d",

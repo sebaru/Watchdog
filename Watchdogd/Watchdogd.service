@@ -7,12 +7,14 @@ After=syslog.target network.target auditd.service
 ExecStart=/usr/local/bin/Watchdogd
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
-RestartSec=2
+RestartSec=5
 Nice=10
 MemoryHigh=75%
 MemoryMax=80%
 MemorySwapMax=2G
 LimitNOFILE=2048
+#5 minutes to stop.
+TimeoutStopSec=600
 
 [Install]
 WantedBy=multi-user.target

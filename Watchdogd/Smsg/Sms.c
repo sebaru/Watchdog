@@ -7,7 +7,7 @@
  * Sms.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -254,6 +254,7 @@
                 Json_get_string ( module->config, "ovh_application_secret" ),
                 Json_get_string ( module->config, "ovh_consumer_key" ),
                 method, query, body, timestamp );
+    Info_new ( __func__, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
     g_free(body);
 
     mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
@@ -273,7 +274,6 @@
 
 /********************************************************* Envoi de la requete ************************************************/
     SoupMessage *soup_msg = soup_message_new ( method, query );
-    Info_new ( __func__, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
     SoupMessageHeaders *headers = soup_message_get_request_headers( soup_msg );
     soup_message_headers_append ( headers, "X-Ovh-Application", Json_get_string ( module->config, "ovh_application_key" ) );
     soup_message_headers_append ( headers, "X-Ovh-Consumer",    Json_get_string ( module->config, "ovh_consumer_key" ) );
@@ -314,7 +314,8 @@
      }
 
     gint sms_notification = Json_get_int ( msg, "sms_notification" );
-    GList *recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
+    GList *Recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
+    GList *recipients = Recipients;
     while(recipients)
      { JsonNode *user = recipients->data;
        gchar *user_phone = Json_get_string ( user, "phone" );
@@ -343,7 +344,7 @@
         }
        recipients = g_list_next(recipients);
      }
-    g_list_free(recipients);
+    g_list_free(Recipients);
     Json_node_unref ( UsersNode );
     Http_Post_thread_AI_to_local_BUS ( module, vars->ai_nbr_sms, vars->nbr_sms, TRUE );
   }

@@ -7,7 +7,7 @@
  * Archive.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@
     Json_node_add_int    ( arch, "date_usec", tv.tv_usec );
 
     pthread_mutex_lock( &Partage->archive_liste_sync );                                /* Ajout dans la liste de arch a traiter */
-    Partage->archive_liste = g_slist_append( Partage->archive_liste, arch );
+    Partage->archive_liste = g_slist_prepend( Partage->archive_liste, arch );
     Partage->archive_liste_taille++;
     pthread_mutex_unlock( &Partage->archive_liste_sync );
   }
@@ -81,15 +81,9 @@
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
 
-    gint cpt_1_minute = Partage->top + 600;
     gint max_enreg = ARCHIVE_MAX_ENREG_TO_API;
     while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
-     { if (cpt_1_minute < Partage->top)                                                      /* Sauvegarde toutes les minutes */
-        { Ajouter_arch ( "SYS", "ARCHIVE_LIST_SIZE", 1.0*Partage->archive_liste_taille );
-          cpt_1_minute += 600;
-        }
-
-       if (!Partage->archive_liste) { sleep(2); continue; }
+     { if (!Partage->archive_liste) { sleep(2); continue; }
        Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Begin %05d archive(s)", Partage->archive_liste_taille );
        gint top            = Partage->top;
        gint nb_enreg       = 0;                                            /* Au début aucun enregistrement est passé a la DB */
@@ -124,19 +118,18 @@
            }
           pthread_mutex_unlock( &Partage->archive_liste_sync );
 
-          Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %05d archive(s) en %06.1fs. Reste %05d",
-                    Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, Partage->archive_liste_taille );
-          max_enreg = max_enreg * 10;
+          Info_new( __func__, Config.log_msrv, LOG_INFO, "Traitement de %05d archive(s) en %06.1fs (max %d). Reste %05d",
+                    Json_get_int ( api_result, "nbr_archives_saved" ), (Partage->top-top)/10.0, max_enreg, Partage->archive_liste_taille );
+          max_enreg = max_enreg + 50;
           if (max_enreg>ARCHIVE_MAX_ENREG_TO_API) max_enreg = ARCHIVE_MAX_ENREG_TO_API;
         }
        else
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error. Reste %05d.", Partage->archive_liste_taille );
-          max_enreg = max_enreg / 10;
-          if (max_enreg==0) max_enreg = 1;
+        { max_enreg = 10;
+          Info_new( __func__, Config.log_msrv, LOG_ERR, "API Error when sending %d enregs. Reste %05d. Reduce max_enreg to %d.",
+                    nb_enreg, Partage->archive_liste_taille, max_enreg );
         }
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
-       Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_archive_queue, 1.0*Partage->archive_liste_taille, TRUE );
      }
 
     ARCH_Clear();                                                   /* Suppression des enregistrements restants dans la liste */

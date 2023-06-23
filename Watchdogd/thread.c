@@ -7,7 +7,7 @@
  * thread.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2023 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Thread_send_comm_to_master: Envoi le statut de la comm au master                                                       */
+/* Thread_send_comm_to_master: Envoi le statut de la comm au master                                                           */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
@@ -78,9 +78,11 @@
     Info_new( __func__, Config.log_bus, LOG_DEBUG, "'%s': WebSocket Message received !", thread_tech_id );
     gsize taille;
 
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    gchar *buffer = g_bytes_get_data ( message_brut, &taille );
+    JsonNode *response = Json_get_from_string ( buffer );
     if (!response)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "'%s': WebSocket Message Dropped (not JSON) !", thread_tech_id );
+     { if (taille) buffer[taille-1] = 0;
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': WebSocket Message Dropped (not JSON): %s !", thread_tech_id, buffer );
        return;
      }
 
@@ -125,7 +127,7 @@
     GError *error = NULL;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    module->Master_websocket = soup_session_websocket_connect_finish ( module->Master_session, res, &error );
+    module->Master_websocket = soup_session_websocket_connect_finish ( module->Soup_session, res, &error );
     if (error)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error: %s.", thread_tech_id, error->message );
        g_error_free (error);
@@ -136,8 +138,7 @@
        return;
      }
 
-    /*g_object_set ( G_OBJECT(infos->ws_motifs), "max-incoming-payload-size", G_GINT64_CONSTANT(0), NULL );*/
-    g_object_set ( G_OBJECT(module->Master_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
+    soup_websocket_connection_set_keepalive_interval ( module->Master_websocket, 30 );
     g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(Thread_ws_on_master_message_CB), module );
     g_signal_connect ( module->Master_websocket, "closed",  G_CALLBACK(Thread_ws_on_master_close_CB), module );
     g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(Thread_ws_on_master_error_CB), module );
@@ -167,7 +168,7 @@
     g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
     SoupMessage *msg = soup_message_new ( "GET", chaine );
     g_signal_connect ( G_OBJECT(msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
-    soup_session_websocket_connect_async ( module->Master_session, msg, NULL, protocols, 0, NULL, Thread_ws_on_master_connected, module );
+    soup_session_websocket_connect_async ( module->Soup_session, msg, NULL, protocols, 0, NULL, Thread_ws_on_master_connected, module );
     g_object_unref(msg);
   }
 /******************************************************************************************************************************/
@@ -203,8 +204,6 @@
  gboolean Thread_every_hour ( struct THREAD *module )
   { if (Partage->top >= module->hour_top + 36000)                                                    /* Toutes les 1 secondes */
      { module->hour_top = Partage->top;
-#warning waiting for https://github.com/GNOME/libsoup/commit/d20c6601664624116f3dc43f21c7ec4a186cf8d3 before removing
-       soup_session_abort ( module->Master_session );
        return(TRUE);
      }
     return(FALSE);
@@ -230,16 +229,7 @@
           Thread_end ( module );                            /* Pas besoin de return : Thread_end fait un pthread_exit */
         }
      }
-
-    module->Master_session = soup_session_new();
-    soup_session_set_user_agent   ( module->Master_session, "Abls-habitat Agent" );
-    soup_session_set_timeout      ( module->Master_session, 10 );
-    soup_session_set_idle_timeout ( module->Master_session, 10 );
-#warning a virer
-    SoupLogger *log = soup_logger_new (SOUP_LOGGER_LOG_MINIMAL);
-    soup_session_add_feature ( module->Master_session, (SoupSessionFeature *)log );
-    g_object_unref ( log );
-
+    module->Soup_session = HTTP_New_session ( "Abls-habitat Thread" );
 /******************************************************* Ecoute du Master *****************************************************/
     Thread_ws_bus_init( module );
 
@@ -267,10 +257,9 @@
        while ( module->Master_websocket ) sched_yield();
      }
 
-    soup_session_abort ( module->Master_session );
-    g_object_unref ( module->Master_session ); module->Master_session = NULL;
+    g_object_unref  ( module->Soup_session );  module->Soup_session = NULL;
     g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
-    g_slist_free ( module->WS_messages );      module->WS_messages = NULL;
+    g_slist_free    ( module->WS_messages );   module->WS_messages = NULL;
     if (module->vars) { g_free(module->vars);  module->vars   = NULL; }
     Json_node_unref ( module->IOs );           module->IOs    = NULL;
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
@@ -285,16 +274,14 @@
  void Decharger_librairies ( void )
   { GSList *liste;
 
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-
-    liste = Partage->com_msrv.Threads;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    liste = Partage->com_msrv.Threads;                    /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct THREAD *module = liste->data;
        module->Thread_run = FALSE;                                                       /* On demande au thread de s'arreter */
        liste = liste->next;
      }
 
-    liste = Partage->com_msrv.Threads;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    liste = Partage->com_msrv.Threads;                    /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct THREAD *module = liste->data;
        if (module->TID) pthread_join( module->TID, NULL );                                             /* Attente fin du fils */
@@ -305,14 +292,16 @@
      { struct THREAD *module = Partage->com_msrv.Threads->data;
        if (module->dl_handle) dlclose( module->dl_handle );
        pthread_mutex_destroy( &module->synchro );
+
+       pthread_mutex_lock ( &Partage->com_msrv.synchro );
        Partage->com_msrv.Threads = g_slist_remove( Partage->com_msrv.Threads, module );
+       pthread_mutex_unlock ( &Partage->com_msrv.synchro );
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': thread unloaded", Json_get_string ( module->config, "thread_tech_id" ) );
        Json_node_unref ( module->config );
        g_free( module );
      }
 
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
 /* Thread_Push_API_message: Recoit une commande depuis l'API, au travers du master                                            */
@@ -349,6 +338,43 @@
     json_node_ref ( request );
     module->WS_messages = g_slist_append ( module->WS_messages, request );
     pthread_mutex_unlock ( &module->synchro );
+  }
+/******************************************************************************************************************************/
+/* Thread_Set_debug: Modifie le paramètre de debug du thread                                                                  */
+/* Entrée: L'element json decrivant la requete                                                                                */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Thread_Set_debug ( JsonNode *request )
+  { if (!request)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "request not provided" ); return; }
+
+    if (!Json_has_member ( request, "thread_tech_id" ))
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_tech_id' in request" ); return; }
+
+    if (!Json_has_member ( request, "debug" ))
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'debug' in request" ); return; }
+
+    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+
+    struct THREAD *module = NULL;
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    while(liste)
+     { struct THREAD *search_module = liste->data;
+       if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
+        { module = search_module;                                                        /* On demande au thread de s'arreter */
+          break;
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+
+    if (!module)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': thread not found", thread_tech_id ); return; }
+
+    gboolean debug = Json_get_bool ( request, "debug" );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "'%s': debug set to %d", thread_tech_id, debug );
+    module->Thread_debug = debug;
   }
 /******************************************************************************************************************************/
 /* Thread_Stop_one_thread: Decharge un seul et unique thread                                                                  */
@@ -488,14 +514,8 @@
     pthread_mutex_lock ( &Partage->com_msrv.synchro );
     Partage->com_msrv.Threads = g_slist_append ( Partage->com_msrv.Threads, module );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
-    if (module->Thread_run)
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "%s: '%s': thread of class '%s' loaded (enable=1)",
-                 __func__, thread_tech_id, thread_classe );
-     }
-    else
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "%s: '%s': thread of class '%s' not loaded (enable=0)",
-                 __func__, thread_tech_id, thread_classe );
-     }
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread '%s' of class '%s' loaded with enable='%d'",
+              thread_tech_id, thread_classe, module->Thread_run );
   }
 /******************************************************************************************************************************/
 /* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                                             */
@@ -520,11 +540,6 @@
 /******************************************************************************************************************************/
  gboolean Demarrer_dls ( void )
   { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
-    if (Partage->com_dls.Thread_run == TRUE)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "%s: An instance is already running %d",__func__, Partage->com_dls.TID );
-       return(FALSE);
-     }
-    memset( &Partage->com_dls, 0, sizeof(Partage->com_dls) );                       /* Initialisation des variables du thread */
     if ( pthread_create( &Partage->com_dls.TID, NULL, (void *)Run_dls, NULL ) )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
        return(FALSE);
@@ -588,7 +603,7 @@
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for DLS (%p) to finish", Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;
-    while ( Partage->com_dls.TID != 0 ) sched_yield();                                                     /* Attente fin DLS */
+    while ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                            /* Attente fin DLS */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for API_SYNC (%p) to finish", Partage->com_msrv.TID_api_sync );
@@ -601,7 +616,7 @@
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for HTTP (%p) to finish", Partage->com_http.TID );
     Partage->com_http.Thread_run = FALSE;
-    while ( Partage->com_http.TID != 0 ) sched_yield();                                                    /* Attente fin DLS */
+    while ( Partage->com_http.TID ) pthread_join ( Partage->com_http.TID, NULL );                          /* Attente fin DLS */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, HTTP is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Fin stopper_fils" );

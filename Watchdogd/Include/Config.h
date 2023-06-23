@@ -7,7 +7,7 @@
  * Config.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,13 +39,6 @@
     gchar config_file[80];                                        /* Nom du fichier dont est issu les informations ci dessous */
     gboolean headless;                                                                          /* Headless instance or not ? */
 
-    gint  db_port;
-    gchar db_hostname[ TAILLE_DB_HOST+1 ];                                                /* Nom du host de la base de donnes */
-    gchar db_username[ TAILLE_DB_USERNAME+1 ];                                /* Nom de l'administrateur de la base de données*/
-    gchar db_database[ TAILLE_DB_DATABASE+1 ];                                              /* Chemin d'acces aux DB watchdog */
-    gchar db_password[ TAILLE_DB_PASSWORD+1 ];                                              /* Mot de passe de connexion ODBC */
-
-    gboolean installed;                                                                    /* TRUE si la config a pu etre lue */
     gchar home [ TAILLE_HOME+1 ];                                                              /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
@@ -53,20 +46,13 @@
     guint    log_level;                                                                       /* Niveau de debug du programme */
     gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
     gboolean log_bus;                                                                                      /* TRUE si log_bus */
-    gboolean log_db;                                                                              /* TRUE si log des acces DB */
-    gboolean log_trad;                                                                    /* TRUE si log des compilations DLS */
     gboolean single;                                                                                /* Demarrage des thread ? */
   };
 
- #define DEFAUT_DB_HOST                 "localhost"          /* Ne pas depasser TAILLE_DB_HOST caracteres */
- #define DEFAUT_DB_DATABASE             "WatchdogDB"         /* Ne pas depasser TAILLE_DB_NAME caracteres */
- #define DEFAUT_DB_USERNAME             "watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
- #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */
- #define DEFAUT_DB_PORT                 3306
  #define DEFAUT_PROCESS_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
 
 /******************************************* Prototypes de fonctions **************************************/
- extern void Lire_config ( void );
+ extern void Lire_config ( int argc, char *argv[] );
  extern void Print_config ( void );
 #endif
 

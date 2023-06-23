@@ -7,7 +7,7 @@
  * The_dls_AI.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@
     bit->in_range  = Json_get_bool   ( element, "in_range"  );
     plugin->Dls_data_AI = g_slist_prepend ( plugin->Dls_data_AI, bit );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
-              "Create bit DLS_AI '%s:%s'=%f (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
+              "Create bit DLS_AI '%s:%s'=%f %s (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_AI : Recherche un CH dans les plugins DLS                                                                  */
@@ -97,7 +97,20 @@
     bit->valeur   = valeur;
     bit->in_range = in_range;
     Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-              "Changing DLS_AI '%s:%s'=%f", bit->tech_id, bit->acronyme, bit->valeur );
+              "Changing DLS_AI '%s:%s'=%f %s", bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
+  }
+/******************************************************************************************************************************/
+/* Dls_cadran_send_AI_to_API: Ennvoi une AI à l'API pour affichage des cadrans                                                */
+/* Entrées: la structure DLs_AI                                                                                               */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_cadran_send_AI_to_API ( struct DLS_AI *bit )
+  { if (!bit) return;
+    JsonNode *RootNode = Json_node_create();
+    Dls_AI_to_json ( RootNode, bit );
+    pthread_mutex_lock ( &Partage->abonnements_synchro );
+    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
+    pthread_mutex_unlock ( &Partage->abonnements_synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_AI_from_thread_ai: Positionne une AI dans DLS depuis une AI 'thread'                                          */
@@ -106,15 +119,12 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request )
   { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
-           Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" ) &&
-           Json_has_member ( request, "unite" ) && Json_has_member ( request, "archivage" ) &&
-           Json_has_member ( request, "libelle" )
+           Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" )
           )
        ) return(FALSE);
 
     gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
     gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
-    gchar *libelle         = Json_get_string ( request, "libelle" );
     gchar *tech_id         = thread_tech_id;
     gchar *acronyme        = thread_acronyme;
 
@@ -122,17 +132,21 @@
      { tech_id  = Json_get_string ( request, "tech_id" );
        acronyme = Json_get_string ( request, "acronyme" );
      }
+
+    struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
+    if (!bit)
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_AI from '%s': '%s:%s'/'%s:%s' not found",
+                 thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
+       return(FALSE);
+     }
+
     Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
-              Json_get_double ( request, "valeur" ), Json_get_string ( request, "unite" ),
-              Json_get_bool ( request, "in_range" ), libelle );
-    struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
-    if (bit)
-     { Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-       bit->archivage = Json_get_int ( request, "archivage" );
-       g_snprintf ( bit->unite,   sizeof(bit->unite),   Json_get_string ( request, "unite" ) );
-       g_snprintf ( bit->libelle, sizeof(bit->libelle), Json_get_string ( request, "libelle" ) );
-     }
+              Json_get_double ( request, "valeur" ), bit->unite,
+              Json_get_bool ( request, "in_range" ), bit->libelle );
+    Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
+    if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );
+
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -141,13 +155,14 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit )
-  { Json_node_add_string ( element, "tech_id",      bit->tech_id );
-    Json_node_add_string ( element, "acronyme",     bit->acronyme );
-    Json_node_add_double ( element, "valeur",       bit->valeur );
-    Json_node_add_string ( element, "unite",        bit->unite );
-    Json_node_add_int    ( element, "in_range",     bit->in_range );
-    Json_node_add_int    ( element, "last_arch",    bit->last_arch );
-    Json_node_add_int    ( element, "archivage",    bit->archivage );
+  { Json_node_add_string ( element, "classe",    "AI" );
+    Json_node_add_string ( element, "tech_id",   bit->tech_id );
+    Json_node_add_string ( element, "acronyme",  bit->acronyme );
+    Json_node_add_double ( element, "valeur",    bit->valeur );
+    Json_node_add_string ( element, "unite",     bit->unite );
+    Json_node_add_bool   ( element, "in_range",  bit->in_range );
+    Json_node_add_int    ( element, "archivage", bit->archivage );
+    Json_node_add_string ( element, "libelle",   bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_all_AI_to_json: Transforme tous les bits en JSON                                                                       */

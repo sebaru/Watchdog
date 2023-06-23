@@ -7,7 +7,7 @@
  * api_sync.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2023 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,9 @@
     Json_node_add_int ( RootNode, "request_time", time(NULL) );
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending to API %s", query );
-    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( Partage->com_msrv.API_session, soup_msg, RootNode );
+
+    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( soup_msg, RootNode );
+
     if (unref_RootNode) Json_node_unref(RootNode);
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
@@ -91,7 +93,7 @@
        return(NULL);
      }
 
-    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( Partage->com_msrv.API_session, soup_msg, NULL );
+    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( soup_msg, NULL );
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
     gint   status_code   = soup_message_get_status(soup_msg);
@@ -115,122 +117,6 @@
     return(ResponseNode);
  }
 /******************************************************************************************************************************/
-/* API_handle_API_messages: Traite les messages recue de l'API                                                               */
-/* Entrée: les parametres de la libsoup                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void AGENT_upgrade_to ( gchar *branche )
-  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading to '%s' in progress", branche );
-    gint pid = getpid();
-    gint new_pid = fork();
-    if (new_pid<0)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: erreur Fork" ); }
-    else if (!new_pid)
-     { g_strcanon ( branche, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_", '_' );
-       gchar chaine[256];
-       g_snprintf ( chaine, sizeof(chaine), "git clone -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
-       system(chaine);
-       system("cd temp_src; ./autogen.sh; sudo make install; cd ..; rm -rf temp_src;" );
-       Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
-       kill (pid, SIGTERM);                                                                          /* Stop old processes */
-       exit(0);
-     }
-  }
-/******************************************************************************************************************************/
-/* API_handle_API_messages: Traite les messages recue de l'API                                                               */
-/* Entrée: les parametres de la libsoup                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void API_handle_API_messages ( void )
-  {
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    JsonNode *request = Partage->com_msrv.API_ws_messages->data;
-    Partage->com_msrv.API_ws_messages = g_slist_remove ( Partage->com_msrv.API_ws_messages, request );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
-
-    gchar *agent_tag = Json_get_string ( request, "agent_tag" );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "receive agent_tag '%s' !", agent_tag );
-
-         if ( !strcasecmp( agent_tag, "RESET") )
-     { Partage->com_msrv.Thread_run = FALSE;
-       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "RESET: Stopping in progress" );
-     }
-    else if ( !strcasecmp( agent_tag, "UPGRADE") )
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading in progress" );
-       AGENT_upgrade_to ( WTD_BRANCHE );
-     }
-    else if ( !strcasecmp( agent_tag, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
-    else if ( !strcasecmp( agent_tag, "THREAD_RESTART") ) { Thread_Stop_one_thread ( request );
-                                                            Thread_Start_one_thread ( NULL, 0, request, NULL );
-                                                          }
-    else if ( !strcasecmp( agent_tag, "THREAD_SEND") )    { Thread_Push_API_message ( request ); }
-    else if ( !strcasecmp( agent_tag, "AGENT_SET") )
-     { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
-               Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
-             )
-          )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "AGENT_SET: wrong parameters" );
-          goto end;
-        }
-       Config.log_bus    = Json_get_bool ( request, "log_bus" );
-       Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
-       gboolean headless = Json_get_bool ( request, "headless" );
-       gchar *branche    = Json_get_string ( request, "branche" );
-       Info_change_log_level ( Json_get_int ( request, "log_level" ) );
-       Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d",
-                 Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
-       if (Config.headless != headless)
-        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
-          Partage->com_msrv.Thread_run = FALSE;
-        }
-       if (strcmp ( WTD_BRANCHE, branche ))
-        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: branche has changed, upgrading and rebooting" );
-          AGENT_upgrade_to ( branche );
-        }
-     }
-    else if (Config.instance_is_master == FALSE) goto end;
-
-    if ( !strcasecmp( agent_tag, "REMAP") ) MSRV_Remap();
-    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
-    else if ( !strcasecmp( agent_tag, "SYN_CLIC") )
-     { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end; }
-       if ( !Json_has_member ( request, "acronyme" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end; }
-       gchar *tech_id  = Json_get_string ( request, "tech_id" );
-       gchar *acronyme = Json_get_string ( request, "acronyme" );
-       Envoyer_commande_dls_data ( tech_id, acronyme );
-     }
-    else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") )
-     { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_ACQUIT: tech_id is missing" );
-          goto end;
-        }
-       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
-       Dls_Acquitter_plugin ( plugin_tech_id );
-     }
-    else if ( !strcasecmp( agent_tag, "DLS_COMPIL") )
-     { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
-          goto end;
-        }
-       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
-       Dls_Reseter_un_plugin ( plugin_tech_id );
-     }
-    else if ( !strcasecmp( agent_tag, "DLS_SET") )
-     { if ( ! Json_has_member ( request, "tech_id" )  )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
-          goto end;
-        }
-       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
-       if (Json_has_member ( request, "debug"  )) Dls_Debug_plugin   ( plugin_tech_id, Json_get_bool ( request, "debug" ) );
-       if (Json_has_member ( request, "enable" )) Dls_Activer_plugin ( plugin_tech_id, Json_get_bool ( request, "enable" ) );
-     }
-
-end:
-    Json_node_unref(request);
-  }
-/******************************************************************************************************************************/
 /* API_on_API_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée à l'API               */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
@@ -239,9 +125,11 @@ end:
   { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Message received !" );
     gsize taille;
 
-    JsonNode *request = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    gchar *buffer = g_bytes_get_data ( message_brut, &taille );
+    JsonNode *request = Json_get_from_string ( buffer );
     if (!request)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON) !" );
+     { if (taille) buffer[taille-1] = 0;
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON) %s !", buffer );
        return;
      }
 
@@ -262,27 +150,28 @@ end:
 /******************************************************************************************************************************/
  static void API_on_API_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
   { Partage->com_msrv.API_websocket = NULL;
-    Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Close. Reboot Needed!" );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "WebSocket Close. Reboot Needed!" );
     /* Partage->com_msrv.Thread_run = FALSE; */
   }
  static void API_on_API_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Error received %p!", self );
+  { Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Error received %p!", self );
   }
 /******************************************************************************************************************************/
-/* API_ws_on_API_connected: Termine la creation de la connexion websocket API API et raccorde le signal handler             */
+/* API_ws_on_API_connected: Termine la creation de la connexion websocket API API et raccorde le signal handler               */
 /* Entrée: les variables traditionnelles de libsous                                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void API_on_API_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
   { GError *error = NULL;
-    Partage->com_msrv.API_websocket = soup_session_websocket_connect_finish ( Partage->com_msrv.API_session, res, &error );
-    if (!Partage->com_msrv.API_websocket)                                                    /* No limit on incoming packet ! */
+    Partage->com_msrv.API_websocket = soup_session_websocket_connect_finish ( Partage->API_Sync_session, res, &error );
+    if (!Partage->com_msrv.API_websocket)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket error: %s.", error->message );
        g_error_free (error);
        return;
      }
-    g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "max-incoming-payload-size", G_GINT64_CONSTANT(2048000), NULL );
-    g_object_set ( G_OBJECT(Partage->com_msrv.API_websocket), "keepalive-interval", G_GINT64_CONSTANT(30), NULL );
+    soup_websocket_connection_set_keepalive_interval ( Partage->com_msrv.API_websocket, 30 );
+    soup_websocket_connection_set_max_incoming_payload_size ( Partage->com_msrv.API_websocket, 2048000 );/* No limit on incoming packet ! */
+
     g_signal_connect ( Partage->com_msrv.API_websocket, "message", G_CALLBACK(API_on_API_message_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "closed",  G_CALLBACK(API_on_API_close_CB), NULL );
     g_signal_connect ( Partage->com_msrv.API_websocket, "error",   G_CALLBACK(API_on_API_error_CB), NULL );
@@ -300,8 +189,8 @@ end:
     SoupMessage *soup_msg = soup_message_new ( "GET", chaine );
     Http_Add_Agent_signature ( soup_msg, NULL, 0 );
 
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Starting WebSocket connect to %s", chaine );
-    soup_session_websocket_connect_async ( Partage->com_msrv.API_session, soup_msg,
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Starting WebSocket connect to %s", chaine );
+    soup_session_websocket_connect_async ( Partage->API_Sync_session, soup_msg,
                                            NULL, protocols, 0, NULL, API_on_API_connected, NULL );
     g_object_unref(soup_msg);
   }
@@ -328,8 +217,8 @@ end:
   { prctl(PR_SET_NAME, "W-APISYNC", 0, 0, 0 );
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
-
 /***************************************** WebSocket Connect to API ************************************************************/
+    Partage->API_Sync_session = HTTP_New_session( "Abls-habitat SYNC Agent" );
     API_ws_init();
     gint cpt_1_minute = Partage->top + 600;
     while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
@@ -338,21 +227,30 @@ end:
        if (Partage->com_msrv.liste_visuel) API_Send_visuels ();                                /* Traitement des I dynamiques */
 /*---------------------------------------------- Report des messages ---------------------------------------------------------*/
        if (Partage->com_msrv.liste_msg) API_Send_MSGS();
-       if (Partage->com_msrv.API_ws_messages) API_handle_API_messages();
+/*---------------------------------------------- Report des abonnements ------------------------------------------------------*/
+       if (Partage->abonnements) API_Send_Abonnements();
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
-        { if (Partage->com_msrv.API_websocket == NULL) API_ws_init();                 /* Si websocket closed, try to restart */
+        { if (Partage->com_msrv.API_websocket == NULL) API_ws_init();                  /* Si websocket closed, try to restart */
           cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
-
        usleep(1000);
        sched_yield();
+       if (!Partage->com_msrv.API_websocket) continue;                                   /* Si pas de connexion API, attendre */
+
+/*------------------------------------- Report de tout ce qui a été préparé à l'API ------------------------------------------*/
+       if (Partage->liste_json_to_ws_api)
+        { JsonNode *RootNode = Partage->liste_json_to_ws_api->data;
+          Partage->liste_json_to_ws_api = g_slist_remove ( Partage->liste_json_to_ws_api, RootNode );
+          Partage->liste_json_to_ws_api_size--;
+          gchar *buf = Json_node_to_string ( RootNode );
+          soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
+          g_free(buf);
+          Json_node_unref ( RootNode );
+        }
      }
     API_ws_end();
-    g_slist_free    ( Partage->com_msrv.liste_visuel ); Partage->com_msrv.liste_visuel = NULL;
-    g_slist_foreach ( Partage->com_msrv.liste_msg, (GFunc)g_free, NULL );
-    g_slist_free    ( Partage->com_msrv.liste_msg ); Partage->com_msrv.liste_msg    = NULL;
-
+    g_object_unref ( Partage->API_Sync_session );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

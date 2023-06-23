@@ -7,7 +7,7 @@
  * bus_slave.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -167,7 +167,8 @@
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
        goto end;
      }
-    g_object_set ( soup_msg, "http-version", SOUP_HTTP_1_0, NULL );
+    /*g_object_set ( soup_msg, "http-version", SOUP_HTTP_1_0, NULL );*/
+    g_signal_connect ( G_OBJECT(soup_msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
     JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL); /* SYNC */
 
     gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
@@ -201,7 +202,7 @@ end:
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
        return(FALSE);
      }
-    g_object_set ( soup_msg, "http-version", SOUP_HTTP_1_0, NULL );
+    /*g_object_set ( soup_msg, "http-version", SOUP_HTTP_1_0, NULL );*/
     g_signal_connect ( G_OBJECT(soup_msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
 
     JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, RootNode ); /* SYNC */
@@ -224,17 +225,9 @@ end:
 /******************************************************************************************************************************/
  void Http_Post_thread_DI_to_local_BUS ( struct THREAD *module, JsonNode *thread_di, gboolean etat )
   { if (!module) return;
-    gboolean update = FALSE;
-    if (!Json_has_member ( thread_di, "etat" )) { update = TRUE; }
-    else
-     { gboolean old_etat = Json_get_bool ( thread_di, "etat" );
-       if ( old_etat != etat ) update = TRUE;
-     }
-    if (update)
-     { Json_node_add_bool ( thread_di, "etat", etat );
-       if (Config.instance_is_master == TRUE) Dls_data_set_DI_from_thread_di ( thread_di );
-       else Http_Post_to_local_BUS ( module, "SET_DI", thread_di );
-     }
+    Json_node_add_bool ( thread_di, "etat", etat );
+    if (Config.instance_is_master == TRUE) Dls_data_set_DI_from_thread_di ( thread_di );
+    else Http_Post_to_local_BUS ( module, "SET_DI", thread_di );
   }
 /******************************************************************************************************************************/
 /* Http_Post_thread_AI_to_local_BUS: Envoie le bit AI au master                                                               */
@@ -243,19 +236,11 @@ end:
 /******************************************************************************************************************************/
  void Http_Post_thread_AI_to_local_BUS ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
   { if (!module) return;
-    gboolean update = FALSE;
-    if (!Json_has_member ( thread_ai, "valeur" )) { update = TRUE; }
-    else
-     { gdouble  old_valeur   = Json_get_double ( thread_ai, "valeur" );
-       gboolean old_in_range = Json_get_bool   ( thread_ai, "in_range" );
-       if ( old_valeur != valeur || old_in_range != in_range ) update = TRUE;
-     }
-    if (update)
-     { Json_node_add_double ( thread_ai, "valeur", valeur );
-       Json_node_add_bool   ( thread_ai, "in_range", in_range );
-       if (Config.instance_is_master == TRUE) Dls_data_set_AI_from_thread_ai ( thread_ai );
-       else Http_Post_to_local_BUS ( module, "SET_AI", thread_ai );
-     }
+
+    Json_node_add_double ( thread_ai, "valeur", valeur );
+    Json_node_add_bool   ( thread_ai, "in_range", in_range );
+    if (Config.instance_is_master == TRUE) Dls_data_set_AI_from_thread_ai ( thread_ai );
+    else Http_Post_to_local_BUS ( module, "SET_AI", thread_ai );
   }
 /******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */
@@ -290,32 +275,45 @@ end:
     Json_node_unref(thread_watchdog);
   }
 /******************************************************************************************************************************/
-/* Http_traiter_get_do: Donne les DO au thread appelant                                                                       */
+/* Http_traiter_get_output: Donne les DO et AO au thread appelant                                                             */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_get_do ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query )
+ void Http_traiter_get_output ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id) { Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL ); return; }
 
-    JsonNode *Response = Json_node_create();
-    JsonArray *output_array = Json_node_add_array ( Response, "douts" );
     struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( thread_tech_id );
-    if (plugin)
-     { GSList *liste = plugin->Dls_data_DO;
-       while (liste)
-        { struct DLS_DO *dout = liste->data;
-          JsonNode *element = Json_node_create();
-          Dls_DO_to_json ( element, dout );
-          if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
-           { Json_array_add_element ( output_array, element );
-           } else Json_node_unref ( element );
-          liste = g_slist_next ( liste );
-        }
-       Info_new( __func__, Config.log_bus, LOG_INFO,  "GET_DO done for '%s'", thread_tech_id );
+    if (!plugin) { Http_Send_json_response ( msg, SOUP_STATUS_NOT_FOUND, "Plugin not found", NULL ); return; }
+
+    JsonNode *Response = Json_node_create();
+    JsonArray *dout_array = Json_node_add_array ( Response, "douts" );
+    GSList *liste = plugin->Dls_data_DO;
+    while (liste)
+     { struct DLS_DO *dout = liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_DO_to_json ( element, dout );
+       if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
+        { Json_array_add_element ( dout_array, element );
+        } else Json_node_unref ( element );
+       liste = g_slist_next ( liste );
      }
-    Http_Send_json_response ( msg, SOUP_STATUS_OK, "There are DO", Response );
+
+    JsonArray *aout_array = Json_node_add_array ( Response, "aouts" );
+    liste = plugin->Dls_data_AO;
+    while (liste)
+     { struct DLS_AO *aout = liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_AO_to_json ( element, aout );
+       if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
+        { Json_array_add_element ( aout_array, element );
+        } else Json_node_unref ( element );
+       liste = g_slist_next ( liste );
+     }
+    Info_new( __func__, Config.log_bus, LOG_INFO,  "GET_OUTPUT done for '%s'", thread_tech_id );
+
+    Http_Send_json_response ( msg, SOUP_STATUS_OK, "There are Outputs", Response );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_set_watchdog_post: Positionne un Watchdog dans DLS                                                            */
@@ -360,7 +358,8 @@ end:
     Info_new( __func__, Config.log_bus, LOG_INFO,
               "SET_CDE from '%s': '%s:%s'=1", thread_tech_id,
               Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
-    Envoyer_commande_dls_data ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
+    struct DLS_DI *bit = Dls_data_lookup_DI ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
+    Dls_data_set_DI_pulse ( NULL, bit );
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "CDE set", NULL );
   }
 /******************************************************************************************************************************/

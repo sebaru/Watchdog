@@ -7,7 +7,7 @@
  * watchdogd.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,15 +35,14 @@
  #include <uuid/uuid.h>
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
+ #include "Erreur.h"
  #include "Json.h"
  #include "Dls.h"
  #include "Thread.h"
- #include "Db.h"
  #include "config.h"
  #include "Http.h"
  #include "Config.h"
  #include "Archive.h"
- #include "Mnemonique_DB.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */
 
@@ -69,7 +68,6 @@
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
-    SoupSession *API_session;
     SoupWebsocketConnection *API_websocket;
     GSList *API_ws_messages;                                                             /* Liste des messages recue de l'API */
     gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
@@ -95,6 +93,12 @@
     GSList *archive_liste;                                                                /* liste de struct ARCHDB a traiter */
     gint archive_liste_taille;
 
+    SoupSession *API_Sync_session;
+    GSList *liste_json_to_ws_api;                                                   /* liste de JSON a envoyer à l'APi via WS */
+    gint    liste_json_to_ws_api_size;                                 /* taille de la liste de JSON a envoyer à l'APi via WS */
+    pthread_mutex_t abonnements_synchro;                                                  /* Bit de synchronisation processus */
+    GSList *abonnements;                                                               /* Abonnements aux entrées analogiques */
+
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
@@ -114,6 +118,7 @@
  extern void API_Clear_ARCHIVE ( void );
  extern void API_Send_visuels ( void );
  extern void API_Send_MSGS ( void );
+ extern void API_Send_Abonnements ( void );
  extern void Run_api_sync ( void );
  extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
@@ -127,8 +132,9 @@
  extern void UUID_Load ( gchar *thread, gchar *target );
 
  extern void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size );                  /* Dans http_common.c */
+ extern SoupSession *HTTP_New_session ( gchar *user_agent );
  extern gboolean Http_Accept_certificate ( SoupMessage* self, GTlsCertificate* tls_peer_certificate, GTlsCertificateFlags tls_peer_errors, gpointer user_data );
- extern JsonNode *Http_Send_json_request_from_agent ( SoupSession *session, SoupMessage *soup_msg, JsonNode *RootNode );
+ extern JsonNode *Http_Send_json_request_from_agent ( SoupMessage *soup_msg, JsonNode *RootNode );
  extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode );
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
 

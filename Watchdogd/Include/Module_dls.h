@@ -7,7 +7,7 @@
  * Module_dls.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
  #ifndef _MODULE_DLS_H_
  #define _MODULE_DLS_H_
  #include <glib.h>
+ #include <json-glib/json-glib.h>
 
  enum                                                                                  /* différent statut des temporisations */
   { DLS_TEMPO_NOT_COUNTING,                                                                 /* La tempo ne compte pas du tout */
@@ -63,19 +64,18 @@
     guint   last_arch;                                                                         /* Date de la derniere archive */
     guint   in_range;
     guint   archivage;
+    gboolean abonnement;
    };
 
  struct DLS_AO
   { gchar   acronyme[64];
     gchar   tech_id[32];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
-    gdouble min; /* a virer */
-    gdouble max;
-    guint   type;                                                                                  /* Type de gestion de l'EA */
     gchar   unite[32];                                                                           /* Km, h, ° ... */
     gdouble valeur;
     guint   archivage;
     guint   last_arch;                                                                         /* Date de la derniere archive */
+    gboolean abonnement;                                                 /* Devons-nous envoyer les valeurs en live à l'API ? */
   };
 
  struct DLS_WATCHDOG
@@ -83,7 +83,6 @@
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gint    top;
-    gboolean etat;                                                                                      /* Etat actuel du bit */
   };
 
  struct DLS_HORLOGE
@@ -97,7 +96,6 @@
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gboolean etat;                                                                                      /* Etat actuel du bit */
-    gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
     gboolean edge_up;
     gboolean edge_down;
   };
@@ -108,7 +106,6 @@
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gint    groupe; /* Groupe 'radio' */
     gboolean etat;                                                                                      /* Etat actuel du bit */
-    gboolean next_etat;                                                                       /*prochain etat calculé par DLS */
     gboolean edge_up;
     gboolean edge_down;
   };
@@ -143,6 +140,7 @@
     gboolean etat;
     gint    archivage;
     guint   last_arch;
+    gboolean abonnement;
   };
 
  struct DLS_CH
@@ -154,6 +152,7 @@
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
     guint old_top;                                                                         /* Date de debut du comptage du CH */
     gboolean etat;
+    gboolean abonnement;
   };
 
  struct DLS_VISUEL
@@ -164,19 +163,18 @@
     gchar    mode[32];
     gchar    color[16];
     gboolean cligno;
-    gint     last_change;
+    gboolean disable;
     gint     changes;
+    gint     last_change_reset;
   };
 
  struct DLS_MESSAGE
-  { gchar   tech_id[32];
+  { JsonNode *source_node;
+    gchar   tech_id[32];
     gchar   acronyme[64];
     gboolean etat;
-    gboolean etat_update;
     gint groupe;
-    gint last_change;
     gint last_on;
-    gint changes;
   };
 
  struct DLS_REGISTRE
@@ -187,6 +185,7 @@
     gchar   unite[32];
     gint    archivage;
     guint   last_arch;                                                   /* Date de dernier enregistrement en base de données */
+    gboolean abonnement;
     gdouble pid_somme_erreurs;                                                                                /* Calcul PID KI*/
     gdouble pid_prev_erreur;                                                                                 /* Calcul PID KD */
   };
@@ -234,6 +233,7 @@
  extern gboolean Dls_data_get_DI        ( struct DLS_DI *bit );
  extern gboolean Dls_data_get_DI_up     ( struct DLS_DI *bit );
  extern gboolean Dls_data_get_DI_down   ( struct DLS_DI *bit );
+ extern void Dls_data_set_DI_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit );
 
  extern struct DLS_DO *Dls_data_lookup_DO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *bit, gboolean valeur );
@@ -264,16 +264,17 @@
  extern struct DLS_REGISTRE *Dls_data_lookup_REGISTRE ( gchar *tech_id, gchar *acronyme );
  extern void    Dls_data_set_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *reg, gdouble valeur );
  extern gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg );
+ extern void Dls_cadran_send_REGISTRE_to_API ( struct DLS_REGISTRE *bit );
 
  extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
-                                   gchar *mode, gchar *color, gboolean cligno, gchar *libelle );
+                                   gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable );
 
  extern struct DLS_HORLOGE *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );
 
  extern struct DLS_MESSAGE *Dls_data_lookup_MESSAGE ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gboolean update, gboolean etat );
+ extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gboolean etat );
 
  extern struct DLS_TEMPO *Dls_data_lookup_TEMPO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_TEMPO     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,

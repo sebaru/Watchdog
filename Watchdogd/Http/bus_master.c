@@ -7,7 +7,7 @@
  * bus_master.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,222 +33,32 @@
 /* Entrée: des infos sur le paquet à envoyer                                                                                  */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Http_ws_send_to_client ( struct WS_CLIENT_SESSION *client, JsonNode *node )
-  { gchar *buf = Json_node_to_string ( node );
-    soup_websocket_connection_send_text ( client->connexion, buf );
-    g_free(buf);
-  }
-/******************************************************************************************************************************/
-/* Http_ws_send_to_all: Envoi d'un buffer a tous les clients connectés à la websocket                                         */
-/* Entrée: Le buffer                                                                                                          */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_ws_send_to_all ( JsonNode *node )
-  { gchar *buf = Json_node_to_string ( node );
-    pthread_mutex_lock( &Partage->com_http.synchro );
-    GSList *sessions = Partage->com_http.liste_http_clients;
-    while ( sessions )
-     { struct HTTP_CLIENT_SESSION *session = sessions->data;
-       GSList *liste_ws = session->liste_ws_clients;
-       while (liste_ws)
-        { struct WS_CLIENT_SESSION *client = liste_ws->data;
-          soup_websocket_connection_send_text ( client->connexion, buf );
-          liste_ws = g_slist_next(liste_ws);
-        }
-       sessions = g_slist_next ( sessions );
-     }
-    pthread_mutex_unlock( &Partage->com_http.synchro );
-    g_free(buf);
-  }
-/******************************************************************************************************************************/
-/* Envoyer_un_cadran: Envoi un update cadran au client                                                                        */
-/* Entrée: une reference sur la session en cours, et le cadran a envoyer                                                      */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void HTTP_CADRAN_to_json ( JsonNode *node, struct HTTP_CADRAN *http_cadran )
-  { Json_node_add_string ( node, "tech_id",  http_cadran->tech_id );
-    Json_node_add_string ( node, "acronyme", http_cadran->acronyme );
-    Json_node_add_string ( node, "classe",   http_cadran->classe );
-    Json_node_add_bool   ( node, "in_range", http_cadran->in_range );
-    Json_node_add_double ( node, "valeur",   http_cadran->valeur );
-    Json_node_add_string ( node, "unite",    http_cadran->unite );
-  }
-/******************************************************************************************************************************/
-/* Http_ws_on_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket                              */
-/* Entrée: les parametres de la libsoup                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Http_ws_on_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
-  { struct WS_CLIENT_SESSION *client = user_data;
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Message received !" );
-    gsize taille;
-
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
-    if (!response)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON) !" );
-       return;
-     }
-
-    if (!Json_has_member ( response, "zmq_tag" ))
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (no 'zmq_tag') !" );
-       Json_node_unref(response);
-       return;
-     }
-
-    gchar *zmq_tag = Json_get_string( response, "zmq_tag" );
-
-    if(!strcasecmp(zmq_tag,"CONNECT"))
-     { if ( ! (Json_has_member( response, "wtd_session") ))
-        { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket without wtd_session !" ); }
-       else
-        { gchar *wtd_session = Json_get_string ( response, "wtd_session");
-          GSList *liste = Partage->com_http.liste_http_clients;
-          while ( liste )                                                      /* Recherche de la session HTTP correspondante */
-           { struct HTTP_CLIENT_SESSION *http_session = liste->data;
-             if (!strcmp(http_session->wtd_session, wtd_session))
-              { client->http_session = http_session;
-                pthread_mutex_lock( &Partage->com_http.synchro );
-                http_session->liste_ws_clients = g_slist_prepend ( http_session->liste_ws_clients, client );
-                pthread_mutex_unlock( &Partage->com_http.synchro );
-                Info_new( __func__, Config.log_msrv, LOG_WARNING, "session found for '%s' !", http_session->username );
-                break;
-              }
-             liste = g_slist_next ( liste );
-           }
-        }
-     }
-
-    if (!client->http_session)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Not authorized !" ); }
-    Json_node_unref(response);
-  }
-/******************************************************************************************************************************/
-/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_Envoyer_les_cadrans ( void )
-  { pthread_mutex_lock( &Partage->com_http.synchro );
-    GSList *sessions = Partage->com_http.liste_http_clients;
-    while ( sessions )
-     { struct HTTP_CLIENT_SESSION *session = sessions->data;
-       GSList *cadrans = session->Liste_bit_cadrans;
-       while ( cadrans )
-        { struct HTTP_CADRAN *cadran = cadrans->data;
-          if (cadran->last_update + 10 <= Partage->top)
-           { GSList *clients = session->liste_ws_clients;
-             JsonNode *RootNode = Json_node_create();
-             if (RootNode)
-              { Http_Formater_cadran ( cadran );
-                Json_node_add_string ( RootNode, "zmq_tag", "DLS_CADRAN" );
-                HTTP_CADRAN_to_json ( RootNode, cadran );
-                while (clients)
-                 { struct WS_CLIENT_SESSION *client = clients->data;
-                   Http_ws_send_to_client ( client, RootNode );
-                   clients = g_slist_next(clients);
-                 }
-                Json_node_unref( RootNode );
-              }
-             cadran->last_update = Partage->top;
-           }
-          cadrans = g_slist_next(cadrans);
-        }
-       sessions = g_slist_next(sessions);
-     }
-    pthread_mutex_unlock( &Partage->com_http.synchro );
-  }
-/******************************************************************************************************************************/
-/* Envoi_au_serveur: Envoi une requete web au serveur Watchdogd                                                               */
-/* Entrée: des infos sur le paquet à envoyer                                                                                  */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
  void Http_ws_send_json_to_slave ( struct HTTP_WS_SESSION *slave, JsonNode *RootNode )
   { gchar *buffer = Json_node_to_string ( RootNode );
     soup_websocket_connection_send_text ( slave->connexion, buffer );
     g_free(buffer);
   }
 /******************************************************************************************************************************/
-/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
+/* Http_Send_to_slaves: Envoi un tag aux slaves                                                                               */
 /* Entrée: les données fournies par la librairie libsoup                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Http_Send_ping_to_slaves ( void )
-  { pthread_mutex_lock( &Partage->com_http.synchro );
-    GSList *liste = Partage->com_http.Slaves;
-    JsonNode *RootNode=Json_node_create();
-    Json_node_add_string ( RootNode, "tag", "PING" );
-    while ( liste )
-     { struct HTTP_WS_SESSION *slave = liste->data;
-       Http_ws_send_json_to_slave ( slave, RootNode );
-       liste = g_slist_next( liste );
-     }
-    Json_node_unref ( RootNode );
-    pthread_mutex_unlock( &Partage->com_http.synchro );
-  }
-/******************************************************************************************************************************/
-/* Http_Envoyer_les_cadrans: Envoi les cadrans aux clients                                                                    */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_Send_to_slaves ( gchar *target_tech_id, JsonNode *RootNode )
-  { pthread_mutex_lock( &Partage->com_http.synchro );
+ void Http_Send_to_slaves ( gchar *tag, JsonNode *RootNode )
+  { gboolean unref_RootNode = FALSE;
+    if (!RootNode) { RootNode = Json_node_create (); unref_RootNode = TRUE; }
+    Json_node_add_string ( RootNode, "tag", tag );
+    gchar *buffer = Json_node_to_string ( RootNode );
+    if (unref_RootNode) Json_node_unref (RootNode);
+
+    pthread_mutex_lock( &Partage->com_http.synchro );
     GSList *liste = Partage->com_http.Slaves;
     while ( liste )
      { struct HTTP_WS_SESSION *slave = liste->data;
-       Http_ws_send_json_to_slave ( slave, RootNode );
+       soup_websocket_connection_send_text ( slave->connexion, buffer );
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock( &Partage->com_http.synchro );
-  }
-/******************************************************************************************************************************/
-/* Http_ws_destroy_session: Supprime une session WS                                                                           */
-/* Entrée: la WS                                                                                                              */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_ws_destroy_session ( struct WS_CLIENT_SESSION *client )
-  { if (client->http_session)
-     { struct HTTP_CLIENT_SESSION *session = client->http_session;
-       pthread_mutex_lock( &Partage->com_http.synchro );
-       session->liste_ws_clients = g_slist_remove ( session->liste_ws_clients, client );
-       pthread_mutex_unlock( &Partage->com_http.synchro );
-       g_slist_free ( client->Liste_bit_visuels );
-     }
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Session closed !" );
-    g_object_unref(client->connexion);
-    g_free(client);
-  }
-/******************************************************************************************************************************/
-/* Http_ws_on_closed: Traite une deconnexion                                                                                  */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Http_ws_on_closed ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { struct WS_CLIENT_SESSION *client = user_data;
-    Http_ws_destroy_session ( client );
-  }
- static void Http_ws_on_error ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Error received %p!", self );
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_websocket: Traite une requete websocket                                                                       */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Http_traiter_open_websocket_motifs_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
-                                              SoupWebsocketConnection* connexion, gpointer user_data )
-  { Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Opened %p state %d!", connexion,
-              soup_websocket_connection_get_state (connexion) );
-    struct WS_CLIENT_SESSION *client = g_try_malloc0( sizeof(struct WS_CLIENT_SESSION) );
-    if(!client)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "WebSocket Memory error. Closing !" );
-       return;
-     }
-    client->connexion = connexion;
-    g_signal_connect ( connexion, "message", G_CALLBACK(Http_ws_on_message), client );
-    g_signal_connect ( connexion, "closed",  G_CALLBACK(Http_ws_on_closed), client );
-    g_signal_connect ( connexion, "error",   G_CALLBACK(Http_ws_on_error), client );
-    /*soup_websocket_connection_send_text ( connexion, "Welcome on Watchdog WebSocket !" );*/
-    g_object_ref(connexion);
+    g_free(buffer);
   }
 /******************************************************************************************************************************/
 /* Http_ws_on_slave_message: Appelé par libsoup lorsque l'on recoit un message sur la websocket slave                         */
@@ -256,13 +66,14 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Http_ws_on_slave_message ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
-  { struct HTTP_WS_SESSION *slave = user_data;
+  { /*struct HTTP_WS_SESSION *slave = user_data;*/
     Info_new( __func__, Config.log_msrv, LOG_INFO, "WebSocket Message received !" );
     gsize taille;
-
-    JsonNode *response = Json_get_from_string ( g_bytes_get_data ( message_brut, &taille ) );
+    gchar *buffer = g_bytes_get_data ( message_brut, &taille );
+    JsonNode *response = Json_get_from_string ( buffer );
     if (!response)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON) !" );
+     { if (taille) buffer[taille-1] = 0;
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (not JSON): %s !", buffer );
        return;
      }
 

@@ -7,7 +7,7 @@
  * Teleinfo.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -201,15 +201,6 @@
         }
      }
     close(vars->fd);                                                                          /* Fermeture de la connexion FD */
-
-    Json_node_unref ( vars->Adco );
-    Json_node_unref ( vars->Isous );
-    Json_node_unref ( vars->Base );
-    Json_node_unref ( vars->Hchc );
-    Json_node_unref ( vars->Hchp );
-    Json_node_unref ( vars->Iinst );
-    Json_node_unref ( vars->Imax );
-    Json_node_unref ( vars->Papp );
 
     Thread_end(module);
   }

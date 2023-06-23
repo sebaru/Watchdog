@@ -7,7 +7,7 @@
  * Modbus.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
  enum
   { WAGO_UNUSED_1, /* a virer */
     WAGO_UNUSED_2,
-    WAGO_UNUSED_3,
+    WAGO_750550,
     WAGO_750455,
     WAGO_750461,
     NBR_TYPE_WAGO

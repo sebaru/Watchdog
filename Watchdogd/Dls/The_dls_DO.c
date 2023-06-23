@@ -7,7 +7,7 @@
  * The_dls_DO.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,17 +92,21 @@
 /******************************************************************************************************************************/
  void Dls_data_set_DO ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *dout, gboolean etat )
   { if (!dout) return;
-     if (dout->etat != etat)
-     { Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
-                 (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, etat );
-
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                          /* Envoie au MSRV pour dispatch aux threads */
-       Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, dout );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Partage->audit_bit_interne_per_sec++;
-     }
+    if (dout->etat == etat) return;
     dout->etat = etat;
+    Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
+              (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, dout->etat );
+
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode)
+     { Dls_DO_to_json ( RootNode, dout );
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                       /* Envoie au MSRV pour dispatch aux threads */
+       Partage->com_msrv.Liste_DO = g_slist_append ( Partage->com_msrv.Liste_DO, RootNode );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+     }
+    else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+    Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_bool_up: Remonte le front montant d'un boolean                                                                */

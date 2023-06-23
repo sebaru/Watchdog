@@ -7,7 +7,7 @@
  * Watchdogd.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2023 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@
  #include <sys/file.h>
  #include <sys/types.h>
  #include <grp.h>
- #include <popt.h>
  #include <pthread.h>
  #include <pwd.h>
  #include <systemd/sd-login.h>
@@ -54,9 +53,8 @@
  static void Traitement_signaux( int num )
   { char chaine[50];
     if (num == SIGALRM)
-     { Partage->top++;
-       if (Partage->com_msrv.Thread_run != TRUE) return;
-
+     { if (!(Partage && Partage->com_msrv.Thread_run)) return;
+       Partage->top++;
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "Timer: Partage->top = 0 !!" ); }
 
@@ -204,113 +202,6 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
-/* Entrée: argc, argv                                                                                                         */
-/* Sortie: -1 si erreur, 0 si ok                                                                                              */
-/******************************************************************************************************************************/
- static void Lire_ligne_commande( int argc, char *argv[] )
-  { gint help = 0, log_level = -1, single = 0, version = 0, link = 0;
-    gchar *api_url = NULL, *domain_uuid = NULL, *domain_secret = NULL, *agent_uuid_src = NULL;
-    struct poptOption Options[]=
-     { { "version",        'v', POPT_ARG_NONE,
-         &version,          0, "Display Version Number", NULL },
-       { "debug",          'd', POPT_ARG_INT,
-         &log_level,      0, "Debug level", "LEVEL" },
-       { "help",           'h', POPT_ARG_NONE,
-         &help,             0, "Help", NULL },
-       { "single",         's', POPT_ARG_NONE,
-         &single,           0, "Don't start thread", NULL },
-       { "link",           'l', POPT_ARG_NONE,
-         &link,             0, "Link to API", NULL },
-       { "api-url",        'A', POPT_ARG_STRING,
-         &api_url,          0, "API Url (default is api.abls-habitat.fr)", NULL },
-       { "domain-uuid",    'D', POPT_ARG_STRING,
-         &domain_uuid,      0, "Domain to link to (mandatory)", NULL },
-       { "domain-secret",  'S', POPT_ARG_STRING,
-         &domain_secret,    0, "Domain secret (mandatory)", NULL },
-       { "agent-uuid",     'U', POPT_ARG_STRING,
-         &agent_uuid_src,   0, "Agent UUID (default is to create a new one)", NULL },
-       POPT_TABLEEND
-     };
-    poptContext context;
-    int rc;
-
-    context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
-    while ( (rc = poptGetNextOpt( context )) != -1)                                          /* Parse de la ligne de commande */
-     { switch (rc)
-        { case POPT_ERROR_BADOPT: printf( "Option %s is unknown\n", poptBadOption(context, 0) );
-                                  help=1; break;
-          default: printf("Parsing error\n");
-        }
-     }
-
-    if (help)                                                                                 /* Affichage de l'aide en ligne */
-     { poptPrintHelp(context, stdout, 0);
-       poptFreeContext(context);
-       exit(EXIT_OK);
-     }
-    poptFreeContext( context );                                                                         /* Liberation memoire */
-
-    if (version)                                                                            /* Affichage du numéro de version */
-     { printf(" Watchdogd - Version %s\n", WTD_VERSION );
-       exit(EXIT_OK);
-     }
-
-/*--------------------------------------------------------- Creation du fichier de config ------------------------------------*/
-    if (link)
-     { if (getuid()!=0)
-        { printf(" You should be root to link to API\n" );
-          exit(EXIT_OK);
-        }
-
-       if ( !domain_uuid )
-        { printf(" You need 'domain_uuid' to link to API\n" );
-          exit(EXIT_OK);
-        }
-
-       if ( !domain_secret )
-        { printf(" You need 'domain_secret' to link to API\n" );
-          exit(EXIT_OK);
-        }
-
-       if ( !api_url ) api_url = "https://api.abls-habitat.fr";
-       if ( g_str_has_prefix ( api_url, "https://" ) ) api_url+=8;
-       if ( g_str_has_prefix ( api_url, "http://"  ) ) api_url+=7;
-       if ( g_str_has_prefix ( api_url, "wss://"   ) ) api_url+=6;
-       if ( g_str_has_prefix ( api_url, "ws://"    ) ) api_url+=5;
-       if (strlen(api_url)==0) api_url = "api.abls-habitat.fr";
-
-       gchar agent_uuid[37];
-       if ( agent_uuid_src ) g_snprintf( agent_uuid, sizeof(agent_uuid), "%s", agent_uuid_src );
-       else UUID_New ( agent_uuid );
-/******************************************* Création fichier de config *******************************************************/
-       JsonNode *RootNode = Json_node_create ();
-       if (RootNode)
-        { Json_node_add_string( RootNode, "domain_uuid", domain_uuid );
-          Json_node_add_string( RootNode, "domain_secret", domain_secret );
-          Json_node_add_string( RootNode, "agent_uuid", agent_uuid );
-          Json_node_add_string( RootNode, "api_url", api_url );
-          Json_node_add_string( RootNode, "product", "agent" );
-          Json_node_add_string( RootNode, "vendor", "abls-habitat.fr" );
-          time_t t = time(NULL);
-          struct tm *temps = localtime( &t );
-          if (temps)
-           { gchar date[64];
-             strftime( date, sizeof(date), "%F %T", temps );
-             Json_node_add_string( RootNode, "install_time", date );
-           }
-          Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );
-          Json_node_unref(RootNode);
-          printf(" Config file created, you can restart.\n" );
-        }
-       else { printf ("Writing config failed: Memory Error.\n" ); }
-       exit(EXIT_OK);
-     }
-    if (single)          Config.single      = TRUE;                                            /* Demarrage en mode single ?? */
-    if (log_level!=-1)   Config.log_level   = log_level;
-    fflush(0);
-  }
-/******************************************************************************************************************************/
 /* Drop_privileges: Passe sous un autre user que root                                                                         */
 /* Entrée: néant                                                                                                              */
 /* Sortie: EXIT si erreur                                                                                                     */
@@ -327,8 +218,7 @@
     if (Config.headless)
      { pwd = getpwnam ( "watchdog" );
        if (!pwd)
-        { Info_new( __func__, Config.log_msrv, LOG_CRIT,
-                    "'watchdog' user not found while Headless, creating." );
+        { Info_new( __func__, Config.log_msrv, LOG_CRIT, "'watchdog' user not found while Headless, creating." );
           system("useradd -m -c 'WatchdogServer' watchdog" );
         }
        pwd = getpwnam ( "watchdog" );
@@ -342,7 +232,7 @@
     else /* When not headless */
      { gchar *session;
        uid_t active_session;
-       if (sd_seat_get_active(	"seat0",	&session,	&active_session) < 0)
+       if (sd_seat_get_active( "seat0", &session, &active_session) < 0)
         { Info_new( __func__, Config.log_msrv, LOG_CRIT,
                     "seat_get_active failed (%s). Waiting 5s.", strerror (errno) );
           return(FALSE);
@@ -356,40 +246,28 @@
         }
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.\n", pwd->pw_name, pwd->pw_uid );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Dropping from root to '%s' (%d).\n", pwd->pw_name, pwd->pw_uid );
 
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE,
-             "Dropping from root to '%s' (%d).\n", pwd->pw_name, pwd->pw_uid );
+/***************************************************** Configuration des groupes **********************************************/
+    system("groupadd abls" );                                                         /* Ajoute le groupe abls sur le systeme */
+    gchar *groupes[] = { "abls", "audio", "dialout", "gpio", NULL };
+    gid_t *grp_list  = NULL;
+    gint nbr_groupe  = 0;
+    gint cpt_groupe  = 0;
 
-    /* setting groups */
-    gid_t *grp_list = NULL;
-    gint nbr_group = 0;
-    struct group *grp;
-
-    grp = getgrnam("audio");
-    if (grp)
-     { nbr_group++;
-       grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
-       grp_list[nbr_group-1] = grp->gr_gid;
+    while ( groupes[cpt_groupe] )                              /* Cherche les groupe_id et peuple la liste des groupes voulus */
+     { struct group *groupe = getgrnam( groupes[cpt_groupe] );
+       if (groupe)
+        { nbr_groupe++;
+          grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_groupe );
+          grp_list[nbr_groupe-1] = groupe->gr_gid;
+        } else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Groupe '%s' unknown, not added" , groupes[cpt_groupe] );
+       cpt_groupe++;
      }
 
-    grp = getgrnam("dialout");
-    if (grp)
-     { nbr_group++;
-       grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
-       grp_list[nbr_group-1] = grp->gr_gid;
-     }
-
-    grp = getgrnam("gpio");
-    if (grp)
-     { nbr_group++;
-       grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_group );
-       grp_list[nbr_group-1] = grp->gr_gid;
-     }
-
-    if (nbr_group)
-     { if (setgroups ( nbr_group, grp_list )==-1)
-        { Info_new( __func__, Config.log_msrv, LOG_CRIT, "%s: Error, cannot SetGroups for user '%s' (%s)\n",
-                    __func__, pwd->pw_name, strerror(errno) );
+    if (nbr_groupe)
+     { if (setgroups ( nbr_groupe, grp_list )==-1)
+        { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error, cannot SetGroups for user '%s' (%s)", pwd->pw_name, strerror(errno) );
           g_free(grp_list);
           return(FALSE);
         }
@@ -397,14 +275,12 @@
      }
 
     if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                  /* On drop les privilèges */
-     { Info_new( __func__, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREgid for user '%s' (%s)\n",
-                 __func__, pwd->pw_name, strerror(errno) );
+     { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error, cannot setREgid for user '%s' (%s)", pwd->pw_name, strerror(errno) );
        return(FALSE);
      }
 
     if (setreuid ( pwd->pw_uid, pwd->pw_uid )==-1)                                                  /* On drop les privilèges */
-     { Info_new( __func__, Config.log_msrv, LOG_CRIT, "%s: Error, cannot setREuid for user '%s' (%s)\n",
-                 __func__, pwd->pw_name, strerror(errno) );
+     { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error, cannot setREuid for user '%s' (%s)", pwd->pw_name, strerror(errno) );
        return(FALSE);
      }
 
@@ -427,6 +303,227 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* MSRV_Agent_upgrade_to: Upgrade un agent sur la branche en parametre                                                        */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_Agent_upgrade_to ( gchar *branche )
+  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading to '%s' in progress", branche );
+    gint pid = getpid();
+    gint new_pid = fork();
+    if (new_pid<0)
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: erreur Fork" ); }
+    else if (!new_pid)
+     { g_strcanon ( branche, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_", '_' );
+       gchar chaine[256];
+       g_snprintf ( chaine, sizeof(chaine), "nice -20 git clone -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
+       system(chaine);
+       system("cd temp_src; nice -20 ./autogen.sh; sudo make install; cd ..; rm -rf temp_src;" );
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
+       kill (pid, SIGTERM);                                                                             /* Stop old processes */
+       exit(0);
+     }
+  }
+/******************************************************************************************************************************/
+/* MSRV_handle_API_messages: Traite les messages recue de l'API                                                               */
+/* Entrée: les parametres de la libsoup                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_handle_API_messages ( void )
+  {
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    JsonNode *request = Partage->com_msrv.API_ws_messages->data;
+    Partage->com_msrv.API_ws_messages = g_slist_remove ( Partage->com_msrv.API_ws_messages, request );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+
+    gchar *agent_tag = Json_get_string ( request, "agent_tag" );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "receive agent_tag '%s' !", agent_tag );
+
+         if ( !strcasecmp( agent_tag, "RESET") )
+     { Partage->com_msrv.Thread_run = FALSE;
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "RESET: Stopping in progress" );
+     }
+    else if ( !strcasecmp( agent_tag, "UPGRADE") )
+     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading in progress" );
+       MSRV_Agent_upgrade_to ( WTD_BRANCHE );
+     }
+    else if ( !strcasecmp( agent_tag, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
+    else if ( !strcasecmp( agent_tag, "THREAD_RESTART") ) { Thread_Stop_one_thread ( request );
+                                                            Thread_Start_one_thread ( NULL, 0, request, NULL );
+                                                          }
+    else if ( !strcasecmp( agent_tag, "THREAD_SEND") )    { Thread_Push_API_message ( request ); }
+    else if ( !strcasecmp( agent_tag, "THREAD_DEBUG") )   { Thread_Set_debug ( request ); }
+    else if ( !strcasecmp( agent_tag, "AGENT_SET") )
+     { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
+               Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
+             )
+          )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "AGENT_SET: wrong parameters" );
+          goto end;
+        }
+       Config.log_bus    = Json_get_bool ( request, "log_bus" );
+       Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
+       gboolean headless = Json_get_bool ( request, "headless" );
+       gchar *branche    = Json_get_string ( request, "branche" );
+       Info_change_log_level ( Json_get_int ( request, "log_level" ) );
+       Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d",
+                 Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
+       if (Config.headless != headless)
+        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
+          Partage->com_msrv.Thread_run = FALSE;
+        }
+       if (strcmp ( WTD_BRANCHE, branche ))
+        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: branche has changed, upgrading and rebooting" );
+          MSRV_Agent_upgrade_to ( branche );
+        }
+     }
+
+    if (Config.instance_is_master == FALSE) goto end;
+
+    if ( !strcasecmp( agent_tag, "REMAP") )
+     { MSRV_Remap();
+       Http_Send_to_slaves ( "SYNC_IO", NULL );                                  /* Synchronisation des IO depuis les threads */
+     }
+    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
+    else if ( !strcasecmp( agent_tag, "SYN_CLIC") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end; }
+       if ( !Json_has_member ( request, "acronyme" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end; }
+       gchar *tech_id  = Json_get_string ( request, "tech_id" );
+       gchar *acronyme = Json_get_string ( request, "acronyme" );
+       struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
+       Dls_data_set_DI_pulse ( NULL, bit );
+     }
+    else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_ACQUIT: tech_id is missing" );
+          goto end;
+        }
+       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
+       Dls_Acquitter_plugin ( plugin_tech_id );
+     }
+    else if ( !strcasecmp( agent_tag, "DLS_COMPIL") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
+          goto end;
+        }
+       gchar *target_tech_id = Json_get_string ( request, "tech_id" );
+       gboolean reset = TRUE;
+       if (Json_has_member ( request, "dls_reset" ) && Json_get_bool ( request, "dls_reset" ) == FALSE ) reset = FALSE;
+       struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( target_tech_id );
+       if (found) Dls_Export_Data_to_API ( found );   /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
+       struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id, reset );
+       if (dls) Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s': resetted", target_tech_id );
+           else Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "'%s': error when resetting", target_tech_id );
+       Dls_Load_horloge_ticks();
+     }
+    else if ( !strcasecmp( agent_tag, "ABONNER") )
+     { if ( !Json_has_member ( request, "cadrans" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "ABONNER: cadrans is missing" );
+          goto end;
+        }
+       pthread_mutex_lock ( &Partage->com_dls.synchro );
+       GList *Cadrans = json_array_get_elements ( Json_get_array ( request, "cadrans" ) );
+       GList *cadrans = Cadrans;
+       while(cadrans)
+        { JsonNode *cadran = cadrans->data;
+          gchar *classe    = Json_get_string ( cadran, "classe" );
+          gchar *tech_id   = Json_get_string ( cadran, "tech_id" );
+          gchar *acronyme  = Json_get_string ( cadran, "acronyme" );
+          if (classe && tech_id && acronyme)
+           { Info_new( __func__, Config.log_msrv, LOG_INFO, "Abonnement au bit '%s:%s'", tech_id, acronyme );
+             if (!strcasecmp ( classe, "AI" ))
+              { struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_AI_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
+              }
+             else if (!strcasecmp ( classe, "CH" ))
+              { struct DLS_CH *bit = Dls_data_lookup_CH ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_CH_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
+              }
+             else if (!strcasecmp ( classe, "CI" ))
+              { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_CI_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
+              }
+             else if (!strcasecmp ( classe, "REGISTRE" ))
+              { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_REGISTRE_to_API ( bit );              /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
+              }
+             else if (!strcasecmp ( classe, "AO" ))
+              { struct DLS_AO *bit = Dls_data_lookup_AO ( tech_id, acronyme );
+                if (bit)
+                 { bit->abonnement = TRUE;
+                   Dls_cadran_send_AO_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
+                 }
+              }
+             else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Abonnement: bit '%s:%s' inconnu", tech_id, acronyme );
+           } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
+          cadrans = g_list_next(cadrans);
+        }
+       g_list_free(Cadrans);
+       pthread_mutex_unlock ( &Partage->com_dls.synchro );
+     }
+    else if ( !strcasecmp( agent_tag, "DESABONNER") )
+     { if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "classe" )) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DESABONNER: cadran is missing" );
+          goto end;
+        }
+       pthread_mutex_lock ( &Partage->com_dls.synchro );
+       gchar *classe    = Json_get_string ( request, "classe" );
+       gchar *tech_id   = Json_get_string ( request, "tech_id" );
+       gchar *acronyme  = Json_get_string ( request, "acronyme" );
+       if (classe && tech_id && acronyme)
+        { Info_new( __func__, Config.log_msrv, LOG_INFO, "Désabonnement au bit '%s:%s'", tech_id, acronyme );
+          if (!strcasecmp ( classe, "AI" ))
+           { struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else if (!strcasecmp ( classe, "CI" ))
+           { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else if (!strcasecmp ( classe, "CH" ))
+           { struct DLS_CH *bit = Dls_data_lookup_CH ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else if (!strcasecmp ( classe, "REGISTRE" ))
+           { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else if (!strcasecmp ( classe, "AO" ))
+           { struct DLS_AO *bit = Dls_data_lookup_AO ( tech_id, acronyme );
+             if (bit) bit->abonnement = FALSE;
+           }
+          else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Désabonnement: bit '%s:%s' inconnu", tech_id, acronyme );
+        } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
+       pthread_mutex_unlock ( &Partage->com_dls.synchro );
+     }
+    else if ( !strcasecmp( agent_tag, "DLS_SET") )
+     { if ( ! Json_has_member ( request, "tech_id" )  )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
+          goto end;
+        }
+       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
+       if (Json_has_member ( request, "debug"  )) Dls_Debug_plugin   ( plugin_tech_id, Json_get_bool ( request, "debug" ) );
+       if (Json_has_member ( request, "enable" )) Dls_Activer_plugin ( plugin_tech_id, Json_get_bool ( request, "enable" ) );
+     }
+
+end:
+    Json_node_unref(request);
+  }
+/******************************************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                                              */
 /* Entrée: argc, argv                                                                                                         */
 /* Sortie: -1 si erreur, 0 si ok                                                                                              */
@@ -441,10 +538,12 @@
     prctl(PR_SET_NAME, "W-INIT", 0, 0, 0 );
     umask(022);                                                                              /* Masque de creation de fichier */
 
-    Lire_config();                                                     /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
+    Lire_config( argc, argv );                                         /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
     Info_init( LOG_INFO );                                               /* Init msgs d'erreurs, par défaut, en mode LOG_INFO */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Start %s, branche '%s'", WTD_VERSION, WTD_BRANCHE );
-    Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config domain_uuid: %s", Json_get_string ( Config.config, "domain_uuid" ) );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config agent_uuid : %s", Json_get_string ( Config.config, "agent_uuid" ) );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config api_url    : %s", Json_get_string ( Config.config, "api_url" ) );
 
     Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
     if (!Partage)
@@ -452,17 +551,6 @@
        error_code = EXIT_FAILURE;
        goto first_stage_end;
      }
-
-    if ( Config.installed == FALSE )                                                    /* Si le fichier de conf n'existe pas */
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Agent %s is not installed. Please run with --link.", WTD_VERSION );
-       goto second_stage_end;
-     }
-
-/************************************************* Init libsoup session *******************************************************/
-    Partage->com_msrv.API_session = soup_session_new();
-    soup_session_set_user_agent   ( Partage->com_msrv.API_session, "Abls-habitat Agent" );
-    soup_session_set_timeout      ( Partage->com_msrv.API_session, 10 );
-    soup_session_set_idle_timeout ( Partage->com_msrv.API_session, 60 );
 
 /************************************************* Test Connexion to Global API ***********************************************/
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
@@ -536,9 +624,9 @@
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_http.synchro, NULL );
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
-    pthread_mutex_init( &Partage->com_dls.synchro_data, NULL );
     pthread_mutex_init( &Partage->archive_liste_sync, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
+    pthread_mutex_init( &Partage->abonnements_synchro, NULL );
 
 /************************************************* Gestion des signaux ********************************************************/
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
@@ -552,22 +640,19 @@
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb HTTP" ); }
     if (!Demarrer_api_sync())                                                                           /* Démarrage API_SYNC */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb API_SYNC" ); }
-    if (!Demarrer_arch_sync())                                                                         /* Démarrage ARCH_SYNC */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
-/***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single)                                                                             /* Si demarrage des thread */
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
-    else
-     { if (!Config.installed)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "NOT starting threads (Instance is not installed)" ); }
-       else
-        { if (Config.instance_is_master)                                                                  /* Démarrage D.L.S. */
-           { if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
-             MSRV_Remap();                                                 /* Mappage des bits avant de charger les thread IO */
-           }
-          Charger_librairies();                                               /* Chargement de toutes les librairies Watchdog */
-        }
+
+/***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
+    if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
+     { if (!Demarrer_arch_sync())                                                                         /* Démarrage ARCH_SYNC */
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
+       Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
+       Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
+       MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
      }
+
+/***************************************** Demarrage des threads builtin et librairies ****************************************/
+    if (Config.single == FALSE) Charger_librairies();                                              /* Si demarrage des thread */
+    else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" );
 
 /*************************************** Mise en place de la gestion des signaux **********************************************/
     sig.sa_handler = Traitement_signaux;                                            /* Gestionnaire de traitement des signaux */
@@ -597,25 +682,29 @@
     gint cpt_5_minutes = Partage->top + 3000;
     gint cpt_1_minute  = Partage->top + 600;
 
-    sleep(1);
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Main Thread" );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
+    sleep(10);                                                                              /* On laisse les threads demarrer */
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
+       Http_Send_to_slaves ( "SYNC_IO", NULL );                                  /* Synchronisation des IO depuis les threads */
+       sleep(5);
+       if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
 
           if (cpt_5_minutes < Partage->top)                                                 /* Update DB toutes les 5 minutes */
-           {
-             cpt_5_minutes += 3000;                                                        /* Sauvegarde toutes les 5 minutes */
+           { cpt_5_minutes += 3000;                                                        /* Sauvegarde toutes les 5 minutes */
            }
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
-           { Http_Send_ping_to_slaves();
-             Print_SQL_status();                                                          /* Print SQL status for debugging ! */
+           { Http_Send_to_slaves ( "PING", NULL );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 
+/*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
+          if (Partage->com_msrv.API_ws_messages) MSRV_handle_API_messages();
           usleep(1000);
           sched_yield();
         }
@@ -623,7 +712,10 @@
     else
      { prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
-        { usleep(1000);
+        {
+/*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
+          if (Partage->com_msrv.API_ws_messages) MSRV_handle_API_messages();
+          usleep(1000);
           sched_yield();
         }
      }
@@ -633,18 +725,33 @@
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
 
+    if (Config.instance_is_master)                                        /* Dechargement DLS après les threads IO, dls, arch */
+     { Dls_Decharger_plugins();                                                               /* Dechargement des modules DLS */
+       Json_node_unref ( Partage->com_dls.HORLOGE_ticks );                                   /* Libération des bits d'horloge */
+     }
+
     if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
     if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
     Json_node_unref ( Partage->Maps_root );
+    g_slist_free ( Partage->com_msrv.liste_visuel );
+    g_slist_free_full ( Partage->com_msrv.liste_msg, (GDestroyNotify)g_free );
+    g_slist_free_full ( Partage->abonnements, (GDestroyNotify)Json_node_unref );
+    g_slist_free_full ( Partage->liste_json_to_ws_api, (GDestroyNotify)Json_node_unref );
 
 /************************************************* Dechargement des mutex *****************************************************/
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
-    pthread_mutex_destroy( &Partage->com_dls.synchro_data );
     pthread_mutex_destroy( &Partage->archive_liste_sync );
     pthread_mutex_destroy( &Partage->com_db.synchro );
+    pthread_mutex_destroy( &Partage->abonnements_synchro );
 
+/****************************************************** Arret du timer ********************************************************/
+    timer.it_value.tv_sec  = timer.it_interval.tv_sec  = 0;
+    timer.it_value.tv_usec = timer.it_interval.tv_usec = 0;
+    setitimer( ITIMER_REAL, &timer, NULL );
+
+/****************************************************** Arret des signaux *****************************************************/
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
@@ -652,9 +759,6 @@ third_stage_end:
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
 second_stage_end:
-    soup_session_abort ( Partage->com_msrv.API_session );
-    g_object_unref( Partage->com_msrv.API_session );
-    Partage->com_msrv.API_session = NULL;
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
 first_stage_end:

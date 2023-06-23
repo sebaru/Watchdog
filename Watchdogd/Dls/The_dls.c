@@ -7,7 +7,7 @@
  * The_dls.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2020 - Sebastien Lefevre
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,36 +64,20 @@
   { if (!(avant && apres)) return(0.0);
     else return( apres->tv_sec - avant->tv_sec + (apres->tv_usec - avant->tv_usec)/1000000.0 );
   }
-
-/******************************************************************************************************************************/
-/* Envoyer_commande_dls_data: Gestion des envois de commande DLS via dls_data                                                 */
-/* Entrée/Sortie: rien                                                                                                        */
-/******************************************************************************************************************************/
- void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
-  { struct DLS_DI *di= Dls_data_lookup_DI ( tech_id, acronyme );
-    if (!di) return;
-
-    pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, di );
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Mise a un du bit DI '%s:%s' demandée", tech_id, acronyme );
-  }
 /******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Set_cde_exterieure ( void )
-  { pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    while( Partage->com_dls.Set_Dls_Data )                                                  /* A-t-on une entrée a allumer ?? */
+  { while( Partage->com_dls.Set_Dls_Data )                                                  /* A-t-on une entrée a allumer ?? */
      { struct DLS_DI *di = Partage->com_dls.Set_Dls_Data->data;
        Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a 1 du bit DI %s:%s",
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, di );
        Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, di );
-       Dls_data_set_DI ( NULL, di, TRUE );                                                       /* Mise a un du bit d'entrée */
+       Dls_data_set_DI ( di, TRUE );                                                             /* Mise a un du bit d'entrée */
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
 /******************************************************************************************************************************/
 /* Reset_cde_exterieure: Mise à zero des bits de commande exterieure                                                          */
@@ -101,15 +85,13 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Reset_cde_exterieure ( void )
-  { pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
+  { while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { struct DLS_DI *di = Partage->com_dls.Reset_Dls_Data->data;
        Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, di );
-       Dls_data_set_DI ( NULL, di, FALSE );                                                    /* Mise a zero du bit d'entrée */
+       Dls_data_set_DI ( di, FALSE );                                                          /* Mise a zero du bit d'entrée */
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }
 /******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
@@ -129,13 +111,13 @@
        Partage->com_dls.Reset_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Reset_Dls_MONO_Edge_down, mono );
        mono->edge_down = TRUE;
      }
-    while( Partage->com_dls.Set_Dls_BI_Edge_up )                                       /* A-t-on un boolean up a allumer ?? */
+    while( Partage->com_dls.Set_Dls_BI_Edge_up )                                         /* A-t-on un boolean up a allumer ?? */
      { struct DLS_BI *bi = Partage->com_dls.Set_Dls_BI_Edge_up->data;
        Partage->com_dls.Set_Dls_BI_Edge_up   = g_slist_remove  ( Partage->com_dls.Set_Dls_BI_Edge_up, bi );
        Partage->com_dls.Reset_Dls_BI_Edge_up = g_slist_prepend ( Partage->com_dls.Reset_Dls_BI_Edge_up, bi );
        bi->edge_up = TRUE;
      }
-    while( Partage->com_dls.Set_Dls_BI_Edge_down )                                   /* A-t-on un boolean down a allumer ?? */
+    while( Partage->com_dls.Set_Dls_BI_Edge_down )                                     /* A-t-on un boolean down a allumer ?? */
      { struct DLS_BI *bi = Partage->com_dls.Set_Dls_BI_Edge_down->data;
        Partage->com_dls.Set_Dls_BI_Edge_down   = g_slist_remove  ( Partage->com_dls.Set_Dls_BI_Edge_down, bi );
        Partage->com_dls.Reset_Dls_BI_Edge_down = g_slist_prepend ( Partage->com_dls.Reset_Dls_BI_Edge_down, bi );
@@ -192,43 +174,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_set_all_bool : positionne les nouvelles valeur des bits internes                                                       */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Dls_set_all_bool ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { GSList *liste;
-    liste = plugin->Dls_data_MONO;
-    while ( liste )
-     { struct DLS_MONO *mono = liste->data;
-       if (mono->etat != mono->next_etat)
-        { if (mono->next_etat == TRUE)
-           { Partage->com_dls.Set_Dls_MONO_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_up, mono ); }
-          else
-           { Partage->com_dls.Set_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_down, mono ); }
-          Partage->audit_bit_interne_per_sec++;
-          mono->etat = mono->next_etat;
-        }
-       mono->next_etat = FALSE;
-       liste = g_slist_next(liste);
-     }
-
-    liste = plugin->Dls_data_BI;
-    while ( liste )
-     { struct DLS_BI *bi = liste->data;
-       if (bi->etat != bi->next_etat)
-        { if (bi->next_etat == TRUE)
-           { Partage->com_dls.Set_Dls_BI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_BI_Edge_up, bi ); }
-          else
-           { Partage->com_dls.Set_Dls_BI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_BI_Edge_down, bi ); }
-          Partage->audit_bit_interne_per_sec++;
-          bi->etat = bi->next_etat;
-        }
-       liste = g_slist_next(liste);
-     }
-  }
-/*----------------------------------------------------------------------------------------------------------------------------*/
-/******************************************************************************************************************************/
 /* Dls_data_set_bus : Envoi un message sur le bus système                                                                     */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et les paramètres du message                                  */
 /******************************************************************************************************************************/
@@ -236,7 +181,8 @@
                          gchar *target_tech_id, gchar *json_parametre )
   { JsonNode *RootNode = Json_get_from_string ( json_parametre );
     if (RootNode)
-     { Http_Send_to_slaves ( target_tech_id, RootNode );
+     { Json_node_add_string ( RootNode, "thread_tech_id", target_tech_id );
+       Http_Send_to_slaves ( "FROM_DLS", RootNode );
        Json_node_unref(RootNode);
      }
   }
@@ -346,13 +292,19 @@
                       );
 
 /*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
-    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok, FALSE,  bit_comm_module );
-    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs, FALSE, !bit_comm_module );
+    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok,  bit_comm_module );
+    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs, !bit_comm_module );
 
-    if (!(plugin->enable && plugin->go)) return;                      /* si plugin a l'arret, on considère que la comm est OK */
+    if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
+    if (!plugin->enable) return;                                            /* si plugin a l'arret, on n'éxécute pas non plus */
+    if (!plugin->go)     return;                                          /* si pas de fonction GO, on n'éxécute pas non plus */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
+    if(plugin->vars.resetted && plugin->init_visuels)
+     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Send '_START' to '%s', and Init_visuel", plugin->tech_id );
+       plugin->init_visuels(&plugin->vars);
+     }
     gettimeofday( &tv_avant, NULL );
-    plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
+    plugin->go( &plugin->vars );                                                                        /* On appel le plugin */
     gettimeofday( &tv_apres, NULL );
     plugin->conso+=Chrono( &tv_avant, &tv_apres );
     plugin->vars.resetted = FALSE;
@@ -362,7 +314,6 @@
 /******************************************************************************************************************************/
  void Run_dls ( void )
   { gint last_top_10sec, last_top_5sec, last_top_2sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min, last_top_10min;
-    gint wait;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
@@ -370,19 +321,9 @@
     Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
-    Dls_Importer_plugins();                                                    /* Chargement des modules dls avec compilation */
-
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Wait 20sec to let threads get I/Os" );
-    wait=20;
-    while( Partage->com_dls.Thread_run == TRUE && wait )                                     /* On tourne tant que necessaire */
-     { sleep(1); wait--; }        /* attente 20 secondes pour initialisation des bit internes et collection des infos modules */
-
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Starting" );
-    Dls_Load_horloge_ticks();                                                                /* Chargement des ticks horloges */
-
     last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = last_top_10min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     {
+     { pthread_mutex_lock( &Partage->com_dls.synchro );                               /* Zone de protection des bits internes */
 /******************************************************************************************************************************/
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz, TRUE );
@@ -428,18 +369,20 @@
 /******************************************************************************************************************************/
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_archive_queue, 1.0*Partage->archive_liste_taille, TRUE );
+          Dls_foreach_plugins ( NULL, Dls_run_archivage );                        /* Archivage au mieux toutes les 5 secondes */
           last_top_5sec = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_10sec>=100)                                                        /* Toutes les 10 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
+          Dls_data_set_BI ( NULL, Partage->com_dls.sys_api_socket, (Partage->com_msrv.API_websocket ? TRUE : FALSE) );
           last_top_10sec = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_api_enreg_queue, (gdouble)Partage->liste_json_to_ws_api_size, TRUE );
           struct rusage conso;
           getrusage ( RUSAGE_SELF, &conso );
           Dls_data_set_AI ( NULL, Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
@@ -460,24 +403,43 @@
        Partage->com_dls.next_bit_alerte_fixe = 0;
        Partage->com_dls.next_bit_alerte_fugitive = 0;
        Dls_foreach_plugins ( NULL, Dls_run_plugin );
-       Dls_foreach_plugins ( NULL, Dls_run_archivage );
 
        Partage->com_dls.Top_check_horaire = FALSE;                        /* Controle horaire effectué un fois par minute max */
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
-       Dls_foreach_plugins ( NULL, Dls_set_all_bool );/* Positionne les booleans (mono/bi) selon la valeur calculé par les modules */
        Partage->com_dls.bit_alerte          = Partage->com_dls.next_bit_alerte;
        Partage->com_dls.bit_alerte_fixe     = Partage->com_dls.next_bit_alerte_fixe;
        Partage->com_dls.bit_alerte_fugitive = Partage->com_dls.next_bit_alerte_fugitive;
        Dls_data_clear_HORLOGE();
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz,   FALSE );                     /* RaZ des Mono du plugin 'SYS' */
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_2hz,   FALSE );
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1sec,  FALSE );
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec,  FALSE );
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, FALSE );
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min,  FALSE );
 
+       pthread_mutex_unlock( &Partage->com_dls.synchro );                      /* Fin de Zone de protection des bits internes */
 /******************************************** Gestion des 1000 tours DLS par seconde ******************************************/
        Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */
        usleep(Partage->com_dls.temps_sched);
        sched_yield();
      }
-    Dls_Decharger_plugins();                                                                  /* Dechargement des modules DLS */
-    Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
+
+    g_slist_free ( Partage->com_dls.Set_Dls_Data );
+    g_slist_free ( Partage->com_dls.Reset_Dls_Data );
+    g_slist_free ( Partage->com_dls.Set_Dls_DI_Edge_up );
+    g_slist_free ( Partage->com_dls.Set_Dls_DI_Edge_down );
+    g_slist_free ( Partage->com_dls.Reset_Dls_DI_Edge_up );
+    g_slist_free ( Partage->com_dls.Reset_Dls_DI_Edge_down );
+    g_slist_free ( Partage->com_dls.Set_Dls_MONO_Edge_up );
+    g_slist_free ( Partage->com_dls.Set_Dls_MONO_Edge_down );
+    g_slist_free ( Partage->com_dls.Reset_Dls_MONO_Edge_up );
+    g_slist_free ( Partage->com_dls.Reset_Dls_MONO_Edge_down );
+    g_slist_free ( Partage->com_dls.Set_Dls_BI_Edge_up );
+    g_slist_free ( Partage->com_dls.Set_Dls_BI_Edge_down );
+    g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_up );
+    g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_down );
+
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "DLS Down (%p)", pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
