@@ -65,19 +65,6 @@
     else return( apres->tv_sec - avant->tv_sec + (apres->tv_usec - avant->tv_usec)/1000000.0 );
   }
 /******************************************************************************************************************************/
-/* Envoyer_commande_dls_data: Gestion des envois de commande DLS via dls_data                                                 */
-/* Entrée/Sortie: rien                                                                                                        */
-/******************************************************************************************************************************/
- void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
-  { struct DLS_DI *di= Dls_data_lookup_DI ( tech_id, acronyme );
-    if (!di) return;
-
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, di );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Mise a un du bit DI '%s:%s' demandée", tech_id, acronyme );
-  }
-/******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
@@ -336,8 +323,7 @@
 
     last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = last_top_10min = Partage->top;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     {
-       pthread_mutex_lock( &Partage->com_dls.synchro );                               /* Zone de protection des bits internes */
+     { pthread_mutex_lock( &Partage->com_dls.synchro );                               /* Zone de protection des bits internes */
 /******************************************************************************************************************************/
        if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz, TRUE );
@@ -396,8 +382,7 @@
 /******************************************************************************************************************************/
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_msg_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_msg), TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_visuel_queue, (gdouble)g_slist_length(Partage->com_msrv.liste_visuel), TRUE );
+          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_api_enreg_queue, (gdouble)Partage->liste_json_to_ws_api_size, TRUE );
           struct rusage conso;
           getrusage ( RUSAGE_SELF, &conso );
           Dls_data_set_AI ( NULL, Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
@@ -426,6 +411,12 @@
        Partage->com_dls.bit_alerte_fixe     = Partage->com_dls.next_bit_alerte_fixe;
        Partage->com_dls.bit_alerte_fugitive = Partage->com_dls.next_bit_alerte_fugitive;
        Dls_data_clear_HORLOGE();
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz,   FALSE );                     /* RaZ des Mono du plugin 'SYS' */
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_2hz,   FALSE );
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1sec,  FALSE );
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec,  FALSE );
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, FALSE );
+       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min,  FALSE );
 
        pthread_mutex_unlock( &Partage->com_dls.synchro );                      /* Fin de Zone de protection des bits internes */
 /******************************************** Gestion des 1000 tours DLS par seconde ******************************************/

@@ -56,7 +56,7 @@
     Json_node_add_int    ( arch, "date_usec", tv.tv_usec );
 
     pthread_mutex_lock( &Partage->archive_liste_sync );                                /* Ajout dans la liste de arch a traiter */
-    Partage->archive_liste = g_slist_append( Partage->archive_liste, arch );
+    Partage->archive_liste = g_slist_prepend( Partage->archive_liste, arch );
     Partage->archive_liste_taille++;
     pthread_mutex_unlock( &Partage->archive_liste_sync );
   }

@@ -176,10 +176,14 @@
        if (Partage->com_http.loop) g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
      }
 
-    if (Partage->com_http.loop) g_main_loop_unref( Partage->com_http.loop );
     if (Partage->com_http.local_socket)
      { soup_server_disconnect ( Partage->com_http.local_socket );
        g_object_unref(Partage->com_http.local_socket);
+     }
+
+    if (Partage->com_http.loop)
+     { g_main_loop_quit ( Partage->com_http.loop );
+       g_main_loop_unref( Partage->com_http.loop );
      }
 
     Info_new( __func__, Partage->com_http.Thread_debug, LOG_NOTICE, "HTTP Down (%p)", pthread_self() );

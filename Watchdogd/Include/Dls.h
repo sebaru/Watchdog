@@ -139,8 +139,7 @@
     struct DLS_AI *sys_bit_per_sec;
     struct DLS_AI *sys_tour_per_sec;
     struct DLS_AI *sys_dls_wait;
-    struct DLS_AI *sys_nbr_msg_queue;
-    struct DLS_AI *sys_nbr_visuel_queue;
+    struct DLS_AI *sys_nbr_api_enreg_queue;
     struct DLS_AI *sys_nbr_archive_queue;
     struct DLS_AI *sys_maxrss;
 
@@ -165,8 +164,6 @@
  extern void Dls_run_archivage ( gpointer user_data, struct DLS_PLUGIN *plugin );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
-
- extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
 

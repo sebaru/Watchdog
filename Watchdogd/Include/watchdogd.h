@@ -94,6 +94,8 @@
     gint archive_liste_taille;
 
     SoupSession *API_Sync_session;
+    GSList *liste_json_to_ws_api;                                                   /* liste de JSON a envoyer à l'APi via WS */
+    gint    liste_json_to_ws_api_size;                                 /* taille de la liste de JSON a envoyer à l'APi via WS */
     pthread_mutex_t abonnements_synchro;                                                  /* Bit de synchronisation processus */
     GSList *abonnements;                                                               /* Abonnements aux entrées analogiques */
 

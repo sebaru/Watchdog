@@ -392,7 +392,8 @@
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end; }
        gchar *tech_id  = Json_get_string ( request, "tech_id" );
        gchar *acronyme = Json_get_string ( request, "acronyme" );
-       Envoyer_commande_dls_data ( tech_id, acronyme );
+       struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
+       Dls_data_set_DI_pulse ( NULL, bit );
      }
     else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") )
      { if ( !Json_has_member ( request, "tech_id" ) )
@@ -735,6 +736,7 @@ end:
     g_slist_free ( Partage->com_msrv.liste_visuel );
     g_slist_free_full ( Partage->com_msrv.liste_msg, (GDestroyNotify)g_free );
     g_slist_free_full ( Partage->abonnements, (GDestroyNotify)Json_node_unref );
+    g_slist_free_full ( Partage->liste_json_to_ws_api, (GDestroyNotify)Json_node_unref );
 
 /************************************************* Dechargement des mutex *****************************************************/
 
