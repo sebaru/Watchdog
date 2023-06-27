@@ -14,7 +14,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf update -y
   dnf install -y libtool automake autoconf gcc gcc-c++ redhat-rpm-config
   dnf install -y glib2-devel bison flex openssl
-  dnf install -y nut-devel mariadb-devel libuuid-devel
+  dnf install -y nut-devel libuuid-devel
   dnf install -y popt-devel libsoup3-devel gtts
   dnf install -y json-glib-devel gammu-devel
   dnf install -y mpg123 sox libusb1-devel libgpiod-devel

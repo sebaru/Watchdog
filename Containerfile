@@ -6,7 +6,7 @@ RUN echo "Installing Fedora dependencies"
 RUN dnf update -y
 RUN dnf install -y libtool automake autoconf gcc gcc-c++ redhat-rpm-config
 RUN dnf install -y glib2-devel openssl
-RUN dnf install -y nut-devel mariadb-devel libuuid-devel
+RUN dnf install -y nut-devel libuuid-devel
 RUN dnf install -y popt-devel libsoup3-devel gtts
 RUN dnf install -y json-glib-devel gammu-devel
 RUN dnf install -y mpg123 sox libusb1-devel libgpiod-devel
