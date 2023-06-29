@@ -95,12 +95,10 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- static JsonNode *MSGS_Convert_msg_on_to_histo ( struct DLS_MESSAGE *msg )
+ static void MSGS_Convert_msg_on_to_histo ( struct DLS_MESSAGE *msg )
   { gchar libelle[128], chaine[512], date_create[128];
     struct timeval tv;
     struct tm *temps;
-
-    JsonNode *histo = json_node_copy ( msg->source_node );
 
     gettimeofday( &tv, NULL );
     temps = localtime( (time_t *)&tv.tv_sec );
@@ -109,13 +107,12 @@
     g_snprintf( date_create, sizeof(date_create), "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
     g_free( date_utf8 );
 
-    g_snprintf ( libelle, sizeof(libelle), "%s", Json_get_string(histo, "libelle") );
+    g_snprintf ( libelle, sizeof(libelle), "%s", Json_get_string(msg->source_node, "libelle_src") );
     Convert_libelle_dynamique ( msg->tech_id, libelle, sizeof(libelle) );
 /***************************************** Création de la structure interne de stockage ***************************************/
-    Json_node_add_string ( histo, "libelle", libelle );                                       /* Ecrasement libelle d'origine */
-    Json_node_add_string ( histo, "date_create", date_create );                               /* Ecrasement libelle d'origine */
-    Json_node_add_bool   ( histo, "alive", TRUE );
-    return(histo);
+    Json_node_add_string ( msg->source_node, "libelle", libelle );
+    Json_node_add_string ( msg->source_node, "date_create", date_create );
+    Json_node_add_bool   ( msg->source_node, "alive", TRUE );
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
@@ -164,20 +161,17 @@
                  event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
 
        if (event->etat == 1)
-        { JsonNode *histo = MSGS_Convert_msg_on_to_histo ( event->msg );
-          if (histo)
-           { if (Partage->top >= event->msg->last_on + Json_get_int ( histo, "rate_limit" )*10 )
-              { event->msg->last_on = Partage->top;
-                Http_Send_to_slaves ( "DLS_HISTO", histo );
-                Json_array_add_element ( Histos, histo );
-              }
-             else
-              { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
-                          Json_get_int ( histo, "rate_limit" ), event->msg->tech_id, event->msg->acronyme );
-                Json_node_unref(histo);
-              }
-           } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg on to histo",
-                            event->msg->tech_id, event->msg->acronyme );
+        { MSGS_Convert_msg_on_to_histo ( event->msg );
+          if (Partage->top >= event->msg->last_on + Json_get_int ( event->msg->source_node, "rate_limit" )*10 )
+           { event->msg->last_on = Partage->top;
+             Http_Send_to_slaves ( "DLS_HISTO", event->msg->source_node );
+             json_node_ref ( event->msg->source_node );                          /* Pour ajout dans l'array qui prend le lead */
+             Json_array_add_element ( Histos, event->msg->source_node );
+           }
+          else
+           { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
+                       Json_get_int ( event->msg->source_node, "rate_limit" ), event->msg->tech_id, event->msg->acronyme );
+           }
         }
        else if (event->etat == 0)
         { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );

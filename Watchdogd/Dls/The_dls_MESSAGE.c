@@ -67,6 +67,8 @@
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     bit->etat = Json_get_bool ( element, "etat" );
+    Json_node_add_string ( bit->source_node, "libelle_src",
+                           Json_get_string ( bit->source_node, "libelle" ) );            /* Recopie pour conversion dynamique */
     bit->source_node = json_node_ref ( element );
     plugin->Dls_data_MESSAGE = g_slist_prepend ( plugin->Dls_data_MESSAGE, bit );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
