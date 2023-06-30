@@ -52,9 +52,10 @@
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = Json_get_bool ( element, "etat" );
+    bit->mono = Json_get_bool ( element, "mono" );
     plugin->Dls_data_DO = g_slist_prepend ( plugin->Dls_data_DO, bit );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
-              "Create bit DLS_DO '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
+              "Create bit DLS_DO '%s:%s'=%d (%s) mono=%d", bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->mono );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_DO: Recherche un DO dans les plugins DLS                                                                   */
@@ -101,11 +102,23 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Dls_DO_to_json ( RootNode, dout );
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                       /* Envoie au MSRV pour dispatch aux threads */
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                          /* Envoie au MSRV pour dispatch aux threads */
        Partage->com_msrv.Liste_DO = g_slist_append ( Partage->com_msrv.Liste_DO, RootNode );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
      }
     else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+
+    if (etat == TRUE && dout->mono) /* Si sortie de type monostable, elle redescend tout de suite */
+     { JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Dls_DO_to_json ( RootNode, dout );
+          Json_node_add_bool ( RootNode, "etat", FALSE );                                    /* Passage a zero dans la foulée */
+          pthread_mutex_lock( &Partage->com_msrv.synchro );                       /* Envoie au MSRV pour dispatch aux threads */
+          Partage->com_msrv.Liste_DO = g_slist_append ( Partage->com_msrv.Liste_DO, RootNode );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+        }
+       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+     }
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/

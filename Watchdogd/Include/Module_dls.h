@@ -123,6 +123,7 @@
   { gchar   tech_id[32];
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
+    gboolean mono;
     gboolean etat;
     gboolean edge_up;
     gboolean edge_down;

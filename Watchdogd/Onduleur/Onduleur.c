@@ -353,15 +353,15 @@
     vars->Output_hz       = Mnemo_create_thread_AI ( module, "OUTPUT_HZ", "Fréquence de sortie", "HZ", ARCHIVE_1_MIN );
     vars->Output_voltage  = Mnemo_create_thread_AI ( module, "OUTPUT_VOLTAGE", "Tension de sortie", "V", ARCHIVE_1_MIN );
 
-    Mnemo_create_thread_DO ( module, "LOAD_OFF",        "Coupe la sortie ondulée" );
-    Mnemo_create_thread_DO ( module, "LOAD_ON",         "Active la sortie ondulée" );
-    Mnemo_create_thread_DO ( module, "OUTLET_1_OFF",    "Désactive la prise n°1" );
-    Mnemo_create_thread_DO ( module, "OUTLET_1_ON",     "Active la prise n°1" );
-    Mnemo_create_thread_DO ( module, "OUTLET_2_OFF",    "Désactive la prise n°2" );
-    Mnemo_create_thread_DO ( module, "OUTLET_2_ON",     "Active la prise n°2" );
-    Mnemo_create_thread_DO ( module, "START_DEEP_BAT",  "Active un test de décharge profond" );
-    Mnemo_create_thread_DO ( module, "START_QUICK_BAT", "Active un test de décharge léger" );
-    Mnemo_create_thread_DO ( module, "STOP_TEST_BAT",   "Stop le test de décharge batterie" );
+    Mnemo_create_thread_DO ( module, "LOAD_OFF",        "Coupe la sortie ondulée", TRUE );
+    Mnemo_create_thread_DO ( module, "LOAD_ON",         "Active la sortie ondulée", TRUE );
+    Mnemo_create_thread_DO ( module, "OUTLET_1_OFF",    "Désactive la prise n°1", TRUE );
+    Mnemo_create_thread_DO ( module, "OUTLET_1_ON",     "Active la prise n°1", TRUE );
+    Mnemo_create_thread_DO ( module, "OUTLET_2_OFF",    "Désactive la prise n°2", TRUE );
+    Mnemo_create_thread_DO ( module, "OUTLET_2_ON",     "Active la prise n°2", TRUE );
+    Mnemo_create_thread_DO ( module, "START_DEEP_BAT",  "Active un test de décharge profond", TRUE );
+    Mnemo_create_thread_DO ( module, "START_QUICK_BAT", "Active un test de décharge léger", TRUE );
+    Mnemo_create_thread_DO ( module, "STOP_TEST_BAT",   "Stop le test de décharge batterie", TRUE );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
