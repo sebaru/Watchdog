@@ -63,7 +63,7 @@
  extern void Http_traiter_set_ai_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
  extern void Http_traiter_set_cde_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
  extern void Http_traiter_set_watchdog_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
- extern void Http_traiter_get_output ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query );
+ extern void Http_traiter_get_io ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query );
 
  extern JsonNode *Http_Msg_to_Json ( SoupServerMessage *msg );
  extern JsonNode *Http_Get_from_local_BUS ( struct THREAD *module, gchar *uri );

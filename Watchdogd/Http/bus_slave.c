@@ -275,44 +275,68 @@ end:
     Json_node_unref(thread_watchdog);
   }
 /******************************************************************************************************************************/
-/* Http_traiter_get_output: Donne les DO et AO au thread appelant                                                             */
+/* Http_traiter_get_io: Donne les IO du thread appelant                                                                       */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- void Http_traiter_get_output ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query )
+ void Http_traiter_get_io ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query )
   { gchar *thread_tech_id;
     if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
     if (!thread_tech_id) { Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL ); return; }
 
     struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( thread_tech_id );
     if (!plugin) { Http_Send_json_response ( msg, SOUP_STATUS_NOT_FOUND, "Plugin not found", NULL ); return; }
-
     JsonNode *Response = Json_node_create();
-    JsonArray *dout_array = Json_node_add_array ( Response, "douts" );
-    GSList *liste = plugin->Dls_data_DO;
+
+    JsonArray *DI_array = Json_node_add_array ( Response, "DI" );
+    GSList *liste = plugin->Dls_data_DI;
     while (liste)
-     { struct DLS_DO *dout = liste->data;
+     { struct DLS_DI *DI = liste->data;
        JsonNode *element = Json_node_create();
-       Dls_DO_to_json ( element, dout );
+       Dls_DI_to_json ( element, DI );
        if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
-        { Json_array_add_element ( dout_array, element );
+        { Json_array_add_element ( DI_array, element );
         } else Json_node_unref ( element );
        liste = g_slist_next ( liste );
      }
 
-    JsonArray *aout_array = Json_node_add_array ( Response, "aouts" );
+    JsonArray *DO_array = Json_node_add_array ( Response, "DO" );
+    liste = plugin->Dls_data_DO;
+    while (liste)
+     { struct DLS_DO *DO = liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_DO_to_json ( element, DO );
+       if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
+        { Json_array_add_element ( DO_array, element );
+        } else Json_node_unref ( element );
+       liste = g_slist_next ( liste );
+     }
+
+    JsonArray *AI_array = Json_node_add_array ( Response, "AI" );
+    liste = plugin->Dls_data_AI;
+    while (liste)
+     { struct DLS_AI *AI = liste->data;
+       JsonNode *element = Json_node_create();
+       Dls_AI_to_json ( element, AI );
+       if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
+        { Json_array_add_element ( AI_array, element );
+        } else Json_node_unref ( element );
+       liste = g_slist_next ( liste );
+     }
+
+    JsonArray *AO_array = Json_node_add_array ( Response, "AO" );
     liste = plugin->Dls_data_AO;
     while (liste)
-     { struct DLS_AO *aout = liste->data;
+     { struct DLS_AO *AO = liste->data;
        JsonNode *element = Json_node_create();
-       Dls_AO_to_json ( element, aout );
+       Dls_AO_to_json ( element, AO );
        if (MSRV_Map_to_thread ( element ) && Json_has_member ( element, "thread_tech_id" ) && Json_has_member ( element, "thread_acronyme" ) )
-        { Json_array_add_element ( aout_array, element );
+        { Json_array_add_element ( AO_array, element );
         } else Json_node_unref ( element );
        liste = g_slist_next ( liste );
      }
-    Info_new( __func__, Config.log_bus, LOG_INFO,  "GET_OUTPUT done for '%s'", thread_tech_id );
 
+    Info_new( __func__, Config.log_bus, LOG_INFO,  "GET_IO done for '%s'", thread_tech_id );
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "There are Outputs", Response );
   }
 /******************************************************************************************************************************/

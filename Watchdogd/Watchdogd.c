@@ -643,7 +643,7 @@ end:
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
-     { if (!Demarrer_arch_sync())                                                                         /* Démarrage ARCH_SYNC */
+     { if (!Demarrer_arch_sync())                                                                      /* Démarrage ARCH_SYNC */
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
        Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
        Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
@@ -651,7 +651,7 @@ end:
      }
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single == FALSE) Charger_librairies();                                              /* Si demarrage des thread */
+    if (Config.single == FALSE) Charger_librairies();                                             /* Si demarrage des threads */
     else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" );
 
 /*************************************** Mise en place de la gestion des signaux **********************************************/
@@ -682,14 +682,11 @@ end:
     gint cpt_5_minutes = Partage->top + 3000;
     gint cpt_1_minute  = Partage->top + 600;
 
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
-    sleep(10);                                                                              /* On laisse les threads demarrer */
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
-
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
-       Http_Send_to_slaves ( "SYNC_IO", NULL );                                  /* Synchronisation des IO depuis les threads */
-       sleep(5);
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
+       sleep(10);                                                                           /* On laisse les threads demarrer */
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
        if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
@@ -711,6 +708,7 @@ end:
      }
     else
      { prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting SLAVE Thread" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         {
 /*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
