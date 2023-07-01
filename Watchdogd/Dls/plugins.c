@@ -372,9 +372,6 @@
 /******************************************************************************************************************************/
  struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id, gboolean reset )
   { struct DLS_PLUGIN *plugin = NULL;
-    pthread_mutex_lock ( &Nbr_compil_mutex );                   /* Increment le nombre de thread de compilation en parallelle */
-    Nbr_compil++;
-    pthread_mutex_unlock ( &Nbr_compil_mutex );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Starting import of plugin '%s'", tech_id );
                                                                                  /* Récupère les metadata du plugin à charger */
     JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", "tech_id=%s", tech_id );
@@ -614,10 +611,13 @@ end:
      }
 
     while (Nbr_compil >= get_nprocs()) sched_yield();
+    pthread_mutex_lock ( &Nbr_compil_mutex );                   /* Increment le nombre de thread de compilation en parallelle */
+    Nbr_compil++; /* fait +1 avant de lancer le pthread pour etre sur que le thread demarre */
     if ( pthread_create( &TID, &attr, Run_Dls_Import_thread, tech_id ) )
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': pthread_create failed.", tech_id );
-       return;
+       Nbr_compil--; /* Démarrage failed */
      }
+    pthread_mutex_unlock ( &Nbr_compil_mutex );
   }
 /******************************************************************************************************************************/
 /* Dls_Importer_plugins: Importe tous les plugins depuis l'API                                                                */
