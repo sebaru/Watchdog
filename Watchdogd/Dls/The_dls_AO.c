@@ -51,11 +51,12 @@
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
+    g_snprintf( bit->unite,    sizeof(bit->unite),    "%s", Json_get_string ( element, "unite" ) );
     bit->archivage = Json_get_int    ( element, "archivage" );
     bit->valeur    = Json_get_double ( element, "valeur" );
     plugin->Dls_data_AO = g_slist_prepend ( plugin->Dls_data_AO, bit );
     Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
-              "Create bit DLS_AO '%s:%s'=%f (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
+              "Create bit DLS_AO '%s:%s'=%f %s (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_AO : Recherche un CH dans les plugins DLS                                                                  */
@@ -98,8 +99,8 @@
     Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-              "ligne %04d: Changing DLS_AO '%s:%s'=%f",
-              (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->valeur );
+              "ligne %04d: Changing DLS_AO '%s:%s'=%f %s",
+              (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->valeur, ao->unite );
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
@@ -124,7 +125,7 @@
   { Json_node_add_string ( element, "classe",       "AO" );
     Json_node_add_string ( element, "tech_id",      bit->tech_id );
     Json_node_add_string ( element, "acronyme",     bit->acronyme );
-    Json_node_add_double ( element, "valeur_brute", bit->valeur );
+    Json_node_add_string ( element, "unite",        bit->unite );
     Json_node_add_double ( element, "valeur",       bit->valeur );
     Json_node_add_int    ( element, "archivage",    bit->archivage );
   }
