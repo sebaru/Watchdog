@@ -64,8 +64,8 @@
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
-    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
+    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     bit->etat = Json_get_bool ( element, "etat" );
     bit->source_node = json_node_ref ( element );
     Json_node_add_string ( bit->source_node, "libelle_src",

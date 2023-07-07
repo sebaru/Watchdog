@@ -48,8 +48,8 @@
      { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
-    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
+    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     g_snprintf( bit->unite,    sizeof(bit->unite),    "%s", Json_get_string ( element, "unite" ) );
     bit->archivage = Json_get_int    ( element, "archivage" );
@@ -101,8 +101,8 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Dls_AO_to_json ( RootNode, ao );
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-       Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
+       Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, RootNode );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
      }
     else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
