@@ -54,7 +54,7 @@
     GSList *liste = Partage->com_http.Slaves;
     while ( liste )
      { struct HTTP_WS_SESSION *slave = liste->data;
-       soup_websocket_connection_send_text ( slave->connexion, buffer );
+       if (slave->connexion) soup_websocket_connection_send_text ( slave->connexion, buffer );
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock( &Partage->com_http.synchro );

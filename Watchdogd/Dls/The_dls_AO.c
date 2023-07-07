@@ -95,12 +95,17 @@
   { if (!ao) return;
     if (ao->valeur == valeur) return;
     ao->valeur = valeur;                                                            /* Archive au mieux toutes les 5 secondes */
-    pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-    Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_AO '%s:%s'=%f %s",
               (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->valeur, ao->unite );
+    JsonNode *RootNode = Json_node_create ();
+    if (RootNode)
+     { Dls_AO_to_json ( RootNode, ao );
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
+       Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, ao );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+     }
+    else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
