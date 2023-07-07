@@ -1148,6 +1148,7 @@
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
                if ( !strcasecmp (tag, "SET_DO") )  Modbus_SET_DO ( module, request );
+          else if ( !strcasecmp (tag, "SET_AO") )  Modbus_SET_AO ( module, request );
           else if ( !strcasecmp (tag, "SYNC_IO") ) Modbus_Sync_IO_from_master ( module );
           Json_node_unref ( request );
         }
