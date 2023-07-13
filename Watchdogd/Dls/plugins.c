@@ -301,10 +301,17 @@
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = plugin->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
+    liste_bit = plugin->Dls_data_WATCHDOG;                                           /* Decharge tous les watchdogs du module */
     while(liste_bit)
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
        Dls_data_set_WATCHDOG ( &plugin->vars, wtd, 0 );
+       liste_bit = g_slist_next(liste_bit);
+     }
+
+    liste_bit = plugin->Dls_data_MESSAGE;                                            /* Decharge tous les watchdogs du module */
+    while(liste_bit)
+     { struct DLS_MESSAGE *bit = liste_bit->data;
+       Dls_data_set_MESSAGE ( &plugin->vars, bit, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
   }
