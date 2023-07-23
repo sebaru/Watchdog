@@ -215,9 +215,6 @@
     struct DLS_MESSAGE *dls_msg_comm_hs;
   };
 
- extern gboolean Dls_get_top_alerte ( void );
- extern gboolean Dls_get_top_alerte_fugitive ( void );
-
  extern struct DLS_BI *Dls_data_lookup_BI ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_BI        ( struct DLS_BI *bit );
  extern gboolean Dls_data_get_BI_up     ( struct DLS_BI *bit );

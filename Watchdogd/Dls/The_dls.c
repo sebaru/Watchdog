@@ -42,20 +42,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Dls_get_top_alerte: Remonte la valeur du plus haut bit d'alerte dans l'arbre DLS                                           */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: TRUE ou FALSe                                                                                                      */
-/******************************************************************************************************************************/
- gboolean Dls_get_top_alerte ( void )
-  { return( Partage->com_dls.bit_alerte ); }
-/******************************************************************************************************************************/
-/* Dls_get_top_alerte_fugitive: Remonte la valeur du plus haut bit d'alerte fugitive dans l'arbre DLS                         */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: TRUE ou FALSe                                                                                                      */
-/******************************************************************************************************************************/
- gboolean Dls_get_top_alerte_fugitive ( void )
-  { return( Partage->com_dls.bit_alerte_fugitive ); }
-/******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
 /* Sortie: un float                                                                                                           */
@@ -399,17 +385,19 @@
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
        Partage->top_cdg_plugin_dls = 0;                                                         /* On reset le cdg plugin DLS */
-       Partage->com_dls.next_bit_alerte = 0;
-       Partage->com_dls.next_bit_alerte_fixe = 0;
-       Partage->com_dls.next_bit_alerte_fugitive = 0;
-       Dls_foreach_plugins ( NULL, Dls_run_plugin );
+       Partage->com_dls.next_bit_alerte = FALSE;
+       Partage->com_dls.next_bit_alerte_fixe = FALSE;
+       Partage->com_dls.next_bit_alerte_fugitive = FALSE;
+
+       Dls_foreach_plugins ( NULL, Dls_run_plugin );                                                  /* Run all plugin D.L.S */
 
        Partage->com_dls.Top_check_horaire = FALSE;                        /* Controle horaire effectué un fois par minute max */
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
-       Partage->com_dls.bit_alerte          = Partage->com_dls.next_bit_alerte;
-       Partage->com_dls.bit_alerte_fixe     = Partage->com_dls.next_bit_alerte_fixe;
-       Partage->com_dls.bit_alerte_fugitive = Partage->com_dls.next_bit_alerte_fugitive;
+       Dls_data_set_BI ( NULL, Partage->com_dls.sys_top_alerte, Partage->com_dls.next_bit_alerte );  /* Synthèses des Alertes */
+       Dls_data_set_BI ( NULL, Partage->com_dls.sys_top_alerte_fixe, Partage->com_dls.next_bit_alerte_fixe );
+       Dls_data_set_BI ( NULL, Partage->com_dls.sys_top_alerte_fugitive, Partage->com_dls.next_bit_alerte_fugitive );
+
        Dls_data_clear_HORLOGE();
        Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz,   FALSE );                     /* RaZ des Mono du plugin 'SYS' */
        Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_2hz,   FALSE );
