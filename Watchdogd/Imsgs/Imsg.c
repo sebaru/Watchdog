@@ -96,13 +96,13 @@
      }
 
     const gchar *type = xmpp_stanza_get_type ( stanza );
-    if (!strcmp ( type, "error" ))
+    if (type && !strcmp ( type, "error" ))
      { xmpp_stanza_t *error          = xmpp_stanza_get_child_by_name(stanza, "error");
        const gchar   *error_type     = xmpp_stanza_get_attribute ( error, "type" );
        xmpp_stanza_t *condition      = xmpp_stanza_get_children ( error );
        const gchar   *condition_name = xmpp_stanza_get_name ( condition );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: '%s': From '%s' -> Stanza Error '%s'->'%s'",
-                 __func__, thread_tech_id, from, error_type, condition_name );
+       Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': From '%s' -> Stanza Error '%s'->'%s'",
+                 thread_tech_id, from, error_type, condition_name );
        return(1);
      }
 
