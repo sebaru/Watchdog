@@ -87,9 +87,7 @@
     SoupMessageBody *body = soup_server_message_get_request_body ( msg );
     GBytes *buffer        = soup_message_body_flatten ( body );
     gchar *request_body   = g_bytes_get_data ( buffer, &taille_body );
-    g_bytes_unref(buffer);
-
-    gchar *domain_secret = Json_get_string ( Config.config, "domain_secret" );
+    gchar *domain_secret  = Json_get_string ( Config.config, "domain_secret" );
 
     unsigned char hash_bin[EVP_MAX_MD_SIZE];
     gint md_len;
@@ -105,9 +103,9 @@
     EVP_MD_CTX_free(mdctx);
     gchar local_signature[64];
     EVP_EncodeBlock( local_signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
+    g_bytes_unref(buffer);
 
-    gint retour = strcmp ( signature, local_signature );
-    if (retour)
+    if ( strcmp ( signature, local_signature ) )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "'%s' -> Forbidden, Wrong signature", path );
        Http_Send_json_response ( msg, SOUP_STATUS_FORBIDDEN, NULL, NULL );
        return(FALSE);

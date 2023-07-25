@@ -78,7 +78,8 @@
      }
 
     if (!Json_has_member ( response, "tag" ))
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (no 'tag') !" );
+     { if (taille) buffer[taille-1] = 0;
+       Info_new( __func__, Config.log_msrv, LOG_WARNING, "WebSocket Message Dropped (no 'tag'): %s !", buffer );
        Json_node_unref(response);
        return;
      }

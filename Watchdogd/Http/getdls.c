@@ -312,14 +312,13 @@
             Json_has_member ( request, "classe" ) && Json_has_member ( request, "valeur" )
            )
        )
-     { Json_node_unref(request);
-       soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL );
        return;
      }
 
     struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( Json_get_string ( request, "tech_id" ) );
     if (!plugin)
-     { soup_server_message_set_status (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found");
+     { Http_Send_json_response (msg, SOUP_STATUS_NOT_FOUND, "Plugin not found", NULL );
        return;
      }
 
@@ -367,7 +366,7 @@
        /*Audit_log ( session, "DLS %s '%s:%s' set to %f", classe, tech_id, acronyme, valeur );*/
        Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
      }
-    else soup_server_message_set_status (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Wrong Class" );
+    else Http_Send_json_response (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Wrong Class", NULL );
   }
 /******************************************************************************************************************************/
 /* Http_traiter_dls_run_acquitter: Acquitte un dls                                                                            */
@@ -378,7 +377,7 @@
   { if (!request) return;
 
     if ( ! (Json_has_member ( request, "tech_id" ) ) )
-     { soup_server_message_set_status (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres");
+     { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL );
        return;
      }
 
