@@ -159,7 +159,7 @@
     struct DMX_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    
+
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
@@ -171,7 +171,7 @@
           gchar *tag = Json_get_string ( request, "tag" );
           if ( !strcasecmp( tag, "SET_AO" ) &&
                Json_get_bool ( request, "alive" ) == TRUE &&
-               Json_get_int  ( request, "type_sms" ) != MESSAGE_SMS_NONE )
+               Json_get_int  ( request, "type_sms" ) != TXT_NOTIF_NONE )
            { gchar *tech_id  = Json_get_string ( request, "tech_id" );
              gchar *acronyme = Json_get_string ( request, "acronyme" );
              gint   valeur   = Json_get_int    ( request, "valeur" );
