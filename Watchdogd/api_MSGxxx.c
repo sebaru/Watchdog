@@ -184,7 +184,7 @@
        g_free(event);
        cpt++;
      }
-    Partage->liste_json_to_ws_api = g_slist_prepend ( Partage->liste_json_to_ws_api, RootNode );
+    Partage->liste_json_to_ws_api = g_slist_append ( Partage->liste_json_to_ws_api, RootNode );
     Partage->liste_json_to_ws_api_size++;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
