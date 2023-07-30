@@ -417,8 +417,8 @@
        struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( target_tech_id );
        if (found) Dls_Export_Data_to_API ( found );   /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
        struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id, reset );
-       if (dls) Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s': resetted", target_tech_id );
-           else Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "'%s': error when resetting", target_tech_id );
+       if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': resetted", target_tech_id );
+           else Info_new( __func__, Config.log_dls, LOG_INFO, "'%s': error when resetting", target_tech_id );
        Dls_Load_horloge_ticks();
      }
     else if ( !strcasecmp( agent_tag, "ABONNER") )

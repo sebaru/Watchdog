@@ -58,7 +58,7 @@
  static void Set_cde_exterieure ( void )
   { while( Partage->com_dls.Set_Dls_Data )                                                  /* A-t-on une entrée a allumer ?? */
      { struct DLS_DI *di = Partage->com_dls.Set_Dls_Data->data;
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a 1 du bit DI %s:%s",
+       Info_new( __func__, Config.log_dls, LOG_NOTICE, "%s: Mise a 1 du bit DI %s:%s",
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, di );
        Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, di );
@@ -73,7 +73,7 @@
  static void Reset_cde_exterieure ( void )
   { while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { struct DLS_DI *di = Partage->com_dls.Reset_Dls_Data->data;
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
+       Info_new( __func__, Config.log_dls, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, di );
        Dls_data_set_DI ( di, FALSE );                                                          /* Mise a zero du bit d'entrée */
@@ -286,7 +286,7 @@
     if (!plugin->go)     return;                                          /* si pas de fonction GO, on n'éxécute pas non plus */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
     if(plugin->vars.resetted && plugin->init_visuels)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Send '_START' to '%s', and Init_visuel", plugin->tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_INFO, "Send '_START' to '%s', and Init_visuel", plugin->tech_id );
        plugin->init_visuels(&plugin->vars);
      }
     gettimeofday( &tv_avant, NULL );
@@ -303,7 +303,7 @@
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
+    Info_new( __func__, Config.log_dls, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
     Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
@@ -428,7 +428,7 @@
     g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_up );
     g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_down );
 
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "DLS Down (%p)", pthread_self() );
+    Info_new( __func__, Config.log_dls, LOG_NOTICE, "DLS Down (%p)", pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

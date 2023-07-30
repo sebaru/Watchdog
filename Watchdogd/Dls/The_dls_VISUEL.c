@@ -46,7 +46,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_VISUEL *bit = g_try_malloc0 ( sizeof(struct DLS_VISUEL) );
     if (!bit)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -54,7 +54,7 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     g_snprintf( bit->forme,    sizeof(bit->forme),    "%s", Json_get_string ( element, "forme" ) );
     plugin->Dls_data_VISUEL = g_slist_prepend ( plugin->Dls_data_VISUEL, bit );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+    Info_new( __func__, Config.log_dls, LOG_INFO,
               "Create bit DLS_VISUEL '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -106,7 +106,7 @@
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                     "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' cligno=%d libelle='%s', disable=%d",
                     (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
                      visu->mode, visu->color, visu->cligno, visu->libelle, visu->disable );

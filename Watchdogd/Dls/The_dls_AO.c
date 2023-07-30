@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_AO *bit = g_try_malloc0 ( sizeof(struct DLS_AO) );
     if (!bit)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -55,7 +55,7 @@
     bit->archivage = Json_get_int    ( element, "archivage" );
     bit->valeur    = Json_get_double ( element, "valeur" );
     plugin->Dls_data_AO = g_slist_prepend ( plugin->Dls_data_AO, bit );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+    Info_new( __func__, Config.log_dls, LOG_INFO,
               "Create bit DLS_AO '%s:%s'=%f %s (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -95,7 +95,7 @@
   { if (!ao) return;
     if (ao->valeur == valeur) return;
     ao->valeur = valeur;                                                            /* Archive au mieux toutes les 5 secondes */
-    Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_AO '%s:%s'=%f %s",
               (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->valeur, ao->unite );
     JsonNode *RootNode = Json_node_create ();

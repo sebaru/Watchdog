@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_DO *bit = g_try_malloc0 ( sizeof(struct DLS_DO) );
     if (!bit)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -54,7 +54,7 @@
     bit->etat = Json_get_bool ( element, "etat" );
     bit->mono = Json_get_bool ( element, "mono" );
     plugin->Dls_data_DO = g_slist_prepend ( plugin->Dls_data_DO, bit );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+    Info_new( __func__, Config.log_dls, LOG_INFO,
               "Create bit DLS_DO '%s:%s'=%d (%s) mono=%d", bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->mono );
   }
 /******************************************************************************************************************************/
@@ -95,7 +95,7 @@
   { if (!dout) return;
     if (dout->etat == etat) return;
     dout->etat = etat;
-    Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
               (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, dout->etat );
 

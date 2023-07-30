@@ -37,7 +37,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_AI *bit = g_try_malloc0 ( sizeof(struct DLS_AI) );
     if (!bit)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -48,7 +48,7 @@
     bit->valeur    = Json_get_double ( element, "valeur"    );
     bit->in_range  = Json_get_bool   ( element, "in_range"  );
     plugin->Dls_data_AI = g_slist_prepend ( plugin->Dls_data_AI, bit );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+    Info_new( __func__, Config.log_dls, LOG_INFO,
               "Create bit DLS_AI '%s:%s'=%f %s (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -96,7 +96,7 @@
   { if (!bit) return;
     bit->valeur   = valeur;
     bit->in_range = in_range;
-    Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "Changing DLS_AI '%s:%s'=%f %s", bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
   }
 /******************************************************************************************************************************/
