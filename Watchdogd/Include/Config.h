@@ -46,6 +46,7 @@
     guint    log_level;                                                                       /* Niveau de debug du programme */
     gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
     gboolean log_bus;                                                                                      /* TRUE si log_bus */
+    gboolean log_dls;                                                                                      /* TRUE si log_dls */
     gboolean single;                                                                                /* Demarrage des thread ? */
   };
 

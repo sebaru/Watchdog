@@ -355,6 +355,7 @@
     else if ( !strcasecmp( agent_tag, "THREAD_DEBUG") )   { Thread_Set_debug ( request ); }
     else if ( !strcasecmp( agent_tag, "AGENT_SET") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
+               Json_has_member ( request, "log_dls" ) &&
                Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
              )
           )
@@ -363,11 +364,13 @@
         }
        Config.log_bus    = Json_get_bool ( request, "log_bus" );
        Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
+       Config.log_dls    = Json_get_bool ( request, "log_dls" );
        gboolean headless = Json_get_bool ( request, "headless" );
+       gint log_level    = Json_get_int  ( request, "log_level" );
        gchar *branche    = Json_get_string ( request, "branche" );
-       Info_change_log_level ( Json_get_int ( request, "log_level" ) );
-       Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d",
-                 Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
+       Info_change_log_level ( log_level );
+       Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, log_bus=%d, log_dls=%d, log_level=%d, headless=%d",
+                 Config.log_msrv, Config.log_bus, Config.log_dls, log_level, headless );
        if (Config.headless != headless)
         { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
           Partage->com_msrv.Thread_run = FALSE;
