@@ -111,8 +111,8 @@
     Partage->audit_bit_interne_per_sec++;
 
     gint typologie = Json_get_int ( msg->source_node, "typologie" );
-    if ( typologie == MSG_ETAT && msg->etat == 0) return;                   /* Un message d'etat ne peut s'éteindre tout seul */
-    if ( typologie == MSG_ETAT && msg->etat == 1)                       /* Si message d'etat apparait, on eteint le précédent */
+    if ( typologie == MSG_NOTIF && msg->etat == 0) return;                      /* Un message de notification ne s'éteind pas */
+    if ( typologie == MSG_NOTIF && msg->etat == 1)             /* Si message de notification apparait, on eteint le précédent */
      { struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
        if (event)
         { event->etat = FALSE;                                                                        /* On eteint le message */

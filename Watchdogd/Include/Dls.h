@@ -74,12 +74,12 @@
   };
 
  enum
-  { MSG_ETAT,                                                        /* Definitions des types de messages */
+  { MSG_ETAT,                                                                            /* Definitions des types de messages */
     MSG_ALERTE,
     MSG_DEFAUT,
     MSG_ALARME,
     MSG_VEILLE,
-    MSG_ATTENTE,
+    MSG_NOTIF,
     MSG_DANGER,
     MSG_DERANGEMENT,
     NBR_TYPE_MSG
