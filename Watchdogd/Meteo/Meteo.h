@@ -34,6 +34,7 @@
   { gint  last_request;
     JsonNode *sunrise;
     JsonNode *sunset;
+    JsonNode *Weather[14];
     JsonNode *Temp_min[14];
     JsonNode *Temp_max[14];
     JsonNode *Proba_pluie[14];

@@ -92,6 +92,7 @@
     Info_new( __func__, module->Thread_debug, LOG_DEBUG,
               "day %02d -> temp_min=%02d, temp_max=%02d", day, temp_min, temp_max );
 
+    Http_Post_thread_AI_to_local_BUS ( module, vars->Weather[day],          1.0*Json_get_int ( element, "weather" ), TRUE );
     Http_Post_thread_AI_to_local_BUS ( module, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
     Http_Post_thread_AI_to_local_BUS ( module, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
     Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_pluie[day],      1.0*Json_get_int ( element, "probarain" ), TRUE );
@@ -147,6 +148,8 @@
 
     for (gint cpt=0; cpt<14; cpt++)
      { gchar acronyme[64];
+       g_snprintf( acronyme, sizeof(acronyme), "DAY%d_WEATHER", cpt );
+       vars->Weather[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Météo prévisionnelle", "code", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MIN", cpt );
        vars->Temp_min[cpt] = Mnemo_create_thread_AI ( module, acronyme, "Température minimum", "°C", ARCHIVE_1_HEURE );
        g_snprintf( acronyme, sizeof(acronyme), "DAY%d_TEMP_MAX", cpt );
