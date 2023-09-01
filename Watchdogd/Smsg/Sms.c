@@ -555,8 +555,8 @@ end_user:
     vars->sending_is_disabled = FALSE;                                               /* A l'init, l'envoi de SMS est autorisé */
     vars->ai_nbr_sms        = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyés", "sms", ARCHIVE_1_HEURE );
     vars->ai_signal_quality = Mnemo_create_thread_AI ( module, "SIGNAL_QUALITY", "Qualité du signal", "%", ARCHIVE_1_HEURE );
-    vars->nbr_sms = 0;
-    gint next_try = 0;
+    vars->nbr_sms  = 0;
+    gint next_read = 0;
     Envoyer_smsg_gsm_text ( module, "SMS System is running" );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
@@ -584,23 +584,18 @@ end_user:
            { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", thread_tech_id, tag ); }
           Json_node_unref(message);
         }
-/****************************************************** Tentative de connexion ************************************************/
-       if (module->comm_status == FALSE && Partage->top >= next_try )
-        { if (Smsg_connect(module)==FALSE)
-           { next_try = Partage->top + 300;
-             Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Connect failed, trying in 30s", thread_tech_id );
-           }
-        }
-
 /****************************************************** Lecture de SMS ********************************************************/
-       if (module->comm_status == TRUE)
-        { if (Lire_sms_gsm(module)==FALSE) { Smsg_disconnect(module); }
+       if (Partage->top < next_read) continue;
+       next_read = Partage->top + 50;
+       if (Smsg_connect(module))
+        { Lire_sms_gsm(module);
           GSM_SignalQuality sig;
           GSM_GetSignalQuality( vars->gammu_machine, &sig );
           Http_Post_thread_AI_to_local_BUS ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
+          Smsg_disconnect(module);
         }
+       else Info_new( __func__, module->Thread_debug, LOG_INFO, "Connect failed" );
      }
-    Smsg_disconnect(module);
     Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
