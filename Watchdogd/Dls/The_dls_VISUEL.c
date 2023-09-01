@@ -84,10 +84,15 @@
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
-                            gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable )
+                            gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gchar *libelle, gboolean disable )
   { if (!visu) return;
     if (Partage->com_msrv.Thread_run == FALSE) return;
-    if ( strcmp ( visu->mode, mode ) || strcmp( visu->color, color ) || visu->cligno != cligno || visu->disable != disable)
+    if (    strcmp ( visu->mode, mode )
+         || strcmp ( visu->color, color )
+         || visu->cligno  != cligno
+         || visu->disable != disable
+         || visu->valeur  != valeur
+       )
      { if ( visu->last_change_reset + 50 <= Partage->top )                 /* Reset compteur de changes toutes les 5 secondes */
         { visu->changes = 0;
           visu->last_change_reset = Partage->top;
@@ -99,6 +104,7 @@
                  g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
                  g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
                  Convert_libelle_dynamique ( visu->tech_id, visu->libelle, sizeof(visu->libelle) );
+                 visu->valeur  = valeur;
                  visu->cligno  = cligno;
                  visu->disable = disable;
                }
@@ -107,9 +113,9 @@
           Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' cligno=%d libelle='%s', disable=%d",
+                    "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' cligno=%d libelle='%s', disable=%d",
                     (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
-                     visu->mode, visu->color, visu->cligno, visu->libelle, visu->disable );
+                     visu->mode, visu->color, visu->valeur, visu->cligno, visu->libelle, visu->disable );
         }
        visu->changes++;                                                                                /* Un change de plus ! */
        Partage->audit_bit_interne_per_sec++;
