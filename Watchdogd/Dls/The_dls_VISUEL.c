@@ -131,6 +131,7 @@
     Json_node_add_string ( RootNode, "acronyme",  bit->acronyme );
     Json_node_add_string ( RootNode, "mode",      bit->mode  );
     Json_node_add_string ( RootNode, "color",     bit->color );
+    Json_node_add_double ( RootNode, "valeur",    bit->valeur );
     Json_node_add_bool   ( RootNode, "cligno",    bit->cligno );
     Json_node_add_bool   ( RootNode, "disable",   bit->disable );
     Json_node_add_string ( RootNode, "libelle",   bit->libelle );
