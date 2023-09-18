@@ -83,7 +83,7 @@
     plugin->enable = FALSE;
     plugin->start_date = 0;
     plugin->conso  = 0.0;
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s' stopped (%s)",
+    Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' stopped (%s)",
               plugin->tech_id, plugin->name );
   }
 /******************************************************************************************************************************/
@@ -94,7 +94,7 @@
  gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for DLS create %s", tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for DLS create %s", tech_id );
        return(FALSE);
      }
     Json_node_add_string ( RootNode, "tech_id", tech_id );
@@ -102,7 +102,7 @@
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/create", RootNode );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR,
+     { Info_new( __func__, Config.log_dls, LOG_ERR,
                  "API Request for DLS CREATE failed. '%s' not created.", tech_id );
        Json_node_unref ( api_result );
        Json_node_unref ( RootNode );
@@ -124,7 +124,7 @@
     plugin->enable = TRUE;
     plugin->conso  = 0.0;
     plugin->start_date = time(NULL);
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s' started (%s)", plugin->tech_id, plugin->name );
+    Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' started (%s)", plugin->tech_id, plugin->name );
   }
 /******************************************************************************************************************************/
 /* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
@@ -143,7 +143,7 @@
  static gboolean Dls_Save_CodeC_to_disk ( gchar *tech_id, gchar *codec )
   { gchar source_file[128];
 
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Saving '%s' to disk started", tech_id );
+    Info_new( __func__, Config.log_dls, LOG_NOTICE, "Saving '%s' to disk started", tech_id );
     g_snprintf( source_file, sizeof(source_file), "Dls/%s.c", tech_id );
     unlink(source_file);
     gint id_fichier = open( source_file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
@@ -173,7 +173,7 @@
  static gboolean Dls_Compiler_source_dls( gchar *tech_id )
   { gchar source_file[128], target_file[128];
 
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Compilation of '%s' started", tech_id );
+    Info_new( __func__, Config.log_dls, LOG_NOTICE, "Compilation of '%s' started", tech_id );
     gint top = Partage->top;
     g_snprintf( source_file, sizeof(source_file), "Dls/%s.c", tech_id );
     g_snprintf( target_file, sizeof(target_file),  "Dls/libdls%s.so", tech_id );
@@ -216,22 +216,22 @@
 
     if (plugin->handle)                                /* Si deja chargé, on le décharge. A ce niveau, dls est stoppé (mutex) */
      { if (dlclose( plugin->handle ))
-        { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s': dlclose error '%s' (%s)",
+        { Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': dlclose error '%s' (%s)",
                     plugin->tech_id, dlerror(), plugin->shortname );
         }
        plugin->handle = NULL;
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s' unloaded (%s)", plugin->tech_id, plugin->shortname );
+       Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' unloaded (%s)", plugin->tech_id, plugin->shortname );
      }
 
     plugin->handle = dlopen( nom_fichier_absolu, RTLD_LOCAL | RTLD_NOW );                   /* Ouverture du fichier librairie */
     if (!plugin->handle)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s': dlopen failed (%s)", plugin->tech_id, dlerror() );
+     { Info_new( __func__, Config.log_dls, LOG_WARNING, "'%s': dlopen failed (%s)", plugin->tech_id, dlerror() );
        return(FALSE);
      }
 
     plugin->version = dlsym( plugin->handle, "version" );                                         /* Recherche de la fonction */
     if (!plugin->version)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s' does not provide version function", plugin->tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_WARNING, "'%s' does not provide version function", plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
@@ -239,7 +239,7 @@
 
     plugin->remap_all_alias = dlsym( plugin->handle, "remap_all_alias" );                         /* Recherche de la fonction */
     if (!plugin->remap_all_alias)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s' does not provide remap_all_alias function", plugin->tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_WARNING, "'%s' does not provide remap_all_alias function", plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
@@ -247,7 +247,7 @@
 
     plugin->init_visuels = dlsym( plugin->handle, "init_visuels" );                               /* Recherche de la fonction */
     if (!plugin->init_visuels)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s' does not provide init_visuels function", plugin->tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_WARNING, "'%s' does not provide init_visuels function", plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
@@ -261,13 +261,13 @@
 /*------------------------------------------------------- Chargement GO ------------------------------------------------------*/
     plugin->go = dlsym( plugin->handle, "Go" );                                              /* Recherche de la fonction 'Go' */
     if (!plugin->go)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_WARNING, "'%s' failed sur absence GO", plugin->tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_WARNING, "'%s' failed sur absence GO", plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
      }
 
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s' dlopened (%s)", plugin->tech_id, plugin->shortname );
+    Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' dlopened (%s)", plugin->tech_id, plugin->shortname );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -301,10 +301,17 @@
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = plugin->Dls_data_WATCHDOG;                                          /* Decharge tous les watchdogs du module */
+    liste_bit = plugin->Dls_data_WATCHDOG;                                           /* Decharge tous les watchdogs du module */
     while(liste_bit)
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
        Dls_data_set_WATCHDOG ( &plugin->vars, wtd, 0 );
+       liste_bit = g_slist_next(liste_bit);
+     }
+
+    liste_bit = plugin->Dls_data_MESSAGE;                                            /* Decharge tous les watchdogs du module */
+    while(liste_bit)
+     { struct DLS_MESSAGE *bit = liste_bit->data;
+       Dls_data_set_MESSAGE ( &plugin->vars, bit, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
   }
@@ -319,28 +326,31 @@
      { struct DLS_PLUGIN *plugin = liste->data;
        if (plugin->handle && plugin->remap_all_alias)
         { plugin->remap_all_alias(&plugin->vars);
-          Info_new( __func__, plugin->debug || Partage->com_dls.Thread_debug, LOG_DEBUG, "Remapping Alias for '%s' OK", plugin->tech_id );
+          Info_new( __func__, plugin->debug || Config.log_dls, LOG_DEBUG, "Remapping Alias for '%s' OK", plugin->tech_id );
         }
-       else Info_new( __func__, plugin->debug || Partage->com_dls.Thread_debug, LOG_ERR, "Remapping Alias for '%s' Failed", plugin->tech_id );
+       else Info_new( __func__, plugin->debug || Config.log_dls, LOG_ERR, "Remapping Alias for '%s' Failed", plugin->tech_id );
 
        if (!strcasecmp ( plugin->tech_id, "SYS" ) )                         /* Mapping des bits internes pour le plugin "SYS" */
-        { Partage->com_dls.sys_flipflop_5hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
-          Partage->com_dls.sys_flipflop_2hz      = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
-          Partage->com_dls.sys_flipflop_1sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
-          Partage->com_dls.sys_flipflop_2sec     = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2SEC" );
-          Partage->com_dls.sys_api_socket        = Dls_data_lookup_BI   ( "SYS", "API_SOCKET" );
-          Partage->com_dls.sys_top_5hz           = Dls_data_lookup_MONO ( "SYS", "TOP_5HZ" );
-          Partage->com_dls.sys_top_2hz           = Dls_data_lookup_MONO ( "SYS", "TOP_2HZ" );
-          Partage->com_dls.sys_top_1sec          = Dls_data_lookup_MONO ( "SYS", "TOP_1SEC" );
-          Partage->com_dls.sys_top_5sec          = Dls_data_lookup_MONO ( "SYS", "TOP_5SEC" );
-          Partage->com_dls.sys_top_10sec         = Dls_data_lookup_MONO ( "SYS", "TOP_10SEC" );
-          Partage->com_dls.sys_top_1min          = Dls_data_lookup_MONO ( "SYS", "TOP_1MIN" );
-          Partage->com_dls.sys_bit_per_sec       = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
-          Partage->com_dls.sys_tour_per_sec      = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
-          Partage->com_dls.sys_dls_wait          = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
+        { Partage->com_dls.sys_flipflop_5hz        = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
+          Partage->com_dls.sys_flipflop_2hz        = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
+          Partage->com_dls.sys_flipflop_1sec       = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
+          Partage->com_dls.sys_flipflop_2sec       = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2SEC" );
+          Partage->com_dls.sys_api_socket          = Dls_data_lookup_BI   ( "SYS", "API_SOCKET" );
+          Partage->com_dls.sys_top_alerte          = Dls_data_lookup_BI   ( "SYS", "TOP_ALERTE" );
+          Partage->com_dls.sys_top_alerte_fixe     = Dls_data_lookup_BI   ( "SYS", "TOP_ALERTE_FIXE" );
+          Partage->com_dls.sys_top_alerte_fugitive = Dls_data_lookup_BI   ( "SYS", "TOP_ALERTE_FUGITIVE" );
+          Partage->com_dls.sys_top_5hz             = Dls_data_lookup_MONO ( "SYS", "TOP_5HZ" );
+          Partage->com_dls.sys_top_2hz             = Dls_data_lookup_MONO ( "SYS", "TOP_2HZ" );
+          Partage->com_dls.sys_top_1sec            = Dls_data_lookup_MONO ( "SYS", "TOP_1SEC" );
+          Partage->com_dls.sys_top_5sec            = Dls_data_lookup_MONO ( "SYS", "TOP_5SEC" );
+          Partage->com_dls.sys_top_10sec           = Dls_data_lookup_MONO ( "SYS", "TOP_10SEC" );
+          Partage->com_dls.sys_top_1min            = Dls_data_lookup_MONO ( "SYS", "TOP_1MIN" );
+          Partage->com_dls.sys_bit_per_sec         = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
+          Partage->com_dls.sys_tour_per_sec        = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
+          Partage->com_dls.sys_dls_wait            = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
           Partage->com_dls.sys_nbr_api_enreg_queue = Dls_data_lookup_AI   ( "SYS", "NBR_API_ENREG_QUEUE" );
-          Partage->com_dls.sys_nbr_archive_queue = Dls_data_lookup_AI   ( "SYS", "NBR_ARCHIVE_QUEUE" );
-          Partage->com_dls.sys_maxrss            = Dls_data_lookup_AI   ( "SYS", "MAXRSS" );
+          Partage->com_dls.sys_nbr_archive_queue   = Dls_data_lookup_AI   ( "SYS", "NBR_ARCHIVE_QUEUE" );
+          Partage->com_dls.sys_maxrss              = Dls_data_lookup_AI   ( "SYS", "MAXRSS" );
         }
 
        plugin->vars.dls_osyn_acquit             = Dls_data_lookup_DI   ( plugin->tech_id, "OSYN_ACQUIT" );
@@ -372,19 +382,16 @@
 /******************************************************************************************************************************/
  struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id, gboolean reset )
   { struct DLS_PLUGIN *plugin = NULL;
-    pthread_mutex_lock ( &Nbr_compil_mutex );                   /* Increment le nombre de thread de compilation en parallelle */
-    Nbr_compil++;
-    pthread_mutex_unlock ( &Nbr_compil_mutex );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "Starting import of plugin '%s'", tech_id );
+    Info_new( __func__, Config.log_dls, LOG_INFO, "Starting import of plugin '%s'", tech_id );
                                                                                  /* Récupère les metadata du plugin à charger */
     JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", "tech_id=%s", tech_id );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': API Error.", tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': API Error.", tech_id );
        goto end;
      }
 
     if ( !Json_has_member ( api_result, "codec" ) )
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': Missing CodeC.", tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': Missing CodeC.", tech_id );
        goto end;
      }
 
@@ -406,7 +413,7 @@
         }
      }
     if (!plugin)                                       /* si vraiment on arrive pas a reserver ou trouver la mémoire, on sort */
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s' Memory error", tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s' Memory error", tech_id );
        goto end;
      }
 
@@ -558,7 +565,7 @@
     Json_node_foreach_array_element ( api_result, "mnemos_TEMPO", Dls_data_TEMPO_create_by_array, plugin );
 
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)               /* DlOpen before remap (sinon on mappe pas la bonne zone mémoire */
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
     Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */
 
     if (reset)
@@ -604,20 +611,23 @@ end:
 
     pthread_attr_t attr;                                                      /* Attribut de thread pour parametrer le module */
     if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': pthread_attr_init failed.", tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': pthread_attr_init failed.", tech_id );
        return;
      }
 
     if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) )                       /* On le laisse joinable au boot */
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': pthread_setdetachstate failed.", tech_id );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': pthread_setdetachstate failed.", tech_id );
        return;
      }
 
     while (Nbr_compil >= get_nprocs()) sched_yield();
+    pthread_mutex_lock ( &Nbr_compil_mutex );                   /* Increment le nombre de thread de compilation en parallelle */
+    Nbr_compil++; /* fait +1 avant de lancer le pthread pour etre sur que le thread demarre */
     if ( pthread_create( &TID, &attr, Run_Dls_Import_thread, tech_id ) )
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "'%s': pthread_create failed.", tech_id );
-       return;
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': pthread_create failed.", tech_id );
+       Nbr_compil--; /* Démarrage failed */
      }
+    pthread_mutex_unlock ( &Nbr_compil_mutex );
   }
 /******************************************************************************************************************************/
 /* Dls_Importer_plugins: Importe tous les plugins depuis l'API                                                                */
@@ -628,18 +638,18 @@ end:
   { gint top = Partage->top;
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/plugins", NULL );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "API Request for /run/dls/plugins failed. No plugin loaded." );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "API Request for /run/dls/plugins failed. No plugin loaded." );
        Json_node_unref ( api_result );
        return;
      }
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "API Request for /run/dls/plugins OK." );
+    Info_new( __func__, Config.log_dls, LOG_INFO, "API Request for /run/dls/plugins OK." );
 
     pthread_mutexattr_t param;                                                                /* Creation du mutex de synchro */
     pthread_mutexattr_init( &param );                                                         /* Creation du mutex de synchro */
     pthread_mutex_init( &Nbr_compil_mutex, &param );
     Json_node_foreach_array_element ( api_result, "plugins", Dls_Importer_un_plugin_by_array, NULL );
     while (Nbr_compil) sched_yield();                                         /* Tant que des threads de compilation tournent */
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "%03d plugins loaded in %06.1fs (with %02d proc)",
+    Info_new( __func__, Config.log_dls, LOG_NOTICE, "%03d plugins loaded in %06.1fs (with %02d proc)",
               Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0, get_nprocs() );
     Json_node_unref ( api_result );
   }
@@ -654,7 +664,7 @@ end:
      { struct DLS_PLUGIN *plugin = Partage->com_dls.Dls_plugins->data;
        Dls_Export_Data_to_API ( plugin );                                         /* Sauvegarde les valeurs des bits internes */
        if (plugin->handle && dlclose( plugin->handle ))
-        { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "dlclose error '%s' for '%s' (%s)",
+        { Info_new( __func__, Config.log_dls, LOG_NOTICE, "dlclose error '%s' for '%s' (%s)",
                     dlerror(), plugin->tech_id, plugin->shortname );
         }
 
@@ -675,7 +685,7 @@ end:
        Partage->com_dls.Dls_plugins = g_slist_remove( Partage->com_dls.Dls_plugins, plugin );
        if (plugin->Arbre_Comm) g_slist_free(plugin->Arbre_Comm);
                                                                              /* Destruction de l'entete associé dans la GList */
-       Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "plugin '%s' unloaded (%s)", plugin->tech_id, plugin->name );
+       Info_new( __func__, Config.log_dls, LOG_INFO, "plugin '%s' unloaded (%s)", plugin->tech_id, plugin->name );
        g_free( plugin );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -688,7 +698,7 @@ end:
  static void Dls_Debug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG, "'%s' debug started ('%s')",
+     { Info_new( __func__, Config.log_dls, LOG_DEBUG, "'%s' debug started ('%s')",
                  plugin->tech_id, plugin->name );
        plugin->debug = plugin->vars.debug = TRUE;
      }
@@ -701,7 +711,7 @@ end:
  static void Dls_Undebug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { gchar *tech_id = (gchar *)user_data;
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_DEBUG, "'%s' debug stopped ('%s')",
+     { Info_new( __func__, Config.log_dls, LOG_DEBUG, "'%s' debug stopped ('%s')",
                  plugin->tech_id, plugin->name );
        plugin->debug = plugin->vars.debug = FALSE;
      }

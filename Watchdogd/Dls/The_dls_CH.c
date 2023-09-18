@@ -46,17 +46,17 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_CH *bit = g_try_malloc0 ( sizeof(struct DLS_CH) );
     if (!bit)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
-    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
+    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->valeur = Json_get_int  ( element, "valeur" );
     bit->etat   = Json_get_bool ( element, "etat" );
     if (!strcasecmp ( tech_id, "SYS" ) ) bit->archivage = 2;            /* Si CH du plugin SYS, on archive toutes les minutes */
     plugin->Dls_data_CH = g_slist_prepend ( plugin->Dls_data_CH, bit );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+    Info_new( __func__, Config.log_dls, LOG_INFO,
               "Create bit DLS_CH '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -116,7 +116,7 @@
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
              if (cpt_h->abonnement) Dls_cadran_send_CH_to_API ( cpt_h );
-             Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+             Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                        "ligne %04d: Changing DLS_CH '%s:%s'=%d",
                        (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
              Partage->audit_bit_interne_per_sec++;

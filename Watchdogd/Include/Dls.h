@@ -74,23 +74,24 @@
   };
 
  enum
-  { MSG_ETAT,                                                        /* Definitions des types de messages */
+  { MSG_ETAT,                                                                            /* Definitions des types de messages */
     MSG_ALERTE,
     MSG_DEFAUT,
     MSG_ALARME,
     MSG_VEILLE,
-    MSG_ATTENTE,
+    MSG_NOTIF,
     MSG_DANGER,
     MSG_DERANGEMENT,
     NBR_TYPE_MSG
   };
 
  enum
-  { MESSAGE_SMS_NONE,
-    MESSAGE_SMS_YES,
-    MESSAGE_SMS_GSM_ONLY,
-    MESSAGE_SMS_OVH_ONLY,
-    NBR_TYPE_MESSAGE_SMS
+  { TXT_NOTIF_NONE,
+    TXT_NOTIF_YES,
+    TXT_NOTIF_GSM_ONLY,
+    TXT_NOTIF_OVH_ONLY,
+    TXT_NOTIF_CHAT_ONLY,
+    NBR_TYPE_TXT_NOTIF
   };
 
  struct DLS_MESSAGE_EVENT
@@ -121,7 +122,6 @@
     JsonNode *HORLOGE_ticks;                                                           /* Liste des horloges ticks a dérouler */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
     guint temps_sched;                                          /* Delai d'attente DLS pour assurer 100 tours max par seconde */
     gboolean Top_check_horaire;                                                    /* True le controle horaire est réalisable */
 
@@ -130,6 +130,9 @@
     struct DLS_BI *sys_flipflop_1sec;
     struct DLS_BI *sys_flipflop_2sec;
     struct DLS_BI *sys_api_socket;
+    struct DLS_BI *sys_top_alerte;
+    struct DLS_BI *sys_top_alerte_fixe;
+    struct DLS_BI *sys_top_alerte_fugitive;
     struct DLS_MONO *sys_top_5hz;
     struct DLS_MONO *sys_top_2hz;
     struct DLS_MONO *sys_top_1sec;
@@ -144,11 +147,8 @@
     struct DLS_AI *sys_maxrss;
 
     gboolean next_bit_alerte;
-    gboolean bit_alerte;
     gboolean next_bit_alerte_fixe;
-    gboolean bit_alerte_fixe;
     gboolean next_bit_alerte_fugitive;
-    gboolean bit_alerte_fugitive;
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/

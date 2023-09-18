@@ -244,9 +244,9 @@
           Partage->liste_json_to_ws_api = g_slist_remove ( Partage->liste_json_to_ws_api, RootNode );
           Partage->liste_json_to_ws_api_size--;
           gchar *buf = Json_node_to_string ( RootNode );
+          Json_node_unref ( RootNode );
           soup_websocket_connection_send_text ( Partage->com_msrv.API_websocket, buf );
           g_free(buf);
-          Json_node_unref ( RootNode );
         }
      }
     API_ws_end();

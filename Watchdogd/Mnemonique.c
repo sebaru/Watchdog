@@ -86,7 +86,7 @@
 /* Entrée: la structure THREAD, les parametres de la DI                                                                       */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- JsonNode *Mnemo_create_thread_DO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
+ JsonNode *Mnemo_create_thread_DO ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle, gboolean mono )
   { JsonNode *node = Json_node_create();
     if (!node) return(NULL);
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
@@ -94,6 +94,7 @@
     Json_node_add_string ( node, "thread_tech_id", thread_tech_id );
     Json_node_add_string ( node, "thread_acronyme", thread_acronyme );
     Json_node_add_string ( node, "libelle", libelle );
+    Json_node_add_bool   ( node, "mono", mono );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/do", node );
     if (!api_result || Json_get_int ( api_result, "api_status" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,

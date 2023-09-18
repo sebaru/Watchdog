@@ -355,6 +355,7 @@
     else if ( !strcasecmp( agent_tag, "THREAD_DEBUG") )   { Thread_Set_debug ( request ); }
     else if ( !strcasecmp( agent_tag, "AGENT_SET") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
+               Json_has_member ( request, "log_dls" ) &&
                Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
              )
           )
@@ -363,11 +364,13 @@
         }
        Config.log_bus    = Json_get_bool ( request, "log_bus" );
        Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
+       Config.log_dls    = Json_get_bool ( request, "log_dls" );
        gboolean headless = Json_get_bool ( request, "headless" );
+       gint log_level    = Json_get_int  ( request, "log_level" );
        gchar *branche    = Json_get_string ( request, "branche" );
-       Info_change_log_level ( Json_get_int ( request, "log_level" ) );
-       Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, bus=%d, log_level=%d, headless=%d",
-                 Config.log_msrv, Config.log_bus, Json_get_int ( request, "log_level" ), headless );
+       Info_change_log_level ( log_level );
+       Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, log_bus=%d, log_dls=%d, log_level=%d, headless=%d",
+                 Config.log_msrv, Config.log_bus, Config.log_dls, log_level, headless );
        if (Config.headless != headless)
         { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
           Partage->com_msrv.Thread_run = FALSE;
@@ -414,8 +417,8 @@
        struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( target_tech_id );
        if (found) Dls_Export_Data_to_API ( found );   /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
        struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id, reset );
-       if (dls) Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "'%s': resetted", target_tech_id );
-           else Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO, "'%s': error when resetting", target_tech_id );
+       if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': resetted", target_tech_id );
+           else Info_new( __func__, Config.log_dls, LOG_INFO, "'%s': error when resetting", target_tech_id );
        Dls_Load_horloge_ticks();
      }
     else if ( !strcasecmp( agent_tag, "ABONNER") )
@@ -643,7 +646,7 @@ end:
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
-     { if (!Demarrer_arch_sync())                                                                         /* Démarrage ARCH_SYNC */
+     { if (!Demarrer_arch_sync())                                                                      /* Démarrage ARCH_SYNC */
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
        Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
        Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
@@ -651,7 +654,7 @@ end:
      }
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single == FALSE) Charger_librairies();                                              /* Si demarrage des thread */
+    if (Config.single == FALSE) Charger_librairies();                                             /* Si demarrage des threads */
     else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" );
 
 /*************************************** Mise en place de la gestion des signaux **********************************************/
@@ -682,14 +685,11 @@ end:
     gint cpt_5_minutes = Partage->top + 3000;
     gint cpt_1_minute  = Partage->top + 600;
 
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
-    sleep(10);                                                                              /* On laisse les threads demarrer */
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
-
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
-       Http_Send_to_slaves ( "SYNC_IO", NULL );                                  /* Synchronisation des IO depuis les threads */
-       sleep(5);
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread in 10 seconds" );
+       sleep(10);                                                                           /* On laisse les threads demarrer */
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
        if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
@@ -711,6 +711,7 @@ end:
      }
     else
      { prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting SLAVE Thread" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         {
 /*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/

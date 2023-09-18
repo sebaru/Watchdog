@@ -123,6 +123,7 @@
   { gchar   tech_id[32];
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
+    gboolean mono;
     gboolean etat;
     gboolean edge_up;
     gboolean edge_down;
@@ -162,6 +163,7 @@
     gchar    libelle[128];                                                                                    /* Km, h, ° ... */
     gchar    mode[32];
     gchar    color[16];
+    gdouble  valeur;
     gboolean cligno;
     gboolean disable;
     gint     changes;
@@ -214,9 +216,6 @@
     struct DLS_MESSAGE *dls_msg_comm_hs;
   };
 
- extern gboolean Dls_get_top_alerte ( void );
- extern gboolean Dls_get_top_alerte_fugitive ( void );
-
  extern struct DLS_BI *Dls_data_lookup_BI ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_BI        ( struct DLS_BI *bit );
  extern gboolean Dls_data_get_BI_up     ( struct DLS_BI *bit );
@@ -268,7 +267,7 @@
 
  extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
-                                   gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable );
+                                   gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gchar *libelle, gboolean disable );
 
  extern struct DLS_HORLOGE *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );

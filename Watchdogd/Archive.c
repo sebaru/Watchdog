@@ -68,7 +68,9 @@
  static void ARCH_Clear ( void )
   { pthread_mutex_lock( &Partage->archive_liste_sync );                                                      /* lockage futex */
     gint save_nbr = Partage->archive_liste_taille;
-    g_slist_foreach ( Partage->archive_liste, (GFunc) Json_node_unref, NULL );
+    g_slist_free_full ( Partage->archive_liste, (GDestroyNotify) Json_node_unref );
+    Partage->archive_liste        = NULL;
+    Partage->archive_liste_taille = 0;
     pthread_mutex_unlock( &Partage->archive_liste_sync );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Clear %05d archive(s)", save_nbr );
  }
@@ -81,7 +83,7 @@
 
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
 
-    gint max_enreg = ARCHIVE_MAX_ENREG_TO_API;
+    gint max_enreg = ARCHIVE_MAX_ENREG_TO_API;                                          /* Au démarrage, directe limite haute */
     while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { if (!Partage->archive_liste) { sleep(2); continue; }
        Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Begin %05d archive(s)", Partage->archive_liste_taille );
@@ -95,8 +97,8 @@
        while (liste && Partage->com_msrv.Thread_run == TRUE && nb_enreg<max_enreg)
         { JsonNode *arch = liste->data;                                                               /* Recuperation du arch */
           json_node_ref ( arch );
-          Json_array_add_element ( archives, arch );
-          nb_enreg++;                        /* Permet de limiter a au plus 500 enregistrements histoire de limiter la famine */
+          Json_array_add_element ( archives, arch );       /* RootNode devient propriétaire de l'enregistrement, dans l'array */
+          nb_enreg++;                  /* Permet de limiter a au plus max_enreg enregistrements histoire de limiter la famine */
           liste = g_slist_next(liste);
         }
        pthread_mutex_unlock( &Partage->archive_liste_sync );

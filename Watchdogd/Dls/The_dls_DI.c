@@ -37,15 +37,15 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_DI *bit = g_try_malloc0 ( sizeof(struct DLS_DI) );
     if (!bit)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
-    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
+    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_DI = g_slist_prepend ( plugin->Dls_data_DI, bit );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+    Info_new( __func__, Config.log_dls, LOG_INFO,
               "Create bit DLS_DI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -102,7 +102,7 @@
   { if (!bit) return;
 
     if (bit->etat != valeur)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_NOTICE, "Changing DLS_DI '%s:%s'=%d up %d down %d",
+     { Info_new( __func__, Config.log_dls, LOG_NOTICE, "Changing DLS_DI '%s:%s'=%d up %d down %d",
                  bit->tech_id, bit->acronyme, valeur, bit->edge_up, bit->edge_down );
        if (valeur) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up,   bit );
               else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, bit );
@@ -117,7 +117,7 @@
  void Dls_data_set_DI_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit )
   { if (!bit) return;
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bit );
-    Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_NOTICE,
+    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_NOTICE,
               "Mise a un du bit DI '%s:%s' demandée", bit->tech_id, bit->acronyme );
   }
 /******************************************************************************************************************************/

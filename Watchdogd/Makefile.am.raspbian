@@ -19,23 +19,21 @@ Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
 Watchdogd_LDFLAGS = -rdynamic -lpopt -ldl \
-                   `pkg-config --libs glib-2.0 gthread-2.0 openssl libsoup-3.0 json-glib-1.0 uuid libsystemd libjwt` \
-                   `mariadb_config --libs`
+                   `pkg-config --libs glib-2.0 gthread-2.0 openssl libsoup-3.0 json-glib-1.0 uuid libsystemd libjwt`
 
-Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 openssl libsoup-3.0 json-glib-1.0 uuid libsystemd libjwt` \
-                   `mariadb_config --cflags`
+Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 openssl libsoup-3.0 json-glib-1.0 uuid libsystemd libjwt`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include \
             -DWTD_PKGDATADIR=\"$(pkgdatadir)\"
 
 sysconf_DATA = watchdogd.abls.conf.sample
-pkgdata_DATA = init_db.sql base_icones.sql
+pkgdata_DATA =
 dist_systemdsystemunit_DATA = Watchdogd.service
-dist_systemduserunit_DATA = Watchdogd-user.service
+dist_systemduserunit_DATA =
 dist_sudoers_DATA = watchdogd_sudo
 
-EXTRA_DIST = Watchdogd.service Watchdogd-user.service watchdogd.abls.conf init_db.sql base_icones.sql
+EXTRA_DIST = Watchdogd.service watchdogd.abls.conf
 MAINTAINERCLEANFILES = Makefile.in
 
 install-data-local:

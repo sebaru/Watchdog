@@ -37,18 +37,18 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_AI *bit = g_try_malloc0 ( sizeof(struct DLS_AI) );
     if (!bit)
-     { Info_new( __func__, Partage->com_dls.Thread_debug, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
-    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
+    g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     g_snprintf( bit->unite,    sizeof(bit->unite),    "%s", Json_get_string ( element, "unite" ) );
     bit->archivage = Json_get_int    ( element, "archivage" );
     bit->valeur    = Json_get_double ( element, "valeur"    );
     bit->in_range  = Json_get_bool   ( element, "in_range"  );
     plugin->Dls_data_AI = g_slist_prepend ( plugin->Dls_data_AI, bit );
-    Info_new( __func__, Partage->com_dls.Thread_debug, LOG_INFO,
+    Info_new( __func__, Config.log_dls, LOG_INFO,
               "Create bit DLS_AI '%s:%s'=%f %s (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -96,7 +96,7 @@
   { if (!bit) return;
     bit->valeur   = valeur;
     bit->in_range = in_range;
-    Info_new( __func__, (Partage->com_dls.Thread_debug || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "Changing DLS_AI '%s:%s'=%f %s", bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
   }
 /******************************************************************************************************************************/
@@ -140,10 +140,10 @@
        return(FALSE);
      }
 
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
+    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s) (abonnement=%d)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_double ( request, "valeur" ), bit->unite,
-              Json_get_bool ( request, "in_range" ), bit->libelle );
+              Json_get_bool ( request, "in_range" ), bit->libelle, bit->abonnement );
     Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
     if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );
 

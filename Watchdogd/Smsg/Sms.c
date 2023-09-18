@@ -313,7 +313,7 @@
        return;
      }
 
-    gint sms_notification = Json_get_int ( msg, "sms_notification" );
+    gint txt_notification = Json_get_int ( msg, "txt_notification" );
     GList *Recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
     GList *recipients = Recipients;
     while(recipients)
@@ -327,18 +327,18 @@
         { Info_new( __func__, module->Thread_debug, LOG_ERR,
                     "%s: Warning: User %s has an empty Phone number", thread_tech_id, Json_get_string ( user, "email" ) );
         }
-       else switch (sms_notification)
-        { case MESSAGE_SMS_YES:
+       else switch (txt_notification)
+        { case TXT_NOTIF_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
                 { Info_new( __func__, module->Thread_debug, LOG_ERR,
                             "%s: Error sending with GSM. Falling back to OVH", thread_tech_id );
                   Envoi_sms_ovh( module, msg, user_phone );
                 }
                break;
-          case MESSAGE_SMS_GSM_ONLY:
+          case TXT_NOTIF_GSM_ONLY:
                Envoi_sms_gsm ( module, msg, user_phone );
                break;
-          case MESSAGE_SMS_OVH_ONLY:
+          case TXT_NOTIF_OVH_ONLY:
                Envoi_sms_ovh ( module, msg, user_phone );
                break;
         }
@@ -357,7 +357,7 @@
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_int    ( RootNode, "sms_notification", MESSAGE_SMS_OVH_ONLY );
+    Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_OVH_ONLY );
     Smsg_send_to_all_authorized_recipients( module, RootNode );
     Json_node_unref(RootNode);
   }
@@ -370,7 +370,7 @@
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_int    ( RootNode, "sms_notification", MESSAGE_SMS_GSM_ONLY );
+    Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_GSM_ONLY );
     Smsg_send_to_all_authorized_recipients( module, RootNode );
     Json_node_unref(RootNode);
   }
@@ -555,8 +555,8 @@ end_user:
     vars->sending_is_disabled = FALSE;                                               /* A l'init, l'envoi de SMS est autorisé */
     vars->ai_nbr_sms        = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyés", "sms", ARCHIVE_1_HEURE );
     vars->ai_signal_quality = Mnemo_create_thread_AI ( module, "SIGNAL_QUALITY", "Qualité du signal", "%", ARCHIVE_1_HEURE );
-    vars->nbr_sms = 0;
-    gint next_try = 0;
+    vars->nbr_sms  = 0;
+    gint next_read = 0;
     Envoyer_smsg_gsm_text ( module, "SMS System is running" );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
@@ -570,7 +570,7 @@ end_user:
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( message, "tag" );
           if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
-               Json_get_int ( message, "sms_notification" ) != MESSAGE_SMS_NONE )
+               Json_get_int ( message, "txt_notification" ) != TXT_NOTIF_NONE )
            { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
                        Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
                        Json_get_string ( message, "libelle" ) );
@@ -584,23 +584,18 @@ end_user:
            { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", thread_tech_id, tag ); }
           Json_node_unref(message);
         }
-/****************************************************** Tentative de connexion ************************************************/
-       if (module->comm_status == FALSE && Partage->top >= next_try )
-        { if (Smsg_connect(module)==FALSE)
-           { next_try = Partage->top + 300;
-             Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Connect failed, trying in 30s", thread_tech_id );
-           }
-        }
-
 /****************************************************** Lecture de SMS ********************************************************/
-       if (module->comm_status == TRUE)
-        { if (Lire_sms_gsm(module)==FALSE) { Smsg_disconnect(module); }
+       if (Partage->top < next_read) continue;
+       next_read = Partage->top + 50;
+       if (Smsg_connect(module))
+        { Lire_sms_gsm(module);
           GSM_SignalQuality sig;
           GSM_GetSignalQuality( vars->gammu_machine, &sig );
           Http_Post_thread_AI_to_local_BUS ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
+          Smsg_disconnect(module);
         }
+       else Info_new( __func__, module->Thread_debug, LOG_INFO, "Connect failed" );
      }
-    Smsg_disconnect(module);
     Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

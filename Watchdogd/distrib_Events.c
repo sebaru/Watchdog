@@ -48,6 +48,9 @@
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
        if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( "SET_DO", RootNode );
+       else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
+                      "'%s:%s' is not mapped. dropping",
+                       Json_get_string ( RootNode, "tech_id" ), Json_get_string ( RootNode, "acronyme" ) );
        Json_node_unref ( RootNode );
        cpt++;
      }
@@ -60,6 +63,9 @@
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
        if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( "SET_AO", RootNode );
+       else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
+                      "'%s:%s' is not mapped. dropping",
+                       Json_get_string ( RootNode, "tech_id" ), Json_get_string ( RootNode, "acronyme" ) );
        Json_node_unref ( RootNode );
        cpt++;
      }
