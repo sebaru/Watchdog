@@ -66,7 +66,6 @@
     GSM_FreeStateMachine(vars->gammu_machine);                                                 /* Free up used memory */
     vars->gammu_machine = NULL;
     Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Disconnected", thread_tech_id );
-    Thread_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
 /* smsg_connect: Ouvre une connexion vers le téléphone ou la clef 3G                                                          */
@@ -134,7 +133,6 @@
 
     Info_new( __func__, module->Thread_debug, LOG_INFO,
               "%s: Connection OK with '%s/%s'", thread_tech_id, constructeur, model );
-    Thread_send_comm_to_master ( module, TRUE );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -150,11 +148,6 @@
     GSM_Error error;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-
-    if (module->comm_status == FALSE)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: COMM is FALSE", thread_tech_id );
-       return(FALSE);
-     }
 
     if (!telephone)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: telephone is NULL", thread_tech_id );
@@ -588,13 +581,17 @@ end_user:
        if (Partage->top < next_read) continue;
        next_read = Partage->top + 50;
        if (Smsg_connect(module))
-        { Lire_sms_gsm(module);
+        { Thread_send_comm_to_master ( module, TRUE );
+          Lire_sms_gsm(module);
           GSM_SignalQuality sig;
           GSM_GetSignalQuality( vars->gammu_machine, &sig );
           Http_Post_thread_AI_to_local_BUS ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
           Smsg_disconnect(module);
         }
-       else Info_new( __func__, module->Thread_debug, LOG_INFO, "Connect failed" );
+       else
+        { Info_new( __func__, module->Thread_debug, LOG_INFO, "Connect failed" );
+          Thread_send_comm_to_master ( module, FALSE );
+        }
      }
     Thread_end(module);
   }
