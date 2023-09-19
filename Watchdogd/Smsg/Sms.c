@@ -355,6 +355,8 @@
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_OVH_ONLY );
+    Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
+    Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->WS_messages = g_slist_append ( module->WS_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
@@ -369,6 +371,8 @@
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_GSM_ONLY );
+    Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
+    Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->WS_messages = g_slist_append ( module->WS_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
@@ -568,7 +572,8 @@ end_user:
           module->WS_messages = g_slist_remove ( module->WS_messages, message );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( message, "tag" );
-          if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
+          if (!tag) { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: no tag. dropping.", thread_tech_id ); }
+          else if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
                Json_get_int ( message, "txt_notification" ) != TXT_NOTIF_NONE )
            { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
                        Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
