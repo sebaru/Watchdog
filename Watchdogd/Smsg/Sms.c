@@ -355,8 +355,9 @@
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_OVH_ONLY );
-    Smsg_send_to_all_authorized_recipients( module, RootNode );
-    Json_node_unref(RootNode);
+    pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
+    module->WS_messages = g_slist_append ( module->WS_messages, RootNode );
+    pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -368,8 +369,9 @@
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_GSM_ONLY );
-    Smsg_send_to_all_authorized_recipients( module, RootNode );
-    Json_node_unref(RootNode);
+    pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
+    module->WS_messages = g_slist_append ( module->WS_messages, RootNode );
+    pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
