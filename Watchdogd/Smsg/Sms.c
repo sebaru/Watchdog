@@ -154,7 +154,11 @@
        return(FALSE);
      }
 
-    GSM_InitLocales(NULL);
+    if (!Smsg_connect(module))
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Connect failed, cannot send SMS to '%s'", telephone );
+       return(FALSE);
+     }
+
     memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
     sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
     sms.UDH.Type = UDH_NoUDH;                                                                 /* No UDH, just a plain message */
@@ -194,10 +198,12 @@
        return(FALSE);
      }
 
-    gint timeout = Partage->top+100;
+    gint timeout = Partage->top+200;
 
     while ( module->Thread_run == TRUE && vars->gammu_send_status == ERR_TIMEOUT && Partage->top < timeout )
      { GSM_ReadDevice(vars->gammu_machine, TRUE); }
+
+    Smsg_disconnect(module);
 
     if (vars->gammu_send_status == ERR_NONE)
      { Info_new( __func__, module->Thread_debug, LOG_NOTICE,
