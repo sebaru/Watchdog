@@ -155,7 +155,7 @@
      }
 
     if (!Smsg_connect(module))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Connect failed, cannot send SMS to '%s'", telephone );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Connect failed, cannot send SMS to '%s'", thread_tech_id, telephone );
        return(FALSE);
      }
 
@@ -198,9 +198,7 @@
        return(FALSE);
      }
 
-    gint timeout = Partage->top+200;
-
-    while ( module->Thread_run == TRUE && vars->gammu_send_status == ERR_TIMEOUT && Partage->top < timeout )
+    while ( module->Thread_run == TRUE && vars->gammu_send_status == ERR_TIMEOUT )
      { GSM_ReadDevice(vars->gammu_machine, TRUE); }
 
     Smsg_disconnect(module);
@@ -592,12 +590,12 @@ end_user:
           GSM_SignalQuality sig;
           GSM_GetSignalQuality( vars->gammu_machine, &sig );
           Http_Post_thread_AI_to_local_BUS ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
-          Smsg_disconnect(module);
         }
        else
         { Info_new( __func__, module->Thread_debug, LOG_INFO, "Connect failed" );
           Thread_send_comm_to_master ( module, FALSE );
         }
+       Smsg_disconnect(module);
      }
     Thread_end(module);
   }
