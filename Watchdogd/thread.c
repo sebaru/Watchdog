@@ -164,8 +164,9 @@
      }
 
     static gchar *protocols[] = { "live-bus", NULL };
-    gchar chaine[256];
-    g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
+    gchar chaine[256], *scheme;
+    if (Config.bus_is_ssl) scheme = "wss"; else scheme = "ws";
+    g_snprintf(chaine, sizeof(chaine), "%s://%s:5559/ws_bus", scheme, Config.master_hostname );
     SoupMessage *msg = soup_message_new ( "GET", chaine );
     g_signal_connect ( G_OBJECT(msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
     soup_session_websocket_connect_async ( module->Soup_session, msg, NULL, protocols, 0, NULL, Thread_ws_on_master_connected, module );
