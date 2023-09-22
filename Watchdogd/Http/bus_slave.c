@@ -158,7 +158,9 @@
   { if (!module) return(NULL);
 
     gchar query[256];
-    g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
+    gchar *scheme;
+    if (Config.bus_is_ssl) scheme = "https"; else scheme = "http";
+    g_snprintf( query, sizeof(query), "%s://%s:5559/%s", scheme, Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
     SoupMessage *soup_msg  = soup_message_new ( "GET", query );
     if (!soup_msg)
@@ -192,8 +194,9 @@ end:
     if (!RootNode) return(FALSE);
 
     Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-
-    g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
+    gchar *scheme;
+    if (Config.bus_is_ssl) scheme = "https"; else scheme = "http";
+    g_snprintf( query, sizeof(query), "%s://%s:5559/%s", scheme, Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
     SoupMessage *soup_msg  = soup_message_new ( "POST", query );
     if (!soup_msg)

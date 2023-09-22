@@ -47,6 +47,7 @@
     gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
     gboolean log_bus;                                                                                      /* TRUE si log_bus */
     gboolean log_dls;                                                                                      /* TRUE si log_dls */
+    gboolean bus_is_ssl;                                                 /* TRUE si les echanges sur le bus sont chiffrés SSL */
     gboolean single;                                                                                /* Demarrage des thread ? */
   };
 

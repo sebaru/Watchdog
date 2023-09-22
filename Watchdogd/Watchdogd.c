@@ -364,6 +364,7 @@
           goto end;
         }
        Config.log_bus    = Json_get_bool ( request, "log_bus" );
+       Config.bus_is_ssl = Json_get_bool ( request, "bus_is_ssl" );
        Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
        Config.log_dls    = Json_get_bool ( request, "log_dls" );
        gboolean headless = Json_get_bool ( request, "headless" );

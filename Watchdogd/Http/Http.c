@@ -134,37 +134,37 @@
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
     Partage->com_http.Thread_run = TRUE;                                                                /* Le thread tourne ! */
     Info_new( __func__, Partage->com_http.Thread_debug, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
-
 /********************************************* New API ************************************************************************/
-    GTlsCertificate *cert = g_tls_certificate_new_from_files (HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error);
-    if (error)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
-                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
-       g_error_free(error);
-       return;
+    if (Config.bus_is_ssl)
+     { GTlsCertificate *cert = g_tls_certificate_new_from_files (HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error);
+       if (error)
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
+                    HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
+          g_error_free(error);
+          goto end;
+        }
+       Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API SSL Server", "tls-certificate", cert, NULL);
+       g_object_unref (cert);
      }
+    else Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API Server", NULL);
 
-    SoupServer *socket = Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API Server", "tls-certificate", cert, NULL);
-    g_object_unref (cert);
-    if (!socket)
+    if (!Partage->com_http.local_socket)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer new Failed !" );
-       return;
+       goto end;
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "SSL Loaded with '%s' and '%s'", HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
 
-    soup_server_add_handler ( socket, "/" , HTTP_Handle_request_CB, NULL, NULL );
+    soup_server_add_handler ( Partage->com_http.local_socket, "/" , HTTP_Handle_request_CB, NULL, NULL );
 
     if (Config.instance_is_master)
      { static gchar *protocols[] = { "live-bus", NULL };
-       soup_server_add_websocket_handler ( socket, "/ws_bus" , NULL, protocols, Http_traiter_open_websocket_for_slaves_CB, NULL, NULL );
+       soup_server_add_websocket_handler ( Partage->com_http.local_socket, "/ws_bus" , NULL, protocols, Http_traiter_open_websocket_for_slaves_CB, NULL, NULL );
      }
 
-    if (!soup_server_listen_all (socket, HTTP_DEFAUT_TCP_PORT, SOUP_SERVER_LISTEN_HTTPS, &error))
+    if (!soup_server_listen_all (Partage->com_http.local_socket, HTTP_DEFAUT_TCP_PORT, SOUP_SERVER_LISTEN_HTTPS, &error))
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer Listen Failed '%s' !", error->message );
        g_error_free(error);
-       soup_server_disconnect(socket);
-       Partage->com_http.local_socket = NULL;
-       return;
+       goto end_socket;
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "HTTP SoupServer SSL Listen OK on port %d !", HTTP_DEFAUT_TCP_PORT );
 
@@ -172,10 +172,10 @@
     while(Partage->com_http.Thread_run == TRUE)
      { sched_yield();
        usleep(1000);
-
-       if (Partage->com_http.loop) g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
+       g_main_context_iteration ( g_main_loop_get_context ( Partage->com_http.loop ), FALSE );
      }
 
+end_socket:
     if (Partage->com_http.local_socket)
      { soup_server_disconnect ( Partage->com_http.local_socket );
        g_object_unref(Partage->com_http.local_socket);
@@ -186,6 +186,7 @@
        g_main_loop_unref( Partage->com_http.loop );
      }
 
+end:
     Info_new( __func__, Partage->com_http.Thread_debug, LOG_NOTICE, "HTTP Down (%p)", pthread_self() );
     Partage->com_http.TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
