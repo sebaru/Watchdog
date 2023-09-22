@@ -215,11 +215,13 @@
        return(FALSE);
      }
 
+    system("groupadd abls" );                                                         /* Ajoute le groupe abls sur le systeme */
     if (Config.headless)
      { pwd = getpwnam ( "watchdog" );
        if (!pwd)
         { Info_new( __func__, Config.log_msrv, LOG_CRIT, "'watchdog' user not found while Headless, creating." );
           system("useradd -m -c 'WatchdogServer' watchdog" );
+          system("usermod -a -G abls watchdog" );
         }
        pwd = getpwnam ( "watchdog" );
        if (!pwd)
@@ -249,7 +251,6 @@
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Dropping from root to '%s' (%d).\n", pwd->pw_name, pwd->pw_uid );
 
 /***************************************************** Configuration des groupes **********************************************/
-    system("groupadd abls" );                                                         /* Ajoute le groupe abls sur le systeme */
     gchar *groupes[] = { "abls", "audio", "dialout", "gpio", NULL };
     gid_t *grp_list  = NULL;
     gint nbr_groupe  = 0;
