@@ -135,18 +135,15 @@
     Partage->com_http.Thread_run = TRUE;                                                                /* Le thread tourne ! */
     Info_new( __func__, Partage->com_http.Thread_debug, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
 /********************************************* New API ************************************************************************/
-    if (Config.bus_is_ssl)
-     { GTlsCertificate *cert = g_tls_certificate_new_from_files (HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error);
-       if (error)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
-                    HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
-          g_error_free(error);
-          goto end;
-        }
-       Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API SSL Server", "tls-certificate", cert, NULL );
-       g_object_unref (cert);
+    GTlsCertificate *cert = g_tls_certificate_new_from_files (HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, &error);
+    if (error)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Failed to load SSL Certificate '%s' and '%s'. Error '%s'",
+                 HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY, error->message  );
+       g_error_free(error);
+       goto end;
      }
-    else Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API Server", NULL );
+    Partage->com_http.local_socket = soup_server_new( "server-header", "Watchdogd API SSL Server", "tls-certificate", cert, NULL );
+    g_object_unref (cert);
 
     if (!Partage->com_http.local_socket)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer new Failed !" );
@@ -161,7 +158,7 @@
        soup_server_add_websocket_handler ( Partage->com_http.local_socket, "/ws_bus" , NULL, protocols, Http_traiter_open_websocket_for_slaves_CB, NULL, NULL );
      }
 
-    if (!soup_server_listen_all (Partage->com_http.local_socket, HTTP_DEFAUT_TCP_PORT, (Config.bus_is_ssl ? SOUP_SERVER_LISTEN_HTTPS : 0), &error))
+    if (!soup_server_listen_all (Partage->com_http.local_socket, HTTP_DEFAUT_TCP_PORT, SOUP_SERVER_LISTEN_HTTPS, &error))
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer Listen Failed '%s' !", error->message );
        g_error_free(error);
        goto end_socket;
