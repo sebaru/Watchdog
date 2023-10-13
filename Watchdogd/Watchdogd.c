@@ -222,6 +222,12 @@
         { Info_new( __func__, Config.log_msrv, LOG_CRIT, "'watchdog' user not found while Headless, creating." );
           system("useradd -m -c 'WatchdogServer' watchdog" );
           system("usermod -a -G abls watchdog" );
+          system("usermod -a -G audio watchdog" );
+          system("usermod -a -G dialout watchdog" );
+          system("usermod -a -G gpio watchdog" );
+          system("loginctl enable-linger watchdog");                    /* Enable lingering for dbus and pipewire for example */
+          Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Creation of user 'watchdog' successful. Restarting." );
+          return(FALSE);
         }
        pwd = getpwnam ( "watchdog" );
        if (!pwd)
@@ -229,7 +235,6 @@
                    "Creation of user 'watchdog' failed (%s). Stopping.", strerror(errno) );
           return(FALSE);
         }
-       system("loginctl enable-linger watchdog");                       /* Enable lingering for dbus and pipewire for example */
      }
     else /* When not headless */
      { gchar *session;
@@ -248,33 +253,8 @@
         }
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.\n", pwd->pw_name, pwd->pw_uid );
+/***************************************************** Drop *******************************************************************/
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Dropping from root to '%s' (%d).\n", pwd->pw_name, pwd->pw_uid );
-
-/***************************************************** Configuration des groupes **********************************************/
-    gchar *groupes[] = { "abls", "audio", "dialout", "gpio", NULL };
-    gid_t *grp_list  = NULL;
-    gint nbr_groupe  = 0;
-    gint cpt_groupe  = 0;
-
-    while ( groupes[cpt_groupe] )                              /* Cherche les groupe_id et peuple la liste des groupes voulus */
-     { struct group *groupe = getgrnam( groupes[cpt_groupe] );
-       if (groupe)
-        { nbr_groupe++;
-          grp_list = g_try_realloc ( grp_list, sizeof(gid_t) * nbr_groupe );
-          grp_list[nbr_groupe-1] = groupe->gr_gid;
-        } else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Groupe '%s' unknown, not added" , groupes[cpt_groupe] );
-       cpt_groupe++;
-     }
-
-    if (nbr_groupe)
-     { if (setgroups ( nbr_groupe, grp_list )==-1)
-        { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error, cannot SetGroups for user '%s' (%s)", pwd->pw_name, strerror(errno) );
-          g_free(grp_list);
-          return(FALSE);
-        }
-       g_free(grp_list);
-     }
-
     if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                  /* On drop les privilèges */
      { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error, cannot setREgid for user '%s' (%s)", pwd->pw_name, strerror(errno) );
        return(FALSE);
