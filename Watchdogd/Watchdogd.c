@@ -253,6 +253,12 @@
         }
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.\n", pwd->pw_name, pwd->pw_uid );
+
+/***************************************************** Set_groups *************************************************************/
+    if (initgroups ( pwd->pw_name, pwd->pw_gid )==-1)                                               /* On drop les privilèges */
+     { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error, cannot Initgroups for user '%s' (%s)\n", pwd->pw_name, strerror(errno) );
+       return(FALSE);
+     }
 /***************************************************** Drop *******************************************************************/
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Dropping from root to '%s' (%d).\n", pwd->pw_name, pwd->pw_uid );
     if (setregid ( pwd->pw_gid, pwd->pw_gid )==-1)                                                  /* On drop les privilèges */
