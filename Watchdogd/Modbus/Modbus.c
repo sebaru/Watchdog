@@ -845,7 +845,7 @@
         }
        else Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error for DI" );
      }
-/***************************************************** Mapping des DigitalOutput **********************************************/
+/***************************************************** Mapping des AnalogOutput ***********************************************/
     Info_new( __func__, module->Thread_debug, LOG_INFO, "Allocate %d AO", vars->nbr_sortie_ana );
     if(vars->nbr_sortie_ana)
      { vars->AO = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_sortie_ana );
@@ -945,7 +945,7 @@
                   gboolean new_in_range;
                   gdouble new_valeur;
                   switch( type_borne )
-                   { case WAGO_750455:
+                   { case WAGO_750455:                                                                       /* Borne 4/20 mA */
                       { gint16 new_valeur_int  = (gint16)vars->response.data[ 2*cpt + 1 ] << 5;
                                new_valeur_int |= (gint16)vars->response.data[ 2*cpt + 2 ] >> 3;
                         gdouble min  = Json_get_double ( vars->AI[cpt], "min" );
@@ -966,7 +966,10 @@
                   gdouble  old_valeur   = Json_get_double ( vars->AI[cpt], "valeur" );
                   gboolean old_in_range = Json_get_bool   ( vars->AI[cpt], "in_range" );
                   if ( old_valeur != new_valeur || old_in_range != new_in_range )
-                   { Http_Post_thread_AI_to_local_BUS ( module, vars->AI[cpt], new_valeur, new_in_range ); }
+                   { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Change AI%03d to %f (in_range=%d), min=%f, max=%f",
+                               cpt, new_valeur, new_in_range, Json_get_double ( vars->AI[cpt], "min" ), Json_get_double ( vars->AI[cpt], "max" ) );
+                     Http_Post_thread_AI_to_local_BUS ( module, vars->AI[cpt], new_valeur, new_in_range );
+                   }
                 }
              }
             vars->mode = MODBUS_SET_DO;
