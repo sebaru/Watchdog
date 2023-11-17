@@ -190,7 +190,7 @@
                "-I/usr/lib/i386-linux-gnu/glib-2.0/include", "-I/usr/lib/x86_64-linux-gnu/glib-2.0/include",
                "-I/usr/include/json-glib-1.0", "-I/usr/include/sysprof-4",
                "-I/usr/include/libmount", "-I/usr/include/blkid",
-               "-shared", "--no-gnu-unique", "-Wno-unused-variable", "-ggdb", "-Wall", "-lwatchdog-dls",
+               "-shared", "--no-gnu-unique", "-Wno-unused-variable", "-ggdb", "-Wall", "-lwatchdog-dls", "-lm",
                source_file, "-fPIC", "-o", target_file, NULL );
        _exit(0);
      }
