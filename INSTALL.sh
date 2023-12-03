@@ -23,7 +23,6 @@ if [ "$SOCLE" = "fedora" ]
 
   echo "/usr/local/lib" > /etc/ld.so.conf.d/local.conf
   echo "/usr/local/lib64" >> /etc/ld.so.conf.d/local.conf
-  ldconfig
 fi
 
 
@@ -57,11 +56,12 @@ echo "Compiling and installing"
 make install
 cd ..
 rm -rf watchdogabls
+ldconfig
 
 systemctl daemon-reload
-systemctl start Watchdogd
+systemctl enable --now Watchdogd
 #      echo "Pour lancer Watchdog, tapez 'systemctl --user enable Watchdogd-user --now'"
 
-  echo "Installation terminée.\n"
+  echo "Installation terminée. Rebootez puis linker l'agent."
   echo "Pour linker l'agent, utilisez Watchdogd --save --domain-uuid 'domain_uuid', --domain-secret 'domain_secret'"
   echo "Ou utiliser la console https://console.abls-habitat.fr/agent/add pour vous guider"
