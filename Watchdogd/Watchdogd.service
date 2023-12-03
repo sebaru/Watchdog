@@ -14,7 +14,7 @@ MemoryMax=80%
 MemorySwapMax=2G
 LimitNOFILE=2048
 #5 minutes to stop.
-TimeoutStopSec=600
+TimeoutStopSec=60
 
 [Install]
 WantedBy=multi-user.target
