@@ -439,7 +439,6 @@
     g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_down );
 
     Info_new( __func__, Config.log_dls, LOG_NOTICE, "DLS Down (%p)", pthread_self() );
-    Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -603,7 +603,7 @@
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for DLS (%p) to finish", Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;
-    while ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                            /* Attente fin DLS */
+    if ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                               /* Attente fin DLS */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for API_SYNC (%p) to finish", Partage->com_msrv.TID_api_sync );

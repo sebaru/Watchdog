@@ -185,7 +185,6 @@ end_socket:
 
 end:
     Info_new( __func__, Partage->com_http.Thread_debug, LOG_NOTICE, "HTTP Down (%p)", pthread_self() );
-    Partage->com_http.TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
