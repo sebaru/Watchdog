@@ -221,18 +221,8 @@
        if (!pwd)
         { Info_new( __func__, Config.log_msrv, LOG_CRIT, "'watchdog' user not found while Headless, creating." );
           system("useradd -m -c 'WatchdogServer' watchdog" );
-          system("usermod -a -G abls watchdog" );
-          system("usermod -a -G audio watchdog" );
-          system("usermod -a -G dialout watchdog" );
-          system("usermod -a -G gpio watchdog" );
           system("loginctl enable-linger watchdog");                    /* Enable lingering for dbus and pipewire for example */
           Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Creation of user 'watchdog' successful. Restarting." );
-          return(FALSE);
-        }
-       pwd = getpwnam ( "watchdog" );
-       if (!pwd)
-        { Info_new( __func__, Config.log_msrv, LOG_CRIT,
-                   "Creation of user 'watchdog' failed (%s). Stopping.", strerror(errno) );
           return(FALSE);
         }
      }
@@ -252,8 +242,11 @@
           return(FALSE);
         }
      }
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.\n", pwd->pw_name, pwd->pw_uid );
-
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.", pwd->pw_name, pwd->pw_uid );
+    gchar usermod[256];
+    g_snprintf( usermod, sizeof(usermod), "usermod -a -G abls -G audio -G dialout -G gpio %s", pwd->pw_name );
+    system ( usermod );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", usermod );
 /***************************************************** Set_groups *************************************************************/
     if (initgroups ( pwd->pw_name, pwd->pw_gid )==-1)                                               /* On drop les privilèges */
      { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error, cannot Initgroups for user '%s' (%s)\n", pwd->pw_name, strerror(errno) );
