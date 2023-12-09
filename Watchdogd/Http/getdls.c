@@ -325,21 +325,7 @@
     gchar *tech_id  = Json_get_string ( request, "tech_id" );
     gchar *acronyme = Json_get_string ( request, "acronyme" );
     gchar *classe   = Json_get_string ( request, "classe" );
-    if ( !strcasecmp ( classe, "DI" ) )
-     { gboolean valeur = Json_get_bool ( request, "valeur" );
-       struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
-       Dls_data_set_DI ( bit, valeur );
-       /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
-       Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
-     }
-    else if ( !strcasecmp ( classe, "DO" ) )
-     { gboolean valeur = Json_get_bool ( request, "valeur" );
-       struct DLS_DO *bit = Dls_data_lookup_DO ( tech_id, acronyme );
-       Dls_data_set_DO ( NULL, bit, valeur );
-       /*Audit_log ( session, "DLS %s '%s:%s' set to %d", classe, tech_id, acronyme, valeur );*/
-       Http_Send_json_response ( msg, SOUP_STATUS_OK, NULL, NULL );
-     }
-    else if ( !strcasecmp ( classe, "BI" ) )
+    if ( !strcasecmp ( classe, "BI" ) )
      { gboolean valeur = Json_get_bool ( request, "valeur" );
        struct DLS_BI *bit = Dls_data_lookup_BI ( tech_id, acronyme );
        Dls_data_set_BI ( NULL, bit, valeur );
