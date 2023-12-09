@@ -339,8 +339,8 @@
     vars->date_last_reponse = Partage->top;
     vars->date_retente   = 0;
     vars->transaction_id = 1;
-    vars->started = TRUE;
-    vars->mode = MODBUS_GET_DESCRIPTION;
+    vars->started        = TRUE;
+    vars->mode           = MODBUS_GET_DESCRIPTION;
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Module Connected" );
 
     return(TRUE);
@@ -930,7 +930,7 @@
              { if (vars->DI[cpt])                                                                   /* Si l'entrée est mappée */
                 { gint new_etat_int = (vars->response.data[ cpt_byte ] & cpt_poid);
                   gboolean new_etat = (new_etat_int ? TRUE : FALSE);
-                  if (new_etat != Json_get_bool ( vars->DI[cpt], "etat" ))
+                  if ( vars->first_turn || (new_etat != Json_get_bool ( vars->DI[cpt], "etat" )) )
                    { Http_Post_thread_DI_to_local_BUS ( module, vars->DI[cpt], (new_etat ? TRUE : FALSE) ); }
                 }
                cpt_poid = cpt_poid << 1;
@@ -965,7 +965,7 @@
                    }
                   gdouble  old_valeur   = Json_get_double ( vars->AI[cpt], "valeur" );
                   gboolean old_in_range = Json_get_bool   ( vars->AI[cpt], "in_range" );
-                  if ( old_valeur != new_valeur || old_in_range != new_in_range )
+                  if ( vars->first_turn || old_valeur != new_valeur || old_in_range != new_in_range )
                    { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Change AI%03d to %f (in_range=%d), min=%f, max=%f",
                                cpt, new_valeur, new_in_range, Json_get_double ( vars->AI[cpt], "min" ), Json_get_double ( vars->AI[cpt], "max" ) );
                      Http_Post_thread_AI_to_local_BUS ( module, vars->AI[cpt], new_valeur, new_in_range );
@@ -1036,15 +1036,13 @@
             break;
        case MODBUS_GET_NBR_AI:
              { vars->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
-               Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Entree ANA", vars->nbr_entree_ana
-                       );
+               Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Entree ANA", vars->nbr_entree_ana );
                vars->mode = MODBUS_GET_NBR_AO;
              }
             break;
        case MODBUS_GET_NBR_AO:
              { vars->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
-               Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Sortie ANA", vars->nbr_sortie_ana
-                       );
+               Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Sortie ANA", vars->nbr_sortie_ana );
                vars->mode = MODBUS_GET_NBR_DI;
              }
             break;
@@ -1126,8 +1124,7 @@
            { Modbus_Processer_trame( module ); }                                    /* Si l'on a trouvé une trame complète !! */
         }
        else
-        { Info_new( __func__, module->Thread_debug, LOG_WARNING,
-                    "Read Error. Get %d, error %s", cpt, strerror(errno) );
+        { Info_new( __func__, module->Thread_debug, LOG_WARNING, "Read Error. Get %d, error %s", cpt, strerror(errno) );
           Deconnecter_module ( module );
         }
       }
@@ -1171,7 +1168,8 @@
                 vars->do_check_eana = TRUE;
               }
              switch (vars->mode)
-              { case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
+              { case MODBUS_GET_DESCRIPTION: vars->first_turn = TRUE;
+                                             Interroger_description( module ); break;
                 case MODBUS_GET_FIRMWARE   : Interroger_firmware( module ); break;
                 case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
                 case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
@@ -1195,6 +1193,7 @@
                                               { Interroger_sortie_ana( module ); }
                                              else vars->mode = MODBUS_GET_DI;
                                              vars->do_check_eana = FALSE;                                /* Le check est fait */
+                                             vars->first_turn    = FALSE;
                                              break;
               }
            }
