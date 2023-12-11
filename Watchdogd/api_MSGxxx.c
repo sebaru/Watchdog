@@ -162,7 +162,8 @@
 
        if (event->etat == 1)
         { MSGS_Convert_msg_on_to_histo ( event->msg );
-          if ( event->msg->last_on && Partage->top >= event->msg->last_on + Json_get_int ( event->msg->source_node, "rate_limit" )*10 )
+          gint rate_limit = Json_get_int ( event->msg->source_node, "rate_limit" );
+          if ( !event->msg->last_on || (Partage->top >= event->msg->last_on + rate_limit*10 ) )
            { event->msg->last_on = Partage->top;
              Http_Send_to_slaves ( "DLS_HISTO", event->msg->source_node );
              json_node_ref ( event->msg->source_node );                          /* Pour ajout dans l'array qui prend le lead */
@@ -170,7 +171,7 @@
            }
           else
            { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
-                       Json_get_int ( event->msg->source_node, "rate_limit" ), event->msg->tech_id, event->msg->acronyme );
+                       rate_limit, event->msg->tech_id, event->msg->acronyme );
            }
         }
        else if (event->etat == 0)
