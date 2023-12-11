@@ -68,7 +68,7 @@
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     bit->etat = Json_get_bool ( element, "etat" );
     bit->source_node = json_node_ref ( element );
-    bit->last_on = -1;                                                                   /* A l'init, il n'y a pas de last on */
+    bit->last_on = 0;                                            /* A l'init, il n'y a pas de last on (en dixieme de seconde) */
     Json_node_add_string ( bit->source_node, "libelle_src",
                            Json_get_string ( bit->source_node, "libelle" ) );            /* Recopie pour conversion dynamique */
     plugin->Dls_data_MESSAGE = g_slist_prepend ( plugin->Dls_data_MESSAGE, bit );
