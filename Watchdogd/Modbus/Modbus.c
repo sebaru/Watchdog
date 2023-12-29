@@ -836,9 +836,10 @@
              if ( 0 <= num && num < vars->nbr_entree_tor )
               { vars->DI[num] = element;
                 Json_node_add_bool ( vars->DI[num], "etat", FALSE );
-                Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New DI '%s' (%s)",
+                Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New DI '%s' (%s), flip=%d",
                           Json_get_string ( vars->DI[num], "thread_acronyme" ),
-                          Json_get_string ( vars->DI[num], "libelle" ));
+                          Json_get_string ( vars->DI[num], "libelle" ),
+                          Json_get_bool   ( vars->DI[num], "flip" ));
               } else Info_new( __func__, module->Thread_debug, LOG_WARNING, "Map DI: num %d out of range '%d'",
                                 num, vars->nbr_entree_tor );
            }
@@ -930,6 +931,7 @@
              { if (vars->DI[cpt])                                                                   /* Si l'entrée est mappée */
                 { gint new_etat_int = (vars->response.data[ cpt_byte ] & cpt_poid);
                   gboolean new_etat = (new_etat_int ? TRUE : FALSE);
+                  if ( Json_get_bool ( vars->DI[cpt], "flip" ) ) new_etat = new_etat ^ 1;
                   if ( vars->first_turn || (new_etat != Json_get_bool ( vars->DI[cpt], "etat" )) )
                    { Http_Post_thread_DI_to_local_BUS ( module, vars->DI[cpt], (new_etat ? TRUE : FALSE) ); }
                 }
