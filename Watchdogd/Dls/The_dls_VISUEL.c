@@ -88,7 +88,7 @@
   { if (!visu) return;
     if (Partage->com_msrv.Thread_run == FALSE) return;
     if (    strcmp ( visu->mode, mode )
-         || strcmp ( visu->color, color )
+         || strcmp ( visu->color, color )                     /* On ne peut pas checker le libellé car il peut etre dynamique */
          || visu->cligno  != cligno
          || visu->disable != disable
          || visu->valeur  != valeur

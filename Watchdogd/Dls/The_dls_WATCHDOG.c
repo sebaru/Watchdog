@@ -90,12 +90,20 @@
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
-/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/* Dls_data_get_WATCHDOG: Remonte l'etat d'un watchdog                                                                        */
+/* Sortie : TRUE sur le watchdog est en decompte, 0 sinon                                                                     */
 /******************************************************************************************************************************/
  gboolean Dls_data_get_WATCHDOG ( struct DLS_WATCHDOG *bit )
   { if (!bit) return(FALSE);
     return( (Partage->top < bit->top ? TRUE : FALSE) ); /* False = Compteur échu */
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_WATCHDOG_time: Renvoie le temps de decompte restant du watchdog                                               */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
+ gint Dls_data_get_WATCHDOG_time ( struct DLS_WATCHDOG *bit )
+  { if (!bit) return(0);
+    return( (Partage->top < bit->top ? (bit->top - Partage->top) : 0) );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_WATHDOG_from_thread_watchdog: Positionne un Watchdog dans DLS depuis un Watchdog 'thread'                     */
