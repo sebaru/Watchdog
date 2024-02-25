@@ -6,4 +6,5 @@
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart Watchdogd
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/killall Watchdogd
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/journalctl -f -u Watchdogd
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/journalctl -f -u Watchdogd.service
 Defaults:%abls !requiretty
