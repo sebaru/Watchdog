@@ -294,13 +294,14 @@
        liste_bit = g_slist_next(liste_bit);
      }
 
-    liste_bit = plugin->Dls_data_BI;                                                    /* Decharge tous les bieens du module */
+/* 25/02/2024 désactivation pour garder l'état des bits groupés.
+    liste_bit = plugin->Dls_data_BI;
     while(liste_bit)
      { struct DLS_BI *bi = liste_bit->data;
        Dls_data_set_BI   ( &plugin->vars, bi, FALSE );
        liste_bit = g_slist_next(liste_bit);
      }
-
+*/
     liste_bit = plugin->Dls_data_WATCHDOG;                                           /* Decharge tous les watchdogs du module */
     while(liste_bit)
      { struct DLS_WATCHDOG *wtd = liste_bit->data;
