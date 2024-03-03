@@ -130,9 +130,6 @@
     struct DLS_BI *sys_flipflop_1sec;
     struct DLS_BI *sys_flipflop_2sec;
     struct DLS_BI *sys_api_socket;
-    struct DLS_BI *sys_top_alerte;
-    struct DLS_BI *sys_top_alerte_fixe;
-    struct DLS_BI *sys_top_alerte_fugitive;
     struct DLS_MONO *sys_top_5hz;
     struct DLS_MONO *sys_top_2hz;
     struct DLS_MONO *sys_top_1sec;
@@ -145,10 +142,6 @@
     struct DLS_AI *sys_nbr_api_enreg_queue;
     struct DLS_AI *sys_nbr_archive_queue;
     struct DLS_AI *sys_maxrss;
-
-    gboolean next_bit_alerte;
-    gboolean next_bit_alerte_fixe;
-    gboolean next_bit_alerte_fugitive;
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/

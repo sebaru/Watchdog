@@ -246,9 +246,6 @@
  static void Dls_run_plugin ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct timeval tv_avant, tv_apres;
 
-    Partage->com_dls.next_bit_alerte          |= Dls_data_get_MONO( plugin->vars.dls_memssb_alerte );
-    Partage->com_dls.next_bit_alerte_fixe     |= Dls_data_get_MONO( plugin->vars.dls_memssb_alerte_fixe );
-    Partage->com_dls.next_bit_alerte_fugitive |= Dls_data_get_MONO( plugin->vars.dls_memssb_alerte_fugitive );
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
     gboolean bit_comm_module = TRUE;
     GSList *liste = plugin->Arbre_Comm;
@@ -395,18 +392,12 @@
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
        Partage->top_cdg_plugin_dls = 0;                                                         /* On reset le cdg plugin DLS */
-       Partage->com_dls.next_bit_alerte = FALSE;
-       Partage->com_dls.next_bit_alerte_fixe = FALSE;
-       Partage->com_dls.next_bit_alerte_fugitive = FALSE;
 
        Dls_foreach_plugins ( NULL, Dls_run_plugin );                                                  /* Run all plugin D.L.S */
 
        Partage->com_dls.Top_check_horaire = FALSE;                        /* Controle horaire effectué un fois par minute max */
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
-       Dls_data_set_BI ( NULL, Partage->com_dls.sys_top_alerte, Partage->com_dls.next_bit_alerte );  /* Synthèses des Alertes */
-       Dls_data_set_BI ( NULL, Partage->com_dls.sys_top_alerte_fixe, Partage->com_dls.next_bit_alerte_fixe );
-       Dls_data_set_BI ( NULL, Partage->com_dls.sys_top_alerte_fugitive, Partage->com_dls.next_bit_alerte_fugitive );
 
        Dls_data_clear_HORLOGE();
        Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz,   FALSE );                     /* RaZ des Mono du plugin 'SYS' */

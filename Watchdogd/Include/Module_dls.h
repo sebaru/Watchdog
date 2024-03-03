@@ -204,7 +204,6 @@
     struct DLS_MONO *dls_memsa_alarme_fixe;
     struct DLS_MONO *dls_memssb_veille;
     struct DLS_MONO *dls_memssb_alerte;
-    struct DLS_MONO *dls_memssb_alerte_fugitive;
     struct DLS_MONO *dls_memssb_alerte_fixe;
     struct DLS_MONO *dls_memssp_ok;
     struct DLS_MONO *dls_memssp_derangement;

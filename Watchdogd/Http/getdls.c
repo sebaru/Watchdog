@@ -67,7 +67,6 @@
 
     Json_node_add_bool   ( element, "bit_alerte",           Dls_data_get_MONO ( dls->vars.dls_memssb_alerte ) );
     Json_node_add_bool   ( element, "bit_alerte_fixe",      Dls_data_get_MONO ( dls->vars.dls_memssb_alerte_fixe ) );
-    Json_node_add_bool   ( element, "bit_alerte_fugitive",  Dls_data_get_MONO ( dls->vars.dls_memssb_alerte_fugitive ) );
     Json_node_add_bool   ( element, "bit_veille",           Dls_data_get_MONO ( dls->vars.dls_memssb_veille ) );
 
     Json_node_add_bool   ( element, "bit_derangement",      Dls_data_get_MONO ( dls->vars.dls_memssp_derangement ) );

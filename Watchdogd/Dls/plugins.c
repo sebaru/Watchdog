@@ -337,9 +337,6 @@
           Partage->com_dls.sys_flipflop_1sec       = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
           Partage->com_dls.sys_flipflop_2sec       = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2SEC" );
           Partage->com_dls.sys_api_socket          = Dls_data_lookup_BI   ( "SYS", "API_SOCKET" );
-          Partage->com_dls.sys_top_alerte          = Dls_data_lookup_BI   ( "SYS", "TOP_ALERTE" );
-          Partage->com_dls.sys_top_alerte_fixe     = Dls_data_lookup_BI   ( "SYS", "TOP_ALERTE_FIXE" );
-          Partage->com_dls.sys_top_alerte_fugitive = Dls_data_lookup_BI   ( "SYS", "TOP_ALERTE_FUGITIVE" );
           Partage->com_dls.sys_top_5hz             = Dls_data_lookup_MONO ( "SYS", "TOP_5HZ" );
           Partage->com_dls.sys_top_2hz             = Dls_data_lookup_MONO ( "SYS", "TOP_2HZ" );
           Partage->com_dls.sys_top_1sec            = Dls_data_lookup_MONO ( "SYS", "TOP_1SEC" );
@@ -363,7 +360,6 @@
        plugin->vars.dls_memsa_alarme_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME_FIXE" );
        plugin->vars.dls_memssb_veille           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_VEILLE" );
        plugin->vars.dls_memssb_alerte           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE" );
-       plugin->vars.dls_memssb_alerte_fugitive  = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FUGITIVE" );
        plugin->vars.dls_memssb_alerte_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FIXE" );
        plugin->vars.dls_memssp_ok               = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_OK" );
        plugin->vars.dls_memssp_derangement      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT" );
