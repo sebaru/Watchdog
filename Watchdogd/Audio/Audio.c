@@ -132,6 +132,10 @@
 
     vars->p_all  = Mnemo_create_thread_DI ( module, "P_ALL", "Profil Audio: All Hps Enabled" );
     vars->p_none = Mnemo_create_thread_DI ( module, "P_NONE", "Profil Audio: All Hps disabled" );
+    gint volume  = Json_get_int ( module->config, "volume" );
+    gchar chaine[256];
+    g_snprintf( chaine, sizeof(chaine), "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%", volume );
+    systemc(chaine);
 
     gboolean retour = Jouer_google_speech( module, "Module audio démarré !" );
     Thread_send_comm_to_master ( module, retour );
