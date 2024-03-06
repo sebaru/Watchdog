@@ -135,7 +135,7 @@
     gint volume  = Json_get_int ( module->config, "volume" );
     gchar chaine[256];
     g_snprintf( chaine, sizeof(chaine), "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%", volume );
-    systemc(chaine);
+    system(chaine);
 
     gboolean retour = Jouer_google_speech( module, "Module audio démarré !" );
     Thread_send_comm_to_master ( module, retour );
