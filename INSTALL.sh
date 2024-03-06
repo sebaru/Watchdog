@@ -17,7 +17,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y nut-devel libuuid-devel
   dnf install -y popt-devel libsoup3-devel gtts
   dnf install -y json-glib-devel gammu-devel
-  dnf install -y mpg123 sox libusb1-devel libgpiod-devel
+  dnf install -y wireplumber mpg123 sox libusb1-devel libgpiod-devel
   dnf install -y libstrophe-devel libphidget22-devel
   dnf install -y git systemd-devel libjwt-devel
 
@@ -38,7 +38,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   fi
 
   apt install -y libtool automake autoconf gcc g++ git cmake openssl curl
-  apt install -y libglib2.0-dev
+  apt install -y libglib2.0-dev wireplumber
   apt install -y libupsclient-dev libssl-dev default-libmysqlclient-dev libstrophe-dev libgammu-dev
   apt install -y libpopt-dev libssl-dev libmariadb-dev libjwt-dev
   apt install -y sox libsox-fmt-all python3-pip mpg123
