@@ -1,0 +1,50 @@
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Shelly.h   Header et constantes des modules SHELLY Watchdgo 4.0                                          */
+/* Projet WatchDog version 4.0       Gestion d'habitat                                                    08.03.2024 23:33:53 */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
+/*
+ * Shelly.h
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2010-2023 - Sebastien Lefevre
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+
+#ifndef _SHELLY_H_
+ #define _SHELLY_H_
+
+/************************************************** Gestion des shelly ********************************************************/
+ struct SHELLY_VARS
+  { JsonNode *EM10_ACT_POWER;
+    JsonNode *EM10_APRT_POWER;
+    JsonNode *EM10_CURRENT;
+    JsonNode *EM10_FREQ;
+    JsonNode *EM10_PF;
+    JsonNode *EM10_VOLTAGE;
+    JsonNode *EM11_ACT_POWER;
+    JsonNode *EM11_APRT_POWER;
+    JsonNode *EM11_CURRENT;
+    JsonNode *EM11_FREQ;
+    JsonNode *EM11_PF;
+    JsonNode *EM11_VOLTAGE;
+  };
+
+/****************************************************** Déclaration des prototypes ********************************************/
+
+#endif
+/*----------------------------------------------------------------------------------------------------------------------------*/
