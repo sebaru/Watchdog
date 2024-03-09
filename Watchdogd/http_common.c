@@ -52,6 +52,16 @@
     MQTT_Send_to_topic ( mqtt_session, "master/set/ai", thread_ai );
   }
 /******************************************************************************************************************************/
+/* MQTT_Send_DI: Envoie le bit DI au master                                                                                   */
+/* Entrée: la structure MQTT, la DI, la valeur                                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_DI ( struct mosquitto *mqtt_session, JsonNode *thread_di, gboolean etat )
+  { if (! (mqtt_session && thread_di)) return;
+    Json_node_add_bool ( thread_di, "etat", etat );
+    MQTT_Send_to_topic ( mqtt_session, "master/set/di", thread_di );
+  }
+/******************************************************************************************************************************/
 /* MQTT_Subscribe: souscrit à un topic                                                                                        */
 /* Entrée: la structure MQTT, le topic                                                                                        */
 /* Sortie: néant                                                                                                              */

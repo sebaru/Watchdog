@@ -933,7 +933,7 @@
                   gboolean new_etat = (new_etat_int ? TRUE : FALSE);
                   if ( Json_get_bool ( vars->DI[cpt], "flip" ) ) new_etat = new_etat ^ 1;
                   if ( vars->first_turn || (new_etat != Json_get_bool ( vars->DI[cpt], "etat" )) )
-                   { Http_Post_thread_DI_to_local_BUS ( module, vars->DI[cpt], (new_etat ? TRUE : FALSE) ); }
+                   { MQTT_Send_DI ( module->MQTT_session, vars->DI[cpt], (new_etat ? TRUE : FALSE) ); }
                 }
                cpt_poid = cpt_poid << 1;
                if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }

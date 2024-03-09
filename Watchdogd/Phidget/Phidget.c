@@ -144,7 +144,7 @@
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %d", thread_tech_id, thread_acronyme, valeur );
-    Http_Post_thread_DI_to_local_BUS ( canal->module, canal->element, (valeur ? TRUE : FALSE) );
+    MQTT_Send_DI ( canal->module->MQTT_session, canal->element, (valeur ? TRUE : FALSE) );
   }
 /******************************************************************************************************************************/
 /* Phidget_AnalogAttach: Appelé quand un canal analogique est en cours d'attachement                                          */

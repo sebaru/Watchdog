@@ -271,17 +271,17 @@
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { Http_Post_thread_DI_to_local_BUS ( module, vars->Outlet_1_status, !strcmp(reponse, "\"on\"") ); }
+     { MQTT_Send_DI ( module->MQTT_session, vars->Outlet_1_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { Http_Post_thread_DI_to_local_BUS ( module, vars->Outlet_2_status, !strcmp(reponse, "\"on\"") ); }
+     { MQTT_Send_DI ( module->MQTT_session, vars->Outlet_2_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_online,       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
-       Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_charging,     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
-       Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_on_batt,      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
-       Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
-       Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
+     { MQTT_Send_DI ( module->MQTT_session, vars->Ups_online,       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
+       MQTT_Send_DI ( module->MQTT_session, vars->Ups_charging,     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
+       MQTT_Send_DI ( module->MQTT_session, vars->Ups_on_batt,      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
+       MQTT_Send_DI ( module->MQTT_session, vars->Ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
+       MQTT_Send_DI ( module->MQTT_session, vars->Ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
   }
 /******************************************************************************************************************************/

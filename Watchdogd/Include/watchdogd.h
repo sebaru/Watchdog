@@ -139,6 +139,7 @@
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
  extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, JsonNode *node );
  extern void MQTT_Send_AI ( struct mosquitto *mqtt_session, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
+ extern void MQTT_Send_DI ( struct mosquitto *mqtt_session, JsonNode *thread_di, gboolean etat );
  extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

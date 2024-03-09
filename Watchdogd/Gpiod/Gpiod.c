@@ -151,7 +151,7 @@
            { gboolean etat = gpiod_line_get_value( vars->lignes[cpt].gpio_ligne );
              if (etat != vars->lignes[cpt].etat) /* Détection de changement */
               { vars->lignes[cpt].etat = etat;
-                /*if (vars->lignes[cpt].mapped) Http_Post_thread_DI_to_local_BUS ( module, vars->lignes[cpt].tech_id, vars->lignes[cpt].acronyme, etat );*/
+                /*if (vars->lignes[cpt].mapped) MQTT_Send_DI ( module->MQTT_session, vars->lignes[cpt].tech_id, vars->lignes[cpt].acronyme, etat );*/
                 Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: INPUT: GPIO%02d = %d", tech_id, cpt, etat );
                 break;
               }

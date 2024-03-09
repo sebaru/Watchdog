@@ -318,10 +318,9 @@
        return;
      }
 
-    if ( !strcmp ( msg->topic, "master/set/ai" ) )
-     { if ( Dls_data_set_AI_from_thread_ai ( request ) == FALSE )
-        { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_AI: wrong parameters" ); }
-     }
+         if ( !strcmp ( msg->topic, "master/set/ai" ) ) Dls_data_set_AI_from_thread_ai ( request );
+    else if ( !strcmp ( msg->topic, "master/set/di" ) ) Dls_data_set_DI_from_thread_di ( request );
+
     Json_node_unref ( request );
   }
 /******************************************************************************************************************************/
