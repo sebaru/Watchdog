@@ -149,11 +149,6 @@
 
     soup_server_add_handler ( Partage->com_http.local_socket, "/" , HTTP_Handle_request_CB, NULL, NULL );
 
-    if (Config.instance_is_master)
-     { static gchar *protocols[] = { "live-bus", NULL };
-       soup_server_add_websocket_handler ( Partage->com_http.local_socket, "/ws_bus" , NULL, protocols, Http_traiter_open_websocket_for_slaves_CB, NULL, NULL );
-     }
-
     if (!soup_server_listen_all (Partage->com_http.local_socket, HTTP_DEFAUT_TCP_PORT, SOUP_SERVER_LISTEN_HTTPS, &error))
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer Listen Failed '%s' !", error->message );
        g_error_free(error);

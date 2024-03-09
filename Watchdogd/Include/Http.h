@@ -41,12 +41,7 @@
     GMainLoop *loop;
     GMainContext *loop_context;
     GSList *liste_http_clients;
-    GSList *Slaves;                                                               /* Liste des slaves connectés au l'instance */
     gint num_session;
-  };
-
- struct HTTP_WS_SESSION
-  { SoupWebsocketConnection *connexion;
   };
 
 /*************************************************** Définitions des prototypes ***********************************************/
@@ -66,11 +61,5 @@
  extern gboolean Http_Post_to_local_BUS ( struct THREAD *module, gchar *uri, JsonNode *RootNode );
  extern void Http_Add_Thread_signature ( struct THREAD *module, SoupMessage *msg, gchar *buf, gint buf_size );
  extern gboolean Http_Check_Thread_signature ( gchar *path, SoupServerMessage *msg, gchar **thread_tech_id_p );
-
- extern void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
-                                                         SoupWebsocketConnection* connection, gpointer user_data );
-
- extern void Http_ws_send_json_to_slave ( struct HTTP_WS_SESSION *slave, JsonNode *node );
- extern void Http_Send_to_slaves ( gchar *tag, JsonNode *RootNode );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

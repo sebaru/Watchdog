@@ -765,7 +765,7 @@ end:
            }
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
-           { /*Http_Send_to_slaves ( "PING", NULL );
+           { MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, "threads", "PING", NULL );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 
