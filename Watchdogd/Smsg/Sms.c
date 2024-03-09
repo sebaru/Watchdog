@@ -358,7 +358,7 @@
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
-    module->WS_messages = g_slist_append ( module->WS_messages, RootNode );
+    module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
@@ -374,7 +374,7 @@
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
-    module->WS_messages = g_slist_append ( module->WS_messages, RootNode );
+    module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
@@ -566,10 +566,10 @@ end_user:
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 
 /****************************************************** Ecoute du master ******************************************************/
-       while ( module->WS_messages )
+       while ( module->MQTT_messages )
         { pthread_mutex_lock ( &module->synchro );
-          JsonNode *message = module->WS_messages->data;
-          module->WS_messages = g_slist_remove ( module->WS_messages, message );
+          JsonNode *message = module->MQTT_messages->data;
+          module->MQTT_messages = g_slist_remove ( module->MQTT_messages, message );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( message, "tag" );
           if (!tag) { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: no tag. dropping.", thread_tech_id ); }

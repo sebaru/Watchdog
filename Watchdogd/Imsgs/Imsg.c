@@ -362,10 +362,10 @@ reconnect:
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
        xmpp_run_once ( vars->ctx, 500 ); /* En milliseconde */
 /****************************************************** Ecoute du master ******************************************************/
-       while ( module->WS_messages )
+       while ( module->MQTT_messages )
         { pthread_mutex_lock ( &module->synchro );
-          JsonNode *request = module->WS_messages->data;
-          module->WS_messages = g_slist_remove ( module->WS_messages, request );
+          JsonNode *request = module->MQTT_messages->data;
+          module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
           gint txt_notification = Json_get_int ( request, "txt_notification" );

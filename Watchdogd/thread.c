@@ -72,7 +72,7 @@
 /* Entrée: les parametres MQTT                                                                                                */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Thread_on_mqtt_message_CB(struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg)
+ static void Thread_on_MQTT_message_CB(struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg)
   { struct THREAD *module = obj;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     JsonNode *response = Json_get_from_string ( msg->payload );
@@ -83,85 +83,8 @@
 
     Json_node_add_string ( response, "topic", msg->topic );
     pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
-    module->WS_messages = g_slist_append ( module->WS_messages, response );
+    module->MQTT_messages = g_slist_append ( module->MQTT_messages, response );
     pthread_mutex_unlock ( &module->synchro );
-  }
-/******************************************************************************************************************************/
-/* Thread_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master     */
-/* Entrée: les parametres de la libsoup                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Thread_ws_on_master_message_CB ( SoupWebsocketConnection *connexion, gint type, GBytes *message_brut, gpointer user_data )
-  { struct THREAD *module = user_data;
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( __func__, Config.log_bus, LOG_DEBUG, "'%s': WebSocket Message received !", thread_tech_id );
-    gsize taille;
-
-    gchar *buffer = g_bytes_get_data ( message_brut, &taille );
-    JsonNode *response = Json_get_from_string ( buffer );
-    if (!response)
-     { if (taille) buffer[taille-1] = 0;
-       Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': WebSocket Message Dropped (not JSON): %s !", thread_tech_id, buffer );
-       return;
-     }
-
-    if (!Json_has_member ( response, "tag" ))
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "'%s': WebSocket Message Dropped (no 'tag') !", thread_tech_id );
-       Json_node_unref(response);
-       return;
-     }
-
-    gchar *tag = Json_get_string ( response, "tag" );
-    Info_new( __func__, Config.log_bus, LOG_DEBUG, "'%s': receive tag '%s'  !", thread_tech_id, tag );
-
-    pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
-    module->WS_messages = g_slist_append ( module->WS_messages, response );
-    pthread_mutex_unlock ( &module->synchro );
-  }
-/******************************************************************************************************************************/
-/* Http_ws_on_master_closed: Traite une deconnexion du master                                                                 */
-/* Entrée: les données fournies par la librairie libsoup                                                                      */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Thread_ws_on_master_close_CB ( SoupWebsocketConnection *connexion, gpointer user_data )
-  { struct THREAD *module = user_data;
-    Info_new( __func__, module->Thread_debug, LOG_ERR, "WebSocket Close. Reboot Needed!" );
-    module->Master_websocket = NULL;
-  }
- static void Thread_ws_on_master_error_CB ( SoupWebsocketConnection *self, GError *error, gpointer user_data)
-  { struct THREAD *module = user_data;
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "WebSocket Error received %p!", self );
-  }
-/******************************************************************************************************************************/
-/* Traiter_connect_ws_CB: Termine la creation de la connexion websocket MSGS et raccorde le signal handler                    */
-/* Entrée: les variables traditionnelles de libsous                                                                           */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Thread_ws_on_master_connected ( GObject *source_object, GAsyncResult *res, gpointer user_data )
-  { struct THREAD *module = user_data;
-    if (!module || !module->config)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "module or module->config is null." );
-       return;
-     }
-    GError *error = NULL;
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-
-    module->Master_websocket = soup_session_websocket_connect_finish ( module->Soup_session, res, &error );
-    if (error)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error: %s.", thread_tech_id, error->message );
-       g_error_free (error);
-       return;
-     }
-    if (!module->Master_websocket)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error.", thread_tech_id );
-       return;
-     }
-
-    soup_websocket_connection_set_keepalive_interval ( module->Master_websocket, 30 );
-    g_signal_connect ( module->Master_websocket, "message", G_CALLBACK(Thread_ws_on_master_message_CB), module );
-    g_signal_connect ( module->Master_websocket, "closed",  G_CALLBACK(Thread_ws_on_master_close_CB), module );
-    g_signal_connect ( module->Master_websocket, "error",   G_CALLBACK(Thread_ws_on_master_error_CB), module );
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': WebSocket to Master connected", thread_tech_id );
   }
 /******************************************************************************************************************************/
 /* Http_Accept_certificate: appelé pour vérifier le certificat TLS présenté par le serveur                                    */
@@ -170,26 +93,6 @@
 /******************************************************************************************************************************/
  gboolean Http_Accept_certificate ( SoupMessage* self, GTlsCertificate* tls_peer_certificate, GTlsCertificateFlags tls_peer_errors, gpointer user_data )
   { return(TRUE); }
-/******************************************************************************************************************************/
-/* Thread_ws_bus_init: appelé par chaque thread pour demarrer le websocket vers le master                                     */
-/* Entrée: La thread                                                                                                          */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Thread_ws_bus_init ( struct THREAD *module )
-  { gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    if (module->Master_websocket )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': WebSocket error: Already UP.", thread_tech_id );
-       return;
-     }
-
-    static gchar *protocols[] = { "live-bus", NULL };
-    gchar chaine[256];
-    g_snprintf(chaine, sizeof(chaine), "wss://%s:5559/ws_bus", Config.master_hostname );
-    SoupMessage *msg = soup_message_new ( "GET", chaine );
-    g_signal_connect ( G_OBJECT(msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
-    soup_session_websocket_connect_async ( module->Soup_session, msg, NULL, protocols, 0, NULL, Thread_ws_on_master_connected, module );
-    g_object_unref(msg);
-  }
 /******************************************************************************************************************************/
 /* Thread_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                                   */
 /* Entrée: La structure afférente                                                                                             */
@@ -211,7 +114,6 @@
 /********************************************************* Toutes les minutes *************************************************/
     if (Partage->top >= module->telemetrie_top+600)                                                     /* Toutes les minutes */
      { MQTT_Send_AI ( module, module->ai_nbr_tour_par_sec, module->nbr_tour_par_sec, TRUE );
-       if (!module->Master_websocket) Thread_ws_bus_init ( module );               /* si perte de la websocket, on reconnecte */
        module->telemetrie_top = Partage->top;
      }
   }
@@ -261,14 +163,13 @@
        MQTT_Subscribe ( module->MQTT_session, topic );
        g_snprintf ( topic, sizeof(topic), "threads/#" );
        MQTT_Subscribe ( module->MQTT_session, topic );
-       mosquitto_message_callback_set( module->MQTT_session, Thread_on_mqtt_message_CB );
+       mosquitto_message_callback_set( module->MQTT_session, Thread_on_MQTT_message_CB );
      }
     if ( mosquitto_loop_start(	module->MQTT_session	) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
 
 /******************************************************* Ecoute du Master *****************************************************/
     module->Soup_session = HTTP_New_session ( "Abls-habitat Thread" );
-    Thread_ws_bus_init( module );
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
@@ -289,17 +190,12 @@
 /******************************************************************************************************************************/
  void Thread_end ( struct THREAD *module )
   { Thread_send_comm_to_master ( module, FALSE );
-    if (module->Master_websocket && soup_websocket_connection_get_state (module->Master_websocket) == SOUP_WEBSOCKET_STATE_OPEN)
-     { soup_websocket_connection_close ( module->Master_websocket, 0, "Thanks, Bye !" );
-       while ( module->Master_websocket ) sched_yield();
-     }
-
     mosquitto_disconnect(	module->MQTT_session	);
     mosquitto_loop_stop(	module->MQTT_session, FALSE	);
     mosquitto_destroy(	module->MQTT_session	);
     g_object_unref  ( module->Soup_session );  module->Soup_session = NULL;
-    g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
-    g_slist_free    ( module->WS_messages );   module->WS_messages = NULL;
+    g_slist_foreach ( module->MQTT_messages, (GFunc) Json_node_unref, NULL );
+    g_slist_free    ( module->MQTT_messages );   module->MQTT_messages = NULL;
     if (module->vars) { g_free(module->vars);  module->vars   = NULL; }
     Json_node_unref ( module->IOs );           module->IOs    = NULL;
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
@@ -376,7 +272,7 @@
 
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     json_node_ref ( request );
-    module->WS_messages = g_slist_append ( module->WS_messages, request );
+    module->MQTT_messages = g_slist_append ( module->MQTT_messages, request );
     pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/

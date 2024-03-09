@@ -43,11 +43,10 @@
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
     SoupSession *Soup_session;
     struct mosquitto *MQTT_session;
+    GSList *MQTT_messages;
     JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
-    SoupWebsocketConnection *Master_websocket;
-    GSList *WS_messages;
     JsonNode *ai_nbr_tour_par_sec;                                                                        /* Tour par seconde */
     JsonNode *IOs;
     gint nbr_tour;

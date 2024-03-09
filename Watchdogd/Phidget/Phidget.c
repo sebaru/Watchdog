@@ -469,10 +469,10 @@ error:
         }
        Thread_send_comm_to_master ( module, (elements ? FALSE : TRUE) );
 /****************************************************** Ecoute du master ******************************************************/
-       while ( module->WS_messages )
+       while ( module->MQTT_messages )
         { pthread_mutex_lock ( &module->synchro );
-          JsonNode *request = module->WS_messages->data;
-          module->WS_messages = g_slist_remove ( module->WS_messages, request );
+          JsonNode *request = module->MQTT_messages->data;
+          module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
 
