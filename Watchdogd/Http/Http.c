@@ -114,7 +114,6 @@
         }
             if (!strcasecmp ( path, "/dls/run/set" ))      Http_traiter_dls_run_set       ( server, msg, path, request );
        else if (!strcasecmp ( path, "/dls/run/acquitter")) Http_traiter_dls_run_acquitter ( server, msg, path, request );
-       else if (!strcasecmp ( path, "/set_watchdog"))      Http_traiter_set_watchdog_post ( server, msg, path, request );
        else Http_Send_json_response (msg, SOUP_STATUS_NOT_FOUND, "Not found", NULL );
        Json_node_unref ( request );
      }

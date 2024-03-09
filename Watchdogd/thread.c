@@ -53,7 +53,7 @@
 /******************************************************************************************************************************/
  void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
-     { Http_Post_thread_WATCHDOG_to_local_BUS ( module, "IO_COMM", (etat ? 900 : 0) );
+     { MQTT_Send_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
        JsonNode *RootNode = Json_node_create();
        if (RootNode)
         { Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );

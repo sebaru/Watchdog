@@ -216,24 +216,6 @@ end:
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Http_Post_WATCHDOG_to_local_BUS: Envoie le bit WATCHDOG au master selon le status                                          */
-/* Entrée: la structure THREAD, le tech_id, l'acronyme, la consigne                                                           */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_Post_thread_WATCHDOG_to_local_BUS ( struct THREAD *module, gchar *thread_acronyme, gint consigne )
-  { if (!module) return;
-    JsonNode *thread_watchdog = Json_node_create ();
-    if(!thread_watchdog) return;
-    Json_node_add_string ( thread_watchdog, "thread_acronyme", thread_acronyme );
-    Json_node_add_int    ( thread_watchdog, "consigne", consigne );
-    if (Config.instance_is_master == TRUE)
-     { Json_node_add_string ( thread_watchdog, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-       Dls_data_set_WATCHDOG_from_thread_watchdog ( thread_watchdog );
-     }
-    else Http_Post_to_local_BUS ( module, "SET_WATCHDOG", thread_watchdog );
-    Json_node_unref(thread_watchdog);
-  }
-/******************************************************************************************************************************/
 /* Http_traiter_get_io: Donne les IO du thread appelant                                                                       */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
@@ -297,52 +279,5 @@ end:
 
     Info_new( __func__, Config.log_bus, LOG_INFO,  "GET_IO done for '%s'", thread_tech_id );
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "There are Outputs", Response );
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_set_watchdog_post: Positionne un Watchdog dans DLS                                                            */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : HTTP Response code                                                                                                */
-/******************************************************************************************************************************/
- void Http_traiter_set_watchdog_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
-  { gchar *thread_tech_id;
-    if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
-    if (!thread_tech_id)
-     { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
-       return;
-     }
-
-    if ( Dls_data_set_WATCHDOG_from_thread_watchdog ( request ) == FALSE )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: wrong parameters from '%s'", thread_tech_id );
-       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
-       return;
-     }
-    Http_Send_json_response ( msg, SOUP_STATUS_OK, "WATCHDOG set", NULL );
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_set_cde_post: Positionne une Commande dans DLS                                                                */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : HTTP Response code                                                                                                */
-/******************************************************************************************************************************/
- void Http_traiter_set_cde_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
-  { gchar *thread_tech_id;
-    if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
-    if (!thread_tech_id)
-     { Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "thread_tech_id missing", NULL);
-       Info_new( __func__, Config.log_bus, LOG_ERR, "thread_tech_id missing for path %s", path );
-       return;
-     }
-
-    if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_CDE: wrong parameters from '%s'", thread_tech_id );
-       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
-       return;
-     }
-    Info_new( __func__, Config.log_bus, LOG_INFO,
-              "SET_CDE from '%s': '%s:%s'=1", thread_tech_id,
-              Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
-    struct DLS_DI *bit = Dls_data_lookup_DI ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
-    Dls_data_set_DI_pulse ( NULL, bit );
-    Http_Send_json_response ( msg, SOUP_STATUS_OK, "CDE set", NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

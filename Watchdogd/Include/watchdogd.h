@@ -142,6 +142,7 @@
  extern void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
  extern void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat );
  extern void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme );
+ extern void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne );
  extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

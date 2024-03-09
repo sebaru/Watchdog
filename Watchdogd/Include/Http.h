@@ -59,7 +59,6 @@
  extern void Http_traiter_dls_run_set ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
  extern void Http_traiter_dls_run_acquitter ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
 
- extern void Http_traiter_set_watchdog_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
  extern void Http_traiter_get_io ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query );
 
  extern JsonNode *Http_Msg_to_Json ( SoupServerMessage *msg );
@@ -67,7 +66,6 @@
  extern gboolean Http_Post_to_local_BUS ( struct THREAD *module, gchar *uri, JsonNode *RootNode );
  extern void Http_Add_Thread_signature ( struct THREAD *module, SoupMessage *msg, gchar *buf, gint buf_size );
  extern gboolean Http_Check_Thread_signature ( gchar *path, SoupServerMessage *msg, gchar **thread_tech_id_p );
- extern void Http_Post_thread_WATCHDOG_to_local_BUS ( struct THREAD *module, gchar *acronyme, gint consigne );
 
  extern void Http_traiter_open_websocket_for_slaves_CB ( SoupServer *server, SoupServerMessage *msg, const char* path,
                                                          SoupWebsocketConnection* connection, gpointer user_data );

@@ -336,6 +336,7 @@
 
          if ( !strcmp ( topic, "master/set/ai" ) )       Dls_data_set_AI_from_thread_ai ( request );
     else if ( !strcmp ( topic, "master/set/di" ) )       Dls_data_set_DI_from_thread_di ( request );
+    else if ( !strcmp ( topic, "master/set/watchdog" ) ) Dls_data_set_WATCHDOG_from_thread_watchdog ( request );
     else if ( !strcmp ( topic, "master/set/di_pulse" ) )
      { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
         { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI_PULSE: wrong parameters" ); }

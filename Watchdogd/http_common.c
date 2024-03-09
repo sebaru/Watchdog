@@ -76,6 +76,21 @@
     Json_node_unref ( thread_di );
   }
 /******************************************************************************************************************************/
+/* MQTT_Send_WATCHDOG: Envoie le WATCHDOG au master                                                                           */
+/* Entrée: la structure MQTT, le watchdog, la consigne                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne )
+  { if (! (module && thread_acronyme)) return;
+    JsonNode *thread_watchdog = Json_node_create ();
+    if(!thread_watchdog) return;
+    Json_node_add_string ( thread_watchdog, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_node_add_string ( thread_watchdog, "thread_acronyme", thread_acronyme );
+    Json_node_add_int    ( thread_watchdog, "consigne", consigne );
+    MQTT_Send_to_topic ( module->MQTT_session, "master/set/watchdog", thread_watchdog );
+    Json_node_unref(thread_watchdog);
+  }
+/******************************************************************************************************************************/
 /* MQTT_Subscribe: souscrit à un topic                                                                                        */
 /* Entrée: la structure MQTT, le topic                                                                                        */
 /* Sortie: néant                                                                                                              */
