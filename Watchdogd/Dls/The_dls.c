@@ -245,6 +245,7 @@
 /******************************************************************************************************************************/
  static void Dls_run_plugin ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct timeval tv_avant, tv_apres;
+    if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
 
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
     gboolean bit_comm_module = TRUE;
@@ -288,7 +289,6 @@
     Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok,  bit_comm_module );
     Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs, !bit_comm_module );
 
-    if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
     if (!plugin->enable) return;                                            /* si plugin a l'arret, on n'éxécute pas non plus */
     if (!plugin->go)     return;                                          /* si pas de fonction GO, on n'éxécute pas non plus */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
