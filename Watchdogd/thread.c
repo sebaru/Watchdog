@@ -258,7 +258,9 @@
     else
      { gchar topic[256];
        g_snprintf ( topic, sizeof(topic), "thread/%s/#", thread_tech_id );
-       mosquitto_subscribe(	module->MQTT_session, NULL, topic, 0 );
+       MQTT_Subscribe ( module->MQTT_session, topic );
+       g_snprintf ( topic, sizeof(topic), "threads/#" );
+       MQTT_Subscribe ( module->MQTT_session, topic );
        mosquitto_message_callback_set( module->MQTT_session, Thread_on_mqtt_message_CB );
      }
     if ( mosquitto_loop_start(	module->MQTT_session	) != MOSQ_ERR_SUCCESS )

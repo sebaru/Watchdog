@@ -47,7 +47,11 @@
        Partage->com_msrv.Liste_DO = g_slist_remove ( Partage->com_msrv.Liste_DO, RootNode );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-       if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( "SET_DO", RootNode );
+       if (MSRV_Map_to_thread ( RootNode ))
+        { gchar topic[256];
+          g_snprintf ( topic, sizeof(topic), "thread/%s", Json_get_string ( RootNode, "thread_tech_id" ) );
+          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, topic, "SET_DO", RootNode );
+        }
        else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
                       "'%s:%s' is not mapped. dropping",
                        Json_get_string ( RootNode, "tech_id" ), Json_get_string ( RootNode, "acronyme" ) );
@@ -62,7 +66,11 @@
        Partage->com_msrv.Liste_AO = g_slist_remove ( Partage->com_msrv.Liste_AO, RootNode );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-       if (MSRV_Map_to_thread ( RootNode )) Http_Send_to_slaves ( "SET_AO", RootNode );
+       if (MSRV_Map_to_thread ( RootNode ))
+        { gchar topic[256];
+          g_snprintf ( topic, sizeof(topic), "thread/%s", Json_get_string ( RootNode, "thread_tech_id" ) );
+          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, topic, "SET_AO", RootNode );
+        }
        else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
                       "'%s:%s' is not mapped. dropping",
                        Json_get_string ( RootNode, "tech_id" ), Json_get_string ( RootNode, "acronyme" ) );
