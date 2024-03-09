@@ -343,7 +343,7 @@
      }
     g_list_free(Recipients);
     Json_node_unref ( UsersNode );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->ai_nbr_sms, vars->nbr_sms, TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->ai_nbr_sms, vars->nbr_sms, TRUE );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -596,7 +596,7 @@ end_user:
           Lire_sms_gsm(module);
           GSM_SignalQuality sig;
           GSM_GetSignalQuality( vars->gammu_machine, &sig );
-          Http_Post_thread_AI_to_local_BUS ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
+          MQTT_Send_AI ( module->MQTT_session, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
         }
        else
         { Info_new( __func__, module->Thread_debug, LOG_INFO, "Connect failed" );

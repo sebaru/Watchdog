@@ -92,18 +92,18 @@
     Info_new( __func__, module->Thread_debug, LOG_DEBUG,
               "day %02d -> temp_min=%02d, temp_max=%02d", day, temp_min, temp_max );
 
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Weather[day],          1.0*Json_get_int ( element, "weather" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_pluie[day],      1.0*Json_get_int ( element, "probarain" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_gel[day],        1.0*Json_get_int ( element, "probafrost" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_brouillard[day], 1.0*Json_get_int ( element, "probafog" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_vent_70[day],    1.0*Json_get_int ( element, "probawind70" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_vent_100[day],   1.0*Json_get_int ( element, "probawind100" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Proba_vent_orage[day], 1.0*Json_get_int ( element, "gustx" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Vent_10m[day],         1.0*Json_get_int ( element, "wind10m" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Direction_vent[day],   1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Rafale_vent[day],      1.0*Json_get_int ( element, "gust10m" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Weather[day],          1.0*Json_get_int ( element, "weather" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Temp_min[day],         1.0*Json_get_int ( element, "tmin" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Temp_max[day],         1.0*Json_get_int ( element, "tmax" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Proba_pluie[day],      1.0*Json_get_int ( element, "probarain" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Proba_gel[day],        1.0*Json_get_int ( element, "probafrost" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Proba_brouillard[day], 1.0*Json_get_int ( element, "probafog" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Proba_vent_70[day],    1.0*Json_get_int ( element, "probawind70" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Proba_vent_100[day],   1.0*Json_get_int ( element, "probawind100" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Proba_vent_orage[day], 1.0*Json_get_int ( element, "gustx" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Vent_10m[day],         1.0*Json_get_int ( element, "wind10m" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Direction_vent[day],   1.0*Json_get_int ( element, "dirwind10m" ), TRUE );
+    MQTT_Send_AI ( module->MQTT_session, vars->Rafale_vent[day],      1.0*Json_get_int ( element, "gust10m" ), TRUE );
   }
 /******************************************************************************************************************************/
 /* Meteo_get_forecast: Récupère le forecast auprès de meteoconcept                                                            */

@@ -210,7 +210,7 @@
 
 /********************************************************* Toutes les minutes *************************************************/
     if (Partage->top >= module->telemetrie_top+600)                                                     /* Toutes les minutes */
-     { Http_Post_thread_AI_to_local_BUS ( module, module->ai_nbr_tour_par_sec, module->nbr_tour_par_sec, TRUE );
+     { MQTT_Send_AI ( module->MQTT_session, module->ai_nbr_tour_par_sec, module->nbr_tour_par_sec, TRUE );
        if (!module->Master_websocket) Thread_ws_bus_init ( module );               /* si perte de la websocket, on reconnecte */
        module->telemetrie_top = Partage->top;
      }

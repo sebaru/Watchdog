@@ -227,19 +227,6 @@ end:
     else Http_Post_to_local_BUS ( module, "SET_DI", thread_di );
   }
 /******************************************************************************************************************************/
-/* Http_Post_thread_AI_to_local_BUS: Envoie le bit AI au master                                                               */
-/* Entrée: la structure THREAD, le json associé, l'etat attentu                                                               */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_Post_thread_AI_to_local_BUS ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
-  { if (!module) return;
-
-    Json_node_add_double ( thread_ai, "valeur", valeur );
-    Json_node_add_bool   ( thread_ai, "in_range", in_range );
-    if (Config.instance_is_master == TRUE) Dls_data_set_AI_from_thread_ai ( thread_ai );
-    else Http_Post_to_local_BUS ( module, "SET_AI", thread_ai );
-  }
-/******************************************************************************************************************************/
 /* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */
 /* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                        */
 /* Sortie: néant                                                                                                              */

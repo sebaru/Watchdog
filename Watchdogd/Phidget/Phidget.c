@@ -64,7 +64,7 @@
      { Info_new( __func__, canal->module->Thread_debug, LOG_ERR,
 		         "Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;",
            thread_tech_id, thread_acronyme, description, code );
-       Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, 0.0, FALSE );
+       MQTT_Send_AI ( canal->module->MQTT_session, canal->element, 0.0, FALSE );
      }
     else
      { Info_new( __func__, canal->module->Thread_debug, LOG_ERR,
@@ -82,7 +82,7 @@
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
+    MQTT_Send_AI ( canal->module->MQTT_session, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onTemperatureSensorChange: Appelé quand un module I/O Temperaute a changé de valeur                                */
@@ -94,7 +94,7 @@
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
+    MQTT_Send_AI ( canal->module->MQTT_session, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
@@ -106,7 +106,7 @@
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
+    MQTT_Send_AI ( canal->module->MQTT_session, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                   */
@@ -119,7 +119,7 @@
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
+    MQTT_Send_AI ( canal->module->MQTT_session, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltageRatoiInputChange: Appelé quand un module I/O RatioInput a changé de valeur                                */
@@ -132,7 +132,7 @@
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
     Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
-    Http_Post_thread_AI_to_local_BUS ( canal->module, canal->element, valeur, TRUE );
+    MQTT_Send_AI ( canal->module->MQTT_session, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
 /* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
