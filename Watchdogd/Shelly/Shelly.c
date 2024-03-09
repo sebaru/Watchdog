@@ -72,21 +72,21 @@
               { JsonNode *params = Json_get_object_as_node ( request, "params" );
                 if (Json_has_member ( params, "em1:0" ) )
                  { JsonNode *em = Json_get_object_as_node ( params, "em1:0" );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM10_ACT_POWER,  Json_get_double ( em, "act_power" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM10_APRT_POWER, Json_get_double ( em, "aprt_power" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM10_CURRENT,    Json_get_double ( em, "current" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM10_FREQ,       Json_get_double ( em, "freq" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM10_PF,         Json_get_double ( em, "pf" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM10_VOLTAGE,    Json_get_double ( em, "voltage" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM10_ACT_POWER,  Json_get_double ( em, "act_power" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM10_APRT_POWER, Json_get_double ( em, "aprt_power" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM10_CURRENT,    Json_get_double ( em, "current" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM10_FREQ,       Json_get_double ( em, "freq" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM10_PF,         Json_get_double ( em, "pf" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM10_VOLTAGE,    Json_get_double ( em, "voltage" ), TRUE );
                  }
                 else if (Json_has_member ( params, "em1:1" ) )
                  { JsonNode *em = Json_get_object_as_node ( params, "em1:1" );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM11_ACT_POWER,  Json_get_double ( em, "act_power" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM11_APRT_POWER, Json_get_double ( em, "aprt_power" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM11_CURRENT,    Json_get_double ( em, "current" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM11_FREQ,       Json_get_double ( em, "freq" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM11_PF,         Json_get_double ( em, "pf" ), TRUE );
-                   MQTT_Send_AI ( module->MQTT_session, vars->EM11_VOLTAGE,    Json_get_double ( em, "voltage" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM11_ACT_POWER,  Json_get_double ( em, "act_power" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM11_APRT_POWER, Json_get_double ( em, "aprt_power" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM11_CURRENT,    Json_get_double ( em, "current" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM11_FREQ,       Json_get_double ( em, "freq" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM11_PF,         Json_get_double ( em, "pf" ), TRUE );
+                   MQTT_Send_AI ( module, vars->EM11_VOLTAGE,    Json_get_double ( em, "voltage" ), TRUE );
                  }
               }
              Thread_send_comm_to_master ( module, TRUE );

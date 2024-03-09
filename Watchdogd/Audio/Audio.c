@@ -170,7 +170,7 @@
                           "Envoi audio inhibé. Dropping '%s:%s'", tech_id, acronyme );
               }
              else
-              { Http_Post_to_local_BUS_CDE ( module, thread_tech_id, "P_ALL" );           /* Pos. du profil audio via interne */
+              { MQTT_Send_DI_pulse ( module, thread_tech_id, "P_ALL" );           /* Pos. du profil audio via interne */
 
                 if (vars->last_audio + AUDIO_JINGLE < Partage->top)                            /* Si Pas de message depuis xx */
                  { Jouer_wav_by_file( module, "jingle"); }                                          /* On balance le jingle ! */
@@ -184,7 +184,7 @@
                  { gboolean retour = Jouer_google_speech( module, libelle );
                    Thread_send_comm_to_master ( module, retour );
                  }
-                Http_Post_to_local_BUS_CDE ( module, thread_tech_id, "P_NONE" );             /* Bit de fin d'emission message */
+                MQTT_Send_DI_pulse ( module, thread_tech_id, "P_NONE" );             /* Bit de fin d'emission message */
               }
            }
           else if ( !strcasecmp( tag, "DISABLE" ) )

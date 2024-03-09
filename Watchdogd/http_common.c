@@ -45,21 +45,35 @@
 /* Entrée: la structure MQTT, l'AI, la valeur et le range                                                                     */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Send_AI ( struct mosquitto *mqtt_session, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
-  { if (! (mqtt_session && thread_ai)) return;
+ void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
+  { if (! (module && thread_ai)) return;
     Json_node_add_double ( thread_ai, "valeur", valeur );
     Json_node_add_bool   ( thread_ai, "in_range", in_range );
-    MQTT_Send_to_topic ( mqtt_session, "master/set/ai", thread_ai );
+    MQTT_Send_to_topic ( module->MQTT_session, "master/set/ai", thread_ai );
   }
 /******************************************************************************************************************************/
 /* MQTT_Send_DI: Envoie le bit DI au master                                                                                   */
 /* Entrée: la structure MQTT, la DI, la valeur                                                                                */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Send_DI ( struct mosquitto *mqtt_session, JsonNode *thread_di, gboolean etat )
-  { if (! (mqtt_session && thread_di)) return;
+ void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat )
+  { if (! (module && thread_di)) return;
     Json_node_add_bool ( thread_di, "etat", etat );
-    MQTT_Send_to_topic ( mqtt_session, "master/set/di", thread_di );
+    MQTT_Send_to_topic ( module->MQTT_session, "master/set/di", thread_di );
+  }
+/******************************************************************************************************************************/
+/* MQTT_Send_DI: Envoie le bit DI au master, au format pulse                                                                  */
+/* Entrée: la structure MQTT, la DI, la valeur                                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *tech_id, gchar *acronyme )
+  { if (! (module && tech_id && acronyme)) return;
+    JsonNode *thread_di = Json_node_create();
+    Json_node_add_string ( thread_di, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_node_add_string ( thread_di, "tech_id", tech_id );
+    Json_node_add_string ( thread_di, "acronyme", acronyme );
+    MQTT_Send_to_topic ( module->MQTT_session, "master/set/di_pulse", thread_di );
+    Json_node_unref ( thread_di );
   }
 /******************************************************************************************************************************/
 /* MQTT_Subscribe: souscrit à un topic                                                                                        */

@@ -216,20 +216,6 @@ end:
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Http_Post_to_local_BUS_CDE: Envoie le bit DI CDE au master                                                                 */
-/* Entrée: la structure THREAD, le tech_id, l'acronyme, l'etat attentu                                                        */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_Post_to_local_BUS_CDE ( struct THREAD *module, gchar *tech_id, gchar *acronyme )
-  { if (!module) return;
-    JsonNode *body = Json_node_create ();
-    if(!body) return;
-    Json_node_add_string ( body, "tech_id",  tech_id );
-    Json_node_add_string ( body, "acronyme", acronyme );
-    Http_Post_to_local_BUS ( module, "SET_CDE", body );
-    Json_node_unref(body);
-  }
-/******************************************************************************************************************************/
 /* Http_Post_WATCHDOG_to_local_BUS: Envoie le bit WATCHDOG au master selon le status                                          */
 /* Entrée: la structure THREAD, le tech_id, l'acronyme, la consigne                                                           */
 /* Sortie: néant                                                                                                              */
@@ -358,37 +344,5 @@ end:
     struct DLS_DI *bit = Dls_data_lookup_DI ( Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ) );
     Dls_data_set_DI_pulse ( NULL, bit );
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "CDE set", NULL );
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_set_ai_post: Positionne une AI dans DLS                                                                       */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : HTTP Response code                                                                                                */
-/******************************************************************************************************************************/
- void Http_traiter_set_ai_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
-  { gchar *thread_tech_id;
-    if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
-
-    if ( Dls_data_set_AI_from_thread_ai ( request ) == FALSE )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_AI: wrong parameters from '%s'", thread_tech_id );
-       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
-       return;
-     }
-    Http_Send_json_response ( msg, SOUP_STATUS_OK, "AI set", NULL );
-  }
-/******************************************************************************************************************************/
-/* Http_traiter_set_di_post: Positionne une DI dans DLS                                                                       */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : HTTP Response code                                                                                                */
-/******************************************************************************************************************************/
- void Http_traiter_set_di_post ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request )
-  { gchar *thread_tech_id;
-    if (!Http_Check_Thread_signature ( path, msg, &thread_tech_id )) return;
-
-    if ( Dls_data_set_DI_from_thread_di ( request ) == FALSE )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI: wrong parameters from '%s'", thread_tech_id );
-       Http_Send_json_response (msg, SOUP_STATUS_BAD_REQUEST, "Mauvais parametres", NULL);
-       return;
-     }
-    Http_Send_json_response ( msg, SOUP_STATUS_OK, "DI set", NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

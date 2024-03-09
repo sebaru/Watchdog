@@ -54,16 +54,16 @@
        vars->started = FALSE;
      }
 
-    MQTT_Send_AI ( module->MQTT_session, vars->Load, 0.0, FALSE );
-    MQTT_Send_AI ( module->MQTT_session, vars->Realpower, 0.0, FALSE );
-    MQTT_Send_AI ( module->MQTT_session, vars->Battery_charge, 0.0, FALSE );
-    MQTT_Send_AI ( module->MQTT_session, vars->Input_voltage, 0.0, FALSE );
-    MQTT_Send_AI ( module->MQTT_session, vars->Battery_runtime, 0.0, FALSE );
-    MQTT_Send_AI ( module->MQTT_session, vars->Battery_voltage, 0.0, FALSE );
-    MQTT_Send_AI ( module->MQTT_session, vars->Input_hz, 0.0, FALSE );
-    MQTT_Send_AI ( module->MQTT_session, vars->Output_current, 0.0, FALSE );
-    MQTT_Send_AI ( module->MQTT_session, vars->Output_hz, 0.0, FALSE );
-    MQTT_Send_AI ( module->MQTT_session, vars->Output_voltage, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Load, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Realpower, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Battery_charge, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Input_voltage, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Battery_runtime, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Battery_voltage, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Input_hz, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Output_current, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Output_hz, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Output_voltage, 0.0, FALSE );
 
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s disconnected (host='%s')", thread_tech_id, host );
     Thread_send_comm_to_master ( module, FALSE );
@@ -240,48 +240,48 @@
     gchar *reponse;
 
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Load, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Load, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Realpower, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Realpower, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Battery_charge, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Battery_charge, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Input_voltage, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Input_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Battery_runtime, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Battery_runtime, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Battery_voltage, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Battery_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Input_hz, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Input_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Output_current, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Output_current, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Output_hz, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Output_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { MQTT_Send_AI ( module->MQTT_session, vars->Output_voltage, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Output_voltage, atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { MQTT_Send_DI ( module->MQTT_session, vars->Outlet_1_status, !strcmp(reponse, "\"on\"") ); }
+     { MQTT_Send_DI ( module, vars->Outlet_1_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { MQTT_Send_DI ( module->MQTT_session, vars->Outlet_2_status, !strcmp(reponse, "\"on\"") ); }
+     { MQTT_Send_DI ( module, vars->Outlet_2_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { MQTT_Send_DI ( module->MQTT_session, vars->Ups_online,       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
-       MQTT_Send_DI ( module->MQTT_session, vars->Ups_charging,     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
-       MQTT_Send_DI ( module->MQTT_session, vars->Ups_on_batt,      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
-       MQTT_Send_DI ( module->MQTT_session, vars->Ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
-       MQTT_Send_DI ( module->MQTT_session, vars->Ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
+     { MQTT_Send_DI ( module, vars->Ups_online,       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
+       MQTT_Send_DI ( module, vars->Ups_charging,     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
+       MQTT_Send_DI ( module, vars->Ups_on_batt,      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
+       MQTT_Send_DI ( module, vars->Ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
+       MQTT_Send_DI ( module, vars->Ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
   }
 /******************************************************************************************************************************/

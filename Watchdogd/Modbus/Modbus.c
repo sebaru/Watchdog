@@ -933,7 +933,7 @@
                   gboolean new_etat = (new_etat_int ? TRUE : FALSE);
                   if ( Json_get_bool ( vars->DI[cpt], "flip" ) ) new_etat = new_etat ^ 1;
                   if ( vars->first_turn || (new_etat != Json_get_bool ( vars->DI[cpt], "etat" )) )
-                   { MQTT_Send_DI ( module->MQTT_session, vars->DI[cpt], (new_etat ? TRUE : FALSE) ); }
+                   { MQTT_Send_DI ( module, vars->DI[cpt], (new_etat ? TRUE : FALSE) ); }
                 }
                cpt_poid = cpt_poid << 1;
                if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
@@ -970,7 +970,7 @@
                   if ( vars->first_turn || old_valeur != new_valeur || old_in_range != new_in_range )
                    { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Change AI%03d to %f (in_range=%d), min=%f, max=%f",
                                cpt, new_valeur, new_in_range, Json_get_double ( vars->AI[cpt], "min" ), Json_get_double ( vars->AI[cpt], "max" ) );
-                     MQTT_Send_AI ( module->MQTT_session, vars->AI[cpt], new_valeur, new_in_range );
+                     MQTT_Send_AI ( module, vars->AI[cpt], new_valeur, new_in_range );
                    }
                 }
              }
