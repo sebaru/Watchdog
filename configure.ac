@@ -89,5 +89,6 @@ Watchdogd/Dmx/Makefile \
 Watchdogd/Meteo/Makefile \
 Watchdogd/Phidget/Makefile \
 Watchdogd/Gpiod/Makefile \
+Watchdogd/Shelly/Makefile \
 ])
 AC_OUTPUT

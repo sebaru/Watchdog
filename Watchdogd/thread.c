@@ -68,6 +68,25 @@
      }
   }
 /******************************************************************************************************************************/
+/* Thread_on_mqtt_master_message_CB: Appelé lorsque l'on recoit un message MQTT                                               */
+/* Entrée: les parametres MQTT                                                                                                */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Thread_on_mqtt_message_CB(struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg)
+  { struct THREAD *module = obj;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    JsonNode *response = Json_get_from_string ( msg->payload );
+    if (!response)
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "'%s': MQTT Message Dropped (not JSON) !", thread_tech_id );
+       return;
+     }
+
+    Json_node_add_string ( response, "topic", msg->topic );
+    pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
+    module->WS_messages = g_slist_append ( module->WS_messages, response );
+    pthread_mutex_unlock ( &module->synchro );
+  }
+/******************************************************************************************************************************/
 /* Thread_ws_on_master_message_CB: Appelé par libsoup lorsque l'on recoit un message sur la websocket connectée au master     */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
@@ -229,8 +248,24 @@
           Thread_end ( module );                            /* Pas besoin de return : Thread_end fait un pthread_exit */
         }
      }
-    module->Soup_session = HTTP_New_session ( "Abls-habitat Thread" );
+
+/******************************************************* Ecoute du MQTT *******************************************************/
+    module->MQTT_session = mosquitto_new(	thread_tech_id, FALSE, module	);
+    if (!module->MQTT_session)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
+    else if ( mosquitto_connect(	module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT connection to '%s' error.", thread_tech_id, Config.master_hostname ); }
+    else
+     { gchar topic[256];
+       g_snprintf ( topic, sizeof(topic), "thread/%s/#", thread_tech_id );
+       mosquitto_subscribe(	module->MQTT_session, NULL, topic, 0 );
+       mosquitto_message_callback_set( module->MQTT_session, Thread_on_mqtt_message_CB );
+     }
+    if ( mosquitto_loop_start(	module->MQTT_session	) != MOSQ_ERR_SUCCESS )
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
+
 /******************************************************* Ecoute du Master *****************************************************/
+    module->Soup_session = HTTP_New_session ( "Abls-habitat Thread" );
     Thread_ws_bus_init( module );
 
     gchar *description = "Add description to database table";
@@ -257,6 +292,9 @@
        while ( module->Master_websocket ) sched_yield();
      }
 
+    mosquitto_disconnect(	module->MQTT_session	);
+    mosquitto_loop_stop(	module->MQTT_session, FALSE	);
+    mosquitto_destroy(	module->MQTT_session	);
     g_object_unref  ( module->Soup_session );  module->Soup_session = NULL;
     g_slist_foreach ( module->WS_messages, (GFunc) Json_node_unref, NULL );
     g_slist_free    ( module->WS_messages );   module->WS_messages = NULL;

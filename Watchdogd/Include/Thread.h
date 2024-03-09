@@ -33,6 +33,7 @@
  #include <string.h>
  #include <errno.h>
  #include <json-glib/json-glib.h>
+ #include <mosquitto.h>
 
  struct THREAD
   { pthread_t TID;                                                                                   /* Identifiant du thread */
@@ -41,6 +42,7 @@
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
     SoupSession *Soup_session;
+    struct mosquitto *MQTT_session;
     JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */

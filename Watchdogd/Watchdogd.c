@@ -304,6 +304,26 @@
        exit(0);
      }
   }
+
+/******************************************************************************************************************************/
+/* MSRV_on_mqtt_message_CB: Appelé lorsque l'on recoit un message MQTT                                                        */
+/* Entrée: les parametres MQTT                                                                                                */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MSRV_on_mqtt_message_CB(struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg)
+  {
+    JsonNode *request = Json_get_from_string ( msg->payload );
+    if (!request)
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "MQTT Message Dropped (not JSON) !" );
+       return;
+     }
+
+    if ( !strcmp ( msg->topic, "master/set/ai" ) )
+     { if ( Dls_data_set_AI_from_thread_ai ( request ) == FALSE )
+        { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_AI: wrong parameters" ); }
+     }
+    Json_node_unref ( request );
+  }
 /******************************************************************************************************************************/
 /* MSRV_handle_API_messages: Traite les messages recue de l'API                                                               */
 /* Entrée: les parametres de la libsoup                                                                                       */
@@ -603,6 +623,25 @@ end:
        goto third_stage_end;
      }
 
+/******************************************************* Ecoute du MQTT *******************************************************/
+    mosquitto_lib_init();
+    struct mosquitto *mqtt = mosquitto_new( "master", FALSE, NULL );
+    if (!mqtt)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT session error." ); goto fourth_stage_end; }
+    else if ( mosquitto_connect( mqtt, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT connection to '%s' error.", Config.master_hostname );
+       goto fourth_stage_end;
+     }
+    else
+     { gchar topic[256];
+       g_snprintf ( topic, sizeof(topic), "master/#" );
+       mosquitto_subscribe( mqtt, NULL, topic, 0 );
+       mosquitto_message_callback_set( mqtt, MSRV_on_mqtt_message_CB );
+     }
+    if ( mosquitto_loop_start( mqtt ) != MOSQ_ERR_SUCCESS )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT loop not started." ); goto fourth_stage_end; }
+
+/************************************************ Initialisation des mutex ****************************************************/
     time ( &Partage->start_time );
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_http.synchro, NULL );
@@ -735,6 +774,12 @@ end:
 /****************************************************** Arret des signaux *****************************************************/
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
+
+fourth_stage_end:
+    mosquitto_disconnect( mqtt );
+    mosquitto_loop_stop( mqtt, FALSE );
+    mosquitto_destroy( mqtt );
+    mosquitto_lib_cleanup();
 
 third_stage_end:
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */

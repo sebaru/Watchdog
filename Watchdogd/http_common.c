@@ -30,6 +30,39 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Mqtt_Send_to_topic: Envoie le node au broker                                                                               */
+/* Entrée: la structure MQTT, le topic, le node                                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, JsonNode *node )
+  { if (! (mqtt_session && topic && node) ) return;
+    gchar *buffer = Json_node_to_string ( node );
+    mosquitto_publish(	mqtt_session, NULL, topic, strlen(buffer), buffer, 0, FALSE );
+    g_free(buffer);
+  }
+/******************************************************************************************************************************/
+/* Mqtt_Send_AI: Envoie le bit AI au master                                                                                   */
+/* Entrée: la structure MQTT, l'AI, la valeur et le range                                                                     */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_AI ( struct mosquitto *mqtt_session, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
+  { if (! (mqtt_session && thread_ai)) return;
+    Json_node_add_double ( thread_ai, "valeur", valeur );
+    Json_node_add_bool   ( thread_ai, "in_range", in_range );
+    MQTT_Send_to_topic ( mqtt_session, "master/set/ai", thread_ai );
+  }
+/******************************************************************************************************************************/
+/* MQTT_Subscribe: souscrit à un topic                                                                                        */
+/* Entrée: la structure MQTT, le topic                                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic )
+  { if ( mosquitto_subscribe(	mqtt_session, NULL, topic, 0 ) != MOSQ_ERR_SUCCESS )
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "Subscribe to topic '%s' FAILED", topic ); }
+    else
+     { Info_new( __func__, Config.log_bus, LOG_INFO, "Subscribe to topic '%s' OK", topic ); }
+  }
+/******************************************************************************************************************************/
 /* HTTP_New_session: créé une nouvelle session libsoup                                                                        */
 /* Entrée: le message                                                                                                         */
 /* Sortie: néant                                                                                                              */
