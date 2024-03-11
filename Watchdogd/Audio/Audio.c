@@ -143,10 +143,10 @@
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /******************************************************************************************************************************/
-       while ( module->WS_messages )
+       while ( module->MQTT_messages )
         { pthread_mutex_lock ( &module->synchro );
-          JsonNode *request = module->WS_messages->data;
-          module->WS_messages = g_slist_remove ( module->WS_messages, request );
+          JsonNode *request = module->MQTT_messages->data;
+          module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
           if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
@@ -170,7 +170,7 @@
                           "Envoi audio inhibé. Dropping '%s:%s'", tech_id, acronyme );
               }
              else
-              { Http_Post_to_local_BUS_CDE ( module, thread_tech_id, "P_ALL" );           /* Pos. du profil audio via interne */
+              { MQTT_Send_DI_pulse ( module, thread_tech_id, "P_ALL" );           /* Pos. du profil audio via interne */
 
                 if (vars->last_audio + AUDIO_JINGLE < Partage->top)                            /* Si Pas de message depuis xx */
                  { Jouer_wav_by_file( module, "jingle"); }                                          /* On balance le jingle ! */
@@ -184,7 +184,7 @@
                  { gboolean retour = Jouer_google_speech( module, libelle );
                    Thread_send_comm_to_master ( module, retour );
                  }
-                Http_Post_to_local_BUS_CDE ( module, thread_tech_id, "P_NONE" );             /* Bit de fin d'emission message */
+                MQTT_Send_DI_pulse ( module, thread_tech_id, "P_NONE" );             /* Bit de fin d'emission message */
               }
            }
           else if ( !strcasecmp( tag, "DISABLE" ) )

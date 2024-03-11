@@ -69,7 +69,9 @@
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
     SoupWebsocketConnection *API_websocket;
-    GSList *API_ws_messages;                                                             /* Liste des messages recue de l'API */
+    GSList *API_ws_messages;                                                             /* Liste des messages recus de l'API */
+    struct mosquitto *MQTT_session;                                                            /* Session MQTT vers le broker */
+    GSList *MQTT_messages;                                                               /* Liste des messages recus via MQTT */
     gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
   };
 
@@ -137,8 +139,11 @@
  extern JsonNode *Http_Send_json_request_from_agent ( SoupMessage *soup_msg, JsonNode *RootNode );
  extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode );
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
- extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, JsonNode *node );
- extern void MQTT_Send_AI ( struct mosquitto *mqtt_session, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
+ extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node );
+ extern void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
+ extern void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat );
+ extern void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme );
+ extern void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne );
  extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

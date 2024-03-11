@@ -343,7 +343,7 @@
      }
     g_list_free(Recipients);
     Json_node_unref ( UsersNode );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->ai_nbr_sms, vars->nbr_sms, TRUE );
+    MQTT_Send_AI ( module, vars->ai_nbr_sms, vars->nbr_sms, TRUE );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -358,7 +358,7 @@
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
-    module->WS_messages = g_slist_append ( module->WS_messages, RootNode );
+    module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
@@ -374,7 +374,7 @@
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
-    module->WS_messages = g_slist_append ( module->WS_messages, RootNode );
+    module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
@@ -485,7 +485,7 @@
           gchar *libelle         = Json_get_string ( element, "libelle" );
           Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': From '%s' map found for '%s' (%s)-> '%s:%s' - %s",
                     thread_tech_id, from, Json_get_string( UserNode, "email" ), thread_acronyme, tech_id, acronyme, libelle );
-          Http_Post_to_local_BUS_CDE ( module, tech_id, acronyme );
+          MQTT_Send_DI_pulse ( module, tech_id, acronyme );
           gchar chaine[256];
           g_snprintf ( chaine, sizeof(chaine), "'%s' fait.", texte );
           Envoyer_smsg_gsm_text ( module, chaine );
@@ -566,10 +566,10 @@ end_user:
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 
 /****************************************************** Ecoute du master ******************************************************/
-       while ( module->WS_messages )
+       while ( module->MQTT_messages )
         { pthread_mutex_lock ( &module->synchro );
-          JsonNode *message = module->WS_messages->data;
-          module->WS_messages = g_slist_remove ( module->WS_messages, message );
+          JsonNode *message = module->MQTT_messages->data;
+          module->MQTT_messages = g_slist_remove ( module->MQTT_messages, message );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( message, "tag" );
           if (!tag) { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: no tag. dropping.", thread_tech_id ); }
@@ -596,7 +596,7 @@ end_user:
           Lire_sms_gsm(module);
           GSM_SignalQuality sig;
           GSM_GetSignalQuality( vars->gammu_machine, &sig );
-          Http_Post_thread_AI_to_local_BUS ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
+          MQTT_Send_AI ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
         }
        else
         { Info_new( __func__, module->Thread_debug, LOG_INFO, "Connect failed" );

@@ -34,22 +34,65 @@
 /* Entrée: la structure MQTT, le topic, le node                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, JsonNode *node )
-  { if (! (mqtt_session && topic && node) ) return;
+ void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node )
+  { gboolean free_node=FALSE;
+    if (! (mqtt_session && topic && tag) ) return;
+    if (!node) { node = Json_node_create(); free_node = TRUE; }
+    Json_node_add_string ( node, "tag", tag );
     gchar *buffer = Json_node_to_string ( node );
     mosquitto_publish(	mqtt_session, NULL, topic, strlen(buffer), buffer, 0, FALSE );
     g_free(buffer);
+    if (free_node) Json_node_unref(node);
   }
 /******************************************************************************************************************************/
 /* Mqtt_Send_AI: Envoie le bit AI au master                                                                                   */
 /* Entrée: la structure MQTT, l'AI, la valeur et le range                                                                     */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Send_AI ( struct mosquitto *mqtt_session, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
-  { if (! (mqtt_session && thread_ai)) return;
+ void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
+  { if (! (module && thread_ai)) return;
     Json_node_add_double ( thread_ai, "valeur", valeur );
     Json_node_add_bool   ( thread_ai, "in_range", in_range );
-    MQTT_Send_to_topic ( mqtt_session, "master/set/ai", thread_ai );
+    MQTT_Send_to_topic ( module->MQTT_session, "master", "SET_AI", thread_ai );
+  }
+/******************************************************************************************************************************/
+/* MQTT_Send_DI: Envoie le bit DI au master                                                                                   */
+/* Entrée: la structure MQTT, la DI, la valeur                                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat )
+  { if (! (module && thread_di)) return;
+    Json_node_add_bool ( thread_di, "etat", etat );
+    MQTT_Send_to_topic ( module->MQTT_session, "master", "SET_DI", thread_di );
+  }
+/******************************************************************************************************************************/
+/* MQTT_Send_DI: Envoie le bit DI au master, au format pulse                                                                  */
+/* Entrée: la structure MQTT, la DI, la valeur                                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *tech_id, gchar *acronyme )
+  { if (! (module && tech_id && acronyme)) return;
+    JsonNode *thread_di = Json_node_create();
+    Json_node_add_string ( thread_di, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_node_add_string ( thread_di, "tech_id", tech_id );
+    Json_node_add_string ( thread_di, "acronyme", acronyme );
+    MQTT_Send_to_topic ( module->MQTT_session, "master", "SET_DI_PULSE", thread_di );
+    Json_node_unref ( thread_di );
+  }
+/******************************************************************************************************************************/
+/* MQTT_Send_WATCHDOG: Envoie le WATCHDOG au master                                                                           */
+/* Entrée: la structure MQTT, le watchdog, la consigne                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne )
+  { if (! (module && thread_acronyme)) return;
+    JsonNode *thread_watchdog = Json_node_create ();
+    if(!thread_watchdog) return;
+    Json_node_add_string ( thread_watchdog, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_node_add_string ( thread_watchdog, "thread_acronyme", thread_acronyme );
+    Json_node_add_int    ( thread_watchdog, "consigne", consigne );
+    MQTT_Send_to_topic ( module->MQTT_session, "master", "SET_WATCHDOG", thread_watchdog );
+    Json_node_unref(thread_watchdog);
   }
 /******************************************************************************************************************************/
 /* MQTT_Subscribe: souscrit à un topic                                                                                        */

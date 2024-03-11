@@ -54,16 +54,16 @@
        vars->started = FALSE;
      }
 
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Load, 0.0, FALSE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Realpower, 0.0, FALSE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Battery_charge, 0.0, FALSE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Input_voltage, 0.0, FALSE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Battery_runtime, 0.0, FALSE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Battery_voltage, 0.0, FALSE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Input_hz, 0.0, FALSE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Output_current, 0.0, FALSE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Output_hz, 0.0, FALSE );
-    Http_Post_thread_AI_to_local_BUS ( module, vars->Output_voltage, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Load, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Realpower, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Battery_charge, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Input_voltage, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Battery_runtime, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Battery_voltage, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Input_hz, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Output_current, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Output_hz, 0.0, FALSE );
+    MQTT_Send_AI ( module, vars->Output_voltage, 0.0, FALSE );
 
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s disconnected (host='%s')", thread_tech_id, host );
     Thread_send_comm_to_master ( module, FALSE );
@@ -240,48 +240,48 @@
     gchar *reponse;
 
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Load, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Load, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Realpower, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Realpower, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Battery_charge, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Battery_charge, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Input_voltage, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Input_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Battery_runtime, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Battery_runtime, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Battery_voltage, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Battery_voltage, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Input_hz, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Input_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Output_current, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Output_current, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Output_hz, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Output_hz, atof(reponse+1), TRUE ); }
 
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { Http_Post_thread_AI_to_local_BUS ( module, vars->Output_voltage, atof(reponse+1), TRUE ); }
+     { MQTT_Send_AI ( module, vars->Output_voltage, atof(reponse+1), TRUE ); }
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { Http_Post_thread_DI_to_local_BUS ( module, vars->Outlet_1_status, !strcmp(reponse, "\"on\"") ); }
+     { MQTT_Send_DI ( module, vars->Outlet_1_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { Http_Post_thread_DI_to_local_BUS ( module, vars->Outlet_2_status, !strcmp(reponse, "\"on\"") ); }
+     { MQTT_Send_DI ( module, vars->Outlet_2_status, !strcmp(reponse, "\"on\"") ); }
 
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_online,       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
-       Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_charging,     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
-       Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_on_batt,      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
-       Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
-       Http_Post_thread_DI_to_local_BUS ( module, vars->Ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
+     { MQTT_Send_DI ( module, vars->Ups_online,       (g_strrstr(reponse, "OL")?TRUE:FALSE) );
+       MQTT_Send_DI ( module, vars->Ups_charging,     (g_strrstr(reponse, "DISCHRG")?FALSE:TRUE) );
+       MQTT_Send_DI ( module, vars->Ups_on_batt,      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
+       MQTT_Send_DI ( module, vars->Ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
+       MQTT_Send_DI ( module, vars->Ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
      }
   }
 /******************************************************************************************************************************/
@@ -366,10 +366,10 @@
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
-       while ( module->WS_messages )
+       while ( module->MQTT_messages )
         { pthread_mutex_lock ( &module->synchro );
-          JsonNode *request = module->WS_messages->data;
-          module->WS_messages = g_slist_remove ( module->WS_messages, request );
+          JsonNode *request = module->MQTT_messages->data;
+          module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
           if ( !strcasecmp (tag, "SET_DO") ) Ups_SET_DO ( module, request );

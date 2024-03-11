@@ -114,10 +114,6 @@
         }
             if (!strcasecmp ( path, "/dls/run/set" ))      Http_traiter_dls_run_set       ( server, msg, path, request );
        else if (!strcasecmp ( path, "/dls/run/acquitter")) Http_traiter_dls_run_acquitter ( server, msg, path, request );
-       else if (!strcasecmp ( path, "/set_di"))            Http_traiter_set_di_post       ( server, msg, path, request );
-       else if (!strcasecmp ( path, "/set_ai"))            Http_traiter_set_ai_post       ( server, msg, path, request );
-       else if (!strcasecmp ( path, "/set_cde"))           Http_traiter_set_cde_post      ( server, msg, path, request );
-       else if (!strcasecmp ( path, "/set_watchdog"))      Http_traiter_set_watchdog_post ( server, msg, path, request );
        else Http_Send_json_response (msg, SOUP_STATUS_NOT_FOUND, "Not found", NULL );
        Json_node_unref ( request );
      }
@@ -152,11 +148,6 @@
     Info_new( __func__, Config.log_msrv, LOG_INFO, "SSL Loaded with '%s' and '%s'", HTTP_DEFAUT_FILE_CERT, HTTP_DEFAUT_FILE_KEY );
 
     soup_server_add_handler ( Partage->com_http.local_socket, "/" , HTTP_Handle_request_CB, NULL, NULL );
-
-    if (Config.instance_is_master)
-     { static gchar *protocols[] = { "live-bus", NULL };
-       soup_server_add_websocket_handler ( Partage->com_http.local_socket, "/ws_bus" , NULL, protocols, Http_traiter_open_websocket_for_slaves_CB, NULL, NULL );
-     }
 
     if (!soup_server_listen_all (Partage->com_http.local_socket, HTTP_DEFAUT_TCP_PORT, SOUP_SERVER_LISTEN_HTTPS, &error))
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "SoupServer Listen Failed '%s' !", error->message );
