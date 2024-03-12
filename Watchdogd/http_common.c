@@ -53,7 +53,7 @@
   { if (! (module && thread_ai)) return;
     Json_node_add_double ( thread_ai, "valeur", valeur );
     Json_node_add_bool   ( thread_ai, "in_range", in_range );
-    MQTT_Send_to_topic ( module->MQTT_session, "master", "SET_AI", thread_ai );
+    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_AI", thread_ai );
   }
 /******************************************************************************************************************************/
 /* MQTT_Send_DI: Envoie le bit DI au master                                                                                   */
@@ -63,7 +63,7 @@
  void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat )
   { if (! (module && thread_di)) return;
     Json_node_add_bool ( thread_di, "etat", etat );
-    MQTT_Send_to_topic ( module->MQTT_session, "master", "SET_DI", thread_di );
+    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_DI", thread_di );
   }
 /******************************************************************************************************************************/
 /* MQTT_Send_DI: Envoie le bit DI au master, au format pulse                                                                  */
@@ -76,7 +76,7 @@
     Json_node_add_string ( thread_di, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_string ( thread_di, "tech_id", tech_id );
     Json_node_add_string ( thread_di, "acronyme", acronyme );
-    MQTT_Send_to_topic ( module->MQTT_session, "master", "SET_DI_PULSE", thread_di );
+    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_DI_PULSE", thread_di );
     Json_node_unref ( thread_di );
   }
 /******************************************************************************************************************************/
@@ -91,7 +91,7 @@
     Json_node_add_string ( thread_watchdog, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_string ( thread_watchdog, "thread_acronyme", thread_acronyme );
     Json_node_add_int    ( thread_watchdog, "consigne", consigne );
-    MQTT_Send_to_topic ( module->MQTT_session, "master", "SET_WATCHDOG", thread_watchdog );
+    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_WATCHDOG", thread_watchdog );
     Json_node_unref(thread_watchdog);
   }
 /******************************************************************************************************************************/
