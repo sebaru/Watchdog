@@ -36,12 +36,16 @@
     JsonNode *EM10_FREQ;
     JsonNode *EM10_PF;
     JsonNode *EM10_VOLTAGE;
+    JsonNode *EM10_ENERGY;
+    JsonNode *EM10_INJECTION;
     JsonNode *EM11_ACT_POWER;
     JsonNode *EM11_APRT_POWER;
     JsonNode *EM11_CURRENT;
     JsonNode *EM11_FREQ;
     JsonNode *EM11_PF;
     JsonNode *EM11_VOLTAGE;
+    JsonNode *EM11_ENERGY;
+    JsonNode *EM11_INJECTION;
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/
