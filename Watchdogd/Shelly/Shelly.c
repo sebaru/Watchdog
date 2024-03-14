@@ -100,6 +100,7 @@
                 gchar *component      = Json_get_string ( first_event, "component" );
                 JsonNode *data        = Json_get_object_as_node ( first_event, "data" );
                 JsonArray *values     = Json_get_array ( data, "values" );
+                           values     = json_array_get_array_element ( values, 0 ); /* Array in array */
                 gdouble energie       = json_array_get_double_element ( values, 0 );
                 gdouble injection     = json_array_get_double_element ( values, 1 );
                 if ( component && !strcmp ( component, "em1data:0" ) )
