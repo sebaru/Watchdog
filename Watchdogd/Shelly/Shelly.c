@@ -103,13 +103,15 @@
                            values     = json_array_get_array_element ( values, 0 ); /* Array in array */
                 gdouble energie       = json_array_get_double_element ( values, 0 );
                 gdouble injection     = json_array_get_double_element ( values, 1 );
-                if ( component && !strcmp ( component, "em1data:0" ) )
-                 { MQTT_Send_AI ( module, vars->EM10_ENERGY, energie, TRUE );
-                   MQTT_Send_AI ( module, vars->EM10_ENERGY, injection, TRUE );
-                 }
-                if ( component && !strcmp ( component, "em1data:1" ) )
-                 { MQTT_Send_AI ( module, vars->EM11_ENERGY, energie, TRUE );
-                   MQTT_Send_AI ( module, vars->EM11_ENERGY, injection, TRUE );
+                if ( component )
+                 { if (!strcmp ( component, "em1data:0" ) )
+                    { MQTT_Send_AI ( module, vars->EM10_ENERGY, energie, TRUE );
+                      MQTT_Send_AI ( module, vars->EM10_INJECTION, injection, TRUE );
+                    }
+                   else if (!strcmp ( component, "em1data:1" ) )
+                    { MQTT_Send_AI ( module, vars->EM11_ENERGY, energie, TRUE );
+                      MQTT_Send_AI ( module, vars->EM11_INJECTION, injection, TRUE );
+                    }
                  }
               }
              Thread_send_comm_to_master ( module, TRUE );
