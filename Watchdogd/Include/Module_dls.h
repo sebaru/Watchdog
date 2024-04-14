@@ -61,9 +61,9 @@
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gchar   unite[32];                                                                                        /* Km, h, ° ... */
     gdouble valeur;
-    guint   last_arch;                                                                         /* Date de la derniere archive */
     guint   in_range;
     guint   archivage;
+    guint   last_arch;                                                                         /* Date de la derniere archive */
     gboolean abonnement;
    };
 
@@ -117,6 +117,8 @@
     gboolean etat;
     gboolean edge_up;
     gboolean edge_down;
+    guint   archivage;
+    guint   last_arch;                                                                         /* Date de la derniere archive */
   };
 
  struct DLS_DO
@@ -127,6 +129,8 @@
     gboolean etat;
     gboolean edge_up;
     gboolean edge_down;
+    guint   archivage;
+    guint   last_arch;                                                                         /* Date de la derniere archive */
   };
 
  struct DLS_CI

@@ -51,7 +51,8 @@
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
-    bit->etat = Json_get_bool ( element, "etat" );
+    bit->archivage = Json_get_int ( element, "archivage" );
+    bit->etat      = Json_get_bool ( element, "etat" );
     bit->mono = Json_get_bool ( element, "mono" );
     plugin->Dls_data_DO = g_slist_prepend ( plugin->Dls_data_DO, bit );
     Info_new( __func__, Config.log_dls, LOG_INFO,
