@@ -28,7 +28,7 @@
 #ifndef _TELEINFO_H_
  #define _TELEINFO_H_
 
- #define TAILLE_BUFFER_TELEINFO           25
+ #define TAILLE_BUFFER_TELEINFO           80
  #define TINFO_RETRY_DELAI                600                               /* Une minute avant de se reconnecter si probleme */
 
  enum

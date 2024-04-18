@@ -77,15 +77,22 @@
  static void Processer_trame( struct THREAD *module )
   { struct TELEINFO_VARS *vars = module->vars;
 
-         if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { MQTT_Send_AI ( module, vars->Adco,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { MQTT_Send_AI ( module, vars->Isous, atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { MQTT_Send_AI ( module, vars->Base,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { MQTT_Send_AI ( module, vars->Hchc,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { MQTT_Send_AI ( module, vars->Hchp,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { MQTT_Send_AI ( module, vars->Iinst, atof(vars->buffer + 6), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { MQTT_Send_AI ( module, vars->Imax,  atof(vars->buffer + 5), TRUE ); }
-    else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { MQTT_Send_AI ( module, vars->Papp,  atof(vars->buffer + 5), TRUE ); }
+    if (Json_get_bool ( module->config, "standard" ) == FALSE )
+     {      if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { MQTT_Send_AI ( module, vars->Adco,  atof(vars->buffer + 5), TRUE ); }
+       else if ( ! strncmp ( vars->buffer, "ISOUS", 5 ) ) { MQTT_Send_AI ( module, vars->Isous, atof(vars->buffer + 6), TRUE ); }
+       else if ( ! strncmp ( vars->buffer, "BASE", 4 ) )  { MQTT_Send_AI ( module, vars->Base,  atof(vars->buffer + 5), TRUE ); }
+       else if ( ! strncmp ( vars->buffer, "HCHC", 4 ) )  { MQTT_Send_AI ( module, vars->Hchc,  atof(vars->buffer + 5), TRUE ); }
+       else if ( ! strncmp ( vars->buffer, "HCHP", 4 ) )  { MQTT_Send_AI ( module, vars->Hchp,  atof(vars->buffer + 5), TRUE ); }
+       else if ( ! strncmp ( vars->buffer, "IINST", 5 ) ) { MQTT_Send_AI ( module, vars->Iinst, atof(vars->buffer + 6), TRUE ); }
+       else if ( ! strncmp ( vars->buffer, "IMAX", 4 ) )  { MQTT_Send_AI ( module, vars->Imax,  atof(vars->buffer + 5), TRUE ); }
+       else if ( ! strncmp ( vars->buffer, "PAPP", 4 ) )  { MQTT_Send_AI ( module, vars->Papp,  atof(vars->buffer + 5), TRUE ); }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
+     }
+    else
+     { Info_new( __func__, module->Thread_debug, LOG_INFO, "Recu %s", vars->buffer );
+            if ( ! strncmp ( vars->buffer, "ADCO", 4 ) )  { MQTT_Send_AI ( module, vars->Adco,  atof(vars->buffer + 5), TRUE ); }
+     }
+
     vars->last_view = Partage->top;
   }
 /******************************************************************************************************************************/
@@ -172,7 +179,7 @@
                     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
                     Info_new( __func__, module->Thread_debug, LOG_ERR,
                              "%s: %s: BufferOverflow, dropping trame (nbr_octet_lu=%d, cpt=%d, taille buffer=%d)",
-                              __func__, thread_tech_id, nbr_octet_lu, cpt, TAILLE_BUFFER_TELEINFO  );
+                              __func__, thread_tech_id, nbr_octet_lu, cpt, TAILLE_BUFFER_TELEINFO );
                   }
            }
         }
