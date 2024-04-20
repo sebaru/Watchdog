@@ -49,7 +49,8 @@
     bit->in_range  = Json_get_bool   ( element, "in_range"  );
     plugin->Dls_data_AI = g_slist_prepend ( plugin->Dls_data_AI, bit );
     Info_new( __func__, Config.log_dls, LOG_INFO,
-              "Create bit DLS_AI '%s:%s'=%f %s (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle );
+              "Create bit DLS_AI '%s:%s'=%f %s (%s) archivage=%d",
+              bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle, bit->archivage );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_AI : Recherche un CH dans les plugins DLS                                                                  */

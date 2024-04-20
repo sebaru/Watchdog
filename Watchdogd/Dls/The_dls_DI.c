@@ -47,7 +47,8 @@
     bit->etat      = Json_get_bool ( element, "etat" );
     plugin->Dls_data_DI = g_slist_prepend ( plugin->Dls_data_DI, bit );
     Info_new( __func__, Config.log_dls, LOG_INFO,
-              "Create bit DLS_DI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
+              "Create bit DLS_DI '%s:%s'=%d (%s) archivage=%d",
+               bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->archivage );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_DI: Recherche un DI dans les plugins DLS                                                                   */
@@ -108,6 +109,8 @@
        if (valeur) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up,   bit );
               else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, bit );
        Partage->audit_bit_interne_per_sec++;
+       Ajouter_arch( bit->tech_id, bit->acronyme, bit->etat*1.0 );                                     /* Archivage si besoin */
+       bit->last_arch = Partage->top;
      }
     bit->etat = valeur;
   }
