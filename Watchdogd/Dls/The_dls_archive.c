@@ -50,7 +50,7 @@
     GSList *liste = plugin->Dls_data_AI;
     while ( liste )
      { struct DLS_AI *bit = liste->data;
-       if ( (bit->archivage && bit->last_arch + bit->archivage <= Partage->top)         /* Archivage demandé & il est temps ? */
+       if ( (bit->archivage && (bit->last_arch + bit->archivage <= Partage->top))       /* Archivage demandé & il est temps ? */
           || bit->last_arch == 0)                                                                                 /* a L'init */
         { Ajouter_arch( bit->tech_id, bit->acronyme, (bit->in_range ? bit->valeur : 0.0) );            /* Archivage si besoin */
           bit->last_arch = Partage->top;
@@ -61,7 +61,7 @@
     liste = plugin->Dls_data_AO;
     while ( liste )
      { struct DLS_AO *bit = liste->data;
-       if ( (bit->archivage && bit->last_arch + bit->archivage <= Partage->top)         /* Archivage demandé & il est temps ? */
+       if ( (bit->archivage && (bit->last_arch + bit->archivage <= Partage->top))       /* Archivage demandé & il est temps ? */
           || bit->last_arch == 0)                                                                                 /* a L'init */
         { Ajouter_arch( bit->tech_id, bit->acronyme, bit->valeur );                                    /* Archivage si besoin */
           bit->last_arch = Partage->top;
@@ -72,7 +72,7 @@
     liste = plugin->Dls_data_DI;
     while ( liste )
      { struct DLS_DI *bit = liste->data;
-       if ( (bit->archivage && bit->last_arch + bit->archivage <= Partage->top)         /* Archivage demandé & il est temps ? */
+       if ( (bit->archivage && (bit->last_arch + bit->archivage <= Partage->top))       /* Archivage demandé & il est temps ? */
           || bit->last_arch == 0)                                                                                 /* a L'init */
         { Ajouter_arch( bit->tech_id, bit->acronyme, bit->etat*1.0 );                                  /* Archivage si besoin */
           bit->last_arch = Partage->top;
@@ -83,7 +83,7 @@
     liste = plugin->Dls_data_DO;
     while ( liste )
      { struct DLS_DO *bit = liste->data;
-       if ( (bit->archivage && bit->last_arch + bit->archivage <= Partage->top)         /* Archivage demandé & il est temps ? */
+       if ( (bit->archivage && (bit->last_arch + bit->archivage <= Partage->top))       /* Archivage demandé & il est temps ? */
           || bit->last_arch == 0)                                                                                 /* a L'init */
         { Ajouter_arch( bit->tech_id, bit->acronyme, bit->etat*1.0 );                                  /* Archivage si besoin */
           bit->last_arch = Partage->top;
@@ -94,7 +94,7 @@
     liste = plugin->Dls_data_CI;
     while ( liste )
      { struct DLS_CI *bit = liste->data;
-       if ( (bit->archivage && bit->last_arch + bit->archivage <= Partage->top)         /* Archivage demandé & il est temps ? */
+       if ( (bit->archivage && (bit->last_arch + bit->archivage <= Partage->top))       /* Archivage demandé & il est temps ? */
           || bit->last_arch == 0)                                                                                 /* a L'init */
         { Ajouter_arch( bit->tech_id, bit->acronyme, bit->valeur*1.0 );                                /* Archivage si besoin */
           bit->last_arch = Partage->top;
@@ -105,7 +105,7 @@
     liste = plugin->Dls_data_CH;
     while ( liste )
      { struct DLS_CH *bit = liste->data;
-       if ( (bit->archivage && bit->last_arch + bit->archivage <= Partage->top)         /* Archivage demandé & il est temps ? */
+       if ( (bit->archivage && (bit->last_arch + bit->archivage <= Partage->top))       /* Archivage demandé & il est temps ? */
           || bit->last_arch == 0)                                                                                 /* a L'init */
         { Ajouter_arch( bit->tech_id, bit->acronyme, bit->valeur*1.0 );                                /* Archivage si besoin */
           bit->last_arch = Partage->top;
@@ -116,7 +116,7 @@
     liste = plugin->Dls_data_REGISTRE;
     while ( liste )
      { struct DLS_REGISTRE *bit = liste->data;
-       if ( (bit->archivage && bit->last_arch + bit->archivage <= Partage->top)         /* Archivage demandé & il est temps ? */
+       if ( (bit->archivage && (bit->last_arch + bit->archivage <= Partage->top))       /* Archivage demandé & il est temps ? */
           || bit->last_arch == 0)                                                                                 /* a L'init */
         { Ajouter_arch( bit->tech_id, bit->acronyme, bit->valeur );                                    /* Archivage si besoin */
           bit->last_arch = Partage->top;
