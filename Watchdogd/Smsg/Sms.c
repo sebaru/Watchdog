@@ -327,9 +327,20 @@
        else switch (txt_notification)
         { case TXT_NOTIF_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
-                { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                            "%s: Error sending with GSM. Falling back to OVH", thread_tech_id );
-                  Envoi_sms_ovh( module, msg, user_phone );
+                { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error sending with GSM" );
+                  gchar *free_sms_api_user = Json_get_string ( user, "free_sms_api_user" );
+                  if (free_sms_api_user && strlen(free_sms_api_user))
+                   { Info_new( __func__, module->Thread_debug, LOG_INFO, "Sending with FREE API" );
+                     gchar chaine[512];
+                     g_snprintf( chaine, sizeof(chaine),
+                                 "curl -k -X POST \"https://smsapi.free-mobile.fr/sendmsg?user=%s&pass=%s&msg=%s\"",
+                                 free_sms_api_user, Json_get_string ( user, "free_sms_api_key" ),
+                                 Json_get_string ( msg, "libelle" ) );
+                   }
+                  else
+                   { Info_new( __func__, module->Thread_debug, LOG_INFO, "Sending with OVH" );
+                     Envoi_sms_ovh( module, msg, user_phone );
+                   }
                 }
                break;
           case TXT_NOTIF_GSM_ONLY:
