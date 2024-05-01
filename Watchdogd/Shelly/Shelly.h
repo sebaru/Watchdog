@@ -29,8 +29,12 @@
  #define _SHELLY_H_
 
 /************************************************** Gestion des shelly ********************************************************/
+ #define SHELLY_PRO_EM_50   "shellyproem50"
+ #define SHELLY_PRO_3_EM    "shellypro3em"
+
  struct SHELLY_VARS
-  { JsonNode *EM10_ACT_POWER;
+  { /* Shelly PRO EM 50 Monophasé */
+    JsonNode *EM10_ACT_POWER;
     JsonNode *EM10_APRT_POWER;
     JsonNode *EM10_CURRENT;
     JsonNode *EM10_FREQ;
@@ -46,9 +50,36 @@
     JsonNode *EM11_VOLTAGE;
     JsonNode *EM11_ENERGY;
     JsonNode *EM11_INJECTION;
+    /* Shelly PRO_3_EM triphasé */
+    JsonNode *U1;
+    JsonNode *U2;
+    JsonNode *U3;
+    JsonNode *I1;
+    JsonNode *I2;
+    JsonNode *I3;
+    JsonNode *I_TOTAL;
+    JsonNode *ACT_TOTAL;
+    JsonNode *ACT_POWER1;
+    JsonNode *ACT_POWER2;
+    JsonNode *ACT_POWER3;
+    JsonNode *APRT_TOTAL;
+    JsonNode *APRT_POWER1;
+    JsonNode *APRT_POWER2;
+    JsonNode *APRT_POWER3;
+    JsonNode *FREQ1;
+    JsonNode *FREQ2;
+    JsonNode *FREQ3;
+    JsonNode *PF1;
+    JsonNode *PF2;
+    JsonNode *PF3;
+    JsonNode *ENERGY1;
+    JsonNode *ENERGY2;
+    JsonNode *ENERGY3;
+    JsonNode *INJECTION1;
+    JsonNode *INJECTION2;
+    JsonNode *INJECTION3;
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/
-
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
