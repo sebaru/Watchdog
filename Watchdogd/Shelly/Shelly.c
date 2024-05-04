@@ -80,9 +80,9 @@
        vars->FREQ1       = Mnemo_create_thread_AI ( module, "FREQ1",        "Fréquence Phase 1", "HZ", ARCHIVE_1_MIN );
        vars->FREQ2       = Mnemo_create_thread_AI ( module, "FREQ2",        "Fréquence Phase 2", "HZ", ARCHIVE_1_MIN );
        vars->FREQ3       = Mnemo_create_thread_AI ( module, "FREQ3",        "Fréquence Phase 3", "HZ", ARCHIVE_1_MIN );
-       vars->PF1         = Mnemo_create_thread_AI ( module, "PF1",          "Facteur de charg Phase 1", "", ARCHIVE_1_MIN );
-       vars->PF2         = Mnemo_create_thread_AI ( module, "PF2",          "Facteur de charg Phase 2", "", ARCHIVE_1_MIN );
-       vars->PF3         = Mnemo_create_thread_AI ( module, "PF3",          "Facteur de charg Phase 3", "", ARCHIVE_1_MIN );
+       vars->PF1         = Mnemo_create_thread_AI ( module, "PF1",          "Facteur de charge Phase 1", "cos", ARCHIVE_1_MIN );
+       vars->PF2         = Mnemo_create_thread_AI ( module, "PF2",          "Facteur de charge Phase 2", "cos", ARCHIVE_1_MIN );
+       vars->PF3         = Mnemo_create_thread_AI ( module, "PF3",          "Facteur de charge Phase 3", "cos", ARCHIVE_1_MIN );
        vars->ENERGY1     = Mnemo_create_thread_AI ( module, "ENERGY1",      "Energie consommée Phase 1", "Wh",   ARCHIVE_1_MIN );
        vars->ENERGY2     = Mnemo_create_thread_AI ( module, "ENERGY2",      "Energie consommée Phase 2", "Wh",   ARCHIVE_1_MIN );
        vars->ENERGY3     = Mnemo_create_thread_AI ( module, "ENERGY3",      "Energie consommée Phase 3", "Wh",   ARCHIVE_1_MIN );
