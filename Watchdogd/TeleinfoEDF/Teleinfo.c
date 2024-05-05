@@ -145,66 +145,70 @@
     gchar *thread_tech_id  = Json_get_string ( module->config, "thread_tech_id" );
     gboolean mode_standard = Json_get_bool ( module->config, "standard" );
 
-    vars->Adco  = Mnemo_create_thread_AI ( module, "ADCO",  "N° d’identification du compteur", "numéro", ARCHIVE_1_JOUR );
-    vars->Isous = Mnemo_create_thread_AI ( module, "ISOUS", "Intensité EDF souscrite ", "A", ARCHIVE_1_MIN );
-    vars->Base  = Mnemo_create_thread_AI ( module, "BASE",  "Index option BASE", "Wh", ARCHIVE_1_MIN );
-    vars->Hchc  = Mnemo_create_thread_AI ( module, "HCHC",  "Index heures creuses", "Wh", ARCHIVE_1_MIN );
-    vars->Hchp  = Mnemo_create_thread_AI ( module, "HCHP",  "Index heures pleines", "Wh", ARCHIVE_1_MIN );
-    vars->Iinst = Mnemo_create_thread_AI ( module, "IINST", "Intensité EDF instantanée", "A", ARCHIVE_1_MIN );
-    vars->Imax  = Mnemo_create_thread_AI ( module, "IMAX",  "Intensité EDF maximale", "A", ARCHIVE_1_MIN );
-    vars->Papp  = Mnemo_create_thread_AI ( module, "PAPP",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+    if (mode_standard == FALSE)
+     { vars->Adco  = Mnemo_create_thread_AI ( module, "ADCO",  "N° d’identification du compteur", "numéro", ARCHIVE_1_JOUR );
+       vars->Isous = Mnemo_create_thread_AI ( module, "ISOUS", "Intensité EDF souscrite ", "A", ARCHIVE_1_MIN );
+       vars->Base  = Mnemo_create_thread_AI ( module, "BASE",  "Index option BASE", "Wh", ARCHIVE_1_MIN );
+       vars->Hchc  = Mnemo_create_thread_AI ( module, "HCHC",  "Index heures creuses", "Wh", ARCHIVE_1_MIN );
+       vars->Hchp  = Mnemo_create_thread_AI ( module, "HCHP",  "Index heures pleines", "Wh", ARCHIVE_1_MIN );
+       vars->Iinst = Mnemo_create_thread_AI ( module, "IINST", "Intensité EDF instantanée", "A", ARCHIVE_1_MIN );
+       vars->Imax  = Mnemo_create_thread_AI ( module, "IMAX",  "Intensité EDF maximale", "A", ARCHIVE_1_MIN );
+       vars->Papp  = Mnemo_create_thread_AI ( module, "PAPP",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+     }
+    else
+     { vars->IRMS1    = Mnemo_create_thread_AI ( module, "IRMS1",   "Courant efficace, phase 1", "A", ARCHIVE_1_MIN );
+       vars->IRMS2    = Mnemo_create_thread_AI ( module, "IRMS2",   "Courant efficace, phase 2", "A", ARCHIVE_1_MIN );
+       vars->IRMS3    = Mnemo_create_thread_AI ( module, "IRMS3",   "Courant efficace, phase 3", "A", ARCHIVE_1_MIN );
+       vars->URMS1    = Mnemo_create_thread_AI ( module, "URMS1",   "Tension efficace, phase 1", "V", ARCHIVE_1_MIN );
+       vars->URMS2    = Mnemo_create_thread_AI ( module, "URMS2",   "Tension efficace, phase 2", "V", ARCHIVE_1_MIN );
+       vars->URMS3    = Mnemo_create_thread_AI ( module, "URMS3",   "Tension efficace, phase 3", "V", ARCHIVE_1_MIN );
+       vars->PREF     = Mnemo_create_thread_AI ( module, "PREF",    "Puissance app. de référence (souscrite)", "kVA", ARCHIVE_1_JOUR );
+       vars->PCOUP    = Mnemo_create_thread_AI ( module, "PCOUP",   "Puissance app. de coupure", "kVA", ARCHIVE_1_JOUR );
+       vars->SINSTS   = Mnemo_create_thread_AI ( module, "SINSTS",  "Puissance app. Instantanée soutirée", "VA", ARCHIVE_1_MIN );
+       vars->SINSTS1  = Mnemo_create_thread_AI ( module, "SINSTS1", "Puissance app. Instantanée soutirée phase 1", "VA", ARCHIVE_1_MIN );
+       vars->SINSTS2  = Mnemo_create_thread_AI ( module, "SINSTS2", "Puissance app. Instantanée soutirée phase 2", "VA", ARCHIVE_1_MIN );
+       vars->SINSTS3  = Mnemo_create_thread_AI ( module, "SINSTS3", "Puissance app. Instantanée soutirée phase 3", "VA", ARCHIVE_1_MIN );
+       vars->SMAXSN   = Mnemo_create_thread_AI ( module, "SMAXSN",  "Puissance app. max. soutirée n", "VA", ARCHIVE_1_HEURE );
+       vars->SMAXSN1  = Mnemo_create_thread_AI ( module, "SMAXSN1", "Puissance app. max. soutirée n phase 1", "VA", ARCHIVE_1_HEURE );
+       vars->SMAXSN2  = Mnemo_create_thread_AI ( module, "SMAXSN2", "Puissance app. max. soutirée n phase 2", "VA", ARCHIVE_1_HEURE );
+       vars->SMAXSN3  = Mnemo_create_thread_AI ( module, "SMAXSN3", "Puissance app. max. soutirée n phase 3", "VA", ARCHIVE_1_HEURE );
+       vars->UMOY1    = Mnemo_create_thread_AI ( module, "UMOY1",   "Tension moyenne phase 1", "V", ARCHIVE_1_HEURE );
+       vars->UMOY2    = Mnemo_create_thread_AI ( module, "UMOY2",   "Tension moyenne phase 2", "V", ARCHIVE_1_HEURE );
+       vars->UMOY3    = Mnemo_create_thread_AI ( module, "UMOY3",   "Tension moyenne phase 3", "V", ARCHIVE_1_HEURE );;
+       vars->NTARF    = Mnemo_create_thread_AI ( module, "NTARF",   "Numéro de l’index tarifaire en cours", "", ARCHIVE_1_HEURE );
+       vars->ADSC     = Mnemo_create_thread_AI ( module, "ADSC",    "Adresse Secondaire du Compteur (n° de série)", "", ARCHIVE_1_JOUR );
+       vars->EAST     = Mnemo_create_thread_AI ( module, "EAST",    "Energie active soutirée totale", "Wh", ARCHIVE_1_MIN );
+       vars->EASF01   = Mnemo_create_thread_AI ( module, "EASF01",  "Energie active soutirée Fournisseur, index 01", "Wh", ARCHIVE_5_MIN );
+       vars->EASF02   = Mnemo_create_thread_AI ( module, "EASF02",  "Energie active soutirée Fournisseur, index 02", "Wh", ARCHIVE_5_MIN );
+       vars->EASF03   = Mnemo_create_thread_AI ( module, "EASF03",  "Energie active soutirée Fournisseur, index 03", "Wh", ARCHIVE_5_MIN );
+       vars->EASF04   = Mnemo_create_thread_AI ( module, "EASF04",  "Energie active soutirée Fournisseur, index 04", "Wh", ARCHIVE_5_MIN );
+       vars->EASF05   = Mnemo_create_thread_AI ( module, "EASF05",  "Energie active soutirée Fournisseur, index 05", "Wh", ARCHIVE_5_MIN );
+       vars->EASF06   = Mnemo_create_thread_AI ( module, "EASF06",  "Energie active soutirée Fournisseur, index 06", "Wh", ARCHIVE_5_MIN );
+       vars->EASF07   = Mnemo_create_thread_AI ( module, "EASF07",  "Energie active soutirée Fournisseur, index 07", "Wh", ARCHIVE_5_MIN );
+       vars->EASF08   = Mnemo_create_thread_AI ( module, "EASF08",  "Energie active soutirée Fournisseur, index 08", "Wh", ARCHIVE_5_MIN );
+       vars->EASF09   = Mnemo_create_thread_AI ( module, "EASF09",  "Energie active soutirée Fournisseur, index 09", "Wh", ARCHIVE_5_MIN );
+       vars->EASF10   = Mnemo_create_thread_AI ( module, "EASF10",  "Energie active soutirée Fournisseur, index 10", "Wh", ARCHIVE_5_MIN );
+       vars->EASD01   = Mnemo_create_thread_AI ( module, "EASD01",  "Energie active soutirée Distributeur, index 01", "Wh", ARCHIVE_5_MIN );
+       vars->EASD02   = Mnemo_create_thread_AI ( module, "EASD02",  "Energie active soutirée Distributeur, index 02", "Wh", ARCHIVE_5_MIN );
+       vars->EASD03   = Mnemo_create_thread_AI ( module, "EASD03",  "Energie active soutirée Distributeur, index 03", "Wh", ARCHIVE_5_MIN );
+       vars->EASD04   = Mnemo_create_thread_AI ( module, "EASD04",  "Energie active soutirée Distributeur, index 04", "Wh", ARCHIVE_5_MIN );
+       vars->PRM      = Mnemo_create_thread_AI ( module, "PRM",     "N° de compteur (ex-PDL)", "", ARCHIVE_1_JOUR );
+       /*vars->STGE     = Mnemo_create_thread_AI ( module, "STGE",    "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+       vars->SMAXSN-1 = Mnemo_create_thread_AI ( module, "SMAXSN-1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+       vars->RELAIS   = Mnemo_create_thread_AI ( module, "RELAIS",  "Etat Relais Heure Creuse", "bool", ARCHIVE_5_MIN );
+       vars->NJOURF   = Mnemo_create_thread_AI ( module, "NJOURF",  "Numéro du jour en cours calendrier fournisseur", "", ARCHIVE_1_HEURE );
+       vars->VTIC     = Mnemo_create_thread_AI ( module, "VTIC",    "Version de la TIC", "VA", ARCHIVE_1_MIN );
+       vars->SMAXSN1-1 = Mnemo_create_thread_AI ( module, "SMAXSN1-1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+       vars->SMAXSN2-1 = Mnemo_create_thread_AI ( module, "SMAXSN2-1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+       vars->SMAXSN3-1 = Mnemo_create_thread_AI ( module, "SMAXSN3-1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+       vars->MSG1
+       vars->NJOURF+1 = Mnemo_create_thread_AI ( module, "NJOURF+1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
+       vars->PJOURF+1
+       vars->DATE
+       vars->NGTF
+       vars->LTARF  HEURES PLEINES */
+     }
 
-    vars->IRMS1    = Mnemo_create_thread_AI ( module, "IRMS1",   "Courant efficace, phase 1", "A", ARCHIVE_1_MIN );
-    vars->IRMS2    = Mnemo_create_thread_AI ( module, "IRMS2",   "Courant efficace, phase 2", "A", ARCHIVE_1_MIN );
-    vars->IRMS3    = Mnemo_create_thread_AI ( module, "IRMS3",   "Courant efficace, phase 3", "A", ARCHIVE_1_MIN );
-    vars->URMS1    = Mnemo_create_thread_AI ( module, "URMS1",   "Tension efficace, phase 1", "V", ARCHIVE_1_MIN );
-    vars->URMS2    = Mnemo_create_thread_AI ( module, "URMS2",   "Tension efficace, phase 2", "V", ARCHIVE_1_MIN );
-    vars->URMS3    = Mnemo_create_thread_AI ( module, "URMS3",   "Tension efficace, phase 3", "V", ARCHIVE_1_MIN );
-    vars->PREF     = Mnemo_create_thread_AI ( module, "PREF",    "Puissance app. de référence (souscrite)", "kVA", ARCHIVE_1_JOUR );
-    vars->PCOUP    = Mnemo_create_thread_AI ( module, "PCOUP",   "Puissance app. de coupure", "kVA", ARCHIVE_1_JOUR );
-    vars->SINSTS   = Mnemo_create_thread_AI ( module, "SINSTS",  "Puissance app. Instantanée soutirée", "VA", ARCHIVE_1_MIN );
-    vars->SINSTS1  = Mnemo_create_thread_AI ( module, "SINSTS1", "Puissance app. Instantanée soutirée phase 1", "VA", ARCHIVE_1_MIN );
-    vars->SINSTS2  = Mnemo_create_thread_AI ( module, "SINSTS2", "Puissance app. Instantanée soutirée phase 2", "VA", ARCHIVE_1_MIN );
-    vars->SINSTS3  = Mnemo_create_thread_AI ( module, "SINSTS3", "Puissance app. Instantanée soutirée phase 3", "VA", ARCHIVE_1_MIN );
-    vars->SMAXSN   = Mnemo_create_thread_AI ( module, "SMAXSN",  "Puissance app. max. soutirée n", "VA", ARCHIVE_1_HEURE );
-    vars->SMAXSN1  = Mnemo_create_thread_AI ( module, "SMAXSN1", "Puissance app. max. soutirée n phase 1", "VA", ARCHIVE_1_HEURE );
-    vars->SMAXSN2  = Mnemo_create_thread_AI ( module, "SMAXSN2", "Puissance app. max. soutirée n phase 2", "VA", ARCHIVE_1_HEURE );
-    vars->SMAXSN3  = Mnemo_create_thread_AI ( module, "SMAXSN3", "Puissance app. max. soutirée n phase 3", "VA", ARCHIVE_1_HEURE );
-    vars->UMOY1    = Mnemo_create_thread_AI ( module, "UMOY1",   "Tension moyenne phase 1", "V", ARCHIVE_1_HEURE );
-    vars->UMOY2    = Mnemo_create_thread_AI ( module, "UMOY2",   "Tension moyenne phase 2", "V", ARCHIVE_1_HEURE );
-    vars->UMOY3    = Mnemo_create_thread_AI ( module, "UMOY3",   "Tension moyenne phase 3", "V", ARCHIVE_1_HEURE );;
-    vars->NTARF    = Mnemo_create_thread_AI ( module, "NTARF",   "Numéro de l’index tarifaire en cours", "", ARCHIVE_1_HEURE );
-    vars->ADSC     = Mnemo_create_thread_AI ( module, "ADSC",    "Adresse Secondaire du Compteur (n° de série)", "", ARCHIVE_1_JOUR );
-    vars->EAST     = Mnemo_create_thread_AI ( module, "EAST",    "Energie active soutirée totale", "Wh", ARCHIVE_1_MIN );
-    vars->EASF01   = Mnemo_create_thread_AI ( module, "EASF01",  "Energie active soutirée Fournisseur, index 01", "Wh", ARCHIVE_5_MIN );
-    vars->EASF02   = Mnemo_create_thread_AI ( module, "EASF02",  "Energie active soutirée Fournisseur, index 02", "Wh", ARCHIVE_5_MIN );
-    vars->EASF03   = Mnemo_create_thread_AI ( module, "EASF03",  "Energie active soutirée Fournisseur, index 03", "Wh", ARCHIVE_5_MIN );
-    vars->EASF04   = Mnemo_create_thread_AI ( module, "EASF04",  "Energie active soutirée Fournisseur, index 04", "Wh", ARCHIVE_5_MIN );
-    vars->EASF05   = Mnemo_create_thread_AI ( module, "EASF05",  "Energie active soutirée Fournisseur, index 05", "Wh", ARCHIVE_5_MIN );
-    vars->EASF06   = Mnemo_create_thread_AI ( module, "EASF06",  "Energie active soutirée Fournisseur, index 06", "Wh", ARCHIVE_5_MIN );
-    vars->EASF07   = Mnemo_create_thread_AI ( module, "EASF07",  "Energie active soutirée Fournisseur, index 07", "Wh", ARCHIVE_5_MIN );
-    vars->EASF08   = Mnemo_create_thread_AI ( module, "EASF08",  "Energie active soutirée Fournisseur, index 08", "Wh", ARCHIVE_5_MIN );
-    vars->EASF09   = Mnemo_create_thread_AI ( module, "EASF09",  "Energie active soutirée Fournisseur, index 09", "Wh", ARCHIVE_5_MIN );
-    vars->EASF10   = Mnemo_create_thread_AI ( module, "EASF10",  "Energie active soutirée Fournisseur, index 10", "Wh", ARCHIVE_5_MIN );
-    vars->EASD01   = Mnemo_create_thread_AI ( module, "EASD01",  "Energie active soutirée Distributeur, index 01", "Wh", ARCHIVE_5_MIN );
-    vars->EASD02   = Mnemo_create_thread_AI ( module, "EASD02",  "Energie active soutirée Distributeur, index 02", "Wh", ARCHIVE_5_MIN );
-    vars->EASD03   = Mnemo_create_thread_AI ( module, "EASD03",  "Energie active soutirée Distributeur, index 03", "Wh", ARCHIVE_5_MIN );
-    vars->EASD04   = Mnemo_create_thread_AI ( module, "EASD04",  "Energie active soutirée Distributeur, index 04", "Wh", ARCHIVE_5_MIN );
-    vars->PRM      = Mnemo_create_thread_AI ( module, "PRM",     "N° de compteur (ex-PDL)", "", ARCHIVE_1_JOUR );
-    /*vars->STGE     = Mnemo_create_thread_AI ( module, "STGE",    "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
-    vars->SMAXSN-1 = Mnemo_create_thread_AI ( module, "SMAXSN-1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
-    vars->RELAIS   = Mnemo_create_thread_AI ( module, "RELAIS",  "Etat Relais Heure Creuse", "bool", ARCHIVE_5_MIN );
-    vars->NJOURF   = Mnemo_create_thread_AI ( module, "NJOURF",  "Numéro du jour en cours calendrier fournisseur", "", ARCHIVE_1_HEURE );
-    vars->VTIC     = Mnemo_create_thread_AI ( module, "VTIC",    "Version de la TIC", "VA", ARCHIVE_1_MIN );
-    vars->SMAXSN1-1 = Mnemo_create_thread_AI ( module, "SMAXSN1-1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
-    vars->SMAXSN2-1 = Mnemo_create_thread_AI ( module, "SMAXSN2-1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
-    vars->SMAXSN3-1 = Mnemo_create_thread_AI ( module, "SMAXSN3-1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
-    vars->MSG1
-    vars->NJOURF+1 = Mnemo_create_thread_AI ( module, "NJOURF+1",  "Puissance apparente EDF consommée", "VA", ARCHIVE_1_MIN );
-    vars->PJOURF+1
-    vars->DATE
-    vars->NGTF
-    vars->LTARF  HEURES PLEINES */
     nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&vars->buffer, 0, TAILLE_BUFFER_TELEINFO );
     vars->mode = TINFO_RETRING;
