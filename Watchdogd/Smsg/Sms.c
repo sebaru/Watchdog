@@ -336,6 +336,7 @@
                                  "curl -k -X POST \"https://smsapi.free-mobile.fr/sendmsg?user=%s&pass=%s&msg=%s\"",
                                  free_sms_api_user, Json_get_string ( user, "free_sms_api_key" ),
                                  Json_get_string ( msg, "libelle" ) );
+                     system ( chaine );
                    }
                   else
                    { Info_new( __func__, module->Thread_debug, LOG_INFO, "Sending with OVH" );
