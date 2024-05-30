@@ -65,8 +65,6 @@
     tcsetattr(fd, TCSANOW, &oldtio);
     tcflush(fd, TCIOFLUSH);
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Ouverture port teleinfo okay %s", port );
-
-    Thread_send_comm_to_master ( module, TRUE );
     return(fd);
   }
 /******************************************************************************************************************************/
