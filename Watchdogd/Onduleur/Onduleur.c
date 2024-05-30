@@ -345,13 +345,13 @@
     vars->Load            = Mnemo_create_thread_AI ( module, "LOAD", "Charge onduleur", "%", ARCHIVE_1_MIN );
     vars->Realpower       = Mnemo_create_thread_AI ( module, "REALPOWER", "Charge onduleur", "W", ARCHIVE_1_MIN );
     vars->Battery_charge  = Mnemo_create_thread_AI ( module, "BATTERY_CHARGE", "Charge batterie", "%", ARCHIVE_1_MIN );
-    vars->Input_voltage   = Mnemo_create_thread_AI ( module, "INPUT_VOLTAGE", "Tension d'entrée", "V", ARCHIVE_1_MIN );
+    vars->Input_voltage   = Mnemo_create_thread_AI ( module, "INPUT_VOLTAGE", "Tension d'entrée", "V", ARCHIVE_5_MIN );
     vars->Battery_runtime = Mnemo_create_thread_AI ( module, "BATTERY_RUNTIME", "Durée de batterie restante", "s", ARCHIVE_1_MIN );
     vars->Battery_voltage = Mnemo_create_thread_AI ( module, "BATTERY_VOLTAGE", "Tension batterie", "V", ARCHIVE_1_MIN );
-    vars->Input_hz        = Mnemo_create_thread_AI ( module, "INPUT_HZ", "Fréquence d'entrée", "HZ", ARCHIVE_1_MIN );
+    vars->Input_hz        = Mnemo_create_thread_AI ( module, "INPUT_HZ", "Fréquence d'entrée", "HZ", ARCHIVE_5_MIN );
     vars->Output_current  = Mnemo_create_thread_AI ( module, "OUTPUT_CURRENT", "Courant de sortie", "A", ARCHIVE_1_MIN );
-    vars->Output_hz       = Mnemo_create_thread_AI ( module, "OUTPUT_HZ", "Fréquence de sortie", "HZ", ARCHIVE_1_MIN );
-    vars->Output_voltage  = Mnemo_create_thread_AI ( module, "OUTPUT_VOLTAGE", "Tension de sortie", "V", ARCHIVE_1_MIN );
+    vars->Output_hz       = Mnemo_create_thread_AI ( module, "OUTPUT_HZ", "Fréquence de sortie", "HZ", ARCHIVE_5_MIN );
+    vars->Output_voltage  = Mnemo_create_thread_AI ( module, "OUTPUT_VOLTAGE", "Tension de sortie", "V", ARCHIVE_5_MIN );
 
     Mnemo_create_thread_DO ( module, "LOAD_OFF",        "Coupe la sortie ondulée", TRUE );
     Mnemo_create_thread_DO ( module, "LOAD_ON",         "Active la sortie ondulée", TRUE );

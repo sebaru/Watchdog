@@ -1,6 +1,6 @@
 [Unit]
 Description=Watchdog System daemon
-After=syslog.target network.target auditd.service
+After=syslog.target network.target auditd.service mariadb.service
 
 [Service]
 #ExecStart=/usr/bin/valgrind --tool=memcheck --leak-check=full --log-file=/var/log/watchdog.log /usr/local/bin/Watchdogd

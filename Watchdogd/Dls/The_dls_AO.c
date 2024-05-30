@@ -56,7 +56,8 @@
     bit->valeur    = Json_get_double ( element, "valeur" );
     plugin->Dls_data_AO = g_slist_prepend ( plugin->Dls_data_AO, bit );
     Info_new( __func__, Config.log_dls, LOG_INFO,
-              "Create bit DLS_AO '%s:%s'=%f %s (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle );
+              "Create bit DLS_AO '%s:%s'=%f %s (%s) archivage=%d",
+               bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle, bit->archivage );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_AO : Recherche un CH dans les plugins DLS                                                                  */

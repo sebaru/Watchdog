@@ -51,11 +51,13 @@
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
-    bit->etat = Json_get_bool ( element, "etat" );
+    bit->archivage = Json_get_int ( element, "archivage" );
+    bit->etat      = Json_get_bool ( element, "etat" );
     bit->mono = Json_get_bool ( element, "mono" );
     plugin->Dls_data_DO = g_slist_prepend ( plugin->Dls_data_DO, bit );
     Info_new( __func__, Config.log_dls, LOG_INFO,
-              "Create bit DLS_DO '%s:%s'=%d (%s) mono=%d", bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->mono );
+              "Create bit DLS_DO '%s:%s'=%d (%s) mono=%d  archivage=%d",
+               bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->mono, bit->archivage );
   }
 /******************************************************************************************************************************/
 /* Dls_data_lookup_DO: Recherche un DO dans les plugins DLS                                                                   */
@@ -98,6 +100,8 @@
     Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
               (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, dout->etat );
+    Ajouter_arch( dout->tech_id, dout->acronyme, dout->etat*1.0 );                                     /* Archivage si besoin */
+    dout->last_arch = Partage->top;
 
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)

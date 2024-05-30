@@ -3,18 +3,17 @@
 #* Projet WatchDog version 3.0       Gestion d'habitat                              ven 03 septembre 2021 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS= 
+SUBDIRS=
 
 lib_LTLIBRARIES                         = libwatchdog-server-gpiod.la
-libwatchdog_server_gpiod_la_SOURCES    = Gpiod.c Gpiod.h admin_gpiod.c
+libwatchdog_server_gpiod_la_SOURCES    = Gpiod.c Gpiod.h
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include
 
 libwatchdog_server_gpiod_la_LDFLAGS = -rdynamic \
-                                      `pkg-config --libs glib-2.0 json-glib-1.0 libsoup-3.0 libgpiod` \
-                                      `mysql_config --libs`
+                                      `pkg-config --libs glib-2.0 json-glib-1.0 libsoup-3.0 libgpiod`
 
-libwatchdog_server_gpiod_la_CFLAGS = `pkg-config --cflags glib-2.0 json-glib-1.0 libsoup-3.0 libgpiod` \
-                                     `mysql_config --cflags`
+libwatchdog_server_gpiod_la_CFLAGS = `pkg-config --cflags glib-2.0 json-glib-1.0 libsoup-3.0 libgpiod`
+
 

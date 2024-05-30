@@ -28,15 +28,14 @@
 #ifndef _ARCHIVAGE_DB_H_
  #define _ARCHIVAGE_DB_H_
 
- #define ARCHIVE_MAX_ENREG_TO_API   10000
+ #define ARCHIVE_MAX_ENREG_TO_API   500
 
- enum
-  { ARCHIVE_NONE,
-    ARCHIVE_5_SEC,
-    ARCHIVE_1_MIN,
-    ARCHIVE_1_HEURE,
-    ARCHIVE_1_JOUR
-  };
+ #define ARCHIVE_NONE           0
+ #define ARCHIVE_5_SEC          50
+ #define ARCHIVE_1_MIN          600
+ #define ARCHIVE_5_MIN          3000
+ #define ARCHIVE_1_HEURE        36000
+ #define ARCHIVE_1_JOUR         864000
 
 /******************************************* Définitions des prototypes *******************************************************/
  extern void Ajouter_arch( gchar *tech_id, gchar *nom, gdouble valeur );

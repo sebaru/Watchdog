@@ -28,7 +28,7 @@
 #ifndef _TELEINFO_H_
  #define _TELEINFO_H_
 
- #define TAILLE_BUFFER_TELEINFO           25
+ #define TAILLE_BUFFER_TELEINFO           128
  #define TINFO_RETRY_DELAI                600                               /* Une minute avant de se reconnecter si probleme */
 
  enum
@@ -52,6 +52,43 @@
     JsonNode *Iinst;
     JsonNode *Imax;
     JsonNode *Papp;
+    JsonNode *IRMS1;
+    JsonNode *IRMS2;
+    JsonNode *IRMS3;
+    JsonNode *URMS1;
+    JsonNode *URMS2;
+    JsonNode *URMS3;
+    JsonNode *PREF;
+    JsonNode *PCOUP;
+    JsonNode *SINSTS;
+    JsonNode *SINSTS1;
+    JsonNode *SINSTS2;
+    JsonNode *SINSTS3;
+    JsonNode *SMAXSN;
+    JsonNode *SMAXSN1;
+    JsonNode *SMAXSN2;
+    JsonNode *SMAXSN3;
+    JsonNode *UMOY1;
+    JsonNode *UMOY2;
+    JsonNode *UMOY3;
+    JsonNode *NTARF;
+    JsonNode *ADSC;
+    JsonNode *EAST;
+    JsonNode *EASF01;
+    JsonNode *EASF02;
+    JsonNode *EASF03;
+    JsonNode *EASF04;
+    JsonNode *EASF05;
+    JsonNode *EASF06;
+    JsonNode *EASF07;
+    JsonNode *EASF08;
+    JsonNode *EASF09;
+    JsonNode *EASF10;
+    JsonNode *EASD01;
+    JsonNode *EASD02;
+    JsonNode *EASD03;
+    JsonNode *EASD04;
+    JsonNode *PRM;
  };
 
 /************************************************ Définitions des prototypes **************************************************/

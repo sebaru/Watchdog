@@ -236,7 +236,7 @@
     JsonArray *receivers = Json_node_add_array ( RootNode, "receivers" );
     Json_array_add_element ( receivers, json_node_init_string ( json_node_alloc(), telephone ) );
 
-    gchar libelle[128];
+    gchar libelle[256];
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
     Json_node_add_string( RootNode, "message", libelle );
 
@@ -289,6 +289,36 @@
     g_object_unref( soup_msg );
   }
 /******************************************************************************************************************************/
+/* Envoi_sms_smsbox: Envoi un sms par SMSBOX                                                                                  */
+/* Entrée: le message à envoyer sateur                                                                                        */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Envoi_sms_freeapi ( struct THREAD *module, JsonNode *msg, JsonNode *user )
+  { gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+
+    JsonNode *RootNode = Json_node_create();
+    Json_node_add_string( RootNode, "user", Json_get_string ( user, "free_sms_api_user" ) );
+    Json_node_add_string( RootNode, "pass", Json_get_string ( user, "free_sms_api_key" ) );
+
+    gchar libelle[256];
+    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
+    Json_node_add_string( RootNode, "msg",  libelle );
+
+/********************************************************* Envoi de la requete ************************************************/
+    SoupMessage *soup_msg = soup_message_new ( "POST", "https://smsapi.free-mobile.fr/sendmsg" );
+    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, RootNode );
+    Json_node_unref ( response );
+    Json_node_unref ( RootNode );
+
+    gint status_code = soup_message_get_status ( soup_msg );
+    if (status_code!=200)
+     { gchar *reason_phrase = soup_message_get_reason_phrase ( soup_msg );
+       Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
+     }
+    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, Json_get_string ( user, "email" ) );
+    g_object_unref( soup_msg );
+  }
+/******************************************************************************************************************************/
 /* Smsg_send_to_all_authorized_recipients : Envoi à tous les portables autorisés                                              */
 /* Entrée: le message                                                                                                         */
 /* Sortie : néant                                                                                                             */
@@ -327,9 +357,16 @@
        else switch (txt_notification)
         { case TXT_NOTIF_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
-                { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                            "%s: Error sending with GSM. Falling back to OVH", thread_tech_id );
-                  Envoi_sms_ovh( module, msg, user_phone );
+                { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error sending with GSM" );
+                  gchar *free_sms_api_user = Json_get_string ( user, "free_sms_api_user" );
+                  if (free_sms_api_user && strlen(free_sms_api_user))
+                   { Info_new( __func__, module->Thread_debug, LOG_INFO, "Sending with FREE API" );
+                     Envoi_sms_freeapi( module, msg, user );
+                   }
+                  else
+                   { Info_new( __func__, module->Thread_debug, LOG_INFO, "Sending with OVH" );
+                     Envoi_sms_ovh( module, msg, user_phone );
+                   }
                 }
                break;
           case TXT_NOTIF_GSM_ONLY:
