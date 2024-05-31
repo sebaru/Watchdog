@@ -210,6 +210,14 @@
     return( tempo->state );
   }
 /******************************************************************************************************************************/
+/* Dls_data_get_TEMPO_time: Renvoie le temps de decompte restant de la tempo                                                  */
+/* Sortie : le temps, ou 0 si pas trouvé                                                                                      */
+/******************************************************************************************************************************/
+ gint Dls_data_get_TEMPO_time ( struct DLS_TEMPO *bit )
+  { if (!bit) return(0);
+    return( ((bit->date_on - Partage->top) > 0 ? (bit->date_on - Partage->top) : 0) );
+  }
+/******************************************************************************************************************************/
 /* Dls_TEMPO_to_json : Formate un bit au format JSON                                                                          */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */

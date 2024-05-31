@@ -283,6 +283,7 @@
  extern void     Dls_data_set_TEMPO     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,
                                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
  extern gboolean Dls_data_get_TEMPO     ( struct DLS_TEMPO *bit );
+ extern gint     Dls_data_get_TEMPO_time ( struct DLS_TEMPO *bit );
 
 
  extern void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input );
