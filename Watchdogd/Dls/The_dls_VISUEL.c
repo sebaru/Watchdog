@@ -93,33 +93,28 @@
          || visu->disable != disable
          || visu->valeur  != valeur
        )
-     { if ( visu->last_change_reset + 50 <= Partage->top )                 /* Reset compteur de changes toutes les 5 secondes */
-        { visu->changes = 0;
-          visu->last_change_reset = Partage->top;
-        }
-
-       if ( visu->changes <= 10 )                                                          /* Si moins de 10 changes en 5 sec */
-        { if ( visu->changes == 10 ) { visu->disable = TRUE; }                      /* Est-ce le dernier change avant blocage */
-          else { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
-                 g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
-                 g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
-                 Convert_libelle_dynamique ( visu->tech_id, visu->libelle, sizeof(visu->libelle) );
-                 visu->valeur  = valeur;
-                 visu->cligno  = cligno;
-                 visu->disable = disable;
-               }
-
-          pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
-          Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' cligno=%d libelle='%s', disable=%d",
-                    (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
-                     visu->mode, visu->color, visu->valeur, visu->cligno, visu->libelle, visu->disable );
-        }
-       visu->changes++;                                                                                /* Un change de plus ! */
-       Partage->audit_bit_interne_per_sec++;
+     { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
+       g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
+       g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
+       Convert_libelle_dynamique ( visu->tech_id, visu->libelle, sizeof(visu->libelle) );
+       visu->valeur  = valeur;
+       visu->cligno  = cligno;
+       visu->disable = disable;
+       visu->changed = TRUE;
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' cligno=%d libelle='%s', disable=%d",
+                 (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
+                  visu->mode, visu->color, visu->valeur, visu->cligno, visu->libelle, visu->disable );
      }
+
+    if (visu->changed && Partage->top >= visu->next_send)
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );                                /* Ajout dans la liste de i a traiter */
+       Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       visu->changed = FALSE;
+       visu->next_send = Partage->top + 10;
+     }
+    Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
 /* Dls_VISUEL_to_json : Formate un bit au format JSON                                                                         */

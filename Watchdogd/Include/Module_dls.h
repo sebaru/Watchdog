@@ -170,8 +170,8 @@
     gdouble  valeur;
     gboolean cligno;
     gboolean disable;
-    gint     changes;
-    gint     last_change_reset;
+    gboolean changed;
+    gint     next_send;
   };
 
  struct DLS_MESSAGE
