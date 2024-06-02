@@ -102,9 +102,10 @@
        visu->disable = disable;
        visu->changed = TRUE;
        Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' cligno=%d libelle='%s', disable=%d",
+                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s', decimal='%d') "
+                 "cligno=%d libelle='%s', disable=%d",
                  (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
-                  visu->mode, visu->color, visu->valeur, visu->cligno, visu->libelle, visu->disable );
+                  visu->mode, visu->color, visu->valeur, visu->unite, visu->decimal, visu->cligno, visu->libelle, visu->disable );
      }
 
     if (visu->changed && Partage->top >= visu->next_send)
@@ -115,6 +116,48 @@
        visu->next_send = Partage->top + 10;
      }
     Partage->audit_bit_interne_per_sec++;
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_visuel_for_registre : Met un jour un visuel accroché a un registre                                            */
+/* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
+                                         gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable, gint decimal )
+  { if (!visu) return;
+    if (!src) return;
+
+    gdouble valeur = Dls_data_get_REGISTRE ( src );
+    visu->decimal  = decimal;
+    g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
+    Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, libelle, disable );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_visuel_for_watchdog : Met un jour un visuel accroché a un watchdog                                            */
+/* Entrée : le dls en cours, le visuel, le watchdog et les parametre du visuel                                                */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
+                                         gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable )
+  { if (!visu) return;
+    if (!src) return;
+
+    gdouble valeur = Dls_data_get_WATCHDOG_time ( src );
+    visu->decimal  = 0;
+    g_snprintf( visu->unite, sizeof(visu->unite), "s" );
+    Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, libelle, disable );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_visuel_for_tempo : Met un jour un visuel accroché a une temporisation                                         */
+/* Entrée : le dls en cours, le visuel, la temporisation et les parametre du visuel                                           */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
+                                      gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable )
+  { if (!visu) return;
+    if (!src) return;
+
+    gdouble valeur = Dls_data_get_TEMPO_time ( src );
+    visu->decimal  = 0;
+    g_snprintf( visu->unite, sizeof(visu->unite), "s" );
+    Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, libelle, disable );
   }
 /******************************************************************************************************************************/
 /* Dls_VISUEL_to_json : Formate un bit au format JSON                                                                         */
@@ -130,5 +173,7 @@
     Json_node_add_bool   ( RootNode, "cligno",    bit->cligno );
     Json_node_add_bool   ( RootNode, "disable",   bit->disable );
     Json_node_add_string ( RootNode, "libelle",   bit->libelle );
+    Json_node_add_string ( RootNode, "unite",     bit->unite );
+    Json_node_add_int    ( RootNode, "decimal",   bit->decimal );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
