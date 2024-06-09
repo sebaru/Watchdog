@@ -108,7 +108,7 @@
                   visu->mode, visu->color, visu->valeur, visu->unite, visu->decimal, visu->cligno, visu->libelle, visu->disable );
      }
 
-    if (visu->changed && Partage->top >= visu->next_send)
+    if (visu->changed && (Partage->top >= visu->next_send))
      { pthread_mutex_lock( &Partage->com_msrv.synchro );                                /* Ajout dans la liste de i a traiter */
        Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
