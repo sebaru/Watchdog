@@ -655,43 +655,30 @@ end:
 
 /******************************************************* Ecoute du MQTT *******************************************************/
     mosquitto_lib_init();
-    Partage->com_msrv.MQTT_session = NULL;
-    if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
-     { Partage->com_msrv.MQTT_session = mosquitto_new( Json_get_string ( Config.config, "agent_uuid" ), FALSE, NULL );
-       if (!Partage->com_msrv.MQTT_session)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT session error." ); goto fourth_stage_end; }
-       else if ( mosquitto_connect( Partage->com_msrv.MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT connection to '%s' error.", Config.master_hostname );
-          goto fourth_stage_end;
-        }
-       else
-        { gchar topic[256];
-          g_snprintf ( topic, sizeof(topic), "agent/master/#" );
-          mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
-          g_snprintf ( topic, sizeof(topic), "agent/%s/#", Json_get_string ( Config.config, "agent_uuid" ) );
-          mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
-          g_snprintf ( topic, sizeof(topic), "agents/#" );
-          mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
+    Partage->com_msrv.MQTT_session = mosquitto_new( Json_get_string ( Config.config, "agent_uuid" ), FALSE, NULL );
+    if (!Partage->com_msrv.MQTT_session)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT session error." ); goto fourth_stage_end; }
+    else if ( mosquitto_connect( Partage->com_msrv.MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT connection to '%s' error.", Config.master_hostname );
+       goto fourth_stage_end;
+     }
 
-          mosquitto_message_callback_set( Partage->com_msrv.MQTT_session, MSRV_on_mqtt_message_CB );
-        }
+    mosquitto_message_callback_set( Partage->com_msrv.MQTT_session, MSRV_on_mqtt_message_CB );
+    if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
+     { gchar topic[256];
+       g_snprintf ( topic, sizeof(topic), "agent/master/#" );
+       mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
+       g_snprintf ( topic, sizeof(topic), "agent/%s/#", Json_get_string ( Config.config, "agent_uuid" ) );
+       mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
+       g_snprintf ( topic, sizeof(topic), "agents/#" );
+       mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
      }
     else
-     { Partage->com_msrv.MQTT_session = mosquitto_new( Json_get_string ( Config.config, "agent_uuid" ), FALSE, NULL );
-       if (!Partage->com_msrv.MQTT_session)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT session error." ); goto fourth_stage_end; }
-       else if ( mosquitto_connect( Partage->com_msrv.MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT connection to '%s' error.", Config.master_hostname );
-          goto fourth_stage_end;
-        }
-       else
-        { gchar topic[256];
-          g_snprintf ( topic, sizeof(topic), "agent/%s/#", Json_get_string ( Config.config, "agent_uuid" ) );
-          mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
-          g_snprintf ( topic, sizeof(topic), "agents/#" );
-          mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
-          mosquitto_message_callback_set( Partage->com_msrv.MQTT_session, MSRV_on_mqtt_message_CB );
-        }
+     { gchar topic[256];
+       g_snprintf ( topic, sizeof(topic), "agent/%s/#", Json_get_string ( Config.config, "agent_uuid" ) );
+       mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
+       g_snprintf ( topic, sizeof(topic), "agents/#" );
+       mosquitto_subscribe( Partage->com_msrv.MQTT_session, NULL, topic, 0 );
      }
 
     if ( mosquitto_loop_start( Partage->com_msrv.MQTT_session ) != MOSQ_ERR_SUCCESS )
