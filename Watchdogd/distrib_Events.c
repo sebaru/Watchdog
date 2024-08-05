@@ -50,7 +50,7 @@
        if (MSRV_Map_to_thread ( RootNode ))
         { gchar topic[256];
           g_snprintf ( topic, sizeof(topic), "thread/%s", Json_get_string ( RootNode, "thread_tech_id" ) );
-          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, topic, "SET_DO", RootNode );
+          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, topic, "SET_DO", RootNode );
         }
        else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
                       "'%s:%s' is not mapped. dropping",
@@ -69,7 +69,7 @@
        if (MSRV_Map_to_thread ( RootNode ))
         { gchar topic[256];
           g_snprintf ( topic, sizeof(topic), "thread/%s", Json_get_string ( RootNode, "thread_tech_id" ) );
-          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, topic, "SET_AO", RootNode );
+          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, topic, "SET_AO", RootNode );
         }
        else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
                       "'%s:%s' is not mapped. dropping",
