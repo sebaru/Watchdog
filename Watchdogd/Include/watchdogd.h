@@ -70,7 +70,8 @@
     GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
     SoupWebsocketConnection *API_websocket;
     GSList *API_ws_messages;                                                             /* Liste des messages recus de l'API */
-    struct mosquitto *MQTT_session;                                                            /* Session MQTT vers le broker */
+    struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
+    struct mosquitto *MQTT_API_session;                                                    /* Session MQTT vers le broker API */
     GSList *MQTT_messages;                                                               /* Liste des messages recus via MQTT */
     gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
   };
