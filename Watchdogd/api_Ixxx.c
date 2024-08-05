@@ -40,12 +40,7 @@
 /******************************************************************************************************************************/
  void API_Send_visuels ( void )
   { gint cpt = 0;
-    JsonNode *RootNode  = Json_node_create();
-    if (!RootNode) return;
-    Json_node_add_string ( RootNode, "tag", "visuels" );
-    JsonArray *Visuels = Json_node_add_array ( RootNode, "visuels" );
-    if (!Visuels) { Json_node_unref ( RootNode ); return; }
-
+    JsonNode *element = Json_node_create ();
     while (Partage->com_msrv.liste_visuel && Partage->com_msrv.Thread_run == TRUE && cpt<100)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );
        struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
@@ -56,12 +51,10 @@
                 "Send VISUEL %s:%s mode=%s, color=%s, valeur='%f', cligno=%d, libelle='%s', disable=%d",
                  visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->valeur, visuel->cligno, visuel->libelle, visuel->disable
                );
-       JsonNode *element = Json_node_create ();
        Dls_VISUEL_to_json ( element, visuel );
-       Json_array_add_element ( Visuels, element );
+       MQTT_Send_to_API ( "DLS_VISUEL", element );
        cpt++;
      }
-    Partage->liste_json_to_ws_api = g_slist_prepend ( Partage->liste_json_to_ws_api, RootNode );
-    Partage->liste_json_to_ws_api_size++;
+    Json_node_unref ( element );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
