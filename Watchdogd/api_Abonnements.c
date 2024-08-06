@@ -33,22 +33,15 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void API_Send_Abonnements ( void )
-  { JsonNode *RootNode = Json_node_create();
-    if (!RootNode) return;
-    Json_node_add_string ( RootNode, "tag", "abonnements" );
-    JsonArray *Abonnements = Json_node_add_array ( RootNode, "abonnements" );
-    if (!Abonnements) { Json_node_unref ( RootNode ); return; }
-
-    gint cpt = 0;
+  { gint cpt = 0;
     while (Partage->abonnements && Partage->com_msrv.Thread_run == TRUE && cpt<100)
      { pthread_mutex_lock( &Partage->abonnements_synchro );                           /* Ajout dans la liste de msg a traiter */
        JsonNode *element = Partage->abonnements->data;
        Partage->abonnements = g_slist_remove ( Partage->abonnements, element );
        pthread_mutex_unlock( &Partage->abonnements_synchro );
-       Json_array_add_element ( Abonnements, element );
+       MQTT_Send_to_API ( "DLS_ABONNEMENT", element );
+       Json_node_unref ( element );
        cpt++;
      }
-    Partage->liste_json_to_ws_api = g_slist_prepend ( Partage->liste_json_to_ws_api, RootNode );
-    Partage->liste_json_to_ws_api_size++;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
