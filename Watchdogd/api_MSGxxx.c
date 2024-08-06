@@ -145,11 +145,6 @@
 /******************************************************************************************************************************/
  void API_Send_MSGS ( void )
   { gint cpt = 0;
-    JsonNode *RootNode = Json_node_create();
-    if (!RootNode) return;
-    Json_node_add_string ( RootNode, "tag", "histos" );
-    JsonArray *Histos = Json_node_add_array ( RootNode, "histos" );
-    if (!Histos) { Json_node_unref ( RootNode ); return; }
 
     while (Partage->com_msrv.liste_msg && Partage->com_msrv.Thread_run == TRUE && cpt<100)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
@@ -166,8 +161,7 @@
           if ( !event->msg->last_on || (Partage->top >= event->msg->last_on + rate_limit*10 ) )
            { event->msg->last_on = Partage->top;
              MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "DLS_HISTO", event->msg->source_node );
-             json_node_ref ( event->msg->source_node );                          /* Pour ajout dans l'array qui prend le lead */
-             Json_array_add_element ( Histos, event->msg->source_node );
+             MQTT_Send_to_API ( "DLS_HISTO", event->msg->source_node );
            }
           else
            { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
@@ -178,14 +172,13 @@
         { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );
           if(histo)
            { MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "DLS_HISTO", histo );
-             Json_array_add_element ( Histos, histo );
+             MQTT_Send_to_API ( "DLS_HISTO", histo );
+             Json_node_unref ( histo );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
                             event->msg->tech_id, event->msg->acronyme );
         }
        g_free(event);
        cpt++;
      }
-    Partage->liste_json_to_ws_api = g_slist_append ( Partage->liste_json_to_ws_api, RootNode );
-    Partage->liste_json_to_ws_api_size++;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
