@@ -290,7 +290,7 @@
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void MSRV_Agent_upgrade_to ( gchar *branche )
+ void MSRV_Agent_upgrade_to ( gchar *branche )
   { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading to '%s' in progress", branche );
     gint pid = getpid();
     gint new_pid = fork();
@@ -353,208 +353,6 @@
      }
 end:
     Json_node_unref ( request );
-  }
-/******************************************************************************************************************************/
-/* MSRV_Handle_API_messages: Traite les messages recue de l'API                                                               */
-/* Entrée: les parametres de la libsoup                                                                                       */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MSRV_Handle_API_messages ( void )
-  {
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    JsonNode *request = Partage->com_msrv.API_ws_messages->data;
-    Partage->com_msrv.API_ws_messages = g_slist_remove ( Partage->com_msrv.API_ws_messages, request );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
-
-    gchar *agent_tag = Json_get_string ( request, "agent_tag" );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "receive agent_tag '%s' !", agent_tag );
-
-         if ( !strcasecmp( agent_tag, "RESET") )
-     { Partage->com_msrv.Thread_run = FALSE;
-       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "RESET: Stopping in progress" );
-     }
-    else if ( !strcasecmp( agent_tag, "UPGRADE") )
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading in progress" );
-       MSRV_Agent_upgrade_to ( WTD_BRANCHE );
-     }
-    else if ( !strcasecmp( agent_tag, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
-    else if ( !strcasecmp( agent_tag, "THREAD_RESTART") ) { Thread_Stop_one_thread ( request );
-                                                            Thread_Start_one_thread ( NULL, 0, request, NULL );
-                                                          }
-    else if ( !strcasecmp( agent_tag, "THREAD_SEND") )    { Thread_Push_API_message ( request ); }
-    else if ( !strcasecmp( agent_tag, "THREAD_DEBUG") )   { Thread_Set_debug ( request ); }
-    else if ( !strcasecmp( agent_tag, "AGENT_SET") )
-     { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
-               Json_has_member ( request, "log_dls" ) &&
-               Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
-             )
-          )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "AGENT_SET: wrong parameters" );
-          goto end;
-        }
-       Config.log_bus    = Json_get_bool ( request, "log_bus" );
-       Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
-       Config.log_dls    = Json_get_bool ( request, "log_dls" );
-       gboolean headless = Json_get_bool ( request, "headless" );
-       gint log_level    = Json_get_int  ( request, "log_level" );
-       gchar *branche    = Json_get_string ( request, "branche" );
-       Info_change_log_level ( log_level );
-       Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, log_bus=%d, log_dls=%d, log_level=%d, headless=%d",
-                 Config.log_msrv, Config.log_bus, Config.log_dls, log_level, headless );
-       if (Config.headless != headless)
-        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
-          Partage->com_msrv.Thread_run = FALSE;
-        }
-       if (strcmp ( WTD_BRANCHE, branche ))
-        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: branche has changed, upgrading and rebooting" );
-          MSRV_Agent_upgrade_to ( branche );
-        }
-     }
-
-    if (Config.instance_is_master == FALSE) goto end;
-
-    if ( !strcasecmp( agent_tag, "REMAP") )
-     { MSRV_Remap();
-       MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "SYNC_IO", NULL );/* Synchronisation des IO depuis les threads */
-     }
-    else if ( !strcasecmp( agent_tag, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
-    else if ( !strcasecmp( agent_tag, "SYN_CLIC") )
-     { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end; }
-       if ( !Json_has_member ( request, "acronyme" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end; }
-       gchar *tech_id  = Json_get_string ( request, "tech_id" );
-       gchar *acronyme = Json_get_string ( request, "acronyme" );
-       struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
-       Dls_data_set_DI_pulse ( NULL, bit );
-     }
-    else if ( !strcasecmp( agent_tag, "DLS_ACQUIT") )
-     { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_ACQUIT: tech_id is missing" );
-          goto end;
-        }
-       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
-       Dls_Acquitter_plugin ( plugin_tech_id );
-     }
-    else if ( !strcasecmp( agent_tag, "DLS_COMPIL") )
-     { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
-          goto end;
-        }
-       gchar *target_tech_id = Json_get_string ( request, "tech_id" );
-       gboolean reset = TRUE;
-       if (Json_has_member ( request, "dls_reset" ) && Json_get_bool ( request, "dls_reset" ) == FALSE ) reset = FALSE;
-       struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( target_tech_id );
-       if (found) Dls_Export_Data_to_API ( found );   /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
-       struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id, reset );
-       if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': resetted", target_tech_id );
-           else Info_new( __func__, Config.log_dls, LOG_INFO, "'%s': error when resetting", target_tech_id );
-       Dls_Load_horloge_ticks();
-     }
-    else if ( !strcasecmp( agent_tag, "ABONNER") )
-     { if ( !Json_has_member ( request, "cadrans" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "ABONNER: cadrans is missing" );
-          goto end;
-        }
-       pthread_mutex_lock ( &Partage->com_dls.synchro );
-       GList *Cadrans = json_array_get_elements ( Json_get_array ( request, "cadrans" ) );
-       GList *cadrans = Cadrans;
-       while(cadrans)
-        { JsonNode *cadran = cadrans->data;
-          gchar *classe    = Json_get_string ( cadran, "classe" );
-          gchar *tech_id   = Json_get_string ( cadran, "tech_id" );
-          gchar *acronyme  = Json_get_string ( cadran, "acronyme" );
-          if (classe && tech_id && acronyme)
-           { Info_new( __func__, Config.log_msrv, LOG_INFO, "Abonnement au bit '%s:%s'", tech_id, acronyme );
-             if (!strcasecmp ( classe, "AI" ))
-              { struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
-                if (bit)
-                 { bit->abonnement = TRUE;
-                   Dls_cadran_send_AI_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
-                 }
-              }
-             else if (!strcasecmp ( classe, "CH" ))
-              { struct DLS_CH *bit = Dls_data_lookup_CH ( tech_id, acronyme );
-                if (bit)
-                 { bit->abonnement = TRUE;
-                   Dls_cadran_send_CH_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
-                 }
-              }
-             else if (!strcasecmp ( classe, "CI" ))
-              { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
-                if (bit)
-                 { bit->abonnement = TRUE;
-                   Dls_cadran_send_CI_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
-                 }
-              }
-             else if (!strcasecmp ( classe, "REGISTRE" ))
-              { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
-                if (bit)
-                 { bit->abonnement = TRUE;
-                   Dls_cadran_send_REGISTRE_to_API ( bit );              /* Envoi la valeur a date pour update cadran sur ihm */
-                 }
-              }
-             else if (!strcasecmp ( classe, "AO" ))
-              { struct DLS_AO *bit = Dls_data_lookup_AO ( tech_id, acronyme );
-                if (bit)
-                 { bit->abonnement = TRUE;
-                   Dls_cadran_send_AO_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
-                 }
-              }
-             else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Abonnement: bit '%s:%s' inconnu", tech_id, acronyme );
-           } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
-          cadrans = g_list_next(cadrans);
-        }
-       g_list_free(Cadrans);
-       pthread_mutex_unlock ( &Partage->com_dls.synchro );
-     }
-    else if ( !strcasecmp( agent_tag, "DESABONNER") )
-     { if ( ! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) && Json_has_member ( request, "classe" )) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DESABONNER: cadran is missing" );
-          goto end;
-        }
-       pthread_mutex_lock ( &Partage->com_dls.synchro );
-       gchar *classe    = Json_get_string ( request, "classe" );
-       gchar *tech_id   = Json_get_string ( request, "tech_id" );
-       gchar *acronyme  = Json_get_string ( request, "acronyme" );
-       if (classe && tech_id && acronyme)
-        { Info_new( __func__, Config.log_msrv, LOG_INFO, "Désabonnement au bit '%s:%s'", tech_id, acronyme );
-          if (!strcasecmp ( classe, "AI" ))
-           { struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
-             if (bit) bit->abonnement = FALSE;
-           }
-          else if (!strcasecmp ( classe, "CI" ))
-           { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
-             if (bit) bit->abonnement = FALSE;
-           }
-          else if (!strcasecmp ( classe, "CH" ))
-           { struct DLS_CH *bit = Dls_data_lookup_CH ( tech_id, acronyme );
-             if (bit) bit->abonnement = FALSE;
-           }
-          else if (!strcasecmp ( classe, "REGISTRE" ))
-           { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
-             if (bit) bit->abonnement = FALSE;
-           }
-          else if (!strcasecmp ( classe, "AO" ))
-           { struct DLS_AO *bit = Dls_data_lookup_AO ( tech_id, acronyme );
-             if (bit) bit->abonnement = FALSE;
-           }
-          else Info_new( __func__, Config.log_msrv, LOG_WARNING, "Désabonnement: bit '%s:%s' inconnu", tech_id, acronyme );
-        } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Abonnement: wrong parameters" );
-       pthread_mutex_unlock ( &Partage->com_dls.synchro );
-     }
-    else if ( !strcasecmp( agent_tag, "DLS_SET") )
-     { if ( ! Json_has_member ( request, "tech_id" )  )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
-          goto end;
-        }
-       gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
-       if (Json_has_member ( request, "debug"  )) Dls_Debug_plugin   ( plugin_tech_id, Json_get_bool ( request, "debug" ) );
-       if (Json_has_member ( request, "enable" )) Dls_Activer_plugin ( plugin_tech_id, Json_get_bool ( request, "enable" ) );
-     }
-
-end:
-    Json_node_unref(request);
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                                              */
@@ -626,6 +424,7 @@ end:
        gchar *mqtt_hostname      = Json_get_string ( api_result, "mqtt_hostname" );
        if (mqtt_hostname) g_snprintf( Config.mqtt_hostname, sizeof(Config.mqtt_hostname), "%s", mqtt_hostname );
                      else g_snprintf( Config.mqtt_hostname, sizeof(Config.mqtt_hostname), "localhost" );
+       Config.mqtt_port          = Json_get_int ( api_result, "mqtt_port" );
 
        gchar *mqtt_password      = Json_get_string ( api_result, "mqtt_password" );
        if (mqtt_hostname) g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "%s", mqtt_password );
@@ -662,7 +461,7 @@ end:
 
 /******************************************************* Ecoute du MQTT Local *************************************************/
     mosquitto_lib_init();
-    Partage->com_msrv.MQTT_local_session = mosquitto_new( Json_get_string ( Config.config, "agent_uuid" ), FALSE, NULL );
+    Partage->com_msrv.MQTT_local_session = mosquitto_new( "local_master"/*Json_get_string ( Config.config, "agent_uuid" )*/, FALSE, NULL );
     if (!Partage->com_msrv.MQTT_local_session)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_local session error." ); goto fourth_stage_end; }
 
@@ -674,44 +473,20 @@ end:
     mosquitto_message_callback_set( Partage->com_msrv.MQTT_local_session, MSRV_on_mqtt_message_CB );
     gchar topic[256];
     g_snprintf ( topic, sizeof(topic), "agent/%s/#", Json_get_string ( Config.config, "agent_uuid" ) );
-    mosquitto_subscribe( Partage->com_msrv.MQTT_local_session, NULL, topic, 0 );
+    mosquitto_subscribe( Partage->com_msrv.MQTT_local_session, NULL, topic, 1 );
     g_snprintf ( topic, sizeof(topic), "agents/#" );
-    mosquitto_subscribe( Partage->com_msrv.MQTT_local_session, NULL, topic, 0 );
+    mosquitto_subscribe( Partage->com_msrv.MQTT_local_session, NULL, topic, 1 );
 
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
      { g_snprintf ( topic, sizeof(topic), "agent/master/#" );
-       mosquitto_subscribe( Partage->com_msrv.MQTT_local_session, NULL, topic, 0 );
+       mosquitto_subscribe( Partage->com_msrv.MQTT_local_session, NULL, topic, 1 );
      }
 
     if ( mosquitto_loop_start( Partage->com_msrv.MQTT_local_session ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_local loop not started." ); goto fourth_stage_end; }
 
 /******************************************************* Ecoute du MQTT API ***************************************************/
-    Partage->com_msrv.MQTT_API_session = mosquitto_new( Json_get_string ( Config.config, "agent_uuid" ), FALSE, NULL );
-    if (!Partage->com_msrv.MQTT_API_session)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API session error." ); goto fifth_stage_end; }
-    gchar mqtt_username[128];
-    g_snprintf( mqtt_username, sizeof(mqtt_username), "domain-%s", Json_get_string ( Config.config, "domain_uuid" ) );
-    mosquitto_username_pw_set(	Partage->com_msrv.MQTT_API_session, mqtt_username, Config.mqtt_password );
-
-    if ( mosquitto_connect( Partage->com_msrv.MQTT_API_session, Config.mqtt_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API connection to '%s' error.", Json_get_string ( Config.config, "mqtt_hostname" ) );
-       goto fifth_stage_end;
-     }
-
-    mosquitto_message_callback_set( Partage->com_msrv.MQTT_API_session, MSRV_on_mqtt_message_CB );
-    g_snprintf ( topic, sizeof(topic), "agent/%s/#", Json_get_string ( Config.config, "agent_uuid" ) );
-    mosquitto_subscribe( Partage->com_msrv.MQTT_API_session, NULL, topic, 0 );
-    g_snprintf ( topic, sizeof(topic), "agents/#" );
-    mosquitto_subscribe( Partage->com_msrv.MQTT_API_session, NULL, topic, 0 );
-
-    if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
-     { g_snprintf ( topic, sizeof(topic), "agent/master/#" );
-       mosquitto_subscribe( Partage->com_msrv.MQTT_API_session, NULL, topic, 0 );
-     }
-
-    if ( mosquitto_loop_start( Partage->com_msrv.MQTT_API_session ) != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT loop not started." ); goto fifth_stage_end; }
+    if (!MQTT_Start_MQTT_API()) goto fifth_stage_end;
 
 /************************************************ Initialisation des mutex ****************************************************/
     time ( &Partage->start_time );
@@ -796,7 +571,6 @@ end:
 
 /*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
           if (Partage->com_msrv.MQTT_messages)   MSRV_Handle_MQTT_messages();
-          if (Partage->com_msrv.API_ws_messages) MSRV_Handle_API_messages();
           usleep(1000);
           sched_yield();
         }
@@ -808,7 +582,6 @@ end:
         {
 /*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
           if (Partage->com_msrv.MQTT_messages)   MSRV_Handle_MQTT_messages();
-          if (Partage->com_msrv.API_ws_messages) MSRV_Handle_API_messages();
           usleep(1000);
           sched_yield();
         }
@@ -830,7 +603,6 @@ end:
     g_slist_free ( Partage->com_msrv.liste_visuel );
     g_slist_free_full ( Partage->com_msrv.liste_msg, (GDestroyNotify)g_free );
     g_slist_free_full ( Partage->abonnements, (GDestroyNotify)Json_node_unref );
-    g_slist_free_full ( Partage->liste_json_to_ws_api, (GDestroyNotify)Json_node_unref );
 
 /************************************************* Dechargement des mutex *****************************************************/
 
@@ -850,9 +622,7 @@ end:
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
 fifth_stage_end:
-    mosquitto_disconnect( Partage->com_msrv.MQTT_API_session );
-    mosquitto_loop_stop( Partage->com_msrv.MQTT_API_session, FALSE );
-    mosquitto_destroy( Partage->com_msrv.MQTT_API_session );
+    MQTT_Stop_MQTT_API();
 
 fourth_stage_end:
     mosquitto_disconnect( Partage->com_msrv.MQTT_local_session );

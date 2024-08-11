@@ -30,22 +30,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* MQTT_Send_to_API: Envoie le node au broker API                                                                             */
-/* Entrée: le topic, le node                                                                               */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void MQTT_Send_to_API ( gchar *topic, JsonNode *node )
-  { gchar topic_full[256];
-    gboolean free_node=FALSE;
-    if (!topic) return;
-    if (!node) { node = Json_node_create(); free_node = TRUE; }
-    gchar *buffer = Json_node_to_string ( node );
-    g_snprintf( topic_full, sizeof(topic_full), "%s/%s", Json_get_string ( Config.config, "domain_uuid" ), topic );
-    mosquitto_publish(	Partage->com_msrv.MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 0, FALSE );
-    g_free(buffer);
-    if (free_node) Json_node_unref(node);
-  }
-/******************************************************************************************************************************/
 /* Mqtt_Send_to_topic: Envoie le node au broker                                                                               */
 /* Entrée: la structure MQTT, le topic, le node                                                                               */
 /* Sortie: néant                                                                                                              */
@@ -56,7 +40,7 @@
     if (!node) { node = Json_node_create(); free_node = TRUE; }
     Json_node_add_string ( node, "tag", tag );
     gchar *buffer = Json_node_to_string ( node );
-    mosquitto_publish(	mqtt_session, NULL, topic, strlen(buffer), buffer, 0, FALSE );
+    mosquitto_publish(	mqtt_session, NULL, topic, strlen(buffer), buffer, 1, TRUE );
     g_free(buffer);
     if (free_node) Json_node_unref(node);
   }
@@ -116,7 +100,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic )
-  { if ( mosquitto_subscribe(	mqtt_session, NULL, topic, 0 ) != MOSQ_ERR_SUCCESS )
+  { if ( mosquitto_subscribe(	mqtt_session, NULL, topic, 1 ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "Subscribe to topic '%s' FAILED", topic ); }
     else
      { Info_new( __func__, Config.log_bus, LOG_INFO, "Subscribe to topic '%s' OK", topic ); }

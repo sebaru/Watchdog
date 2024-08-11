@@ -129,7 +129,7 @@
     struct DLS_BI *sys_flipflop_2hz;
     struct DLS_BI *sys_flipflop_1sec;
     struct DLS_BI *sys_flipflop_2sec;
-    struct DLS_BI *sys_api_socket;
+    struct DLS_BI *sys_mqtt_connected;
     struct DLS_MONO *sys_top_5hz;
     struct DLS_MONO *sys_top_2hz;
     struct DLS_MONO *sys_top_1sec;
@@ -139,7 +139,6 @@
     struct DLS_AI *sys_bit_per_sec;
     struct DLS_AI *sys_tour_per_sec;
     struct DLS_AI *sys_dls_wait;
-    struct DLS_AI *sys_nbr_api_enreg_queue;
     struct DLS_AI *sys_nbr_archive_queue;
     struct DLS_AI *sys_maxrss;
   };

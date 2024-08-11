@@ -43,8 +43,9 @@
     gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
     gchar master_hostname[ 32 ];
-    gchar mqtt_hostname[ 32 ];
-    gchar mqtt_password[ 32 ];
+    gchar mqtt_hostname[ 32 ];                                                                /* Hostname du serveur MQTT_API */
+    guint mqtt_port;                                                                 /* Port de connexion du serveur MQTT_API */
+    gchar mqtt_password[ 129 ];
     guint    log_level;                                                                       /* Niveau de debug du programme */
     gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
     gboolean log_bus;                                                                                      /* TRUE si log_bus */

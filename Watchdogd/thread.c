@@ -152,7 +152,7 @@
      }
 
 /******************************************************* Ecoute du MQTT *******************************************************/
-    module->MQTT_session = mosquitto_new( thread_tech_id, FALSE, module	);
+    module->MQTT_session = mosquitto_new( thread_tech_id, FALSE, module );
     if (!module->MQTT_session)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
     else if ( mosquitto_connect(	module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
