@@ -575,10 +575,9 @@ end:
           if (Partage->com_msrv.liste_visuel)  MQTT_Send_visuels_to_API ();                    /* Traitement des I dynamiques */
 /*---------------------------------------------- Report des messages ---------------------------------------------------------*/
           if (Partage->com_msrv.liste_msg)     MQTT_Send_MSGS_to_API();
-#ifdef bouh
 /*---------------------------------------------- Report des abonnements ------------------------------------------------------*/
-          if (Partage->abonnements) API_Send_Abonnements();
-#endif
+          if (Partage->abonnements) MQTT_Send_Abonnements_to_API();
+
           usleep(1000);
           sched_yield();
         }

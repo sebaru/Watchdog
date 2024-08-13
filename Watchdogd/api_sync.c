@@ -126,9 +126,6 @@
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
     while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      {
-/*---------------------------------------------- Report des abonnements ------------------------------------------------------*/
-       if (Partage->abonnements) API_Send_Abonnements();
-
        usleep(1000);
        sched_yield();
      }

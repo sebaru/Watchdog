@@ -114,7 +114,6 @@
 
  extern void API_Send_ARCHIVE ( void );                                                                     /* Dans api_xxx.c */
  extern void API_Clear_ARCHIVE ( void );
- extern void API_Send_Abonnements ( void );
  extern void Run_api_sync ( void );
  extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
@@ -147,6 +146,7 @@
  extern void MQTT_Stop_MQTT_API ( void );
  extern void MQTT_Send_MSGS_to_API ( void );
  extern void MQTT_Send_visuels_to_API ( void );
+ extern void MQTT_Send_Abonnements_to_API ( void );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
