@@ -114,8 +114,6 @@
 
  extern void API_Send_ARCHIVE ( void );                                                                     /* Dans api_xxx.c */
  extern void API_Clear_ARCHIVE ( void );
- extern void API_Send_visuels ( void );
- extern void API_Send_MSGS ( void );
  extern void API_Send_Abonnements ( void );
  extern void Run_api_sync ( void );
  extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
@@ -136,16 +134,19 @@
  extern JsonNode *Http_Send_json_request_from_agent ( SoupMessage *soup_msg, JsonNode *RootNode );
  extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode );
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
+
  extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node );
  extern void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
  extern void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat );
  extern void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme );
  extern void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne );
  extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
+ extern void MQTT_Send_to_API ( gchar *topic, JsonNode *node );
 
  extern gboolean MQTT_Start_MQTT_API ( void );
  extern void MQTT_Stop_MQTT_API ( void );
- extern void MQTT_Send_to_API ( gchar *topic, JsonNode *node );
+ extern void MQTT_Send_MSGS_to_API ( void );
+ extern void MQTT_Send_visuels_to_API ( void );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

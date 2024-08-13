@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
-/* Watchdogd/api_Ixxx.c        Distribution des Visuels à l'API                                                               */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                          lun 10 mai 2004 11:31:17 CEST */
+/* Watchdogd/mqtt_visuels.c        Distribution des Visuels à l'API                                                           */
+/* Projet WatchDog version 4.0       Gestion d'habitat                                          lun 10 mai 2004 11:31:17 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -35,10 +35,10 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* API_Send_visuels: Envoi les visuels a l'API                                                                                */
+/* MQTT_Send_visuels_to_API: Envoi les visuels a l'API                                                                        */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void API_Send_visuels ( void )
+ void MQTT_Send_visuels_to_API ( void )
   { gint cpt = 0;
     JsonNode *element = Json_node_create ();
     while (Partage->com_msrv.liste_visuel && Partage->com_msrv.Thread_run == TRUE && cpt<100)

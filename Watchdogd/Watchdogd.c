@@ -569,8 +569,16 @@ end:
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 
-/*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
-          if (Partage->com_msrv.MQTT_messages)   MSRV_Handle_MQTT_messages();
+/*---------------------------------------------- Ecoute les messages MQTT ----------------------------------------------------*/
+          if (Partage->com_msrv.MQTT_messages) MSRV_Handle_MQTT_messages();
+/*---------------------------------------------- Report des visuels ----------------------------------------------------------*/
+          if (Partage->com_msrv.liste_visuel)  MQTT_Send_visuels_to_API ();                    /* Traitement des I dynamiques */
+/*---------------------------------------------- Report des messages ---------------------------------------------------------*/
+          if (Partage->com_msrv.liste_msg)     MQTT_Send_MSGS_to_API();
+#ifdef bouh
+/*---------------------------------------------- Report des abonnements ------------------------------------------------------*/
+          if (Partage->abonnements) API_Send_Abonnements();
+#endif
           usleep(1000);
           sched_yield();
         }
