@@ -83,8 +83,6 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Json_node_add_int  ( RootNode, "length_msg", num );
 
-    Json_node_add_int    ( RootNode, "archive_liste_taille", Partage->archive_liste_taille );
-
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "Status OK", RootNode );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

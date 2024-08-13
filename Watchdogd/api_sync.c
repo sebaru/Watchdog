@@ -116,20 +116,4 @@
     g_object_unref( soup_msg );
     return(ResponseNode);
  }
-
-/******************************************************************************************************************************/
-/* Main: Fonction principale du thread                                                                                        */
-/******************************************************************************************************************************/
- void Run_api_sync ( void )
-  { prctl(PR_SET_NAME, "W-APISYNC", 0, 0, 0 );
-
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
-    while(Partage->com_msrv.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
-     {
-       usleep(1000);
-       sched_yield();
-     }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Down (%p)", pthread_self() );
-    pthread_exit(GINT_TO_POINTER(0));
-  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

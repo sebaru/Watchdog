@@ -484,34 +484,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Demarrer_API_sync: Processus de synchronisation avec l'API                                                                 */
-/* Entrée: rien                                                                                                               */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Demarrer_api_sync ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
-    if ( pthread_create( &Partage->com_msrv.TID_api_sync, NULL, (void *)Run_api_sync, NULL ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
-       return(FALSE);
-     }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "thread api_sync (%p) seems to be running", Partage->com_msrv.TID_api_sync );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Demarrer_ARCH_sync: Processus de synchronisation d'archive                                                                 */
-/* Entrée: rien                                                                                                               */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Demarrer_arch_sync ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
-    if ( pthread_create( &Partage->com_msrv.TID_arch_sync, NULL, (void *)Run_arch_sync, NULL ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
-       return(FALSE);
-     }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "thread arch_sync (%p) seems to be running", Partage->com_msrv.TID_arch_sync );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Demarrer_http: Processus HTTP                                                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: false si probleme                                                                                                  */
@@ -541,10 +513,6 @@
     Partage->com_dls.Thread_run = FALSE;
     if ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                               /* Attente fin DLS */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
-
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for API_SYNC (%p) to finish", Partage->com_msrv.TID_api_sync );
-    if ( Partage->com_msrv.TID_api_sync ) pthread_join ( Partage->com_msrv.TID_api_sync, NULL );
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, API_SYNC is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for ARCH_SYNC (%p) to finish", Partage->com_msrv.TID_arch_sync );
     if ( Partage->com_msrv.TID_arch_sync ) pthread_join ( Partage->com_msrv.TID_arch_sync, NULL );

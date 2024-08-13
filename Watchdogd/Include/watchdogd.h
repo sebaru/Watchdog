@@ -42,7 +42,7 @@
  #include "config.h"
  #include "Http.h"
  #include "Config.h"
- #include "Archive.h"
+ #include "Mqtt.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */
 
@@ -60,7 +60,6 @@
  struct COM_MSRV                                                            /* Communication entre DLS et le serveur Watchdog */
   { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    pthread_t TID_api_sync;                                                                          /* Identifiant du thread */
     pthread_t TID_arch_sync;                                                                         /* Identifiant du thread */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
@@ -90,10 +89,6 @@
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_HTTP com_http;                                                                       /* Zone mémoire pour HTTP */
 
-    pthread_mutex_t archive_liste_sync;                                                   /* Bit de synchronisation processus */
-    GSList *archive_liste;                                                                /* liste de struct ARCHDB a traiter */
-    gint archive_liste_taille;
-
     pthread_mutex_t abonnements_synchro;                                                  /* Bit de synchronisation processus */
     GSList *abonnements;                                                               /* Abonnements aux entrées analogiques */
 
@@ -114,7 +109,6 @@
 
  extern void API_Send_ARCHIVE ( void );                                                                     /* Dans api_xxx.c */
  extern void API_Clear_ARCHIVE ( void );
- extern void Run_api_sync ( void );
  extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
 
@@ -141,12 +135,6 @@
  extern void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne );
  extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
  extern void MQTT_Send_to_API ( gchar *topic, JsonNode *node );
-
- extern gboolean MQTT_Start_MQTT_API ( void );
- extern void MQTT_Stop_MQTT_API ( void );
- extern void MQTT_Send_MSGS_to_API ( void );
- extern void MQTT_Send_visuels_to_API ( void );
- extern void MQTT_Send_Abonnements_to_API ( void );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

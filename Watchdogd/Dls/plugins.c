@@ -346,7 +346,6 @@
           Partage->com_dls.sys_bit_per_sec         = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
           Partage->com_dls.sys_tour_per_sec        = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
           Partage->com_dls.sys_dls_wait            = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
-          Partage->com_dls.sys_nbr_archive_queue   = Dls_data_lookup_AI   ( "SYS", "NBR_ARCHIVE_QUEUE" );
           Partage->com_dls.sys_maxrss              = Dls_data_lookup_AI   ( "SYS", "MAXRSS" );
         }
 

@@ -109,7 +109,7 @@
        if (valeur) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up,   bit );
               else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, bit );
        Partage->audit_bit_interne_per_sec++;
-       Ajouter_arch( bit->tech_id, bit->acronyme, bit->etat*1.0 );                                     /* Archivage si besoin */
+       MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->etat*1.0 );                         /* Archivage si besoin */
        bit->last_arch = Partage->top;
      }
     bit->etat = valeur;

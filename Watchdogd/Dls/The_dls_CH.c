@@ -122,7 +122,7 @@
              Partage->audit_bit_interne_per_sec++;
            }
           if (cpt_h->last_arch + 600 < Partage->top)
-           { Ajouter_arch( cpt_h->tech_id, cpt_h->acronyme, 1.0*cpt_h->valeur );
+           { MQTT_Send_archive_to_API( cpt_h->tech_id, cpt_h->acronyme, 1.0*cpt_h->valeur );
              cpt_h->last_arch = Partage->top;
            }
         }

@@ -100,7 +100,7 @@
     Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
               (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, dout->etat );
-    Ajouter_arch( dout->tech_id, dout->acronyme, dout->etat*1.0 );                                     /* Archivage si besoin */
+    MQTT_Send_archive_to_API( dout->tech_id, dout->acronyme, dout->etat*1.0 );                                     /* Archivage si besoin */
     dout->last_arch = Partage->top;
 
     JsonNode *RootNode = Json_node_create ();

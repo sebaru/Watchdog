@@ -493,7 +493,6 @@ end:
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_http.synchro, NULL );
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
-    pthread_mutex_init( &Partage->archive_liste_sync, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
     pthread_mutex_init( &Partage->abonnements_synchro, NULL );
 
@@ -507,14 +506,10 @@ end:
 
     if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb HTTP" ); }
-    if (!Demarrer_api_sync())                                                                           /* Démarrage API_SYNC */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb API_SYNC" ); }
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
-     { if (!Demarrer_arch_sync())                                                                      /* Démarrage ARCH_SYNC */
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb ARCH_SYNC" ); }
-       Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
+     { Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
        Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
        MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
      }
@@ -615,7 +610,6 @@ end:
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
-    pthread_mutex_destroy( &Partage->archive_liste_sync );
     pthread_mutex_destroy( &Partage->com_db.synchro );
     pthread_mutex_destroy( &Partage->abonnements_synchro );
 

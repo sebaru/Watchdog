@@ -7,7 +7,7 @@ noinst_HEADERS    = Erreur.h \
                     Config.h Http.h \
                     Json.h Thread.h \
                     watchdogd.h Dls.h \
-                    Archive.h
+                    Mqtt.h
 
 include_HEADERS   = Module_dls.h
 

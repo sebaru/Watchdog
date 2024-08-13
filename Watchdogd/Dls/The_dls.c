@@ -363,7 +363,6 @@
 /******************************************************************************************************************************/
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_archive_queue, 1.0*Partage->archive_liste_taille, TRUE );
           Dls_foreach_plugins ( NULL, Dls_run_archivage );                        /* Archivage au mieux toutes les 5 secondes */
           last_top_5sec = Partage->top;
         }
