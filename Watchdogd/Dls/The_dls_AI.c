@@ -136,13 +136,13 @@
 
     struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
     if (!bit)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_AI from '%s': '%s:%s'/'%s:%s' not found",
-                 thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_AI '%s:%s'/'%s:%s' not found",
+                 thread_tech_id, thread_acronyme, tech_id, acronyme );
        return(FALSE);
      }
 
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s) (abonnement=%d)",
-              thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
+    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI '%s:%s'/'%s:%s'=%f %s (range=%d) (%s) (abonnement=%d)",
+              thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_double ( request, "valeur" ), bit->unite,
               Json_get_bool ( request, "in_range" ), bit->libelle, bit->abonnement );
     Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );

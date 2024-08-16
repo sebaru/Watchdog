@@ -47,6 +47,8 @@
 /******************************************************************************************************************************/
  void Dls_run_archivage ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { if (!plugin) return;
+    if (!plugin->enable) return;                                                        /* On archive pas les plugins disable */
+
     GSList *liste = plugin->Dls_data_AI;
     while ( liste )
      { struct DLS_AI *bit = liste->data;
