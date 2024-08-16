@@ -334,6 +334,9 @@
     JsonNode *request = Partage->com_msrv.MQTT_messages->data;
     Partage->com_msrv.MQTT_messages = g_slist_remove ( Partage->com_msrv.MQTT_messages, request );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+
+    if (!Config.instance_is_master) goto end;
+
     gchar *tag = Json_get_string ( request, "tag" );
     if (!tag) goto end;
 
