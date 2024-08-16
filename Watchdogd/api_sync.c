@@ -29,7 +29,6 @@
  #include <string.h>
  #include <unistd.h>
  #include <time.h>
- #include <sys/prctl.h>
 
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"

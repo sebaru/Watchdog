@@ -304,8 +304,8 @@ end:
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean MQTT_Start_MQTT_API ( void )
-  { gchar *agent_uuid  = Json_get_string ( Config.config, "agent_uuid" );
-    gchar *domain_uuid = Json_get_string ( Config.config, "domain_uuid" );
+  { gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
+    gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
 
     Partage->com_msrv.MQTT_API_session = mosquitto_new( agent_uuid, FALSE, NULL );
     if (!Partage->com_msrv.MQTT_API_session)
@@ -314,6 +314,9 @@ end:
     mosquitto_log_callback_set        ( Partage->com_msrv.MQTT_API_session, MQTT_on_log_CB );
     mosquitto_connect_callback_set    ( Partage->com_msrv.MQTT_API_session, MQTT_on_connect_CB );
     mosquitto_disconnect_callback_set ( Partage->com_msrv.MQTT_API_session, MQTT_on_disconnect_CB );
+
+    if (Config.mqtt_over_ssl)
+     { mosquitto_tls_set( Partage->com_msrv.MQTT_API_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }
 
     gchar mqtt_username[128];
     g_snprintf( mqtt_username, sizeof(mqtt_username), "domain-%s", domain_uuid );

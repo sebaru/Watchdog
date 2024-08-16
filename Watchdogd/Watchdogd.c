@@ -424,10 +424,11 @@ end:
        gchar *mqtt_hostname      = Json_get_string ( api_result, "mqtt_hostname" );
        if (mqtt_hostname) g_snprintf( Config.mqtt_hostname, sizeof(Config.mqtt_hostname), "%s", mqtt_hostname );
                      else g_snprintf( Config.mqtt_hostname, sizeof(Config.mqtt_hostname), "localhost" );
-       Config.mqtt_port          = Json_get_int ( api_result, "mqtt_port" );
+       Config.mqtt_port          = Json_get_int  ( api_result, "mqtt_port" );
+       Config.mqtt_over_ssl      = Json_get_bool ( api_result, "mqtt_over_ssl" );
 
        gchar *mqtt_password      = Json_get_string ( api_result, "mqtt_password" );
-       if (mqtt_hostname) g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "%s", mqtt_password );
+       if (mqtt_password) g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "%s", mqtt_password );
                      else g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "nopassword" );
 
        Info_change_log_level ( Json_get_int ( api_result, "log_level" ) );
