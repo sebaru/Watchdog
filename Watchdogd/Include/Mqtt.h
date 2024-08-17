@@ -43,5 +43,8 @@
  extern void MQTT_Send_Abonnements_to_API ( void );
  extern void MQTT_Send_archive_to_API( gchar *tech_id, gchar *nom, gdouble valeur );
 
+ extern gboolean MQTT_Start_MQTT_LOCAL ( void );                                                             /* Dans mqtt_x.h */
+ extern void MQTT_Stop_MQTT_LOCAL ( void );
+
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

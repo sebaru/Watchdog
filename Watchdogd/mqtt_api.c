@@ -55,7 +55,6 @@
   { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected with return code %d: %s",
               return_code, mosquitto_connack_string(	return_code ) );
     if (return_code == 0) Partage->com_msrv.MQTT_connected = TRUE ;
-
   }
 /******************************************************************************************************************************/
 /* MQTT_on_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                              */
@@ -66,6 +65,17 @@
   { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Disconnected with return code %d: %s",
               return_code, mosquitto_connack_string(	return_code ) );
     Partage->com_msrv.MQTT_connected = FALSE;
+  }
+/******************************************************************************************************************************/
+/* MQTT_Subscribe: souscrit à un topic                                                                                        */
+/* Entrée: la structure MQTT, le topic                                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic )
+  { if ( mosquitto_subscribe(	mqtt_session, NULL, topic, 1 ) != MOSQ_ERR_SUCCESS )
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "Subscribe to topic '%s' FAILED", topic ); }
+    else
+     { Info_new( __func__, Config.log_bus, LOG_INFO, "Subscribe to topic '%s' OK", topic ); }
   }
 /******************************************************************************************************************************/
 /* MQTT_on_API_message_CB: Appelé par mosquitto lorsque l'on recoit un message MQTT de la part de l'API                       */
@@ -309,7 +319,8 @@ end:
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean MQTT_Start_MQTT_API ( void )
-  { gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
+  { gint retour;
+    gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
     gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
 
     Partage->com_msrv.MQTT_API_session = mosquitto_new( agent_uuid, FALSE, NULL );
@@ -319,6 +330,7 @@ end:
     mosquitto_log_callback_set        ( Partage->com_msrv.MQTT_API_session, MQTT_on_log_CB );
     mosquitto_connect_callback_set    ( Partage->com_msrv.MQTT_API_session, MQTT_on_connect_CB );
     mosquitto_disconnect_callback_set ( Partage->com_msrv.MQTT_API_session, MQTT_on_disconnect_CB );
+    mosquitto_message_callback_set    ( Partage->com_msrv.MQTT_API_session, MQTT_on_mqtt_api_message_CB );
 
     if (Config.mqtt_over_ssl)
      { mosquitto_tls_set( Partage->com_msrv.MQTT_API_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }
@@ -326,13 +338,14 @@ end:
     gchar mqtt_username[128];
     g_snprintf( mqtt_username, sizeof(mqtt_username), "domain-%s", domain_uuid );
     mosquitto_username_pw_set(	Partage->com_msrv.MQTT_API_session, mqtt_username, Config.mqtt_password );
-    if ( mosquitto_connect( Partage->com_msrv.MQTT_API_session, Config.mqtt_hostname, Config.mqtt_port, 60 ) != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API connection to '%s' error.", Config.mqtt_hostname );
+    retour = mosquitto_connect( Partage->com_msrv.MQTT_API_session, Config.mqtt_hostname, Config.mqtt_port, 60 );
+    if ( retour != MOSQ_ERR_SUCCESS )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API connection to '%s' error: %s",
+                 Config.mqtt_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
      }
 
     gchar topic[256];
-    mosquitto_message_callback_set( Partage->com_msrv.MQTT_API_session, MQTT_on_mqtt_api_message_CB );
     g_snprintf ( topic, sizeof(topic), "%s/%s/#", domain_uuid, agent_uuid );
     MQTT_Subscribe ( Partage->com_msrv.MQTT_API_session, topic );
     g_snprintf ( topic, sizeof(topic), "%s/agents/#", domain_uuid );
@@ -343,8 +356,9 @@ end:
        MQTT_Subscribe ( Partage->com_msrv.MQTT_API_session, topic );
      }
 
-    if ( mosquitto_loop_start( Partage->com_msrv.MQTT_API_session ) != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT loop not started." );
+    retour = mosquitto_loop_start( Partage->com_msrv.MQTT_API_session );
+    if ( retour != MOSQ_ERR_SUCCESS )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT loop not started: ", mosquitto_strerror ( retour ) );
        return(FALSE);
      }
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected as %s with id %s on %s.",
