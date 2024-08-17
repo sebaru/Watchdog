@@ -44,7 +44,7 @@
        case MOSQ_LOG_ERR:     info_level = LOG_ERR;     break;
        case MOSQ_LOG_DEBUG:   info_level = LOG_DEBUG;   break;
      }
-    Info_new( __func__, Config.log_msrv, info_level, "LOCAL: %s", message );
+    Info_new( __func__, Config.log_bus, info_level, "LOCAL: %s", message );
   }
 /******************************************************************************************************************************/
 /* MQTT_local_on_connect_CB: appelé par la librairie quand le broker est connecté                                             */
@@ -52,7 +52,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MQTT_local_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected with return code %d: %s",
+  { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Connected with return code %d: %s",
               return_code, mosquitto_connack_string(	return_code ) );
   }
 /******************************************************************************************************************************/
@@ -61,7 +61,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MQTT_local_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Disconnected with return code %d: %s",
+  { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Disconnected with return code %d: %s",
               return_code, mosquitto_connack_string(	return_code ) );
   }
 /******************************************************************************************************************************/
@@ -70,19 +70,17 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MQTT_on_mqtt_local_message_CB ( struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg )
-  { gchar **tokens = g_strsplit ( msg->topic, "/", 3 );
+  { gchar **tokens = g_strsplit ( msg->topic, "/", 2 );
     if (!tokens) return;
     if (!tokens[0]) goto end; /* Normalement "agent"  */
     if (!tokens[1]) goto end; /* Normalement "master" */
-    if (!tokens[2]) goto end; /* Normalement "master" */
-    gchar *topic = tokens[2];
 
-/*-------------------------------------------------- Message without payload -------------------------------------------------*/
     JsonNode *request = Json_get_from_string ( msg->payload );
     if (!request)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "MQTT Message from LOCAL dropped: not JSON" );
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "MQTT Message from LOCAL dropped: not JSON" );
        goto end;
      }
+    gchar *topic = Json_get_string ( request, "tag" );
 
          if ( !strcmp ( topic, "SET_AI" ) )       Dls_data_set_AI_from_thread_ai ( request );
     else if ( !strcmp ( topic, "SET_DI" ) )       Dls_data_set_DI_from_thread_di ( request );
@@ -112,7 +110,7 @@ end:
 
     Partage->com_msrv.MQTT_local_session = mosquitto_new( agent_uuid, FALSE, NULL );
     if (!Partage->com_msrv.MQTT_local_session)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_local session error." ); return(FALSE); }
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local session error." ); return(FALSE); }
 
     mosquitto_log_callback_set        ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_log_CB );
     mosquitto_connect_callback_set    ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_connect_CB );
@@ -124,30 +122,20 @@ end:
 
     retour = mosquitto_connect( Partage->com_msrv.MQTT_local_session, Config.master_hostname, 1883, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_local connection to '%s' error: %s",
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local connection to '%s' error: %s",
                  Config.master_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
      }
 
-#warning encore utile ?
-    gchar topic[256];
-    g_snprintf ( topic, sizeof(topic), "agent/%s/#", Json_get_string ( Config.config, "agent_uuid" ) );
-    MQTT_Subscribe ( Partage->com_msrv.MQTT_local_session, topic );
-    g_snprintf ( topic, sizeof(topic), "agents/#" );
-    MQTT_Subscribe ( Partage->com_msrv.MQTT_local_session, topic );
-
-    if (Config.instance_is_master)                                                                          /* Démarrage MQTT */
-     { g_snprintf ( topic, sizeof(topic), "agent/master/#" );
-       MQTT_Subscribe ( Partage->com_msrv.MQTT_local_session, topic );
-     }
+    MQTT_Subscribe ( Partage->com_msrv.MQTT_local_session, "agent/master/#" );
 
     retour = mosquitto_loop_start( Partage->com_msrv.MQTT_local_session );
     if ( retour != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_local loop not started: %s", mosquitto_strerror ( retour ) );
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local loop not started: %s", mosquitto_strerror ( retour ) );
        return(FALSE);
      }
 
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "MQTT_local loop started" );
+    Info_new( __func__, Config.log_bus, LOG_NOTICE, "MQTT_local loop started" );
     return(TRUE);
   }
 /******************************************************************************************************************************/

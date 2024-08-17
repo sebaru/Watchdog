@@ -90,12 +90,7 @@
     if (!tokens[2]) goto end; /* Normalement le tag/topic  */
     gchar *topic = tokens[2];
 
-    if ( strcasecmp ( tokens[0], Json_get_string ( Config.config, "domain_uuid" ) ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT Message received from API for wrong domain. Dropping !" );
-       goto end;
-     }
-
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "MQTT Message received from API: %s", topic );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "MQTT Message received from API: %s", topic );
 
 /*-------------------------------------------------- Message without payload -------------------------------------------------*/
          if ( !strcasecmp( topic, "RESET") )
