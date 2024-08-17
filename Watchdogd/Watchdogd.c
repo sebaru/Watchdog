@@ -547,8 +547,7 @@ end:
     setitimer( ITIMER_REAL, &timer, NULL );                                                                /* Active le timer */
 
 /***************************************** Debut de la boucle sans fin ********************************************************/
-    gint cpt_5_minutes = Partage->top + 3000;
-    gint cpt_1_minute  = Partage->top + 600;
+    gint cpt_1_minute = Partage->top + 300;                                                      /* 1er step dans 30 secondes */
 
     if (Config.instance_is_master)
      { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
@@ -559,12 +558,11 @@ end:
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
 
-          if (cpt_5_minutes < Partage->top)                                                 /* Update DB toutes les 5 minutes */
-           { cpt_5_minutes += 3000;                                                        /* Sauvegarde toutes les 5 minutes */
-           }
-
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
-           { MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "PING", NULL );
+           { JsonNode *RootNode = Json_node_create();
+             Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
+             MQTT_Send_to_API ( "heartbeat", RootNode );
+             Json_node_unref ( RootNode );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 
@@ -586,6 +584,13 @@ end:
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting SLAVE Thread" );
        while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         {
+          if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
+           { JsonNode *RootNode = Json_node_create();
+             Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
+             MQTT_Send_to_API ( "heartbeat", RootNode );
+             Json_node_unref ( RootNode );
+             cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
+           }
 /*---------------------------------------------- Ecoute l'API ----------------------------------------------------------------*/
           if (Partage->com_msrv.MQTT_messages)   MSRV_Handle_MQTT_messages();
           usleep(1000);
