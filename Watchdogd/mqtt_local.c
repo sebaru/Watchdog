@@ -96,8 +96,11 @@
               Dls_data_set_DI_pulse ( NULL, bit );
             }
      }
-end:
+    else Info_new( __func__, Config.log_bus, LOG_ERR, "tag inconnu: %s", topic );
+
     Json_node_unref ( request );
+end:
+    g_strfreev( tokens );                                                                      /* Libération des tokens topic */
   }
 /******************************************************************************************************************************/
 /* MQTT_Start_MQTT_LOCAL: Appelé pour démarrer les interactions MQTT du master avec les slaves                                */
