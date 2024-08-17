@@ -104,7 +104,8 @@
   { if (!bit) return;
 
     if (bit->etat != valeur)
-     { Info_new( __func__, Config.log_dls, LOG_NOTICE, "Changing DLS_DI '%s:%s'=%d up %d down %d",
+     { bit->etat = valeur;
+       Info_new( __func__, Config.log_dls, LOG_NOTICE, "Changing DLS_DI '%s:%s'=%d up %d down %d",
                  bit->tech_id, bit->acronyme, valeur, bit->edge_up, bit->edge_down );
        if (valeur) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up,   bit );
               else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, bit );
@@ -112,7 +113,6 @@
        MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->etat*1.0 );                         /* Archivage si besoin */
        bit->last_arch = Partage->top;
      }
-    bit->etat = valeur;
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_DI_pulse: Envoi une impulsion sur une DI                                                                      */
