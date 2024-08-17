@@ -163,7 +163,7 @@ end:
     if (!node) { node = Json_node_create(); free_node = TRUE; }
     Json_node_add_string ( node, "tag", tag );
     gchar *buffer = Json_node_to_string ( node );
-    mosquitto_publish(	mqtt_session, NULL, topic, strlen(buffer), buffer, 1, TRUE );
+    mosquitto_publish(	mqtt_session, NULL, topic, strlen(buffer), buffer, 2, TRUE );
     g_free(buffer);
     if (free_node) Json_node_unref(node);
   }

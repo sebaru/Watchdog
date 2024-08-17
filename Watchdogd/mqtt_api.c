@@ -304,7 +304,7 @@ end:
     if (!node) { node = Json_node_create(); free_node = TRUE; }
     gchar *buffer = Json_node_to_string ( node );
     g_snprintf( topic_full, sizeof(topic_full), "%s/%s", Json_get_string ( Config.config, "domain_uuid" ), topic );
-    mosquitto_publish(	Partage->com_msrv.MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 1, TRUE );
+    mosquitto_publish(	Partage->com_msrv.MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 2, TRUE );
     g_free(buffer);
     if (free_node) Json_node_unref(node);
   }
