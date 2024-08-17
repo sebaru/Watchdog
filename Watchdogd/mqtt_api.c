@@ -85,26 +85,31 @@
        goto end;
      }
 
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "MQTT Message received from API: %s", topic );
+
+/*-------------------------------------------------- Message without payload -------------------------------------------------*/
+         if ( !strcasecmp( topic, "RESET") )
+     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "RESET: Stopping in progress" );
+       Partage->com_msrv.Thread_run = FALSE;
+       goto end;
+     }
+    else if ( !strcasecmp( topic, "UPGRADE") )
+     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading in progress" );
+       MSRV_Agent_upgrade_to ( WTD_BRANCHE );
+       goto end;
+     }
+
+/*-------------------------------------------------- Message without payload -------------------------------------------------*/
     JsonNode *request = Json_get_from_string ( msg->payload );
     if (!request)
      { Info_new( __func__, Config.log_msrv, LOG_WARNING, "MQTT Message from API dropped: not JSON" );
        goto end;
      }
 
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "MQTT Message received from API: %s", topic );
-
-         if ( !strcasecmp( topic, "RESET") )
-     { Partage->com_msrv.Thread_run = FALSE;
-       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "RESET: Stopping in progress" );
-     }
-    else if ( !strcasecmp( topic, "UPGRADE") )
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading in progress" );
-       MSRV_Agent_upgrade_to ( WTD_BRANCHE );
-     }
-    else if ( !strcasecmp( topic, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
+         if ( !strcasecmp( topic, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
     else if ( !strcasecmp( topic, "THREAD_RESTART") ) { Thread_Stop_one_thread ( request );
-                                                            Thread_Start_one_thread ( NULL, 0, request, NULL );
-                                                          }
+                                                        Thread_Start_one_thread ( NULL, 0, request, NULL );
+                                                      }
     else if ( !strcasecmp( topic, "THREAD_SEND") )    { Thread_Push_API_message ( request ); }
     else if ( !strcasecmp( topic, "THREAD_DEBUG") )   { Thread_Set_debug ( request ); }
     else if ( !strcasecmp( topic, "AGENT_SET") )
