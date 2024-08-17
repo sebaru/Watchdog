@@ -55,12 +55,12 @@
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { MQTT_Send_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
 
-       if (etat)
-        { JsonNode *RootNode = Json_node_create();
-          Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-          MQTT_Send_to_API ( "HEARTBEAT", RootNode );
-          Json_node_unref ( RootNode );
-        }
+       JsonNode *RootNode = Json_node_create();
+       Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
+       Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+       Json_node_add_bool   ( RootNode, "io_comm",        module->comm_status );
+       MQTT_Send_to_API ( "HEARTBEAT", RootNode );
+       Json_node_unref ( RootNode );
 
        module->comm_next_update = Partage->top + 600;                                                   /* Toutes les minutes */
        module->comm_status = etat;
