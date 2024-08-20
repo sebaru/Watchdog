@@ -34,7 +34,7 @@
  #include "watchdogd.h"
 
 /************************************* Converstion du histo dynamique *******************************************************/
- void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max )
+ void Convert_libelle_dynamique ( gchar *libelle, gint taille_max )
   { gchar chaine[512], prefixe[128], tech_id[32], acronyme[64], suffixe[128];
     memset ( suffixe, 0, sizeof(suffixe) );
     while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe ) == 4 )
@@ -74,21 +74,6 @@
      }
     * */
      }
-    while ( sscanf ( libelle, "$THIS%128[^\n]", suffixe ) == 1 )
-     { gchar result[128];
-       g_snprintf( result, sizeof(result), "%s", local_tech_id );                                                 /* Prologue */
-       g_strlcat ( result, suffixe, sizeof(result) );
-       g_snprintf( libelle, taille_max, "%s", result );
-       memset ( suffixe, 0, sizeof(suffixe) );
-     }
-    while ( sscanf ( libelle, "%128[^$]$THIS%128[^\n]", prefixe, suffixe ) == 2 )
-     { gchar result[128];
-       g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
-       g_strlcat ( result, local_tech_id, sizeof(result) );
-       g_strlcat ( result, suffixe, sizeof(result) );
-       g_snprintf( libelle, taille_max, "%s", result );
-       memset ( suffixe, 0, sizeof(suffixe) );
-     }
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Message parsé final: %s", libelle );
   }
 /******************************************************************************************************************************/
@@ -108,7 +93,7 @@
     g_free( date_utf8 );
 
     g_snprintf ( libelle, sizeof(libelle), "%s", Json_get_string(msg->source_node, "libelle_src") );
-    Convert_libelle_dynamique ( msg->tech_id, libelle, sizeof(libelle) );
+    Convert_libelle_dynamique ( libelle, sizeof(libelle) );
 /***************************************** Création de la structure interne de stockage ***************************************/
     Json_node_add_string ( msg->source_node, "libelle", libelle );
     Json_node_add_string ( msg->source_node, "date_create", date_create );

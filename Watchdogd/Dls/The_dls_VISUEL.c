@@ -96,7 +96,7 @@
      { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
        g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
        g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
-       Convert_libelle_dynamique ( visu->tech_id, visu->libelle, sizeof(visu->libelle) );
+       Convert_libelle_dynamique ( visu->libelle, sizeof(visu->libelle) );
        visu->valeur  = valeur;
        visu->cligno  = cligno;
        visu->disable = disable;
