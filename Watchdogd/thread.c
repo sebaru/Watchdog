@@ -163,6 +163,7 @@
        g_snprintf ( topic, sizeof(topic), "threads/#" );
        MQTT_Subscribe ( module->MQTT_session, topic );
        mosquitto_message_callback_set( module->MQTT_session, Thread_on_MQTT_message_CB );
+       mosquitto_reconnect_delay_set ( module->MQTT_session, 10, 60, TRUE );
      }
     if ( mosquitto_loop_start(	module->MQTT_session	) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }

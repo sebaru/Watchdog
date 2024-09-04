@@ -81,6 +81,10 @@
        goto end;
      }
     gchar *topic = Json_get_string ( request, "tag" );
+    if (!topic)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "Requete sans tag reçue sur topic %s", msg->topic );
+       goto end_request;
+     }
 
          if ( !strcmp ( topic, "SET_AI" ) )       Dls_data_set_AI_from_thread_ai ( request );
     else if ( !strcmp ( topic, "SET_DI" ) )       Dls_data_set_DI_from_thread_di ( request );
@@ -96,8 +100,9 @@
               Dls_data_set_DI_pulse ( NULL, bit );
             }
      }
-    else Info_new( __func__, Config.log_bus, LOG_ERR, "tag inconnu: %s", topic );
+    else Info_new( __func__, Config.log_bus, LOG_ERR, "tag inconnu: %s sur topic %s", topic, msg->topic );
 
+end_request:
     Json_node_unref ( request );
 end:
     g_strfreev( tokens );                                                                      /* Libération des tokens topic */
@@ -121,7 +126,7 @@ end:
     mosquitto_message_callback_set    ( Partage->com_msrv.MQTT_local_session, MQTT_on_mqtt_local_message_CB );
 
     /*if (Config.mqtt_over_ssl)
-     { mosquitto_tls_set( Partage->com_msrv.MQTT_API_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }*/
+     { mosquitto_tls_set( Partage->com_msrv.MQTT_local_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }*/
 
     retour = mosquitto_connect( Partage->com_msrv.MQTT_local_session, Config.master_hostname, 1883, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )

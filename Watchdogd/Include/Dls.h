@@ -216,7 +216,7 @@
  extern void Dls_data_BI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_BI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit );
-
+ extern void Dls_BI_export_to_API ( struct DLS_BI *bit );
                                                                                                     /* Dans The_dls_HORLOGE.c */
  extern void Dls_data_clear_HORLOGE ();
  extern void Dls_data_activer_horloge ( void );

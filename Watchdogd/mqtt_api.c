@@ -326,12 +326,13 @@ end:
     mosquitto_connect_callback_set    ( Partage->com_msrv.MQTT_API_session, MQTT_on_connect_CB );
     mosquitto_disconnect_callback_set ( Partage->com_msrv.MQTT_API_session, MQTT_on_disconnect_CB );
     mosquitto_message_callback_set    ( Partage->com_msrv.MQTT_API_session, MQTT_on_mqtt_api_message_CB );
+    mosquitto_reconnect_delay_set     ( Partage->com_msrv.MQTT_API_session, 10, 60, TRUE );
 
     if (Config.mqtt_over_ssl)
      { mosquitto_tls_set( Partage->com_msrv.MQTT_API_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }
 
     gchar mqtt_username[128];
-    g_snprintf( mqtt_username, sizeof(mqtt_username), "domain-%s", domain_uuid );
+    g_snprintf( mqtt_username, sizeof(mqtt_username), "agent-%s", domain_uuid );
     mosquitto_username_pw_set(	Partage->com_msrv.MQTT_API_session, mqtt_username, Config.mqtt_password );
     retour = mosquitto_connect( Partage->com_msrv.MQTT_API_session, Config.mqtt_hostname, Config.mqtt_port, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )

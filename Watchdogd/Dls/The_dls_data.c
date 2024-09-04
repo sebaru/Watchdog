@@ -41,10 +41,12 @@
 
     gint top = Partage->top;
 
-    JsonArray *BIArray = Json_node_add_array ( RootNode, "mnemos_BI" );
-    if (plugin) Dls_all_BI_to_json ( BIArray, plugin );
-    else Dls_foreach_plugins ( BIArray, Dls_all_BI_to_json );
-    Json_node_add_int ( RootNode, "nbr_mnemos_BI", json_array_get_length ( BIArray ) );
+    GSList *liste = plugin->Dls_data_BI;
+    while ( liste )
+     { struct DLS_BI *bit = liste->data;
+       Dls_BI_export_to_API ( bit );
+       liste = g_slist_next(liste);
+     }
 
     JsonArray *MONOArray = Json_node_add_array ( RootNode, "mnemos_MONO" );
     if (plugin) Dls_all_MONO_to_json ( MONOArray, plugin );
