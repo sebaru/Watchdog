@@ -105,7 +105,7 @@
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 
- extern void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max );
+ extern void Convert_libelle_dynamique ( gchar *libelle, gint taille_max );
 
  extern void API_Send_ARCHIVE ( void );                                                                     /* Dans api_xxx.c */
  extern void API_Clear_ARCHIVE ( void );
