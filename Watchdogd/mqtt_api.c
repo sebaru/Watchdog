@@ -332,7 +332,7 @@ end:
      { mosquitto_tls_set( Partage->com_msrv.MQTT_API_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }
 
     gchar mqtt_username[128];
-    g_snprintf( mqtt_username, sizeof(mqtt_username), "agent-%s", domain_uuid );
+    g_snprintf( mqtt_username, sizeof(mqtt_username), "%s-agent", domain_uuid );
     mosquitto_username_pw_set(	Partage->com_msrv.MQTT_API_session, mqtt_username, Config.mqtt_password );
     retour = mosquitto_connect( Partage->com_msrv.MQTT_API_session, Config.mqtt_hostname, Config.mqtt_port, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )
