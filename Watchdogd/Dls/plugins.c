@@ -336,7 +336,7 @@
           Partage->com_dls.sys_flipflop_2hz        = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
           Partage->com_dls.sys_flipflop_1sec       = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
           Partage->com_dls.sys_flipflop_2sec       = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2SEC" );
-          Partage->com_dls.sys_api_socket          = Dls_data_lookup_BI   ( "SYS", "API_SOCKET" );
+          Partage->com_dls.sys_mqtt_connected      = Dls_data_lookup_BI   ( "SYS", "MQTT_CONNECTED" );
           Partage->com_dls.sys_top_5hz             = Dls_data_lookup_MONO ( "SYS", "TOP_5HZ" );
           Partage->com_dls.sys_top_2hz             = Dls_data_lookup_MONO ( "SYS", "TOP_2HZ" );
           Partage->com_dls.sys_top_1sec            = Dls_data_lookup_MONO ( "SYS", "TOP_1SEC" );
@@ -346,8 +346,6 @@
           Partage->com_dls.sys_bit_per_sec         = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
           Partage->com_dls.sys_tour_per_sec        = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
           Partage->com_dls.sys_dls_wait            = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
-          Partage->com_dls.sys_nbr_api_enreg_queue = Dls_data_lookup_AI   ( "SYS", "NBR_API_ENREG_QUEUE" );
-          Partage->com_dls.sys_nbr_archive_queue   = Dls_data_lookup_AI   ( "SYS", "NBR_ARCHIVE_QUEUE" );
           Partage->com_dls.sys_maxrss              = Dls_data_lookup_AI   ( "SYS", "MAXRSS" );
         }
 

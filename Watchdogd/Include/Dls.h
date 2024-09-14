@@ -129,7 +129,7 @@
     struct DLS_BI *sys_flipflop_2hz;
     struct DLS_BI *sys_flipflop_1sec;
     struct DLS_BI *sys_flipflop_2sec;
-    struct DLS_BI *sys_api_socket;
+    struct DLS_BI *sys_mqtt_connected;
     struct DLS_MONO *sys_top_5hz;
     struct DLS_MONO *sys_top_2hz;
     struct DLS_MONO *sys_top_1sec;
@@ -139,8 +139,6 @@
     struct DLS_AI *sys_bit_per_sec;
     struct DLS_AI *sys_tour_per_sec;
     struct DLS_AI *sys_dls_wait;
-    struct DLS_AI *sys_nbr_api_enreg_queue;
-    struct DLS_AI *sys_nbr_archive_queue;
     struct DLS_AI *sys_maxrss;
   };
 
@@ -218,7 +216,7 @@
  extern void Dls_data_BI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_BI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit );
-
+ extern void Dls_BI_export_to_API ( struct DLS_BI *bit );
                                                                                                     /* Dans The_dls_HORLOGE.c */
  extern void Dls_data_clear_HORLOGE ();
  extern void Dls_data_activer_horloge ( void );

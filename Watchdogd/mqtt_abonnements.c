@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/api_Abonnements.c        Distribution des abonnements l'API                                                      */
+/* Watchdogd/mqtt_Abonnements.c        Distribution des abonnements l'API                                                     */
 /* Projet WatchDog version 4.0       Gestion d'habitat                                                    17.02.2023 22:05:20 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * api_Abonnements.c
+ * mqtt_Abonnements.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2023 - Sebastien LEFEVRE
@@ -29,10 +29,10 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* API_Send_Abonnements: Envoi les abonnements à l'API                                                                        */
+/* MQTT_Send_Abonnements_to_API: Envoi les abonnements à l'API                                                                */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void API_Send_Abonnements ( void )
+ void MQTT_Send_Abonnements_to_API ( void )
   { gint cpt = 0;
     while (Partage->abonnements && Partage->com_msrv.Thread_run == TRUE && cpt<100)
      { pthread_mutex_lock( &Partage->abonnements_synchro );                           /* Ajout dans la liste de msg a traiter */

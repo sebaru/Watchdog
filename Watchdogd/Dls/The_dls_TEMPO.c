@@ -225,13 +225,23 @@
  void Dls_TEMPO_to_json ( JsonNode *element, struct DLS_TEMPO *bit )
   { Json_node_add_string ( element, "tech_id",  bit->tech_id );
     Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool ( element, "etat", bit->state );
-    Json_node_add_int  ( element, "status", bit->status );
+    Json_node_add_bool ( element, "etat",   bit->state );
     Json_node_add_int  ( element, "daa", bit->delai_on );
     Json_node_add_int  ( element, "dma", bit->min_on );
     Json_node_add_int  ( element, "dMa", bit->max_on );
     Json_node_add_int  ( element, "dad", bit->delai_off );
     Json_node_add_int  ( element, "date_on", bit->date_on );
     Json_node_add_int  ( element, "date_off", bit->date_off );
+    gchar *status;
+    switch ( bit->status )
+     { default:
+       case DLS_TEMPO_NOT_COUNTING:       status = "NOT COUNTING";       break;
+       case DLS_TEMPO_WAIT_FOR_DELAI_ON:  status = "WAIT_FOR_DELAI_ON";  break;
+       case DLS_TEMPO_WAIT_FOR_MIN_ON:    status = "WAIT_FOR_MIN_ON";    break;
+       case DLS_TEMPO_WAIT_FOR_DELAI_OFF: status = "WAIT_FOR_DELAI_OFF"; break;
+       case DLS_TEMPO_WAIT_FOR_MAX_ON:    status = "WAIT_FOR_MAX_ON";    break;
+       case DLS_TEMPO_WAIT_FOR_COND_OFF:  status = "WAIT_FOR_COND_OFF";  break;
+     }
+    Json_node_add_string ( element, "status", status );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

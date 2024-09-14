@@ -169,7 +169,7 @@
     if (RootNode)
      { gchar topic[256];
        g_snprintf( topic, sizeof(topic), "thread/%s", target_tech_id );
-       MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, topic, "DLS", RootNode );
+       MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, topic, "DLS", RootNode );
        Json_node_unref(RootNode);
      }
   }
@@ -363,20 +363,18 @@
 /******************************************************************************************************************************/
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_archive_queue, 1.0*Partage->archive_liste_taille, TRUE );
           Dls_foreach_plugins ( NULL, Dls_run_archivage );                        /* Archivage au mieux toutes les 5 secondes */
           last_top_5sec = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_10sec>=100)                                                        /* Toutes les 10 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
-          Dls_data_set_BI ( NULL, Partage->com_dls.sys_api_socket, (Partage->com_msrv.API_websocket ? TRUE : FALSE) );
+          Dls_data_set_BI ( NULL, Partage->com_dls.sys_mqtt_connected, Partage->com_msrv.MQTT_connected );
           last_top_10sec = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_api_enreg_queue, (gdouble)Partage->liste_json_to_ws_api_size, TRUE );
           struct rusage conso;
           getrusage ( RUSAGE_SELF, &conso );
           Dls_data_set_AI ( NULL, Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );

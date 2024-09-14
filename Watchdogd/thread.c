@@ -54,15 +54,14 @@
  void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { MQTT_Send_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
+
        JsonNode *RootNode = Json_node_create();
-       if (RootNode)
-        { Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
-          Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-          Json_node_add_bool   ( RootNode, "io_comm", module->comm_status );
-          JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/heartbeat", RootNode );
-          Json_node_unref ( api_result );
-          Json_node_unref ( RootNode );
-        }
+       Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
+       Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+       Json_node_add_bool   ( RootNode, "io_comm",        module->comm_status );
+       MQTT_Send_to_API ( "HEARTBEAT", RootNode );
+       Json_node_unref ( RootNode );
+
        module->comm_next_update = Partage->top + 600;                                                   /* Toutes les minutes */
        module->comm_status = etat;
      }
@@ -152,7 +151,7 @@
      }
 
 /******************************************************* Ecoute du MQTT *******************************************************/
-    module->MQTT_session = mosquitto_new( thread_tech_id, FALSE, module	);
+    module->MQTT_session = mosquitto_new( thread_tech_id, FALSE, module );
     if (!module->MQTT_session)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
     else if ( mosquitto_connect(	module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
@@ -164,6 +163,7 @@
        g_snprintf ( topic, sizeof(topic), "threads/#" );
        MQTT_Subscribe ( module->MQTT_session, topic );
        mosquitto_message_callback_set( module->MQTT_session, Thread_on_MQTT_message_CB );
+       mosquitto_reconnect_delay_set ( module->MQTT_session, 10, 60, TRUE );
      }
     if ( mosquitto_loop_start(	module->MQTT_session	) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
@@ -484,34 +484,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Demarrer_API_sync: Processus de synchronisation avec l'API                                                                 */
-/* Entrée: rien                                                                                                               */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Demarrer_api_sync ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
-    if ( pthread_create( &Partage->com_msrv.TID_api_sync, NULL, (void *)Run_api_sync, NULL ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
-       return(FALSE);
-     }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "thread api_sync (%p) seems to be running", Partage->com_msrv.TID_api_sync );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Demarrer_ARCH_sync: Processus de synchronisation d'archive                                                                 */
-/* Entrée: rien                                                                                                               */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Demarrer_arch_sync ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
-    if ( pthread_create( &Partage->com_msrv.TID_arch_sync, NULL, (void *)Run_arch_sync, NULL ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
-       return(FALSE);
-     }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "thread arch_sync (%p) seems to be running", Partage->com_msrv.TID_arch_sync );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Demarrer_http: Processus HTTP                                                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: false si probleme                                                                                                  */
@@ -541,10 +513,6 @@
     Partage->com_dls.Thread_run = FALSE;
     if ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                               /* Attente fin DLS */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
-
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for API_SYNC (%p) to finish", Partage->com_msrv.TID_api_sync );
-    if ( Partage->com_msrv.TID_api_sync ) pthread_join ( Partage->com_msrv.TID_api_sync, NULL );
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, API_SYNC is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for ARCH_SYNC (%p) to finish", Partage->com_msrv.TID_arch_sync );
     if ( Partage->com_msrv.TID_arch_sync ) pthread_join ( Partage->com_msrv.TID_arch_sync, NULL );

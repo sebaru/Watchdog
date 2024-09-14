@@ -42,7 +42,7 @@
  #include "config.h"
  #include "Http.h"
  #include "Config.h"
- #include "Archive.h"
+ #include "Mqtt.h"
 
  extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */
 
@@ -60,7 +60,6 @@
  struct COM_MSRV                                                            /* Communication entre DLS et le serveur Watchdog */
   { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    pthread_t TID_api_sync;                                                                          /* Identifiant du thread */
     pthread_t TID_arch_sync;                                                                         /* Identifiant du thread */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
@@ -68,11 +67,10 @@
     GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
-    SoupWebsocketConnection *API_websocket;
-    GSList *API_ws_messages;                                                             /* Liste des messages recus de l'API */
-    struct mosquitto *MQTT_session;                                                            /* Session MQTT vers le broker */
+    struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
+    struct mosquitto *MQTT_API_session;                                                    /* Session MQTT vers le broker API */
+    gboolean MQTT_connected;                                                         /* TRUE si la connexion au broker est OK */
     GSList *MQTT_messages;                                                               /* Liste des messages recus via MQTT */
-    gint last_master_ping;                                                    /* Gere le dernier ping du master vers le slave */
   };
 
  struct PARTAGE                                                                            /* Structure des données partagées */
@@ -91,13 +89,6 @@
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_HTTP com_http;                                                                       /* Zone mémoire pour HTTP */
 
-    pthread_mutex_t archive_liste_sync;                                                   /* Bit de synchronisation processus */
-    GSList *archive_liste;                                                                /* liste de struct ARCHDB a traiter */
-    gint archive_liste_taille;
-
-    SoupSession *API_Sync_session;
-    GSList *liste_json_to_ws_api;                                                   /* liste de JSON a envoyer à l'APi via WS */
-    gint    liste_json_to_ws_api_size;                                 /* taille de la liste de JSON a envoyer à l'APi via WS */
     pthread_mutex_t abonnements_synchro;                                                  /* Bit de synchronisation processus */
     GSList *abonnements;                                                               /* Abonnements aux entrées analogiques */
 
@@ -114,14 +105,10 @@
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
 
- extern void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max );
+ extern void Convert_libelle_dynamique ( gchar *libelle, gint taille_max );
 
  extern void API_Send_ARCHIVE ( void );                                                                     /* Dans api_xxx.c */
  extern void API_Clear_ARCHIVE ( void );
- extern void API_Send_visuels ( void );
- extern void API_Send_MSGS ( void );
- extern void API_Send_Abonnements ( void );
- extern void Run_api_sync ( void );
  extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
 
@@ -129,6 +116,7 @@
 
  extern gboolean MSRV_Map_to_thread ( JsonNode *key );
  extern gboolean MSRV_Map_from_thread ( JsonNode *key );
+ extern void MSRV_Agent_upgrade_to ( gchar *branche );
 
  extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
  extern void UUID_Load ( gchar *thread, gchar *target );
@@ -139,11 +127,14 @@
  extern JsonNode *Http_Send_json_request_from_agent ( SoupMessage *soup_msg, JsonNode *RootNode );
  extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode );
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
+
  extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node );
  extern void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
  extern void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat );
  extern void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme );
  extern void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne );
  extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
+ extern void MQTT_Send_to_API ( gchar *topic, JsonNode *node );
+
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
