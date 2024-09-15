@@ -214,13 +214,6 @@
                    Dls_cadran_send_CH_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
                  }
               }
-             else if (!strcasecmp ( classe, "CI" ))
-              { struct DLS_CI *bit = Dls_data_lookup_CI ( tech_id, acronyme );
-                if (bit)
-                 { bit->abonnement = TRUE;
-                   Dls_cadran_send_CI_to_API ( bit );                    /* Envoi la valeur a date pour update cadran sur ihm */
-                 }
-              }
              else if (!strcasecmp ( classe, "REGISTRE" ))
               { struct DLS_REGISTRE *bit = Dls_data_lookup_REGISTRE ( tech_id, acronyme );
                 if (bit)

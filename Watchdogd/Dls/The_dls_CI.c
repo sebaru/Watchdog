@@ -103,7 +103,6 @@
           if (cpt_imp->val_en_cours1>=ratio)
            { cpt_imp->valeur++;
              cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
-             if (cpt_imp->abonnement) Dls_cadran_send_CI_to_API ( cpt_imp );
              Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                        "ligne %04d: Changing DLS_CI '%s:%s'=%d",
                        (vars ? vars->num_ligne : -1), cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
@@ -120,19 +119,6 @@
  gint Dls_data_get_CI ( struct DLS_CI *cpt_imp )
   { if (!cpt_imp) return(0);
     return( cpt_imp->valeur );
-  }
-/******************************************************************************************************************************/
-/* Dls_cadran_send_CI_to_API: Ennvoi un CI à l'API pour affichage des cadrans                                                 */
-/* Entrées: la structure DLs_AI                                                                                               */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_cadran_send_CI_to_API ( struct DLS_CI *bit )
-  { if (!bit) return;
-    JsonNode *RootNode = Json_node_create();
-    Dls_CI_to_json ( RootNode, bit );
-    pthread_mutex_lock ( &Partage->abonnements_synchro );
-    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-    pthread_mutex_unlock ( &Partage->abonnements_synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_CI_to_json : Formate un CI au format JSON                                                                              */

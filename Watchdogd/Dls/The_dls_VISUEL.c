@@ -118,6 +118,20 @@
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_VISUEL_for_CI : Met un jour un visuel accroché a un compteur d'impulsion                                      */
+/* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
+                                   gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable, gint decimal )
+  { if (!visu) return;
+    if (!src) return;
+
+    gint valeur   = Dls_data_get_CI ( src ) * src->multi;
+    visu->decimal = decimal;
+    g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
+    Dls_data_set_VISUEL ( vars, visu, mode, color, 1.0*valeur, cligno, libelle, disable );
+  }
+/******************************************************************************************************************************/
 /* Dls_data_set_visuel_for_registre : Met un jour un visuel accroché a un registre                                            */
 /* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
 /******************************************************************************************************************************/
