@@ -115,7 +115,8 @@
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
-             if (cpt_h->abonnement) Dls_cadran_send_CH_to_API ( cpt_h );
+#warning migrate to DLS_REPORT
+             /*if (cpt_h->abonnement) Dls_cadran_send_CH_to_API ( cpt_h );*/
              Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                        "ligne %04d: Changing DLS_CH '%s:%s'=%d",
                        (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
@@ -129,19 +130,6 @@
      }
     else
      { cpt_h->etat = FALSE; }
-  }
-/******************************************************************************************************************************/
-/* Dls_cadran_send_CH_to_API: Ennvoi un CH à l'API pour affichage des cadrans                                                 */
-/* Entrées: la structure DLs_AI                                                                                               */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_cadran_send_CH_to_API ( struct DLS_CH *bit )
-  { if (!bit) return;
-    JsonNode *RootNode = Json_node_create();
-    Dls_CH_to_json ( RootNode, bit );
-    pthread_mutex_lock ( &Partage->abonnements_synchro );
-    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-    pthread_mutex_unlock ( &Partage->abonnements_synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_CH_to_json : Formate un CH au format JSON                                                                              */

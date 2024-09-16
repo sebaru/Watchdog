@@ -101,19 +101,6 @@
               "Changing DLS_AI '%s:%s'=%f %s", bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
   }
 /******************************************************************************************************************************/
-/* Dls_cadran_send_AI_to_API: Ennvoi une AI à l'API pour affichage des cadrans                                                */
-/* Entrées: la structure DLs_AI                                                                                               */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_cadran_send_AI_to_API ( struct DLS_AI *bit )
-  { if (!bit) return;
-    JsonNode *RootNode = Json_node_create();
-    Dls_AI_to_json ( RootNode, bit );
-    pthread_mutex_lock ( &Partage->abonnements_synchro );
-    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-    pthread_mutex_unlock ( &Partage->abonnements_synchro );
-  }
-/******************************************************************************************************************************/
 /* Dls_data_set_AI_from_thread_ai: Positionne une AI dans DLS depuis une AI 'thread'                                          */
 /* Entrées: la structure JSON                                                                                                 */
 /* Sortie : TRUE si OK, sinon FALSE                                                                                           */
@@ -141,12 +128,13 @@
        return(FALSE);
      }
 
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI '%s:%s'/'%s:%s'=%f %s (range=%d) (%s) (abonnement=%d)",
+    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
               thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_double ( request, "valeur" ), bit->unite,
-              Json_get_bool ( request, "in_range" ), bit->libelle, bit->abonnement );
+              Json_get_bool ( request, "in_range" ), bit->libelle );
     Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-    if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );
+#warning migrate to DLS_REPORT
+/*    if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );*/
 
     return(TRUE);
   }

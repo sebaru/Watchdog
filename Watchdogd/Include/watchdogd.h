@@ -89,9 +89,6 @@
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_HTTP com_http;                                                                       /* Zone mémoire pour HTTP */
 
-    pthread_mutex_t abonnements_synchro;                                                  /* Bit de synchronisation processus */
-    GSList *abonnements;                                                               /* Abonnements aux entrées analogiques */
-
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */

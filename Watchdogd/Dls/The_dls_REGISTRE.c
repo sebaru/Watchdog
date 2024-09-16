@@ -89,7 +89,8 @@
   { if (!reg) return;
     if (valeur != reg->valeur)
      { reg->valeur = valeur;
-       if (reg->abonnement) Dls_cadran_send_REGISTRE_to_API ( reg );
+#warning migrate to DLS_REPORT
+/*       if (reg->abonnement) Dls_cadran_send_REGISTRE_to_API ( reg );*/
        Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_REGISTRE '%s:%s'=%f",
                  (vars ? vars->num_ligne : -1), reg->tech_id, reg->acronyme, reg->valeur );
@@ -103,19 +104,6 @@
  gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg )
   { if (!reg) return(0.0);
     return( reg->valeur );
-  }
-/******************************************************************************************************************************/
-/* Dls_cadran_send_REGISTRE_to_API: Ennvoi un registre à l'API pour affichage des cadrans                                     */
-/* Entrées: la structure DLs_AI                                                                                               */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_cadran_send_REGISTRE_to_API ( struct DLS_REGISTRE *bit )
-  { if (!bit) return;
-    JsonNode *RootNode = Json_node_create();
-    Dls_REGISTRE_to_json ( RootNode, bit );
-    pthread_mutex_lock ( &Partage->abonnements_synchro );
-    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-    pthread_mutex_unlock ( &Partage->abonnements_synchro );
   }
 /******************************************************************************************************************************/
 /* Dls_REGISTRE_to_json : Formate un bit au format JSON                                                                       */

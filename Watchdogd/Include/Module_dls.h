@@ -64,7 +64,6 @@
     guint   in_range;
     guint   archivage;
     guint   last_arch;                                                                         /* Date de la derniere archive */
-    gboolean abonnement;
    };
 
  struct DLS_AO
@@ -75,7 +74,6 @@
     gdouble valeur;
     guint   archivage;
     guint   last_arch;                                                                         /* Date de la derniere archive */
-    gboolean abonnement;                                                 /* Devons-nous envoyer les valeurs en live à l'API ? */
   };
 
  struct DLS_WATCHDOG
@@ -145,7 +143,6 @@
     gboolean etat;
     gint    archivage;
     guint   last_arch;
-    gboolean abonnement;
   };
 
  struct DLS_CH
@@ -157,7 +154,6 @@
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
     guint old_top;                                                                         /* Date de debut du comptage du CH */
     gboolean etat;
-    gboolean abonnement;
   };
 
  struct DLS_VISUEL
@@ -193,7 +189,6 @@
     gchar   unite[32];
     gint    archivage;
     guint   last_arch;                                                   /* Date de dernier enregistrement en base de données */
-    gboolean abonnement;
     gdouble pid_somme_erreurs;                                                                                /* Calcul PID KI*/
     gdouble pid_prev_erreur;                                                                                 /* Calcul PID KD */
   };
@@ -269,7 +264,6 @@
  extern struct DLS_REGISTRE *Dls_data_lookup_REGISTRE ( gchar *tech_id, gchar *acronyme );
  extern void    Dls_data_set_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *reg, gdouble valeur );
  extern gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg );
- extern void Dls_cadran_send_REGISTRE_to_API ( struct DLS_REGISTRE *bit );
 
  extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,

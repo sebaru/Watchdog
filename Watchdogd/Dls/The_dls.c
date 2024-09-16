@@ -259,13 +259,14 @@
 
     if ( Dls_data_get_MONO ( plugin->vars.dls_comm ) != bit_comm_module )                    /* Envoi à l'API si il y a écart */
      { Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_comm, bit_comm_module );
-       JsonNode *RootNode = Json_node_create ();
+#warning à migrer to DLS_REPORT dans Dls_data_set_MONO
+/*       JsonNode *RootNode = Json_node_create ();
        if (RootNode)
         { Dls_MONO_to_json ( RootNode, plugin->vars.dls_comm );
           pthread_mutex_lock ( &Partage->abonnements_synchro );
           Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
           pthread_mutex_unlock ( &Partage->abonnements_synchro );
-        }
+        }*/
      }
 
     Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok,

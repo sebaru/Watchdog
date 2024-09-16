@@ -428,7 +428,6 @@
     pthread_mutex_init( &Partage->com_http.synchro, NULL );
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
-    pthread_mutex_init( &Partage->abonnements_synchro, NULL );
 
 /************************************************* Gestion des signaux ********************************************************/
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
@@ -500,8 +499,6 @@
           if (Partage->com_msrv.liste_visuel)  MQTT_Send_visuels_to_API ();                    /* Traitement des I dynamiques */
 /*---------------------------------------------- Report des messages ---------------------------------------------------------*/
           if (Partage->com_msrv.liste_msg)     MQTT_Send_MSGS_to_API();
-/*---------------------------------------------- Report des abonnements ------------------------------------------------------*/
-          if (Partage->abonnements) MQTT_Send_Abonnements_to_API();
 
           usleep(1000);
           sched_yield();
@@ -540,14 +537,11 @@
     Json_node_unref ( Partage->Maps_root );
     g_slist_free ( Partage->com_msrv.liste_visuel );
     g_slist_free_full ( Partage->com_msrv.liste_msg, (GDestroyNotify)g_free );
-    g_slist_free_full ( Partage->abonnements, (GDestroyNotify)Json_node_unref );
 
 /************************************************* Dechargement des mutex *****************************************************/
-
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_db.synchro );
-    pthread_mutex_destroy( &Partage->abonnements_synchro );
 
 /****************************************************** Arret du timer ********************************************************/
     timer.it_value.tv_sec  = timer.it_interval.tv_sec  = 0;

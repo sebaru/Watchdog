@@ -168,20 +168,16 @@
  extern void Dls_data_CH_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_CH_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_CH_to_json ( JsonNode *element, struct DLS_CH *bit );
- extern void Dls_cadran_send_CH_to_API ( struct DLS_CH *bit );
                                                                                                          /* Dans The_dls_AI.c */
  extern void Dls_data_AI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
  extern void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range );
  extern gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request );
- extern void Dls_cadran_send_AI_to_API ( struct DLS_AI *bit );
                                                                                                          /* Dans The_dls_AO.c */
  extern void Dls_data_AO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit );
- extern void Dls_cadran_send_AO_to_API ( struct DLS_AO *bit );
-
                                                                                                       /* Dans The_dls_TEMPO.c */
  extern void Dls_data_TEMPO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_TEMPO_to_json ( JsonNode *element, struct DLS_TEMPO *bit );

@@ -110,19 +110,6 @@
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
-/* Dls_cadran_send_AO_to_API: Ennvoi une AO à l'API pour affichage des cadrans                                                */
-/* Entrées: la structure DLs_AO                                                                                               */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_cadran_send_AO_to_API ( struct DLS_AO *bit )
-  { if (!bit) return;
-    JsonNode *RootNode = Json_node_create();
-    Dls_AO_to_json ( RootNode, bit );
-    pthread_mutex_lock ( &Partage->abonnements_synchro );
-    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-    pthread_mutex_unlock ( &Partage->abonnements_synchro );
-  }
-/******************************************************************************************************************************/
 /* Dls_AO_to_json: Convertir un AO en JSON                                                                                    */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
