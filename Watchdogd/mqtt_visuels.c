@@ -52,7 +52,7 @@
                  visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->valeur, visuel->cligno, visuel->libelle, visuel->disable
                );
        Dls_VISUEL_to_json ( element, visuel );
-       MQTT_Send_to_API ( "DLS_VISUEL", element );
+       MQTT_Send_to_API ( element, "DLS_VISUEL" );
        cpt++;
      }
     Json_node_unref ( element );

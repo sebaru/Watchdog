@@ -93,12 +93,13 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range )
+ void Dls_data_set_AI ( struct DLS_AI *bit, gdouble valeur, gboolean in_range )
   { if (!bit) return;
     bit->valeur   = valeur;
     bit->in_range = in_range;
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info_new( __func__, Config.log_dls, LOG_DEBUG,
               "Changing DLS_AI '%s:%s'=%f %s", bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
+    Dls_AI_export_to_API ( bit );                                                                            /* envoi a l'API */
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_AI_from_thread_ai: Positionne une AI dans DLS depuis une AI 'thread'                                          */
@@ -132,10 +133,7 @@
               thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_double ( request, "valeur" ), bit->unite,
               Json_get_bool ( request, "in_range" ), bit->libelle );
-    Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-#warning migrate to DLS_REPORT
-/*    if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );*/
-
+    Dls_data_set_AI ( bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -167,6 +165,20 @@
        Dls_AI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_AI_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le JsonNode et le bit                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_AI_export_to_API ( struct DLS_AI *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_double ( element, "valeur",    bit->valeur );
+       Json_node_add_bool   ( element, "in_range",  bit->in_range );
+       MQTT_Send_to_API     ( element, "DLS_REPORT/AI/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref      ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

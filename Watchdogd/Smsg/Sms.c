@@ -300,9 +300,11 @@
     Json_node_add_string( RootNode, "user", Json_get_string ( user, "free_sms_api_user" ) );
     Json_node_add_string( RootNode, "pass", Json_get_string ( user, "free_sms_api_key" ) );
 
-    gchar libelle[256];
-    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
+    gchar libelle_utf8[256];
+    g_snprintf( libelle_utf8, sizeof(libelle_utf8), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
+    gchar *libelle = g_convert ( libelle_utf8, -1, "ISO-8859-1", "UTF8", NULL, NULL, NULL );
     Json_node_add_string( RootNode, "msg",  libelle );
+    g_free(libelle);
 
 /********************************************************* Envoi de la requete ************************************************/
     SoupMessage *soup_msg = soup_message_new ( "POST", "https://smsapi.free-mobile.fr/sendmsg" );

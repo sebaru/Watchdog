@@ -343,17 +343,17 @@
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_bit_per_sec, (gdouble)Partage->audit_bit_interne_per_sec_hold, TRUE );
+          Dls_data_set_AI ( Partage->com_dls.sys_bit_per_sec, (gdouble)Partage->audit_bit_interne_per_sec_hold, TRUE );
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_tour_per_sec, (gdouble)Partage->audit_tour_dls_per_sec_hold, TRUE );
+          Dls_data_set_AI ( Partage->com_dls.sys_tour_per_sec, (gdouble)Partage->audit_tour_dls_per_sec_hold, TRUE );
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE ); /* historique */
+          Dls_data_set_AI ( Partage->com_dls.sys_dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE ); /* historique */
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_2sec>=20)                                                           /* Toutes les 2 secondes */
@@ -378,7 +378,7 @@
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
           struct rusage conso;
           getrusage ( RUSAGE_SELF, &conso );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
+          Dls_data_set_AI ( Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Dls_data_activer_horloge();
           last_top_1min = Partage->top;

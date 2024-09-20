@@ -165,7 +165,6 @@
     gchar    color[16];
     gdouble  valeur;
     gchar    unite[32];
-    gint     decimal;
     gboolean cligno;
     gboolean disable;
     gboolean changed;
@@ -271,11 +270,11 @@
  extern void Dls_data_set_VISUEL_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
                                                 gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable );
  extern void Dls_data_set_VISUEL_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
-                                                gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable, gint decimal );
+                                                gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable );
  extern void Dls_data_set_VISUEL_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
                                              gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable );
  extern void Dls_data_set_VISUEL_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
-                                          gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable, gint decimal );
+                                          gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable );
  extern struct DLS_HORLOGE *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );
 

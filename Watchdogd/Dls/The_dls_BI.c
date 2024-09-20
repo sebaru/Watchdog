@@ -140,13 +140,9 @@
  void Dls_BI_export_to_API ( struct DLS_BI *bit )
   { JsonNode *element = Json_node_create ();
     if (element)
-     { Json_node_add_string ( element, "classe", "B" );
-       Json_node_add_string ( element, "tech_id",  bit->tech_id );
-       Json_node_add_string ( element, "acronyme", bit->acronyme );
-       Json_node_add_bool   ( element, "etat",     bit->etat );
-       /*Json_node_add_int    ( element, "groupe",   bit->groupe );*/
-       MQTT_Send_to_API ( "DLS_REPORT", element );
-       Json_node_unref ( element );
+     { Json_node_add_bool ( element, "etat", bit->etat );
+       MQTT_Send_to_API   ( element, "DLS_REPORT/BI/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref    ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

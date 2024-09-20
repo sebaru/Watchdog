@@ -100,7 +100,8 @@
     Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
               (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, dout->etat );
-    MQTT_Send_archive_to_API( dout->tech_id, dout->acronyme, dout->etat*1.0 );                                     /* Archivage si besoin */
+    Dls_DO_export_to_API ( dout );                                                                           /* envoi a l'API */
+    MQTT_Send_archive_to_API( dout->tech_id, dout->acronyme, dout->etat*1.0 );                         /* Archivage si besoin */
     dout->last_arch = Partage->top;
 
     JsonNode *RootNode = Json_node_create ();
@@ -165,6 +166,19 @@
        Dls_DO_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_DO_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le JsonNode et le bit                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_DO_export_to_API ( struct DLS_DO *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_bool ( element, "etat", bit->etat );
+       MQTT_Send_to_API   ( element, "DLS_REPORT/DO/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref    ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -112,6 +112,7 @@
        Partage->audit_bit_interne_per_sec++;
        MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->etat*1.0 );                         /* Archivage si besoin */
        bit->last_arch = Partage->top;
+       Dls_DI_export_to_API ( bit );                                                                         /* envoi a l'API */
      }
   }
 /******************************************************************************************************************************/
@@ -182,6 +183,19 @@
        Dls_DI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_DI_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le JsonNode et le bit                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_DI_export_to_API ( struct DLS_DI *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_bool ( element, "etat", bit->etat );
+       MQTT_Send_to_API   ( element, "DLS_REPORT/DI/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref    ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

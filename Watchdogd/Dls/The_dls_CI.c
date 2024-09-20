@@ -152,4 +152,18 @@
        liste = g_slist_next(liste);
      }
   }
+/******************************************************************************************************************************/
+/* Dls_CI_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le bit                                                                                                            */
+/* Sortie : le JSON                                                                                                           */
+/******************************************************************************************************************************/
+ void Dls_CI_export_to_API ( struct DLS_CI *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_int  ( element, "valeur", bit->valeur );
+       Json_node_add_bool ( element, "etat",   bit->etat );
+       MQTT_Send_to_API   ( element, "DLS_REPORT/CI/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref    ( element );
+     }
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

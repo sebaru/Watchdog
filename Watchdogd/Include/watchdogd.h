@@ -131,7 +131,7 @@
  extern void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme );
  extern void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne );
  extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
- extern void MQTT_Send_to_API ( gchar *topic, JsonNode *node );
+ extern void MQTT_Send_to_API ( JsonNode *node, gchar *topic, ... );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

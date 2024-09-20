@@ -115,8 +115,8 @@
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
            { cpt_h->valeur++;
              cpt_h->old_top = new_top;
-#warning migrate to DLS_REPORT
-             /*if (cpt_h->abonnement) Dls_cadran_send_CH_to_API ( cpt_h );*/
+             if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                              /* Si debug, envoi a l'API */
+
              Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                        "ligne %04d: Changing DLS_CH '%s:%s'=%d",
                        (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
@@ -159,6 +159,20 @@
        Dls_CH_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_CH_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le bit                                                                                                            */
+/* Sortie : le JSON                                                                                                           */
+/******************************************************************************************************************************/
+ void Dls_CH_export_to_API ( struct DLS_CH *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_int  ( element, "valeur", bit->valeur );
+       Json_node_add_bool ( element, "etat",   bit->etat );
+       MQTT_Send_to_API   ( element, "DLS_REPORT/CH/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref    ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

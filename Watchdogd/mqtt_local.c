@@ -130,7 +130,7 @@ end:
 
     retour = mosquitto_connect( Partage->com_msrv.MQTT_local_session, Config.master_hostname, 1883, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local connection to '%s' error: %s",
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local connection to '%s:1883' error: %s",
                  Config.master_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
      }

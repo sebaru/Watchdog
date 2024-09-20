@@ -54,7 +54,7 @@
     Json_node_add_double ( arch, "valeur",    valeur );
     Json_node_add_int    ( arch, "date_sec",  tv.tv_sec );
     Json_node_add_int    ( arch, "date_usec", tv.tv_usec );
-    MQTT_Send_to_API ( "DLS_ARCHIVE", arch );
+    MQTT_Send_to_API ( arch, "DLS_ARCHIVE" );
     Json_node_unref ( arch );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

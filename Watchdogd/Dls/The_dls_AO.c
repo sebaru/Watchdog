@@ -92,22 +92,23 @@
 /* Met à jour la sortie analogique à partir de sa valeur avant mise a l'echelle                                               */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *ao, gdouble valeur )
-  { if (!ao) return;
-    if (ao->valeur == valeur) return;
-    ao->valeur = valeur;                                                            /* Archive au mieux toutes les 5 secondes */
+ void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *bit, gdouble valeur )
+  { if (!bit) return;
+    if (bit->valeur == valeur) return;
+    bit->valeur = valeur;                                                           /* Archive au mieux toutes les 5 secondes */
     Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_AO '%s:%s'=%f %s",
-              (vars ? vars->num_ligne : -1), ao->tech_id, ao->acronyme, ao->valeur, ao->unite );
+              (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
-     { Dls_AO_to_json ( RootNode, ao );
+     { Dls_AO_to_json ( RootNode, bit );
        pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
        Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, RootNode );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
      }
     else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
     Partage->audit_bit_interne_per_sec++;
+    Dls_AO_export_to_API ( bit );                                                                            /* envoi a l'API */
   }
 /******************************************************************************************************************************/
 /* Dls_AO_to_json: Convertir un AO en JSON                                                                                    */
@@ -136,6 +137,19 @@
        Dls_AO_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_AO_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le JsonNode et le bit                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_AO_export_to_API ( struct DLS_AO *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_double ( element, "valeur", bit->valeur );
+       MQTT_Send_to_API ( element, "DLS_REPORT/AO/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

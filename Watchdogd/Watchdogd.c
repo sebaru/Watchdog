@@ -490,7 +490,7 @@
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
            { JsonNode *RootNode = Json_node_create();
              Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
-             MQTT_Send_to_API ( "HEARTBEAT", RootNode );
+             MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
              Json_node_unref ( RootNode );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
@@ -512,7 +512,7 @@
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
            { JsonNode *RootNode = Json_node_create();
              Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
-             MQTT_Send_to_API ( "HEARTBEAT", RootNode );
+             MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
              Json_node_unref ( RootNode );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }

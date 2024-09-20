@@ -205,13 +205,19 @@ end:
 /* Entrée: le topic, le node                                                                                                  */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Send_to_API ( gchar *topic, JsonNode *node )
-  { gchar topic_full[256];
-    gboolean free_node=FALSE;
+ void MQTT_Send_to_API ( JsonNode *node, gchar *topic, ... )
+  { gchar topic_inter[256], topic_full[256];
+    va_list ap;
     if (!topic) return;
+
+    g_snprintf( topic_inter, sizeof(topic_inter), "%s/%s", Json_get_string ( Config.config, "domain_uuid" ), topic );
+    va_start( ap, topic );
+    g_vsnprintf ( topic_full, sizeof(topic_full), topic_inter, ap );
+    va_end ( ap );
+
+    gboolean free_node=FALSE;
     if (!node) { node = Json_node_create(); free_node = TRUE; }
     gchar *buffer = Json_node_to_string ( node );
-    g_snprintf( topic_full, sizeof(topic_full), "%s/%s", Json_get_string ( Config.config, "domain_uuid" ), topic );
     mosquitto_publish(	Partage->com_msrv.MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 2, TRUE );
     g_free(buffer);
     if (free_node) Json_node_unref(node);

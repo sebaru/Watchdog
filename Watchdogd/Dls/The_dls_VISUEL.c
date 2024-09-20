@@ -102,10 +102,10 @@
        visu->disable = disable;
        visu->changed = TRUE;
        Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s', decimal='%d') "
+                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s') "
                  "cligno=%d libelle='%s', disable=%d",
                  (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
-                  visu->mode, visu->color, visu->valeur, visu->unite, visu->decimal, visu->cligno, visu->libelle, visu->disable );
+                  visu->mode, visu->color, visu->valeur, visu->unite, visu->cligno, visu->libelle, visu->disable );
      }
 
     if (visu->changed && (Partage->top >= visu->next_send))
@@ -122,12 +122,11 @@
 /* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
-                                   gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable, gint decimal )
+                                   gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable )
   { if (!visu) return;
     if (!src) return;
 
     gint valeur   = Dls_data_get_CI ( src ) * src->multi;
-    visu->decimal = decimal;
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
     Dls_data_set_VISUEL ( vars, visu, mode, color, 1.0*valeur, cligno, libelle, disable );
   }
@@ -136,12 +135,11 @@
 /* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
-                                         gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable, gint decimal )
+                                         gchar *mode, gchar *color, gboolean cligno, gchar *libelle, gboolean disable )
   { if (!visu) return;
     if (!src) return;
 
     gdouble valeur = Dls_data_get_REGISTRE ( src );
-    visu->decimal  = decimal;
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
     Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, libelle, disable );
   }
@@ -155,7 +153,6 @@
     if (!src) return;
 
     gdouble valeur = Dls_data_get_WATCHDOG_time ( src );
-    visu->decimal  = 0;
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
     Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, libelle, disable );
   }
@@ -169,7 +166,6 @@
     if (!src) return;
 
     gdouble valeur = Dls_data_get_TEMPO_time ( src );
-    visu->decimal  = 0;
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
     Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, libelle, disable );
   }
@@ -188,6 +184,5 @@
     Json_node_add_bool   ( RootNode, "disable",   bit->disable );
     Json_node_add_string ( RootNode, "libelle",   bit->libelle );
     Json_node_add_string ( RootNode, "unite",     bit->unite );
-    Json_node_add_int    ( RootNode, "decimal",   bit->decimal );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

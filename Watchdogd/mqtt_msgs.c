@@ -145,7 +145,7 @@
           gint rate_limit = Json_get_int ( event->msg->source_node, "rate_limit" );
           if ( !event->msg->last_on || (Partage->top >= event->msg->last_on + rate_limit*10 ) )
            { event->msg->last_on = Partage->top;
-             MQTT_Send_to_API ( "DLS_HISTO", event->msg->source_node );
+             MQTT_Send_to_API ( event->msg->source_node, "DLS_HISTO" );
              MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "DLS_HISTO", event->msg->source_node );
            }
           else
@@ -156,7 +156,7 @@
        else if (event->etat == 0)
         { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );
           if(histo)
-           { MQTT_Send_to_API ( "DLS_HISTO", histo );
+           { MQTT_Send_to_API ( histo, "DLS_HISTO" );
              MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "DLS_HISTO", histo );
              Json_node_unref ( histo );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
