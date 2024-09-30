@@ -12,7 +12,7 @@ if [ "$SOCLE" = "fedora" ]
  then
   echo "Installing Fedora dependencies"
   dnf update -y
-  dnf install -y libtool automake autoconf gcc gcc-c++ redhat-rpm-config
+  dnf install -y git libtool automake autoconf gcc gcc-c++ redhat-rpm-config
   dnf install -y glib2-devel openssl mosquitto-devel
   dnf install -y nut-devel libuuid-devel
   dnf install -y popt-devel libsoup3-devel gtts
@@ -37,7 +37,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
     apt install -y gcc-8-base
   fi
 
-  apt install -y libtool automake autoconf gcc g++ git cmake openssl curl
+  apt install -y git libtool automake autoconf gcc g++ git cmake openssl curl
   apt install -y libglib2.0-dev wireplumber mosquitto-dev
   apt install -y libupsclient-dev libssl-dev libstrophe-dev libgammu-dev
   apt install -y libpopt-dev libssl-dev libmariadb-dev libjwt-dev
