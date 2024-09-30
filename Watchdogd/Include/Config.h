@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Watchdogd/Include/Config.h        Définitions de la structure de configuration watchdog                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:23:17 CEST */
+/* Projet WatchDog version 4.0       Gestion d'habitat                      lun 02 jun 2003 14:23:17 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * Config.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

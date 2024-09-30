@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/api_sync.c        Interconnexion avec l'API                                                                      */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    10.06.2022 10:04:24 */
+/* Projet WatchDog version 4.0       Gestion d'habitat                                                    10.06.2022 10:04:24 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * api_sync.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2023 - Sebastien LEFEVRE
+ * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

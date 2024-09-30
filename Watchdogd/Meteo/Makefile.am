@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Meteo/Makefile.am          Profil de compilation de l'interface Ephemeide de Watchdog        */
-#* Projet WatchDog version 3.0       Gestion d'habitat                                12.03.2021 18:35:36 */
+#* Projet WatchDog version 4.0       Gestion d'habitat                                12.03.2021 18:35:36 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

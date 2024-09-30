@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Dmx/Makefile.am          Profil de compilation de l'interface Dmx Watchdog                   */
-#* Projet WatchDog version 3.0       Gestion d'habitat                      mar 22 oct 2019 23:13:10 CEST */
+#* Projet WatchDog version 4.0       Gestion d'habitat                      mar 22 oct 2019 23:13:10 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS= 

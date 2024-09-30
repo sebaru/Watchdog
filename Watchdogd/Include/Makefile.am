@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Include/Makefile.am          Profil de compilation des includes Watchdog                     */
-#* Projet WatchDog version 3.0       Gestion d'habitat                      jeu 31 jui 2003 13:11:59 CEST */
+#* Projet WatchDog version 4.0       Gestion d'habitat                      jeu 31 jui 2003 13:11:59 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 noinst_HEADERS    = Erreur.h \

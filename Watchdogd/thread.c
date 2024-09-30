@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/thread.c        Gestion des Threads                                                                              */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 11 avr 2009 12:21:45 CEST */
+/* Projet WatchDog version 4.0       Gestion d'habitat                                          sam 11 avr 2009 12:21:45 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * thread.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2023 - Sebastien LEFEVRE
+ * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

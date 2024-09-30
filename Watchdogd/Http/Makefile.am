@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Http/Makefile.am          Profil de compilation de l'interface HTTP Watchdog                 */
-#* Projet WatchDog version 3.0       Gestion d'habitat                      ven 01 aoû 2003 11:37:48 CEST */
+#* Projet WatchDog version 4.0       Gestion d'habitat                      ven 01 aoû 2003 11:37:48 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

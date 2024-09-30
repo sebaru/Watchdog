@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Audio/Makefile.am          Profil de compilation de l'interface Audio Watchdog               */
-#* Projet WatchDog version 3.0       Gestion d'habitat                      mar 11 avr 2009 15:48:08 CEST */
+#* Projet WatchDog version 4.0       Gestion d'habitat                      mar 11 avr 2009 15:48:08 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

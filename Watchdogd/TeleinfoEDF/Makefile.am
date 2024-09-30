@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/TeleinfoEDF/Makefile.am     Profil de compilation de l'interface RFXCOM pour Watchdog     */
-#* Projet WatchDog version 3.0       Gestion d'habitat                           dim 25 mai 2012 18:13:27 */
+#* Projet WatchDog version 4.0       Gestion d'habitat                           dim 25 mai 2012 18:13:27 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

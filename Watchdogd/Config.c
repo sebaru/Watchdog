@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Config/Config.c        Lecture du fichier de configuration Watchdog                                              */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         mer. 15 déc. 2010 13:30:12 CET */
+/* Projet WatchDog version 4.0       Gestion d'habitat                                         mer. 15 déc. 2010 13:30:12 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Config.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

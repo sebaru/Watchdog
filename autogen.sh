@@ -9,21 +9,21 @@ osDebian=`grep "ID=debian" /etc/os-release`
 
 if [ -n "$osFedora" ]; then
   echo "Compiling for Fedora !"
-  cp Makefile.am.fedora Makefile.am
-  cp Watchdogd/Makefile.am.fedora Watchdogd/Makefile.am
+  cp Makefile.fedora.am Makefile.am
+  cp Watchdogd/Makefile.fedora.am Watchdogd/Makefile.am
 
 fi
 
 if [ -n "$osRaspbian" ]; then
   echo "Compiling for Raspbian !"
-  cp Makefile.am.raspbian Makefile.am
-  cp Watchdogd/Makefile.am.raspbian Watchdogd/Makefile.am
+  cp Makefile.raspbian.am Makefile.am
+  cp Watchdogd/Makefile.raspbian.am Watchdogd/Makefile.am
 fi
 
 if [ -n "$osDebian" ]; then
   echo "Compiling for Debian !"
   cp Makefile.am.raspbian Makefile.am
-  cp Watchdogd/Makefile.am.raspbian Watchdogd/Makefile.am
+  cp Watchdogd/Makefile.raspbian.am Watchdogd/Makefile.am
 fi
 
 autoheader

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dmx/Dmx.c  Gestion des modules MODBUS Watchdog 2.0                                                               */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    22.10.2019 23:42:08 */
+/* Projet WatchDog version 4.0       Gestion d'habitat                                                    22.10.2019 23:42:08 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Dmx.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
