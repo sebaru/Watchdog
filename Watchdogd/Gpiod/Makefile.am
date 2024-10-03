@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Gpiod/Makefile.am     Profil de compilation de l'interface RASPBERRYPI GPIOD pour Watchdog   */
-#* Projet Abls-Habitat version 4.0       Gestion d'habitat                          ven 03 septembre 2021 */
+#* Projet Abls-Habitat version 4.2       Gestion d'habitat                          ven 03 septembre 2021 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

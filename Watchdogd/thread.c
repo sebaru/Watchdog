@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/thread.c        Gestion des Threads                                                                              */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                      sam 11 avr 2009 12:21:45 CEST */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                      sam 11 avr 2009 12:21:45 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

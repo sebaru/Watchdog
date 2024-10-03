@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Onduleur/Onduleur.c  Gestion des upss UPS Watchdgo 2.0                                                        */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     mar. 10 nov. 2009 15:56:10 CET */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                     mar. 10 nov. 2009 15:56:10 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

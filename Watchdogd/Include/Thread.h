@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/include/thread.h      Déclarations générales de gestion des threads                                              */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                30.01.2022 12:46:36 */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                                30.01.2022 12:46:36 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

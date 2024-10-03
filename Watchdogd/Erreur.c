@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Commun/Erreur.c        Gestion des logs systemes                                                                           */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                      jeu 09 avr 2009 22:08:19 CEST */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                      jeu 09 avr 2009 22:08:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

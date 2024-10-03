@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_MSGxxx.c        Distribution des messages DLS à l'API                                                       */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                    mar. 14 août 2012 19:05:42 CEST */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                    mar. 14 août 2012 19:05:42 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Meteo/Makefile.am          Profil de compilation de l'interface Ephemeide de Watchdog        */
-#* Projet Abls-Habitat version 4.0       Gestion d'habitat                            12.03.2021 18:35:36 */
+#* Projet Abls-Habitat version 4.2       Gestion d'habitat                            12.03.2021 18:35:36 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

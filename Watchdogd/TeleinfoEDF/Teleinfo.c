@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Teleinfo/Teleinfo.c  Gestion des capteurs TELEINFO Watchdog 2.0                                                  */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     dim. 27 mai 2012 12:52:37 CEST */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                     dim. 27 mai 2012 12:52:37 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_CI.c      Déclaration des fonctions pour la gestion des compteurs d'impulsions                       */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     mar. 07 déc. 2010 17:26:52 CET */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                     mar. 07 déc. 2010 17:26:52 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

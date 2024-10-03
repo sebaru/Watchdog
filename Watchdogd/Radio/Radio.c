@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Radio/Radio.c  Gestion des messages radio de Watchdog 2.0                                                        */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     sam. 09 nov. 2013 13:49:53 CET */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                     sam. 09 nov. 2013 13:49:53 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

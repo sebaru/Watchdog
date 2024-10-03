@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Dmx.h   Header et constantes des modules DMX Watchdog 2.0                                                */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                22.10.2019 23:14:43 */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                                22.10.2019 23:14:43 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

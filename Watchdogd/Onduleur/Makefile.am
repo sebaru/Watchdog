@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Onduleur/Makefile.am          Profil de compilation de l'interface Onduleur Watchdog         */
-#* Projet Abls-Habitat version 4.0       Gestion d'habitat                 mar. 10 nov. 2009 15:55:22 CET */
+#* Projet Abls-Habitat version 4.2       Gestion d'habitat                 mar. 10 nov. 2009 15:55:22 CET */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

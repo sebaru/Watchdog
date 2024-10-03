@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Meteo/Meteo.h        Déclaration structure internes pour les données Meteo de Watchdog                           */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                12.03.2021 18:37:46 */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                                12.03.2021 18:37:46 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Enocean/Makefile.am          Profil de compilation de l'interface ENOCEAN pour Watchdog      */
-#* Projet Abls-Habitat version 4.0       Gestion d'habitat                 dim. 28 déc. 2014 15:43:17 CET */
+#* Projet Abls-Habitat version 4.2       Gestion d'habitat                 dim. 28 déc. 2014 15:43:17 CET */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS= 

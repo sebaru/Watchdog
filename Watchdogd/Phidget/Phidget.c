@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Phidget/Phidget.c  Gestion des modules PHIDGET Watchdgo 3.0                                                      */
-/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                18.03.2021 22:02:42 */
+/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                                18.03.2021 22:02:42 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
