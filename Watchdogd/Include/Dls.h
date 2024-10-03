@@ -1,6 +1,7 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Dls.h                  Définitions des constantes programme DLS                                          */
-/*        projet Watchdog v2.0     par LEFEVRE Sebastien                                        sam 09 oct 2004 10:10:32 CEST */
+/* Projet Abls-Habitat version 4.0                                                              sam 09 oct 2004 10:10:32 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Dls.h
