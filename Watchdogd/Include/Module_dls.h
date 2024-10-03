@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Module_dls.h -> Déclaration des prototypes de fonctions                                                  */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                          jeu 31 jui 2003 11:49:36 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                      jeu 31 jui 2003 11:49:36 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Module_dls.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

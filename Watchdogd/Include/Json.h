@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Json.h      Déclarations générales des fonctions de manipulation JSON                                            */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    27.06.2019 09:43:35 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                27.06.2019 09:43:35 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Json.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

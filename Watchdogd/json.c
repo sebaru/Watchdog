@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/json.c        Fonctions helper pour la manipulation des payload au format JSON                                   */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    27.06.2019 09:38:40 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                27.06.2019 09:38:40 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * json.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

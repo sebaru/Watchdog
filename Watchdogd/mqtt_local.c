@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_local.c        Fonctions communes de gestion des requetes MQTT locales                                      */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    17.08.2024 12:31:26 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                17.08.2024 12:31:26 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * mqtt_local.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

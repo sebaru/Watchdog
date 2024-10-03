@@ -1,11 +1,11 @@
 /**********************************************************************************************************/
 /* Watchdogd/Onduleur/Onduleur.h   Header et constantes des modules UPS Watchdgo 2.0                      */
-/* Projet WatchDog version 4.0       Gestion d'habitat                     mar. 10 nov. 2009 16:35:20 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                 mar. 10 nov. 2009 16:35:20 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * Onduleur.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

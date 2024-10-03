@@ -1,11 +1,11 @@
 /**********************************************************************************************************/
 /* Watchdogd/shm.c        Gestion de la mémoire partagée                                                  */
-/* Projet WatchDog version 4.0       Gestion d'habitat                      dim 05 avr 2009 12:32:40 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                  dim 05 avr 2009 12:32:40 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * shm.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

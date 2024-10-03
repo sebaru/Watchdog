@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/api_sync.c        Interconnexion avec l'API                                                                      */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    10.06.2022 10:04:24 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                10.06.2022 10:04:24 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * api_sync.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

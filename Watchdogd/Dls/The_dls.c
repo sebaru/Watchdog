@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                                                 */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                       mar. 06 juil. 2010 18:31:32 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                   mar. 06 juil. 2010 18:31:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

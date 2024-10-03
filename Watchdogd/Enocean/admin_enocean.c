@@ -1,11 +1,11 @@
 /**********************************************************************************************************/
 /* Watchdogd/Enocean/admin_enocean.c        Gestion des connexions Admin ENOCEAN au serveur watchdog      */
-/* Projet WatchDog version 4.0       Gestion d'habitat                     dim. 28 déc. 2014 15:45:35 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                 dim. 28 déc. 2014 15:45:35 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * admin_enocean.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

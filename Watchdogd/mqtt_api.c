@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_api.c        Fonctions communes de gestion des requetes HTTP                                             */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    30.12.2020 22:03:58 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                30.12.2020 22:03:58 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * mqtt_api.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

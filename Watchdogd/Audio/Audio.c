@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Audio/Audio.c  Gestion des messages audio de Watchdog 2.0                                                        */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                         sam. 09 nov. 2013 13:49:53 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     sam. 09 nov. 2013 13:49:53 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Archive.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

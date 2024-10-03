@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_TEMPO.c              Déclaration des fonctions pour la gestion des tempo.c                           */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                         sam. 09 mars 2013 11:47:18 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     sam. 09 mars 2013 11:47:18 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_TEMPO.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

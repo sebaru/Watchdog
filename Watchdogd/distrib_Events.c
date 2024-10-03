@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/distrib_Events.c        Distribution des changements d'etats motif                                               */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                        sam. 24 janv. 2015 13:53:26 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                    sam. 24 janv. 2015 13:53:26 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * distrib_Events.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

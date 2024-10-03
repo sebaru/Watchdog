@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/api_Abonnements.c        Distribution des abonnements l'API                                                      */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    17.02.2023 22:05:20 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                17.02.2023 22:05:20 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * api_Abonnements.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

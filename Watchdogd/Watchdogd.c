@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Watchdogd.c        Démarrage/Arret du systeme Watchdog, gestion des connexions clientes                          */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                           mar 14 fév 2006 15:56:40 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                       mar 14 fév 2006 15:56:40 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Watchdogd.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

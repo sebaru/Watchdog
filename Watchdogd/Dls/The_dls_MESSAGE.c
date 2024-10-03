@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/Ths_dls_MESSAGE.c        Déclaration des fonctions pour la gestion des message                               */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                         jeu. 29 déc. 2011 14:55:42 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     jeu. 29 déc. 2011 14:55:42 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_MESSAGE.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

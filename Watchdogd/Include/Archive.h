@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Archive.h        Déclaration structure internes des archivages                                           */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                          sam 08 jui 2006 12:02:36 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                      sam 08 jui 2006 12:02:36 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Archive.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

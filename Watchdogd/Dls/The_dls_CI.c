@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_CI.c      Déclaration des fonctions pour la gestion des compteurs d'impulsions                       */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                         mar. 07 déc. 2010 17:26:52 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     mar. 07 déc. 2010 17:26:52 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_CI.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

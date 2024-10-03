@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Gpiod/Gpiod.c  Gestion des I/O Gpiod  Watchdog 3.0                                                               */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    03.09.2021 17:51:06 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                03.09.2021 17:51:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Gpiod.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

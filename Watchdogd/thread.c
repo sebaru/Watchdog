@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/thread.c        Gestion des Threads                                                                              */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                          sam 11 avr 2009 12:21:45 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                      sam 11 avr 2009 12:21:45 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * thread.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

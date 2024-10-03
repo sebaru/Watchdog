@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_data.c  Impot/Export des dls_data vers l'API                                                         */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    01.11.2022 15:12:19 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                01.11.2022 15:12:19 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_data.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

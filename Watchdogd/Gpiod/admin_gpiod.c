@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Gpiod/admin_raspberryPI.c        Gestion des connexions Gpiod pour watchdog                                      */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    01.10.2021 21:52:58 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                01.10.2021 21:52:58 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * admin_raspberryPI.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

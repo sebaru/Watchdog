@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Gpiod/Gpiod.h        Déclaration structure internes des communication RASPBERRYPI                                */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    03.09.2021 18:52:35 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                03.09.2021 18:52:35 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Gpiod.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

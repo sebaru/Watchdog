@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Phidget/Phidget.h   Header et constantes des modules Phidget Watchdgo 3.0                                        */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    18.03.2021 21:59:33 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                18.03.2021 21:59:33 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Phidget.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

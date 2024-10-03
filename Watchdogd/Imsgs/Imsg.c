@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Imsg/Imsg.c  Gestion des Instant Messaging IMSG Watchdog 2.0                                                     */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    20.02.2018 17:58:31 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                20.02.2018 17:58:31 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Imsg.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

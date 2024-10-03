@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Phidget/Phidget.c  Gestion des modules PHIDGET Watchdgo 3.0                                                      */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    18.03.2021 22:02:42 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                18.03.2021 22:02:42 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Phidget.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

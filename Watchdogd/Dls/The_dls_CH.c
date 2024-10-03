@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_CH.c      Déclaration des fonctions pour la gestion des cpt_h                                        */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                           mar 14 fév 2006 15:03:51 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                       mar 14 fév 2006 15:03:51 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_CH.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

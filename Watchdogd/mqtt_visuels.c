@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_visuels.c        Distribution des Visuels à l'API                                                           */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                          lun 10 mai 2004 11:31:17 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                      lun 10 mai 2004 11:31:17 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * api_Ixxx.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

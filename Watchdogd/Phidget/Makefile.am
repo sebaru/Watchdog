@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Phidget/Makefile.am          Profil de compilation de l'interface Phidget de Watchdog        */
-#* Projet WatchDog version 4.0       Gestion d'habitat                      jeu 18 mar 2021 21:56:00 CEST */
+#* Projet Abls-Habitat version 4.0       Gestion d'habitat                  jeu 18 mar 2021 21:56:00 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Http/Http.c        Gestion des connexions HTTP WebService de watchdog                                            */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                   mer. 24 avril 2013 18:48:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Http.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_MSGxxx.c        Distribution des messages DLS à l'API                                                       */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                        mar. 14 août 2012 19:05:42 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                    mar. 14 août 2012 19:05:42 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * mqtt_MSGxxx.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

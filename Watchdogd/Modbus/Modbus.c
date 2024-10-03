@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Modbus/Modbus.c  Gestion des modules MODBUS Watchdgo 2.0                                                         */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                         jeu. 24 déc. 2009 12:59:27 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     jeu. 24 déc. 2009 12:59:27 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Modbus.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

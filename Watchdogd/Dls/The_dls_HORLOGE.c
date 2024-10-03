@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_HORLOGE.c        Déclaration des fonctions pour la gestion des Horloges                              */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    03.07.2018 21:25:00 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                03.07.2018 21:25:00 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_HORLOGE.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/heure.c    ->    fonctions appelées par les plugins D.L.S                                                    */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                           lun 22 déc 2003 16:46:02 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                       lun 22 déc 2003 16:46:02 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * heure.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

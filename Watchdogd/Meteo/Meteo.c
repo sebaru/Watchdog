@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Meteo/Meteo.c        Gestion de l'méteo pour Watchdog v3.0                                        */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    12.03.2021 20:49:16 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                12.03.2021 20:49:16 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Meteo.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

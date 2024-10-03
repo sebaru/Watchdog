@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Config/Config.c        Lecture du fichier de configuration Watchdog                                              */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                         mer. 15 déc. 2010 13:30:12 CET */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     mer. 15 déc. 2010 13:30:12 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Config.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

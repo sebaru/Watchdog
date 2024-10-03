@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Teleinfo/Teleinfo.h        Déclaration structure internes des communication TELEINFO                             */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                        dim. 27 mai 2012 13:02:55 CEST  */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                    dim. 27 mai 2012 13:02:55 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Teleinfo.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

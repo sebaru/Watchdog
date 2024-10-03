@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Admin/admin_dmx.c        Gestion des responses Admin MODBUS au serveur watchdog                              */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                       dim. 05 sept. 2010 12:01:28 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                   dim. 05 sept. 2010 12:01:28 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * admin_dmx.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

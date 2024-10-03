@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_REGITRE.c              Déclaration des fonctions pour la gestion des registre.c                      */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    22.03.2017 10:29:53 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                22.03.2017 10:29:53 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_REGISTRE.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

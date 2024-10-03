@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Imsgs/Imsg.h     Header et constantes des modules imsg Purple Watchdgog 2.0                                      */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    25.02.2018 16:27:36 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                25.02.2018 16:27:36 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Imsg.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

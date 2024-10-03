@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Http/bus_slave.c       Gestion des request BUS depuis le slave                                                   */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    12.03.2022 09:08:22 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                12.03.2022 09:08:22 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * bus_slave.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

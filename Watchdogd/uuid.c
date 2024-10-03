@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/uiud.c        Fonctions communes autour des UUID                                                                 */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    12.11.2021 22:14:10 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                12.11.2021 22:14:10 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * uuid.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

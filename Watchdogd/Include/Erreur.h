@@ -1,11 +1,11 @@
 /**********************************************************************************************************/
 /* Include/Erreur.h      Déclaration des constantes et prototypes de gestion de log                       */
-/* Projet WatchDog version 4.0       Gestion d'habitat                      lun 21 avr 2003 22:06:10 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                  lun 21 avr 2003 22:06:10 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * Erreur.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

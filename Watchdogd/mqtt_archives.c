@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_archives.c  Gestion des archivages des bit_internes Watchdog                                                */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                         mer. 09 mai 2012 12:44:56 CEST */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     mer. 09 mai 2012 12:44:56 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * mqtt_archives.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Http/getdlslist.c       Gestion des request getdlslist pour le thread HTTP de watchdog                           */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    15.02.2019 19:54:39 */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                                15.02.2019 19:54:39 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * getdlslist.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *

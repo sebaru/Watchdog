@@ -1,11 +1,11 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Audio.h        Déclaration structure internes pour audio                                                 */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                         mer 15 avr 2009 15:40:43 CEST  */
+/* Projet Abls-Habitat version 4.0       Gestion d'habitat                                     mer 15 avr 2009 15:40:43 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Audio.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2024 - Sebastien LEFEVRE
  *
