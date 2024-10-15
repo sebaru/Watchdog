@@ -180,42 +180,6 @@ end:
     return(response);
   }
 /******************************************************************************************************************************/
-/* Http_Post_to_local_BUS: Envoie un message a l'API local                                                                    */
-/* Entrée: la socket, le tag, le message, sa longueur                                                                         */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gboolean Http_Post_to_local_BUS ( struct THREAD *module, gchar *uri, JsonNode *RootNode )
-  { gchar query[256];
-    gboolean retour = FALSE;
-
-    if (!module) return(FALSE);
-    if (!RootNode) return(FALSE);
-
-    Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-    g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
-/********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg  = soup_message_new ( "POST", query );
-    if (!soup_msg)
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
-       return(FALSE);
-     }
-    /*g_object_set ( soup_msg, "http-version", SOUP_HTTP_1_0, NULL );*/
-    g_signal_connect ( G_OBJECT(soup_msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
-
-    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, RootNode ); /* SYNC */
-    Json_node_unref( response );
-
-    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
-    gint   status_code   = soup_message_get_status(soup_msg);
-
-    Info_new( __func__, Config.log_bus, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
-    if (status_code!=200)
-         { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
-    else { retour = TRUE; }
-    g_object_unref( soup_msg );
-    return(retour);
-  }
-/******************************************************************************************************************************/
 /* Http_traiter_get_io: Donne les IO du thread appelant                                                                       */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */

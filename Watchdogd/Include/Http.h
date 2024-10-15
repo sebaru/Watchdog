@@ -49,16 +49,10 @@
  extern void Run_HTTP ( void );
 
  extern void Http_traiter_status  ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_dls_status ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_dls_run    ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_dls_run_set ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
- extern void Http_traiter_dls_run_acquitter ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
-
  extern void Http_traiter_get_io ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query );
 
  extern JsonNode *Http_Msg_to_Json ( SoupServerMessage *msg );
  extern JsonNode *Http_Get_from_local_BUS ( struct THREAD *module, gchar *uri );
- extern gboolean Http_Post_to_local_BUS ( struct THREAD *module, gchar *uri, JsonNode *RootNode );
  extern void Http_Add_Thread_signature ( struct THREAD *module, SoupMessage *msg, gchar *buf, gint buf_size );
  extern gboolean Http_Check_Thread_signature ( gchar *path, SoupServerMessage *msg, gchar **thread_tech_id_p );
  #endif

@@ -6,7 +6,7 @@
 SUBDIRS=
 
 noinst_LTLIBRARIES           = libwatchdog-http.la
-libwatchdog_http_la_SOURCES  = Http.c getstatus.c bus_slave.c getdls.c
+libwatchdog_http_la_SOURCES  = Http.c getstatus.c bus_slave.c
 
 
 libwatchdog_http_la_LDFLAGS = `pkg-config --libs glib-2.0 openssl gthread-2.0 json-glib-1.0 libsoup-3.0` \
