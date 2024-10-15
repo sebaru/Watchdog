@@ -317,7 +317,7 @@
      { gchar *reason_phrase = soup_message_get_reason_phrase ( soup_msg );
        Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
      }
-    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, Json_get_string ( user, "email" ) );
+    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle_utf8, Json_get_string ( user, "email" ) );
     g_object_unref( soup_msg );
   }
 /******************************************************************************************************************************/
@@ -409,7 +409,7 @@
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_GSM_ONLY );
+    Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_YES );
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
