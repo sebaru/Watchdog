@@ -122,17 +122,6 @@
     return( bi->edge_down );
   }
 /******************************************************************************************************************************/
-/* Dls_BI_to_json : Formate un bit au format JSON                                                                           */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat",     bit->etat );
-    Json_node_add_int    ( element, "groupe",   bit->groupe );
-  }
-/******************************************************************************************************************************/
 /* Dls_BI_export_to_API : Formate un bit au format JSON                                                                       */
 /* Entrées: le bit                                                                                                            */
 /* Sortie : le JSON                                                                                                           */

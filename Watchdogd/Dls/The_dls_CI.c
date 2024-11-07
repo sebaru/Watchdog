@@ -107,6 +107,7 @@
                        "ligne %04d: Changing DLS_CI '%s:%s'=%d",
                        (vars ? vars->num_ligne : -1), cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
            }
+          if (vars && vars->debug) Dls_CI_export_to_API ( cpt_imp );                               /* Si debug, envoi a l'API */
         }
      }
     else
@@ -119,38 +120,6 @@
  gint Dls_data_get_CI ( struct DLS_CI *cpt_imp )
   { if (!cpt_imp) return(0);
     return( cpt_imp->valeur );
-  }
-/******************************************************************************************************************************/
-/* Dls_CI_to_json : Formate un CI au format JSON                                                                              */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_CI_to_json ( JsonNode *element, struct DLS_CI *bit )
-  { Json_node_add_string ( element, "classe",   "CI" );
-    Json_node_add_string ( element, "tech_id",   bit->tech_id );
-    Json_node_add_string ( element, "acronyme",  bit->acronyme );
-    Json_node_add_int    ( element, "valeur",    bit->valeur );
-    Json_node_add_double ( element, "multi",     bit->multi );
-    Json_node_add_string ( element, "unite",     bit->unite );
-    Json_node_add_bool   ( element, "etat",      bit->etat );
-    Json_node_add_int    ( element, "archivage", bit->archivage );
-    Json_node_add_string ( element, "libelle",   bit->libelle );
-  };
-/******************************************************************************************************************************/
-/* Dls_all_CI_to_json: Transforme tous les bits en JSON                                                                       */
-/* Entrée: target                                                                                                             */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Dls_all_CI_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
-  { JsonArray *RootArray = array;
-    GSList *liste = plugin->Dls_data_CI;
-    while ( liste )
-     { struct DLS_CI *bit = liste->data;
-       JsonNode *element = Json_node_create();
-       Dls_CI_to_json ( element, bit );
-       Json_array_add_element ( RootArray, element );
-       liste = g_slist_next(liste);
-     }
   }
 /******************************************************************************************************************************/
 /* Dls_CI_export_to_API : Formate un bit au format JSON                                                                       */
