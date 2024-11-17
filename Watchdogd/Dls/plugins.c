@@ -596,7 +596,7 @@ end:
   { pthread_mutex_lock( &Partage->com_dls.synchro );
     while(Partage->com_dls.Dls_plugins)                                                     /* Liberation mémoire des modules */
      { struct DLS_PLUGIN *plugin = Partage->com_dls.Dls_plugins->data;
-       Dls_Export_Data_to_API ( plugin );                                         /* Sauvegarde les valeurs des bits internes */
+       Dls_Save_Data_to_API ( plugin );                                           /* Sauvegarde les valeurs des bits internes */
        if (plugin->handle && dlclose( plugin->handle ))
         { Info_new( __func__, Config.log_dls, LOG_NOTICE, "dlclose error '%s' for '%s' (%s)",
                     dlerror(), plugin->tech_id, plugin->shortname );

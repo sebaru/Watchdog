@@ -28,34 +28,28 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Dls_Export_Data_to_API : Envoie les infos DLS_DATA à la base de données pour sauvegarde !                                  */
+/* Dls_Save_Data_to_API : Envoie les infos DLS_DATA à la base de données pour sauvegarde !                                    */
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_Export_Data_to_API ( struct DLS_PLUGIN *plugin )
+ void Dls_Save_Data_to_API ( struct DLS_PLUGIN *plugin )
   { GSList *liste = NULL;
-    if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
 
+    if (!plugin)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data: plugin is NULL." ); return; }
+    if (Config.instance_is_master == FALSE)                                        /* Seul le master sauvegarde les compteurs */
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data: instance is not Master." ); return; }
 
     gint top = Partage->top;
-
-    liste = plugin->Dls_data_BI;
-    while ( liste )
-     { struct DLS_BI *bit = liste->data;
-       Dls_BI_export_to_API ( bit );
-       liste = g_slist_next(liste);
-     }
-
-    liste = plugin->Dls_data_CI;
-    while ( liste )
-     { struct DLS_CI *bit = liste->data;
-       Dls_CI_export_to_API ( bit );
-       liste = g_slist_next(liste);
-     }
 
     JsonNode *RootNode = Json_node_create();
     if (!RootNode)
      { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data to API." ); return; }
+
+    JsonArray *BIArray = Json_node_add_array ( RootNode, "mnemos_BI" );
+    if (plugin) Dls_all_BI_to_json ( BIArray, plugin );
+    else Dls_foreach_plugins ( BIArray, Dls_all_BI_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_BI", json_array_get_length ( BIArray ) );
 
     JsonArray *MONOArray = Json_node_add_array ( RootNode, "mnemos_MONO" );
     if (plugin) Dls_all_MONO_to_json ( MONOArray, plugin );
@@ -87,6 +81,11 @@
     else Dls_foreach_plugins ( DOArray, Dls_all_DO_to_json );
     Json_node_add_int ( RootNode, "nbr_mnemos_DO", json_array_get_length ( DOArray ) );
 
+    JsonArray *CIArray = Json_node_add_array ( RootNode, "mnemos_CI" );
+    if (plugin) Dls_all_CI_to_json ( CIArray, plugin );
+    else Dls_foreach_plugins ( CIArray, Dls_all_CI_to_json );
+    Json_node_add_int ( RootNode, "nbr_mnemos_CI", json_array_get_length ( CIArray ) );
+
     JsonArray *CHArray = Json_node_add_array ( RootNode, "mnemos_CH" );
     if (plugin) Dls_all_CH_to_json ( CHArray, plugin );
     else Dls_foreach_plugins ( CHArray, Dls_all_CH_to_json );
@@ -108,6 +107,8 @@
                  "'%s': Save %d AI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_AI" ) );
        Info_new( __func__, Config.log_dls, LOG_DEBUG,
                  "'%s': Save %d AO to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_AO" ) );
+       Info_new( __func__, Config.log_dls, LOG_DEBUG,
+                 "'%s': Save %d CI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_CI" ) );
        Info_new( __func__, Config.log_dls, LOG_DEBUG,
                  "'%s': Save %d CH to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_CH" ) );
        Info_new( __func__, Config.log_dls, LOG_NOTICE, "Saved '%s' DLS_DATA in %06.1fs", plugin->tech_id, (Partage->top-top)/10.0 );

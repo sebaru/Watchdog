@@ -159,15 +159,15 @@
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
 
- extern void Dls_Export_Data_to_API ( struct DLS_PLUGIN *plugin );                                     /* Dans The_Dls_data.c */
+ extern void Dls_Save_Data_to_API ( struct DLS_PLUGIN *plugin );                                       /* Dans The_Dls_data.c */
 
                                                                                                          /* Dans The_dls_CI.c */
  extern void Dls_data_CI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
+ extern void Dls_all_CI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_CI_export_to_API ( struct DLS_CI *bit );
                                                                                                          /* Dans The_dls_CH.c */
  extern void Dls_data_CH_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_CH_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
- extern void Dls_CH_to_json ( JsonNode *element, struct DLS_CH *bit );
  extern void Dls_CH_export_to_API ( struct DLS_CH *bit );
                                                                                                          /* Dans The_dls_AI.c */
  extern void Dls_data_AI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
@@ -213,6 +213,7 @@
 
                                                                                                          /* Dans The_dls_BI.c */
  extern void Dls_data_BI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
+ extern void Dls_all_BI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_BI_export_to_API ( struct DLS_BI *bit );
                                                                                                     /* Dans The_dls_HORLOGE.c */
  extern void Dls_data_clear_HORLOGE ();

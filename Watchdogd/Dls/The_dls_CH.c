@@ -132,36 +132,6 @@
      { cpt_h->etat = FALSE; }
   }
 /******************************************************************************************************************************/
-/* Dls_CH_to_json : Formate un CH au format JSON                                                                              */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_CH_to_json ( JsonNode *element, struct DLS_CH *bit )
-  { Json_node_add_string ( element, "classe",    "CH" );
-    Json_node_add_string ( element, "tech_id",   bit->tech_id );
-    Json_node_add_string ( element, "acronyme",  bit->acronyme );
-    Json_node_add_int    ( element, "valeur",    bit->valeur );
-    Json_node_add_bool   ( element, "etat",      bit->etat );
-    Json_node_add_int    ( element, "archivage", bit->archivage );
-    Json_node_add_string ( element, "libelle",   bit->libelle );
-  };
-/******************************************************************************************************************************/
-/* Dls_all_CH_to_json: Transforme tous les bits en JSON                                                                       */
-/* Entrée: target                                                                                                             */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Dls_all_CH_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
-  { JsonArray *RootArray = array;
-    GSList *liste = plugin->Dls_data_CH;
-    while ( liste )
-     { struct DLS_CH *bit = liste->data;
-       JsonNode *element = Json_node_create();
-       Dls_CH_to_json ( element, bit );
-       Json_array_add_element ( RootArray, element );
-       liste = g_slist_next(liste);
-     }
-  }
-/******************************************************************************************************************************/
 /* Dls_CH_export_to_API : Formate un bit au format JSON                                                                       */
 /* Entrées: le bit                                                                                                            */
 /* Sortie : le JSON                                                                                                           */
@@ -173,6 +143,25 @@
        Json_node_add_bool ( element, "etat",   bit->etat );
        MQTT_Send_to_API   ( element, "DLS_REPORT/CH/%s/%s", bit->tech_id, bit->acronyme );
        Json_node_unref    ( element );
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_all_CH_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_CH_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
+  { JsonArray *RootArray = array;
+    GSList *liste = plugin->Dls_data_CH;
+    while ( liste )
+     { struct DLS_CH *bit = liste->data;
+       JsonNode *element = Json_node_create();
+       Json_node_add_string ( element, "tech_id",   bit->tech_id );
+       Json_node_add_string ( element, "acronyme",  bit->acronyme );
+       Json_node_add_int    ( element, "valeur",    bit->valeur );
+       Json_node_add_bool   ( element, "etat",      bit->etat );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

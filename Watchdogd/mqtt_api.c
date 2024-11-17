@@ -179,7 +179,7 @@
        gboolean reset = TRUE;
        if (Json_has_member ( request, "dls_reset" ) && Json_get_bool ( request, "dls_reset" ) == FALSE ) reset = FALSE;
        struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( target_tech_id );
-       if (found) Dls_Export_Data_to_API ( found );   /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
+       if (found) Dls_Save_Data_to_API ( found );     /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
        struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id, reset );
        if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': resetted", target_tech_id );
            else Info_new( __func__, Config.log_dls, LOG_INFO, "'%s': error when resetting", target_tech_id );

@@ -134,4 +134,22 @@
        Json_node_unref    ( element );
      }
   }
+/******************************************************************************************************************************/
+/* Dls_all_BI_to_json: Transforme tous les bits en JSON                                                                       */
+/* Entrée: target                                                                                                             */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_all_BI_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
+  { JsonArray *RootArray = array;
+    GSList *liste = plugin->Dls_data_BI;
+    while ( liste )
+     { struct DLS_BI *bit = liste->data;
+       JsonNode *element = Json_node_create();
+       Json_node_add_string ( element, "tech_id",  bit->tech_id );
+       Json_node_add_string ( element, "acronyme", bit->acronyme );
+       Json_node_add_bool   ( element, "etat",     bit->etat );
+       Json_array_add_element ( RootArray, element );
+       liste = g_slist_next(liste);
+     }
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
