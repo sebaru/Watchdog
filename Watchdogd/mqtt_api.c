@@ -103,6 +103,11 @@
        MSRV_Agent_upgrade_to ( WTD_BRANCHE );
        goto end;
      }
+    else if ( Config.instance_is_master && !strcasecmp( topic, "REMAP") )
+     { MSRV_Remap();
+       MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "SYNC_IO", NULL );/* Synchronisation des IO depuis les threads */
+     }
+    else if ( Config.instance_is_master && !strcasecmp( topic, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
 
 /*-------------------------------------------------- Message without payload -------------------------------------------------*/
     JsonNode *request = Json_get_from_string ( msg->payload );
@@ -147,12 +152,7 @@
 
     if (Config.instance_is_master == FALSE) goto end_request;
 
-    if ( !strcasecmp( topic, "REMAP") )
-     { MSRV_Remap();
-       MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "SYNC_IO", NULL );/* Synchronisation des IO depuis les threads */
-     }
-    else if ( !strcasecmp( topic, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
-    else if ( !strcasecmp( topic, "SYN_CLIC") )
+    if ( !strcasecmp( topic, "SYN_CLIC") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end; }
        if ( !Json_has_member ( request, "acronyme" ) )
