@@ -143,10 +143,10 @@
     if (save)
      { JsonNode *RootNode = Json_node_create ();
        if (RootNode)
-        { Json_node_add_string( RootNode, "domain_uuid",   domain_uuid );
-          Json_node_add_string( RootNode, "domain_secret", domain_secret );
-          Json_node_add_string( RootNode, "agent_uuid",    agent_uuid );
-          Json_node_add_string( RootNode, "api_url",       api_url );
+        { Json_node_add_string( RootNode, "domain_uuid",   Json_get_string ( Config.config, "domain_uuid" ) );
+          Json_node_add_string( RootNode, "domain_secret", Json_get_string ( Config.config, "domain_secret" ) );
+          Json_node_add_string( RootNode, "agent_uuid",    Json_get_string ( Config.config, "agent_uuid" ) );
+          Json_node_add_string( RootNode, "api_url",       Json_get_string ( Config.config, "api_url" ) );
           Json_node_add_string( RootNode, "product",       "agent" );
           Json_node_add_string( RootNode, "vendor",        "abls-habitat.fr" );
           Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );
