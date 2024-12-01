@@ -154,9 +154,9 @@
 
     if ( !strcasecmp( topic, "SYN_CLIC") )
      { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end; }
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end_request; }
        if ( !Json_has_member ( request, "acronyme" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end; }
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end_request; }
        gchar *tech_id  = Json_get_string ( request, "tech_id" );
        gchar *acronyme = Json_get_string ( request, "acronyme" );
        struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
@@ -165,7 +165,7 @@
     else if ( !strcasecmp( topic, "DLS_ACQUIT") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_ACQUIT: tech_id is missing" );
-          goto end;
+          goto end_request;
         }
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Acquitter_plugin ( plugin_tech_id );
@@ -173,7 +173,7 @@
     else if ( !strcasecmp( topic, "DLS_COMPIL") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
-          goto end;
+          goto end_request;
         }
        gchar *target_tech_id = Json_get_string ( request, "tech_id" );
        gboolean reset = TRUE;
@@ -188,7 +188,7 @@
     else if ( !strcasecmp( topic, "DLS_SET") )
      { if ( ! Json_has_member ( request, "tech_id" )  )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
-          goto end;
+          goto end_request;
         }
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        if (Json_has_member ( request, "debug"  )) Dls_Debug_plugin   ( plugin_tech_id, Json_get_bool ( request, "debug" ) );
