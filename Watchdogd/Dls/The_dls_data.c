@@ -33,9 +33,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_Save_Data_to_API ( struct DLS_PLUGIN *plugin )
-  { GSList *liste = NULL;
-
-    if (!plugin)
+  { if (!plugin)
      { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data: plugin is NULL." ); return; }
     if (Config.instance_is_master == FALSE)                                        /* Seul le master sauvegarde les compteurs */
      { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data: instance is not Master." ); return; }

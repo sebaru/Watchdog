@@ -247,6 +247,7 @@
  static void Dls_run_plugin ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct timeval tv_avant, tv_apres;
     if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
+    plugin->vars.debug = plugin->debug_time > Partage->top;                             /* Recopie du champ de debug temporel */
 
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
     gboolean bit_comm_module = TRUE;

@@ -256,7 +256,6 @@
     plugin->conso = 0.0;
     if (plugin->enable) plugin->start_date = time(NULL);
                    else plugin->start_date = 0;
-    plugin->vars.debug = plugin->debug;                            /* Recopie du champ de debug depuis la DB vers la zone RUN */
 
 /*------------------------------------------------------- Chargement GO ------------------------------------------------------*/
     plugin->go = dlsym( plugin->handle, "Go" );                                              /* Recherche de la fonction 'Go' */
@@ -327,9 +326,9 @@
      { struct DLS_PLUGIN *plugin = liste->data;
        if (plugin->handle && plugin->remap_all_alias)
         { plugin->remap_all_alias(&plugin->vars);
-          Info_new( __func__, plugin->debug || Config.log_dls, LOG_DEBUG, "Remapping Alias for '%s' OK", plugin->tech_id );
+          Info_new( __func__, Config.log_dls, LOG_DEBUG, "Remapping Alias for '%s' OK", plugin->tech_id );
         }
-       else Info_new( __func__, plugin->debug || Config.log_dls, LOG_ERR, "Remapping Alias for '%s' Failed", plugin->tech_id );
+       else Info_new( __func__, Config.log_dls, LOG_ERR, "Remapping Alias for '%s' Failed", plugin->tech_id );
 
        if (!strcasecmp ( plugin->tech_id, "SYS" ) )                         /* Mapping des bits internes pour le plugin "SYS" */
         { Partage->com_dls.sys_flipflop_5hz        = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
@@ -400,7 +399,6 @@
         { g_snprintf ( plugin->tech_id,   sizeof(plugin->tech_id),   "%s", tech_id );
           g_snprintf ( plugin->name,      sizeof(plugin->name),      "%s", Json_get_string ( api_result, "name" ) );
           g_snprintf ( plugin->shortname, sizeof(plugin->shortname), "%s", Json_get_string ( api_result, "shortname" ) );
-          plugin->debug  = Json_get_bool ( api_result, "debug" );
           plugin->enable = Json_get_bool ( api_result, "enable" );
           pthread_mutex_lock( &Partage->com_dls.synchro );                                                   /* On stoppe DLS */
           Partage->com_dls.Dls_plugins = g_slist_append( Partage->com_dls.Dls_plugins, plugin );          /* Ajout à la liste */
@@ -634,7 +632,7 @@ end:
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { Info_new( __func__, Config.log_dls, LOG_DEBUG, "'%s' debug started ('%s')",
                  plugin->tech_id, plugin->name );
-       plugin->debug = plugin->vars.debug = TRUE;
+       plugin->debug_time = Partage->top + 1200;                                                   /* Debug pendant 2 minutes */
      }
   }
 /******************************************************************************************************************************/
@@ -647,7 +645,7 @@ end:
     if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
      { Info_new( __func__, Config.log_dls, LOG_DEBUG, "'%s' debug stopped ('%s')",
                  plugin->tech_id, plugin->name );
-       plugin->debug = plugin->vars.debug = FALSE;
+       plugin->debug_time = 0;
      }
   }
 /******************************************************************************************************************************/

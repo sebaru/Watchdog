@@ -39,12 +39,10 @@
     gchar shortname[ NBR_CARAC_ACRONYME ];
     gchar tech_id[NBR_CARAC_TECHID];
     gchar package[130];
-    gchar syn_parent_page[NBR_CARAC_TECHID];
-    gchar syn_page[NBR_CARAC_TECHID];
     guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint dls_id;
-    gboolean enable;
-    gboolean debug;                                                                                /* Nombre de ligne de code */
+    gboolean enable;                                                                   /* TRUE si le plugin doit etre executé */
+    gint  debug_time;                                                                                       /* Temps de debug */
 
     GSList *Dls_data_BI;                                                                               /* Liste des bistables */
     GSList *Dls_data_MONO;                                                                           /* Liste des monostables */
