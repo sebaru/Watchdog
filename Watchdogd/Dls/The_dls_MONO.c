@@ -90,7 +90,6 @@
                 (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
        mono->etat = FALSE;
        Partage->com_dls.Set_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_down, mono );
-       Partage->audit_bit_interne_per_sec++;
      }
     else if (mono->etat == FALSE && valeur == TRUE)
      { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
@@ -98,8 +97,9 @@
                 (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
        mono->etat = TRUE;
        Partage->com_dls.Set_Dls_MONO_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_up, mono );
-       Partage->audit_bit_interne_per_sec++;
      }
+    if (vars && vars->debug) Dls_MONO_export_to_API ( mono );
+    Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_MONO: Remonte l'etat d'un monostable                                                                          */
@@ -128,16 +128,6 @@
     return( mono->edge_down );
   }
 /******************************************************************************************************************************/
-/* Dls_MONO_to_json : Formate un bit au format JSON                                                                           */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_MONO_to_json ( JsonNode *element, struct DLS_MONO *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat",     bit->etat );
-  }
-/******************************************************************************************************************************/
 /* Dls_all_MONO_to_json: Transforme tous les bits en JSON                                                                     */
 /* Entrée: target                                                                                                             */
 /* Sortie: néant                                                                                                              */
@@ -148,9 +138,24 @@
     while ( liste )
      { struct DLS_MONO *bit = liste->data;
        JsonNode *element = Json_node_create();
-       Dls_MONO_to_json ( element, bit );
+       Json_node_add_string ( element, "tech_id",  bit->tech_id );
+       Json_node_add_string ( element, "acronyme", bit->acronyme );
+       Json_node_add_bool   ( element, "etat",     bit->etat );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_MONO_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le JsonNode et le bit                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_MONO_export_to_API ( struct DLS_MONO *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_bool   ( element, "etat",     bit->etat );
+       MQTT_Send_to_API     ( element, "DLS_REPORT/MONO/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref      ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -37,34 +37,6 @@
  #include "watchdogd.h"
  #include "Http.h"
 
-#warning a migrer coté API
-#ifdef bouh
-    gpointer search_string = g_hash_table_lookup ( query, "search[value]" );
-    if (!search_string) { search = g_strdup (""); }
-                   else { search = Normaliser_chaine ( search_string ); }
-    gchar *draw_string = g_hash_table_lookup ( query, "draw" );
-    if (draw_string) Json_node_add_int ( RootNode, "draw", atoi(draw_string) );
-                else Json_node_add_int ( RootNode, "draw", 1 );
-    gchar *start_string = g_hash_table_lookup ( query, "start" );
-    if (start_string) start = atoi(start_string);
-                 else start = 200;
-    gchar *length_string = g_hash_table_lookup ( query, "length" );
-    if (length_string) length = atoi(length_string);
-                  else length = 200;
-
-
-    "SELECT COUNT(*) AS recordsTotal FROM dictionnaire LIMIT %d", length )==FALSE)
-                                  "SELECT COUNT(*) AS recordsFiltered FROM dictionnaire "
-                                  "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
-                                  "LIMIT %d OFFSET %d",
-                                  search, search, search, length, start )==FALSE)
-    if (SQL_Select_to_json_node ( RootNode, "data",
-                                  "SELECT * FROM dictionnaire "
-                                  "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
-                                  "LIMIT %d OFFSET %d",
-                                  search, search, search, length, start )==FALSE)
-
-#endif
 /******************************************************************************************************************************/
 /* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
 /* Entrée: le messages                                                                                                        */

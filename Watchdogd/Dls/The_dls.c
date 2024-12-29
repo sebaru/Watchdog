@@ -260,26 +260,21 @@
 
     if ( Dls_data_get_MONO ( plugin->vars.dls_comm ) != bit_comm_module )                    /* Envoi à l'API si il y a écart */
      { Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_comm, bit_comm_module );
-#warning à migrer to DLS_REPORT dans Dls_data_set_MONO
-/*       JsonNode *RootNode = Json_node_create ();
-       if (RootNode)
-        { Dls_MONO_to_json ( RootNode, plugin->vars.dls_comm );
-          pthread_mutex_lock ( &Partage->abonnements_synchro );
-          Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-          pthread_mutex_unlock ( &Partage->abonnements_synchro );
-        }*/
+       Dls_MONO_export_to_API ( plugin->vars.dls_comm );
      }
 
-    Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok,
-                        bit_comm_module &&
-                        !( Dls_data_get_MONO( plugin->vars.dls_memsa_defaut ) ||
-                           Dls_data_get_MONO( plugin->vars.dls_memsa_defaut_fixe ) ||
-                           Dls_data_get_MONO( plugin->vars.dls_memsa_alarme ) ||
-                           Dls_data_get_MONO( plugin->vars.dls_memsa_alarme_fixe )
-                         )
+/*-------------------------------------------------- Calcul du MEMSA_OK ------------------------------------------------------*/
+    gboolean new_memsa_ok = bit_comm_module && !( Dls_data_get_MONO( plugin->vars.dls_memsa_defaut ) ||
+                                                  Dls_data_get_MONO( plugin->vars.dls_memsa_defaut_fixe ) ||
+                                                  Dls_data_get_MONO( plugin->vars.dls_memsa_alarme ) ||
+                                                  Dls_data_get_MONO( plugin->vars.dls_memsa_alarme_fixe )
+                                                );
+    if ( Dls_data_get_MONO ( plugin->vars.dls_memsa_ok ) != new_memsa_ok )                   /* Envoi à l'API si il y a écart */
+     { Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok, new_memsa_ok );
+       Dls_MONO_export_to_API ( plugin->vars.dls_memsa_ok );
+     }
 
-                      );
-
+/*-------------------------------------------------- Calcul du MEMSSP_OK -----------------------------------------------------*/
     Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memssp_ok,
                         !( Dls_data_get_MONO( plugin->vars.dls_memssp_derangement ) ||
                            Dls_data_get_MONO( plugin->vars.dls_memssp_derangement_fixe ) ||

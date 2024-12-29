@@ -207,8 +207,7 @@
                                                                                                        /* Dans The_dls_MONO.c */
  extern void Dls_data_MONO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_MONO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
- extern void Dls_MONO_to_json ( JsonNode *element, struct DLS_MONO *bit );
-
+ extern void Dls_MONO_export_to_API ( struct DLS_MONO *bit );
                                                                                                          /* Dans The_dls_BI.c */
  extern void Dls_data_BI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_BI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
