@@ -524,6 +524,7 @@
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Info_new( __func__, Config.log_msrv, LOG_INFO, "fin boucle sans fin" );
 
+    Stopper_dls();                /* On arrete DLS avant les threads pour assurer la sauvegarde des bits internes sur l'API ! */
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
 

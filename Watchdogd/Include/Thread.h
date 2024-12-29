@@ -56,12 +56,13 @@
     gint telemetrie_top;
     gint hour_top;
     void *vars;                                                               /* Pointeur vers les variables de run du module */
-    void (*Run_thread)( struct THREAD *module );                          /* Fonction principale de gestion du module */
+    void (*Run_thread)( struct THREAD *module );                                  /* Fonction principale de gestion du module */
   };
 
 /************************************************ Définitions des prototypes **************************************************/
  extern void Stopper_fils ( void );                                                                          /* Dans thread.c */
  extern gboolean Demarrer_dls ( void );
+ extern void Stopper_dls ( void );
  extern gboolean Demarrer_http ( void );
  extern gboolean Demarrer_arch ( void );
  extern void Charger_librairies ( void );

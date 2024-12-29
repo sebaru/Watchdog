@@ -475,13 +475,23 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Demarrer_dls ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
+  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage DLS %d", getpid() );
     if ( pthread_create( &Partage->com_dls.TID, NULL, (void *)Run_dls, NULL ) )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
        return(FALSE);
      }
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "thread dls (%p) seems to be running", Partage->com_dls.TID );
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Stopper_dls: arret du processus D.L.S                                                                                      */
+/* Entré/Sortie: néant                                                                                                        */
+/******************************************************************************************************************************/
+ void Stopper_dls ( void )
+  { Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for DLS (%p) to finish", Partage->com_dls.TID );
+    Partage->com_dls.Thread_run = FALSE;
+    if ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                               /* Attente fin DLS */
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
   }
 /******************************************************************************************************************************/
 /* Demarrer_http: Processus HTTP                                                                                              */
@@ -508,11 +518,6 @@
 /******************************************************************************************************************************/
  void Stopper_fils ( void )
   { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Debut stopper_fils" );
-
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for DLS (%p) to finish", Partage->com_dls.TID );
-    Partage->com_dls.Thread_run = FALSE;
-    if ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                               /* Attente fin DLS */
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for ARCH_SYNC (%p) to finish", Partage->com_msrv.TID_arch_sync );
     if ( Partage->com_msrv.TID_arch_sync ) pthread_join ( Partage->com_msrv.TID_arch_sync, NULL );
