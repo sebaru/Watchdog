@@ -187,8 +187,7 @@
                                                                                                    /* Dans The_dls_REGISTRE.c */
  extern void Dls_data_REGISTRE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_REGISTRE_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
- extern void Dls_REGISTRE_to_json ( JsonNode *element, struct DLS_REGISTRE *bit );
-
+ extern void Dls_REGISTRE_export_to_API ( struct DLS_REGISTRE *bit );
                                                                                                          /* Dans The_dls_DI.c */
  extern void Dls_data_DI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );

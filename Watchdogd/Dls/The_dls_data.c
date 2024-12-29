@@ -45,48 +45,39 @@
      { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data to API." ); return; }
 
     JsonArray *BIArray = Json_node_add_array ( RootNode, "mnemos_BI" );
-    if (plugin) Dls_all_BI_to_json ( BIArray, plugin );
-    else Dls_foreach_plugins ( BIArray, Dls_all_BI_to_json );
+    Dls_all_BI_to_json ( BIArray, plugin );
     Json_node_add_int ( RootNode, "nbr_mnemos_BI", json_array_get_length ( BIArray ) );
 
     JsonArray *MONOArray = Json_node_add_array ( RootNode, "mnemos_MONO" );
-    if (plugin) Dls_all_MONO_to_json ( MONOArray, plugin );
-    else Dls_foreach_plugins ( MONOArray, Dls_all_MONO_to_json );
+    Dls_all_MONO_to_json ( MONOArray, plugin );
     Json_node_add_int ( RootNode, "nbr_mnemos_MONO", json_array_get_length ( MONOArray ) );
 
     JsonArray *REGISTREArray = Json_node_add_array ( RootNode, "mnemos_REGISTRE" );
-    if (plugin) Dls_all_REGISTRE_to_json ( REGISTREArray, plugin );
-    else Dls_foreach_plugins ( REGISTREArray, Dls_all_REGISTRE_to_json );
+    Dls_all_REGISTRE_to_json ( REGISTREArray, plugin );
     Json_node_add_int ( RootNode, "nbr_mnemos_REGISTRE", json_array_get_length ( REGISTREArray ) );
 
     JsonArray *AIArray = Json_node_add_array ( RootNode, "mnemos_AI" );
-    if (plugin) Dls_all_AI_to_json ( AIArray, plugin );
-    else Dls_foreach_plugins ( AIArray, Dls_all_AI_to_json );
+    Dls_all_AI_to_json ( AIArray, plugin );
     Json_node_add_int ( RootNode, "nbr_mnemos_AI", json_array_get_length ( AIArray ) );
 
     JsonArray *AOArray = Json_node_add_array ( RootNode, "mnemos_AO" );
-    if (plugin) Dls_all_AO_to_json ( AOArray, plugin );
-    else Dls_foreach_plugins ( AOArray, Dls_all_AO_to_json );
+    Dls_all_AO_to_json ( AOArray, plugin );
     Json_node_add_int ( RootNode, "nbr_mnemos_AO", json_array_get_length ( AOArray ) );
 
     JsonArray *DIArray = Json_node_add_array ( RootNode, "mnemos_DI" );
-    if (plugin) Dls_all_DI_to_json ( DIArray, plugin );
-    else Dls_foreach_plugins ( DIArray, Dls_all_DI_to_json );
+    Dls_all_DI_to_json ( DIArray, plugin );
     Json_node_add_int ( RootNode, "nbr_mnemos_DI", json_array_get_length ( DIArray ) );
 
     JsonArray *DOArray = Json_node_add_array ( RootNode, "mnemos_DO" );
-    if (plugin) Dls_all_DO_to_json ( DOArray, plugin );
-    else Dls_foreach_plugins ( DOArray, Dls_all_DO_to_json );
+    Dls_all_DO_to_json ( DOArray, plugin );
     Json_node_add_int ( RootNode, "nbr_mnemos_DO", json_array_get_length ( DOArray ) );
 
     JsonArray *CIArray = Json_node_add_array ( RootNode, "mnemos_CI" );
-    if (plugin) Dls_all_CI_to_json ( CIArray, plugin );
-    else Dls_foreach_plugins ( CIArray, Dls_all_CI_to_json );
+    Dls_all_CI_to_json ( CIArray, plugin );
     Json_node_add_int ( RootNode, "nbr_mnemos_CI", json_array_get_length ( CIArray ) );
 
     JsonArray *CHArray = Json_node_add_array ( RootNode, "mnemos_CH" );
-    if (plugin) Dls_all_CH_to_json ( CHArray, plugin );
-    else Dls_foreach_plugins ( CHArray, Dls_all_CH_to_json );
+    Dls_all_CH_to_json ( CHArray, plugin );
     Json_node_add_int ( RootNode, "nbr_mnemos_CH", json_array_get_length ( CHArray ) );
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
