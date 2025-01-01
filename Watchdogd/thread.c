@@ -173,7 +173,9 @@
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
-    if (Dls_auto_create_plugin( thread_tech_id, description ) == FALSE)
+    gchar package[128];
+    g_snprintf ( package, sizeof(package), "Thread_%s", Json_get_string ( module->config, "thread_classe" ) );
+    if (Dls_auto_create_plugin( thread_tech_id, description, package ) == FALSE)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: DLS Create ERROR (%s)\n", thread_tech_id, description ); }
 
     module->IOs = Json_node_create();

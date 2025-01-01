@@ -91,7 +91,7 @@
 /* Entrées: le tech_id (unique) et le nom associé                                                                             */
 /* Sortie: -1 si pb, id sinon                                                                                                 */
 /******************************************************************************************************************************/
- gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description )
+ gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description, gchar *package )
   { JsonNode *RootNode = Json_node_create ();
     if (!RootNode)
      { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for DLS create %s", tech_id );
@@ -99,6 +99,7 @@
      }
     Json_node_add_string ( RootNode, "tech_id", tech_id );
     Json_node_add_string ( RootNode, "description", description );
+    if (package) Json_node_add_string ( RootNode, "package", package );
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/create", RootNode );
     if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
