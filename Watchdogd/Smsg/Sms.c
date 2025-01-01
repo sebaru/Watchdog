@@ -632,7 +632,7 @@ end_user:
 /****************************************************** Lecture de SMS ********************************************************/
        if (Partage->top < next_read) continue;
        next_read = Partage->top + 50;
-       if (Smsg_connect(module))
+       if (module->Thread_run && Smsg_connect(module))
         { Thread_send_comm_to_master ( module, TRUE );
           Lire_sms_gsm(module);
           GSM_SignalQuality sig;
