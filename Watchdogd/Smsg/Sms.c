@@ -614,13 +614,13 @@ end_user:
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( message, "tag" );
           if (!tag) { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: no tag. dropping.", thread_tech_id ); }
+          else if (!module->Thread_run)
+           { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: stopping in progress. dropping.", thread_tech_id ); }
           else if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
                Json_get_int ( message, "txt_notification" ) != TXT_NOTIF_NONE )
            { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
                        Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
                        Json_get_string ( message, "libelle" ) );
-
-/*************************************************** Envoi en mode GSM ********************************************************/
              Smsg_send_to_all_authorized_recipients( module, message );
            }
           else if ( !strcasecmp ( tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
