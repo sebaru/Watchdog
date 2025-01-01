@@ -35,12 +35,23 @@
 
 /************************************* Converstion du histo dynamique *******************************************************/
  void Convert_libelle_dynamique ( gchar *libelle, gint taille_max )
-  { gchar chaine[512], prefixe[128], tech_id[32], acronyme[64], suffixe[128];
-    memset ( suffixe, 0, sizeof(suffixe) );
-    while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe ) == 4 )
+  { gchar prefixe[128], tech_id[32], acronyme[64], suffixe[128];
+
+encore:
+    memset ( prefixe,  0, sizeof(prefixe)  );                       /* Mise à zero pour gérer correctement les fins de tampon */
+    memset ( suffixe,  0, sizeof(suffixe)  );
+    memset ( tech_id,  0, sizeof(tech_id)  );
+    memset ( acronyme, 0, sizeof(acronyme) );
+
+    sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe );
+
+    if (prefixe[0] == '\0')                                                        /* si pas de prefixe, on retente en direct */
+     { sscanf ( libelle, "$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", tech_id, acronyme, suffixe ); }
+
+    if (tech_id[0] != '\0' && acronyme[0] != '\0')                               /* Si on a trouvé un couple tech_id:acronyme */
      { struct DLS_REGISTRE *reg;
        struct DLS_AI *ai;
-       gchar result[128];
+       gchar result[128], chaine[32];
        g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
        if ( (ai = Dls_data_lookup_AI ( tech_id, acronyme )) != NULL )
         { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
@@ -54,25 +65,7 @@
        g_strlcat ( result, chaine, sizeof(result) );
        g_strlcat ( result, suffixe, sizeof(result) );
        g_snprintf( libelle, taille_max, "%s", result );
-       memset ( suffixe, 0, sizeof(suffixe) );
-/*               g_snprintf( chaine, sizeof(chaine), "%d %s", ci->valeur, ci->unite ); /* Row1 = unite */
-/*               g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );*/
-/*            break;
-       case MNEMO_REGISTRE:
-             { Dls_data_get_REGISTRE ( tech_id, acronyme, dlsdata_p );
-               struct DLS_REGISTRE *reg = *dlsdata_p;
-               if (reg)
-                { if (reg->valeur-roundf(reg->valeur) == 0.0)
-                   { g_snprintf( chaine, sizeof(chaine), "%.0f %s", reg->valeur, reg->unite ); }
-                  else
-                   { g_snprintf( chaine, sizeof(chaine), "%.2f %s", reg->valeur, reg->unite ); }
-                }
-               else g_snprintf( chaine, sizeof(chaine), "erreur" );
-             }
-            break;
-       default: return(NULL);
-     }
-    * */
+       goto encore;
      }
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Message parsé final: %s", libelle );
   }
