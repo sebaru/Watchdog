@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Dls/Makefile.am          Profil de compilation de l'interface DLS Watchdog                   */
-#* Projet Abls-Habitat version 4.2       Gestion d'habitat                 ven 01 aout 2003 11:37:48 CEST */
+#* Projet Abls-Habitat version 4.3       Gestion d'habitat                 ven 01 aout 2003 11:37:48 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

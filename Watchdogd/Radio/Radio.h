@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Radio.h        Déclaration structure internes pour radio                                                 */
-/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                     mer 15 avr 2009 15:40:43 CEST  */
+/* Projet Abls-Habitat version 4.3       Gestion d'habitat                                     mer 15 avr 2009 15:40:43 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Smsg/Sms.h        Déclaration structure internes des SMS avec Gammu                                              */
-/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                                18.02.2018 11:59:59 */
+/* Projet Abls-Habitat version 4.3       Gestion d'habitat                                                18.02.2018 11:59:59 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

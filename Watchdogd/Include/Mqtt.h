@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Mqtt.h        Déclaration structure internes des archivages                                              */
-/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                      sam 08 jui 2006 12:02:36 CEST */
+/* Projet Abls-Habitat version 4.3       Gestion d'habitat                                      sam 08 jui 2006 12:02:36 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

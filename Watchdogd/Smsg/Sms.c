@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/sms.c        Gestion des SMS de Watchdog v2.0                                                                    */
-/* Projet Abls-Habitat version 4.2       Gestion d'habitat                                   ven. 02 avril 2010 20:37:40 CEST */
+/* Projet Abls-Habitat version 4.3       Gestion d'habitat                                   ven. 02 avril 2010 20:37:40 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
