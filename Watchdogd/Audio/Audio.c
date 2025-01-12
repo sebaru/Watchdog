@@ -90,6 +90,7 @@
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /******************************************************************************************************************************/
+       if (!module->MQTT_messages) continue;
        pthread_mutex_lock ( &module->synchro );
        JsonNode *request = module->MQTT_messages->data;
        module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
