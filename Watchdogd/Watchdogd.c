@@ -374,15 +374,19 @@
        gchar *master_hostname    = Json_get_string ( api_result, "master_hostname" );
        if (master_hostname) g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "%s", master_hostname );
                        else g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "nomasterhost" );
+
        gchar *mqtt_hostname      = Json_get_string ( api_result, "mqtt_hostname" );
        if (mqtt_hostname) g_snprintf( Config.mqtt_hostname, sizeof(Config.mqtt_hostname), "%s", mqtt_hostname );
                      else g_snprintf( Config.mqtt_hostname, sizeof(Config.mqtt_hostname), "localhost" );
        Config.mqtt_port          = Json_get_int  ( api_result, "mqtt_port" );
        Config.mqtt_over_ssl      = Json_get_bool ( api_result, "mqtt_over_ssl" );
-
        gchar *mqtt_password      = Json_get_string ( api_result, "mqtt_password" );
        if (mqtt_password) g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "%s", mqtt_password );
                      else g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "nopassword" );
+
+       gchar *audio_tech_id    = Json_get_string ( api_result, "audio_tech_id" );
+       if (audio_tech_id) g_snprintf( Config.audio_tech_id, sizeof(Config.audio_tech_id), "%s", audio_tech_id );
+                     else g_snprintf( Config.audio_tech_id, sizeof(Config.audio_tech_id), "AUDIO" );
 
        Info_change_log_level ( Json_get_int ( api_result, "log_level" ) );
        Json_node_unref ( api_result );

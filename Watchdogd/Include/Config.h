@@ -47,6 +47,7 @@
     guint mqtt_port;                                                                 /* Port de connexion du serveur MQTT_API */
     gboolean mqtt_over_ssl;                                                                          /* TRUE si MQTT over SSL */
     gchar mqtt_password[ 129 ];
+    gchar audio_tech_id[ 32 ];                     /* TechID du thread principal AUDIO pour piloter les sorties Haut-Parleurs */
     guint    log_level;                                                                       /* Niveau de debug du programme */
     gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
     gboolean log_bus;                                                                                      /* TRUE si log_bus */
