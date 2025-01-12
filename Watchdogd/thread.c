@@ -74,6 +74,7 @@
  static void Thread_on_MQTT_message_CB(struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg)
   { struct THREAD *module = obj;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    if (module->Thread_run == FALSE) return;                     /* Si le module est en arret, on ne lui donne pas le message */
     JsonNode *response = Json_get_from_string ( msg->payload );
     if (!response)
      { Info_new( __func__, Config.log_bus, LOG_WARNING, "'%s': MQTT Message Dropped (not JSON) !", thread_tech_id );
@@ -81,7 +82,7 @@
      }
 
     Json_node_add_string ( response, "topic", msg->topic );
-    pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
+    pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, response );
     pthread_mutex_unlock ( &module->synchro );
   }
@@ -154,7 +155,7 @@
     module->MQTT_session = mosquitto_new( thread_tech_id, FALSE, module );
     if (!module->MQTT_session)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
-    else if ( mosquitto_connect(	module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
+    else if ( mosquitto_connect( module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT connection to '%s' error.", thread_tech_id, Config.master_hostname ); }
     else
      { gchar topic[256];
@@ -165,7 +166,7 @@
        mosquitto_message_callback_set( module->MQTT_session, Thread_on_MQTT_message_CB );
        mosquitto_reconnect_delay_set ( module->MQTT_session, 10, 60, TRUE );
      }
-    if ( mosquitto_loop_start(	module->MQTT_session	) != MOSQ_ERR_SUCCESS )
+    if ( mosquitto_loop_start( module->MQTT_session ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
 
 /******************************************************* Ecoute du Master *****************************************************/
@@ -192,9 +193,9 @@
 /******************************************************************************************************************************/
  void Thread_end ( struct THREAD *module )
   { Thread_send_comm_to_master ( module, FALSE );
-    mosquitto_disconnect(	module->MQTT_session	);
-    mosquitto_loop_stop(	module->MQTT_session, FALSE	);
-    mosquitto_destroy(	module->MQTT_session	);
+    mosquitto_disconnect( module->MQTT_session );
+    mosquitto_loop_stop( module->MQTT_session, FALSE );
+    mosquitto_destroy( module->MQTT_session );
     g_object_unref  ( module->Soup_session );  module->Soup_session = NULL;
     g_slist_foreach ( module->MQTT_messages, (GFunc) Json_node_unref, NULL );
     g_slist_free    ( module->MQTT_messages );   module->MQTT_messages = NULL;
