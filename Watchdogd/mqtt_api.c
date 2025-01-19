@@ -53,7 +53,7 @@
 /******************************************************************************************************************************/
  static void MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected with return code %d: %s",
-              return_code, mosquitto_connack_string(	return_code ) );
+              return_code, mosquitto_connack_string( return_code ) );
     if (return_code == 0) Partage->com_msrv.MQTT_connected = TRUE ;
   }
 /******************************************************************************************************************************/
@@ -63,7 +63,7 @@
 /******************************************************************************************************************************/
  static void MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Disconnected with return code %d: %s",
-              return_code, mosquitto_connack_string(	return_code ) );
+              return_code, mosquitto_connack_string( return_code ) );
     Partage->com_msrv.MQTT_connected = FALSE;
   }
 /******************************************************************************************************************************/
@@ -72,7 +72,7 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic )
-  { if ( mosquitto_subscribe(	mqtt_session, NULL, topic, 1 ) != MOSQ_ERR_SUCCESS )
+  { if ( mosquitto_subscribe( mqtt_session, NULL, topic, 1 ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "Subscribe to topic '%s' FAILED", topic ); }
     else
      { Info_new( __func__, Config.log_bus, LOG_INFO, "Subscribe to topic '%s' OK", topic ); }
@@ -160,7 +160,8 @@
        gchar *tech_id  = Json_get_string ( request, "tech_id" );
        gchar *acronyme = Json_get_string ( request, "acronyme" );
        struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
-       Dls_data_set_DI_pulse ( NULL, bit );
+       if (!bit) Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: '%s:%s' not found. Dropping.", tech_id, acronyme );
+       else Dls_data_set_DI_pulse ( NULL, bit );
      }
     else if ( !strcasecmp( topic, "DLS_ACQUIT") )
      { if ( !Json_has_member ( request, "tech_id" ) )
@@ -218,7 +219,7 @@ end:
     gboolean free_node=FALSE;
     if (!node) { node = Json_node_create(); free_node = TRUE; }
     gchar *buffer = Json_node_to_string ( node );
-    mosquitto_publish(	Partage->com_msrv.MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 2, TRUE );
+    mosquitto_publish( Partage->com_msrv.MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 2, TRUE );
     g_free(buffer);
     if (free_node) Json_node_unref(node);
   }
@@ -247,7 +248,7 @@ end:
 
     gchar mqtt_username[128];
     g_snprintf( mqtt_username, sizeof(mqtt_username), "%s-agent", domain_uuid );
-    mosquitto_username_pw_set(	Partage->com_msrv.MQTT_API_session, mqtt_username, Config.mqtt_password );
+    mosquitto_username_pw_set( Partage->com_msrv.MQTT_API_session, mqtt_username, Config.mqtt_password );
     retour = mosquitto_connect( Partage->com_msrv.MQTT_API_session, Config.mqtt_hostname, Config.mqtt_port, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API connection to '%s' error: %s",
