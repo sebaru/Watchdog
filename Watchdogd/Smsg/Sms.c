@@ -7,7 +7,7 @@
  * Sms.c
  * This file is part of Abls-Habitat
  *
- * Copyright (C) 1988-2024 - Sebastien LEFEVRE
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -631,7 +631,6 @@ end_user:
         }
 /****************************************************** Lecture de SMS ********************************************************/
        if (Partage->top < next_read) continue;
-       next_read = Partage->top + 50;
        if (module->Thread_run && Smsg_connect(module))
         { Thread_send_comm_to_master ( module, TRUE );
           Lire_sms_gsm(module);
@@ -644,6 +643,7 @@ end_user:
           Thread_send_comm_to_master ( module, FALSE );
         }
        Smsg_disconnect(module);
+       next_read = Partage->top + 50;
      }
     Thread_end(module);
   }
