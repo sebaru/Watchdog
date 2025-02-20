@@ -393,6 +393,7 @@
     Dls_Save_CodeC_to_disk ( tech_id, Json_get_string ( api_result, "codec" ) );
     Dls_Compiler_source_dls ( tech_id );
 
+    pthread_mutex_lock( &Partage->com_dls.synchro );                     /* On stoppe DLS pour éviter la compilation multiple */
     plugin = Dls_get_plugin_by_tech_id ( tech_id );                                               /* Plugin deja en mémoire ? */
     if (plugin == NULL)                                                            /* si pas trouvé, on créé l'enregistrement */
      { plugin = g_try_malloc0 ( sizeof (struct DLS_PLUGIN) );
@@ -401,11 +402,11 @@
           g_snprintf ( plugin->name,      sizeof(plugin->name),      "%s", Json_get_string ( api_result, "name" ) );
           g_snprintf ( plugin->shortname, sizeof(plugin->shortname), "%s", Json_get_string ( api_result, "shortname" ) );
           plugin->enable = Json_get_bool ( api_result, "enable" );
-          pthread_mutex_lock( &Partage->com_dls.synchro );                                                   /* On stoppe DLS */
           Partage->com_dls.Dls_plugins = g_slist_append( Partage->com_dls.Dls_plugins, plugin );          /* Ajout à la liste */
-          pthread_mutex_unlock( &Partage->com_dls.synchro );
         }
      }
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+
     if (!plugin)                                       /* si vraiment on arrive pas a reserver ou trouver la mémoire, on sort */
      { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s' Memory error", tech_id );
        goto end;
@@ -503,7 +504,7 @@
 
     if (reset)
      { Reseter_all_bit_interne ( plugin );
-       plugin->vars.resetted = TRUE;                                                  /* au chargement, le bit de start vaut 1 ! */
+       plugin->vars.resetted = TRUE;                                               /* au chargement, le bit de start vaut 1 ! */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
 
@@ -521,7 +522,7 @@
 
 end:
     Json_node_unref(api_result);
-    pthread_mutex_lock ( &Nbr_compil_mutex ); /* Decremente le compteur de thread (si fonction appelée en mode pthreadècreate */
+    pthread_mutex_lock ( &Nbr_compil_mutex ); /* Decremente le compteur de thread (si fonction appelée en mode pthread_create */
     if (Nbr_compil) Nbr_compil--;
     pthread_mutex_unlock ( &Nbr_compil_mutex );
     return(plugin);
