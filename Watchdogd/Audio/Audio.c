@@ -39,9 +39,9 @@
 /******************************************************************************************************************************/
 /* Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
 /* Entrée : le message à jouer                                                                                                */
-/* Sortie : True si OK, False sinon                                                                                           */
+/* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- gboolean Jouer_google_speech ( struct THREAD *module, gchar *audio_libelle )
+ static void Jouer_google_speech ( struct THREAD *module, gchar *audio_libelle )
   { gint pid;
 
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Send '%s'", audio_libelle );
@@ -54,7 +54,8 @@
     if (pid<0)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
                  "'%s' fork failed pid=%d (%s)", audio_libelle, pid, strerror(errno) );
-       return(FALSE);
+       Thread_send_comm_to_master ( module, FALSE );
+       return;
      }
     else if (!pid)
      { execlp( "Wtd_play_google.sh", "Wtd_play_google", language, audio_libelle, device, NULL );
@@ -66,7 +67,7 @@
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Wtd_play_google %s '%s' %s finished pid=%d",
               language, audio_libelle, device, pid );
-    return(TRUE);
+    Thread_send_comm_to_master ( module, TRUE );
   }
 /******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
@@ -77,15 +78,14 @@
   { Thread_init ( module, sizeof(struct AUDIO_VARS) );
     struct AUDIO_VARS *vars = module->vars;
 
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    /*gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );*/
 
     gint volume  = Json_get_int ( module->config, "volume" );
     gchar chaine[256];
     g_snprintf( chaine, sizeof(chaine), "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%", volume );
     system(chaine);
     sleep(5);
-    gboolean retour = Jouer_google_speech( module, "Module audio démarré !" );
-    Thread_send_comm_to_master ( module, retour );
+    Jouer_google_speech( module, "Module audio démarré !" );
     vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
@@ -137,8 +137,7 @@
              vars->last_audio = Partage->top;
 
                                                             /* Si audio_libelle, le jouer, sinon jouer le libelle tout court) */
-             gboolean retour = Jouer_google_speech( module, (strlen(audio_libelle) ? audio_libelle : libelle) );
-             Thread_send_comm_to_master ( module, retour );
+             Jouer_google_speech( module, (strlen(audio_libelle) ? audio_libelle : libelle) );
              if (Config.instance_is_master == TRUE)                                          /* Bit de fin d'emission message */
               { MQTT_Send_DI_pulse ( module, Json_get_string ( Config.config, "audio_tech_id" ), "P_NONE" ); }
            }
