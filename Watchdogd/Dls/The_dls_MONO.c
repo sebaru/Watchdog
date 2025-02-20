@@ -90,6 +90,7 @@
                 (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
        mono->etat = FALSE;
        Partage->com_dls.Set_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_down, mono );
+       if (vars && vars->debug) Dls_MONO_export_to_API ( mono );
      }
     else if (mono->etat == FALSE && valeur == TRUE)
      { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
@@ -97,8 +98,8 @@
                 (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
        mono->etat = TRUE;
        Partage->com_dls.Set_Dls_MONO_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_up, mono );
+       if (vars && vars->debug) Dls_MONO_export_to_API ( mono );
      }
-    if (vars && vars->debug) Dls_MONO_export_to_API ( mono );
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
