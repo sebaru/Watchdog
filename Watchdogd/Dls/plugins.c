@@ -271,11 +271,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Reseter_all_bit_interne: Met a 0 et decharge tous les bits interne d'un plugin                                             */
+/* Dls_Reseter_all_bit_interne: Met a 0 et decharge tous les bits interne d'un plugin                                         */
 /* Entrée: le plugin                                                                                                          */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- static void Reseter_all_bit_interne ( struct DLS_PLUGIN *plugin )
+ void Dls_Reseter_all_bit_interne ( struct DLS_PLUGIN *plugin )
   { GSList *liste_bit;
 
     liste_bit = plugin->Dls_data_TEMPO;
@@ -372,10 +372,10 @@
   }
 /******************************************************************************************************************************/
 /* Dls_Importer_un_plugin: Ajoute ou Recharge un plugin dans la liste des plugins                                             */
-/* Entrée: le tech_id associé et 'reset' si les dls_data doivent etre resettées                                               */
+/* Entrée: le tech_id associé                                                                                                 */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id, gboolean reset )
+ struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id )
   { struct DLS_PLUGIN *plugin = NULL;
     Info_new( __func__, Config.log_dls, LOG_INFO, "Starting import of plugin '%s'", tech_id );
                                                                                  /* Récupère les metadata du plugin à charger */
@@ -502,12 +502,7 @@
      { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
     Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */
 
-    if (reset)
-     { Reseter_all_bit_interne ( plugin );
-       plugin->vars.resetted = TRUE;                                               /* au chargement, le bit de start vaut 1 ! */
-     }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-
 /****************************************** Calcul des Thread_tech_ids de dependances *****************************************/
     if (plugin->Thread_tech_ids) { g_slist_free_full ( plugin->Thread_tech_ids, (GDestroyNotify) g_free ); plugin->Thread_tech_ids = NULL; }
 
@@ -533,7 +528,7 @@ end:
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void *Run_Dls_Import_thread ( void *tech_id )
-  { return(Dls_Importer_un_plugin ( (gchar *)tech_id, FALSE )); }
+  { return(Dls_Importer_un_plugin ( (gchar *)tech_id )); }
 /******************************************************************************************************************************/
 /* Dls_Importer_un_plugin_by_array: Ajoute un plugin dans la liste des plugins                                                */
 /* Entrée: les données JSON recu de la requete HTTP                                                                           */
