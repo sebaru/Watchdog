@@ -102,7 +102,6 @@
   { gchar   tech_id[32];
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
-    gint    groupe; /* Groupe 'radio' */
     gboolean etat;                                                                                      /* Etat actuel du bit */
     gboolean edge_up;
     gboolean edge_down;
@@ -177,7 +176,6 @@
     gchar   tech_id[32];
     gchar   acronyme[64];
     gboolean etat;
-    gint groupe;
     gint last_on;
   };
 
