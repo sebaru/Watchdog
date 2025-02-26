@@ -177,14 +177,28 @@
           goto end_request;
         }
        gchar *target_tech_id = Json_get_string ( request, "tech_id" );
-       gboolean reset = TRUE;
-       if (Json_has_member ( request, "dls_reset" ) && Json_get_bool ( request, "dls_reset" ) == FALSE ) reset = FALSE;
        struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( target_tech_id );
        if (found) Dls_Save_Data_to_API ( found );     /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
-       struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id, reset );
-       if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': resetted", target_tech_id );
-           else Info_new( __func__, Config.log_dls, LOG_INFO, "'%s': error when resetting", target_tech_id );
+       struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id );
+       if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': imported", target_tech_id );
+           else Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': error when importing", target_tech_id );
        Dls_Load_horloge_ticks();
+     }
+    else if ( !strcasecmp( topic, "DLS_RESTART") )
+     { if ( !Json_has_member ( request, "tech_id" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_RESTART: tech_id is missing" );
+          goto end_request;
+        }
+       gchar *target_tech_id = Json_get_string ( request, "tech_id" );
+       struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( target_tech_id );
+       if (plugin)
+        { pthread_mutex_lock( &Partage->com_dls.synchro );                    /* On stoppe DLS pour éviter l'usage concurrent */
+          Dls_Reseter_all_bit_interne ( plugin );
+          plugin->vars.resetted = TRUE;                                            /* au chargement, le bit de start vaut 1 ! */
+          pthread_mutex_unlock( &Partage->com_dls.synchro );
+          Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': resetted", target_tech_id );
+        }
+       else Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': error when resetting: plugin not found.", target_tech_id );
      }
     else if ( !strcasecmp( topic, "DLS_SET") )
      { if ( ! Json_has_member ( request, "tech_id" )  )
