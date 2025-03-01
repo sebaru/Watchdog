@@ -364,26 +364,27 @@ reconnect:
 /****************************************************** Ecoute du master ******************************************************/
        while ( module->MQTT_messages )
         { pthread_mutex_lock ( &module->synchro );
-          JsonNode *request = module->MQTT_messages->data;
-          module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
+          JsonNode *message = module->MQTT_messages->data;
+          module->MQTT_messages = g_slist_remove ( module->MQTT_messages, message );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *tag = Json_get_string ( request, "tag" );
-          gint txt_notification = Json_get_int ( request, "txt_notification" );
+          gchar *tag = Json_get_string ( message, "tag" );
+          gint notif_chat = Json_get_int ( message, "notif_chat" );
+          if (notif_chat == IMSG_NOTIF_SET_BY_DLS) { notif_chat = Json_get_int ( message, "notif_chat_by_dls" ); }
 
-          if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( request, "alive" ) == TRUE &&
-               ( txt_notification == TXT_NOTIF_YES || txt_notification == TXT_NOTIF_CHAT_ONLY)
+          if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
+               notif_chat == IMSG_NOTIF_YES
              )
            { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Sending msg '%s:%s' (%s)",
                        jabber_id,
-                       Json_get_string ( request, "tech_id" ), Json_get_string ( request, "acronyme" ),
-                       Json_get_string ( request, "libelle" ) );
+                       Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
+                       Json_get_string ( message, "libelle" ) );
              gchar chaine[256];
-             g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( request, "dls_shortname" ), Json_get_string ( request, "libelle" ) );
+             g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( message, "dls_shortname" ), Json_get_string ( message, "libelle" ) );
              Imsgs_Envoi_message_to_all_available ( module, chaine );
            }
           else if ( !strcasecmp( tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
           else Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': tag '%s' not for this thread", thread_tech_id, tag );
-          Json_node_unref(request);
+          Json_node_unref(message);
         }
      }                                                                                         /* Fin du while partage->arret */
 

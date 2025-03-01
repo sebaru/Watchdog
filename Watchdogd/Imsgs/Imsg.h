@@ -30,6 +30,12 @@
 
  #include <strophe.h>
 
+ enum
+  { IMSG_NOTIF_SET_BY_DLS = -1,
+    IMSG_NOTIF_NO  = 0,
+    IMSG_NOTIF_YES = 1
+  };
+
  #define IMSGS_DEFAUT_USERNAME      "defaultuser@jabber.fr"
  #define IMSGS_DEFAUT_PASSWORD      "defaultpassword"
  #define IMSGS_TIME_RECONNECT      600                                              /* 1 minute avant reconnexion si probleme */

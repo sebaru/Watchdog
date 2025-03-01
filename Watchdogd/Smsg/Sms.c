@@ -344,7 +344,9 @@
        return;
      }
 
-    gint txt_notification = Json_get_int ( msg, "txt_notification" );
+    gint notif_gsm = Json_get_int ( msg, "notif_gsm" );
+    if (notif_gsm == SMSG_NOTIF_SET_BY_DLS) { notif_gsm = Json_get_int ( msg, "notif_gsm_by_dls" ); }
+
     GList *Recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
     GList *recipients = Recipients;
     while(recipients)
@@ -358,8 +360,8 @@
         { Info_new( __func__, module->Thread_debug, LOG_ERR,
                     "%s: Warning: User %s has an empty Phone number", thread_tech_id, Json_get_string ( user, "email" ) );
         }
-       else switch (txt_notification)
-        { case TXT_NOTIF_YES:
+       else switch (notif_gsm)
+        { case SMSG_NOTIF_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
                 { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error sending with GSM" );
                   gchar *free_sms_api_user = Json_get_string ( user, "free_sms_api_user" );
@@ -373,10 +375,7 @@
                    }
                 }
                break;
-          case TXT_NOTIF_GSM_ONLY:
-               Envoi_sms_gsm ( module, msg, user_phone );
-               break;
-          case TXT_NOTIF_OVH_ONLY:
+          case SMSG_NOTIF_OVH_ONLY:
                Envoi_sms_ovh ( module, msg, user_phone );
                break;
         }
@@ -395,7 +394,7 @@
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_OVH_ONLY );
+    Json_node_add_int    ( RootNode, "notif_gsm", SMSG_NOTIF_OVH_ONLY );
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
@@ -411,7 +410,7 @@
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_YES );
+    Json_node_add_int    ( RootNode, "notif_gsm", SMSG_NOTIF_YES );
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
@@ -613,11 +612,13 @@ end_user:
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, message );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( message, "tag" );
-          if (!tag) { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: no tag. dropping.", thread_tech_id ); }
-          else if (!module->Thread_run)
+          gint notif_gsm = Json_get_int ( message, "notif_gsm" );
+          if (notif_gsm == SMSG_NOTIF_SET_BY_DLS) { notif_gsm = Json_get_int ( message, "notif_gsmby_dls" ); }
+
+          if (!module->Thread_run)
            { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: stopping in progress. dropping.", thread_tech_id ); }
           else if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
-               Json_get_int ( message, "txt_notification" ) != TXT_NOTIF_NONE )
+                    notif_gsm != SMSG_NOTIF_NO )
            { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
                        Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
                        Json_get_string ( message, "libelle" ) );

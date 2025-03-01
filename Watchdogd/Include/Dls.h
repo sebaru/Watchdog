@@ -84,15 +84,6 @@
     NBR_TYPE_MSG
   };
 
- enum
-  { TXT_NOTIF_NONE,
-    TXT_NOTIF_YES,
-    TXT_NOTIF_GSM_ONLY,
-    TXT_NOTIF_OVH_ONLY,
-    TXT_NOTIF_CHAT_ONLY,
-    NBR_TYPE_TXT_NOTIF
-  };
-
  struct DLS_MESSAGE_EVENT
   { struct DLS_MESSAGE *msg;
     gboolean etat;
