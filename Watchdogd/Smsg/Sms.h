@@ -31,7 +31,7 @@
  #include <gammu.h>
 
  enum
-  { SMSG_NOTIF_SET_BY_DLS = -1,
+  { SMSG_NOTIF_BY_DLS = -1,
     SMSG_NOTIF_NO  = 0,
     SMSG_NOTIF_YES = 1,
     SMSG_NOTIF_OVH_ONLY = 2
