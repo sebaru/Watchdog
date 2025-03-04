@@ -171,9 +171,9 @@
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Acquitter_plugin ( plugin_tech_id );
      }
-    else if ( !strcasecmp( topic, "DLS_COMPIL") )
+    else if ( !strcasecmp( topic, "DLS_RELOAD") )
      { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_COMPIL: tech_id is missing" );
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_RELOAD: tech_id is missing" );
           goto end_request;
         }
        gchar *target_tech_id = Json_get_string ( request, "tech_id" );
