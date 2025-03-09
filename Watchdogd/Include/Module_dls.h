@@ -135,8 +135,6 @@
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gint    valeur;
-    gint    val_en_cours1;                                                    /* valeur en cours pour le calcul via les ratio */
-    gdouble ratio;
     gdouble multi;
     gchar   unite[32];
     gboolean etat;
@@ -255,7 +253,7 @@
  extern gboolean Dls_data_get_AI_inrange ( struct DLS_AI *bit );
 
  extern struct DLS_CI *Dls_data_lookup_CI ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat, gint reset, gint ratio );
+ extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat, gint reset );
  extern gint Dls_data_get_CI ( struct DLS_CI *bit );
 
  extern struct DLS_CH *Dls_data_lookup_CH ( gchar *tech_id, gchar *acronyme );
