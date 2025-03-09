@@ -135,7 +135,6 @@
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gint    valeur;
-    gdouble multi;
     gchar   unite[32];
     gboolean etat;
     gint    archivage;

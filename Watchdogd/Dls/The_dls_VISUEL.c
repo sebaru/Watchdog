@@ -128,7 +128,7 @@
   { if (!visu) return;
     if (!src) return;
 
-    gint valeur   = Dls_data_get_CI ( src ) * src->multi;
+    gint valeur   = Dls_data_get_CI ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
     Dls_data_set_VISUEL ( vars, visu, mode, color, 1.0*valeur, cligno, noshow, libelle, disable );
   }
