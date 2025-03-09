@@ -191,9 +191,6 @@
  extern void Dls_data_DO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit );
- extern gboolean Dls_data_get_DO ( struct DLS_DO *bit );
- extern gboolean Dls_data_get_DO_up   ( struct DLS_DO *bit );
- extern gboolean Dls_data_get_DO_down ( struct DLS_DO *bit );
  extern void Dls_DO_export_to_API ( struct DLS_DO *bit );
                                                                                                        /* Dans The_dls_MONO.c */
  extern void Dls_data_MONO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );

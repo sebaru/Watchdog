@@ -234,6 +234,9 @@
 
  extern struct DLS_DO *Dls_data_lookup_DO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *bit, gboolean valeur );
+ extern gboolean Dls_data_get_DO        ( struct DLS_DO *bit );
+ extern gboolean Dls_data_get_DO_up     ( struct DLS_DO *bit );
+ extern gboolean Dls_data_get_DO_down   ( struct DLS_DO *bit );
 
  extern struct DLS_AO *Dls_data_lookup_AO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_AO        ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *bi, gdouble valeur );
