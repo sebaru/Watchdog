@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/distrib_Events.c        Distribution des changements d'etats motif                                               */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                        sam. 24 janv. 2015 13:53:26 CET */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                    sam. 24 janv. 2015 13:53:26 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * distrib_Events.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien LEFEVRE
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@
        if (MSRV_Map_to_thread ( RootNode ))
         { gchar topic[256];
           g_snprintf ( topic, sizeof(topic), "thread/%s", Json_get_string ( RootNode, "thread_tech_id" ) );
-          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, topic, "SET_DO", RootNode );
+          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, topic, "SET_DO", RootNode );
         }
        else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
                       "'%s:%s' is not mapped. dropping",
@@ -69,7 +69,7 @@
        if (MSRV_Map_to_thread ( RootNode ))
         { gchar topic[256];
           g_snprintf ( topic, sizeof(topic), "thread/%s", Json_get_string ( RootNode, "thread_tech_id" ) );
-          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, topic, "SET_AO", RootNode );
+          MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, topic, "SET_AO", RootNode );
         }
        else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
                       "'%s:%s' is not mapped. dropping",

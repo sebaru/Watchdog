@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Commun/Erreur.c        Gestion des logs systemes                                                                           */
-/* Projet WatchDog version 1.7       Gestion d'habitat                                          jeu 09 avr 2009 22:08:19 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      jeu 09 avr 2009 22:08:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Erreur.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien LEFEVRE
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

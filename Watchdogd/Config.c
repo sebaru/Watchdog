@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Config/Config.c        Lecture du fichier de configuration Watchdog                                              */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         mer. 15 déc. 2010 13:30:12 CET */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     mer. 15 déc. 2010 13:30:12 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Config.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -143,10 +143,10 @@
     if (save)
      { JsonNode *RootNode = Json_node_create ();
        if (RootNode)
-        { Json_node_add_string( RootNode, "domain_uuid",   domain_uuid );
-          Json_node_add_string( RootNode, "domain_secret", domain_secret );
-          Json_node_add_string( RootNode, "agent_uuid",    agent_uuid );
-          Json_node_add_string( RootNode, "api_url",       api_url );
+        { Json_node_add_string( RootNode, "domain_uuid",   Json_get_string ( Config.config, "domain_uuid" ) );
+          Json_node_add_string( RootNode, "domain_secret", Json_get_string ( Config.config, "domain_secret" ) );
+          Json_node_add_string( RootNode, "agent_uuid",    Json_get_string ( Config.config, "agent_uuid" ) );
+          Json_node_add_string( RootNode, "api_url",       Json_get_string ( Config.config, "api_url" ) );
           Json_node_add_string( RootNode, "product",       "agent" );
           Json_node_add_string( RootNode, "vendor",        "abls-habitat.fr" );
           Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );

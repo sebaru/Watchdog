@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
-/* Watchdogd/api_MSGxxx.c        Distribution des messages DLS à l'API                                                        */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                        mar. 14 août 2012 19:05:42 CEST */
+/* Watchdogd/mqtt_MSGxxx.c        Distribution des messages DLS à l'API                                                       */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                    mar. 14 août 2012 19:05:42 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * api_MSGxxx.c
- * This file is part of Watchdog
+ * mqtt_MSGxxx.c
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien LEFEVRE
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,13 +34,24 @@
  #include "watchdogd.h"
 
 /************************************* Converstion du histo dynamique *******************************************************/
- void Convert_libelle_dynamique ( gchar *local_tech_id, gchar *libelle, gint taille_max )
-  { gchar chaine[512], prefixe[128], tech_id[32], acronyme[64], suffixe[128];
-    memset ( suffixe, 0, sizeof(suffixe) );
-    while ( sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe ) == 4 )
+ void Convert_libelle_dynamique ( gchar *libelle, gint taille_max )
+  { gchar prefixe[128], tech_id[32], acronyme[64], suffixe[128];
+
+encore:
+    memset ( prefixe,  0, sizeof(prefixe)  );                       /* Mise à zero pour gérer correctement les fins de tampon */
+    memset ( suffixe,  0, sizeof(suffixe)  );
+    memset ( tech_id,  0, sizeof(tech_id)  );
+    memset ( acronyme, 0, sizeof(acronyme) );
+
+    sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe );
+
+    if (prefixe[0] == '\0')                                                        /* si pas de prefixe, on retente en direct */
+     { sscanf ( libelle, "$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", tech_id, acronyme, suffixe ); }
+
+    if (tech_id[0] != '\0' && acronyme[0] != '\0')                               /* Si on a trouvé un couple tech_id:acronyme */
      { struct DLS_REGISTRE *reg;
        struct DLS_AI *ai;
-       gchar result[128];
+       gchar result[128], chaine[32];
        g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
        if ( (ai = Dls_data_lookup_AI ( tech_id, acronyme )) != NULL )
         { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
@@ -54,40 +65,7 @@
        g_strlcat ( result, chaine, sizeof(result) );
        g_strlcat ( result, suffixe, sizeof(result) );
        g_snprintf( libelle, taille_max, "%s", result );
-       memset ( suffixe, 0, sizeof(suffixe) );
-/*               g_snprintf( chaine, sizeof(chaine), "%d %s", ci->valeur, ci->unite ); /* Row1 = unite */
-/*               g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );*/
-/*            break;
-       case MNEMO_REGISTRE:
-             { Dls_data_get_REGISTRE ( tech_id, acronyme, dlsdata_p );
-               struct DLS_REGISTRE *reg = *dlsdata_p;
-               if (reg)
-                { if (reg->valeur-roundf(reg->valeur) == 0.0)
-                   { g_snprintf( chaine, sizeof(chaine), "%.0f %s", reg->valeur, reg->unite ); }
-                  else
-                   { g_snprintf( chaine, sizeof(chaine), "%.2f %s", reg->valeur, reg->unite ); }
-                }
-               else g_snprintf( chaine, sizeof(chaine), "erreur" );
-             }
-            break;
-       default: return(NULL);
-     }
-    * */
-     }
-    while ( sscanf ( libelle, "$THIS%128[^\n]", suffixe ) == 1 )
-     { gchar result[128];
-       g_snprintf( result, sizeof(result), "%s", local_tech_id );                                                 /* Prologue */
-       g_strlcat ( result, suffixe, sizeof(result) );
-       g_snprintf( libelle, taille_max, "%s", result );
-       memset ( suffixe, 0, sizeof(suffixe) );
-     }
-    while ( sscanf ( libelle, "%128[^$]$THIS%128[^\n]", prefixe, suffixe ) == 2 )
-     { gchar result[128];
-       g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
-       g_strlcat ( result, local_tech_id, sizeof(result) );
-       g_strlcat ( result, suffixe, sizeof(result) );
-       g_snprintf( libelle, taille_max, "%s", result );
-       memset ( suffixe, 0, sizeof(suffixe) );
+       goto encore;
      }
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Message parsé final: %s", libelle );
   }
@@ -108,7 +86,7 @@
     g_free( date_utf8 );
 
     g_snprintf ( libelle, sizeof(libelle), "%s", Json_get_string(msg->source_node, "libelle_src") );
-    Convert_libelle_dynamique ( msg->tech_id, libelle, sizeof(libelle) );
+    Convert_libelle_dynamique ( libelle, sizeof(libelle) );
 /***************************************** Création de la structure interne de stockage ***************************************/
     Json_node_add_string ( msg->source_node, "libelle", libelle );
     Json_node_add_string ( msg->source_node, "date_create", date_create );
@@ -140,16 +118,11 @@
     return( histo );
   }
 /******************************************************************************************************************************/
-/* API_Send_MSGS: Envoi les messages a l'API                                                                                  */
+/* MQTT_Send_MSGS_to_API: Envoi les messages a l'API                                                                          */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void API_Send_MSGS ( void )
+ void MQTT_Send_MSGS_to_API ( void )
   { gint cpt = 0;
-    JsonNode *RootNode = Json_node_create();
-    if (!RootNode) return;
-    Json_node_add_string ( RootNode, "tag", "histos" );
-    JsonArray *Histos = Json_node_add_array ( RootNode, "histos" );
-    if (!Histos) { Json_node_unref ( RootNode ); return; }
 
     while (Partage->com_msrv.liste_msg && Partage->com_msrv.Thread_run == TRUE && cpt<100)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
@@ -165,9 +138,8 @@
           gint rate_limit = Json_get_int ( event->msg->source_node, "rate_limit" );
           if ( !event->msg->last_on || (Partage->top >= event->msg->last_on + rate_limit*10 ) )
            { event->msg->last_on = Partage->top;
-             MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, "threads", "DLS_HISTO", event->msg->source_node );
-             json_node_ref ( event->msg->source_node );                          /* Pour ajout dans l'array qui prend le lead */
-             Json_array_add_element ( Histos, event->msg->source_node );
+             MQTT_Send_to_API ( event->msg->source_node, "DLS_HISTO" );
+             MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "DLS_HISTO", event->msg->source_node );
            }
           else
            { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
@@ -177,15 +149,14 @@
        else if (event->etat == 0)
         { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );
           if(histo)
-           { MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, "threads", "DLS_HISTO", histo );
-             Json_array_add_element ( Histos, histo );
+           { MQTT_Send_to_API ( histo, "DLS_HISTO" );
+             MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "DLS_HISTO", histo );
+             Json_node_unref ( histo );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
                             event->msg->tech_id, event->msg->acronyme );
         }
        g_free(event);
        cpt++;
      }
-    Partage->liste_json_to_ws_api = g_slist_append ( Partage->liste_json_to_ws_api, RootNode );
-    Partage->liste_json_to_ws_api_size++;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

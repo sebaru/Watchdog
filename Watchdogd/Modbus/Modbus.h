@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Modbus.h   Header et constantes des modules MODBUS Watchdgo 2.0                                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          ven 13 jui 2007 16:14:03 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      ven 13 jui 2007 16:14:03 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Modbus.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

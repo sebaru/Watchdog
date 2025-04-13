@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_CI.c      Déclaration des fonctions pour la gestion des compteurs d'impulsions                       */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         mar. 07 déc. 2010 17:26:52 CET */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     mar. 07 déc. 2010 17:26:52 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_CI.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,6 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     g_snprintf( bit->unite,    sizeof(bit->unite),    "%s", Json_get_string ( element, "unite" ) );
     bit->valeur    = Json_get_int ( element, "valeur" );
-    bit->multi     = Json_get_double ( element, "multi" );
     bit->archivage = Json_get_int ( element, "archivage" );
     bit->etat      = Json_get_bool ( element, "etat" );
     plugin->Dls_data_CI = g_slist_prepend ( plugin->Dls_data_CI, bit );
@@ -87,27 +86,22 @@
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *cpt_imp, gboolean etat, gint reset, gint ratio )
+ void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *cpt_imp, gboolean etat, gint reset )
   { if (!cpt_imp) return;
     if (etat)
      { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
         { if (cpt_imp->valeur!=0)
-           { cpt_imp->val_en_cours1 = 0;                                           /* Valeur transitoire pour gérer les ratio */
-             cpt_imp->valeur = 0;                                                  /* Valeur transitoire pour gérer les ratio */
+           { cpt_imp->valeur = 0;                                                                /* Valeur réelle du compteur */
            }
         }
        else if ( cpt_imp->etat == FALSE )                                                                 /* Passage en actif */
         { cpt_imp->etat = TRUE;
           Partage->audit_bit_interne_per_sec++;
-          cpt_imp->val_en_cours1++;
-          if (cpt_imp->val_en_cours1>=ratio)
-           { cpt_imp->valeur++;
-             cpt_imp->val_en_cours1=0;                                                        /* RAZ de la valeur de calcul 1 */
-             if (cpt_imp->abonnement) Dls_cadran_send_CI_to_API ( cpt_imp );
-             Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                       "ligne %04d: Changing DLS_CI '%s:%s'=%d",
-                       (vars ? vars->num_ligne : -1), cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
-           }
+          cpt_imp->valeur++;
+          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "ligne %04d: Changing DLS_CI '%s:%s'=%d",
+                    (vars ? vars->num_ligne : -1), cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur );
+          if (vars && vars->debug) Dls_CI_export_to_API ( cpt_imp );                               /* Si debug, envoi à l'API */
         }
      }
     else
@@ -122,34 +116,19 @@
     return( cpt_imp->valeur );
   }
 /******************************************************************************************************************************/
-/* Dls_cadran_send_CI_to_API: Ennvoi un CI à l'API pour affichage des cadrans                                                 */
-/* Entrées: la structure DLs_AI                                                                                               */
-/* Sortie : néant                                                                                                             */
+/* Dls_CI_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le bit                                                                                                            */
+/* Sortie : le JSON                                                                                                           */
 /******************************************************************************************************************************/
- void Dls_cadran_send_CI_to_API ( struct DLS_CI *bit )
-  { if (!bit) return;
-    JsonNode *RootNode = Json_node_create();
-    Dls_CI_to_json ( RootNode, bit );
-    pthread_mutex_lock ( &Partage->abonnements_synchro );
-    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-    pthread_mutex_unlock ( &Partage->abonnements_synchro );
+ void Dls_CI_export_to_API ( struct DLS_CI *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_int  ( element, "valeur", bit->valeur );
+       Json_node_add_bool ( element, "etat",   bit->etat );
+       MQTT_Send_to_API   ( element, "DLS_REPORT/CI/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref    ( element );
+     }
   }
-/******************************************************************************************************************************/
-/* Dls_CI_to_json : Formate un CI au format JSON                                                                              */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_CI_to_json ( JsonNode *element, struct DLS_CI *bit )
-  { Json_node_add_string ( element, "classe",   "CI" );
-    Json_node_add_string ( element, "tech_id",   bit->tech_id );
-    Json_node_add_string ( element, "acronyme",  bit->acronyme );
-    Json_node_add_int    ( element, "valeur",    bit->valeur );
-    Json_node_add_double ( element, "multi",     bit->multi );
-    Json_node_add_string ( element, "unite",     bit->unite );
-    Json_node_add_bool   ( element, "etat",      bit->etat );
-    Json_node_add_int    ( element, "archivage", bit->archivage );
-    Json_node_add_string ( element, "libelle",   bit->libelle );
-  };
 /******************************************************************************************************************************/
 /* Dls_all_CI_to_json: Transforme tous les bits en JSON                                                                       */
 /* Entrée: target                                                                                                             */
@@ -161,7 +140,10 @@
     while ( liste )
      { struct DLS_CI *bit = liste->data;
        JsonNode *element = Json_node_create();
-       Dls_CI_to_json ( element, bit );
+       Json_node_add_string ( element, "tech_id",   bit->tech_id );
+       Json_node_add_string ( element, "acronyme",  bit->acronyme );
+       Json_node_add_int    ( element, "valeur",    bit->valeur );
+       Json_node_add_bool   ( element, "etat",      bit->etat );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
      }

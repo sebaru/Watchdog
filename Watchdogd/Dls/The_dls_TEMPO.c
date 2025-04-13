@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_TEMPO.c              Déclaration des fonctions pour la gestion des tempo.c                           */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         sam. 09 mars 2013 11:47:18 CET */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     sam. 09 mars 2013 11:47:18 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_TEMPO.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -210,6 +210,14 @@
     return( tempo->state );
   }
 /******************************************************************************************************************************/
+/* Dls_data_get_TEMPO_time: Renvoie le temps de decompte restant de la tempo                                                  */
+/* Sortie : le temps, ou 0 si pas trouvé                                                                                      */
+/******************************************************************************************************************************/
+ gint Dls_data_get_TEMPO_time ( struct DLS_TEMPO *bit )
+  { if (!bit) return(0);
+    return( ((bit->date_on - Partage->top) > 0 ? (bit->date_on - Partage->top) : 0) );
+  }
+/******************************************************************************************************************************/
 /* Dls_TEMPO_to_json : Formate un bit au format JSON                                                                          */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -217,13 +225,23 @@
  void Dls_TEMPO_to_json ( JsonNode *element, struct DLS_TEMPO *bit )
   { Json_node_add_string ( element, "tech_id",  bit->tech_id );
     Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool ( element, "etat", bit->state );
-    Json_node_add_int  ( element, "status", bit->status );
+    Json_node_add_bool ( element, "etat",   bit->state );
     Json_node_add_int  ( element, "daa", bit->delai_on );
     Json_node_add_int  ( element, "dma", bit->min_on );
     Json_node_add_int  ( element, "dMa", bit->max_on );
     Json_node_add_int  ( element, "dad", bit->delai_off );
     Json_node_add_int  ( element, "date_on", bit->date_on );
     Json_node_add_int  ( element, "date_off", bit->date_off );
+    gchar *status;
+    switch ( bit->status )
+     { default:
+       case DLS_TEMPO_NOT_COUNTING:       status = "NOT COUNTING";       break;
+       case DLS_TEMPO_WAIT_FOR_DELAI_ON:  status = "WAIT_FOR_DELAI_ON";  break;
+       case DLS_TEMPO_WAIT_FOR_MIN_ON:    status = "WAIT_FOR_MIN_ON";    break;
+       case DLS_TEMPO_WAIT_FOR_DELAI_OFF: status = "WAIT_FOR_DELAI_OFF"; break;
+       case DLS_TEMPO_WAIT_FOR_MAX_ON:    status = "WAIT_FOR_MAX_ON";    break;
+       case DLS_TEMPO_WAIT_FOR_COND_OFF:  status = "WAIT_FOR_COND_OFF";  break;
+     }
+    Json_node_add_string ( element, "status", status );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Imsg/Makefile.am          Profil de compilation de l'interface Instant-Messagingpour Watchdog*/
-#* Projet WatchDog version 3.0       Gestion d'habitat                          sam 28 juil 2012 18:13:27 */
+#* Projet Abls-Habitat version 4.4       Gestion d'habitat                      sam 28 juil 2012 18:13:27 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Radio/Radio.c  Gestion des messages radio de Watchdog 2.0                                                        */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         sam. 09 nov. 2013 13:49:53 CET */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     sam. 09 nov. 2013 13:49:53 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Archive.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

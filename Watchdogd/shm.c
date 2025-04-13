@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
-/* Watchdogd/shm.c        Gestion de la mémoire partagée                                                  */
-/* Projet WatchDog version 3.0       Gestion d'habitat                      dim 05 avr 2009 12:32:40 CEST */
+/* Watchdogd/shm.c        Gestion de la mÃ©moire partagÃ©e                                                  */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                  dim 05 avr 2009 12:32:40 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * shm.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien LEFEVRE
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,9 +31,9 @@
 
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Shm_init: initialisation de la mémoire partagée                                                        */
-/* Entrée: rien                                                                                           */
-/* Sortie: un pointeur sur la zone mémoire partagée                                                       */
+/* Shm_init: initialisation de la mÃ©moire partagÃ©e                                                        */
+/* EntrÃ©e: rien                                                                                           */
+/* Sortie: un pointeur sur la zone mÃ©moire partagÃ©e                                                       */
 /**********************************************************************************************************/
  struct PARTAGE *Shm_init ( void )
   { struct PARTAGE *partage;
@@ -46,8 +46,8 @@
     return(partage);
   }
 /**********************************************************************************************************/
-/* Shm_stop: Stoppe l'utilisation de la mémoire partagée                                                  */
-/* Entrée: une structure de mémoire partagée                                                              */
+/* Shm_stop: Stoppe l'utilisation de la mÃ©moire partagÃ©e                                                  */
+/* EntrÃ©e: une structure de mÃ©moire partagÃ©e                                                              */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Shm_stop ( struct PARTAGE *partage )

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Onduleur/Onduleur.c  Gestion des upss UPS Watchdgo 2.0                                                        */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         mar. 10 nov. 2009 15:56:10 CET */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     mar. 10 nov. 2009 15:56:10 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Onduleur.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,8 +152,7 @@
 
     vars->date_next_connexion = 0;
     vars->started = TRUE;
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s up and running (host='%s')", thread_tech_id, host );
-    Thread_send_comm_to_master ( module, TRUE );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s connected (host='%s')", thread_tech_id, host );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -222,10 +221,15 @@
        return(NULL);
      }
 
-    if ( ! strncmp ( buffer, "VAR", 3 ) )
+    if ( ! strncmp ( buffer, "VAR", 3 ) )                                    /* si Réponse numérique de la part du UPS daemon */
      { Info_new( __func__, module->Thread_debug, LOG_DEBUG,
                 "%s: Reading GET VAR %s OK = %s", thread_tech_id, nom_var, buffer );
        return(buffer + 6 + strlen(name) + strlen(nom_var));
+     }
+
+    if ( ! strncmp ( buffer, "ERR", 3 ) )                                            /* Detection des erreurs type DATA-STALE */
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                "%s: Reading GET VAR %s ERROR = %s", thread_tech_id, nom_var, buffer );
      }
 
     return(NULL);                                                  /* VAR NOT SUPPORTED / DRIVER NOT CONNECTED are not errors */
@@ -282,7 +286,9 @@
        MQTT_Send_DI ( module, vars->Ups_on_batt,      (g_strrstr(reponse, "OB")?TRUE:FALSE) );
        MQTT_Send_DI ( module, vars->Ups_replace_batt, (g_strrstr(reponse, "RB")?TRUE:FALSE) );
        MQTT_Send_DI ( module, vars->Ups_alarm,        (g_strrstr(reponse, "ALARM")?TRUE:FALSE) );
+       Thread_send_comm_to_master ( module, TRUE );
      }
+    else Thread_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
 /* Modbus_SET_DO: Met a jour une sortie TOR en fonction du jsonnode en parametre                                              */

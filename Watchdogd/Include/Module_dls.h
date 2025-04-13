@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Module_dls.h -> Déclaration des prototypes de fonctions                                                  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          jeu 31 jui 2003 11:49:36 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      jeu 31 jui 2003 11:49:36 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Module_dls.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,6 @@
     guint   in_range;
     guint   archivage;
     guint   last_arch;                                                                         /* Date de la derniere archive */
-    gboolean abonnement;
    };
 
  struct DLS_AO
@@ -75,7 +74,6 @@
     gdouble valeur;
     guint   archivage;
     guint   last_arch;                                                                         /* Date de la derniere archive */
-    gboolean abonnement;                                                 /* Devons-nous envoyer les valeurs en live à l'API ? */
   };
 
  struct DLS_WATCHDOG
@@ -104,7 +102,6 @@
   { gchar   tech_id[32];
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
-    gint    groupe; /* Groupe 'radio' */
     gboolean etat;                                                                                      /* Etat actuel du bit */
     gboolean edge_up;
     gboolean edge_down;
@@ -138,14 +135,10 @@
     gchar   acronyme[64];
     gchar   libelle[128];                                                                                     /* Km, h, ° ... */
     gint    valeur;
-    gint    val_en_cours1;                                                    /* valeur en cours pour le calcul via les ratio */
-    gdouble ratio;
-    gdouble multi;
     gchar   unite[32];
     gboolean etat;
     gint    archivage;
     guint   last_arch;
-    gboolean abonnement;
   };
 
  struct DLS_CH
@@ -157,7 +150,6 @@
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
     guint old_top;                                                                         /* Date de debut du comptage du CH */
     gboolean etat;
-    gboolean abonnement;
   };
 
  struct DLS_VISUEL
@@ -168,10 +160,12 @@
     gchar    mode[32];
     gchar    color[16];
     gdouble  valeur;
+    gchar    unite[32];
     gboolean cligno;
+    gboolean noshow;
     gboolean disable;
-    gint     changes;
-    gint     last_change_reset;
+    gboolean changed;
+    gint     next_send;
   };
 
  struct DLS_MESSAGE
@@ -179,7 +173,6 @@
     gchar   tech_id[32];
     gchar   acronyme[64];
     gboolean etat;
-    gint groupe;
     gint last_on;
   };
 
@@ -191,7 +184,6 @@
     gchar   unite[32];
     gint    archivage;
     guint   last_arch;                                                   /* Date de dernier enregistrement en base de données */
-    gboolean abonnement;
     gdouble pid_somme_erreurs;                                                                                /* Calcul PID KI*/
     gdouble pid_prev_erreur;                                                                                 /* Calcul PID KD */
   };
@@ -239,6 +231,9 @@
 
  extern struct DLS_DO *Dls_data_lookup_DO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *bit, gboolean valeur );
+ extern gboolean Dls_data_get_DO        ( struct DLS_DO *bit );
+ extern gboolean Dls_data_get_DO_up     ( struct DLS_DO *bit );
+ extern gboolean Dls_data_get_DO_down   ( struct DLS_DO *bit );
 
  extern struct DLS_AO *Dls_data_lookup_AO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_AO        ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *bi, gdouble valeur );
@@ -257,7 +252,7 @@
  extern gboolean Dls_data_get_AI_inrange ( struct DLS_AI *bit );
 
  extern struct DLS_CI *Dls_data_lookup_CI ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat, gint reset, gint ratio );
+ extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat, gint reset );
  extern gint Dls_data_get_CI ( struct DLS_CI *bit );
 
  extern struct DLS_CH *Dls_data_lookup_CH ( gchar *tech_id, gchar *acronyme );
@@ -267,12 +262,18 @@
  extern struct DLS_REGISTRE *Dls_data_lookup_REGISTRE ( gchar *tech_id, gchar *acronyme );
  extern void    Dls_data_set_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *reg, gdouble valeur );
  extern gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg );
- extern void Dls_cadran_send_REGISTRE_to_API ( struct DLS_REGISTRE *bit );
 
  extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
-                                   gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gchar *libelle, gboolean disable );
-
+                                   gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
+ extern void Dls_data_set_VISUEL_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
+                                                gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
+ extern void Dls_data_set_VISUEL_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
+                                                gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
+ extern void Dls_data_set_VISUEL_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
+                                             gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
+ extern void Dls_data_set_VISUEL_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
+                                          gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
  extern struct DLS_HORLOGE *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );
 
@@ -283,6 +284,7 @@
  extern void     Dls_data_set_TEMPO     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,
                                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
  extern gboolean Dls_data_get_TEMPO     ( struct DLS_TEMPO *bit );
+ extern gint     Dls_data_get_TEMPO_time ( struct DLS_TEMPO *bit );
 
 
  extern void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input );

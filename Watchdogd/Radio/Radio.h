@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Radio.h        Déclaration structure internes pour radio                                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer 15 avr 2009 15:40:43 CEST  */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     mer 15 avr 2009 15:40:43 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Radio.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

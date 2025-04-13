@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Meteo/Meteo.h        Déclaration structure internes pour les données Meteo de Watchdog                           */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    12.03.2021 18:37:46 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                12.03.2021 18:37:46 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * sMeteo.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_BI.c        Déclaration des fonctions pour la gestion des booleans                                   */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    24.06.2019 22:07:06 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                24.06.2019 22:07:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_BI.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,16 +93,9 @@
         { Partage->com_dls.Set_Dls_BI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_BI_Edge_up, bi ); }
        else
         { Partage->com_dls.Set_Dls_BI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_BI_Edge_down, bi ); }
+       if (vars && vars->debug) Dls_BI_export_to_API ( bi );                                       /* Si debug, envoi a l'API */
        Partage->audit_bit_interne_per_sec++;
      }
-/*    if (bi->next_etat != valeur)
-     { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d",
-                 (vars ? vars->num_ligne : -1), bi->tech_id, bi->acronyme, valeur, bi->edge_up, bi->edge_down );
-       Partage->audit_bit_interne_per_sec++;
-       bi->next_etat = valeur;
-     }
-*/
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_BI: Remonte l'etat d'un bistable                                                                             */
@@ -129,15 +122,17 @@
     return( bi->edge_down );
   }
 /******************************************************************************************************************************/
-/* Dls_BI_to_json : Formate un bit au format JSON                                                                           */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
+/* Dls_BI_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le bit                                                                                                            */
+/* Sortie : le JSON                                                                                                           */
 /******************************************************************************************************************************/
- void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat",     bit->etat );
-    Json_node_add_int    ( element, "groupe",   bit->groupe );
+ void Dls_BI_export_to_API ( struct DLS_BI *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_bool ( element, "etat", bit->etat );
+       MQTT_Send_to_API   ( element, "DLS_REPORT/BI/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref    ( element );
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_all_BI_to_json: Transforme tous les bits en JSON                                                                       */
@@ -150,7 +145,9 @@
     while ( liste )
      { struct DLS_BI *bit = liste->data;
        JsonNode *element = Json_node_create();
-       Dls_BI_to_json ( element, bit );
+       Json_node_add_string ( element, "tech_id",  bit->tech_id );
+       Json_node_add_string ( element, "acronyme", bit->acronyme );
+       Json_node_add_bool   ( element, "etat",     bit->etat );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
      }

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                                                 */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                       mar. 06 juil. 2010 18:31:32 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                   mar. 06 juil. 2010 18:31:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -169,7 +169,7 @@
     if (RootNode)
      { gchar topic[256];
        g_snprintf( topic, sizeof(topic), "thread/%s", target_tech_id );
-       MQTT_Send_to_topic ( Partage->com_msrv.MQTT_session, topic, "DLS", RootNode );
+       MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, topic, "DLS", RootNode );
        Json_node_unref(RootNode);
      }
   }
@@ -247,6 +247,7 @@
  static void Dls_run_plugin ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { struct timeval tv_avant, tv_apres;
     if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
+    plugin->vars.debug = plugin->debug_time > Partage->top;                             /* Recopie du champ de debug temporel */
 
 /*--------------------------------------------- Calcul des bits internals ----------------------------------------------------*/
     gboolean bit_comm_module = TRUE;
@@ -259,25 +260,21 @@
 
     if ( Dls_data_get_MONO ( plugin->vars.dls_comm ) != bit_comm_module )                    /* Envoi à l'API si il y a écart */
      { Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_comm, bit_comm_module );
-       JsonNode *RootNode = Json_node_create ();
-       if (RootNode)
-        { Dls_MONO_to_json ( RootNode, plugin->vars.dls_comm );
-          pthread_mutex_lock ( &Partage->abonnements_synchro );
-          Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-          pthread_mutex_unlock ( &Partage->abonnements_synchro );
-        }
+       Dls_MONO_export_to_API ( plugin->vars.dls_comm );
      }
 
-    Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok,
-                        bit_comm_module &&
-                        !( Dls_data_get_MONO( plugin->vars.dls_memsa_defaut ) ||
-                           Dls_data_get_MONO( plugin->vars.dls_memsa_defaut_fixe ) ||
-                           Dls_data_get_MONO( plugin->vars.dls_memsa_alarme ) ||
-                           Dls_data_get_MONO( plugin->vars.dls_memsa_alarme_fixe )
-                         )
+/*-------------------------------------------------- Calcul du MEMSA_OK ------------------------------------------------------*/
+    gboolean new_memsa_ok = bit_comm_module && !( Dls_data_get_MONO( plugin->vars.dls_memsa_defaut ) ||
+                                                  Dls_data_get_MONO( plugin->vars.dls_memsa_defaut_fixe ) ||
+                                                  Dls_data_get_MONO( plugin->vars.dls_memsa_alarme ) ||
+                                                  Dls_data_get_MONO( plugin->vars.dls_memsa_alarme_fixe )
+                                                );
+    if ( Dls_data_get_MONO ( plugin->vars.dls_memsa_ok ) != new_memsa_ok )                   /* Envoi à l'API si il y a écart */
+     { Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok, new_memsa_ok );
+       Dls_MONO_export_to_API ( plugin->vars.dls_memsa_ok );
+     }
 
-                      );
-
+/*-------------------------------------------------- Calcul du MEMSSP_OK -----------------------------------------------------*/
     Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memssp_ok,
                         !( Dls_data_get_MONO( plugin->vars.dls_memssp_derangement ) ||
                            Dls_data_get_MONO( plugin->vars.dls_memssp_derangement_fixe ) ||
@@ -342,17 +339,17 @@
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_bit_per_sec, (gdouble)Partage->audit_bit_interne_per_sec_hold, TRUE );
+          Dls_data_set_AI ( Partage->com_dls.sys_bit_per_sec, (gdouble)Partage->audit_bit_interne_per_sec_hold, TRUE );
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_tour_per_sec, (gdouble)Partage->audit_tour_dls_per_sec_hold, TRUE );
+          Dls_data_set_AI ( Partage->com_dls.sys_tour_per_sec, (gdouble)Partage->audit_tour_dls_per_sec_hold, TRUE );
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE ); /* historique */
+          Dls_data_set_AI ( Partage->com_dls.sys_dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE ); /* historique */
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_2sec>=20)                                                           /* Toutes les 2 secondes */
@@ -363,23 +360,21 @@
 /******************************************************************************************************************************/
        if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_archive_queue, 1.0*Partage->archive_liste_taille, TRUE );
           Dls_foreach_plugins ( NULL, Dls_run_archivage );                        /* Archivage au mieux toutes les 5 secondes */
           last_top_5sec = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_10sec>=100)                                                        /* Toutes les 10 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
-          Dls_data_set_BI ( NULL, Partage->com_dls.sys_api_socket, (Partage->com_msrv.API_websocket ? TRUE : FALSE) );
+          Dls_data_set_BI ( NULL, Partage->com_dls.sys_mqtt_connected, Partage->com_msrv.MQTT_connected );
           last_top_10sec = Partage->top;
         }
 /******************************************************************************************************************************/
        if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_nbr_api_enreg_queue, (gdouble)Partage->liste_json_to_ws_api_size, TRUE );
           struct rusage conso;
           getrusage ( RUSAGE_SELF, &conso );
-          Dls_data_set_AI ( NULL, Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
+          Dls_data_set_AI ( Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Dls_data_activer_horloge();
           last_top_1min = Partage->top;

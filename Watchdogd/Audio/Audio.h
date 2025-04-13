@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Audio.h        Déclaration structure internes pour audio                                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer 15 avr 2009 15:40:43 CEST  */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     mer 15 avr 2009 15:40:43 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Audio.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@
 
  struct AUDIO_VARS
   { gint last_audio;                                                                   /* Date de la derniere emission sonore */
-    gboolean diffusion_enabled;                                                        /* Diffusion autorisée pourle thread ? */
+    gboolean diffusion_enabled;                                                       /* Diffusion autorisée pour le thread ? */
 /*********************************************************** Digital Input ****************************************************/
-    JsonNode *p_all;
-    JsonNode *p_none;
+    /*JsonNode *p_all;
+    JsonNode *p_none;*/
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/

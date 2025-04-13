@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Http/Http.c        Gestion des connexions HTTP WebService de watchdog                                            */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                   mer. 24 avril 2013 18:48:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Http.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,34 +37,6 @@
  #include "watchdogd.h"
  #include "Http.h"
 
-#warning a migrer coté API
-#ifdef bouh
-    gpointer search_string = g_hash_table_lookup ( query, "search[value]" );
-    if (!search_string) { search = g_strdup (""); }
-                   else { search = Normaliser_chaine ( search_string ); }
-    gchar *draw_string = g_hash_table_lookup ( query, "draw" );
-    if (draw_string) Json_node_add_int ( RootNode, "draw", atoi(draw_string) );
-                else Json_node_add_int ( RootNode, "draw", 1 );
-    gchar *start_string = g_hash_table_lookup ( query, "start" );
-    if (start_string) start = atoi(start_string);
-                 else start = 200;
-    gchar *length_string = g_hash_table_lookup ( query, "length" );
-    if (length_string) length = atoi(length_string);
-                  else length = 200;
-
-
-    "SELECT COUNT(*) AS recordsTotal FROM dictionnaire LIMIT %d", length )==FALSE)
-                                  "SELECT COUNT(*) AS recordsFiltered FROM dictionnaire "
-                                  "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
-                                  "LIMIT %d OFFSET %d",
-                                  search, search, search, length, start )==FALSE)
-    if (SQL_Select_to_json_node ( RootNode, "data",
-                                  "SELECT * FROM dictionnaire "
-                                  "WHERE tech_id LIKE '%%%s%%' OR acronyme LIKE '%%%s%%' OR libelle LIKE '%%%s%%' "
-                                  "LIMIT %d OFFSET %d",
-                                  search, search, search, length, start )==FALSE)
-
-#endif
 /******************************************************************************************************************************/
 /* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
 /* Entrée: le messages                                                                                                        */
@@ -101,21 +73,9 @@
     if (soup_server_message_get_method(msg) == SOUP_METHOD_GET)
      {      if (!strcasecmp ( path, "/" ))           Http_traiter_status     ( server, msg, path, query, user_data );
        else if (!strcasecmp ( path, "/status" ))     Http_traiter_status     ( server, msg, path, query, user_data );
-       else if (!strcasecmp ( path, "/dls/status" )) Http_traiter_dls_status ( server, msg, path, query, user_data );
-       else if (!strcasecmp ( path, "/dls/run" ))    Http_traiter_dls_run    ( server, msg, path, query, user_data );
+#warning Delete get_io
        else if (!strcasecmp ( path, "/get_io" ))     Http_traiter_get_io     ( server, msg, path, query );
        else { Http_Send_json_response (msg, SOUP_STATUS_NOT_IMPLEMENTED, NULL, NULL ); return; }
-     }
-    else if (soup_server_message_get_method(msg) == SOUP_METHOD_POST)
-     { JsonNode *request = Http_Msg_to_Json ( msg );
-       if (!request)
-        { Http_Send_json_response ( msg, SOUP_STATUS_BAD_REQUEST, "Parsing Request Failed", NULL );
-          return;
-        }
-            if (!strcasecmp ( path, "/dls/run/set" ))      Http_traiter_dls_run_set       ( server, msg, path, request );
-       else if (!strcasecmp ( path, "/dls/run/acquitter")) Http_traiter_dls_run_acquitter ( server, msg, path, request );
-       else Http_Send_json_response (msg, SOUP_STATUS_NOT_FOUND, "Not found", NULL );
-       Json_node_unref ( request );
      }
     else { Http_Send_json_response (msg, SOUP_STATUS_NOT_IMPLEMENTED, "Method not implemented", NULL ); return; }
   }

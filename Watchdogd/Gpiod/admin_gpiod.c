@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Gpiod/admin_raspberryPI.c        Gestion des connexions Gpiod pour watchdog                                      */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    01.10.2021 21:52:58 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                01.10.2021 21:52:58 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * admin_raspberryPI.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

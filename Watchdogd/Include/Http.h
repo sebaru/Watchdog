@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Http.h        Déclaration structure internes des WebServices                                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                   mer. 24 avril 2013 18:48:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * http.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,16 +49,10 @@
  extern void Run_HTTP ( void );
 
  extern void Http_traiter_status  ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_dls_status ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_dls_run    ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query, gpointer user_data );
- extern void Http_traiter_dls_run_set ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
- extern void Http_traiter_dls_run_acquitter ( SoupServer *server, SoupServerMessage *msg, const char *path, JsonNode *request );
-
  extern void Http_traiter_get_io ( SoupServer *server, SoupServerMessage *msg, const char *path, GHashTable *query );
 
  extern JsonNode *Http_Msg_to_Json ( SoupServerMessage *msg );
  extern JsonNode *Http_Get_from_local_BUS ( struct THREAD *module, gchar *uri );
- extern gboolean Http_Post_to_local_BUS ( struct THREAD *module, gchar *uri, JsonNode *RootNode );
  extern void Http_Add_Thread_signature ( struct THREAD *module, SoupMessage *msg, gchar *buf, gint buf_size );
  extern gboolean Http_Check_Thread_signature ( gchar *path, SoupServerMessage *msg, gchar **thread_tech_id_p );
  #endif

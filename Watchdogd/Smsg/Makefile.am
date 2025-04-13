@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Sms/Makefile.am          Profil de compilation de l'interface SMS Watchdog                   */
-#* Projet WatchDog version 3.0       Gestion d'habitat                          mer 05 sept 2012 18:13:27 */
+#* Projet Abls-Habitat version 4.4       Gestion d'habitat                      mer 05 sept 2012 18:13:27 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

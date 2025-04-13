@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_VISUEL.c             Gestion des visuels                                                             */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    22.03.2017 10:29:53 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                22.03.2017 10:29:53 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_VISUEL.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,42 +84,92 @@
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
-                            gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gchar *libelle, gboolean disable )
+                            gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
   { if (!visu) return;
     if (Partage->com_msrv.Thread_run == FALSE) return;
     if (    strcmp ( visu->mode, mode )
          || strcmp ( visu->color, color )                     /* On ne peut pas checker le libellé car il peut etre dynamique */
          || visu->cligno  != cligno
+         || visu->noshow  != noshow
          || visu->disable != disable
          || visu->valeur  != valeur
        )
-     { if ( visu->last_change_reset + 50 <= Partage->top )                 /* Reset compteur de changes toutes les 5 secondes */
-        { visu->changes = 0;
-          visu->last_change_reset = Partage->top;
-        }
-
-       if ( visu->changes <= 10 )                                                          /* Si moins de 10 changes en 5 sec */
-        { if ( visu->changes == 10 ) { visu->disable = TRUE; }                      /* Est-ce le dernier change avant blocage */
-          else { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
-                 g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
-                 g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
-                 Convert_libelle_dynamique ( visu->tech_id, visu->libelle, sizeof(visu->libelle) );
-                 visu->valeur  = valeur;
-                 visu->cligno  = cligno;
-                 visu->disable = disable;
-               }
-
-          pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
-          Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' cligno=%d libelle='%s', disable=%d",
-                    (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
-                     visu->mode, visu->color, visu->valeur, visu->cligno, visu->libelle, visu->disable );
-        }
-       visu->changes++;                                                                                /* Un change de plus ! */
-       Partage->audit_bit_interne_per_sec++;
+     { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
+       g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
+       g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
+       Convert_libelle_dynamique ( visu->libelle, sizeof(visu->libelle) );
+       visu->valeur  = valeur;
+       visu->cligno  = cligno;
+       visu->noshow  = noshow;
+       visu->disable = disable;
+       visu->changed = TRUE;
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s') "
+                 "cligno=%d noshow=%d libelle='%s', disable=%d",
+                 (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
+                  visu->mode, visu->color, visu->valeur, visu->unite, visu->cligno, visu->noshow, visu->libelle, visu->disable );
      }
+
+    if (visu->changed && (Partage->top >= visu->next_send))
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );                                /* Ajout dans la liste de i a traiter */
+       Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       visu->changed = FALSE;
+       visu->next_send = Partage->top + 10;
+     }
+    Partage->audit_bit_interne_per_sec++;
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_VISUEL_for_CI : Met un jour un visuel accroché a un compteur d'impulsion                                      */
+/* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
+                                   gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+  { if (!visu) return;
+    if (!src) return;
+
+    gint valeur   = Dls_data_get_CI ( src );
+    g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
+    Dls_data_set_VISUEL ( vars, visu, mode, color, 1.0*valeur, cligno, noshow, libelle, disable );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_visuel_for_registre : Met un jour un visuel accroché a un registre                                            */
+/* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
+                                         gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+  { if (!visu) return;
+    if (!src) return;
+
+    gdouble valeur = Dls_data_get_REGISTRE ( src );
+    g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
+    Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, noshow, libelle, disable );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_visuel_for_watchdog : Met un jour un visuel accroché a un watchdog                                            */
+/* Entrée : le dls en cours, le visuel, le watchdog et les parametre du visuel                                                */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
+                                         gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+  { if (!visu) return;
+    if (!src) return;
+
+    gdouble valeur = Dls_data_get_WATCHDOG_time ( src );
+    g_snprintf( visu->unite, sizeof(visu->unite), "s" );
+    Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, noshow, libelle, disable );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_visuel_for_tempo : Met un jour un visuel accroché a une temporisation                                         */
+/* Entrée : le dls en cours, le visuel, la temporisation et les parametre du visuel                                           */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
+                                      gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+  { if (!visu) return;
+    if (!src) return;
+
+    gdouble valeur = Dls_data_get_TEMPO_time ( src );
+    g_snprintf( visu->unite, sizeof(visu->unite), "s" );
+    Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, noshow, libelle, disable );
   }
 /******************************************************************************************************************************/
 /* Dls_VISUEL_to_json : Formate un bit au format JSON                                                                         */
@@ -133,7 +183,9 @@
     Json_node_add_string ( RootNode, "color",     bit->color );
     Json_node_add_double ( RootNode, "valeur",    bit->valeur );
     Json_node_add_bool   ( RootNode, "cligno",    bit->cligno );
+    Json_node_add_bool   ( RootNode, "noshow",    bit->noshow );
     Json_node_add_bool   ( RootNode, "disable",   bit->disable );
     Json_node_add_string ( RootNode, "libelle",   bit->libelle );
+    Json_node_add_string ( RootNode, "unite",     bit->unite );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

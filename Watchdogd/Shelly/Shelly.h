@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Shelly.h   Header et constantes des modules SHELLY Watchdgo 4.0                                          */
-/* Projet WatchDog version 4.0       Gestion d'habitat                                                    08.03.2024 23:33:53 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                08.03.2024 23:33:53 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Shelly.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

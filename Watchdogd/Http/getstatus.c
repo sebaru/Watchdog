@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Http/getstatus.c       Gestion des request getstatus pour le thread HTTP de watchdog                             */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                        sam. 15 juin 2013 11:44:29 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                    sam. 15 juin 2013 11:44:29 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * getstatus.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,8 +82,6 @@
     num = g_slist_length( Partage->com_msrv.liste_msg );                                       /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
     Json_node_add_int  ( RootNode, "length_msg", num );
-
-    Json_node_add_int    ( RootNode, "archive_liste_taille", Partage->archive_liste_taille );
 
     Http_Send_json_response ( msg, SOUP_STATUS_OK, "Status OK", RootNode );
   }

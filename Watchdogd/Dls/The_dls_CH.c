@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_CH.c      Déclaration des fonctions pour la gestion des cpt_h                                        */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                           mar 14 fév 2006 15:03:51 CET */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                       mar 14 fév 2006 15:03:51 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_CH.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,19 +111,16 @@
        else
         { int new_top, delta;
           new_top = Partage->top;
-          delta = new_top - cpt_h->old_top;
+          delta   = new_top - cpt_h->old_top;
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
-           { cpt_h->valeur++;
+           { cpt_h->valeur +=delta;
              cpt_h->old_top = new_top;
-             if (cpt_h->abonnement) Dls_cadran_send_CH_to_API ( cpt_h );
+             if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                              /* Si debug, envoi a l'API */
+
              Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                       "ligne %04d: Changing DLS_CH '%s:%s'=%d",
+                       "ligne %04d: Changing DLS_CH '%s:%s'=%d (1/10s)",
                        (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
              Partage->audit_bit_interne_per_sec++;
-           }
-          if (cpt_h->last_arch + 600 < Partage->top)
-           { Ajouter_arch( cpt_h->tech_id, cpt_h->acronyme, 1.0*cpt_h->valeur );
-             cpt_h->last_arch = Partage->top;
            }
         }
      }
@@ -131,32 +128,19 @@
      { cpt_h->etat = FALSE; }
   }
 /******************************************************************************************************************************/
-/* Dls_cadran_send_CH_to_API: Ennvoi un CH à l'API pour affichage des cadrans                                                 */
-/* Entrées: la structure DLs_AI                                                                                               */
-/* Sortie : néant                                                                                                             */
+/* Dls_CH_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le bit                                                                                                            */
+/* Sortie : le JSON                                                                                                           */
 /******************************************************************************************************************************/
- void Dls_cadran_send_CH_to_API ( struct DLS_CH *bit )
-  { if (!bit) return;
-    JsonNode *RootNode = Json_node_create();
-    Dls_CH_to_json ( RootNode, bit );
-    pthread_mutex_lock ( &Partage->abonnements_synchro );
-    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-    pthread_mutex_unlock ( &Partage->abonnements_synchro );
+ void Dls_CH_export_to_API ( struct DLS_CH *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_int  ( element, "valeur", bit->valeur );
+       Json_node_add_bool ( element, "etat",   bit->etat );
+       MQTT_Send_to_API   ( element, "DLS_REPORT/CH/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref    ( element );
+     }
   }
-/******************************************************************************************************************************/
-/* Dls_CH_to_json : Formate un CH au format JSON                                                                              */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_CH_to_json ( JsonNode *element, struct DLS_CH *bit )
-  { Json_node_add_string ( element, "classe",    "CH" );
-    Json_node_add_string ( element, "tech_id",   bit->tech_id );
-    Json_node_add_string ( element, "acronyme",  bit->acronyme );
-    Json_node_add_int    ( element, "valeur",    bit->valeur );
-    Json_node_add_bool   ( element, "etat",      bit->etat );
-    Json_node_add_int    ( element, "archivage", bit->archivage );
-    Json_node_add_string ( element, "libelle",   bit->libelle );
-  };
 /******************************************************************************************************************************/
 /* Dls_all_CH_to_json: Transforme tous les bits en JSON                                                                       */
 /* Entrée: target                                                                                                             */
@@ -168,7 +152,10 @@
     while ( liste )
      { struct DLS_CH *bit = liste->data;
        JsonNode *element = Json_node_create();
-       Dls_CH_to_json ( element, bit );
+       Json_node_add_string ( element, "tech_id",   bit->tech_id );
+       Json_node_add_string ( element, "acronyme",  bit->acronyme );
+       Json_node_add_int    ( element, "valeur",    bit->valeur );
+       Json_node_add_bool   ( element, "etat",      bit->etat );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
      }

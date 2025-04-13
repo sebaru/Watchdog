@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/include/thread.h      Déclarations générales de gestion des threads                                              */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    30.01.2022 12:46:36 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                30.01.2022 12:46:36 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * thread.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,14 +56,13 @@
     gint telemetrie_top;
     gint hour_top;
     void *vars;                                                               /* Pointeur vers les variables de run du module */
-    void (*Run_thread)( struct THREAD *module );                          /* Fonction principale de gestion du module */
+    void (*Run_thread)( struct THREAD *module );                                  /* Fonction principale de gestion du module */
   };
 
 /************************************************ Définitions des prototypes **************************************************/
  extern void Stopper_fils ( void );                                                                          /* Dans thread.c */
  extern gboolean Demarrer_dls ( void );
- extern gboolean Demarrer_api_sync ( void );
- extern gboolean Demarrer_arch_sync ( void );
+ extern void Stopper_dls ( void );
  extern gboolean Demarrer_http ( void );
  extern gboolean Demarrer_arch ( void );
  extern void Charger_librairies ( void );

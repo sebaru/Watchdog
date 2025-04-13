@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Shelly/Makefile.am          Profil de compilation de l'interface SHELLY Watchdog             */
-#* Projet WatchDog version 4.0       Gestion d'habitat                                08.03.2024 23:31:51 */
+#* Projet Abls-Habitat version 4.4       Gestion d'habitat                            08.03.2024 23:31:51 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

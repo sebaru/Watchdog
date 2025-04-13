@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mail.c        Fonctions helper pour la manipulation des payload au format JSON                                   */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    27.06.2019 09:38:40 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                27.06.2019 09:38:40 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * mail.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien LEFEVRE
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

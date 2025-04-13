@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Meteo/Meteo.c        Gestion de l'méteo pour Watchdog v3.0                                        */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    12.03.2021 20:49:16 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                12.03.2021 20:49:16 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Meteo.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -176,6 +176,7 @@
 
     Meteo_get_ephemeride( module );
     Meteo_get_forecast( module );
+    gint polling_consigne = 0;
     while( module->Thread_run == TRUE )                                                      /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute du master ******************************************************/
@@ -190,10 +191,11 @@
           Json_node_unref(request);
         }
 /****************************************************** Connexion ! ***********************************************************/
-       if (Partage->top - vars->last_request >= METEO_POLLING)
+       if (Partage->top - vars->last_request >= polling_consigne)
         { Meteo_get_ephemeride( module );
           Meteo_get_forecast( module );
           vars->last_request = Partage->top;
+          if (!module->comm_status) polling_consigne = 600; else polling_consigne = METEO_POLLING;       /* Polling adaptatif */
         }
      }
 

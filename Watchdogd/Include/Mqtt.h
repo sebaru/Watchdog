@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Include/Archive.h        Déclaration structure internes des archivages                                           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 08 jui 2006 12:02:36 CEST */
+/* Watchdogd/Include/Mqtt.h        Déclaration structure internes des archivages                                              */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      sam 08 jui 2006 12:02:36 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Archive.h
- * This file is part of Watchdog
+ * Mqtt.h
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,8 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef _ARCHIVAGE_DB_H_
- #define _ARCHIVAGE_DB_H_
-
- #define ARCHIVE_MAX_ENREG_TO_API   500
+#ifndef _MQTT_H_
+ #define _MQTT_H_
 
  #define ARCHIVE_NONE           0
  #define ARCHIVE_5_SEC          50
@@ -38,8 +36,14 @@
  #define ARCHIVE_1_JOUR         864000
 
 /******************************************* Définitions des prototypes *******************************************************/
- extern void Ajouter_arch( gchar *tech_id, gchar *nom, gdouble valeur );
- extern void Run_arch_sync ( void );                                                                        /* Dans Archive.h */
+ extern gboolean MQTT_Start_MQTT_API ( void );                                                               /* Dans mqtt_x.h */
+ extern void MQTT_Stop_MQTT_API ( void );
+ extern void MQTT_Send_MSGS_to_API ( void );
+ extern void MQTT_Send_visuels_to_API ( void );
+ extern void MQTT_Send_archive_to_API( gchar *tech_id, gchar *nom, gdouble valeur );
+
+ extern gboolean MQTT_Start_MQTT_LOCAL ( void );                                                             /* Dans mqtt_x.h */
+ extern void MQTT_Stop_MQTT_LOCAL ( void );
 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

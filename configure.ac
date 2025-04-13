@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([Watchdog],[3.x],[sebastien.lefevre@abls-habitat.fr],[Watchdog],[https://github.com/sebaru])
+AC_INIT([Watchdog],[4.x],[sebastien.lefevre@abls-habitat.fr],[Watchdog],[https://github.com/sebaru])
 
 AC_DEFINE_UNQUOTED([WTD_VERSION], "[m4_esyscmd_s([sh -c "git describe --tags | tr -d '\n'"])]", [Numero de version])
 AC_DEFINE_UNQUOTED([WTD_BRANCHE], "[m4_esyscmd_s([sh -c "git branch --show-current"])]", [Branche GIT])

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_AI.c  Gestion des Analog Input                                                                       */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    30.01.2022 14:07:24 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                30.01.2022 14:07:24 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls_AI.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,25 +93,13 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range )
+ void Dls_data_set_AI ( struct DLS_AI *bit, gdouble valeur, gboolean in_range )
   { if (!bit) return;
     bit->valeur   = valeur;
     bit->in_range = in_range;
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info_new( __func__, Config.log_dls, LOG_DEBUG,
               "Changing DLS_AI '%s:%s'=%f %s", bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
-  }
-/******************************************************************************************************************************/
-/* Dls_cadran_send_AI_to_API: Ennvoi une AI à l'API pour affichage des cadrans                                                */
-/* Entrées: la structure DLs_AI                                                                                               */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_cadran_send_AI_to_API ( struct DLS_AI *bit )
-  { if (!bit) return;
-    JsonNode *RootNode = Json_node_create();
-    Dls_AI_to_json ( RootNode, bit );
-    pthread_mutex_lock ( &Partage->abonnements_synchro );
-    Partage->abonnements = g_slist_append ( Partage->abonnements, RootNode );
-    pthread_mutex_unlock ( &Partage->abonnements_synchro );
+    Dls_AI_export_to_API ( bit );                                                                            /* envoi a l'API */
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_AI_from_thread_ai: Positionne une AI dans DLS depuis une AI 'thread'                                          */
@@ -136,18 +124,16 @@
 
     struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
     if (!bit)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_AI from '%s': '%s:%s'/'%s:%s' not found",
-                 thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_AI '%s:%s'/'%s:%s' not found",
+                 thread_tech_id, thread_acronyme, tech_id, acronyme );
        return(FALSE);
      }
 
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI from '%s': '%s:%s'/'%s:%s'=%f %s (range=%d) (%s) (abonnement=%d)",
-              thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
+    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
+              thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_double ( request, "valeur" ), bit->unite,
-              Json_get_bool ( request, "in_range" ), bit->libelle, bit->abonnement );
-    Dls_data_set_AI ( NULL, bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
-    if (bit->abonnement) Dls_cadran_send_AI_to_API ( bit );
-
+              Json_get_bool ( request, "in_range" ), bit->libelle );
+    Dls_data_set_AI ( bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -179,6 +165,20 @@
        Dls_AI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_AI_export_to_API : Formate un bit au format JSON                                                                       */
+/* Entrées: le JsonNode et le bit                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_AI_export_to_API ( struct DLS_AI *bit )
+  { JsonNode *element = Json_node_create ();
+    if (element)
+     { Json_node_add_double ( element, "valeur",    bit->valeur );
+       Json_node_add_bool   ( element, "in_range",  bit->in_range );
+       MQTT_Send_to_API     ( element, "DLS_REPORT/AI/%s/%s", bit->tech_id, bit->acronyme );
+       Json_node_unref      ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

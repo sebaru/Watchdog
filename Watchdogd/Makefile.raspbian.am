@@ -1,18 +1,18 @@
 #**********************************************************************************************************/
 #* Watchdogd/Makefile.am          Profil de compilation du serveur Watchdog                               */
-#* Projet WatchDog version 3.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
+#* Projet Abls-Habitat version 4.4    Gestion d'habitat                           lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Dls Http Smsg Modbus Audio Onduleur TeleinfoEDF Radio Imsgs Meteo Phidget Gpiod Shelly
 
 bin_SCRIPTS = Wtd_set_volume.sh Wtd_play_google.sh
 bin_PROGRAMS = Watchdogd
-Watchdogd_SOURCES = Watchdogd.c thread.c Archive.c Erreur.c \
+Watchdogd_SOURCES = Watchdogd.c thread.c Erreur.c \
                     shm.c json.c Config.c http_common.c \
                     Mnemonique.c \
                     distrib_Events.c \
-                    api_sync.c api_MSGxxx.c api_Ixxx.c api_Abonnements.c mail.c uuid.c \
-                    Synoptiques.c
+                    mqtt_api.c mqtt_local.c mqtt_archives.c \
+                    api_sync.c mqtt_msgs.c mqtt_visuels.c mail.c uuid.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
                     Http/libwatchdog-http.la
@@ -37,4 +37,4 @@ EXTRA_DIST = Watchdogd.service watchdogd.abls.conf
 MAINTAINERCLEANFILES = Makefile.in
 
 install-data-local:
-#	mkdir -p $(pkgdatadir)/IHM; cp -rv IHM/* $(pkgdatadir)/IHM/; chown -R root.root $(pkgdatadir)/IHM
+# mkdir -p $(pkgdatadir)/IHM; cp -rv IHM/* $(pkgdatadir)/IHM/;	chown -R root.root $(pkgdatadir)/IHM

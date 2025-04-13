@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/thread.c        Gestion des Threads                                                                              */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 11 avr 2009 12:21:45 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      sam 11 avr 2009 12:21:45 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * thread.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien LEFEVRE
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,15 +54,14 @@
  void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat )
   { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { MQTT_Send_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
+
        JsonNode *RootNode = Json_node_create();
-       if (RootNode)
-        { Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
-          Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-          Json_node_add_bool   ( RootNode, "io_comm", module->comm_status );
-          JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/heartbeat", RootNode );
-          Json_node_unref ( api_result );
-          Json_node_unref ( RootNode );
-        }
+       Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
+       Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+       Json_node_add_bool   ( RootNode, "io_comm",        module->comm_status );
+       MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
+       Json_node_unref ( RootNode );
+
        module->comm_next_update = Partage->top + 600;                                                   /* Toutes les minutes */
        module->comm_status = etat;
      }
@@ -75,6 +74,7 @@
  static void Thread_on_MQTT_message_CB(struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg)
   { struct THREAD *module = obj;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    if (module->Thread_run == FALSE) return;                     /* Si le module est en arret, on ne lui donne pas le message */
     JsonNode *response = Json_get_from_string ( msg->payload );
     if (!response)
      { Info_new( __func__, Config.log_bus, LOG_WARNING, "'%s': MQTT Message Dropped (not JSON) !", thread_tech_id );
@@ -82,7 +82,7 @@
      }
 
     Json_node_add_string ( response, "topic", msg->topic );
-    pthread_mutex_lock ( &module->synchro );                                             /* on passe le message au thread */
+    pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, response );
     pthread_mutex_unlock ( &module->synchro );
   }
@@ -152,10 +152,10 @@
      }
 
 /******************************************************* Ecoute du MQTT *******************************************************/
-    module->MQTT_session = mosquitto_new( thread_tech_id, FALSE, module	);
+    module->MQTT_session = mosquitto_new( thread_tech_id, FALSE, module );
     if (!module->MQTT_session)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
-    else if ( mosquitto_connect(	module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
+    else if ( mosquitto_connect( module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT connection to '%s' error.", thread_tech_id, Config.master_hostname ); }
     else
      { gchar topic[256];
@@ -164,8 +164,9 @@
        g_snprintf ( topic, sizeof(topic), "threads/#" );
        MQTT_Subscribe ( module->MQTT_session, topic );
        mosquitto_message_callback_set( module->MQTT_session, Thread_on_MQTT_message_CB );
+       mosquitto_reconnect_delay_set ( module->MQTT_session, 10, 60, TRUE );
      }
-    if ( mosquitto_loop_start(	module->MQTT_session	) != MOSQ_ERR_SUCCESS )
+    if ( mosquitto_loop_start( module->MQTT_session ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
 
 /******************************************************* Ecoute du Master *****************************************************/
@@ -173,7 +174,9 @@
 
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
-    if (Dls_auto_create_plugin( thread_tech_id, description ) == FALSE)
+    gchar package[128];
+    g_snprintf ( package, sizeof(package), "Thread_%s", Json_get_string ( module->config, "thread_classe" ) );
+    if (Dls_auto_create_plugin( thread_tech_id, description, package ) == FALSE)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: DLS Create ERROR (%s)\n", thread_tech_id, description ); }
 
     module->IOs = Json_node_create();
@@ -190,9 +193,9 @@
 /******************************************************************************************************************************/
  void Thread_end ( struct THREAD *module )
   { Thread_send_comm_to_master ( module, FALSE );
-    mosquitto_disconnect(	module->MQTT_session	);
-    mosquitto_loop_stop(	module->MQTT_session, FALSE	);
-    mosquitto_destroy(	module->MQTT_session	);
+    mosquitto_disconnect( module->MQTT_session );
+    mosquitto_loop_stop( module->MQTT_session, FALSE );
+    mosquitto_destroy( module->MQTT_session );
     g_object_unref  ( module->Soup_session );  module->Soup_session = NULL;
     g_slist_foreach ( module->MQTT_messages, (GFunc) Json_node_unref, NULL );
     g_slist_free    ( module->MQTT_messages );   module->MQTT_messages = NULL;
@@ -475,7 +478,7 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Demarrer_dls ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
+  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage DLS %d", getpid() );
     if ( pthread_create( &Partage->com_dls.TID, NULL, (void *)Run_dls, NULL ) )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
        return(FALSE);
@@ -484,32 +487,14 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Demarrer_API_sync: Processus de synchronisation avec l'API                                                                 */
-/* Entrée: rien                                                                                                               */
-/* Sortie: false si probleme                                                                                                  */
+/* Stopper_dls: arret du processus D.L.S                                                                                      */
+/* Entré/Sortie: néant                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Demarrer_api_sync ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
-    if ( pthread_create( &Partage->com_msrv.TID_api_sync, NULL, (void *)Run_api_sync, NULL ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
-       return(FALSE);
-     }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "thread api_sync (%p) seems to be running", Partage->com_msrv.TID_api_sync );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Demarrer_ARCH_sync: Processus de synchronisation d'archive                                                                 */
-/* Entrée: rien                                                                                                               */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Demarrer_arch_sync ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
-    if ( pthread_create( &Partage->com_msrv.TID_arch_sync, NULL, (void *)Run_arch_sync, NULL ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
-       return(FALSE);
-     }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "thread arch_sync (%p) seems to be running", Partage->com_msrv.TID_arch_sync );
-    return(TRUE);
+ void Stopper_dls ( void )
+  { Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for DLS (%p) to finish", Partage->com_dls.TID );
+    Partage->com_dls.Thread_run = FALSE;
+    if ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                               /* Attente fin DLS */
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
   }
 /******************************************************************************************************************************/
 /* Demarrer_http: Processus HTTP                                                                                              */
@@ -536,15 +521,6 @@
 /******************************************************************************************************************************/
  void Stopper_fils ( void )
   { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Debut stopper_fils" );
-
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for DLS (%p) to finish", Partage->com_dls.TID );
-    Partage->com_dls.Thread_run = FALSE;
-    if ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                               /* Attente fin DLS */
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
-
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for API_SYNC (%p) to finish", Partage->com_msrv.TID_api_sync );
-    if ( Partage->com_msrv.TID_api_sync ) pthread_join ( Partage->com_msrv.TID_api_sync, NULL );
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, API_SYNC is down" );
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for ARCH_SYNC (%p) to finish", Partage->com_msrv.TID_arch_sync );
     if ( Partage->com_msrv.TID_arch_sync ) pthread_join ( Partage->com_msrv.TID_arch_sync, NULL );

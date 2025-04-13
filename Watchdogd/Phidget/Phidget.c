@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Phidget/Phidget.c  Gestion des modules PHIDGET Watchdgo 3.0                                                      */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                                    18.03.2021 22:02:42 */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                18.03.2021 22:02:42 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Phidget.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -374,6 +374,27 @@ error:
     g_free(canal);
   }
 /******************************************************************************************************************************/
+/* Decharger_un_IO: Décharge une IO dans la librairie                                                                         */
+/* Entrée: Le canal representant l'i/o                                                                                        */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Decharger_un_IO ( struct PHIDGET_ELEMENT *canal )
+  { Phidget_close ( (PhidgetHandle)canal->handle );
+    gchar *capteur = Json_get_string( canal->element, "capteur" );
+
+         if (!strcasecmp(capteur, "ADP1000-PH"))           PhidgetPHSensor_delete         ( (PhidgetPHSensorHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "ADP1000-ORP"))          PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850")) PhidgetTemperatureSensor_delete( (PhidgetTemperatureSensorHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "TMP1200_0-PT100-3920")) PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "AC-CURRENT-10A"))       PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "AC-CURRENT-25A"))       PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "AC-CURRENT-50A"))       PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "AC-CURRENT-100A"))      PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "TEMP_1124_0"))          PhidgetVoltageRatioInput_create( (PhidgetVoltageRatioInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "DIGITAL-INPUT"))        PhidgetDigitalInput_create     ( (PhidgetDigitalInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "REL2001_0"))            PhidgetDigitalOutput_create    ( (PhidgetDigitalOutputHandle *)&canal->handle );
+  }
+/******************************************************************************************************************************/
 /* Phidget_SET_DO: Met a jour une sortie TOR en fonction du jsonnode en parametre                                             */
 /* Entrée: le module et le buffer Josn                                                                                        */
 /* Sortie: Niet                                                                                                               */
@@ -481,9 +502,9 @@ error:
         }
      }
 
-    g_slist_foreach ( vars->Liste_sensors, (GFunc) Phidget_close, NULL );
     PhidgetNet_removeServer( hostname );                                                /* Arrete la connexion au hub phidget */
-    Phidget_finalize(0);
+    g_slist_foreach ( vars->Liste_sensors, (GFunc) Decharger_un_IO, NULL );
+    /*Phidget_finalize(0); non thread_safe apres. */
     g_slist_foreach ( vars->Liste_sensors, (GFunc) g_free, NULL );
     g_slist_free ( vars->Liste_sensors );
 connect_failed:

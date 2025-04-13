@@ -1,12 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Dls.h                  Définitions des constantes programme DLS                                          */
-/*        projet Watchdog v2.0     par LEFEVRE Sebastien                                        sam 09 oct 2004 10:10:32 CEST */
+/* Projet Abls-Habitat version 4.4                                                              sam 09 oct 2004 10:10:32 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Dls.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,12 +39,10 @@
     gchar shortname[ NBR_CARAC_ACRONYME ];
     gchar tech_id[NBR_CARAC_TECHID];
     gchar package[130];
-    gchar syn_parent_page[NBR_CARAC_TECHID];
-    gchar syn_page[NBR_CARAC_TECHID];
     guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint dls_id;
-    gboolean enable;
-    gboolean debug;                                                                                /* Nombre de ligne de code */
+    gboolean enable;                                                                   /* TRUE si le plugin doit etre executé */
+    gint  debug_time;                                                                                       /* Temps de debug */
 
     GSList *Dls_data_BI;                                                                               /* Liste des bistables */
     GSList *Dls_data_MONO;                                                                           /* Liste des monostables */
@@ -85,15 +84,6 @@
     NBR_TYPE_MSG
   };
 
- enum
-  { TXT_NOTIF_NONE,
-    TXT_NOTIF_YES,
-    TXT_NOTIF_GSM_ONLY,
-    TXT_NOTIF_OVH_ONLY,
-    TXT_NOTIF_CHAT_ONLY,
-    NBR_TYPE_TXT_NOTIF
-  };
-
  struct DLS_MESSAGE_EVENT
   { struct DLS_MESSAGE *msg;
     gboolean etat;
@@ -129,7 +119,7 @@
     struct DLS_BI *sys_flipflop_2hz;
     struct DLS_BI *sys_flipflop_1sec;
     struct DLS_BI *sys_flipflop_2sec;
-    struct DLS_BI *sys_api_socket;
+    struct DLS_BI *sys_mqtt_connected;
     struct DLS_MONO *sys_top_5hz;
     struct DLS_MONO *sys_top_2hz;
     struct DLS_MONO *sys_top_1sec;
@@ -139,15 +129,14 @@
     struct DLS_AI *sys_bit_per_sec;
     struct DLS_AI *sys_tour_per_sec;
     struct DLS_AI *sys_dls_wait;
-    struct DLS_AI *sys_nbr_api_enreg_queue;
-    struct DLS_AI *sys_nbr_archive_queue;
     struct DLS_AI *sys_maxrss;
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
  extern void Dls_Importer_plugins ( void );                                                                 /* Dans plugins.c */
- extern struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id, gboolean reset );
- extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description );
+ extern struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id );
+ extern void Dls_Reseter_all_bit_interne ( struct DLS_PLUGIN *plugin );
+ extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description, gchar *package );
  extern void Dls_Decharger_plugins ( void );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
  extern void Dls_Activer_plugin ( gchar *tech_id, gboolean actif );
@@ -160,32 +149,29 @@
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
 
- extern void Dls_Export_Data_to_API ( struct DLS_PLUGIN *plugin );                                     /* Dans The_Dls_data.c */
+ extern void Dls_Save_Data_to_API ( struct DLS_PLUGIN *plugin );                                       /* Dans The_Dls_data.c */
 
                                                                                                          /* Dans The_dls_CI.c */
  extern void Dls_data_CI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_CI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
- extern void Dls_CI_to_json ( JsonNode *element, struct DLS_CI *bit );
- extern void Dls_cadran_send_CI_to_API ( struct DLS_CI *bit );
-
+ extern void Dls_CI_export_to_API ( struct DLS_CI *bit );
                                                                                                          /* Dans The_dls_CH.c */
  extern void Dls_data_CH_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_CH_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
- extern void Dls_CH_to_json ( JsonNode *element, struct DLS_CH *bit );
- extern void Dls_cadran_send_CH_to_API ( struct DLS_CH *bit );
+ extern void Dls_CH_export_to_API ( struct DLS_CH *bit );
                                                                                                          /* Dans The_dls_AI.c */
  extern void Dls_data_AI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
- extern void Dls_data_set_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_AI *bit, gdouble valeur, gboolean in_range );
+ extern void Dls_data_set_AI ( struct DLS_AI *bit, gdouble valeur, gboolean in_range );
  extern gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request );
- extern void Dls_cadran_send_AI_to_API ( struct DLS_AI *bit );
+ extern void Dls_AI_export_to_API ( struct DLS_AI *bit );
+
                                                                                                          /* Dans The_dls_AO.c */
  extern void Dls_data_AO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit );
- extern void Dls_cadran_send_AO_to_API ( struct DLS_AO *bit );
-
+ extern void Dls_AO_export_to_API ( struct DLS_AO *bit );
                                                                                                       /* Dans The_dls_TEMPO.c */
  extern void Dls_data_TEMPO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_TEMPO_to_json ( JsonNode *element, struct DLS_TEMPO *bit );
@@ -193,32 +179,27 @@
                                                                                                    /* Dans The_dls_REGISTRE.c */
  extern void Dls_data_REGISTRE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_REGISTRE_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
- extern void Dls_REGISTRE_to_json ( JsonNode *element, struct DLS_REGISTRE *bit );
-
+ extern void Dls_REGISTRE_export_to_API ( struct DLS_REGISTRE *bit );
                                                                                                          /* Dans The_dls_DI.c */
  extern void Dls_data_DI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
  extern void Dls_data_set_DI ( struct DLS_DI *bit, gboolean valeur );
  extern gboolean Dls_data_set_DI_from_thread_di ( JsonNode *request );
+ extern void Dls_DI_export_to_API ( struct DLS_DI *bit );
                                                                                                          /* Dans The_dls_DO.c */
  extern void Dls_data_DO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit );
- extern gboolean Dls_data_get_DO ( struct DLS_DO *bit );
- extern gboolean Dls_data_get_DO_up   ( struct DLS_DO *bit );
- extern gboolean Dls_data_get_DO_down ( struct DLS_DO *bit );
-
+ extern void Dls_DO_export_to_API ( struct DLS_DO *bit );
                                                                                                        /* Dans The_dls_MONO.c */
  extern void Dls_data_MONO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_MONO_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
- extern void Dls_MONO_to_json ( JsonNode *element, struct DLS_MONO *bit );
-
+ extern void Dls_MONO_export_to_API ( struct DLS_MONO *bit );
                                                                                                          /* Dans The_dls_BI.c */
  extern void Dls_data_BI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_BI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
- extern void Dls_BI_to_json ( JsonNode *element, struct DLS_BI *bit );
-
+ extern void Dls_BI_export_to_API ( struct DLS_BI *bit );
                                                                                                     /* Dans The_dls_HORLOGE.c */
  extern void Dls_data_clear_HORLOGE ();
  extern void Dls_data_activer_horloge ( void );

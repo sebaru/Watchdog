@@ -1,13 +1,13 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Config.h        Définitions de la structure de configuration watchdog                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:23:17 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Config.h        Définitions de la structure de configuration watchdog                                    */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      lun 02 jun 2003 14:23:17 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Config.h
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,11 @@
     gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
     gchar master_hostname[ 32 ];
+    gchar mqtt_hostname[ 32 ];                                                                /* Hostname du serveur MQTT_API */
+    guint mqtt_port;                                                                 /* Port de connexion du serveur MQTT_API */
+    gboolean mqtt_over_ssl;                                                                          /* TRUE si MQTT over SSL */
+    gchar mqtt_password[ 129 ];
+    gchar audio_tech_id[ 32 ];                     /* TechID du thread principal AUDIO pour piloter les sorties Haut-Parleurs */
     guint    log_level;                                                                       /* Niveau de debug du programme */
     gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
     gboolean log_bus;                                                                                      /* TRUE si log_bus */

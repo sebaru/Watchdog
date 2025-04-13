@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Modbus/Makefile.am          Profil de compilation de l'interface Modbus Watchdog             */
-#* Projet WatchDog version 3.0       Gestion d'habitat                      mar 13 jui 2007 15:48:08 CEST */
+#* Projet Abls-Habitat version 4.4       Gestion d'habitat                  mar 13 jui 2007 15:48:08 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

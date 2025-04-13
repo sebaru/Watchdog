@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/sms.c        Gestion des SMS de Watchdog v2.0                                                                    */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                       ven. 02 avril 2010 20:37:40 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                   ven. 02 avril 2010 20:37:40 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Sms.c
- * This file is part of Watchdog
+ * This file is part of Abls-Habitat
  *
- * Copyright (C) 2010-2023 - Sebastien Lefevre
+ * Copyright (C) 1988-2025 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -294,28 +294,32 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoi_sms_freeapi ( struct THREAD *module, JsonNode *msg, JsonNode *user )
-  { gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+  { gchar libelle_utf8[512];
+    g_snprintf( libelle_utf8, sizeof(libelle_utf8), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
+    gchar *libelle = g_uri_escape_string(libelle_utf8, NULL, FALSE);
+    if (libelle == NULL)
+     { Info_new( __func__,module->Thread_debug, LOG_ERR, "Convert error for %s. Not sending message.", libelle_utf8 );
+       return;
+     }
 
-    JsonNode *RootNode = Json_node_create();
-    Json_node_add_string( RootNode, "user", Json_get_string ( user, "free_sms_api_user" ) );
-    Json_node_add_string( RootNode, "pass", Json_get_string ( user, "free_sms_api_key" ) );
-
-    gchar libelle[256];
-    g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
-    Json_node_add_string( RootNode, "msg",  libelle );
+    gchar target_uri[512];
+    g_snprintf ( target_uri, sizeof(target_uri), "https://smsapi.free-mobile.fr/sendmsg?user=%s&pass=%s&msg=%s",
+                 Json_get_string ( user, "free_sms_api_user" ), Json_get_string ( user, "free_sms_api_key" ), libelle
+               );
+    g_free(libelle);
 
 /********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg = soup_message_new ( "POST", "https://smsapi.free-mobile.fr/sendmsg" );
-    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, RootNode );
+    SoupMessage *soup_msg = soup_message_new ( "GET", target_uri );
+    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
     Json_node_unref ( response );
-    Json_node_unref ( RootNode );
 
     gint status_code = soup_message_get_status ( soup_msg );
     if (status_code!=200)
      { gchar *reason_phrase = soup_message_get_reason_phrase ( soup_msg );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
+       Info_new( __func__, module->Thread_debug, LOG_ERR, "Status %d, reason %s for '%s' to '%s'",
+                 status_code, reason_phrase, libelle_utf8, Json_get_string ( user, "email" ) );
      }
-    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, Json_get_string ( user, "email" ) );
+    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' sent to '%s'", libelle_utf8, Json_get_string ( user, "email" ) );
     g_object_unref( soup_msg );
   }
 /******************************************************************************************************************************/
@@ -340,7 +344,9 @@
        return;
      }
 
-    gint txt_notification = Json_get_int ( msg, "txt_notification" );
+    gint notif_sms = Json_get_int ( msg, "notif_sms" );
+    if (notif_sms == SMSG_NOTIF_BY_DLS) { notif_sms = Json_get_int ( msg, "notif_sms_by_dls" ); }
+
     GList *Recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
     GList *recipients = Recipients;
     while(recipients)
@@ -354,8 +360,8 @@
         { Info_new( __func__, module->Thread_debug, LOG_ERR,
                     "%s: Warning: User %s has an empty Phone number", thread_tech_id, Json_get_string ( user, "email" ) );
         }
-       else switch (txt_notification)
-        { case TXT_NOTIF_YES:
+       else switch (notif_sms)
+        { case SMSG_NOTIF_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
                 { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error sending with GSM" );
                   gchar *free_sms_api_user = Json_get_string ( user, "free_sms_api_user" );
@@ -369,10 +375,7 @@
                    }
                 }
                break;
-          case TXT_NOTIF_GSM_ONLY:
-               Envoi_sms_gsm ( module, msg, user_phone );
-               break;
-          case TXT_NOTIF_OVH_ONLY:
+          case SMSG_NOTIF_OVH_ONLY:
                Envoi_sms_ovh ( module, msg, user_phone );
                break;
         }
@@ -391,7 +394,7 @@
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_OVH_ONLY );
+    Json_node_add_int    ( RootNode, "notif_sms", SMSG_NOTIF_OVH_ONLY );
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
@@ -407,7 +410,7 @@
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_int    ( RootNode, "txt_notification", TXT_NOTIF_GSM_ONLY );
+    Json_node_add_int    ( RootNode, "notif_sms", SMSG_NOTIF_YES );
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
@@ -609,14 +612,16 @@ end_user:
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, message );
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( message, "tag" );
-          if (!tag) { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: no tag. dropping.", thread_tech_id ); }
+          gint notif_sms = Json_get_int ( message, "notif_sms" );
+          if (notif_sms == SMSG_NOTIF_BY_DLS) { notif_sms = Json_get_int ( message, "notif_sms_by_dls" ); }
+
+          if (!module->Thread_run)
+           { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: stopping in progress. dropping.", thread_tech_id ); }
           else if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
-               Json_get_int ( message, "txt_notification" ) != TXT_NOTIF_NONE )
+                    notif_sms != SMSG_NOTIF_NO )
            { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
                        Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
                        Json_get_string ( message, "libelle" ) );
-
-/*************************************************** Envoi en mode GSM ********************************************************/
              Smsg_send_to_all_authorized_recipients( module, message );
            }
           else if ( !strcasecmp ( tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
@@ -627,8 +632,7 @@ end_user:
         }
 /****************************************************** Lecture de SMS ********************************************************/
        if (Partage->top < next_read) continue;
-       next_read = Partage->top + 50;
-       if (Smsg_connect(module))
+       if (module->Thread_run && Smsg_connect(module))
         { Thread_send_comm_to_master ( module, TRUE );
           Lire_sms_gsm(module);
           GSM_SignalQuality sig;
@@ -640,6 +644,7 @@ end_user:
           Thread_send_comm_to_master ( module, FALSE );
         }
        Smsg_disconnect(module);
+       next_read = Partage->top + 50;
      }
     Thread_end(module);
   }
