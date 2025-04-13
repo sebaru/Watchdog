@@ -245,11 +245,14 @@
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.", pwd->pw_name, pwd->pw_uid );
     gchar usermod[256];
     g_snprintf( usermod, sizeof(usermod), "usermod -a -G abls %s", pwd->pw_name );     system ( usermod );
-    g_snprintf( usermod, sizeof(usermod), "usermod -a -G audio  %s", pwd->pw_name );   system ( usermod );
-    g_snprintf( usermod, sizeof(usermod), "usermod -a -G dialout %s", pwd->pw_name );  system ( usermod );
-    g_snprintf( usermod, sizeof(usermod), "usermod -a -G gpio %s", pwd->pw_name );     system ( usermod );
-
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", usermod );
+    g_snprintf( usermod, sizeof(usermod), "usermod -a -G audio  %s", pwd->pw_name );   system ( usermod );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", usermod );
+    g_snprintf( usermod, sizeof(usermod), "usermod -a -G dialout %s", pwd->pw_name );  system ( usermod );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", usermod );
+    g_snprintf( usermod, sizeof(usermod), "usermod -a -G gpio %s", pwd->pw_name );     system ( usermod );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", usermod );
+
 /***************************************************** Set_groups *************************************************************/
     if (initgroups ( pwd->pw_name, pwd->pw_gid )==-1)                                               /* On drop les privilèges */
      { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Error, cannot Initgroups for user '%s' (%s)\n", pwd->pw_name, strerror(errno) );
