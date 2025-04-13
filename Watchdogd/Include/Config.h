@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Config.h        Définitions de la structure de configuration watchdog                                    */
-/* Projet Abls-Habitat version 4.3       Gestion d'habitat                                      lun 02 jun 2003 14:23:17 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      lun 02 jun 2003 14:23:17 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

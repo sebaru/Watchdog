@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Http.h        Déclaration structure internes des WebServices                                             */
-/* Projet Abls-Habitat version 4.3       Gestion d'habitat                                   mer. 24 avril 2013 18:48:19 CEST */
+/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                   mer. 24 avril 2013 18:48:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
