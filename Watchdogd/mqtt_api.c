@@ -192,11 +192,16 @@
        gchar *target_tech_id = Json_get_string ( request, "tech_id" );
        struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( target_tech_id );
        if (plugin)
-        { pthread_mutex_lock( &Partage->com_dls.synchro );                    /* On stoppe DLS pour éviter l'usage concurrent */
-          Dls_Reseter_all_bit_interne ( plugin );
+        { pthread_mutex_lock( &Partage->com_dls.synchro );       /* On stoppe DLS pour éviter l'usage concurrent */
+          GSList *liste_bit = plugin->Dls_data_MESSAGE;                   /* Restart tous les messages du module */
+          while(liste_bit)
+           { struct DLS_MESSAGE *bit = liste_bit->data;
+             Dls_data_set_MESSAGE ( &plugin->vars, bit, FALSE );
+             liste_bit = g_slist_next(liste_bit);
+           }
           plugin->vars.resetted = TRUE;                                            /* au chargement, le bit de start vaut 1 ! */
           pthread_mutex_unlock( &Partage->com_dls.synchro );
-          Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': resetted", target_tech_id );
+          Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': restarted", target_tech_id );
         }
        else Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': error when resetting: plugin not found.", target_tech_id );
      }

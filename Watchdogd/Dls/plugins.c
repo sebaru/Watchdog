@@ -271,52 +271,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Dls_Reseter_all_bit_interne: Met a 0 et decharge tous les bits interne d'un plugin                                         */
-/* Entrée: le plugin                                                                                                          */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Dls_Reseter_all_bit_interne ( struct DLS_PLUGIN *plugin )
-  { GSList *liste_bit;
-
-    liste_bit = plugin->Dls_data_TEMPO;
-    while(liste_bit)
-     { struct DLS_TEMPO *tempo = liste_bit->data;
-       tempo->status = DLS_TEMPO_NOT_COUNTING;                                              /* La tempo ne compte pas du tout */
-       tempo->state  = FALSE;
-       tempo->init   = FALSE;
-       liste_bit = g_slist_next(liste_bit);
-     }
-
-    liste_bit = plugin->Dls_data_MONO;                                             /* Decharge tous les monostables du module */
-    while(liste_bit)
-     { struct DLS_MONO *mono = liste_bit->data;
-       Dls_data_set_MONO ( &plugin->vars, mono, FALSE );
-       liste_bit = g_slist_next(liste_bit);
-     }
-
-/* 25/02/2024 désactivation pour garder l'état des bits groupés.
-    liste_bit = plugin->Dls_data_BI;
-    while(liste_bit)
-     { struct DLS_BI *bi = liste_bit->data;
-       Dls_data_set_BI   ( &plugin->vars, bi, FALSE );
-       liste_bit = g_slist_next(liste_bit);
-     }
-*/
-    liste_bit = plugin->Dls_data_WATCHDOG;                                           /* Decharge tous les watchdogs du module */
-    while(liste_bit)
-     { struct DLS_WATCHDOG *wtd = liste_bit->data;
-       Dls_data_set_WATCHDOG ( &plugin->vars, wtd, 0 );
-       liste_bit = g_slist_next(liste_bit);
-     }
-
-    liste_bit = plugin->Dls_data_MESSAGE;                                            /* Decharge tous les watchdogs du module */
-    while(liste_bit)
-     { struct DLS_MESSAGE *bit = liste_bit->data;
-       Dls_data_set_MESSAGE ( &plugin->vars, bit, FALSE );
-       liste_bit = g_slist_next(liste_bit);
-     }
-  }
-/******************************************************************************************************************************/
 /* Dls_plugins_remap_all_alias: remap les alias d'un plugin donné                                                             */
 /* Entrée: le plugin                                                                                                          */
 /* Sortie : les alias sont mappés                                                                                             */
