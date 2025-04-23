@@ -182,7 +182,7 @@
     module->IOs = Json_node_create();
     Json_node_add_array ( module->IOs, "IOs" );
 
-    module->ai_nbr_tour_par_sec = Mnemo_create_thread_AI ( module, "THREAD_TOUR_PAR_SEC", "Nombre de tour par seconde", "t/s", ARCHIVE_1_MIN );
+    module->ai_nbr_tour_par_sec = Mnemo_create_thread_AI ( module, "THREAD_TOUR_PAR_SEC", "Nombre de tour par seconde", "t/s", ARCHIVE_5_MIN );
     Mnemo_create_thread_WATCHDOG ( module, "IO_COMM", "Statut de la communication" );
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Thread '%s' is UP", thread_tech_id );
   }

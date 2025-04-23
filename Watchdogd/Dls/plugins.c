@@ -452,6 +452,9 @@
     if (plugin->Dls_data_TEMPO) { g_slist_free_full ( plugin->Dls_data_TEMPO, (GDestroyNotify) g_free ); plugin->Dls_data_TEMPO = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_TEMPO", Dls_data_TEMPO_create_by_array, plugin );
 
+    if (plugin->Dls_data_HORLOGE) { g_slist_free_full ( plugin->Dls_data_HORLOGE, (GDestroyNotify) g_free ); plugin->Dls_data_HORLOGE = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_HORLOGE", Dls_data_HORLOGE_create_by_array, plugin );
+
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)               /* DlOpen before remap (sinon on mappe pas la bonne zone mémoire */
      { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
     Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */

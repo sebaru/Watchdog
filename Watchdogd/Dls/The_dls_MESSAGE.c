@@ -66,7 +66,7 @@
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
-    bit->etat = Json_get_bool ( element, "etat" );
+    bit->etat = FALSE;                                    /* A l'init, le message est OFF. Json_get_bool ( element, "etat" ); */
     bit->source_node = json_node_ref ( element );
     bit->last_on = 0;                                            /* A l'init, il n'y a pas de last on (en dixieme de seconde) */
     Json_node_add_string ( bit->source_node, "libelle_src",

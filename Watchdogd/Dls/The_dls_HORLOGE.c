@@ -98,7 +98,7 @@
 /******************************************************************************************************************************/
  void Dls_data_clear_HORLOGE ()
   { if (Partage->com_dls.HORLOGE_actives)
-     { g_slist_free_full ( Partage->com_dls.HORLOGE_actives, (GDestroyNotify) g_free );
+     { g_slist_free ( Partage->com_dls.HORLOGE_actives );
        Partage->com_dls.HORLOGE_actives = NULL;
      }
   }
