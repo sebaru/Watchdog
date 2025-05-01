@@ -269,10 +269,7 @@
                                                   Dls_data_get_MONO( plugin->vars.dls_memsa_alarme ) ||
                                                   Dls_data_get_MONO( plugin->vars.dls_memsa_alarme_fixe )
                                                 );
-    if ( Dls_data_get_MONO ( plugin->vars.dls_memsa_ok ) != new_memsa_ok )                   /* Envoi à l'API si il y a écart */
-     { Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok, new_memsa_ok );
-       Dls_MONO_export_to_API ( plugin->vars.dls_memsa_ok );
-     }
+    Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok, new_memsa_ok );
 
 /*-------------------------------------------------- Calcul du MEMSSP_OK -----------------------------------------------------*/
     Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memssp_ok,
