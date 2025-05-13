@@ -103,13 +103,13 @@
   { Thread_init ( module, sizeof(struct GPIOD_VARS) );
     struct GPIOD_VARS *vars = module->vars;
 
-    gchar *tech_id  = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     vars->chip = gpiod_chip_open("/dev/gpiochip0");
     if (!vars->chip)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Error while loading chip 'gpiochip0'", tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error while loading chip 'gpiochip0'" );
        goto end;
      }
-    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: chip 'gpiochip0' loaded", tech_id );
+    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Chip 'gpiochip0' loaded" );
 
     struct gpiod_chip_info *info = gpiod_chip_get_info(vars->chip);
     if (!info) goto end;
@@ -120,11 +120,11 @@
     gpiod_chip_info_free(info);
 
     if (vars->num_lines > GPIOD_MAX_LINE) vars->num_lines = GPIOD_MAX_LINE;
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: found %d lines", tech_id, vars->num_lines );
+    Info_new( __func__, module->Thread_debug, LOG_INFO, "found %d lines", vars->num_lines );
 
     JsonNode *RootNode = Json_node_create ();                                                     /* Envoi de la conf a l'API */
     if (!RootNode) goto end;
-    Json_node_add_string ( RootNode, "thread_tech_id", tech_id );
+    Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
     Json_node_add_int    ( RootNode, "nbr_lignes",     vars->num_lines );
     JsonNode *API_result = Http_Post_to_global_API ( "/run/gpiod/add/io", RootNode );
     Json_node_unref ( API_result );
@@ -132,7 +132,7 @@
 
     vars->lignes = g_try_malloc0 ( sizeof( struct GPIOD_LIGNE ) * vars->num_lines );
     if (!vars->lignes)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory Error while loading lignes", tech_id );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error while loading lignes" );
        goto end;
      }
 
@@ -146,7 +146,7 @@
              if (etat != vars->lignes[cpt].etat) /* Détection de changement */
               { vars->lignes[cpt].etat = etat;
                 /*if (vars->lignes[cpt].mapped) MQTT_Send_DI ( module, vars->lignes[cpt].tech_id, vars->lignes[cpt].acronyme, etat );*/
-                Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: INPUT: GPIO%02d = %d", tech_id, cpt, etat );
+                Info_new( __func__, module->Thread_debug, LOG_DEBUG, "INPUT: GPIO%02d = %d", cpt, etat );
                 break;
               }
            }
