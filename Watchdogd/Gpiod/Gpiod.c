@@ -42,8 +42,7 @@
 
     gint num = Json_get_int ( element, "num" );
     if (num >= vars->num_lines)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                 "GPIO%02d is out of range (>=%d)", num, vars->num_lines );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d is out of range (>=%d)", num, vars->num_lines );
        return;
      }
 
@@ -53,50 +52,42 @@
               "Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d",
               num, vars->lignes[num].mode_inout, vars->lignes[num].mode_activelow );
 
-    if (vars->lignes[num].mode_inout==0)
-     { struct gpiod_line_settings *settings = gpiod_line_settings_new();
-       if (!settings) return;
-
-       gpiod_line_settings_set_direction(settings, GPIOD_LINE_DIRECTION_INPUT);
-
-       struct gpiod_line_config *line_cfg = gpiod_line_config_new();
-       if (!line_cfg) return;
-
-       int ret = gpiod_line_config_add_line_settings(line_cfg, &num, 1, settings);
-       if (!ret)
-        { struct gpiod_request_config *req_cfg = gpiod_request_config_new();
-          if (req_cfg) gpiod_request_config_set_consumer(req_cfg, "WATCHDOG GPIO Thread");
-          vars->lignes[num].gpio_ligne = gpiod_chip_request_lines(vars->chip, req_cfg, line_cfg);
-          if (req_cfg) gpiod_request_config_free(req_cfg);
-          gpiod_line_config_free(line_cfg);
-          gpiod_line_settings_free(settings);
-          vars->lignes[num].etat = gpiod_line_request_get_value( vars->lignes[num].gpio_ligne, num );
-        }
+    struct gpiod_line_settings *settings = gpiod_line_settings_new();
+    if (!settings)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d: gpiod_line_settings_new error", num );
+       return;
      }
-    else
-     { struct gpiod_line_settings *settings = gpiod_line_settings_new();
-       if (!settings) return;
 
-       gpiod_line_settings_set_direction(settings, GPIOD_LINE_DIRECTION_OUTPUT);
+    gpiod_line_settings_set_direction(settings, (vars->lignes[num].mode_inout == 0 ? GPIOD_LINE_DIRECTION_INPUT
+                                                                                   : GPIOD_LINE_DIRECTION_OUTPUT) );
 
-       struct gpiod_line_config *line_cfg = gpiod_line_config_new();
-       if (!line_cfg) return;
+    struct gpiod_line_config *line_cfg = gpiod_line_config_new();
+    if (!line_cfg)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d: gpiod_line_config_new error", num );
+       return;
+     }
 
-       int ret = gpiod_line_config_add_line_settings(line_cfg, &num, 1, settings);
-       if (!ret)
-        { struct gpiod_request_config *req_cfg = gpiod_request_config_new();
-          if (req_cfg) gpiod_request_config_set_consumer(req_cfg, "WATCHDOG GPIO Thread");
-          vars->lignes[num].gpio_ligne = gpiod_chip_request_lines(vars->chip, req_cfg, line_cfg);
-          if (req_cfg) gpiod_request_config_free(req_cfg);
-          gpiod_line_config_free(line_cfg);
-          gpiod_line_settings_free(settings);
-          vars->lignes[num].etat = gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, vars->lignes[num].mode_activelow );
+    gint ret = gpiod_line_config_add_line_settings(line_cfg, &num, 1, settings);
+    if (!ret)
+     { struct gpiod_request_config *req_cfg = gpiod_request_config_new();
+       if (req_cfg) gpiod_request_config_set_consumer(req_cfg, "WATCHDOG GPIO Thread");
+       vars->lignes[num].gpio_ligne = gpiod_chip_request_lines(vars->chip, req_cfg, line_cfg);
+       if (!vars->lignes[num].gpio_ligne)
+        { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d: gpiod_chip_request_lines error", num );
+          return;
         }
+       if (req_cfg) gpiod_request_config_free(req_cfg);
+       gpiod_line_config_free(line_cfg);
+       gpiod_line_settings_free(settings);
+       if (vars->lignes[num].mode_inout==0)                                                                   /* Pour une entrée */
+        { vars->lignes[num].etat = gpiod_line_request_get_value( vars->lignes[num].gpio_ligne, num ); }
+       else                                                                                                   /* Pour une sortie */
+        { vars->lignes[num].etat = gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, vars->lignes[num].mode_activelow ); }
      }
   }
 /******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
-/* Entrée: la structure THREAD associée                                                                                   */
+/* Entrée: la structure THREAD associée                                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct THREAD *module )
