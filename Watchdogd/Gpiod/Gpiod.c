@@ -136,7 +136,7 @@
        goto end;
      }
 
-    Json_node_foreach_array_element ( module->config, "gpios", Charger_un_gpio, module );
+    Json_node_foreach_array_element ( module->config, "IO", Charger_un_gpio, module );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
