@@ -167,7 +167,7 @@
                  { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
                              msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
                    vars->lignes[num].etat = etat;
-                   /*gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, etat );*/
+                   gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, etat );
                    break;
                  }
               }
