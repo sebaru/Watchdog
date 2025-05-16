@@ -42,10 +42,12 @@
 
     gint num = Json_get_int ( element, "num" );
     if (num >= vars->num_lines)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d is out of range (>=%d)", num, vars->num_lines );
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: num %d is out of range (>=%d)",
+                 Json_get_string ( element, "thread_acronyme" ), num, vars->num_lines );
        return;
      }
 
+    vars->lignes[num].element        = element;
     vars->lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
     vars->lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );
     Info_new( __func__, module->Thread_debug, LOG_INFO,
@@ -111,7 +113,7 @@
     gpiod_chip_info_free(info);
 
     if (vars->num_lines > GPIOD_MAX_LINE) vars->num_lines = GPIOD_MAX_LINE;
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "found %d lines", vars->num_lines );
+    Info_new( __func__, module->Thread_debug, LOG_INFO, "Found %d lines", vars->num_lines );
 
     JsonNode *RootNode = Json_node_create ();                                                     /* Envoi de la conf a l'API */
     if (!RootNode) goto end;
@@ -132,12 +134,13 @@
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
        for ( gint cpt = 0; cpt < vars->num_lines; cpt++ )
-        { if (vars->lignes[cpt].mode_inout == 0) /* Ligne d'entrée ? */
+        { if (vars->lignes[cpt].mode_inout == 0)                                                          /* Ligne d'entrée ? */
            { gboolean etat = gpiod_line_request_get_value( vars->lignes[cpt].gpio_ligne, cpt );
-             if (etat != vars->lignes[cpt].etat) /* Détection de changement */
+             if (etat != vars->lignes[cpt].etat)                                                   /* Détection de changement */
               { vars->lignes[cpt].etat = etat;
-                /*if (vars->lignes[cpt].mapped) MQTT_Send_DI ( module, vars->lignes[cpt].tech_id, vars->lignes[cpt].acronyme, etat );*/
-                Info_new( __func__, module->Thread_debug, LOG_DEBUG, "INPUT: GPIO%02d = %d", cpt, etat );
+                MQTT_Send_DI ( module, vars->lignes[cpt].element, etat );
+                Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s = %d",
+                          Json_get_string ( vars->lignes[cpt].element, "thread_acronyme" ), etat );
                 break;
               }
            }
@@ -152,18 +155,22 @@
           gchar *tag = Json_get_string ( request, "tag" );
 
           if ( !strcasecmp( tag, "SET_DO" ) )
-           { /*gboolean etat = Json_get_bool ( request, "etat" );
-             pthread_mutex_lock ( &module->synchro );
+           { gchar *msg_thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
+             gchar *msg_thread_acronyme = Json_get_string ( request, "thread_acronyme" );
+             gchar *msg_tech_id         = Json_get_string ( request, "tech_id" );
+             gchar *msg_acronyme        = Json_get_string ( request, "acronyme" );
+             gboolean etat              = Json_get_bool   ( request, "etat" );
+
              for (gint num=0; num<vars->num_lines; num++)
-              { if ( vars->gpio_lignes && vars->gpio_lignes[num] &&
-                     !strcasecmp ( Json_get_string(vars->DO[num], "thread_acronyme"), msg_thread_acronyme ) )
+              { if ( vars->lignes[num].gpio_ligne &&
+                     !strcasecmp ( Json_get_string( vars->lignes[num].element, "thread_acronyme"), msg_thread_acronyme ) )
                  { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
                              msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
-                   Json_node_add_bool ( vars->DO[num], "etat", etat );
+                   vars->lignes[num].etat = etat;
+                   /*gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, etat );*/
                    break;
                  }
               }
-             pthread_mutex_unlock ( &module->synchro );*/
            }
           Json_node_unref (request);
         }

@@ -37,6 +37,7 @@
     gboolean mode_inout;
     gboolean mode_activelow;
     struct gpiod_line_request *gpio_ligne;
+    JsonNode *element; /* Issu du module->config au chargement */
   };
 
  struct GPIOD_VARS
