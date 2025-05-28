@@ -192,7 +192,7 @@
        gchar *target_tech_id = Json_get_string ( request, "tech_id" );
        struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( target_tech_id );
        if (plugin)
-        { pthread_mutex_lock( &Partage->com_dls.synchro );       /* On stoppe DLS pour éviter l'usage concurrent */
+        { pthread_mutex_lock( &Partage->com_dls.synchro );                    /* On stoppe DLS pour éviter l'usage concurrent */
           plugin->vars.resetted = TRUE;                                            /* au chargement, le bit de start vaut 1 ! */
           pthread_mutex_unlock( &Partage->com_dls.synchro );
           Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': _START sent to plugin", target_tech_id );

@@ -81,9 +81,13 @@
        if (req_cfg) gpiod_request_config_free(req_cfg);
        gpiod_line_config_free(line_cfg);
        gpiod_line_settings_free(settings);
-       if (vars->lignes[num].mode_inout==0)                                                                   /* Pour une entrée */
-        { vars->lignes[num].etat = gpiod_line_request_get_value( vars->lignes[num].gpio_ligne, num ); }
-       else                                                                                                   /* Pour une sortie */
+       if (vars->lignes[num].mode_inout==0)                                                                /* Pour une entrée */
+        { gchar chaine[256];
+          g_snprintf ( chaine, sizeof(chaine), "/usr/bin/raspi-gpio set %d ip pd", num ); /* Active le pull_down, en attendant libgpiod v2 */
+          system(chaine);
+          vars->lignes[num].etat = gpiod_line_request_get_value( vars->lignes[num].gpio_ligne, num );
+        }
+       else                                                                                                /* Pour une sortie */
         { vars->lignes[num].etat = gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, vars->lignes[num].mode_activelow ); }
      }
   }
