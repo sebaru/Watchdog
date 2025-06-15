@@ -97,7 +97,6 @@
     gint connexion;                                                                                     /* FD de connexion IP */
     gint mode;                                                                    /* Mode dans le processus de connexion WAGO */
     gint nbr_oct_lu;                                                                                /* Nombre d'octet deja lu */
-    gboolean first_turn;
     guint16 transaction_id;
     guint nbr_entree_ana;                                                   /* Nombre de entree analogique donnée par le wago */
     guint nbr_sortie_ana;                                                   /* Nombre de sortie analogique donnée par le wago */

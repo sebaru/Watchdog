@@ -179,9 +179,19 @@ end:
 /******************************************************************************************************************************/
  void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
   { if (! (module && thread_ai)) return;
-    Json_node_add_double ( thread_ai, "valeur", valeur );
-    Json_node_add_bool   ( thread_ai, "in_range", in_range );
-    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_AI", thread_ai );
+    gdouble  old_valeur   = Json_get_double ( thread_ai, "valeur" );
+    gboolean old_in_range = Json_get_bool   ( thread_ai, "in_range" );
+    gboolean first_turn   = Json_get_bool   ( thread_ai, "first_turn" );
+
+    if ( first_turn || old_valeur != valeur || old_in_range != in_range )
+     { Json_node_add_double ( thread_ai, "valeur", valeur );
+       Json_node_add_bool   ( thread_ai, "in_range", in_range );
+       Json_node_add_bool   ( thread_ai, "first_turn", FALSE );
+       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f (in_range=%d), min=%f, max=%f",
+                 Json_get_string ( thread_ai, "thread_tech_id" ), Json_get_string ( thread_ai, "thread_acronyme" ),
+                 valeur, in_range, Json_get_double ( thread_ai, "min" ), Json_get_double ( thread_ai, "max" ) );
+       MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_AI", thread_ai );
+     }
   }
 /******************************************************************************************************************************/
 /* MQTT_Send_DI: Envoie le bit DI au master                                                                                   */
@@ -192,11 +202,12 @@ end:
   { if (! (module && thread_di)) return;
     gboolean old_etat   = Json_get_bool ( thread_di, "etat" );
     gboolean first_turn = Json_get_bool ( thread_di, "first_turn" );
+
     if ( first_turn || (old_etat != etat) )
      { Json_node_add_bool ( thread_di, "etat", (etat ? TRUE : FALSE) );
-       Json_node_add_bool ( thread_di, "first_run", FALSE );
-       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s = %d",
-                 Json_get_string ( thread_di, "thread_acronyme" ), etat );
+       Json_node_add_bool ( thread_di, "first_turn", FALSE );
+       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d",
+                 Json_get_string ( thread_di, "thread_tech_id" ), Json_get_string ( thread_di, "thread_acronyme" ), etat );
        MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_DI", thread_di );
      }
   }
