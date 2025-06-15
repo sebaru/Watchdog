@@ -60,8 +60,8 @@
     return(node);
   }
 /******************************************************************************************************************************/
-/* Mnemo_create_thread_DI: Créé un JSON pour une DI                                                                       */
-/* Entrée: la structure THREAD, les parametres de la DI                                                                   */
+/* Mnemo_create_thread_DI: Créé un JSON pour une DI                                                                           */
+/* Entrée: la structure THREAD, les parametres de la DI                                                                       */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  JsonNode *Mnemo_create_thread_DI ( struct THREAD *module, gchar *thread_acronyme, gchar *libelle )
@@ -78,6 +78,7 @@
                  "%s: Could not add DI %s to API", thread_tech_id, thread_acronyme );
      }
     Json_node_unref ( api_result );
+    Json_node_add_bool ( node, "first_turn", TRUE );      /* Ajoute un flag first turn pour envoyer au master des le 1er tour */
     Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
     return(node);
   }

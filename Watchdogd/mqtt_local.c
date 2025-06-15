@@ -53,7 +53,7 @@
 /******************************************************************************************************************************/
  static void MQTT_local_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Connected with return code %d: %s",
-              return_code, mosquitto_connack_string(	return_code ) );
+              return_code, mosquitto_connack_string( return_code ) );
   }
 /******************************************************************************************************************************/
 /* MQTT_local_on_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                        */
@@ -62,7 +62,7 @@
 /******************************************************************************************************************************/
  static void MQTT_local_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Disconnected with return code %d: %s",
-              return_code, mosquitto_connack_string(	return_code ) );
+              return_code, mosquitto_connack_string( return_code ) );
   }
 /******************************************************************************************************************************/
 /* MQTT_on_API_message_CB: Appelé par mosquitto lorsque l'on recoit un message MQTT de la part de l'API                       */
@@ -168,7 +168,7 @@ end:
     if (!node) { node = Json_node_create(); free_node = TRUE; }
     Json_node_add_string ( node, "tag", tag );
     gchar *buffer = Json_node_to_string ( node );
-    mosquitto_publish(	mqtt_session, NULL, topic, strlen(buffer), buffer, 2, TRUE );
+    mosquitto_publish( mqtt_session, NULL, topic, strlen(buffer), buffer, 2, TRUE );
     g_free(buffer);
     if (free_node) Json_node_unref(node);
   }
@@ -190,8 +190,15 @@ end:
 /******************************************************************************************************************************/
  void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat )
   { if (! (module && thread_di)) return;
-    Json_node_add_bool ( thread_di, "etat", etat );
-    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_DI", thread_di );
+    gboolean old_etat   = Json_get_bool ( thread_di, "etat" );
+    gboolean first_turn = Json_get_bool ( thread_di, "first_turn" );
+    if ( first_turn || (old_etat != etat) )
+     { Json_node_add_bool ( thread_di, "etat", (etat ? TRUE : FALSE) );
+       Json_node_add_bool ( thread_di, "first_run", FALSE );
+       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s = %d",
+                 Json_get_string ( thread_di, "thread_acronyme" ), etat );
+       MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_DI", thread_di );
+     }
   }
 /******************************************************************************************************************************/
 /* MQTT_Send_DI: Envoie le bit DI au master, au format pulse                                                                  */
