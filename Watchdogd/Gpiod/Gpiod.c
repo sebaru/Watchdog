@@ -139,14 +139,9 @@
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
        for ( gint cpt = 0; cpt < vars->num_lines; cpt++ )
         { if (vars->lignes[cpt].mode_inout == 0)                                                          /* Ligne d'entrée ? */
-           { gboolean etat = gpiod_line_request_get_value( vars->lignes[cpt].gpio_ligne, cpt );
-             if (etat != vars->lignes[cpt].etat)                                                   /* Détection de changement */
-              { vars->lignes[cpt].etat = etat;
-                MQTT_Send_DI ( module, vars->lignes[cpt].element, etat );
-                Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s = %d",
-                          Json_get_string ( vars->lignes[cpt].element, "thread_acronyme" ), etat );
-                break;
-              }
+           { vars->lignes[cpt].etat = gpiod_line_request_get_value( vars->lignes[cpt].gpio_ligne, cpt );
+             MQTT_Send_DI ( module, vars->lignes[cpt].element, vars->lignes[cpt].etat );
+             break;
            }
         }
 

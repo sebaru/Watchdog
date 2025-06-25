@@ -61,14 +61,12 @@
     gchar *classe          = Json_get_string(canal->element, "classe");
 
     if ( !strcmp ( classe, "AI" ) )
-     { Info_new( __func__, canal->module->Thread_debug, LOG_ERR,
-		         "Error for '%s:%s' : '%s' (code %X). Inrange = FALSE;",
-           thread_tech_id, thread_acronyme, description, code );
+     { Info_new( __func__, canal->module->Thread_debug, LOG_ERR, "Error for '%s:%s' : '%s' (code %X). Set in_range = FALSE.",
+                 thread_tech_id, thread_acronyme, description, code );
        MQTT_Send_AI ( canal->module, canal->element, 0.0, FALSE );
      }
     else
-     { Info_new( __func__, canal->module->Thread_debug, LOG_ERR,
-		               "Error for '%s:%s' : '%s' (code %X).", thread_tech_id,
+     { Info_new( __func__, canal->module->Thread_debug, LOG_ERR, "Error for '%s:%s' : '%s' (code %X).",
                  thread_tech_id, thread_acronyme, description, code );
      }
   }
@@ -366,7 +364,7 @@
     if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
     Phidget_setOnAttachHandler((PhidgetHandle)canal->handle, Phidget_onAttachHandler, canal);
     Phidget_setOnDetachHandler((PhidgetHandle)canal->handle, Phidget_onDetachHandler, canal);
-    if (Phidget_open ((PhidgetHandle)canal->handle) != EPHIDGET_OK) goto error;
+    if (Phidget_openWaitForAttachment ((PhidgetHandle)canal->handle, 5000) != EPHIDGET_OK) goto error;
     vars->Liste_sensors = g_slist_prepend ( vars->Liste_sensors, canal );
     return;
 error:
@@ -462,8 +460,8 @@ error:
     Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Loading %s('%s')", thread_tech_id, hostname, description );
 
     PhidgetReturnCode result = PhidgetNet_addServer( hostname, hostname, 5661, Json_get_string(module->config, "password"), 0);
-	   if (result != EPHIDGET_OK)
-		   { const gchar *error;
+    if (result != EPHIDGET_OK)
+     { const gchar *error;
        Phidget_getErrorDescription ( result, &error );
        Info_new( __func__, module->Thread_debug, LOG_ERR, "PhidgetNet_addServer failed: '%s'", error );
        goto connect_failed;
