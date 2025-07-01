@@ -1,0 +1,5 @@
+vosk
+paho-mqtt
+sounddevice
+soundfile
+numpy
