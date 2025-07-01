@@ -79,7 +79,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -91,7 +91,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -103,7 +103,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -116,7 +116,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -129,7 +129,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -141,7 +141,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_INFO, "'%s:%s' = %d", thread_tech_id, thread_acronyme, valeur );
+    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_DI ( canal->module, canal->element, (valeur ? TRUE : FALSE) );
   }
 /******************************************************************************************************************************/
@@ -159,8 +159,7 @@
      { /**/
      }
     else if (!strcasecmp(capteur, "ADP1000-ORP"))
-     { if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_2V ) != EPHIDGET_OK )
-        { Phidget_print_error(canal); }
+     { /**/
      }
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850"))
      { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3850 ) != EPHIDGET_OK )
@@ -222,7 +221,7 @@
     canal->attached = TRUE;
   }
 /******************************************************************************************************************************/
-/* Phidget_onAttachHandler: Appelé quand un canal est détaché                                                                 */
+/* Phidget_onDetachHandler: Appelé quand un canal est détaché                                                                 */
 /* Entrée: le channel, le contexte                                                                                            */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -294,41 +293,48 @@
 
     if (!strcasecmp(capteur, "ADP1000-PH"))
      { if ( PhidgetPHSensor_create( (PhidgetPHSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetPHSensor_setOnPHChangeHandler( (PhidgetPHSensorHandle)canal->handle, Phidget_onPHSensorChange, canal ) ) goto error;
-       Phidget_set_config ( canal, serial, port, FALSE );
+       Phidget_set_config ( canal, serial, port, TRUE );
      }
     else if (!strcasecmp(capteur, "ADP1000-ORP"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetVoltageInput_setOnVoltageChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                             Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
-       Phidget_set_config ( canal, serial, port, FALSE );
+       Phidget_set_config ( canal, serial, port, TRUE );
      }
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850"))
      { if ( PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetTemperatureSensor_setOnTemperatureChangeHandler( (PhidgetTemperatureSensorHandle)canal->handle,
                                                                      Phidget_onTemperatureSensorChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3920"))
      { if ( PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetTemperatureSensor_setOnTemperatureChangeHandler( (PhidgetTemperatureSensorHandle)canal->handle,
                                                                      Phidget_onTemperatureSensorChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, FALSE );
      }
     else if (!strcasecmp(capteur, "AC-CURRENT-10A"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                            Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else if (!strcasecmp(capteur, "AC-CURRENT-25A"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                            Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else if (!strcasecmp(capteur, "AC-CURRENT-50A"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                            Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
        if ( PhidgetVoltageInput_setVoltageRange( (PhidgetVoltageInputHandle)canal->handle, VOLTAGE_RANGE_5V) != EPHIDGET_OK ) goto error;
@@ -336,23 +342,27 @@
      }
     else if (!strcasecmp(capteur, "AC-CURRENT-100A"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
                                                            Phidget_onVoltageSensorChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else if (!strcasecmp(capteur, "TEMP_1124_0"))
      { if ( PhidgetVoltageRatioInput_create( (PhidgetVoltageRatioInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetVoltageRatioInput_setOnSensorChangeHandler( (PhidgetVoltageRatioInputHandle)canal->handle,
                                                                 Phidget_onVoltageRatioSensorChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else if (!strcasecmp(capteur, "DIGITAL-INPUT"))
      { if ( PhidgetDigitalInput_create( (PhidgetDigitalInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetDigitalInput_setOnStateChangeHandler( (PhidgetDigitalInputHandle)canal->handle, Phidget_onDigitalInputChange, canal ) ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else if (!strcasecmp(capteur, "REL2001_0"))
      { if ( PhidgetDigitalOutput_create( (PhidgetDigitalOutputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else
@@ -361,9 +371,9 @@
        goto error;
      }
 
-    if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
     Phidget_setOnAttachHandler((PhidgetHandle)canal->handle, Phidget_onAttachHandler, canal);
     Phidget_setOnDetachHandler((PhidgetHandle)canal->handle, Phidget_onDetachHandler, canal);
+
     if (Phidget_openWaitForAttachment ((PhidgetHandle)canal->handle, 5000) != EPHIDGET_OK) goto error;
     vars->Liste_sensors = g_slist_prepend ( vars->Liste_sensors, canal );
     return;
