@@ -214,8 +214,8 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
-/* Envoi_sms_smsbox: Envoi un sms par SMSBOX                                                                                  */
-/* Entrée: le message à envoyer sateur                                                                                        */
+/* Envoi_sms_smsbox: Envoi un sms par OVH                                                                                     */
+/* Entrée: le message à envoyer à l'utilisateur                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoi_sms_ovh ( struct THREAD *module, JsonNode *msg, gchar *telephone )

@@ -138,7 +138,7 @@
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
        for ( gint cpt = 0; cpt < vars->num_lines; cpt++ )
-        { if (vars->lignes[cpt].mode_inout == 0)                                                          /* Ligne d'entrée ? */
+        { if (vars->lignes[cpt].gpio_ligne && vars->lignes[cpt].mode_inout == 0)                          /* Ligne d'entrée ? */
            { vars->lignes[cpt].etat = gpiod_line_request_get_value( vars->lignes[cpt].gpio_ligne, cpt );
              MQTT_Send_DI ( module, vars->lignes[cpt].element, vars->lignes[cpt].etat );
              break;
