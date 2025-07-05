@@ -161,6 +161,9 @@
     else if (!strcasecmp(capteur, "ADP1000-ORP"))
      { /**/
      }
+    else if (!strcasecmp(capteur, "PH/ORP-1130"))
+     {
+     }
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850"))
      { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3850 ) != EPHIDGET_OK )
         { Phidget_print_error(canal); }
@@ -304,6 +307,13 @@
                                                             Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
+    else if (!strcasecmp(capteur, "PH/ORP-1130"))
+     { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
+       if ( PhidgetVoltageInput_setOnVoltageChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
+                                                            Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, TRUE );
+     }
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850"))
      { if ( PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
@@ -392,6 +402,7 @@ error:
 
          if (!strcasecmp(capteur, "ADP1000-PH"))           PhidgetPHSensor_delete         ( (PhidgetPHSensorHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "ADP1000-ORP"))          PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "PH/ORP-1130"))          PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850")) PhidgetTemperatureSensor_delete( (PhidgetTemperatureSensorHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3920")) PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "AC-CURRENT-10A"))       PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
