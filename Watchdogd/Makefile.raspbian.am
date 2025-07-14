@@ -11,7 +11,7 @@ Watchdogd_SOURCES = Watchdogd.c thread.c Erreur.c \
                     shm.c json.c Config.c http_common.c \
                     Mnemonique.c \
                     distrib_Events.c \
-                    mqtt_api.c mqtt_local.c mqtt_archives.c \
+                    mqtt.c mqtt_api.c mqtt_local.c mqtt_archives.c \
                     api_sync.c mqtt_msgs.c mqtt_visuels.c mail.c uuid.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
