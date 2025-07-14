@@ -125,13 +125,18 @@
  extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode );
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
 
+                                                                                                           /* Dans mqtt_api.c */
  extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node );
  extern void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
  extern void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat );
  extern void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme );
  extern void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne );
- extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
  extern void MQTT_Send_to_API ( JsonNode *node, gchar *topic, ... );
+                                                                                                               /* Dans mqtt.c */
+ extern void MQTT_on_log_CB( struct mosquitto *mosq, void *obj, int level, const char *message );
+ extern void MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code );
+ extern void MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code );
+ extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

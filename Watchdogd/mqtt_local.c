@@ -30,23 +30,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* MQTT_local_on_log_CB: Affiche un log de la librairie MQTT                                                                  */
-/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MQTT_local_on_log_CB( struct mosquitto *mosq, void *obj, int level, const char *message )
-  { gint info_level;
-    switch(level)
-     { default:
-       case MOSQ_LOG_INFO:    info_level = LOG_INFO;    break;
-       case MOSQ_LOG_NOTICE:  info_level = LOG_NOTICE;  break;
-       case MOSQ_LOG_WARNING: info_level = LOG_WARNING; break;
-       case MOSQ_LOG_ERR:     info_level = LOG_ERR;     break;
-       case MOSQ_LOG_DEBUG:   info_level = LOG_DEBUG;   break;
-     }
-    Info_new( __func__, Config.log_bus, info_level, "LOCAL: %s", message );
-  }
-/******************************************************************************************************************************/
 /* MQTT_local_on_connect_CB: appelé par la librairie quand le broker est connecté                                             */
 /* Entrée: les parametres d'affichage de log de la librairie                                                                  */
 /* Sortie: Néant                                                                                                              */
@@ -65,11 +48,11 @@
               return_code, mosquitto_connack_string( return_code ) );
   }
 /******************************************************************************************************************************/
-/* MQTT_on_API_message_CB: Appelé par mosquitto lorsque l'on recoit un message MQTT de la part de l'API                       */
+/* MQTT_local_on_message_CB: Appelé par mosquitto lorsque l'on recoit un message MQTT de la part du MQTT local                */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void MQTT_on_mqtt_local_message_CB ( struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg )
+ static void MQTT_local_on_message_CB ( struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg )
   { gchar **tokens = g_strsplit ( msg->topic, "/", 2 );
     if (!tokens) return;
     if (!tokens[0]) goto end; /* Normalement "agent"  */
@@ -120,10 +103,11 @@ end:
     if (!Partage->com_msrv.MQTT_local_session)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local session error." ); return(FALSE); }
 
-    mosquitto_log_callback_set        ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_log_CB );
+    mosquitto_log_callback_set        ( Partage->com_msrv.MQTT_local_session, MQTT_on_log_CB );
     mosquitto_connect_callback_set    ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_connect_CB );
     mosquitto_disconnect_callback_set ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_disconnect_CB );
-    mosquitto_message_callback_set    ( Partage->com_msrv.MQTT_local_session, MQTT_on_mqtt_local_message_CB );
+    mosquitto_message_callback_set    ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_message_CB );
+    mosquitto_username_pw_set         ( Partage->com_msrv.MQTT_local_session, Json_get_string ( Config.config, "agent_uuid" ), NULL );
 
     /*if (Config.mqtt_over_ssl)
      { mosquitto_tls_set( Partage->com_msrv.MQTT_local_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }*/

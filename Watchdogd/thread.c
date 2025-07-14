@@ -59,6 +59,7 @@
        Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
        Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
        Json_node_add_bool   ( RootNode, "io_comm",        module->comm_status );
+       Json_node_add_bool   ( RootNode, "mqtt_connected", module->MQTT_connected );
        MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
        Json_node_unref ( RootNode );
 
@@ -71,7 +72,7 @@
 /* Entrée: les parametres MQTT                                                                                                */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Thread_on_MQTT_message_CB(struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg)
+ static void Thread_MQTT_on_message_CB(struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg)
   { struct THREAD *module = obj;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     if (module->Thread_run == FALSE) return;                     /* Si le module est en arret, on ne lui donne pas le message */
@@ -80,6 +81,7 @@
      { Info_new( __func__, Config.log_bus, LOG_WARNING, "'%s': MQTT Message Dropped (not JSON) !", thread_tech_id );
        return;
      }
+    else Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': MQTT Message received at %s: %s", thread_tech_id, msg->topic, msg->payload );
 
     Json_node_add_string ( response, "topic", msg->topic );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
@@ -130,6 +132,30 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
+/* Thread_on_MQTT_connect_CB: appelé par la librairie quand le broker est connecté                                            */
+/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Thread_MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
+  { struct THREAD *module = obj;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Connected with return code %d: %s",
+              thread_tech_id, return_code, mosquitto_connack_string( return_code ) );
+    if (return_code == 0) module->MQTT_connected = TRUE;
+  }
+/******************************************************************************************************************************/
+/* Thread_on_MQTT_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                       */
+/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Thread_MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
+  { struct THREAD *module = obj;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Disconnected with return code %d: %s",
+              thread_tech_id, return_code, mosquitto_connack_string( return_code ) );
+    module->MQTT_connected = FALSE;
+  }
+/******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
 /* Entrée: La structure afférente                                                                                             */
 /* Sortie: néant                                                                                                              */
@@ -155,17 +181,26 @@
     module->MQTT_session = mosquitto_new( thread_tech_id, TRUE, module );
     if (!module->MQTT_session)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
-    else if ( mosquitto_connect( module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT connection to '%s' error.", thread_tech_id, Config.master_hostname ); }
     else
-     { gchar topic[256];
-       g_snprintf ( topic, sizeof(topic), "thread/%s/#", thread_tech_id );
-       MQTT_Subscribe ( module->MQTT_session, topic );
-       g_snprintf ( topic, sizeof(topic), "threads/#" );
-       MQTT_Subscribe ( module->MQTT_session, topic );
-       mosquitto_message_callback_set( module->MQTT_session, Thread_on_MQTT_message_CB );
-       mosquitto_reconnect_delay_set ( module->MQTT_session, 10, 60, TRUE );
+     { mosquitto_message_callback_set    ( module->MQTT_session, Thread_MQTT_on_message_CB );
+       mosquitto_reconnect_delay_set     ( module->MQTT_session, 10, 60, TRUE );
+       mosquitto_log_callback_set        ( module->MQTT_session, MQTT_on_log_CB );
+       mosquitto_connect_callback_set    ( module->MQTT_session, Thread_MQTT_on_connect_CB );
+       mosquitto_disconnect_callback_set ( module->MQTT_session, Thread_MQTT_on_disconnect_CB );
+       mosquitto_username_pw_set         ( module->MQTT_session, thread_tech_id, NULL );
+
+       if ( mosquitto_connect( module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
+        { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT connection to '%s' error.", thread_tech_id, Config.master_hostname ); }
+       else
+        { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Connected to '%s'.", thread_tech_id, Config.master_hostname );
+          gchar topic[256];
+          g_snprintf ( topic, sizeof(topic), "thread/%s/#", thread_tech_id );
+          MQTT_Subscribe ( module->MQTT_session, topic );
+          g_snprintf ( topic, sizeof(topic), "threads/#" );
+          MQTT_Subscribe ( module->MQTT_session, topic );
+        }
      }
+
     if ( mosquitto_loop_start( module->MQTT_session ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
 

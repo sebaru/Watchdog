@@ -30,54 +30,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* MQTT_on_log_CB: Affiche un log de la librairie MQTT                                                                        */
-/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MQTT_on_log_CB( struct mosquitto *mosq, void *obj, int level, const char *message )
-  { gint info_level;
-    switch(level)
-     { default:
-       case MOSQ_LOG_INFO:    info_level = LOG_INFO;    break;
-       case MOSQ_LOG_NOTICE:  info_level = LOG_NOTICE;  break;
-       case MOSQ_LOG_WARNING: info_level = LOG_WARNING; break;
-       case MOSQ_LOG_ERR:     info_level = LOG_ERR;     break;
-       case MOSQ_LOG_DEBUG:   info_level = LOG_DEBUG;   break;
-     }
-    Info_new( __func__, Config.log_msrv, info_level, "%s", message );
-  }
-/******************************************************************************************************************************/
-/* MQTT_on_connect_CB: appelé par la librairie quand le broker est connecté                                                   */
-/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected with return code %d: %s",
-              return_code, mosquitto_connack_string( return_code ) );
-    if (return_code == 0) Partage->com_msrv.MQTT_connected = TRUE ;
-  }
-/******************************************************************************************************************************/
-/* MQTT_on_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                              */
-/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Disconnected with return code %d: %s",
-              return_code, mosquitto_connack_string( return_code ) );
-    Partage->com_msrv.MQTT_connected = FALSE;
-  }
-/******************************************************************************************************************************/
-/* MQTT_Subscribe: souscrit à un topic                                                                                        */
-/* Entrée: la structure MQTT, le topic                                                                                        */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic )
-  { if ( mosquitto_subscribe( mqtt_session, NULL, topic, 1 ) != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "Subscribe to topic '%s' FAILED", topic ); }
-    else
-     { Info_new( __func__, Config.log_bus, LOG_INFO, "Subscribe to topic '%s' OK", topic ); }
-  }
-/******************************************************************************************************************************/
 /* MQTT_on_API_message_CB: Appelé par mosquitto lorsque l'on recoit un message MQTT de la part de l'API                       */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */

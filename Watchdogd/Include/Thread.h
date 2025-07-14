@@ -45,6 +45,7 @@
     struct mosquitto *MQTT_session;
     GSList *MQTT_messages;
     JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
+    gboolean MQTT_connected;                                       /* Report du status de la communication vers le MQTT local */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     JsonNode *ai_nbr_tour_par_sec;                                                                        /* Tour par seconde */

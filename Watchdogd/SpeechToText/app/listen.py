@@ -24,6 +24,22 @@ def publish_mqtt(chaine):
     client.disconnect()
     print("[LOG] Message MQTT envoyé.")
 
+def Send_to_mistral ( texte ):
+    print("[LOG] Preparing Mistral Request", texte )
+    body = { "model": "mistral-small-latest",
+             "messages": [ { "role": "user", "content": texte } ],
+           }
+    headers = { 'Authorization': f'Bearer '+ os.getenv("ABLS_CLEF_MISTRAL", "default_key"), 'Content-Type': 'application/json' }
+    # Effectuer la requête POST
+    response = requests.post('https://api.mistral.ai/v1/chat/completions', json=body, headers=headers)
+    # Vérifier la réponse
+    if response.status_code == 200:
+        result = response.json()
+        print(result)
+    else:
+        print("Erreur:", response.status_code, response.text)
+    return response
+
 def main():
     print("[LOG] Chargement du modèle Vosk...")
     model_vosk = Model(VOSK_MODEL_PATH)
@@ -59,16 +75,9 @@ def main():
     
             if any(word in text for word in TRIGGER_WORDS):
                 print("[LOG] Mot-clé détecté, enregistrement appel MistralAI...")
-                body = { "model": "mistral-small-latest",
-                         "messages": [ { "role": "user", "content": "Transforme le texte suivant en 'intent' en anglais comprehensible par un système de domotique maison: '" + text + "'. Ne répond qu'avec l'intent." } ],
-                       }
-                headers = { 'Authorization': f'Bearer '+ os.getenv("ABLS_CLEF_MISTRAL", "default_key"), 'Content-Type': 'application/json' }
-                # Effectuer la requête POST
-                response = requests.post('https://api.mistral.ai/v1/chat/completions', json=body, headers=headers)
-                # Vérifier la réponse
+                response = Send_to_mistral ( "Transforme le texte '"+ text +"' en 'intention' en te basant sur les champs 'examples' fournis dans la base de correlation publiée sur le site https://static.abls-habitat.fr/intents.json , et ne répond qu'avec le champ 'intention' associé. Si tu ne trouves pas de correspondance, réponds seulement 'inconnu'." );
                 if response.status_code == 200:
                     result = response.json()
-                    print(result)
                     publish_mqtt(json.dumps(result))
                 else:
                     print("Erreur:", response.status_code, response.text)
