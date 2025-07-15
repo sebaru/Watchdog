@@ -171,9 +171,9 @@ end:
      { Json_node_add_double ( thread_ai, "valeur", valeur );
        Json_node_add_bool   ( thread_ai, "in_range", in_range );
        Json_node_add_bool   ( thread_ai, "first_turn", FALSE );
-       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f (in_range=%d), min=%f, max=%f",
+       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f (in_range=%d)",
                  Json_get_string ( thread_ai, "thread_tech_id" ), Json_get_string ( thread_ai, "thread_acronyme" ),
-                 valeur, in_range, Json_get_double ( thread_ai, "min" ), Json_get_double ( thread_ai, "max" ) );
+                 valeur, in_range );
        MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_AI", thread_ai );
      }
   }

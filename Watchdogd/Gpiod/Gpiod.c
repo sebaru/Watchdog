@@ -141,7 +141,6 @@
         { if (vars->lignes[cpt].gpio_ligne && vars->lignes[cpt].mode_inout == 0)                          /* Ligne d'entrée ? */
            { vars->lignes[cpt].etat = gpiod_line_request_get_value( vars->lignes[cpt].gpio_ligne, cpt );
              MQTT_Send_DI ( module, vars->lignes[cpt].element, vars->lignes[cpt].etat );
-             break;
            }
         }
 
