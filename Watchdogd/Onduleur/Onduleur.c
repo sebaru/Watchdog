@@ -345,7 +345,7 @@
     vars->Ups_online      = Mnemo_create_thread_DI ( module, "UPS_ONLINE", "UPS Online" );
     vars->Ups_charging    = Mnemo_create_thread_DI ( module, "UPS_CHARGING", "UPS en charge" );
     vars->Ups_on_batt     = Mnemo_create_thread_DI ( module, "UPS_ON_BATT",  "UPS sur batterie" );
-    vars->Ups_replace_batt= Mnemo_create_thread_DI ( module, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
+    vars->Ups_replace_batt= Mnemo_create_thread_DI ( module, "UPS_REPLACE_BATT",  "Batteries UPS à changer" );
     vars->Ups_alarm       = Mnemo_create_thread_DI ( module, "UPS_ALARM",  "UPS en alarme !" );
 
     vars->Load            = Mnemo_create_thread_AI ( module, "LOAD", "Charge onduleur", "%", ARCHIVE_1_MIN );
