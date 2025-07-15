@@ -134,7 +134,7 @@
      }
 
     Json_node_foreach_array_element ( module->config, "IO", Charger_un_gpio, module );
-
+    Thread_send_comm_to_master ( module, TRUE );                                            /* On est bien accroché aux GPIOs */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
        for ( gint cpt = 0; cpt < vars->num_lines; cpt++ )
