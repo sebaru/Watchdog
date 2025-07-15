@@ -174,59 +174,30 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
-/* Sortie : TRUE sur le regean est UP                                                                                         */
+/* Dls_PID_reset: Reset les données calculées du PID                                                                          */
+/* Sortie : les bits somme et prev sont mis à 0                                                                               */
 /******************************************************************************************************************************/
- void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input )
-  {
-#ifdef bouh
-    Dls_data_get_REGISTRE ( input_tech_id, input_acronyme, r_input );
-    if ( ! (r_input) ) return;
-
-    struct DLS_REGISTRE *input = *r_input;
-    if ( ! (input) ) return;
+ void Dls_PID_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *input )
+  { if (!input) return;
 
     input->pid_somme_erreurs = 0.0;
     input->pid_prev_erreur   = 0.0;
-#endif
   }
 /******************************************************************************************************************************/
-/* Dls_PID: Gestion du PID                                                                                                    */
-/* Sortie : TRUE sur le regean est UP                                                                                         */
+/* Dls_get_top: Récupètre la valeur de l'horloge                                                                              */
+/* Sortie : le top horloge                                                                                                    */
 /******************************************************************************************************************************/
  gint Dls_get_top ( void )
   { return (Partage->top); }
-#ifdef bouh
 /******************************************************************************************************************************/
 /* Dls_PID: Gestion du PID                                                                                                    */
 /* Sortie : TRUE sur le regean est UP                                                                                         */
 /******************************************************************************************************************************/
- gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,
-                   gchar *consigne_tech_id, gchar *consigne_acronyme, gpointer *r_consigne,
-                   gchar *kp_tech_id, gchar *kp_acronyme, gpointer *r_kp,
-                   gchar *ki_tech_id, gchar *ki_acronyme, gpointer *r_ki,
-                   gchar *kd_tech_id, gchar *kd_acronyme, gpointer *r_kd,
-                   gchar *outputmin_tech_id, gchar *outputmin_acronyme, gpointer *r_outputmin,
-                   gchar *outputmax_tech_id, gchar *outputmax_acronyme, gpointer *r_outputmax
-                 )
-  { Dls_data_get_REGISTRE ( input_tech_id, input_acronyme, r_input );
-    Dls_data_get_REGISTRE ( consigne_tech_id, consigne_acronyme, r_consigne );
-    Dls_data_get_REGISTRE ( kp_tech_id, kp_acronyme, r_kp );
-    Dls_data_get_REGISTRE ( kp_tech_id, ki_acronyme, r_ki );
-    Dls_data_get_REGISTRE ( kp_tech_id, kd_acronyme, r_kd );
-    Dls_data_get_REGISTRE ( outputmin_tech_id, outputmin_acronyme, r_outputmin );
-    Dls_data_get_REGISTRE ( outputmax_tech_id, outputmax_acronyme, r_outputmax );
-    if ( ! (r_input && r_consigne && r_kp && r_ki && r_kd && r_outputmin && r_outputmax) ) return(0.0);
-
-    struct DLS_REGISTRE *input = *r_input;
-    struct DLS_REGISTRE *consigne = *r_consigne;
-    struct DLS_REGISTRE *kp = *r_kp;
-    struct DLS_REGISTRE *ki = *r_ki;
-    struct DLS_REGISTRE *kd = *r_kd;
-    struct DLS_REGISTRE *outputmin = *r_outputmin;
-    struct DLS_REGISTRE *outputmax = *r_outputmax;
-
-    if ( ! (input && consigne && kp && ki && kd && outputmin && outputmax) ) return(0.0);
+ void Dls_PID ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *input, struct DLS_REGISTRE *consigne,
+                struct DLS_REGISTRE *kp,struct DLS_REGISTRE *ki, struct DLS_REGISTRE *kd,
+                struct DLS_REGISTRE *outputmin, struct DLS_REGISTRE *outputmax, struct DLS_REGISTRE *output
+              )
+  { if ( ! (input && consigne && kp && ki && kd && outputmin && outputmax && output ) ) return;
 
     gdouble erreur           = consigne->valeur - input->valeur;
     input->pid_somme_erreurs+= erreur;                                /* possibilité de débordement si trop long a stabiliser */
@@ -236,9 +207,8 @@
 
          if (result > outputmax->valeur ) result = outputmax->valeur;
     else if (result < outputmin->valeur ) result = outputmin->valeur;
-    return(result);
+    Dls_data_set_REGISTRE ( vars, output, result );
   }
-#endif
 /******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
 /* Entrée : le Dls_tree correspondant                                                                                         */
