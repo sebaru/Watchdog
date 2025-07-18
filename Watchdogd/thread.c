@@ -139,9 +139,16 @@
  static void Thread_MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { struct THREAD *module = obj;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Connected with return code %d: %s",
-              thread_tech_id, return_code, mosquitto_connack_string( return_code ) );
-    if (return_code == 0) module->MQTT_connected = TRUE;
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Connection to '%s': return code %d: %s",
+              thread_tech_id, Config.master_hostname, return_code, mosquitto_connack_string( return_code ) );
+    if (return_code == 0)
+     { module->MQTT_connected = TRUE;
+       gchar topic[256];
+       g_snprintf ( topic, sizeof(topic), "thread/%s/#", thread_tech_id );
+       MQTT_Subscribe ( module->MQTT_session, topic );
+       g_snprintf ( topic, sizeof(topic), "threads/#" );
+       MQTT_Subscribe ( module->MQTT_session, topic );
+     }
   }
 /******************************************************************************************************************************/
 /* Thread_on_MQTT_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                       */
@@ -191,14 +198,6 @@
 
        if ( mosquitto_connect( module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
         { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT connection to '%s' error.", thread_tech_id, Config.master_hostname ); }
-       else
-        { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Connected to '%s'.", thread_tech_id, Config.master_hostname );
-          gchar topic[256];
-          g_snprintf ( topic, sizeof(topic), "thread/%s/#", thread_tech_id );
-          MQTT_Subscribe ( module->MQTT_session, topic );
-          g_snprintf ( topic, sizeof(topic), "threads/#" );
-          MQTT_Subscribe ( module->MQTT_session, topic );
-        }
      }
 
     if ( mosquitto_loop_start( module->MQTT_session ) != MOSQ_ERR_SUCCESS )
