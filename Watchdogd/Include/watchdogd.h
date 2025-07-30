@@ -104,11 +104,6 @@
 
  extern void Convert_libelle_dynamique ( gchar *libelle, gint taille_max );
 
- extern void API_Send_ARCHIVE ( void );                                                                     /* Dans api_xxx.c */
- extern void API_Clear_ARCHIVE ( void );
- extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
- extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
-
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 
  extern gboolean MSRV_Map_to_thread ( JsonNode *key );
@@ -124,6 +119,11 @@
  extern JsonNode *Http_Send_json_request_from_agent ( SoupMessage *soup_msg, JsonNode *RootNode );
  extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode );
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
+ extern void Http_Init ( void );
+ extern void Http_End ( void );
+ extern JsonNode *Http_Request ( gchar *url, JsonNode *json_payload );
+ extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
+ extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
 
                                                                                                            /* Dans mqtt_api.c */
  extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node );

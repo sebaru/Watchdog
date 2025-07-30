@@ -55,17 +55,15 @@
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending to API %s", query );
 
-    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( soup_msg, RootNode );
+    JsonNode *ResponseNode = Http_Request ( query, RootNode );
 
     if (unref_RootNode) Json_node_unref(RootNode);
 
-    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
-    gint   status_code   = soup_message_get_status(soup_msg);
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s Status %d, reason %s", URI, status_code, reason_phrase );
+    gint http_code = Json_get_int ( ResponseNode, "http_code" );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s Status %d", URI, status_code );
 
-    if (status_code!=200)
+    if (Http_Request!=200)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d for '%s': %s\n", URI, status_code, query, reason_phrase ); }
-    g_object_unref( soup_msg );
     return(ResponseNode);
  }
 /******************************************************************************************************************************/
@@ -86,24 +84,17 @@
      }
     else g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg  = soup_message_new ( "GET", query );
-    if (!soup_msg)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Wrong URI Reading from API %s", query );
-       return(NULL);
-     }
-
-    JsonNode *ResponseNode = Http_Send_json_request_from_agent ( soup_msg, NULL );
-
-    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
-    gint   status_code   = soup_message_get_status(soup_msg);
+    JsonNode *ResponseNode = Http_Request ( query, NULL );
+    if (!ResponseNode) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Error with Http_Get %s", query ); return(NULL); }
+    gint http_code = Json_get_int ( ResponseNode, "http_code" );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s Status %d for '%s'", URI, http_code, query );
 
     gchar nom_fichier[256];
     g_snprintf ( nom_fichier, sizeof(nom_fichier), "cache-%s", query );
     g_strcanon ( nom_fichier+6, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYYZ", '_' );
 
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s Status %d, reason %s", URI, status_code, reason_phrase );
-    if (status_code!=200)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d for '%s': %s\n", URI, status_code, query, reason_phrase );
+    if (http_code!=200)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d for '%s'", URI, http_code, query );
        Json_node_unref ( ResponseNode );
        ResponseNode = Json_read_from_file ( nom_fichier );
        if (ResponseNode) Info_new( __func__, Config.log_msrv, LOG_WARNING, "Using cache for %s", query );
@@ -112,7 +103,6 @@
      { if (Json_has_member ( ResponseNode, "api_cache" ) && Json_get_bool ( ResponseNode, "api_cache" ) )
         { Json_write_to_file ( nom_fichier, ResponseNode ); }
      }
-    g_object_unref( soup_msg );
     return(ResponseNode);
  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

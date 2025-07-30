@@ -339,6 +339,9 @@
        goto first_stage_end;
      }
 
+/************************************************* Init HTTP  *****************************************************************/
+    Http_Init ();
+
 /************************************************* Test Connexion to Global API ***********************************************/
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
     if (!API)
@@ -569,6 +572,7 @@ third_stage_end:
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
 second_stage_end:
+    Http_End();
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
 first_stage_end:

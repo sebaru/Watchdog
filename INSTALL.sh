@@ -15,7 +15,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y gawk git libtool automake autoconf gcc gcc-c++ redhat-rpm-config
   dnf install -y glib2-devel openssl mosquitto-devel
   dnf install -y nut-devel libuuid-devel
-  dnf install -y popt-devel libsoup3-devel gtts
+  dnf install -y popt-devel libsoup3-devel gtts libcurl-devel
   dnf install -y json-glib-devel gammu-devel
   dnf install -y wireplumber mpg123 sox libusb1-devel libgpiod-devel
   dnf install -y libstrophe-devel libphidget22-devel
@@ -38,7 +38,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   fi
 
   apt install -y gawk git libtool automake autoconf gcc g++ git cmake openssl curl
-  apt install -y libglib2.0-dev wireplumber mosquitto-dev
+  apt install -y libglib2.0-dev wireplumber mosquitto-dev libcurl4-openssl-dev
   apt install -y libupsclient-dev libssl-dev libstrophe-dev libgammu-dev
   apt install -y libpopt-dev libssl-dev libmariadb-dev libjwt-dev
   apt install -y sox libsox-fmt-all python3-pip mpg123

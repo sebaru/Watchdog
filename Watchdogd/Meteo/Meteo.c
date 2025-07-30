@@ -48,13 +48,11 @@
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Start getting data for code_insee '%s'", code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg = soup_message_new ( "GET", query );
-    JsonNode *response    = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
-    gchar *reason_phrase  = soup_message_get_reason_phrase(soup_msg);
-    gint   status_code    = soup_message_get_status ( soup_msg );
+    JsonNode *response = Http_Request ( query, NULL );
+    gint http_code     = Json_get_int ( response, "http_code" );
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
-    if (status_code!=200) Thread_send_comm_to_master ( module, FALSE );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d", http_code );
+    if (http_code!=200) Thread_send_comm_to_master ( module, FALSE );
     else
      { gint heure, minute;
        JsonNode *city       = Json_get_object_as_node ( response, "city" );
@@ -75,7 +73,6 @@
        Thread_send_comm_to_master ( module, TRUE );
      }
     Json_node_unref ( response );
-    g_object_unref( soup_msg );
   }
 /******************************************************************************************************************************/
 /* Meteo_update_forecast: Met a jour le forecast auprès de meteoconcept                                                       */
@@ -120,16 +117,11 @@
     Info_new( __func__, module->Thread_debug, LOG_DEBUG,
              "%s: Starting getting data for code_insee '%s'", thread_tech_id, code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg  = soup_message_new ( "GET", query );
-    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
+    JsonNode *response = Http_Request ( query, NULL );
+    gint http_code     = Json_get_int ( response, "http_code" );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d", http_code );
 
-    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
-    gint   status_code   = soup_message_get_status ( soup_msg );
-
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
-    g_object_unref( soup_msg );
-
-    if (status_code==200) { Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module ); }
+    if (http_code==200) { Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module ); }
     Json_node_unref ( response );
   }
 /******************************************************************************************************************************/
