@@ -114,10 +114,6 @@
  extern void UUID_Load ( gchar *thread, gchar *target );
 
  extern void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size );                  /* Dans http_common.c */
- extern SoupSession *HTTP_New_session ( gchar *user_agent );
- extern gboolean Http_Accept_certificate ( SoupMessage* self, GTlsCertificate* tls_peer_certificate, GTlsCertificateFlags tls_peer_errors, gpointer user_data );
- extern JsonNode *Http_Send_json_request_from_agent ( SoupMessage *soup_msg, JsonNode *RootNode );
- extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode );
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
  extern void Http_Init ( void );
  extern void Http_End ( void );

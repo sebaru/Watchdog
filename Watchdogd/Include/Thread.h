@@ -41,7 +41,6 @@
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
-    SoupSession *Soup_session;
     struct mosquitto *MQTT_session;
     GSList *MQTT_messages;
     JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */

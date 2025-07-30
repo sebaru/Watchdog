@@ -203,9 +203,6 @@
     if ( mosquitto_loop_start( module->MQTT_session ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
 
-/******************************************************* Ecoute du Master *****************************************************/
-    module->Soup_session = HTTP_New_session ( "Abls-habitat Thread" );
-
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
     gchar package[128];
@@ -230,7 +227,6 @@
     mosquitto_disconnect( module->MQTT_session );
     mosquitto_loop_stop( module->MQTT_session, FALSE );
     mosquitto_destroy( module->MQTT_session );
-    g_object_unref  ( module->Soup_session );  module->Soup_session = NULL;
     g_slist_foreach ( module->MQTT_messages, (GFunc) Json_node_unref, NULL );
     g_slist_free    ( module->MQTT_messages );   module->MQTT_messages = NULL;
     if (module->vars) { g_free(module->vars);  module->vars   = NULL; }
