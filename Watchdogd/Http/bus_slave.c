@@ -160,23 +160,10 @@
     gchar query[256];
     g_snprintf( query, sizeof(query), "https://%s:5559/%s", Config.master_hostname, uri );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg  = soup_message_new ( "GET", query );
-    if (!soup_msg)
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "MSG Error Sending to %s", query );
-       goto end;
-     }
-    /*g_object_set ( soup_msg, "http-version", SOUP_HTTP_1_0, NULL );*/
-    g_signal_connect ( G_OBJECT(soup_msg), "accept-certificate", G_CALLBACK(Http_Accept_certificate), module );
-    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL); /* SYNC */
-
-    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
-    gint   status_code   = soup_message_get_status(soup_msg);
-
-    Info_new( __func__, Config.log_bus, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
-    if (status_code!=200)
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s': %s\n", status_code, query, reason_phrase ); }
-    g_object_unref( soup_msg );
-end:
+    JsonNode *response = Http_Request ( query, NULL, NULL );
+    gint http_code     = Json_get_int ( response, "http_code" );
+    if (http_code!=200)
+     { Info_new( __func__, Config.log_bus, LOG_ERR, "Error %d for '%s'", http_code, query ); }
     return(response);
   }
 /******************************************************************************************************************************/

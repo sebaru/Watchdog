@@ -315,18 +315,15 @@
     g_free(libelle);
 
 /********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg = soup_message_new ( "GET", target_uri );
-    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
+    JsonNode *response = Http_Request ( target_uri, NULL, NULL );
+    gint http_code = Json_get_int ( response, "http_code" );
     Json_node_unref ( response );
 
-    gint status_code = soup_message_get_status ( soup_msg );
-    if (status_code!=200)
-     { gchar *reason_phrase = soup_message_get_reason_phrase ( soup_msg );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "Status %d, reason %s for '%s' to '%s'",
-                 status_code, reason_phrase, libelle_utf8, Json_get_string ( user, "email" ) );
+    if (http_code!=200)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Status %d for '%s' to '%s'",
+                 http_code, libelle_utf8, Json_get_string ( user, "email" ) );
      }
     else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' sent to '%s'", libelle_utf8, Json_get_string ( user, "email" ) );
-    g_object_unref( soup_msg );
   }
 /******************************************************************************************************************************/
 /* Smsg_send_to_all_authorized_recipients : Envoi à tous les portables autorisés                                              */
