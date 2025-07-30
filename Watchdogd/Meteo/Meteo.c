@@ -48,7 +48,7 @@
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Start getting data for code_insee '%s'", code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    JsonNode *response = Http_Request ( query, NULL );
+    JsonNode *response = Http_Request ( query, NULL, NULL );
     gint http_code     = Json_get_int ( response, "http_code" );
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d", http_code );
@@ -117,7 +117,7 @@
     Info_new( __func__, module->Thread_debug, LOG_DEBUG,
              "%s: Starting getting data for code_insee '%s'", thread_tech_id, code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    JsonNode *response = Http_Request ( query, NULL );
+    JsonNode *response = Http_Request ( query, NULL, NULL );
     gint http_code     = Json_get_int ( response, "http_code" );
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d", http_code );
 

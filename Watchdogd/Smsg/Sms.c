@@ -269,24 +269,30 @@
 
     g_snprintf( signature, sizeof(signature), "$1$%s", hash_string );
 
+/********************************************************* Préparation des headers ********************************************/
+    gchar header[256];
+    GSList *liste = NULL;
+    g_snprintf ( header, sizeof(header), "X-Ovh-Application: %s", Json_get_string ( module->config, "ovh_application_key" ) );
+    liste = g_slist_append ( liste, g_strdup(header) );
+    g_snprintf ( header, sizeof(header), "X-Ovh-Consumer: %s",  Json_get_string ( module->config, "ovh_consumer_key" ) );
+    liste = g_slist_append ( liste, g_strdup(header) );
+    g_snprintf ( header, sizeof(header), "X-Ovh-Signature: %s", signature );
+    liste = g_slist_append ( liste, g_strdup(header) );
+    g_snprintf ( header, sizeof(header), "X-Ovh-Timestamp: %s", timestamp );
+    liste = g_slist_append ( liste, g_strdup(header) );
+
 /********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg = soup_message_new ( method, query );
-    SoupMessageHeaders *headers = soup_message_get_request_headers( soup_msg );
-    soup_message_headers_append ( headers, "X-Ovh-Application", Json_get_string ( module->config, "ovh_application_key" ) );
-    soup_message_headers_append ( headers, "X-Ovh-Consumer",    Json_get_string ( module->config, "ovh_consumer_key" ) );
-    soup_message_headers_append ( headers, "X-Ovh-Signature",   signature );
-    soup_message_headers_append ( headers, "X-Ovh-Timestamp",   timestamp );
-    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, RootNode );
-    Json_node_unref ( response );
+    JsonNode *response = Http_Request ( query, RootNode, liste );
+    gint http_code = Json_get_int ( response, "http_code" );
+    g_slist_free_full ( liste, g_free );
     Json_node_unref ( RootNode );
 
-    gint status_code = soup_message_get_status ( soup_msg );
-    if (status_code!=200)
-     { gchar *reason_phrase = soup_message_get_reason_phrase ( soup_msg );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
+    if (http_code!=200)
+     { /*gchar *reason_phrase = soup_message_get_reason_phrase ( soup_msg );*/
+       Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Status %d", thread_tech_id, http_code );
      }
     else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, telephone );
-    g_object_unref( soup_msg );
+    Json_node_unref ( response );
   }
 /******************************************************************************************************************************/
 /* Envoi_sms_smsbox: Envoi un sms par SMSBOX                                                                                  */

@@ -121,7 +121,7 @@
  extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
  extern void Http_Init ( void );
  extern void Http_End ( void );
- extern JsonNode *Http_Request ( gchar *url, JsonNode *json_payload );
+ extern JsonNode *Http_Request ( gchar *url, JsonNode *json_payload, GSList *headers );
  extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
 

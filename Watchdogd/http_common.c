@@ -78,8 +78,8 @@
 /* Entrée: L'url, le payload                                                                                                  */
 /* Sortie: la reponse json                                                                                                    */
 /******************************************************************************************************************************/
- JsonNode *Http_Request ( gchar *url, JsonNode *json_payload )
-  { struct curl_slist *headers = NULL;                                                /* Set the appropriate headers for JSON */
+ JsonNode *Http_Request ( gchar *url, JsonNode *json_payload, GSList *headers )
+  { struct curl_slist *all_headers = NULL;                                                        /* Gestion des headers HTTP */
     JsonNode *ResponseNode = NULL;
     gchar *payload = NULL;
     gint http_code = 0;                                                                                     /* Code de retour */
@@ -111,26 +111,29 @@
     gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
     gchar *domain_secret = Json_get_string ( Config.config, "domain_secret" );
     gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
-
-/*------------------------------------------------ Préparation des headers ---------------------------------------------------*/
     gchar timestamp[20];
     g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
 
-    headers = curl_slist_append( headers, "Content-Type: application/json" );
+/*------------------------------------------------ Préparation des headers ---------------------------------------------------*/
+    all_headers = curl_slist_append( all_headers, "Content-Type: application/json" );
     gchar chaine[256];
     g_snprintf( chaine, sizeof(chaine), "Origin: %s", "abls-habitat.fr" );
-    headers = curl_slist_append( headers, chaine );
+    all_headers = curl_slist_append( all_headers, chaine );
 
     g_snprintf( chaine, sizeof(chaine), "X-ABLS-DOMAIN: %s", domain_uuid );
-    headers = curl_slist_append( headers, chaine );
+    all_headers = curl_slist_append( all_headers, chaine );
 
     g_snprintf( chaine, sizeof(chaine), "X-ABLS-AGENT: %s", agent_uuid );
-    headers = curl_slist_append( headers, chaine );
+    all_headers = curl_slist_append( all_headers, chaine );
 
     g_snprintf( chaine, sizeof(chaine), "X-ABLS-TIMESTAMP: %s", timestamp );
-    headers = curl_slist_append( headers, chaine );
+    all_headers = curl_slist_append( all_headers, chaine );
 
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    GSList *liste = headers;
+    while ( liste )
+     { all_headers = curl_slist_append( all_headers, liste->data );
+       liste = liste->next;
+     }
 
 /*---------------------------------------------- Calcul de la signature ------------------------------------------------------*/
     unsigned char hash_bin[EVP_MAX_MD_SIZE];
@@ -148,7 +151,10 @@
     EVP_EncodeBlock( signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
 
     g_snprintf( chaine, sizeof(chaine), "X-ABLS-SIGNATURE: %s", signature );
-    headers = curl_slist_append( headers, chaine );
+    all_headers = curl_slist_append( all_headers, chaine );
+
+/*------------------------------------------- Fin des hearders ---------------------------------------------------------------*/
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, all_headers);
 
 /*------------------------------------------- Réalisation de la requete ------------------------------------------------------*/
     CURLcode res = curl_easy_perform(curl);
@@ -172,7 +178,7 @@
     else Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: ResponseNode Error", url );
 
 end:
-    if (headers) curl_slist_free_all(headers);                                                         /* Cleanup the headers */
+    if (all_headers) curl_slist_free_all(all_headers);                                                 /* Cleanup the headers */
     if (buffer)  g_free(buffer);
     if (payload) g_free(payload);
     curl_easy_cleanup(curl);
@@ -351,7 +357,7 @@ end:
     if (!RootNode) { RootNode = Json_node_create(); unref_RootNode = TRUE; }
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending to API %s", query );
 
-    JsonNode *ResponseNode = Http_Request ( query, RootNode );
+    JsonNode *ResponseNode = Http_Request ( query, RootNode, NULL );
     if (unref_RootNode) Json_node_unref(RootNode);
 
     gint http_code = Json_get_int ( ResponseNode, "http_code" );
@@ -379,7 +385,7 @@ end:
      }
     else g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
 /********************************************************* Envoi de la requete ************************************************/
-    JsonNode *ResponseNode = Http_Request ( query, NULL );
+    JsonNode *ResponseNode = Http_Request ( query, NULL, NULL );
     if (!ResponseNode) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Error with Http_Get %s", query ); return(NULL); }
     gint http_code = Json_get_int ( ResponseNode, "http_code" );
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s Status %d for '%s'", URI, http_code, query );
