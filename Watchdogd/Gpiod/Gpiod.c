@@ -150,9 +150,9 @@
           JsonNode *request = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          if (Json_has_member ( request, "tag" ) && !strcasecmp( Json_get_string ( request, "tag" ), "SET_DO" ) )
-           { gchar *msg_thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
-             gchar *msg_thread_acronyme = Json_get_string ( request, "thread_acronyme" );
+          if (Json_has_member ( request, "token_lvl0" ) && !strcasecmp( Json_get_string ( request, "token_lvl0" ), "SET_DO" ) )
+           { gchar *msg_thread_tech_id  = Json_get_string ( request, "token_lvl1" );
+             gchar *msg_thread_acronyme = Json_get_string ( request, "token_lvl2" );
              gchar *msg_tech_id         = Json_get_string ( request, "tech_id" );
              gchar *msg_acronyme        = Json_get_string ( request, "acronyme" );
              gboolean etat              = Json_get_bool   ( request, "etat" );
