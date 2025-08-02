@@ -514,9 +514,10 @@ error:
           JsonNode *request = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *tag = Json_get_string ( request, "tag" );
-
-          if ( !strcasecmp( tag, "SET_DO" ) ) { Phidget_SET_DO ( module, request ); }
+          if (Json_has_member ( request, "tag" ))
+           { gchar *tag = Json_get_string ( request, "tag" );
+             if ( !strcasecmp( tag, "SET_DO" ) ) { Phidget_SET_DO ( module, request ); }
+           }
           Json_node_unref (request);
         }
      }

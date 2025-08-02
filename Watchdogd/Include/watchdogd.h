@@ -123,6 +123,7 @@
 
                                                                                                            /* Dans mqtt_api.c */
  extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node );
+ extern void MQTT_Send_to_topic_new ( struct mosquitto *mqtt_session, JsonNode *node, gboolean retain, gchar *format, ... );
  extern void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
  extern void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat );
  extern void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme );
@@ -132,7 +133,7 @@
  extern void MQTT_on_log_CB( struct mosquitto *mosq, void *obj, int level, const char *message );
  extern void MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code );
  extern void MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code );
- extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
+ extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *format, ... );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

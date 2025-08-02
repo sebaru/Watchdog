@@ -157,6 +157,38 @@ end:
     if (free_node) Json_node_unref(node);
   }
 /******************************************************************************************************************************/
+/* MQTT_Send_to_topic_new: Envoie un node sur un topic MQTT via le broker                                                     */
+/* Entrée: la structure MQTT, le topic, le node, le flag de retenu                                                            */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_to_topic_new ( struct mosquitto *mqtt_session, JsonNode *node, gboolean retain, gchar *format, ... )
+  { va_list ap;
+    if (! (mqtt_session && format) ) return;
+
+    va_start( ap, format );
+    gsize taille = g_printf_string_upper_bound ( format, ap );
+    va_end ( ap );
+    gchar *topic = g_try_malloc(taille+1);
+    if (!topic)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Memory Error for '%s'", format );
+       return;
+     }
+
+    va_start( ap, format );
+    g_vsnprintf ( topic, taille, format, ap );
+    va_end ( ap );
+
+    gboolean free_node=FALSE;
+    if (!node) { node = Json_node_create(); free_node = TRUE; }
+    gchar *buffer = Json_node_to_string ( node );
+    if (buffer)
+     { mosquitto_publish( mqtt_session, NULL, topic, strlen(buffer), buffer, 2, retain );
+       g_free(buffer);
+     }
+    if (free_node) Json_node_unref(node);
+    g_free(topic);
+  }
+/******************************************************************************************************************************/
 /* Mqtt_Send_AI: Envoie le bit AI au master                                                                                   */
 /* Entrée: la structure MQTT, l'AI, la valeur et le range                                                                     */
 /* Sortie: néant                                                                                                              */

@@ -71,8 +71,23 @@
 /* Entrée: la structure MQTT, le topic                                                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic )
-  { if ( mosquitto_subscribe( mqtt_session, NULL, topic, 1 ) != MOSQ_ERR_SUCCESS )
+ void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *format, ... )
+  { va_list ap;
+
+    va_start( ap, format );
+    gsize taille = g_printf_string_upper_bound ( format, ap );
+    va_end ( ap );
+    gchar *topic = g_try_malloc(taille+1);
+    if (!topic)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Memory Error for '%s'", format );
+       return;
+     }
+
+    va_start( ap, format );
+    g_vsnprintf ( topic, taille, format, ap );
+    va_end ( ap );
+
+    if ( mosquitto_subscribe( mqtt_session, NULL, topic, 2 ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "Subscribe to topic '%s' FAILED", topic ); }
     else
      { Info_new( __func__, Config.log_bus, LOG_INFO, "Subscribe to topic '%s' OK", topic ); }

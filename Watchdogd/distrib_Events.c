@@ -51,6 +51,20 @@
         { gchar topic[256];
           g_snprintf ( topic, sizeof(topic), "thread/%s", Json_get_string ( RootNode, "thread_tech_id" ) );
           MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, topic, "SET_DO", RootNode );
+
+          JsonNode *Node = Json_node_create ();
+          if (Node)
+           { Json_node_add_string ( Node, "tech_id",  Json_get_string ( RootNode, "tech_id" ) );
+             Json_node_add_string ( Node, "acronyme", Json_get_string ( RootNode, "acronyme" ) );
+             Json_node_add_bool   ( Node, "etat",     Json_get_bool   ( RootNode, "etat" ) );
+             MQTT_Send_to_topic_new ( Partage->com_msrv.MQTT_local_session, Node, TRUE, "SET_DO/%s/%s",
+                                      Json_get_string ( RootNode, "thread_tech_id" ),
+                                      Json_get_string ( RootNode, "thread_acronyme" ) );
+             Json_node_unref ( Node );
+           }
+          else Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s:%s': Json node create error",
+                         Json_get_string ( RootNode, "thread_tech_id" ),
+                         Json_get_string ( RootNode, "thread_acronyme" ) );
         }
        else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
                       "'%s:%s' is not mapped. dropping",

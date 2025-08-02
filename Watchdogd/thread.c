@@ -83,6 +83,19 @@
      }
     else Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': MQTT Message received at %s: %s", thread_tech_id, msg->topic, msg->payload );
 
+    gchar **tokens = g_strsplit ( msg->topic, "/", 3 );
+    if (!tokens)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT token split failed at %s: %s", thread_tech_id, msg->topic, msg->payload );
+       Json_node_unref ( response );
+       return;
+     }
+
+    if (tokens[0]) Json_node_add_string ( response, "topic_l0", tokens[0] );
+    if (tokens[1]) Json_node_add_string ( response, "topic_l1", tokens[1] );
+    if (tokens[2]) Json_node_add_string ( response, "topic_l2", tokens[2] );
+    g_strfreev ( tokens );
+
+#warning a virer
     Json_node_add_string ( response, "topic", msg->topic );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, response );
@@ -143,11 +156,10 @@
               thread_tech_id, Config.master_hostname, return_code, mosquitto_connack_string( return_code ) );
     if (return_code == 0)
      { module->MQTT_connected = TRUE;
-       gchar topic[256];
-       g_snprintf ( topic, sizeof(topic), "thread/%s/#", thread_tech_id );
-       MQTT_Subscribe ( module->MQTT_session, topic );
-       g_snprintf ( topic, sizeof(topic), "threads/#" );
-       MQTT_Subscribe ( module->MQTT_session, topic );
+       #warning a virer
+       MQTT_Subscribe ( module->MQTT_session, "thread/%s/#", thread_tech_id );
+       MQTT_Subscribe ( module->MQTT_session, "SET_DO/%s/#", thread_tech_id );
+       MQTT_Subscribe ( module->MQTT_session, "threads/#" );
      }
   }
 /******************************************************************************************************************************/
