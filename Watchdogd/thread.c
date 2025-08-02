@@ -160,8 +160,7 @@
               thread_tech_id, Config.master_hostname, return_code, mosquitto_connack_string( return_code ) );
     if (return_code == 0)
      { module->MQTT_connected = TRUE;
-       #warning a virer
-       MQTT_Subscribe ( module->MQTT_session, "thread/%s/#", thread_tech_id );
+       MQTT_Subscribe ( module->MQTT_session, "SET_AO/%s/#", thread_tech_id );
        MQTT_Subscribe ( module->MQTT_session, "SET_DO/%s/#", thread_tech_id );
        MQTT_Subscribe ( module->MQTT_session, "threads/#" );
      }
