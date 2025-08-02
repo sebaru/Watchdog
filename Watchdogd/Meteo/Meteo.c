@@ -177,9 +177,9 @@
           JsonNode *request = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *tag = Json_get_string ( request, "tag" );
+          gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
 
-          Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", thread_tech_id, tag );
+          Info_new( __func__, module->Thread_debug, LOG_DEBUG, "token_lvl0 '%s' not for this thread", token_lvl0 );
           Json_node_unref(request);
         }
 /****************************************************** Connexion ! ***********************************************************/

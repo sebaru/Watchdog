@@ -89,8 +89,8 @@
  static void Modbus_SET_DO ( struct THREAD *module, JsonNode *msg )
   { struct MODBUS_VARS *vars = module->vars;
     gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
-    gchar *msg_thread_tech_id  = Json_get_string ( msg, "thread_tech_id" );
-    gchar *msg_thread_acronyme = Json_get_string ( msg, "thread_acronyme" );
+    gchar *msg_thread_tech_id  = Json_get_string ( msg, "token_lvl1" );
+    gchar *msg_thread_acronyme = Json_get_string ( msg, "token_lvl2" );
     gchar *msg_tech_id         = Json_get_string ( msg, "tech_id" );
     gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
@@ -175,8 +175,8 @@
  static void Modbus_SET_AO ( struct THREAD *module, JsonNode *msg )
   { struct MODBUS_VARS *vars = module->vars;
     gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
-    gchar *msg_thread_tech_id  = Json_get_string ( msg, "thread_tech_id" );
-    gchar *msg_thread_acronyme = Json_get_string ( msg, "thread_acronyme" );
+    gchar *msg_thread_tech_id  = Json_get_string ( msg, "token_lvl1" );
+    gchar *msg_thread_acronyme = Json_get_string ( msg, "token_lvl2" );
     gchar *msg_tech_id         = Json_get_string ( msg, "tech_id" );
     gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
@@ -1141,11 +1141,11 @@
           JsonNode *request = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          if (Json_has_member ( request, "tag" ))
-           { gchar *tag = Json_get_string ( request, "tag" );
-                  if ( !strcasecmp (tag, "SET_DO") )  Modbus_SET_DO ( module, request );
-             else if ( !strcasecmp (tag, "SET_AO") )  Modbus_SET_AO ( module, request );
-             else if ( !strcasecmp (tag, "SYNC_IO") ) Modbus_Sync_IO_from_master ( module );
+          if (Json_has_member ( request, "token_lvl0" ))
+           { gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
+                  if ( !strcasecmp (token_lvl0, "SET_DO") )  Modbus_SET_DO ( module, request );
+             else if ( !strcasecmp (token_lvl0, "SET_AO") )  Modbus_SET_AO ( module, request );
+             else if ( !strcasecmp (token_lvl0, "SYNC_IO") ) Modbus_Sync_IO_from_master ( module );
            }
           Json_node_unref ( request );
         }
