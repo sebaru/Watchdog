@@ -90,9 +90,13 @@
        return;
      }
 
-    if (tokens[0]) Json_node_add_string ( response, "topic_l0", tokens[0] );
-    if (tokens[1]) Json_node_add_string ( response, "topic_l1", tokens[1] );
-    if (tokens[2]) Json_node_add_string ( response, "topic_l2", tokens[2] );
+    gint token_num = 0;
+    while(tokens[token_num])
+     { gchar token_name[16];
+       g_snprintf ( token_name, sizeof ( token_name ), "token_lvl%d", token_num );
+       Json_node_add_string ( response, token_name, tokens[token_num] );
+       token_num++;
+     }
     g_strfreev ( tokens );
 
 #warning a virer
