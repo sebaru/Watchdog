@@ -145,6 +145,18 @@
     MQTT_Send_DI ( canal->module, canal->element, (valeur ? TRUE : FALSE) );
   }
 /******************************************************************************************************************************/
+/* Phidget_onVoltableInputChange: Appelé quand un module I/O VoltageInput a changé de valeur                                  */
+/* Entrée: le channel, le contexte, et la nouvelle valeur                                                                     */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void CCONV Phidget_onSensorChange ( PhidgetVoltageInputHandle handle, void *ctx, double valeur, Phidget_UnitInfo *sensorUnit )
+  { struct PHIDGET_ELEMENT *canal = ctx;
+    gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
+    gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
+    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f %s", thread_tech_id, thread_acronyme, valeur, sensorUnit->symbol );
+    MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
+  }
+/******************************************************************************************************************************/
 /* Phidget_AnalogAttach: Appelé quand un canal analogique est en cours d'attachement                                          */
 /* Entrée: le canal                                                                                                           */
 /* Sortie: néant                                                                                                              */
@@ -161,8 +173,13 @@
     else if (!strcasecmp(capteur, "ADP1000-ORP"))
      { /**/
      }
-    else if (!strcasecmp(capteur, "PH/ORP-1130"))
-     {
+    else if (!strcasecmp(capteur, "1130-PH"))
+     { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_PH ) != EPHIDGET_OK )
+        { Phidget_print_error(canal); }
+     }
+    else if (!strcasecmp(capteur, "1130-ORP"))
+     { if ( PhidgetVoltageInput_setSensorType ( (PhidgetVoltageInputHandle)canal->handle, SENSOR_TYPE_1130_ORP ) != EPHIDGET_OK )
+        { Phidget_print_error(canal); }
      }
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850"))
      { if ( PhidgetTemperatureSensor_setRTDType( (PhidgetTemperatureSensorHandle)canal->handle, RTD_TYPE_PT100_3850 ) != EPHIDGET_OK )
@@ -307,11 +324,18 @@
                                                             Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
-    else if (!strcasecmp(capteur, "PH/ORP-1130"))
+    else if (!strcasecmp(capteur, "1130-PH"))
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetVoltageInput_setOnVoltageChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
-                                                            Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
+                                                            Phidget_onSensorChange, canal ) != EPHIDGET_OK ) goto error;
+       Phidget_set_config ( canal, serial, port, TRUE );
+     }
+    else if (!strcasecmp(capteur, "1130-ORP"))
+     { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
+       if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
+       if ( PhidgetVoltageInput_setOnSensorChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
+                                                           Phidget_onSensorChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850"))
@@ -402,7 +426,8 @@ error:
 
          if (!strcasecmp(capteur, "ADP1000-PH"))           PhidgetPHSensor_delete         ( (PhidgetPHSensorHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "ADP1000-ORP"))          PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
-    else if (!strcasecmp(capteur, "PH/ORP-1130"))          PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "1130-PH"))              PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "1130-ORP"))             PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850")) PhidgetTemperatureSensor_delete( (PhidgetTemperatureSensorHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3920")) PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "AC-CURRENT-10A"))       PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
