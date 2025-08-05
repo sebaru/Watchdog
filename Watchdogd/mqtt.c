@@ -91,5 +91,7 @@
      { Info_new( __func__, Config.log_bus, LOG_ERR, "Subscribe to topic '%s' FAILED", topic ); }
     else
      { Info_new( __func__, Config.log_bus, LOG_INFO, "Subscribe to topic '%s' OK", topic ); }
+
+    g_free(topic);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

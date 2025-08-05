@@ -179,8 +179,11 @@
 
 end:
     if (all_headers) curl_slist_free_all(all_headers);                                                 /* Cleanup the headers */
-    if (buffer)  g_free(buffer);
-    if (payload) g_free(payload);
+    if (payload) g_free(payload);                                                                /* free the "string" payload */
+    if (buffer)                                                                                                 /* Si reponse */
+     { if(buffer->body) g_free(buffer->body);                                                           /* On free la réponse */
+       g_free(buffer);
+     }
     curl_easy_cleanup(curl);
     return(ResponseNode);
   }
