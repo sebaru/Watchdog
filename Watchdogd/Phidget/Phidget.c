@@ -328,7 +328,7 @@
      { if ( PhidgetVoltageInput_create( (PhidgetVoltageInputHandle *)&canal->handle ) != EPHIDGET_OK ) goto error;
        if ( Phidget_setOnErrorHandler( canal->handle, Phidget_onError, canal ) ) goto error;
        if ( PhidgetVoltageInput_setOnVoltageChangeHandler( (PhidgetVoltageInputHandle)canal->handle,
-                                                            Phidget_onSensorChange, canal ) != EPHIDGET_OK ) goto error;
+                                                            Phidget_onVoltageInputChange, canal ) != EPHIDGET_OK ) goto error;
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else if (!strcasecmp(capteur, "1130-ORP"))
