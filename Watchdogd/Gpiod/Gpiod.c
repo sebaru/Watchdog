@@ -46,7 +46,7 @@
                  Json_get_string ( element, "thread_acronyme" ), num, vars->num_lines );
        return;
      }
-    Json_node_add_bool ( element, "first_turn", TRUE );
+    Json_node_add_bool ( element, "need_sync", TRUE );
     vars->lignes[num].element        = element;
     vars->lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
     vars->lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );

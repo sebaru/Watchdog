@@ -45,43 +45,6 @@
  #include "Modbus.h"
 
 /******************************************************************************************************************************/
-/* Modbus_SET_DI_from_master_by_array: Met a jour une DI depuis le master                                                     */
-/* Entrée: le module et le buffer Josn                                                                                        */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Modbus_SET_DI_from_master_by_array ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct THREAD *module = user_data;
-    struct MODBUS_VARS *vars = module->vars;
-    gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
-    gchar *element_thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
-    gchar *element_thread_acronyme = Json_get_string ( element, "thread_acronyme" );
-    gchar *element_tech_id         = Json_get_string ( element, "tech_id" );
-    gchar *element_acronyme        = Json_get_string ( element, "acronyme" );
-
-    if (!element_thread_tech_id)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque element_thread_tech_id" ); }
-    else if (!element_thread_acronyme)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque element_thread_acronyme" ); }
-    else if (strcasecmp (element_thread_tech_id, thread_tech_id))
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Pas pour nous" ); }
-    else if (!Json_has_member ( element, "etat" ))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque etat" ); }
-    else
-     { gdouble etat = Json_get_bool ( element, "etat" );
-       pthread_mutex_lock ( &module->synchro );
-       for (gint num=0; num<vars->nbr_entree_tor; num++)
-        { if ( vars->DI && vars->DI[num] &&
-               !strcasecmp ( Json_get_string(vars->DI[num], "thread_acronyme"), element_thread_acronyme ) )
-           { Json_node_add_bool ( vars->DI[num], "etat", etat );
-             Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DI '%s:%s'/'%s:%s'=%d",
-                       element_thread_tech_id, element_thread_acronyme, element_tech_id, element_acronyme, etat );
-             break;
-           }
-        }
-       pthread_mutex_unlock ( &module->synchro );
-     }
-  }
-/******************************************************************************************************************************/
 /* Modbus_SET_DO: Met a jour une sortie TOR en fonction du jsonnode en parametre                                              */
 /* Entrée: le module et le buffer Josn                                                                                        */
 /* Sortie: Niet                                                                                                               */
@@ -111,56 +74,6 @@
            { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
                        msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
              Json_node_add_bool ( vars->DO[num], "etat", etat );
-             break;
-           }
-        }
-       pthread_mutex_unlock ( &module->synchro );
-     }
-  }
-/******************************************************************************************************************************/
-/* Modbus_SET_DO_by_array: Initialise les DO recues par le master                                                             */
-/* Entrée: les parametres d'une JsonArrayFonction                                                                             */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Modbus_SET_DO_from_master_by_array ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct THREAD *module = user_data;
-    Modbus_SET_DO ( module, element );
-  }
-/******************************************************************************************************************************/
-/* Modbus_SET_AI_from_master_by_array: Met a jour une AI depuis le master                                                     */
-/* Entrée: le module et le buffer Josn                                                                                        */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Modbus_SET_AI_from_master_by_array ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct THREAD *module = user_data;
-    struct MODBUS_VARS *vars = module->vars;
-    gchar *thread_tech_id          = Json_get_string ( module->config, "thread_tech_id" );
-    gchar *element_thread_tech_id  = Json_get_string ( element, "thread_tech_id" );
-    gchar *element_thread_acronyme = Json_get_string ( element, "thread_acronyme" );
-    gchar *element_tech_id         = Json_get_string ( element, "tech_id" );
-    gchar *element_acronyme        = Json_get_string ( element, "acronyme" );
-
-    if (!element_thread_tech_id)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque element_thread_tech_id" ); }
-    else if (!element_thread_acronyme)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque element_thread_acronyme" ); }
-    else if (strcasecmp (element_thread_tech_id, thread_tech_id))
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Pas pour nous" ); }
-    else if (!Json_has_member ( element, "valeur" ))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque etat" ); }
-    else if (!Json_has_member ( element, "in_range" ))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque in_range" ); }
-    else
-     { gdouble valeur    = Json_get_double ( element, "valeur" );
-       gboolean in_range = Json_get_bool   ( element, "in_range" );
-       pthread_mutex_lock ( &module->synchro );
-       for (gint num=0; num<vars->nbr_entree_ana; num++)
-        { if ( vars->AI && vars->AI[num] &&
-               !strcasecmp ( Json_get_string(vars->AI[num], "thread_acronyme"), element_thread_acronyme ) )
-           { Json_node_add_double ( vars->AI[num], "valeur", valeur );
-             Json_node_add_bool   ( vars->AI[num], "in_range", in_range );
-             Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_AI '%s:%s'/'%s:%s'=%f (in_range=%d)",
-                       element_thread_tech_id, element_thread_acronyme, element_tech_id, element_acronyme, valeur, in_range );
              break;
            }
         }
@@ -214,29 +127,19 @@
      }
   }
 /******************************************************************************************************************************/
-/* Modbus_SET_AO_by_array: Initialise les AO recues par le master                                                             */
-/* Entrée: les parametres d'une JsonArrayFonction                                                                             */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Modbus_SET_AO_from_master_by_array ( JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
-  { struct THREAD *module = user_data;
-    Modbus_SET_AO ( module, element );
-  }
-/******************************************************************************************************************************/
-/* Modbus_Sync_Output_from_master: Synchronise les Output du master vers le wago                                              */
+/* Modbus_Sync_INPUT_to_master: Synchronise les Output du master vers le wago                                                 */
 /* Entrée: le module                                                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Modbus_Sync_IO_from_master ( struct THREAD *module )
-  { Info_new( __func__, module->Thread_debug, LOG_INFO, "Syncing IO from master" );
-    JsonNode *result = Http_Get_from_local_BUS ( module, "GET_IO" );
-    if (result)
-     { if (Json_has_member ( result, "DI" ) ) Json_node_foreach_array_element ( result, "DI", Modbus_SET_DI_from_master_by_array, module );
-       if (Json_has_member ( result, "DO" ) ) Json_node_foreach_array_element ( result, "DO", Modbus_SET_DO_from_master_by_array, module );
-       if (Json_has_member ( result, "AI" ) ) Json_node_foreach_array_element ( result, "AI", Modbus_SET_AI_from_master_by_array, module );
-       if (Json_has_member ( result, "AO" ) ) Json_node_foreach_array_element ( result, "AO", Modbus_SET_AO_from_master_by_array, module );
-     }
-    Json_node_unref ( result );
+ static void Modbus_Sync_INPUT_to_master ( struct THREAD *module )
+  { Info_new( __func__, module->Thread_debug, LOG_INFO, "Syncing IO to master" );
+    struct MODBUS_VARS *vars = module->vars;
+
+    for ( gint cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
+     { if (vars->DI[cpt]) Json_node_add_bool ( vars->DI[cpt], "need_sync", TRUE ); }
+
+    for ( gint cpt = 0; cpt<vars->nbr_entree_ana; cpt++)
+     { if (vars->AI[cpt]) Json_node_add_bool ( vars->AI[cpt], "need_sync", TRUE ); }
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -891,7 +794,6 @@
        else Info_new( __func__, module->Thread_debug, LOG_ERR, " Memory Error for DO" );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    Modbus_Sync_IO_from_master( module );
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Module '%s' : io config done",
               Json_get_string ( module->config, "description" ) );
   }
@@ -1145,7 +1047,7 @@
            { gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
                   if ( !strcasecmp (token_lvl0, "SET_DO") )  Modbus_SET_DO ( module, request );
              else if ( !strcasecmp (token_lvl0, "SET_AO") )  Modbus_SET_AO ( module, request );
-             else if ( !strcasecmp (token_lvl0, "SYNC_IO") ) Modbus_Sync_IO_from_master ( module );
+             else if ( !strcasecmp (token_lvl0, "SYNC_INPUT") ) Modbus_Sync_INPUT_to_master ( module );
            }
           Json_node_unref ( request );
         }
