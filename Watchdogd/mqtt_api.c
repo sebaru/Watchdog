@@ -58,7 +58,9 @@
     else if ( Config.instance_is_master && !strcasecmp( topic, "REMAP") )
      { MSRV_Remap();
        MQTT_Send_to_topic_new ( Partage->com_msrv.MQTT_local_session, NULL, FALSE, "SYNC_INPUT" );/* Synchronisation des IO depuis les threads */
-#warning ajouter sync_output
+       pthread_mutex_lock( &Partage->com_dls.synchro );                               /* Zone de protection des bits internes */
+       Dls_foreach_plugins ( NULL, Dls_sync_all_output );                                             /* Run all plugin D.L.S */
+       pthread_mutex_unlock( &Partage->com_dls.synchro );                      /* Fin de Zone de protection des bits internes */
      }
     else if ( Config.instance_is_master && !strcasecmp( topic, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
 

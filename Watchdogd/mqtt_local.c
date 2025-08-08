@@ -199,7 +199,7 @@ end:
     gboolean old_in_range = Json_get_bool   ( thread_ai, "in_range" );
     gboolean need_sync    = Json_get_bool   ( thread_ai, "need_sync" );
 
-    if ( first_turn || old_valeur != valeur || old_in_range != in_range )
+    if ( need_sync || old_valeur != valeur || old_in_range != in_range )
      { Json_node_add_double ( thread_ai, "valeur", valeur );
        Json_node_add_bool   ( thread_ai, "in_range", in_range );
        Json_node_add_bool   ( thread_ai, "need_sync", FALSE );
@@ -219,7 +219,7 @@ end:
     gboolean old_etat   = Json_get_bool ( thread_di, "etat" );
     gboolean need_sync  = Json_get_bool ( thread_di, "need_sync" );
 
-    if ( first_turn || (old_etat != etat) )
+    if ( need_sync || (old_etat != etat) )
      { Json_node_add_bool ( thread_di, "etat", (etat ? TRUE : FALSE) );
        Json_node_add_bool ( thread_di, "need_sync", FALSE );
        Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d",

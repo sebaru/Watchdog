@@ -210,6 +210,37 @@
     Dls_data_set_REGISTRE ( vars, output, result );
   }
 /******************************************************************************************************************************/
+/* Dls_sync_all_output: Envoi une synchronisation globale de toutes les sorties DO et AO                                      */
+/* Entrée : le Dls_tree correspondant                                                                                         */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_sync_all_output ( gpointer user_data, struct DLS_PLUGIN *plugin )
+  { if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
+    GSList *liste = plugin->Dls_data_DO;
+    while ( liste )                                                   /* Calcul de la COMM du DLS a partir de ses dependances */
+     { struct DLS_DO *bit = liste->data;
+       JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Dls_DO_to_json ( RootNode, bit );
+          Partage->com_msrv.Liste_DO = g_slist_append ( Partage->com_msrv.Liste_DO, RootNode );
+        }
+       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+       liste = g_slist_next ( liste );
+     }
+
+    liste = plugin->Dls_data_AO;
+    while ( liste )                                                   /* Calcul de la COMM du DLS a partir de ses dependances */
+     { struct DLS_AO *bit = liste->data;
+       JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Dls_AO_to_json ( RootNode, bit );
+          Partage->com_msrv.Liste_AO = g_slist_append ( Partage->com_msrv.Liste_AO, RootNode );
+        }
+       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+       liste = g_slist_next ( liste );
+     }
+  }
+/******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
 /* Entrée : le Dls_tree correspondant                                                                                         */
 /* Sortie : rien                                                                                                              */

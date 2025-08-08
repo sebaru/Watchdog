@@ -145,6 +145,7 @@
  extern void Dls_run_archivage ( gpointer user_data, struct DLS_PLUGIN *plugin );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
+ extern void Dls_sync_all_output ( gpointer user_data, struct DLS_PLUGIN *plugin );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
 
