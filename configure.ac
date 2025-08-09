@@ -33,7 +33,7 @@ LT_INIT
 
 AM_PATH_GLIB_2_0( 2.2.2 )
 GLIB_GSETTINGS
-PKG_CHECK_MODULES( LIBSOUP, libsoup-3.0 >= 3.3 )
+dnl PKG_CHECK_MODULES( LIBSOUP, >= 3.3 )
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -83,7 +83,6 @@ Watchdogd/Modbus/Makefile \
 Watchdogd/Imsgs/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Dls/Makefile \
-Watchdogd/Http/Makefile \
 Watchdogd/Radio/Makefile \
 Watchdogd/Dmx/Makefile \
 Watchdogd/Meteo/Makefile \

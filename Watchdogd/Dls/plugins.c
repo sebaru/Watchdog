@@ -102,7 +102,7 @@
     if (package) Json_node_add_string ( RootNode, "package", package );
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/create", RootNode );
-    if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
+    if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info_new( __func__, Config.log_dls, LOG_ERR,
                  "API Request for DLS CREATE failed. '%s' not created.", tech_id );
        Json_node_unref ( api_result );
@@ -334,7 +334,7 @@
     Info_new( __func__, Config.log_dls, LOG_INFO, "Starting import of plugin '%s'", tech_id );
                                                                                  /* Récupère les metadata du plugin à charger */
     JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", "tech_id=%s", tech_id );
-    if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
+    if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': API Error.", tech_id );
        goto end;
      }
@@ -523,7 +523,7 @@ end:
  void Dls_Importer_plugins ( void )
   { gint top = Partage->top;
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/plugins", NULL );
-    if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
+    if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info_new( __func__, Config.log_dls, LOG_ERR, "API Request for /run/dls/plugins failed. No plugin loaded." );
        Json_node_unref ( api_result );
        return;

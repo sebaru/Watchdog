@@ -60,11 +60,8 @@
   };
 
 /************************************************ Définitions des prototypes **************************************************/
- extern void Stopper_fils ( void );                                                                          /* Dans thread.c */
- extern gboolean Demarrer_dls ( void );
+ extern gboolean Demarrer_dls ( void );                                                                      /* Dans thread.c */
  extern void Stopper_dls ( void );
- extern gboolean Demarrer_http ( void );
- extern gboolean Demarrer_arch ( void );
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );
  extern void Thread_Start_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );

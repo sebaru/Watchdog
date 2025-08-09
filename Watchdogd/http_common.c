@@ -74,7 +74,7 @@
     return(chunksize);
   }
 /******************************************************************************************************************************/
-/* Http_Post: Réalise une requete POST vers un site distant                                                                   */
+/* Http_Request: Réalise une requete GET ou POST vers un site distant                                                         */
 /* Entrée: L'url, le payload                                                                                                  */
 /* Sortie: la reponse json                                                                                                    */
 /******************************************************************************************************************************/
@@ -188,55 +188,7 @@ end:
     return(ResponseNode);
   }
 /******************************************************************************************************************************/
-/* Http_Add_Agent_signature: signe une requete d'un agent vers l'API Cloud                                                    */
-/* Entrée: le message                                                                                                         */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size )
-  { gchar *origin        = "abls-habitat.fr";
-    gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
-    gchar *domain_secret = Json_get_string ( Config.config, "domain_secret" );
-    gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
-    gchar timestamp[20];
-    g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
-
-    unsigned char hash_bin[EVP_MAX_MD_SIZE];
-    gint md_len;
-    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();                                                                   /* Calcul du SHA1 */
-    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
-    EVP_DigestUpdate(mdctx, domain_uuid,   strlen(domain_uuid));
-    EVP_DigestUpdate(mdctx, agent_uuid,    strlen(agent_uuid));
-    EVP_DigestUpdate(mdctx, domain_secret, strlen(domain_secret));
-    if (buf) EVP_DigestUpdate(mdctx, buf,  buf_size);
-    EVP_DigestUpdate(mdctx, timestamp,     strlen(timestamp));
-    EVP_DigestFinal_ex(mdctx, hash_bin, &md_len);
-    EVP_MD_CTX_free(mdctx);
-    gchar signature[64];
-    EVP_EncodeBlock( signature, hash_bin, 32 ); /* 256 bits -> 32 bytes */
-
-    SoupMessageHeaders *headers = soup_message_get_request_headers ( msg );
-    soup_message_headers_append ( headers, "Origin",           origin );
-    soup_message_headers_append ( headers, "X-ABLS-DOMAIN",    domain_uuid );
-    soup_message_headers_append ( headers, "X-ABLS-AGENT",     agent_uuid );
-    soup_message_headers_append ( headers, "X-ABLS-TIMESTAMP", timestamp );
-    soup_message_headers_append ( headers, "X-ABLS-SIGNATURE", signature );
-  }
-/******************************************************************************************************************************/
-/* Http_Send_json_response: Envoie le json en paramètre en prenant le lead dessus                                             */
-/* Entrée: le message, le buffer json, le code retour                                                                         */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode )
-  { if (!RootNode) soup_server_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_STATIC, NULL, 0 );
-    else
-     { gchar *buf = Json_node_to_string ( RootNode );
-       soup_server_message_set_response ( msg, "application/json; charset=UTF-8", SOUP_MEMORY_TAKE, buf, strlen(buf) );
-       Json_node_unref ( RootNode );
-     }
-    soup_server_message_set_status( msg, code, message );
-  }
-/******************************************************************************************************************************/
-/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Http_Post_to_global_API: Post un payload vers l'API                                                                        */
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/
@@ -260,7 +212,7 @@ end:
     return(ResponseNode);
  }
 /******************************************************************************************************************************/
-/* Http_Msg_to_Json: Récupère la partie payload du msg, au format JSON                                                        */
+/* Http_Get_from_global_API: Récupère la partie payload auprès de l'API                                                       */
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
 /******************************************************************************************************************************/

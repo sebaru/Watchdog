@@ -27,7 +27,6 @@
 
 #ifndef _MODBUS_H_
  #define _MODBUS_H_
- #include <libsoup/soup.h>
  #include <json-glib/json-glib.h>
 
  enum

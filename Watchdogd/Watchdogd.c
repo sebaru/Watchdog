@@ -188,7 +188,7 @@
     Partage->Maps_to_thread   = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_local );
 
     Partage->Maps_root = Http_Post_to_global_API ( "/run/mapping/list", NULL );
-    if (Partage->Maps_root && Json_get_int ( Partage->Maps_root, "api_status" ) == SOUP_STATUS_OK)
+    if (Partage->Maps_root && Json_get_int ( Partage->Maps_root, "http_code" ) == 200)
      { GList *Results = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "mappings" ) );
        GList *results = Results;
        while(results)
@@ -363,7 +363,7 @@
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/agent/start", RootNode );
        Json_node_unref ( RootNode );
-       if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+       if (api_result && Json_get_int ( api_result, "http_code" ) == 200)
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "API Request for AGENT START OK." ); }
        else
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for AGENT START failed. Sleep 5s and stopping." );
@@ -435,7 +435,6 @@
 /************************************************ Initialisation des mutex ****************************************************/
     time ( &Partage->start_time );
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
-    pthread_mutex_init( &Partage->com_http.synchro, NULL );
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
 
@@ -446,9 +445,6 @@
 /********************************************* Active les threads principaux **************************************************/
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Debut boucle sans fin" );
     Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-
-    if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb HTTP" ); }
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
@@ -501,7 +497,6 @@
            { JsonNode *RootNode = Json_node_create();
              Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
              MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
-             Json_node_unref ( RootNode );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 
@@ -536,7 +531,6 @@
 
     Stopper_dls();                /* On arrete DLS avant les threads pour assurer la sauvegarde des bits internes sur l'API ! */
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
-    Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
 
     if (Config.instance_is_master)                                        /* Dechargement DLS après les threads IO, dls, arch */
      { Dls_Decharger_plugins();                                                               /* Dechargement des modules DLS */

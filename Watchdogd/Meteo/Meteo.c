@@ -133,7 +133,7 @@
   { Thread_init ( module, sizeof(struct METEO_VARS) );
     struct METEO_VARS *vars = module->vars;
 
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    /*gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );*/
 
     vars->sunrise = Mnemo_create_thread_HORLOGE ( module, "SUNRISE", "Horloge du levé du soleil" );
     vars->sunset  = Mnemo_create_thread_HORLOGE ( module, "SUNSET",  "Horloge du couché du soleil" );

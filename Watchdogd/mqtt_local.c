@@ -49,7 +49,7 @@
   }
 /******************************************************************************************************************************/
 /* MQTT_local_on_message_CB: Appelé par mosquitto lorsque l'on recoit un message MQTT de la part du MQTT local                */
-/* Entrée: les parametres de la libsoup                                                                                       */
+/* Entrée: les parametres MQTT                                                                                                */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MQTT_local_on_message_CB ( struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg )

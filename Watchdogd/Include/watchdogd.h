@@ -31,7 +31,6 @@
  #include <glib.h>
  #include <string.h>
  #include <openssl/ssl.h>
- #include <libsoup/soup.h>
  #include <uuid/uuid.h>
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
@@ -40,7 +39,6 @@
  #include "Dls.h"
  #include "Thread.h"
  #include "config.h"
- #include "Http.h"
  #include "Config.h"
  #include "Mqtt.h"
 
@@ -60,7 +58,6 @@
  struct COM_MSRV                                                            /* Communication entre DLS et le serveur Watchdog */
   { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    pthread_t TID_arch_sync;                                                                         /* Identifiant du thread */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
@@ -87,7 +84,6 @@
     struct COM_DB com_db;                                                      /* Interfaçage avec le code de gestion des BDD */
     struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
-    struct COM_HTTP com_http;                                                                       /* Zone mémoire pour HTTP */
 
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
@@ -113,9 +109,7 @@
  extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
  extern void UUID_Load ( gchar *thread, gchar *target );
 
- extern void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size );                  /* Dans http_common.c */
- extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
- extern void Http_Init ( void );
+ extern void Http_Init ( void );                                                                        /* Dans http_common.c */
  extern void Http_End ( void );
  extern JsonNode *Http_Request ( gchar *url, JsonNode *json_payload, GSList *headers );
  extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );

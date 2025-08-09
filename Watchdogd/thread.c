@@ -99,19 +99,10 @@
      }
     g_strfreev ( tokens );
 
-#warning a virer
-    Json_node_add_string ( response, "topic", msg->topic );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, response );
     pthread_mutex_unlock ( &module->synchro );
   }
-/******************************************************************************************************************************/
-/* Http_Accept_certificate: appelé pour vérifier le certificat TLS présenté par le serveur                                    */
-/* Entrée: Le certificat                                                                                                      */
-/* Sortie: booléen                                                                                                            */
-/******************************************************************************************************************************/
- gboolean Http_Accept_certificate ( SoupMessage* self, GTlsCertificate* tls_peer_certificate, GTlsCertificateFlags tls_peer_errors, gpointer user_data )
-  { return(TRUE); }
 /******************************************************************************************************************************/
 /* Thread_loop: S'occupe de la telemetrie, de la comm périodique, de la vitesse de rotation                                   */
 /* Entrée: La structure afférente                                                                                             */
@@ -453,7 +444,7 @@
      }
 
     module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
-    if (module->config && Json_get_int ( module->config, "api_status" ) == SOUP_STATUS_OK)
+    if (module->config && Json_get_int ( module->config, "http_code" ) == 200)
      { module->Thread_debug = Json_get_bool ( module->config, "debug" );
        module->Thread_run   = Json_get_bool ( module->config, "enable" );
      }
@@ -510,7 +501,7 @@
   { JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/load", NULL );
     if (!api_result) { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Error for /run/thread LOAD",__func__ ); return; }
 
-    if (Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)                                /* Chargement des modules */
+    if (Json_get_int ( api_result, "http_code" ) == 200)                                           /* Chargement des modules */
      { JsonArray *array = Json_get_array ( api_result, "threads" );
        Info_new( __func__, Config.log_msrv, LOG_INFO, "%s: Loading %d thread",__func__, json_array_get_length(array) );
        Json_node_foreach_array_element ( api_result, "threads", Thread_Start_one_thread, NULL );
@@ -540,43 +531,5 @@
     Partage->com_dls.Thread_run = FALSE;
     if ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                               /* Attente fin DLS */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
-  }
-/******************************************************************************************************************************/
-/* Demarrer_http: Processus HTTP                                                                                              */
-/* Entrée: rien                                                                                                               */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Demarrer_http ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage %d", getpid() );
-    if (Partage->com_http.Thread_run == TRUE)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "%s: An instance is already running %d",__func__, Partage->com_http.TID );
-       return(FALSE);
-     }
-    memset( &Partage->com_http, 0, sizeof(Partage->com_http) );                     /* Initialisation des variables du thread */
-    if ( pthread_create( &Partage->com_http.TID, NULL, (void *)Run_HTTP, NULL ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
-       return(FALSE);
-     }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "thread http (%p) seems to be running", Partage->com_http.TID );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Stopper_fils: arret de tous les fils Watchdog                                                                              */
-/* Entré/Sortie: néant                                                                                                        */
-/******************************************************************************************************************************/
- void Stopper_fils ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Debut stopper_fils" );
-
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for ARCH_SYNC (%p) to finish", Partage->com_msrv.TID_arch_sync );
-    if ( Partage->com_msrv.TID_arch_sync ) pthread_join ( Partage->com_msrv.TID_arch_sync, NULL );
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, ARCH_SYNC is down" );
-
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for HTTP (%p) to finish", Partage->com_http.TID );
-    Partage->com_http.Thread_run = FALSE;
-    if ( Partage->com_http.TID ) pthread_join ( Partage->com_http.TID, NULL );                            /* Attente fin HTTP */
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, HTTP is down" );
-
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Fin stopper_fils" );
-    sleep(1);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

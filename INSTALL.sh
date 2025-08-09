@@ -15,7 +15,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y gawk git libtool automake autoconf gcc gcc-c++ redhat-rpm-config
   dnf install -y glib2-devel openssl mosquitto-devel
   dnf install -y nut-devel libuuid-devel
-  dnf install -y popt-devel libsoup3-devel gtts libcurl-devel
+  dnf install -y popt-devel gtts libcurl-devel
   dnf install -y json-glib-devel gammu-devel
   dnf install -y wireplumber mpg123 sox libusb1-devel libgpiod-devel
   dnf install -y libstrophe-devel libphidget22-devel
@@ -43,7 +43,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y libpopt-dev libssl-dev libmariadb-dev libjwt-dev
   apt install -y sox libsox-fmt-all python3-pip mpg123
   apt install -y libjson-glib-dev libgpiod-dev
-  apt install -y libsoup-3.0-dev alsa-utils libsystemd-dev
+  apt install -y alsa-utils libsystemd-dev
   pip3 install gTTS-token gTTS --upgrade
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
   apt install -y libphidget22 libphidget22-dev

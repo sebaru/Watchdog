@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 noinst_HEADERS    = Erreur.h \
-                    Config.h Http.h \
+                    Config.h \
                     Json.h Thread.h \
                     watchdogd.h Dls.h \
                     Mqtt.h
