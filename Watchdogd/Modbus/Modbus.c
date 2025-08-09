@@ -717,6 +717,7 @@
               { vars->AI[num] = element;
                 Json_node_add_double ( vars->AI[num], "valeur", 0.0 );
                 Json_node_add_bool   ( vars->AI[num], "in_range", FALSE );
+                Json_node_add_bool ( vars->AI[num], "need_sync", TRUE );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AI '%s' (%s, %s)",
                           Json_get_string ( vars->AI[num], "thread_acronyme" ),
                           Json_get_string ( vars->AI[num], "libelle" ),
@@ -739,6 +740,7 @@
              if ( 0 <= num && num < vars->nbr_entree_tor )
               { vars->DI[num] = element;
                 Json_node_add_bool ( vars->DI[num], "etat", FALSE );
+                Json_node_add_bool ( vars->AI[num], "need_sync", TRUE );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New DI '%s' (%s), flip=%d",
                           Json_get_string ( vars->DI[num], "thread_acronyme" ),
                           Json_get_string ( vars->DI[num], "libelle" ),
