@@ -81,7 +81,7 @@
           if (Node)
            { Json_node_add_string ( Node, "tech_id",  Json_get_string ( RootNode, "tech_id" ) );
              Json_node_add_string ( Node, "acronyme", Json_get_string ( RootNode, "acronyme" ) );
-             Json_node_add_bool   ( Node, "valeur",   Json_get_bool   ( RootNode, "valeur" ) );
+             Json_node_add_double ( Node, "valeur",   Json_get_double ( RootNode, "valeur" ) );
              MQTT_Send_to_topic_new ( Partage->com_msrv.MQTT_local_session, Node, TRUE, "SET_AO/%s/%s",
                                       Json_get_string ( RootNode, "thread_tech_id" ),
                                       Json_get_string ( RootNode, "thread_acronyme" ) );
