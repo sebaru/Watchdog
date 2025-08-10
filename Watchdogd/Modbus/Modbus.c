@@ -111,9 +111,9 @@
              gint new_val_int;
              switch( type_borne )
               { case WAGO_750550: if (valeur > 10.0) valeur = 10.0;                                       /* Borne WAGO 0-10V */
-+                                 if (valeur <  0.0) valeur = 0.0;
-+                                 new_val_int = (gint) (32767.0 * valeur / 10.0);        /* Borne sur 32768 valeurs de sortie */
-+                                 break;
+                                  if (valeur <  0.0) valeur = 0.0;
+                                  new_val_int = (gint) (32767.0 * valeur / 10.0);        /* Borne sur 32768 valeurs de sortie */
+                                  break;
 /*              case WAGO_XXX   : gdouble min     = Json_get_double ( vars->AO[num], "min" );
                                   gdouble max     = Json_get_double ( vars->AO[num], "max" );
                                   if (valeur < min) valeur = min;
