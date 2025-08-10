@@ -108,13 +108,18 @@
         { if ( vars->AO && vars->AO[num] &&
                !strcasecmp ( Json_get_string(vars->AO[num], "thread_acronyme"), msg_thread_acronyme ) )
            { gint type_borne = Json_get_int    ( vars->AO[num], "type_borne" );
-             gdouble min     = Json_get_double ( vars->AO[num], "min" );
-             gdouble max     = Json_get_double ( vars->AO[num], "max" );
-             if (valeur < min) valeur = min;
-             if (valeur > max) valeur = max;
              gint new_val_int;
              switch( type_borne )
-              { case WAGO_750550: new_val_int = (gint) (4095 * (valeur - min) / max); break;
+              { case WAGO_750550: if (valeur > 10.0) valeur = 10.0;                                       /* Borne WAGO 0-10V */
++                                 if (valeur <  0.0) valeur = 0.0;
++                                 new_val_int = (gint) (32767.0 * valeur / 10.0);        /* Borne sur 32768 valeurs de sortie */
++                                 break;
+/*              case WAGO_XXX   : gdouble min     = Json_get_double ( vars->AO[num], "min" );
+                                  gdouble max     = Json_get_double ( vars->AO[num], "max" );
+                                  if (valeur < min) valeur = min;
+                                  if (valeur > max) valeur = max;
+                                  new_val_int = (gint) (4095 * (valeur - min) / max);
+                                  break;*/
                 default: new_val_int = 0;
               }
              Json_node_add_int ( vars->AO[num], "val_int", new_val_int );
@@ -681,8 +686,8 @@
      { for ( cpt_byte = 3, cpt = 0; cpt<vars->nbr_sortie_ana; cpt++)
         { if (vars->AO[cpt])
            { gint val_int = Json_get_int ( vars->AO[cpt], "val_int" );
-             requete.data [cpt_byte  ] =  val_int >> 5;
-             requete.data [cpt_byte+1] = (val_int & 0x1F)<<3;
+             requete.data [cpt_byte  ] =  val_int >> 8;                                                /* Octet de poids fort */
+             requete.data [cpt_byte+1] =  val_int & 0xFF;                                            /* Octet de poids faible */
              cpt_byte += 2;
            }
         }
