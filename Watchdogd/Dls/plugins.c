@@ -457,9 +457,9 @@
 
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)               /* DlOpen before remap (sinon on mappe pas la bonne zone mémoire */
      { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
+
     Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */
 
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
 /****************************************** Calcul des Thread_tech_ids de dependances *****************************************/
     if (plugin->Thread_tech_ids) { g_slist_free_full ( plugin->Thread_tech_ids, (GDestroyNotify) g_free ); plugin->Thread_tech_ids = NULL; }
 
@@ -472,6 +472,7 @@
      }
     g_list_free(Thread_tech_ids);
 
+    pthread_mutex_unlock( &Partage->com_dls.synchro );                                              /* Libératin Verrou D.L.S */
 end:
     Json_node_unref(api_result);
     pthread_mutex_lock ( &Nbr_compil_mutex ); /* Decremente le compteur de thread (si fonction appelée en mode pthread_create */
