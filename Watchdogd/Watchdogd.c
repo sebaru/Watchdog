@@ -139,13 +139,17 @@
                  __func__, Json_get_string ( key, "tech_id" ), Json_get_string ( key, "acronyme" ) );
        return(FALSE);
      }
+
+    gboolean found = FALSE;
+    pthread_rwlock_rdlock(&Partage->Maps_synchro);
     JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, key );
     if (map && Json_has_member ( map, "thread_tech_id" ) && Json_has_member ( map, "thread_acronyme" ) )
      { Json_node_add_string ( key, "thread_tech_id",  Json_get_string ( map, "thread_tech_id" ) );
        Json_node_add_string ( key, "thread_acronyme", Json_get_string ( map, "thread_acronyme" ) );
-       return(TRUE);
+       found = TRUE;
      }
-    return(FALSE);
+    pthread_rwlock_unlock(&Partage->Maps_synchro);
+    return(found);
   }
 /******************************************************************************************************************************/
 /* MSRV_Map_to_thread: Met à jour à buffer json en mappant l'equivalent thread d'un bit interne local                         */
@@ -157,32 +161,27 @@
                  __func__, Json_get_string ( key, "thread_tech_id" ), Json_get_string ( key, "thread_acronyme" ) );
        return(FALSE);
      }
+
+    gboolean found = FALSE;
+    pthread_rwlock_rdlock(&Partage->Maps_synchro);
     JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, key );
     if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
      { Json_node_add_string ( key, "tech_id",  Json_get_string ( map, "tech_id" ) );
        Json_node_add_string ( key, "acronyme", Json_get_string ( map, "acronyme" ) );
-       return(TRUE);
+       found = TRUE;
      }
-    return(FALSE);
+    pthread_rwlock_unlock(&Partage->Maps_synchro);
+    return(found);
   }
 /******************************************************************************************************************************/
 /* MSRV_Remap: Charge les données de mapping en mémoire                                                                       */
 /* Entrée: néant                                                                                                              */
 /******************************************************************************************************************************/
  void MSRV_Remap( void )
-  { pthread_mutex_lock( &Partage->com_msrv.synchro );
-    if (Partage->Maps_from_thread)
-     { g_tree_destroy ( Partage->Maps_from_thread );
-       Partage->Maps_from_thread = NULL;
-     }
-    if (Partage->Maps_to_thread)
-     { g_tree_destroy ( Partage->Maps_to_thread );
-       Partage->Maps_to_thread = NULL;
-     }
-    if (Partage->Maps_root)
-     { Json_node_unref ( Partage->Maps_root );
-       Partage->Maps_root = NULL;
-     }
+  { pthread_rwlock_wrlock(&Partage->Maps_synchro);                                      /* Dechargement des données actuelles */
+    if (Partage->Maps_from_thread) { g_tree_destroy  ( Partage->Maps_from_thread ); Partage->Maps_from_thread = NULL; }
+    if (Partage->Maps_to_thread)   { g_tree_destroy  ( Partage->Maps_to_thread );   Partage->Maps_to_thread   = NULL; }
+    if (Partage->Maps_root)        { Json_node_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
 
     Partage->Maps_from_thread = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_thread );
     Partage->Maps_to_thread   = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_local );
@@ -199,7 +198,7 @@
         }
        g_list_free(Results);
      } else { Json_node_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    pthread_rwlock_unlock(&Partage->Maps_synchro);
   }
 /******************************************************************************************************************************/
 /* Drop_privileges: Passe sous un autre user que root                                                                         */
@@ -434,6 +433,7 @@
 
 /************************************************ Initialisation des mutex ****************************************************/
     time ( &Partage->start_time );
+    pthread_rwlock_init( &Partage->Maps_synchro, NULL );                               /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
@@ -537,13 +537,17 @@
        Json_node_unref ( Partage->com_dls.HORLOGE_ticks );                                   /* Libération des bits d'horloge */
      }
 
-    if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
-    if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
-    Json_node_unref ( Partage->Maps_root );
+    pthread_rwlock_wrlock(&Partage->Maps_synchro);
+    if (Partage->Maps_from_thread) { g_tree_destroy  ( Partage->Maps_from_thread ); Partage->Maps_from_thread = NULL; }
+    if (Partage->Maps_to_thread)   { g_tree_destroy  ( Partage->Maps_to_thread );   Partage->Maps_to_thread   = NULL; }
+    if (Partage->Maps_root)        { Json_node_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
+    pthread_rwlock_unlock(&Partage->Maps_synchro);
+
     g_slist_free ( Partage->com_msrv.liste_visuel );
     g_slist_free_full ( Partage->com_msrv.liste_msg, (GDestroyNotify)g_free );
 
 /************************************************* Dechargement des mutex *****************************************************/
+    pthread_rwlock_destroy( &Partage->Maps_synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_db.synchro );
