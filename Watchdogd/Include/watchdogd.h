@@ -50,11 +50,6 @@
 
  #define VERROU_SERVEUR              "watchdogd.lock"
 
- struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */
-  { pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    GSList *Liste;                                                              /* Liste des requetes en cours de realisation */
-  };
-
  struct COM_MSRV                                                            /* Communication entre DLS et le serveur Watchdog */
   { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
@@ -79,7 +74,6 @@
     guint audit_tour_dls_per_sec;
     guint audit_tour_dls_per_sec_hold;
                                                                                                     /* Interfacage avec D.L.S */
-    struct COM_DB com_db;                                                      /* Interfaçage avec le code de gestion des BDD */
     struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
 
