@@ -70,11 +70,11 @@
      }
 
     cpt=0;
-    while ( Partage->com_msrv.Liste_AO && cpt < 50 )
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
-       RootNode = Partage->com_msrv.Liste_AO->data;                                            /* Recuperation du numero de a */
-       Partage->com_msrv.Liste_AO = g_slist_remove ( Partage->com_msrv.Liste_AO, RootNode );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    while ( Partage->Liste_AO && cpt < 50 )
+     { pthread_rwlock_wrlock( &Partage->Liste_AO_synchro );                            /* Ajout dans la liste de AO à traiter */
+       RootNode = Partage->Liste_AO->data;                                                    /* Recuperation du numero de AO */
+       Partage->Liste_AO = g_slist_remove ( Partage->Liste_AO, RootNode );
+       pthread_rwlock_unlock( &Partage->Liste_AO_synchro );                            /* Ajout dans la liste de AO à traiter */
 
        if (MSRV_Map_to_thread ( RootNode ))
         { JsonNode *Node = Json_node_create ();

@@ -102,9 +102,9 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Dls_AO_to_json ( RootNode, bit );
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
-       Partage->com_msrv.Liste_AO = g_slist_append( Partage->com_msrv.Liste_AO, RootNode );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       pthread_rwlock_wrlock( &Partage->Liste_AO_synchro );                           /* Ajout dans la liste des AO a traiter */
+       Partage->Liste_AO = g_slist_append( Partage->Liste_AO, RootNode );
+       pthread_rwlock_unlock( &Partage->Liste_AO_synchro );
      }
     else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
     Partage->audit_bit_interne_per_sec++;
