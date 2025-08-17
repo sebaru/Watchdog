@@ -61,7 +61,6 @@
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
-    GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
     GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
     struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
@@ -89,6 +88,9 @@
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
+
+    pthread_rwlock_t Liste_DO_synchro;                                          /* Mutex de synchronisation des DigitalOutput */
+    GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

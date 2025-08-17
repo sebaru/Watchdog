@@ -41,11 +41,11 @@
     gint cpt;
 
     cpt=0;
-    while ( Partage->com_msrv.Liste_DO && cpt < 50 )
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-       RootNode = Partage->com_msrv.Liste_DO->data;                                               /* Recuperation du numero de a */
-       Partage->com_msrv.Liste_DO = g_slist_remove ( Partage->com_msrv.Liste_DO, RootNode );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    while ( Partage->Liste_DO && cpt < 50 )
+     { pthread_rwlock_wrlock ( &Partage->Liste_DO_synchro );
+       RootNode = Partage->Liste_DO->data;                                                     /* Recuperation du numero de a */
+       Partage->Liste_DO = g_slist_remove ( Partage->Liste_DO, RootNode );
+       pthread_rwlock_unlock ( &Partage->Liste_DO_synchro );
 
        if (MSRV_Map_to_thread ( RootNode ))
         { JsonNode *Node = Json_node_create ();

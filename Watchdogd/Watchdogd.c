@@ -434,6 +434,7 @@
 /************************************************ Initialisation des mutex ****************************************************/
     time ( &Partage->start_time );
     pthread_rwlock_init( &Partage->Maps_synchro, NULL );                               /* Initialisation des mutex de synchro */
+    pthread_rwlock_init( &Partage->Liste_DO_synchro, NULL );                           /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
     pthread_mutex_init( &Partage->com_db.synchro, NULL );
@@ -548,6 +549,7 @@
 
 /************************************************* Dechargement des mutex *****************************************************/
     pthread_rwlock_destroy( &Partage->Maps_synchro );
+    pthread_rwlock_destroy( &Partage->Liste_DO_synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_db.synchro );
