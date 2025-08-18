@@ -438,6 +438,7 @@
     pthread_rwlock_init( &Partage->Liste_AO_synchro, NULL );                           /* Initialisation des mutex de synchro */
     pthread_rwlock_init( &Partage->Threads_synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_rwlock_init( &Partage->Liste_visuel_synchro, NULL );                       /* Initialisation des mutex de synchro */
+    pthread_rwlock_init( &Partage->Liste_msg_synchro, NULL );                          /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
 
@@ -504,9 +505,9 @@
            }
 
 /*---------------------------------------------- Report des visuels ----------------------------------------------------------*/
-          if (Partage->Liste_visuel)           MQTT_Send_visuels_to_API ();                    /* Traitement des I dynamiques */
+          if (Partage->Liste_visuel)  MQTT_Send_visuels_to_API();                              /* Traitement des I dynamiques */
 /*---------------------------------------------- Report des messages ---------------------------------------------------------*/
-          if (Partage->com_msrv.liste_msg)     MQTT_Send_MSGS_to_API();
+          if (Partage->Liste_msg)     MQTT_Send_MSGS_to_API();                    /* Traitement des messages en fil d'attente */
 
           usleep(1000);
           sched_yield();
@@ -550,7 +551,9 @@
     g_slist_free ( Partage->Liste_visuel ); Partage->Liste_visuel = NULL;
     pthread_rwlock_unlock(&Partage->Liste_visuel_synchro);
 
-    g_slist_free_full ( Partage->com_msrv.liste_msg, (GDestroyNotify)g_free );
+    pthread_rwlock_wrlock(&Partage->Liste_msg_synchro);
+    g_slist_free_full ( Partage->Liste_msg, (GDestroyNotify)g_free ); Partage->Liste_msg = NULL;
+    pthread_rwlock_unlock(&Partage->Liste_msg_synchro);
 
 /************************************************* Dechargement des mutex *****************************************************/
     pthread_rwlock_destroy( &Partage->Maps_synchro );
@@ -558,6 +561,7 @@
     pthread_rwlock_destroy( &Partage->Liste_AO_synchro );
     pthread_rwlock_destroy( &Partage->Threads_synchro );
     pthread_rwlock_destroy( &Partage->Liste_visuel_synchro );
+    pthread_rwlock_destroy( &Partage->Liste_msg_synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
 

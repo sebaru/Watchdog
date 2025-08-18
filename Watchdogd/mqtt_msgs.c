@@ -124,14 +124,14 @@ encore:
  void MQTT_Send_MSGS_to_API ( void )
   { gint cpt = 0;
 
-    while (Partage->com_msrv.liste_msg && Partage->com_msrv.Thread_run == TRUE && cpt<100)
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
-       struct DLS_MESSAGE_EVENT *event = Partage->com_msrv.liste_msg->data;                  /* Recuperation du numero de msg */
-       Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    while (Partage->Liste_msg && Partage->com_msrv.Thread_run == TRUE && cpt<100)
+     { pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                          /* Ajout dans la liste de msg a traiter */
+       struct DLS_MESSAGE_EVENT *event = Partage->Liste_msg->data;                           /* Recuperation du numero de msg */
+       Partage->Liste_msg = g_slist_remove ( Partage->Liste_msg, event );
+       pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                          /* Ajout dans la liste de msg a traiter */
        Info_new( __func__, Config.log_msrv, LOG_INFO,
                 "Handle MSG'%s:%s'=%d, Reste a %d a traiter",
-                 event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
+                 event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->Liste_msg) );
 
        if (event->etat == 1)
         { MSGS_Convert_msg_on_to_histo ( event->msg );

@@ -118,9 +118,9 @@
        if (event)
         { event->etat = FALSE;                                                                        /* On eteint le message */
           event->msg  = msg;
-          pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Ajout dans la liste de msg a traiter */
-          Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                       /* Ajout dans la liste de msg a traiter */
+          Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
+          pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                       /* Ajout dans la liste de msg a traiter */
         } else Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_ERR,
                          "Memory error for MSG'%s:%s' = 0 (etat)", msg->tech_id, msg->acronyme );
      }
@@ -134,9 +134,9 @@
 
     event->etat = etat;                                                                 /* Recopie de l'état dans l'evenement */
     event->msg  = msg;
-    pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-    Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                             /* Ajout dans la liste de msg a traiter */
+    Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
+    pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                             /* Ajout dans la liste de msg a traiter */
   }
 /******************************************************************************************************************************/
 /* Dls_MESSAGE_to_json : Formate un bit au format JSON                                                                        */

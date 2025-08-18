@@ -54,7 +54,6 @@
   { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
-    GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
     struct mosquitto *MQTT_API_session;                                                    /* Session MQTT vers le broker API */
     gboolean MQTT_connected;                                                         /* TRUE si la connexion au broker est OK */
@@ -91,6 +90,9 @@
 
     pthread_rwlock_t Liste_visuel_synchro;                                            /* Mutex de synchronisation des Visuels */
     GSList *Liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
+
+    pthread_rwlock_t Liste_msg_synchro;                                              /* Mutex de synchronisation des Messages */
+    GSList *Liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
   };
 
 /************************************************ Définitions des prototypes **************************************************/
