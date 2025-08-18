@@ -124,7 +124,7 @@ encore:
  void MQTT_Send_MSGS_to_API ( void )
   { gint cpt = 0;
 
-    while (Partage->Liste_msg && Partage->com_msrv.Thread_run == TRUE && cpt<100)
+    while (Partage->Liste_msg && Partage->Thread_run == TRUE && cpt<100)
      { pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                          /* Ajout dans la liste de msg a traiter */
        struct DLS_MESSAGE_EVENT *event = Partage->Liste_msg->data;                           /* Recuperation du numero de msg */
        Partage->Liste_msg = g_slist_remove ( Partage->Liste_msg, event );
@@ -139,7 +139,7 @@ encore:
           if ( !event->msg->last_on || (Partage->top >= event->msg->last_on + rate_limit*10 ) )
            { event->msg->last_on = Partage->top;
              MQTT_Send_to_API ( event->msg->source_node, "DLS_HISTO" );
-             MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "DLS_HISTO", event->msg->source_node );
+             MQTT_Send_to_topic ( Partage->MQTT_local_session, "threads", "DLS_HISTO", event->msg->source_node );
            }
           else
            { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
@@ -150,7 +150,7 @@ encore:
         { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );
           if(histo)
            { MQTT_Send_to_API ( histo, "DLS_HISTO" );
-             MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, "threads", "DLS_HISTO", histo );
+             MQTT_Send_to_topic ( Partage->MQTT_local_session, "threads", "DLS_HISTO", histo );
              Json_node_unref ( histo );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
                             event->msg->tech_id, event->msg->acronyme );

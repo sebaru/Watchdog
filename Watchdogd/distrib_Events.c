@@ -53,7 +53,7 @@
            { Json_node_add_string ( Node, "tech_id",  Json_get_string ( RootNode, "tech_id" ) );
              Json_node_add_string ( Node, "acronyme", Json_get_string ( RootNode, "acronyme" ) );
              Json_node_add_bool   ( Node, "etat",     Json_get_bool   ( RootNode, "etat" ) );
-             MQTT_Send_to_topic_new ( Partage->com_msrv.MQTT_local_session, Node, TRUE, "SET_DO/%s/%s",
+             MQTT_Send_to_topic_new ( Partage->MQTT_local_session, Node, TRUE, "SET_DO/%s/%s",
                                       Json_get_string ( RootNode, "thread_tech_id" ),
                                       Json_get_string ( RootNode, "thread_acronyme" ) );
              Json_node_unref ( Node );
@@ -82,7 +82,7 @@
            { Json_node_add_string ( Node, "tech_id",  Json_get_string ( RootNode, "tech_id" ) );
              Json_node_add_string ( Node, "acronyme", Json_get_string ( RootNode, "acronyme" ) );
              Json_node_add_double ( Node, "valeur",   Json_get_double ( RootNode, "valeur" ) );
-             MQTT_Send_to_topic_new ( Partage->com_msrv.MQTT_local_session, Node, TRUE, "SET_AO/%s/%s",
+             MQTT_Send_to_topic_new ( Partage->MQTT_local_session, Node, TRUE, "SET_AO/%s/%s",
                                       Json_get_string ( RootNode, "thread_tech_id" ),
                                       Json_get_string ( RootNode, "thread_acronyme" ) );
              Json_node_unref ( Node );

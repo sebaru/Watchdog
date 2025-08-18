@@ -102,32 +102,32 @@ end:
   { gint retour;
     gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
 
-    Partage->com_msrv.MQTT_local_session = mosquitto_new( agent_uuid, FALSE, NULL );
-    if (!Partage->com_msrv.MQTT_local_session)
+    Partage->MQTT_local_session = mosquitto_new( agent_uuid, FALSE, NULL );
+    if (!Partage->MQTT_local_session)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local session error." ); return(FALSE); }
 
-    mosquitto_log_callback_set        ( Partage->com_msrv.MQTT_local_session, MQTT_on_log_CB );
-    mosquitto_connect_callback_set    ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_connect_CB );
-    mosquitto_disconnect_callback_set ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_disconnect_CB );
-    mosquitto_message_callback_set    ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_message_CB );
-    mosquitto_username_pw_set         ( Partage->com_msrv.MQTT_local_session, Json_get_string ( Config.config, "agent_uuid" ), NULL );
+    mosquitto_log_callback_set        ( Partage->MQTT_local_session, MQTT_on_log_CB );
+    mosquitto_connect_callback_set    ( Partage->MQTT_local_session, MQTT_local_on_connect_CB );
+    mosquitto_disconnect_callback_set ( Partage->MQTT_local_session, MQTT_local_on_disconnect_CB );
+    mosquitto_message_callback_set    ( Partage->MQTT_local_session, MQTT_local_on_message_CB );
+    mosquitto_username_pw_set         ( Partage->MQTT_local_session, Json_get_string ( Config.config, "agent_uuid" ), NULL );
 
     /*if (Config.mqtt_over_ssl)
-     { mosquitto_tls_set( Partage->com_msrv.MQTT_local_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }*/
+     { mosquitto_tls_set( Partage->MQTT_local_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }*/
 
-    retour = mosquitto_connect( Partage->com_msrv.MQTT_local_session, Config.master_hostname, 1883, 60 );
+    retour = mosquitto_connect( Partage->MQTT_local_session, Config.master_hostname, 1883, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local connection to '%s:1883' error: %s",
                  Config.master_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
      }
 
-    MQTT_Subscribe ( Partage->com_msrv.MQTT_local_session, "SET_DI/#" );
-    MQTT_Subscribe ( Partage->com_msrv.MQTT_local_session, "SET_DI_PULSE/#" );
-    MQTT_Subscribe ( Partage->com_msrv.MQTT_local_session, "SET_AI/#" );
-    MQTT_Subscribe ( Partage->com_msrv.MQTT_local_session, "SET_WATCHDOG/#" );
+    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI/#" );
+    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI_PULSE/#" );
+    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_AI/#" );
+    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_WATCHDOG/#" );
 
-    retour = mosquitto_loop_start( Partage->com_msrv.MQTT_local_session );
+    retour = mosquitto_loop_start( Partage->MQTT_local_session );
     if ( retour != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local loop not started: %s", mosquitto_strerror ( retour ) );
        return(FALSE);
@@ -142,10 +142,10 @@ end:
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void MQTT_Stop_MQTT_LOCAL ( void )
-  { mosquitto_disconnect( Partage->com_msrv.MQTT_local_session );
-    mosquitto_loop_stop( Partage->com_msrv.MQTT_local_session, FALSE );
-    mosquitto_destroy( Partage->com_msrv.MQTT_local_session );
-    Partage->com_msrv.MQTT_local_session = NULL;
+  { mosquitto_disconnect( Partage->MQTT_local_session );
+    mosquitto_loop_stop( Partage->MQTT_local_session, FALSE );
+    mosquitto_destroy( Partage->MQTT_local_session );
+    Partage->MQTT_local_session = NULL;
   }
 /******************************************************************************************************************************/
 /* Mqtt_Send_to_topic: Envoie le node au broker                                                                               */

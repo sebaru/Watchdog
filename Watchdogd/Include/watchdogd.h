@@ -50,20 +50,11 @@
 
  #define VERROU_SERVEUR              "watchdogd.lock"
 
- struct COM_MSRV                                                            /* Communication entre DLS et le serveur Watchdog */
-  { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-                                                                       /* Distribution aux threads (par systeme d'abonnement) */
-    struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
-    struct mosquitto *MQTT_API_session;                                                    /* Session MQTT vers le broker API */
-    gboolean MQTT_connected;                                                         /* TRUE si la connexion au broker est OK */
-    GSList *MQTT_messages;                                                               /* Liste des messages recus via MQTT */
-  };
-
- struct PARTAGE                                                                            /* Structure des données partagées */
+  struct PARTAGE                                                                            /* Structure des données partagées */
   { gint  taille_partage;
     gchar version[16];
     time_t start_time;                                                                         /* Date de start de l'instance */
+    gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     guint top;                                                                         /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                                        /* Top de chien de garde des plugins DLS */
     guint audit_bit_interne_per_sec;
@@ -71,7 +62,11 @@
     guint audit_tour_dls_per_sec;
     guint audit_tour_dls_per_sec_hold;
                                                                                                     /* Interfacage avec D.L.S */
-    struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
+    struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
+    struct mosquitto *MQTT_API_session;                                                    /* Session MQTT vers le broker API */
+    gboolean MQTT_connected;                                                         /* TRUE si la connexion au broker est OK */
+    GSList *MQTT_messages;                                                               /* Liste des messages recus via MQTT */
+
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
 
     pthread_rwlock_t Maps_synchro;                                                   /* Mutex de synchronisation des mappings */

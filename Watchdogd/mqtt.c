@@ -54,7 +54,7 @@
  void MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected with return code %d: %s",
               return_code, mosquitto_connack_string( return_code ) );
-    if (return_code == 0) Partage->com_msrv.MQTT_connected = TRUE ;
+    if (return_code == 0) Partage->MQTT_connected = TRUE ;
   }
 /******************************************************************************************************************************/
 /* MQTT_on_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                              */
@@ -64,7 +64,7 @@
  void MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Disconnected with return code %d: %s",
               return_code, mosquitto_connack_string( return_code ) );
-    Partage->com_msrv.MQTT_connected = FALSE;
+    Partage->MQTT_connected = FALSE;
   }
 /******************************************************************************************************************************/
 /* MQTT_Subscribe: souscrit à un topic                                                                                        */

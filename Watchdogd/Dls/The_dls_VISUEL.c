@@ -86,7 +86,7 @@
  void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
                             gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
   { if (!visu) return;
-    if (Partage->com_msrv.Thread_run == FALSE) return;
+    if (Partage->Thread_run == FALSE) return;
     if (    strcmp ( visu->mode, mode )
          || strcmp ( visu->color, color )                     /* On ne peut pas checker le libellé car il peut etre dynamique */
          || visu->cligno  != cligno

@@ -47,7 +47,7 @@
 /*-------------------------------------------------- Message without payload -------------------------------------------------*/
          if ( !strcasecmp( topic, "RESET") )
      { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "RESET: Stopping in progress" );
-       Partage->com_msrv.Thread_run = FALSE;
+       Partage->Thread_run = FALSE;
        goto end;
      }
     else if ( !strcasecmp( topic, "UPGRADE") )
@@ -57,7 +57,7 @@
      }
     else if ( Config.instance_is_master && !strcasecmp( topic, "REMAP") )
      { MSRV_Remap();
-       MQTT_Send_to_topic_new ( Partage->com_msrv.MQTT_local_session, NULL, FALSE, "SYNC_INPUT" );/* Synchronisation des IO depuis les threads */
+       MQTT_Send_to_topic_new ( Partage->MQTT_local_session, NULL, FALSE, "SYNC_INPUT" );/* Synchronisation des IO depuis les threads */
        pthread_mutex_lock( &Partage->com_dls.synchro );                               /* Zone de protection des bits internes */
        Dls_foreach_plugins ( NULL, Dls_sync_all_output );                                             /* Run all plugin D.L.S */
        pthread_mutex_unlock( &Partage->com_dls.synchro );                      /* Fin de Zone de protection des bits internes */
@@ -97,7 +97,7 @@
                  Config.log_msrv, Config.log_bus, Config.log_dls, log_level, headless );
        if (Config.headless != headless)
         { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
-          Partage->com_msrv.Thread_run = FALSE;
+          Partage->Thread_run = FALSE;
         }
        if (strcmp ( WTD_BRANCHE, branche ))
         { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: branche has changed, upgrading and rebooting" );
@@ -187,7 +187,7 @@ end:
     gboolean free_node=FALSE;
     if (!node) { node = Json_node_create(); free_node = TRUE; }
     gchar *buffer = Json_node_to_string ( node );
-    mosquitto_publish( Partage->com_msrv.MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 2, TRUE );
+    mosquitto_publish( Partage->MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 2, TRUE );
     g_free(buffer);
     if (free_node) Json_node_unref(node);
   }
@@ -201,23 +201,23 @@ end:
     gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
     gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
 
-    Partage->com_msrv.MQTT_API_session = mosquitto_new( agent_uuid, FALSE, NULL );
-    if (!Partage->com_msrv.MQTT_API_session)
+    Partage->MQTT_API_session = mosquitto_new( agent_uuid, FALSE, NULL );
+    if (!Partage->MQTT_API_session)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API session error." ); return(FALSE); }
 
-    mosquitto_log_callback_set        ( Partage->com_msrv.MQTT_API_session, MQTT_on_log_CB );
-    mosquitto_connect_callback_set    ( Partage->com_msrv.MQTT_API_session, MQTT_on_connect_CB );
-    mosquitto_disconnect_callback_set ( Partage->com_msrv.MQTT_API_session, MQTT_on_disconnect_CB );
-    mosquitto_message_callback_set    ( Partage->com_msrv.MQTT_API_session, MQTT_on_mqtt_api_message_CB );
-    mosquitto_reconnect_delay_set     ( Partage->com_msrv.MQTT_API_session, 10, 60, TRUE );
+    mosquitto_log_callback_set        ( Partage->MQTT_API_session, MQTT_on_log_CB );
+    mosquitto_connect_callback_set    ( Partage->MQTT_API_session, MQTT_on_connect_CB );
+    mosquitto_disconnect_callback_set ( Partage->MQTT_API_session, MQTT_on_disconnect_CB );
+    mosquitto_message_callback_set    ( Partage->MQTT_API_session, MQTT_on_mqtt_api_message_CB );
+    mosquitto_reconnect_delay_set     ( Partage->MQTT_API_session, 10, 60, TRUE );
 
     if (Config.mqtt_over_ssl)
-     { mosquitto_tls_set( Partage->com_msrv.MQTT_API_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }
+     { mosquitto_tls_set( Partage->MQTT_API_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }
 
     gchar mqtt_username[128];
     g_snprintf( mqtt_username, sizeof(mqtt_username), "%s-agent", domain_uuid );
-    mosquitto_username_pw_set( Partage->com_msrv.MQTT_API_session, mqtt_username, Config.mqtt_password );
-    retour = mosquitto_connect( Partage->com_msrv.MQTT_API_session, Config.mqtt_hostname, Config.mqtt_port, 60 );
+    mosquitto_username_pw_set( Partage->MQTT_API_session, mqtt_username, Config.mqtt_password );
+    retour = mosquitto_connect( Partage->MQTT_API_session, Config.mqtt_hostname, Config.mqtt_port, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API connection to '%s' error: %s",
                  Config.mqtt_hostname, mosquitto_strerror ( retour ) );
@@ -226,16 +226,16 @@ end:
 
     gchar topic[256];
     g_snprintf ( topic, sizeof(topic), "%s/%s/#", domain_uuid, agent_uuid );
-    MQTT_Subscribe ( Partage->com_msrv.MQTT_API_session, topic );
+    MQTT_Subscribe ( Partage->MQTT_API_session, topic );
     g_snprintf ( topic, sizeof(topic), "%s/agents/#", domain_uuid );
-    MQTT_Subscribe ( Partage->com_msrv.MQTT_API_session, topic );
+    MQTT_Subscribe ( Partage->MQTT_API_session, topic );
 
     if (Config.instance_is_master)                                                                          /* Démarrage MQTT */
      { g_snprintf ( topic, sizeof(topic), "%s/master/#", domain_uuid );
-       MQTT_Subscribe ( Partage->com_msrv.MQTT_API_session, topic );
+       MQTT_Subscribe ( Partage->MQTT_API_session, topic );
      }
 
-    retour = mosquitto_loop_start( Partage->com_msrv.MQTT_API_session );
+    retour = mosquitto_loop_start( Partage->MQTT_API_session );
     if ( retour != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT loop not started: ", mosquitto_strerror ( retour ) );
        return(FALSE);
@@ -250,9 +250,9 @@ end:
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void MQTT_Stop_MQTT_API ( void )
-  { mosquitto_disconnect( Partage->com_msrv.MQTT_API_session );
-    mosquitto_loop_stop( Partage->com_msrv.MQTT_API_session, FALSE );
-    mosquitto_destroy( Partage->com_msrv.MQTT_API_session );
-    Partage->com_msrv.MQTT_API_session = NULL;
+  { mosquitto_disconnect( Partage->MQTT_API_session );
+    mosquitto_loop_stop( Partage->MQTT_API_session, FALSE );
+    mosquitto_destroy( Partage->MQTT_API_session );
+    Partage->MQTT_API_session = NULL;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

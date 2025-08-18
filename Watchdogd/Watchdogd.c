@@ -53,7 +53,7 @@
  static void Traitement_signaux( int num )
   { char chaine[50];
     if (num == SIGALRM)
-     { if (!(Partage && Partage->com_msrv.Thread_run)) return;
+     { if (!(Partage && Partage->Thread_run)) return;
        Partage->top++;
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "Timer: Partage->top = 0 !!" ); }
@@ -72,10 +72,10 @@
     switch (num)
      { case SIGQUIT:
        case SIGINT:  Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGINT" );
-                     Partage->com_msrv.Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
+                     Partage->Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
                      break;
        case SIGTERM: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGTERM" );
-                     Partage->com_msrv.Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
+                     Partage->Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
                      break;
        case SIGABRT: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGABRT" );
                      break;
@@ -439,7 +439,6 @@
     pthread_rwlock_init( &Partage->Threads_synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_rwlock_init( &Partage->Liste_visuel_synchro, NULL );                       /* Initialisation des mutex de synchro */
     pthread_rwlock_init( &Partage->Liste_msg_synchro, NULL );                          /* Initialisation des mutex de synchro */
-    pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
 
 /************************************************* Gestion des signaux ********************************************************/
@@ -448,7 +447,7 @@
 
 /********************************************* Active les threads principaux **************************************************/
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Debut boucle sans fin" );
-    Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
+    Partage->Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
@@ -494,7 +493,7 @@
        sleep(10);                                                                           /* On laisse les threads demarrer */
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
        if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
-       while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
+       while(Partage->Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
@@ -516,7 +515,7 @@
     else
      { prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting SLAVE Thread" );
-       while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
+       while(Partage->Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         {
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
            { JsonNode *RootNode = Json_node_create();
@@ -562,7 +561,6 @@
     pthread_rwlock_destroy( &Partage->Threads_synchro );
     pthread_rwlock_destroy( &Partage->Liste_visuel_synchro );
     pthread_rwlock_destroy( &Partage->Liste_msg_synchro );
-    pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
 
 /****************************************************** Arret du timer ********************************************************/
