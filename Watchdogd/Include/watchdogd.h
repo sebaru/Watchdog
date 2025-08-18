@@ -56,7 +56,6 @@
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
-    GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
     struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
     struct mosquitto *MQTT_API_session;                                                    /* Session MQTT vers le broker API */
     gboolean MQTT_connected;                                                         /* TRUE si la connexion au broker est OK */
@@ -87,6 +86,10 @@
 
     pthread_rwlock_t Liste_AO_synchro;                                           /* Mutex de synchronisation des AnalogOutput */
     GSList *Liste_AO;                                                           /* liste de AO a traiter dans la distribution */
+
+    pthread_rwlock_t Threads_synchro;                                                 /* Mutex de synchronisation des Threads */
+    GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
+
   };
 
 /************************************************ Définitions des prototypes **************************************************/

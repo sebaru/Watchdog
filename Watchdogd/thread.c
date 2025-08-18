@@ -249,28 +249,28 @@
  void Decharger_librairies ( void )
   { GSList *liste;
 
-    liste = Partage->com_msrv.Threads;                    /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    liste = Partage->Threads;                             /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct THREAD *module = liste->data;
        module->Thread_run = FALSE;                                                       /* On demande au thread de s'arreter */
        liste = liste->next;
      }
 
-    liste = Partage->com_msrv.Threads;                    /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    liste = Partage->Threads;                             /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct THREAD *module = liste->data;
        if (module->TID) pthread_join( module->TID, NULL );                                             /* Attente fin du fils */
        liste = liste->next;
      }
 
-    while(Partage->com_msrv.Threads)                                                     /* Liberation mémoire des modules */
-     { struct THREAD *module = Partage->com_msrv.Threads->data;
+    while(Partage->Threads)                                                                 /* Liberation mémoire des modules */
+     { struct THREAD *module = Partage->Threads->data;
        if (module->dl_handle) dlclose( module->dl_handle );
        pthread_mutex_destroy( &module->synchro );
 
-       pthread_mutex_lock ( &Partage->com_msrv.synchro );
-       Partage->com_msrv.Threads = g_slist_remove( Partage->com_msrv.Threads, module );
-       pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+       pthread_rwlock_wrlock ( &Partage->Threads_synchro );
+       Partage->Threads = g_slist_remove( Partage->Threads, module );
+       pthread_rwlock_unlock ( &Partage->Threads_synchro );
                                                                              /* Destruction de l'entete associé dans la GList */
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': thread unloaded", Json_get_string ( module->config, "thread_tech_id" ) );
        Json_node_unref ( module->config );
@@ -292,8 +292,8 @@
     gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
 
     struct THREAD *module = NULL;
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    pthread_rwlock_rdlock ( &Partage->Threads_synchro );
+    GSList *liste = Partage->Threads;                     /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct THREAD *search_module = liste->data;
        if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
@@ -302,7 +302,7 @@
         }
        liste = liste->next;
      }
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+    pthread_rwlock_unlock ( &Partage->Threads_synchro );
 
     if (!module)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': thread not found", thread_tech_id ); return; }
@@ -332,8 +332,8 @@
     gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
 
     struct THREAD *module = NULL;
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    GSList *liste = Partage->com_msrv.Threads;            /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    pthread_rwlock_rdlock ( &Partage->Threads_synchro );
+    GSList *liste = Partage->Threads;                     /* Envoie une commande d'arret pour toutes les librairies d'un coup */
     while(liste)
      { struct THREAD *search_module = liste->data;
        if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
@@ -342,7 +342,7 @@
         }
        liste = liste->next;
      }
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+    pthread_rwlock_unlock ( &Partage->Threads_synchro );
 
     if (!module)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': thread not found", thread_tech_id ); return; }
@@ -365,18 +365,18 @@
     gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
 
     struct THREAD *module = NULL;
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    GSList *liste = Partage->com_msrv.Threads;                                                 /* Envoie une commande d'arret */
+    pthread_rwlock_wrlock ( &Partage->Threads_synchro );
+    GSList *liste = Partage->Threads;                                                          /* Envoie une commande d'arret */
     while(liste)
      { struct THREAD *search_module = liste->data;
        if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
         { module = search_module;                                                        /* On demande au thread de s'arreter */
-          Partage->com_msrv.Threads = g_slist_remove( Partage->com_msrv.Threads, module );
+          Partage->Threads = g_slist_remove( Partage->Threads, module );
           break;
         }
        liste = liste->next;
      }
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+    pthread_rwlock_unlock ( &Partage->Threads_synchro );
 
     if (!module)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': thread not found", thread_tech_id ); return; }
@@ -486,9 +486,9 @@
        return;
      }
     pthread_attr_destroy(&attr);                                                                        /* Libération mémoire */
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    Partage->com_msrv.Threads = g_slist_append ( Partage->com_msrv.Threads, module );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+    pthread_rwlock_wrlock ( &Partage->Threads_synchro );
+    Partage->Threads = g_slist_append ( Partage->Threads, module );
+    pthread_rwlock_unlock ( &Partage->Threads_synchro );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread '%s' of class '%s' loaded with enable='%d'",
               thread_tech_id, thread_classe, module->Thread_run );
   }
