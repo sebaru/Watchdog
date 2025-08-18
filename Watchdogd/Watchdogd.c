@@ -437,6 +437,7 @@
     pthread_rwlock_init( &Partage->Liste_DO_synchro, NULL );                           /* Initialisation des mutex de synchro */
     pthread_rwlock_init( &Partage->Liste_AO_synchro, NULL );                           /* Initialisation des mutex de synchro */
     pthread_rwlock_init( &Partage->Threads_synchro, NULL );                            /* Initialisation des mutex de synchro */
+    pthread_rwlock_init( &Partage->Liste_visuel_synchro, NULL );                       /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
 
@@ -503,7 +504,7 @@
            }
 
 /*---------------------------------------------- Report des visuels ----------------------------------------------------------*/
-          if (Partage->com_msrv.liste_visuel)  MQTT_Send_visuels_to_API ();                    /* Traitement des I dynamiques */
+          if (Partage->Liste_visuel)           MQTT_Send_visuels_to_API ();                    /* Traitement des I dynamiques */
 /*---------------------------------------------- Report des messages ---------------------------------------------------------*/
           if (Partage->com_msrv.liste_msg)     MQTT_Send_MSGS_to_API();
 
@@ -545,7 +546,10 @@
     if (Partage->Maps_root)        { Json_node_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
     pthread_rwlock_unlock(&Partage->Maps_synchro);
 
-    g_slist_free ( Partage->com_msrv.liste_visuel );
+    pthread_rwlock_wrlock(&Partage->Liste_visuel_synchro);
+    g_slist_free ( Partage->Liste_visuel ); Partage->Liste_visuel = NULL;
+    pthread_rwlock_unlock(&Partage->Liste_visuel_synchro);
+
     g_slist_free_full ( Partage->com_msrv.liste_msg, (GDestroyNotify)g_free );
 
 /************************************************* Dechargement des mutex *****************************************************/
@@ -553,6 +557,7 @@
     pthread_rwlock_destroy( &Partage->Liste_DO_synchro );
     pthread_rwlock_destroy( &Partage->Liste_AO_synchro );
     pthread_rwlock_destroy( &Partage->Threads_synchro );
+    pthread_rwlock_destroy( &Partage->Liste_visuel_synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
 

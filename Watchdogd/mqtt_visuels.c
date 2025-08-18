@@ -41,11 +41,11 @@
  void MQTT_Send_visuels_to_API ( void )
   { gint cpt = 0;
     JsonNode *element = Json_node_create ();
-    while (Partage->com_msrv.liste_visuel && Partage->com_msrv.Thread_run == TRUE && cpt<100)
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );
-       struct DLS_VISUEL *visuel = Partage->com_msrv.liste_visuel->data;                            /* Recuperation du visuel */
-       Partage->com_msrv.liste_visuel = g_slist_remove ( Partage->com_msrv.liste_visuel, visuel );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    while (Partage->Liste_visuel && Partage->com_msrv.Thread_run == TRUE && cpt<100)
+     { pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );
+       struct DLS_VISUEL *visuel = Partage->Liste_visuel->data;                                     /* Recuperation du visuel */
+       Partage->Liste_visuel = g_slist_remove ( Partage->Liste_visuel, visuel );
+       pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
 
        Info_new( __func__, Config.log_msrv, LOG_DEBUG,
                 "Send VISUEL %s:%s mode=%s, color=%s, valeur='%f', cligno=%d, noshow=%d, libelle='%s', disable=%d",

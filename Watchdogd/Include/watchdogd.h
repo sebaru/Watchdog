@@ -55,7 +55,6 @@
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
-    GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
     struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
     struct mosquitto *MQTT_API_session;                                                    /* Session MQTT vers le broker API */
     gboolean MQTT_connected;                                                         /* TRUE si la connexion au broker est OK */
@@ -90,6 +89,8 @@
     pthread_rwlock_t Threads_synchro;                                                 /* Mutex de synchronisation des Threads */
     GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
 
+    pthread_rwlock_t Liste_visuel_synchro;                                            /* Mutex de synchronisation des Visuels */
+    GSList *Liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

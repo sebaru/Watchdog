@@ -111,9 +111,9 @@
      }
 
     if (visu->changed && (Partage->top >= visu->next_send))
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );                                /* Ajout dans la liste de i a traiter */
-       Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+     { pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );                         /* Ajout dans la liste de i a traiter */
+       Partage->Liste_visuel = g_slist_append( Partage->Liste_visuel, visu );
+       pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
        visu->changed = FALSE;
        visu->next_send = Partage->top + 10;
      }
