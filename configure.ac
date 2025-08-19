@@ -46,6 +46,10 @@ AC_STRUCT_TM
 
 dnl Checks for library functions.
 AC_FUNC_MEMCMP
+# Vérifie libmosquitto
+PKG_CHECK_MODULES([MOSQUITTO], [libmosquitto >= 1.6.0], [], [
+    AC_MSG_ERROR([libmosquitto version 1.6.0 ou supérieure est requise.])
+])
 
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(gettimeofday select socket strdup strerror)

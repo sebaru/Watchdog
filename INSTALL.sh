@@ -38,7 +38,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   fi
 
   apt install -y gawk git libtool automake autoconf gcc g++ git cmake openssl curl
-  apt install -y libglib2.0-dev wireplumber mosquitto-dev libcurl4-openssl-dev
+  apt install -y libglib2.0-dev wireplumber libmosquitto-dev libcurl4-openssl-dev
   apt install -y libupsclient-dev libssl-dev libstrophe-dev libgammu-dev
   apt install -y libpopt-dev libssl-dev libmariadb-dev libjwt-dev
   apt install -y sox libsox-fmt-all python3-pip mpg123
