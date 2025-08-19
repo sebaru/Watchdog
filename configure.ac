@@ -33,7 +33,6 @@ LT_INIT
 
 AM_PATH_GLIB_2_0( 2.2.2 )
 GLIB_GSETTINGS
-dnl PKG_CHECK_MODULES( LIBSOUP, >= 3.3 )
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
