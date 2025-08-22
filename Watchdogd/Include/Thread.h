@@ -62,10 +62,12 @@
 /************************************************ Définitions des prototypes **************************************************/
  extern gboolean Demarrer_dls ( void );                                                                      /* Dans thread.c */
  extern void Stopper_dls ( void );
- extern void Charger_librairies ( void );
- extern void Decharger_librairies ( void );
- extern void Thread_Start_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
- extern void Thread_Stop_one_thread ( JsonNode *element );
+ extern void Thread_Start_all ( void );
+ extern void Thread_Start_by_thread_tech_id ( gchar *thread_tech_id );
+ extern void Thread_Stop_all ( void );
+ extern void Thread_Stop_by_thread_tech_id ( gchar *thread_tech_id );
+ extern void Thread_Restart_by_thread_tech_id ( gchar *thread_tech_id );
+ extern void Thread_Restart_by_classe ( gchar *thread_classe );
  extern void Thread_Push_API_message ( JsonNode *request );
  extern void Thread_Set_debug ( JsonNode *request );
  extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );

@@ -451,13 +451,13 @@
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
-     { Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
+     { MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
+       Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
        Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
-       MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
      }
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single == FALSE) Charger_librairies();                                             /* Si demarrage des threads */
+    if (Config.single == FALSE) Thread_Start_all();                                               /* Si demarrage des threads */
     else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" );
 
 /*************************************** Mise en place de la gestion des signaux **********************************************/
@@ -471,7 +471,7 @@
     sigaction( SIGABRT, &sig, NULL );
     sigaction( SIGPIPE, &sig, NULL );                                                  /* Pour prevenir un segfault du client */
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
-    sigdelset ( &sig.sa_mask, SIGALRM );
+    sigdelset ( &sig.sa_mask, SIGALRM );                                                  /* Sauf ces signaux que l'on trappe */
     sigdelset ( &sig.sa_mask, SIGUSR1 );
     sigdelset ( &sig.sa_mask, SIGUSR2 );
     sigdelset ( &sig.sa_mask, SIGINT  );
@@ -533,7 +533,7 @@
     Info_new( __func__, Config.log_msrv, LOG_INFO, "fin boucle sans fin" );
 
     Stopper_dls();                /* On arrete DLS avant les threads pour assurer la sauvegarde des bits internes sur l'API ! */
-    Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
+    Thread_Stop_all();                                                        /* Déchargement de toutes les librairies filles */
 
     if (Config.instance_is_master)                                        /* Dechargement DLS après les threads IO, dls, arch */
      { Dls_Decharger_plugins();                                                               /* Dechargement des modules DLS */

@@ -38,11 +38,11 @@
   { gchar **tokens = g_strsplit ( msg->topic, "/", 3 );
     if (!tokens) return;
     if (!tokens[0]) goto end; /* Normalement le domain_uuid  */
-    if (!tokens[1]) goto end; /* Normalement le agent_uuid, ou agents ou master */
-    if (!tokens[2]) goto end; /* Normalement le tag/topic  */
+    if (!tokens[1]) goto end; /* Normalement le agent_uuid, ou agents ou master, ou le tag */
+    if (!tokens[2]) goto end; /* Normalement le tag/topic, ou l'operation  */
     gchar *topic = tokens[2];
 
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "MQTT Message received from API: %s", topic );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "MQTT Message received from API: %s/%s", tokens[1], tokens[2] );
 
 /*-------------------------------------------------- Message without payload -------------------------------------------------*/
          if ( !strcasecmp( topic, "RESET") )
@@ -64,17 +64,31 @@
      }
     else if ( Config.instance_is_master && !strcasecmp( topic, "RELOAD_HORLOGE_TICK") ) Dls_Load_horloge_ticks();
 
-/*-------------------------------------------------- Message without payload -------------------------------------------------*/
+/*-------------------------------------------------- Message with payload ----------------------------------------------------*/
     JsonNode *request = Json_get_from_string ( msg->payload );
     if (!request)
      { Info_new( __func__, Config.log_msrv, LOG_WARNING, "MQTT Message from API dropped: not JSON" );
        goto end;
      }
 
-         if ( !strcasecmp( topic, "THREAD_STOP") )    { Thread_Stop_one_thread ( request ); }
-    else if ( !strcasecmp( topic, "THREAD_RESTART") ) { Thread_Stop_one_thread ( request );
-                                                        Thread_Start_one_thread ( NULL, 0, request, NULL );
-                                                      }
+/*-------------------------------------------------- topic Audio Zone --------------------------------------------------------*/
+         if ( !strcasecmp( tokens[1], "AUDIO_ZONE") )
+     {      if (!strcasecmp ( tokens[2], "MAP"    ))
+             { Thread_Restart_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
+       else if (!strcasecmp ( tokens[2], "UNMAP"  ))
+             { Thread_Restart_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
+       else if (!strcasecmp ( tokens[2], "DELETE" ))
+             { Thread_Restart_by_classe ( "audio" ); }
+     }
+/*-------------------------------------------------- topic Thread ------------------------------------------------------------*/
+    else if ( !strcasecmp( topic, "THREAD_STOP") )
+     { gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+       Thread_Stop_by_thread_tech_id ( thread_tech_id );
+     }
+    else if ( !strcasecmp( topic, "THREAD_RESTART") )
+     { gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+       Thread_Restart_by_thread_tech_id ( thread_tech_id );
+     }
     else if ( !strcasecmp( topic, "THREAD_SEND") )    { Thread_Push_API_message ( request ); }
     else if ( !strcasecmp( topic, "THREAD_DEBUG") )   { Thread_Set_debug ( request ); }
     else if ( !strcasecmp( topic, "AGENT_SET") )
@@ -224,15 +238,15 @@ end:
        return(FALSE);
      }
 
-    gchar topic[256];
-    g_snprintf ( topic, sizeof(topic), "%s/%s/#", domain_uuid, agent_uuid );
-    MQTT_Subscribe ( Partage->MQTT_API_session, topic );
-    g_snprintf ( topic, sizeof(topic), "%s/agents/#", domain_uuid );
-    MQTT_Subscribe ( Partage->MQTT_API_session, topic );
+#warning a virer
+    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/%s/#", domain_uuid, agent_uuid );
+    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/agents/#", domain_uuid );
+    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/AUDIO_ZONE/#", domain_uuid );
 
     if (Config.instance_is_master)                                                                          /* Démarrage MQTT */
-     { g_snprintf ( topic, sizeof(topic), "%s/master/#", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, topic );
+     {
+#warning a virer
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/master/#", domain_uuid );
      }
 
     retour = mosquitto_loop_start( Partage->MQTT_API_session );
