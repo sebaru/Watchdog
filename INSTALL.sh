@@ -44,9 +44,11 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y sox libsox-fmt-all python3-pip mpg123
   apt install -y libjson-glib-dev libgpiod-dev
   apt install -y alsa-utils libsystemd-dev
-  pip3 install gTTS-token gTTS --upgrade
+  apt install -y python3-gtts
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
   apt install -y libphidget22 libphidget22-dev
+
+
 fi
 
 git clone https://github.com/sebaru/Watchdog.git watchdogabls
