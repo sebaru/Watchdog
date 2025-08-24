@@ -9,7 +9,7 @@ bin_SCRIPTS = Wtd_set_volume.sh Wtd_play_google.sh
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c thread.c Erreur.c \
                     shm.c json.c Config.c http_common.c \
-                    Mnemonique.c \
+                    Mnemonique.c audio.c \
                     distrib_Events.c \
                     mqtt.c mqtt_api.c mqtt_local.c mqtt_archives.c \
                     mqtt_msgs.c mqtt_visuels.c mail.c uuid.c

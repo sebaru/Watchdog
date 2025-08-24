@@ -144,18 +144,10 @@ encore:
                   strlen(Json_get_string ( event->msg->source_node, "audio_libelle" )) &&
                   strcasecmp ( Json_get_string ( event->msg->source_node, "audio_zone_name" ), "ZD_NONE" )
                 )
-              { JsonNode *AudioNode = Json_node_create();
-                if (AudioNode)
-                 { Json_node_add_string ( AudioNode, "audio_libelle", Json_get_string ( event->msg->source_node, "audio_libelle" ) );
-                   struct DLS_DI *bit = Dls_data_lookup_DI ( Json_get_string ( Config.config, "audio_tech_id" ),
-                                                             Json_get_string ( event->msg->source_node, "audio_zone_name" ) );
-                   Dls_data_set_DI_pulse ( NULL, bit );
-                   MQTT_Send_to_topic_new ( Partage->MQTT_local_session, AudioNode, FALSE, "AUDIO_ZONE/%s",
-                                            Json_get_string ( event->msg->source_node, "audio_zone_name" ) );
-                   Json_node_unref ( AudioNode );
-                 }
+              { gchar *audio_zone_name = Json_get_string ( event->msg->source_node, "audio_zone_name" );
+                gchar *audio_libelle   = Json_get_string ( event->msg->source_node, "audio_libelle" );
+                AUDIO_Send_to_zone ( audio_zone_name, audio_libelle );
               }
-
            }
           else
            { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",

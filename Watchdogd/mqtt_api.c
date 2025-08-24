@@ -73,12 +73,12 @@
 
 /*-------------------------------------------------- topic Audio Zone --------------------------------------------------------*/
          if ( !strcasecmp( tokens[1], "AUDIO_ZONE") )
-     {      if (!strcasecmp ( tokens[2], "MAP"    ))
-             { Thread_Restart_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
-       else if (!strcasecmp ( tokens[2], "UNMAP"  ))
-             { Thread_Restart_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
-       else if (!strcasecmp ( tokens[2], "DELETE" ))
-             { Thread_Restart_by_classe ( "audio" ); }
+     { if (!strcasecmp ( tokens[2], "TEST" ))
+        { gchar libelle_audio[256];
+          gchar *audio_zone_name = Json_get_string ( request, "audio_zone_name" );
+          g_snprintf ( libelle_audio, sizeof(libelle_audio), "Test de diffusion audio sur la zone %s", audio_zone_name );
+          AUDIO_Send_to_zone ( audio_zone_name, libelle_audio );
+        }
      }
 /*-------------------------------------------------- topic Thread ------------------------------------------------------------*/
     else if ( !strcasecmp( tokens[1], "THREAD") )
@@ -94,6 +94,22 @@
              { Thread_Set_debug ( Json_get_string ( request, "thread_tech_id" ), TRUE ); }
        else if ( !strcasecmp( tokens[2], "UNDEBUG") )
              { Thread_Set_debug ( Json_get_string ( request, "thread_tech_id" ), FALSE ); }
+     }
+/*-------------------------------------------------- topic DLS ---------------------------------------------------------------*/
+    else if ( !strcasecmp( tokens[1], "DLS") )
+     { if ( !strcasecmp( tokens[2], "RELOAD") )
+        { if ( !Json_has_member ( request, "tech_id" ) )
+           { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_RELOAD: tech_id is missing" );
+             goto end_request;
+           }
+          gchar *target_tech_id = Json_get_string ( request, "tech_id" );
+          struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( target_tech_id );
+          if (found) Dls_Save_Data_to_API ( found );     /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
+          struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id );
+          if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': imported", target_tech_id );
+              else Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': error when importing", target_tech_id );
+          Dls_Load_horloge_ticks();
+        }
      }
 /*-------------------------------------------------- topic Agent -------------------------------------------------------------*/
     else if ( !strcasecmp( topic, "AGENT_SET") )
@@ -145,19 +161,7 @@
        gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
        Dls_Acquitter_plugin ( plugin_tech_id );
      }
-    else if ( !strcasecmp( topic, "DLS_RELOAD") )
-     { if ( !Json_has_member ( request, "tech_id" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_RELOAD: tech_id is missing" );
-          goto end_request;
-        }
-       gchar *target_tech_id = Json_get_string ( request, "tech_id" );
-       struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( target_tech_id );
-       if (found) Dls_Save_Data_to_API ( found );     /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
-       struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id );
-       if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': imported", target_tech_id );
-           else Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': error when importing", target_tech_id );
-       Dls_Load_horloge_ticks();
-     }
+
     else if ( !strcasecmp( topic, "DLS_RESTART") )
      { if ( !Json_has_member ( request, "tech_id" ) )
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_RESTART: tech_id is missing" );
@@ -243,13 +247,18 @@ end:
        return(FALSE);
      }
 
+
 #warning a virer
     MQTT_Subscribe ( Partage->MQTT_API_session, "%s/%s/#", domain_uuid, agent_uuid );
     MQTT_Subscribe ( Partage->MQTT_API_session, "%s/agents/#", domain_uuid );
-    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/AUDIO_ZONE/#", domain_uuid );
 
+/* Pour Master & Slave */
+    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/#", domain_uuid );
+/* Pour Master uniquement */
     if (Config.instance_is_master)                                                                          /* Démarrage MQTT */
      {
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/AUDIO_ZONE/#", domain_uuid );
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/#", domain_uuid );
 #warning a virer
        MQTT_Subscribe ( Partage->MQTT_API_session, "%s/master/#", domain_uuid );
      }

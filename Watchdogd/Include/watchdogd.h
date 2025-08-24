@@ -106,6 +106,8 @@
  extern gboolean MSRV_Map_from_thread ( JsonNode *key );
  extern void MSRV_Agent_upgrade_to ( gchar *branche );
 
+ extern void AUDIO_Send_to_zone ( gchar *zone, gchar *audio_libelle );                                        /* Dans audio.c */
+
  extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
  extern void UUID_Load ( gchar *thread, gchar *target );
 
