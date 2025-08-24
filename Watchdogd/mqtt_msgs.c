@@ -140,6 +140,22 @@ encore:
            { event->msg->last_on = Partage->top;
              MQTT_Send_to_API ( event->msg->source_node, "DLS_HISTO" );
              MQTT_Send_to_topic ( Partage->MQTT_local_session, "threads", "DLS_HISTO", event->msg->source_node );
+             if ( Json_has_member ( event->msg->source_node, "audio_libelle" ) &&
+                  strlen(Json_get_string ( event->msg->source_node, "audio_libelle" )) &&
+                  strcasecmp ( Json_get_string ( event->msg->source_node, "audio_zone_name" ), "ZD_NONE" )
+                )
+              { JsonNode *AudioNode = Json_node_create();
+                if (AudioNode)
+                 { Json_node_add_string ( AudioNode, "audio_libelle", Json_get_string ( event->msg->source_node, "audio_libelle" ) );
+                   struct DLS_DI *bit = Dls_data_lookup_DI ( Json_get_string ( Config.config, "audio_tech_id" ),
+                                                             Json_get_string ( event->msg->source_node, "audio_zone_name" ) );
+                   Dls_data_set_DI_pulse ( NULL, bit );
+                   MQTT_Send_to_topic_new ( Partage->MQTT_local_session, AudioNode, FALSE, "AUDIO_ZONE/%s",
+                                            Json_get_string ( event->msg->source_node, "audio_zone_name" ) );
+                   Json_node_unref ( AudioNode );
+                 }
+              }
+
            }
           else
            { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",

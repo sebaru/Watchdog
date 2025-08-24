@@ -84,7 +84,19 @@
     gchar chaine[256];
     g_snprintf( chaine, sizeof(chaine), "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%", volume );
     system(chaine);
-    sleep(5);
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Volume set to %d", volume );
+
+    GList *Audio_zones = json_array_get_elements ( Json_get_array ( module->config, "audio_zones" ) );
+    GList *audio_zones = Audio_zones;
+    while(audio_zones)
+     { JsonNode *element = audio_zones->data;
+       gchar *audio_zone_name = Json_get_string ( element, "audio_zone_name" );
+       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Listening to AudioZone '%s'", audio_zone_name );
+       MQTT_Subscribe ( module->MQTT_session, "AUDIO_ZONE/%s", audio_zone_name );
+       audio_zones = g_list_next(audio_zones);
+     }
+    g_list_free(Audio_zones);
+
     Jouer_google_speech( module, "Module audio démarré !" );
     vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
@@ -95,56 +107,20 @@
        JsonNode *request = module->MQTT_messages->data;
        module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
        pthread_mutex_unlock ( &module->synchro );
-       gchar *tag = Json_get_string ( request, "tag" );
-       if ( !strcasecmp( tag, "DISABLE" ) )
-        { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Diffusion disabled by master" );
-          vars->diffusion_enabled = FALSE;
-        }
-       else if ( !strcasecmp( tag, "ENABLE" ) )
-        { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Diffusion enabled by master" );
-          vars->diffusion_enabled = TRUE;
-        }
-       else if ( !strcasecmp( tag, "TEST" ) )
-        { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Test de diffusion" );
-          Jouer_google_speech( module, "Ceci est un test de diffusion audio" );
-        }
-       else if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_has_member ( request, "alive" ) &&
-                 Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) &&
-                 Json_has_member ( request, "audio_profil" ) && Json_has_member ( request, "audio_libelle" ) &&
-                 Json_get_bool ( request, "alive" ) == TRUE &&
-                 strcasecmp( Json_get_string( request, "audio_profil" ), "P_NONE" ) )
-        { gchar *tech_id        = Json_get_string ( request, "tech_id" );
-          gchar *acronyme       = Json_get_string ( request, "acronyme" );
-          gchar *audio_profil   = Json_get_string ( request, "audio_profil" );
-          gchar *audio_libelle  = Json_get_string ( request, "audio_libelle" );
-          gchar *libelle        = Json_get_string ( request, "libelle" );
-          gint typologie        = Json_get_int ( request, "typologie" );
+       if ( Json_has_member ( request, "token_lvl0" ) && !strcasecmp ( Json_get_string ( request, "token_lvl0" ), "AUDIO_ZONE" ) &&
+            Json_has_member ( request, "token_lvl1" ) && Json_has_member ( request, "audio_libelle" )
+          )
+        { gchar *audio_zone_name = Json_get_string ( request, "token_lvl1" );
+          gchar *audio_libelle   = Json_get_string ( request, "audio_libelle" );
+          Info_new( __func__, module->Thread_debug, LOG_INFO, "Saying '%s' on audio_zone '%s'", audio_libelle, audio_zone_name );
+          if (vars->last_audio + AUDIO_JINGLE < Partage->top)                                  /* Si Pas de message depuis xx */
+           { Jouer_google_speech( module, "Attention"); }                                           /* On balance le jingle ! */
+          vars->last_audio = Partage->top;
 
-          Info_new( __func__, module->Thread_debug, LOG_DEBUG,
-                    "Recu message '%s:%s' (audio_profil='%s')", tech_id, acronyme, audio_profil );
-
-          if ( vars->diffusion_enabled == FALSE && ! (typologie == MSG_ALERTE || typologie == MSG_DANGER)
-             )                                                                  /* Bit positionné quand arret diffusion audio */
-           { Info_new( __func__, module->Thread_debug, LOG_WARNING,
-                       "Envoi audio inhibé. Dropping '%s:%s'", tech_id, acronyme );
-           }
-          else
-           { if (Config.instance_is_master == TRUE)                             /* Positionnement du profil audio via interne */
-             { MQTT_Send_DI_pulse ( module, Json_get_string ( Config.config, "audio_tech_id" ), audio_profil ); }
-
-             if (vars->last_audio + AUDIO_JINGLE < Partage->top)                               /* Si Pas de message depuis xx */
-              { Jouer_google_speech( module, "Attention"); }                                        /* On balance le jingle ! */
-             vars->last_audio = Partage->top;
-
-                                                            /* Si audio_libelle, le jouer, sinon jouer le libelle tout court) */
-             Jouer_google_speech( module, (strlen(audio_libelle) ? audio_libelle : libelle) );
-             if (Config.instance_is_master == TRUE)                                          /* Bit de fin d'emission message */
-              { MQTT_Send_DI_pulse ( module, Json_get_string ( Config.config, "audio_tech_id" ), "P_NONE" ); }
-           }
+          Jouer_google_speech( module, audio_libelle );                                                   /* Jouer le libelle */
         }
        Json_node_unref ( request );
      }
-
     Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
