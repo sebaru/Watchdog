@@ -81,16 +81,21 @@
              { Thread_Restart_by_classe ( "audio" ); }
      }
 /*-------------------------------------------------- topic Thread ------------------------------------------------------------*/
-    else if ( !strcasecmp( topic, "THREAD_STOP") )
-     { gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
-       Thread_Stop_by_thread_tech_id ( thread_tech_id );
+    else if ( !strcasecmp( tokens[1], "THREAD") )
+     {      if ( !strcasecmp( tokens[2], "STOP") )
+             { Thread_Stop_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
+       else if ( !strcasecmp( tokens[2], "START") )
+             { Thread_Start_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
+       else if ( !strcasecmp( tokens[2], "RESTART") )
+             { Thread_Restart_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
+       else if ( !strcasecmp( tokens[2], "SEND") )
+             { Thread_Push_API_message ( request ); }
+       else if ( !strcasecmp( tokens[2], "DEBUG") )
+             { Thread_Set_debug ( Json_get_string ( request, "thread_tech_id" ), TRUE ); }
+       else if ( !strcasecmp( tokens[2], "UNDEBUG") )
+             { Thread_Set_debug ( Json_get_string ( request, "thread_tech_id" ), FALSE ); }
      }
-    else if ( !strcasecmp( topic, "THREAD_RESTART") )
-     { gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
-       Thread_Restart_by_thread_tech_id ( thread_tech_id );
-     }
-    else if ( !strcasecmp( topic, "THREAD_SEND") )    { Thread_Push_API_message ( request ); }
-    else if ( !strcasecmp( topic, "THREAD_DEBUG") )   { Thread_Set_debug ( request ); }
+/*-------------------------------------------------- topic Agent -------------------------------------------------------------*/
     else if ( !strcasecmp( topic, "AGENT_SET") )
      { if ( !( Json_has_member ( request, "log_bus" ) && Json_has_member ( request, "log_level" ) &&
                Json_has_member ( request, "log_dls" ) &&

@@ -69,7 +69,7 @@
  extern void Thread_Restart_by_thread_tech_id ( gchar *thread_tech_id );
  extern void Thread_Restart_by_classe ( gchar *thread_classe );
  extern void Thread_Push_API_message ( JsonNode *request );
- extern void Thread_Set_debug ( JsonNode *request );
+ extern void Thread_Set_debug ( gchar *thread_tech_id, gboolean debug );
  extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );
  extern void Thread_loop ( struct THREAD *module );
  extern void Thread_init ( struct THREAD *module, gint sizeof_vars );
