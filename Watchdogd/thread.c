@@ -99,6 +99,13 @@
      }
     g_strfreev ( tokens );
 
+    if (!strcasecmp (Json_get_string ( response, "token_lvl0" ), "SET_DEBUG"))
+     { module->Thread_debug = Json_get_bool ( response, "debug" );
+       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': debug set to %d", thread_tech_id, module->Thread_debug );
+       Json_node_unref ( response );
+       return;
+     }
+
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, response );
     pthread_mutex_unlock ( &module->synchro );
@@ -153,6 +160,9 @@
      { module->MQTT_connected = TRUE;
        MQTT_Subscribe ( module->MQTT_session, "SET_AO/%s/#", thread_tech_id );
        MQTT_Subscribe ( module->MQTT_session, "SET_DO/%s/#", thread_tech_id );
+       MQTT_Subscribe ( module->MQTT_session, "SET_TEST/%s/#", thread_tech_id );
+       MQTT_Subscribe ( module->MQTT_session, "SET_DEBUG/%s/#", thread_tech_id );
+#warning a supprimer
        MQTT_Subscribe ( module->MQTT_session, "threads/#" );
      }
   }
@@ -336,64 +346,6 @@
      { struct THREAD *module = Thread_take_first_module();
        Thread_Stop_safe ( module );
      }
-  }
-/******************************************************************************************************************************/
-/* Thread_Push_API_message: Recoit une commande depuis l'API, au travers du master                                            */
-/* Entrée: L'element json decrivant la requete                                                                                */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Thread_Push_API_message ( JsonNode *request )
-  { if (!request)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "request not provided" ); return; }
-
-    if (!Json_has_member ( request, "thread_tech_id" ))
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_tech_id' in Json" ); return; }
-    gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
-
-    struct THREAD *module = NULL;
-    pthread_rwlock_rdlock ( &Partage->Threads_synchro );
-    GSList *liste = Partage->Threads;                     /* Envoie une commande d'arret pour toutes les librairies d'un coup */
-    while(liste)
-     { struct THREAD *search_module = liste->data;
-       if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
-        { module = search_module;                                                        /* On demande au thread de s'arreter */
-          break;
-        }
-       liste = liste->next;
-     }
-    pthread_rwlock_unlock ( &Partage->Threads_synchro );
-
-    if (!module)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': thread not found", thread_tech_id ); return; }
-
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "'%s': '%s' sent", thread_tech_id, Json_get_string ( request, "tag" ) );
-
-    pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
-    json_node_ref ( request );
-    module->MQTT_messages = g_slist_append ( module->MQTT_messages, request );
-    pthread_mutex_unlock ( &module->synchro );
-  }
-/******************************************************************************************************************************/
-/* Thread_Set_debug: Modifie le paramètre de debug du thread                                                                  */
-/* Entrée: L'element json decrivant la requete                                                                                */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Thread_Set_debug ( gchar *thread_tech_id, gboolean debug )
-  { struct THREAD *module = NULL;
-    pthread_rwlock_rdlock ( &Partage->Threads_synchro );
-    GSList *liste = Partage->Threads;                     /* Envoie une commande d'arret pour toutes les librairies d'un coup */
-    while(liste)
-     { struct THREAD *search_module = liste->data;
-       if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
-        { module->Thread_debug = debug; break; }
-       liste = liste->next;
-     }
-    pthread_rwlock_unlock ( &Partage->Threads_synchro );
-
-    if (!module)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': thread not found", thread_tech_id ); }
-    else
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': debug set to %d", thread_tech_id, debug ); }
   }
 /******************************************************************************************************************************/
 /* Thread_Start_by_thread_tech_id: Création d'un thread                                                                       */

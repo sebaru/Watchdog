@@ -42,9 +42,13 @@
     if (!tokens[2]) goto end; /* Normalement le tag/topic, ou l'operation  */
     gchar *topic = tokens[2];
 
+    if ( strcasecmp( tokens[0], Json_get_string ( Config.config, "domain_uuid" ) ) )
+     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Wrong domain_uuid '%s'. Dropping.", tokens[0] ); goto end; }
+
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "MQTT Message received from API: %s/%s", tokens[1], tokens[2] );
 
 /*-------------------------------------------------- Message without payload -------------------------------------------------*/
+#warning add AGENT
          if ( !strcasecmp( topic, "RESET") )
      { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "RESET: Stopping in progress" );
        Partage->Thread_run = FALSE;
@@ -71,29 +75,18 @@
        goto end;
      }
 
-/*-------------------------------------------------- topic Audio Zone --------------------------------------------------------*/
-         if ( !strcasecmp( tokens[1], "AUDIO_ZONE") )
-     { if (!strcasecmp ( tokens[2], "TEST" ))
-        { gchar libelle_audio[256];
-          gchar *audio_zone_name = Json_get_string ( request, "audio_zone_name" );
-          g_snprintf ( libelle_audio, sizeof(libelle_audio), "Test de diffusion audio sur la zone %s", audio_zone_name );
-          AUDIO_Send_to_zone ( audio_zone_name, libelle_audio );
-        }
-     }
-/*-------------------------------------------------- topic Thread ------------------------------------------------------------*/
-    else if ( !strcasecmp( tokens[1], "THREAD") )
+/*-------------------------------------------------- topic Thread pour le master et les slaves -------------------------------*/
+    if ( !strcasecmp( tokens[1], "THREAD") )
      {      if ( !strcasecmp( tokens[2], "STOP") )
              { Thread_Stop_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
        else if ( !strcasecmp( tokens[2], "START") )
              { Thread_Start_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
        else if ( !strcasecmp( tokens[2], "RESTART") )
              { Thread_Restart_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
-       else if ( !strcasecmp( tokens[2], "SEND") )
-             { Thread_Push_API_message ( request ); }
-       else if ( !strcasecmp( tokens[2], "DEBUG") )
-             { Thread_Set_debug ( Json_get_string ( request, "thread_tech_id" ), TRUE ); }
-       else if ( !strcasecmp( tokens[2], "UNDEBUG") )
-             { Thread_Set_debug ( Json_get_string ( request, "thread_tech_id" ), FALSE ); }
+       else if ( Config.instance_is_master && !strcasecmp( tokens[2], "TEST") )
+             { MQTT_Send_to_topic_new ( Partage->MQTT_local_session, request, FALSE, "SET_TEST/%s", Json_get_string ( request, "thread_tech_id" ) ); }
+       else if ( Config.instance_is_master && !strcasecmp( tokens[2], "DEBUG") )
+             { MQTT_Send_to_topic_new ( Partage->MQTT_local_session, request, FALSE, "SET_DEBUG/%s", Json_get_string ( request, "thread_tech_id" ) ); }
      }
 /*-------------------------------------------------- topic DLS ---------------------------------------------------------------*/
     else if ( !strcasecmp( tokens[1], "DLS") )
@@ -109,6 +102,15 @@
           if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': imported", target_tech_id );
               else Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': error when importing", target_tech_id );
           Dls_Load_horloge_ticks();
+        }
+     }
+/*-------------------------------------------------- topic Audio Zone --------------------------------------------------------*/
+    else if ( !strcasecmp( tokens[1], "AUDIO_ZONE") )
+     { if (!strcasecmp ( tokens[2], "TEST" ))
+        { gchar libelle_audio[256];
+          gchar *audio_zone_name = Json_get_string ( request, "audio_zone_name" );
+          g_snprintf ( libelle_audio, sizeof(libelle_audio), "Test de diffusion audio sur la zone '%s'", audio_zone_name );
+          AUDIO_Send_to_zone ( audio_zone_name, libelle_audio );
         }
      }
 /*-------------------------------------------------- topic Agent -------------------------------------------------------------*/
@@ -253,12 +255,16 @@ end:
     MQTT_Subscribe ( Partage->MQTT_API_session, "%s/agents/#", domain_uuid );
 
 /* Pour Master & Slave */
-    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/#", domain_uuid );
+    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/START", domain_uuid );
+    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/STOP", domain_uuid );
+    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/RESTART", domain_uuid );
 /* Pour Master uniquement */
     if (Config.instance_is_master)                                                                          /* Démarrage MQTT */
      {
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/AUDIO_ZONE/#", domain_uuid );
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/TEST", domain_uuid );
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/DEBUG", domain_uuid );
        MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/#", domain_uuid );
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/AUDIO_ZONE/#", domain_uuid );
 #warning a virer
        MQTT_Subscribe ( Partage->MQTT_API_session, "%s/master/#", domain_uuid );
      }

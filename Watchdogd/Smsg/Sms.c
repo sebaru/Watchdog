@@ -614,6 +614,18 @@ end_user:
           JsonNode *message = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, message );
           pthread_mutex_unlock ( &module->synchro );
+
+          if (Json_has_member ( message, "token_lvl0" ))
+           { gchar *token_lvl0 = Json_get_string ( message, "token_lvl0" );
+             if (!strcasecmp (token_lvl0, "THREAD_TEST") && Json_has_member ( message, "test_mode" ) )
+              { gchar *test_mode  = Json_get_string ( message, "test_mode" );
+                if ( !strcasecmp ( test_mode, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
+                if ( !strcasecmp ( test_mode, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
+              }
+
+           }
+#warning a refaire
+          else {
           gchar *tag = Json_get_string ( message, "tag" );
           gint notif_sms = Json_get_int ( message, "notif_sms" );
           if (notif_sms == SMSG_NOTIF_BY_DLS) { notif_sms = Json_get_int ( message, "notif_sms_by_dls" ); }
@@ -631,6 +643,7 @@ end_user:
           else if ( !strcasecmp ( tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
           else
            { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", thread_tech_id, tag ); }
+          }
           Json_node_unref(message);
         }
 /****************************************************** Lecture de SMS ********************************************************/

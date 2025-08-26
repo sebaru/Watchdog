@@ -367,6 +367,13 @@ reconnect:
           JsonNode *message = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, message );
           pthread_mutex_unlock ( &module->synchro );
+
+          if (Json_has_member ( message, "token_lvl0" ))
+           { gchar *token_lvl0 = Json_get_string ( message, "token_lvl0" );
+             if (!strcasecmp (token_lvl0, "THREAD_TEST")) { Imsgs_Envoi_message_to_all_available ( module, "Test OK" ); }
+           }
+#warning a refaire
+          else {
           gchar *tag = Json_get_string ( message, "tag" );
           gint notif_chat = Json_get_int ( message, "notif_chat" );
           if (notif_chat == IMSG_NOTIF_SET_BY_DLS) { notif_chat = Json_get_int ( message, "notif_chat_by_dls" ); }
@@ -382,8 +389,8 @@ reconnect:
              g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( message, "dls_shortname" ), Json_get_string ( message, "libelle" ) );
              Imsgs_Envoi_message_to_all_available ( module, chaine );
            }
-          else if ( !strcasecmp( tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
           else Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': tag '%s' not for this thread", thread_tech_id, tag );
+          }
           Json_node_unref(message);
         }
      }                                                                                         /* Fin du while partage->arret */

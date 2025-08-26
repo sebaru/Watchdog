@@ -152,7 +152,8 @@ end:
 /* Entrée: la structure MQTT, le topic, le node                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node )
+ #warning a supprimer
+void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node )
   { gboolean free_node=FALSE;
     if (! (mqtt_session && topic && tag) ) return;
     if (!node) { node = Json_node_create(); free_node = TRUE; }
