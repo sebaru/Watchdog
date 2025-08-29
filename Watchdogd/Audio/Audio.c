@@ -107,17 +107,24 @@
        JsonNode *request = module->MQTT_messages->data;
        module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
        pthread_mutex_unlock ( &module->synchro );
-       if ( Json_has_member ( request, "token_lvl0" ) && !strcasecmp ( Json_get_string ( request, "token_lvl0" ), "AUDIO_ZONE" ) &&
-            Json_has_member ( request, "token_lvl1" ) && Json_has_member ( request, "audio_libelle" )
-          )
-        { gchar *audio_zone_name = Json_get_string ( request, "token_lvl1" );
-          gchar *audio_libelle   = Json_get_string ( request, "audio_libelle" );
-          Info_new( __func__, module->Thread_debug, LOG_INFO, "Saying '%s' on audio_zone '%s'", audio_libelle, audio_zone_name );
-          if (vars->last_audio + AUDIO_JINGLE < Partage->top)                                  /* Si Pas de message depuis xx */
-           { Jouer_google_speech( module, "Attention"); }                                           /* On balance le jingle ! */
-          vars->last_audio = Partage->top;
+       if ( Json_has_member ( request, "token_lvl0" ) )
+        { gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
+          if (!strcasecmp ( token_lvl0, "AUDIO_ZONE" ) &&
+              Json_has_member ( request, "token_lvl1" ) && Json_has_member ( request, "audio_libelle" )
+             )
+           { gchar *audio_zone_name = Json_get_string ( request, "token_lvl1" );
+             gchar *audio_libelle   = Json_get_string ( request, "audio_libelle" );
+             Info_new( __func__, module->Thread_debug, LOG_INFO, "Saying '%s' on audio_zone '%s'", audio_libelle, audio_zone_name );
+             if (vars->last_audio + AUDIO_JINGLE < Partage->top)                                  /* Si Pas de message depuis xx */
+              { Jouer_google_speech( module, "Attention"); }                                           /* On balance le jingle ! */
+             vars->last_audio = Partage->top;
 
-          Jouer_google_speech( module, audio_libelle );                                                   /* Jouer le libelle */
+             Jouer_google_speech( module, audio_libelle );                                                   /* Jouer le libelle */
+           }
+          else if (!strcasecmp ( token_lvl0, "SET_TEST" ) )
+           { Info_new( __func__, module->Thread_debug, LOG_INFO, "Saying 'test'" );
+             Jouer_google_speech( module, "Ceci est un test" );
+           }
         }
        Json_node_unref ( request );
      }
