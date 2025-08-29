@@ -72,21 +72,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_stop_plugin_reel: Stoppe un plugin                                                                                     */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_stop_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = user_data;
-    if ( strcasecmp ( tech_id, plugin->tech_id ) ) return;
-
-    plugin->enable = FALSE;
-    plugin->start_date = 0;
-    plugin->conso  = 0.0;
-    Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' stopped (%s)",
-              plugin->tech_id, plugin->name );
-  }
-/******************************************************************************************************************************/
 /* Dls_auto_create_plugin: Créé automatiquement le plugin en parametre (tech_id, nom)                                         */
 /* Entrées: le tech_id (unique) et le nom associé                                                                             */
 /* Sortie: -1 si pb, id sinon                                                                                                 */
@@ -114,27 +99,33 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Dls_start_plugin_reel: Demarre le plugin en parametre                                                                      */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_start_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = user_data;
-    if ( strcasecmp ( tech_id, plugin->tech_id ) ) return;
-
-    plugin->enable = TRUE;
-    plugin->conso  = 0.0;
-    plugin->start_date = time(NULL);
-    Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' started (%s)", plugin->tech_id, plugin->name );
-  }
-/******************************************************************************************************************************/
 /* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
 /* Entrée: l'ID du plugin                                                                                                     */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Dls_Activer_plugin ( gchar *tech_id, gboolean actif )
-  { if (actif) Dls_foreach_plugins ( tech_id, Dls_start_plugin_reel );
-          else Dls_foreach_plugins ( tech_id, Dls_stop_plugin_reel );
+  { if (!tech_id)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "tech_id is null.");
+       return;
+     }
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
+    if (!plugin)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Plugin '%s' not found", tech_id );
+       return;
+     }
+
+    if (actif)
+     { plugin->enable = TRUE;
+       plugin->conso  = 0.0;
+       plugin->start_date = time(NULL);
+       Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' enabled (%s)", plugin->tech_id, plugin->name );
+     }
+    else
+     { plugin->enable = FALSE;
+       plugin->conso  = 0.0;
+       plugin->start_date = 0;
+       Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' disabled (%s)", plugin->tech_id, plugin->name );
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_Save_CodeC_to_disk: Enregistre un codec sur le disque pour le tech_id en parametre                                     */
@@ -579,52 +570,28 @@ end:
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
-/* Dls_Debug_plugin_reel: Active le debug d'un plugin                                                                         */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_Debug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = (gchar *)user_data;
-    if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { Info_new( __func__, Config.log_dls, LOG_DEBUG, "'%s' debug started ('%s')",
-                 plugin->tech_id, plugin->name );
-       plugin->debug_time = Partage->top + 1200;                                                   /* Debug pendant 2 minutes */
-     }
-  }
-/******************************************************************************************************************************/
-/* Dls_Undebug_plugin_reel: Désactive le debug d'un plugin                                                                    */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_Undebug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = (gchar *)user_data;
-    if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { Info_new( __func__, Config.log_dls, LOG_DEBUG, "'%s' debug stopped ('%s')",
-                 plugin->tech_id, plugin->name );
-       plugin->debug_time = 0;
-     }
-  }
-/******************************************************************************************************************************/
 /* Dls_Debug_plugin: Active ou non le debug d'un plugin                                                                       */
 /* Entrée: le tech_id et le choix actif ou non                                                                                */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Dls_Debug_plugin ( gchar *tech_id, gboolean actif )
-  { if (actif) Dls_foreach_plugins ( tech_id, Dls_Debug_plugin_reel );
-          else Dls_foreach_plugins ( tech_id, Dls_Undebug_plugin_reel );
-  }
-/******************************************************************************************************************************/
-/* Dls_Acquitter_plugin_reel: Acquitte le plugin DLS en parametre                                                             */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_Acquitter_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = user_data;
-    if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { Info_new( __func__, plugin->vars.debug, LOG_NOTICE,
-                 "'%s' acquitté ('%s')", plugin->tech_id, plugin->shortname );
-       struct DLS_DI *bit = Dls_data_lookup_DI ( plugin->tech_id, "OSYN_ACQUIT" );
-       Dls_data_set_DI_pulse ( &plugin->vars, bit );
+  { if (!tech_id)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "tech_id is null.");
+       return;
+     }
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
+    if (!plugin)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Plugin '%s' not found", tech_id );
+       return;
+     }
+
+    if(actif)
+     { Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' debug started ('%s')", plugin->tech_id, plugin->name );
+       plugin->debug_time = Partage->top + 1200;                                                   /* Debug pendant 2 minutes */
+     }
+    else
+     { Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' debug stopped ('%s')", plugin->tech_id, plugin->name );
+       plugin->debug_time = 0;
      }
   }
 /******************************************************************************************************************************/
@@ -633,5 +600,18 @@ end:
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Dls_Acquitter_plugin ( gchar *tech_id )
-  { Dls_foreach_plugins ( tech_id, Dls_Acquitter_plugin_reel ); }
+  { if (!tech_id)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "tech_id is null.");
+       return;
+     }
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
+    if (!plugin)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Plugin '%s' not found", tech_id );
+       return;
+     }
+
+    Info_new( __func__, plugin->vars.debug, LOG_NOTICE, "'%s' acquitté ('%s')", plugin->tech_id, plugin->shortname );
+    struct DLS_DI *bit = Dls_data_lookup_DI ( plugin->tech_id, "OSYN_ACQUIT" );
+    Dls_data_set_DI_pulse ( &plugin->vars, bit );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

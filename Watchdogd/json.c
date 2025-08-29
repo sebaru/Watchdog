@@ -225,7 +225,8 @@
 /* Sortie: la chaine de caractere                                                                                             */
 /******************************************************************************************************************************/
  gboolean Json_has_member ( JsonNode *query, gchar *chaine )
-  { JsonObject *object = json_node_get_object (query);
+  { if (!query) { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Query is null for '%s'", chaine );  return(FALSE); }
+    JsonObject *object = json_node_get_object (query);
     if (!object) { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Object is null for '%s'", chaine );  return(FALSE); }
     return( json_object_has_member ( object, chaine ) && !json_object_get_null_member ( object, chaine ) );
   }
