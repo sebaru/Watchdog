@@ -127,28 +127,29 @@ encore:
     while (Partage->Liste_msg && Partage->Thread_run == TRUE && cpt<100)
      { pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                          /* Ajout dans la liste de msg a traiter */
        struct DLS_MESSAGE_EVENT *event = Partage->Liste_msg->data;                           /* Recuperation du numero de msg */
+       struct DLS_MESSAGE *msg = event->msg;
        Partage->Liste_msg = g_slist_remove ( Partage->Liste_msg, event );
+       gint reste_a_faire = g_slist_length(Partage->Liste_msg);
        pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                          /* Ajout dans la liste de msg a traiter */
-       Info_new( __func__, Config.log_msrv, LOG_INFO,
-                "Handle MSG'%s:%s'=%d, Reste a %d a traiter",
-                 event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->Liste_msg) );
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "Handle MSG'%s:%s'=%d, Reste a %d a traiter",
+                 msg->tech_id, msg->acronyme, event->etat, reste_a_faire );
 
        if (event->etat == 1)
-        { MSGS_Convert_msg_on_to_histo ( event->msg );
-          gint rate_limit = Json_get_int ( event->msg->source_node, "rate_limit" );
-          if ( !event->msg->last_on || (Partage->top >= event->msg->last_on + rate_limit*10 ) )
-           { event->msg->last_on = Partage->top;
+        { MSGS_Convert_msg_on_to_histo ( msg );
+          gint rate_limit = Json_get_int ( msg->source_node, "rate_limit" );
+          if ( !msg->last_on || (Partage->top >= msg->last_on + rate_limit*10 ) )
+           { msg->last_on = Partage->top;
              MQTT_Send_to_API ( event->msg->source_node, "DLS_HISTO" );
 /*---------------------------------------------------- Envoi IMSG ------------------------------------------------------------*/
-             gint notif_chat = Json_get_int ( event->msg->source_node, "notif_chat" );
-             if (notif_chat == TXT_NOTIF_BY_DLS) { notif_chat = Json_get_int ( event->msg->source_node, "notif_chat_by_dls" ); }
+             gint notif_chat = Json_get_int ( msg->source_node, "notif_chat" );
+             if (notif_chat == TXT_NOTIF_BY_DLS) { notif_chat = Json_get_int ( msg->source_node, "notif_chat_by_dls" ); }
              if (notif_chat == TXT_NOTIF_YES)
               { JsonNode *IMSGNode = Json_node_create();
                 if (IMSGNode)
-                 { gchar *tech_id       = Json_get_string ( event->msg->source_node, "tech_id" );
-                   gchar *acronyme      = Json_get_string ( event->msg->source_node, "acronyme" );
-                   gchar *dls_shortname = Json_get_string ( event->msg->source_node, "dls_shortname" );
-                   gchar *libelle       = Json_get_string ( event->msg->source_node, "libelle" );
+                 { gchar *tech_id       = Json_get_string ( msg->source_node, "tech_id" );
+                   gchar *acronyme      = Json_get_string ( msg->source_node, "acronyme" );
+                   gchar *dls_shortname = Json_get_string ( msg->source_node, "dls_shortname" );
+                   gchar *libelle       = Json_get_string ( msg->source_node, "libelle" );
                    Json_node_add_string ( IMSGNode, "tech_id", tech_id );
                    Json_node_add_string ( IMSGNode, "acronyme", acronyme );
                    Json_node_add_string ( IMSGNode, "dls_shortname", dls_shortname );
@@ -159,15 +160,15 @@ encore:
                 else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send SMS: memory error" );
               }
 /*---------------------------------------------------- Envoi SMS -------------------------------------------------------------*/
-             gint notif_sms = Json_get_int ( event->msg->source_node, "notif_sms" );
-             if (notif_sms == TXT_NOTIF_BY_DLS) { notif_sms = Json_get_int ( event->msg->source_node, "notif_sms_by_dls" ); }
+             gint notif_sms = Json_get_int ( msg->source_node, "notif_sms" );
+             if (notif_sms == TXT_NOTIF_BY_DLS) { notif_sms = Json_get_int ( msg->source_node, "notif_sms_by_dls" ); }
              if (notif_sms == TXT_NOTIF_YES || notif_sms == TXT_NOTIF_OVH_ONLY)
               { JsonNode *SMSNode = Json_node_create();
                 if (SMSNode)
-                 { gchar *tech_id       = Json_get_string ( event->msg->source_node, "tech_id" );
-                   gchar *acronyme      = Json_get_string ( event->msg->source_node, "acronyme" );
-                   gchar *dls_shortname = Json_get_string ( event->msg->source_node, "dls_shortname" );
-                   gchar *libelle       = Json_get_string ( event->msg->source_node, "libelle" );
+                 { gchar *tech_id       = Json_get_string ( msg->source_node, "tech_id" );
+                   gchar *acronyme      = Json_get_string ( msg->source_node, "acronyme" );
+                   gchar *dls_shortname = Json_get_string ( msg->source_node, "dls_shortname" );
+                   gchar *libelle       = Json_get_string ( msg->source_node, "libelle" );
                    Json_node_add_string ( SMSNode, "tech_id", tech_id );
                    Json_node_add_string ( SMSNode, "acronyme", acronyme );
                    Json_node_add_string ( SMSNode, "dls_shortname", dls_shortname );
@@ -178,24 +179,24 @@ encore:
                 else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send SMS: memory error" );
               }
 /*---------------------------------------------------- Envoi AUDIO -----------------------------------------------------------*/
-             gchar *audio_zone_name = Json_get_string ( event->msg->source_node, "audio_zone_name" );
+             gchar *audio_zone_name = Json_get_string ( msg->source_node, "audio_zone_name" );
              if (strcasecmp ( audio_zone_name, "ZD_NONE"))
-              { gchar *audio_libelle   = Json_get_string ( event->msg->source_node, "audio_libelle" );
+              { gchar *audio_libelle   = Json_get_string ( msg->source_node, "audio_libelle" );
                 if (strlen(audio_libelle)) AUDIO_Send_to_zone ( audio_zone_name, audio_libelle );
               }
            }
           else
            { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
-                       rate_limit, event->msg->tech_id, event->msg->acronyme );
+                       rate_limit, msg->tech_id, msg->acronyme );
            }
         }
        else if (event->etat == 0)
-        { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( event->msg );
+        { JsonNode *histo = MSGS_Convert_msg_off_to_histo ( msg );
           if(histo)
            { MQTT_Send_to_API ( histo, "DLS_HISTO" );
              Json_node_unref ( histo );
            } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
-                            event->msg->tech_id, event->msg->acronyme );
+                            msg->tech_id, msg->acronyme );
         }
        g_free(event);
        cpt++;
