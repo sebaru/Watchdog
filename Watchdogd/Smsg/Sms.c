@@ -348,7 +348,7 @@
      }
 
     gint notif_sms = Json_get_int ( msg, "notif_sms" );
-    if (notif_sms == SMSG_NOTIF_BY_DLS) { notif_sms = Json_get_int ( msg, "notif_sms_by_dls" ); }
+    if (notif_sms == TXT_NOTIF_BY_DLS) { notif_sms = Json_get_int ( msg, "notif_sms_by_dls" ); }
 
     GList *Recipients = json_array_get_elements ( Json_get_array ( UsersNode, "recipients" ) );
     GList *recipients = Recipients;
@@ -364,7 +364,7 @@
                     "%s: Warning: User %s has an empty Phone number", thread_tech_id, Json_get_string ( user, "email" ) );
         }
        else switch (notif_sms)
-        { case SMSG_NOTIF_YES:
+        { case TXT_NOTIF_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
                 { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error sending with GSM" );
                   gchar *free_sms_api_user = Json_get_string ( user, "free_sms_api_user" );
@@ -378,7 +378,7 @@
                    }
                 }
                break;
-          case SMSG_NOTIF_OVH_ONLY:
+          case TXT_NOTIF_OVH_ONLY:
                Envoi_sms_ovh ( module, msg, user_phone );
                break;
         }
@@ -397,7 +397,7 @@
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_int    ( RootNode, "notif_sms", SMSG_NOTIF_OVH_ONLY );
+    Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_OVH_ONLY );
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
@@ -413,7 +413,7 @@
   { JsonNode *RootNode = Json_node_create();
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_int    ( RootNode, "notif_sms", SMSG_NOTIF_YES );
+    Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_YES );
     Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
     Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
@@ -597,6 +597,7 @@ end_user:
     struct SMS_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    MQTT_Subscribe ( module->MQTT_session, "SEND_SMS" );
 
     vars->sending_is_disabled = FALSE;                                               /* A l'init, l'envoi de SMS est autorisé */
     vars->ai_nbr_sms        = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyés", "sms", ARCHIVE_1_HEURE );
@@ -609,7 +610,7 @@ end_user:
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 
 /****************************************************** Ecoute du master ******************************************************/
-       while ( module->MQTT_messages )
+       while ( module->Thread_run && module->MQTT_messages )
         { pthread_mutex_lock ( &module->synchro );
           JsonNode *message = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, message );
@@ -617,33 +618,21 @@ end_user:
 
           if (Json_has_member ( message, "token_lvl0" ))
            { gchar *token_lvl0 = Json_get_string ( message, "token_lvl0" );
-             if (!strcasecmp (token_lvl0, "THREAD_TEST") && Json_has_member ( message, "test_mode" ) )
+             if (!strcasecmp (token_lvl0, "SEND_SMS") &&
+                 Json_has_member ( message, "tech_id" ) &&  Json_has_member ( message, "acronyme" ) &&
+                 Json_has_member ( message, "libelle" )
+                )
+              { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
+                          Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
+                          Json_get_string ( message, "libelle" ) );
+                Smsg_send_to_all_authorized_recipients( module, message );
+              }
+             else if (!strcasecmp (token_lvl0, "THREAD_TEST") && Json_has_member ( message, "test_mode" ) )
               { gchar *test_mode  = Json_get_string ( message, "test_mode" );
                 if ( !strcasecmp ( test_mode, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
                 if ( !strcasecmp ( test_mode, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
               }
-
            }
-#warning a refaire
-          else {
-          gchar *tag = Json_get_string ( message, "tag" );
-          gint notif_sms = Json_get_int ( message, "notif_sms" );
-          if (notif_sms == SMSG_NOTIF_BY_DLS) { notif_sms = Json_get_int ( message, "notif_sms_by_dls" ); }
-
-          if (!module->Thread_run)
-           { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: stopping in progress. dropping.", thread_tech_id ); }
-          else if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
-                    notif_sms != SMSG_NOTIF_NO )
-           { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
-                       Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
-                       Json_get_string ( message, "libelle" ) );
-             Smsg_send_to_all_authorized_recipients( module, message );
-           }
-          else if ( !strcasecmp ( tag, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
-          else if ( !strcasecmp ( tag, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
-          else
-           { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", thread_tech_id, tag ); }
-          }
           Json_node_unref(message);
         }
 /****************************************************** Lecture de SMS ********************************************************/

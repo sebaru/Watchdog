@@ -122,7 +122,7 @@
              Jouer_google_speech( module, audio_libelle );                                                   /* Jouer le libelle */
            }
           else if (!strcasecmp ( token_lvl0, "SET_TEST" ) )
-           { Info_new( __func__, module->Thread_debug, LOG_INFO, "Saying 'test'" );
+           { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Saying 'test'" );
              Jouer_google_speech( module, "Ceci est un test" );
            }
         }

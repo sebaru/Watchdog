@@ -169,7 +169,7 @@
     if (RootNode)
      { gchar topic[256];
        g_snprintf( topic, sizeof(topic), "thread/%s", target_tech_id );
-       MQTT_Send_to_topic ( Partage->MQTT_local_session, topic, "DLS", RootNode );
+       MQTT_Send_to_topic ( Partage->MQTT_local_session, RootNode, FALSE, "SET_BUS/%s", target_tech_id );
        Json_node_unref(RootNode);
      }
   }

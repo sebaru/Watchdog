@@ -30,13 +30,6 @@
 
  #include <gammu.h>
 
- enum
-  { SMSG_NOTIF_BY_DLS = -1,
-    SMSG_NOTIF_NO  = 0,
-    SMSG_NOTIF_YES = 1,
-    SMSG_NOTIF_OVH_ONLY = 2
-  };
-
  struct SMS_VARS
   { gboolean sending_is_disabled;                                  /* Variable permettant d'interdire l'envoi de sms si panic */
     GSM_Error gammu_send_status;

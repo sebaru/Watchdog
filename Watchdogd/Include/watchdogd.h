@@ -90,6 +90,13 @@
     GSList *Liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
   };
 
+ enum
+  { TXT_NOTIF_BY_DLS = -1,
+    TXT_NOTIF_NO  = 0,
+    TXT_NOTIF_YES = 1,
+    TXT_NOTIF_OVH_ONLY = 2
+  };
+
 /************************************************ Définitions des prototypes **************************************************/
  extern void MSRV_Remap( void );                                                                          /* Dans Watchdogd.c */
 
@@ -118,8 +125,7 @@
  extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
 
                                                                                                            /* Dans mqtt_api.c */
- extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node );
- extern void MQTT_Send_to_topic_new ( struct mosquitto *mqtt_session, JsonNode *node, gboolean retain, gchar *format, ... );
+ extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, JsonNode *node, gboolean retain, gchar *format, ... );
  extern void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
  extern void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat );
  extern void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme );

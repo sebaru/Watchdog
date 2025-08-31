@@ -162,8 +162,6 @@
        MQTT_Subscribe ( module->MQTT_session, "SET_DO/%s/#", thread_tech_id );
        MQTT_Subscribe ( module->MQTT_session, "SET_TEST/%s/#", thread_tech_id );
        MQTT_Subscribe ( module->MQTT_session, "SET_DEBUG/%s/#", thread_tech_id );
-#warning a supprimer
-       MQTT_Subscribe ( module->MQTT_session, "threads/#" );
      }
   }
 /******************************************************************************************************************************/

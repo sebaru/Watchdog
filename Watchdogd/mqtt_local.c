@@ -148,27 +148,11 @@ end:
     Partage->MQTT_local_session = NULL;
   }
 /******************************************************************************************************************************/
-/* Mqtt_Send_to_topic: Envoie le node au broker                                                                               */
-/* Entrée: la structure MQTT, le topic, le node                                                                               */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- #warning a supprimer
-void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node )
-  { gboolean free_node=FALSE;
-    if (! (mqtt_session && topic && tag) ) return;
-    if (!node) { node = Json_node_create(); free_node = TRUE; }
-    Json_node_add_string ( node, "tag", tag );
-    gchar *buffer = Json_node_to_string ( node );
-    mosquitto_publish( mqtt_session, NULL, topic, strlen(buffer), buffer, 2, TRUE );
-    g_free(buffer);
-    if (free_node) Json_node_unref(node);
-  }
-/******************************************************************************************************************************/
-/* MQTT_Send_to_topic_new: Envoie un node sur un topic MQTT via le broker                                                     */
+/* MQTT_Send_to_topic: Envoie un node sur un topic MQTT via le broker                                                     */
 /* Entrée: la structure MQTT, le topic, le node, le flag de retenu                                                            */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Send_to_topic_new ( struct mosquitto *mqtt_session, JsonNode *node, gboolean retain, gchar *format, ... )
+ void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, JsonNode *node, gboolean retain, gchar *format, ... )
   { va_list ap;
     if (! (mqtt_session && format) ) return;
 
@@ -217,7 +201,7 @@ void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *t
        if (!RootNode) return;
        Json_node_add_double ( RootNode, "valeur", valeur );
        Json_node_add_bool   ( RootNode, "in_range", in_range );
-       MQTT_Send_to_topic_new ( module->MQTT_session, RootNode, TRUE, "SET_AI/%s/%s", thread_tech_id, thread_acronyme );
+       MQTT_Send_to_topic ( module->MQTT_session, RootNode, TRUE, "SET_AI/%s/%s", thread_tech_id, thread_acronyme );
        Json_node_unref ( RootNode );
      }
   }
@@ -240,7 +224,7 @@ void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *t
        JsonNode *RootNode = Json_node_create();
        if (!RootNode) return;
        Json_node_add_bool ( RootNode, "etat", etat );
-       MQTT_Send_to_topic_new ( module->MQTT_session, RootNode, TRUE, "SET_DI/%s/%s", thread_tech_id, thread_acronyme );
+       MQTT_Send_to_topic ( module->MQTT_session, RootNode, TRUE, "SET_DI/%s/%s", thread_tech_id, thread_acronyme );
        Json_node_unref ( RootNode );
      }
   }
@@ -256,7 +240,7 @@ void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *t
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     Json_node_add_string ( thread_di, "thread_tech_id", thread_tech_id );
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = PULSE", tech_id, acronyme );
-    MQTT_Send_to_topic_new ( module->MQTT_session, thread_di, FALSE, "SET_DI_PULSE/%s/%s", tech_id, acronyme );
+    MQTT_Send_to_topic ( module->MQTT_session, thread_di, FALSE, "SET_DI_PULSE/%s/%s", tech_id, acronyme );
     Json_node_unref ( thread_di );
   }
 /******************************************************************************************************************************/
@@ -272,7 +256,7 @@ void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *t
     Json_node_add_int    ( thread_watchdog, "consigne", consigne );
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, consigne );
-    MQTT_Send_to_topic_new ( module->MQTT_session, thread_watchdog, TRUE, "SET_WATCHDOG/%s/%s", thread_tech_id, thread_acronyme );
+    MQTT_Send_to_topic ( module->MQTT_session, thread_watchdog, TRUE, "SET_WATCHDOG/%s/%s", thread_tech_id, thread_acronyme );
     Json_node_unref ( thread_watchdog );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

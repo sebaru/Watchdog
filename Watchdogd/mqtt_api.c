@@ -98,9 +98,9 @@
        else if ( !strcasecmp( tokens[2], "RESTART") )
              { Thread_Restart_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
        else if ( Config.instance_is_master && !strcasecmp( tokens[2], "TEST") )
-             { MQTT_Send_to_topic_new ( Partage->MQTT_local_session, request, FALSE, "SET_TEST/%s", Json_get_string ( request, "thread_tech_id" ) ); }
+             { MQTT_Send_to_topic ( Partage->MQTT_local_session, request, FALSE, "SET_TEST/%s", Json_get_string ( request, "thread_tech_id" ) ); }
        else if ( Config.instance_is_master && !strcasecmp( tokens[2], "DEBUG") )
-             { MQTT_Send_to_topic_new ( Partage->MQTT_local_session, request, FALSE, "SET_DEBUG/%s", Json_get_string ( request, "thread_tech_id" ) ); }
+             { MQTT_Send_to_topic ( Partage->MQTT_local_session, request, FALSE, "SET_DEBUG/%s", Json_get_string ( request, "thread_tech_id" ) ); }
      }
 /*-------------------------------------------------- topic DLS ---------------------------------------------------------------*/
     else if ( !strcasecmp( tokens[1], "DLS") )
@@ -151,7 +151,7 @@
         }
        else if ( !strcasecmp( tokens[2], "REMAP") )
         { MSRV_Remap();
-          MQTT_Send_to_topic_new ( Partage->MQTT_local_session, NULL, FALSE, "SYNC_INPUT" );/* Synchronisation des IO depuis les threads */
+          MQTT_Send_to_topic ( Partage->MQTT_local_session, NULL, FALSE, "SYNC_INPUT" );/* Synchronisation des IO depuis les threads */
           pthread_mutex_lock( &Partage->com_dls.synchro );                               /* Zone de protection des bits internes */
           Dls_foreach_plugins ( NULL, Dls_sync_all_output );                                             /* Run all plugin D.L.S */
           pthread_mutex_unlock( &Partage->com_dls.synchro );                      /* Fin de Zone de protection des bits internes */

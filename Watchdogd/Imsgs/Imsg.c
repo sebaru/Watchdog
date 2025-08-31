@@ -327,6 +327,7 @@ end_message:
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *jabber_id = Json_get_string ( module->config, "jabberid" );
+    MQTT_Subscribe ( module->MQTT_session, "SEND_IMSG" );
 
     if ( ! (thread_tech_id && jabber_id) )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "No thread_tech_id Or Jabber_id. Stopping." );
@@ -370,27 +371,20 @@ reconnect:
 
           if (Json_has_member ( message, "token_lvl0" ))
            { gchar *token_lvl0 = Json_get_string ( message, "token_lvl0" );
-             if (!strcasecmp (token_lvl0, "THREAD_TEST")) { Imsgs_Envoi_message_to_all_available ( module, "Test OK" ); }
+             if (!strcasecmp (token_lvl0, "SEND_IMSG") &&
+                 Json_has_member ( message, "tech_id" ) &&  Json_has_member ( message, "acronyme" ) &&
+                 Json_has_member ( message, "libelle" )
+                )
+              { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Sending msg '%s:%s' (%s)", thread_tech_id,
+                          jabber_id,
+                          Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
+                          Json_get_string ( message, "libelle" ) );
+                gchar chaine[256];
+                g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( message, "dls_shortname" ), Json_get_string ( message, "libelle" ) );
+                Imsgs_Envoi_message_to_all_available ( module, chaine );
+              }
+             else if (!strcasecmp (token_lvl0, "THREAD_TEST")) { Imsgs_Envoi_message_to_all_available ( module, "Test OK" ); }
            }
-#warning a refaire
-          else {
-          gchar *tag = Json_get_string ( message, "tag" );
-          gint notif_chat = Json_get_int ( message, "notif_chat" );
-          if (notif_chat == IMSG_NOTIF_SET_BY_DLS) { notif_chat = Json_get_int ( message, "notif_chat_by_dls" ); }
-
-          if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
-               notif_chat == IMSG_NOTIF_YES
-             )
-           { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Sending msg '%s:%s' (%s)",
-                       jabber_id,
-                       Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
-                       Json_get_string ( message, "libelle" ) );
-             gchar chaine[256];
-             g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( message, "dls_shortname" ), Json_get_string ( message, "libelle" ) );
-             Imsgs_Envoi_message_to_all_available ( module, chaine );
-           }
-          else Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': tag '%s' not for this thread", thread_tech_id, tag );
-          }
           Json_node_unref(message);
         }
      }                                                                                         /* Fin du while partage->arret */

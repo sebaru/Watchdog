@@ -44,7 +44,10 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ]
   apt install -y sox libsox-fmt-all python3-pip mpg123
   apt install -y libjson-glib-dev libgpiod-dev
   apt install -y alsa-utils libsystemd-dev
-  apt install -y python3-gtts
+  apt install debian-keyring debian-archive-keyring
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6ED0E7B82643E131
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 78DBA3BC47EF2265
+  apt install -t bookworm-backports python3-gtts
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
   apt install -y libphidget22 libphidget22-dev
 
