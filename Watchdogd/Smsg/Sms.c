@@ -395,11 +395,11 @@
 /******************************************************************************************************************************/
  static void Envoyer_smsg_ovh_text ( struct THREAD *module, gchar *texte )
   { JsonNode *RootNode = Json_node_create();
+    if (!RootNode) return;
+    Json_node_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_OVH_ONLY );
-    Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
-    Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
@@ -411,11 +411,11 @@
 /******************************************************************************************************************************/
  static void Envoyer_smsg_gsm_text ( struct THREAD *module, gchar *texte )
   { JsonNode *RootNode = Json_node_create();
+    if (!RootNode) return;
+    Json_node_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
     Json_node_add_string ( RootNode, "libelle", texte );
     Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
     Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_YES );
-    Json_node_add_string ( RootNode, "tag", "DLS_HISTO" );
-    Json_node_add_bool   ( RootNode, "alive", TRUE );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
@@ -618,8 +618,8 @@ end_user:
 
           if (Json_has_member ( message, "token_lvl0" ))
            { gchar *token_lvl0 = Json_get_string ( message, "token_lvl0" );
-             if (!strcasecmp (token_lvl0, "SEND_SMS") &&
-                 Json_has_member ( message, "tech_id" ) &&  Json_has_member ( message, "acronyme" ) &&
+             if (!strcasecmp (token_lvl0, "SEND_SMS") && Json_has_member ( message, "notif_sms" ) &&
+                 Json_has_member ( message, "tech_id" ) && Json_has_member ( message, "acronyme" ) &&
                  Json_has_member ( message, "libelle" )
                 )
               { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,

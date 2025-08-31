@@ -139,7 +139,23 @@ encore:
           gint rate_limit = Json_get_int ( msg->source_node, "rate_limit" );
           if ( !msg->last_on || (Partage->top >= msg->last_on + rate_limit*10 ) )
            { msg->last_on = Partage->top;
-             MQTT_Send_to_API ( event->msg->source_node, "DLS_HISTO" );
+             MSGS_Convert_msg_on_to_histo ( msg );
+/*------------------------------------------------ Envoi vers API ------------------------------------------------------------*/
+             JsonNode *MSGNode = Json_node_create();
+             if (MSGNode)
+              { gchar *tech_id     = Json_get_string ( msg->source_node, "tech_id" );
+                gchar *acronyme    = Json_get_string ( msg->source_node, "acronyme" );
+                gchar *libelle     = Json_get_string ( msg->source_node, "libelle" );
+                gchar *date_create = Json_get_string ( msg->source_node, "date_create" );
+                Json_node_add_string ( MSGNode, "tech_id", tech_id );
+                Json_node_add_string ( MSGNode, "acronyme", acronyme );
+                Json_node_add_string ( MSGNode, "libelle", libelle );
+                Json_node_add_string ( MSGNode, "date_create", date_create );
+                Json_node_add_bool   ( MSGNode, "alive", TRUE );
+                MQTT_Send_to_API ( MSGNode, "DLS_HISTO" );
+                Json_node_unref ( MSGNode );
+              }
+             else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send DLS_HISTO: memory error" );
 /*---------------------------------------------------- Envoi IMSG ------------------------------------------------------------*/
              gint notif_chat = Json_get_int ( msg->source_node, "notif_chat" );
              if (notif_chat == TXT_NOTIF_BY_DLS) { notif_chat = Json_get_int ( msg->source_node, "notif_chat_by_dls" ); }
@@ -173,6 +189,7 @@ encore:
                    Json_node_add_string ( SMSNode, "acronyme", acronyme );
                    Json_node_add_string ( SMSNode, "dls_shortname", dls_shortname );
                    Json_node_add_string ( SMSNode, "libelle", libelle );
+                   Json_node_add_int    ( SMSNode, "notif_sms", notif_sms );
                    MQTT_Send_to_topic ( Partage->MQTT_local_session, SMSNode, FALSE, "SEND_SMS" );
                    Json_node_unref ( SMSNode );
                  }
