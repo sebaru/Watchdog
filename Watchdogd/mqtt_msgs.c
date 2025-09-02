@@ -33,65 +33,6 @@
 /****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
 
-/************************************* Converstion du histo dynamique *******************************************************/
- void Convert_libelle_dynamique ( gchar *libelle, gint taille_max )
-  { gchar prefixe[128], tech_id[32], acronyme[64], suffixe[128];
-
-encore:
-    memset ( prefixe,  0, sizeof(prefixe)  );                       /* Mise à zero pour gérer correctement les fins de tampon */
-    memset ( suffixe,  0, sizeof(suffixe)  );
-    memset ( tech_id,  0, sizeof(tech_id)  );
-    memset ( acronyme, 0, sizeof(acronyme) );
-
-    sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe );
-
-    if (prefixe[0] == '\0')                                                        /* si pas de prefixe, on retente en direct */
-     { sscanf ( libelle, "$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", tech_id, acronyme, suffixe ); }
-
-    if (tech_id[0] != '\0' && acronyme[0] != '\0')                               /* Si on a trouvé un couple tech_id:acronyme */
-     { struct DLS_REGISTRE *reg;
-       struct DLS_AI *ai;
-       gchar result[128], chaine[32];
-       g_snprintf( result, sizeof(result), "%s", prefixe );                                                       /* Prologue */
-       if ( (ai = Dls_data_lookup_AI ( tech_id, acronyme )) != NULL )
-        { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
-           { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
-          else*/
-           { g_snprintf( chaine, sizeof(chaine), "%.02f %s", ai->valeur, ai->unite ); }
-        }
-       else if ( (reg = Dls_data_lookup_REGISTRE ( tech_id, acronyme )) != NULL )
-        { g_snprintf( chaine, sizeof(chaine), "%.02f %s", reg->valeur, reg->unite ); }
-       else g_snprintf( chaine, sizeof(chaine), "erreur" );
-       g_strlcat ( result, chaine, sizeof(result) );
-       g_strlcat ( result, suffixe, sizeof(result) );
-       g_snprintf( libelle, taille_max, "%s", result );
-       goto encore;
-     }
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Message parsé final: %s", libelle );
-  }
-/******************************************************************************************************************************/
-/* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
-/* Entrée/Sortie: rien                                                                                                        */
-/******************************************************************************************************************************/
- static void MSGS_Convert_msg_on_to_histo ( struct DLS_MESSAGE *msg )
-  { gchar libelle[128], chaine[512], date_create[128];
-    struct timeval tv;
-    struct tm *temps;
-
-    gettimeofday( &tv, NULL );
-    temps = localtime( (time_t *)&tv.tv_sec );
-    strftime( chaine, sizeof(chaine), "%F %T", temps );
-    gchar *date_utf8 = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( date_create, sizeof(date_create), "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
-    g_free( date_utf8 );
-
-    g_snprintf ( libelle, sizeof(libelle), "%s", Json_get_string(msg->source_node, "libelle_src") );
-    Convert_libelle_dynamique ( libelle, sizeof(libelle) );
-/***************************************** Création de la structure interne de stockage ***************************************/
-    Json_node_add_string ( msg->source_node, "libelle", libelle );
-    Json_node_add_string ( msg->source_node, "date_create", date_create );
-    Json_node_add_bool   ( msg->source_node, "alive", TRUE );
-  }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
@@ -135,19 +76,33 @@ encore:
                  msg->tech_id, msg->acronyme, event->etat, reste_a_faire );
 
        if (event->etat == 1)
-        { MSGS_Convert_msg_on_to_histo ( msg );
-          gint rate_limit = Json_get_int ( msg->source_node, "rate_limit" );
+        { gint rate_limit = Json_get_int ( msg->source_node, "rate_limit" );
           if ( !msg->last_on || (Partage->top >= msg->last_on + rate_limit*10 ) )
-           { msg->last_on = Partage->top;
-             MSGS_Convert_msg_on_to_histo ( msg );
+           { gchar chaine[512], date_create[128];
+             struct timeval tv;
+             struct tm *temps;
+             msg->last_on = Partage->top;
+
+             gettimeofday( &tv, NULL );
+             temps = localtime( (time_t *)&tv.tv_sec );
+             strftime( chaine, sizeof(chaine), "%F %T", temps );
+             gchar *date_utf8 = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
+             g_snprintf( date_create, sizeof(date_create), "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
+             g_free( date_utf8 );
+             Json_node_add_string ( msg->source_node, "date_create", date_create );
+
+                                                                                  /* Préparation du nouveau libelle dynamique */
+             gchar *libelle_new = Convert_libelle_dynamique ( Json_get_string(msg->source_node, "libelle_src") );
+             Json_node_add_string ( msg->source_node, "libelle", libelle_new );
+             g_free(libelle_new);
+             gchar *tech_id       = Json_get_string ( msg->source_node, "tech_id" );
+             gchar *acronyme      = Json_get_string ( msg->source_node, "acronyme" );
+             gchar *dls_shortname = Json_get_string ( msg->source_node, "dls_shortname" );
+             gchar *libelle       = Json_get_string ( msg->source_node, "libelle" );
 /*------------------------------------------------ Envoi vers API ------------------------------------------------------------*/
              JsonNode *MSGNode = Json_node_create();
              if (MSGNode)
-              { gchar *tech_id     = Json_get_string ( msg->source_node, "tech_id" );
-                gchar *acronyme    = Json_get_string ( msg->source_node, "acronyme" );
-                gchar *libelle     = Json_get_string ( msg->source_node, "libelle" );
-                gchar *date_create = Json_get_string ( msg->source_node, "date_create" );
-                Json_node_add_string ( MSGNode, "tech_id", tech_id );
+              { Json_node_add_string ( MSGNode, "tech_id", tech_id );
                 Json_node_add_string ( MSGNode, "acronyme", acronyme );
                 Json_node_add_string ( MSGNode, "libelle", libelle );
                 Json_node_add_string ( MSGNode, "date_create", date_create );
@@ -162,11 +117,7 @@ encore:
              if (notif_chat == TXT_NOTIF_YES)
               { JsonNode *IMSGNode = Json_node_create();
                 if (IMSGNode)
-                 { gchar *tech_id       = Json_get_string ( msg->source_node, "tech_id" );
-                   gchar *acronyme      = Json_get_string ( msg->source_node, "acronyme" );
-                   gchar *dls_shortname = Json_get_string ( msg->source_node, "dls_shortname" );
-                   gchar *libelle       = Json_get_string ( msg->source_node, "libelle" );
-                   Json_node_add_string ( IMSGNode, "tech_id", tech_id );
+                 { Json_node_add_string ( IMSGNode, "tech_id", tech_id );
                    Json_node_add_string ( IMSGNode, "acronyme", acronyme );
                    Json_node_add_string ( IMSGNode, "dls_shortname", dls_shortname );
                    Json_node_add_string ( IMSGNode, "libelle", libelle );
@@ -181,11 +132,7 @@ encore:
              if (notif_sms == TXT_NOTIF_YES || notif_sms == TXT_NOTIF_OVH_ONLY)
               { JsonNode *SMSNode = Json_node_create();
                 if (SMSNode)
-                 { gchar *tech_id       = Json_get_string ( msg->source_node, "tech_id" );
-                   gchar *acronyme      = Json_get_string ( msg->source_node, "acronyme" );
-                   gchar *dls_shortname = Json_get_string ( msg->source_node, "dls_shortname" );
-                   gchar *libelle       = Json_get_string ( msg->source_node, "libelle" );
-                   Json_node_add_string ( SMSNode, "tech_id", tech_id );
+                 { Json_node_add_string ( SMSNode, "tech_id", tech_id );
                    Json_node_add_string ( SMSNode, "acronyme", acronyme );
                    Json_node_add_string ( SMSNode, "dls_shortname", dls_shortname );
                    Json_node_add_string ( SMSNode, "libelle", libelle );
@@ -198,7 +145,7 @@ encore:
 /*---------------------------------------------------- Envoi AUDIO -----------------------------------------------------------*/
              gchar *audio_zone_name = Json_get_string ( msg->source_node, "audio_zone_name" );
              if (strcasecmp ( audio_zone_name, "ZD_NONE"))
-              { gchar *audio_libelle   = Json_get_string ( msg->source_node, "audio_libelle" );
+              { gchar *audio_libelle = Json_get_string ( msg->source_node, "audio_libelle" );
                 if (strlen(audio_libelle)) AUDIO_Send_to_zone ( audio_zone_name, audio_libelle );
               }
            }

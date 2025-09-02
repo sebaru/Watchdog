@@ -96,12 +96,13 @@
        )
      { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
        g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
-       g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
-       Convert_libelle_dynamique ( visu->libelle, sizeof(visu->libelle) );
        visu->valeur  = valeur;
        visu->cligno  = cligno;
        visu->noshow  = noshow;
        visu->disable = disable;
+       gchar *libelle_new = Convert_libelle_dynamique ( libelle );
+       g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle_new );
+       g_free(libelle_new);
        visu->changed = TRUE;
        Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s') "

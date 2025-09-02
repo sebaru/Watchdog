@@ -104,8 +104,7 @@
  extern gboolean Shm_stop ( struct PARTAGE *partage );
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
-
- extern void Convert_libelle_dynamique ( gchar *libelle, gint taille_max );
+ extern gchar *Convert_libelle_dynamique ( gchar *libelle_src );
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 

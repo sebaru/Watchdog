@@ -33,6 +33,53 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Convert_libelle_dynamique: Conversion du libelle en parametre pour gérer les $ dynamiques                                  */
+/* Entrée : le libelle                                                                                                        */
+/* Sortie: le nouveau libelle adapté, a freer ensuite                                                                         */
+/******************************************************************************************************************************/
+ gchar *Convert_libelle_dynamique ( gchar *libelle_src )
+  { gchar prefixe[128], tech_id[32], acronyme[64], suffixe[128], libelle[256], chaine[32];
+    gint taille_result = 256;
+    gchar *result = g_try_malloc0 ( taille_result );
+    if (!result)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Memory error for '%s'", libelle_src );
+       return(NULL);
+     }
+    g_snprintf ( result, taille_result, "%s", libelle_src );                                            /* Résultat potentiel */
+    g_snprintf ( libelle, sizeof(libelle), "%s", libelle_src );                                           /* Copie de travail */
+encore:
+    memset ( prefixe,  0, sizeof(prefixe)  );                       /* Mise à zero pour gérer correctement les fins de tampon */
+    memset ( suffixe,  0, sizeof(suffixe)  );
+    memset ( tech_id,  0, sizeof(tech_id)  );
+    memset ( acronyme, 0, sizeof(acronyme) );
+
+    sscanf ( libelle, "%128[^$]$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", prefixe, tech_id, acronyme, suffixe );
+
+    if (prefixe[0] == '\0')                                                        /* si pas de prefixe, on retente en direct */
+     { sscanf ( libelle, "$%32[^:]:%64[a-zA-Z0-9_]%128[^\n]", tech_id, acronyme, suffixe ); }
+
+    if (tech_id[0] != '\0' && acronyme[0] != '\0')                               /* Si on a trouvé un couple tech_id:acronyme */
+     { struct DLS_REGISTRE *reg;
+       struct DLS_AI *ai;
+       g_snprintf( result, taille_result, "%s", prefixe );                                                        /* Prologue */
+       if ( (ai = Dls_data_lookup_AI ( tech_id, acronyme )) != NULL )
+        { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
+           { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
+          else*/
+           { g_snprintf( chaine, sizeof(chaine), "%.02f %s", ai->valeur, ai->unite ); }
+        }
+       else if ( (reg = Dls_data_lookup_REGISTRE ( tech_id, acronyme )) != NULL )
+        { g_snprintf( chaine, sizeof(chaine), "%.02f %s", reg->valeur, reg->unite ); }
+       else g_snprintf( chaine, sizeof(chaine), "bit inconnu" );
+       g_strlcat ( result, chaine, taille_result );
+       g_strlcat ( result, suffixe, taille_result );
+       g_snprintf( libelle, sizeof(libelle), "%s", result );                              /* recopie pour prochaine itération */
+       goto encore;
+     }
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Message parsé final: %s", result );
+    return(result);
+  }
+/******************************************************************************************************************************/
 /* Gerer_arrive_Axxx_dls: Gestion de l'arrive des sorties depuis DLS (Axxx = 1)                                               */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
