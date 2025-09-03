@@ -89,6 +89,7 @@
         }
        else                                                                                                /* Pour une sortie */
         { vars->lignes[num].etat = gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, vars->lignes[num].mode_activelow ); }
+       Json_node_add_int ( element, "etat", vars->lignes[num].etat );
      }
   }
 /******************************************************************************************************************************/

@@ -47,7 +47,9 @@
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "MQTT Message received from API: %s/%s", tokens[1], tokens[2] );
 
 /*-------------------------------------------------- Message with payload ----------------------------------------------------*/
-    JsonNode *request = Json_get_from_string ( msg->payload );     /* Request peut etre nulle si mal formée ou pas de payload */
+    JsonNode *request = NULL;                                      /* Request peut etre nulle si mal formée ou pas de payload */
+    if (msg->payload)
+     { request = Json_get_from_string ( msg->payload ); }          /* Request peut etre nulle si mal formée ou pas de payload */
 
 /*-------------------------------------------------- topic Agent -------------------------------------------------------------*/
     if ( !strcasecmp( tokens[1], Json_get_string ( Config.config, "agent_uuid" ) ) )
