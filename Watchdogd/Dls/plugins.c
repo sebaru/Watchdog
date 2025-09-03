@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/plugins.c  -> Gestion des plugins pour DLS                                                                   */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                    dim. 02 janv. 2011 19:04:47 CET */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                    dim. 02 janv. 2011 19:04:47 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
  /*****************************************************************************************************************************/
 /*

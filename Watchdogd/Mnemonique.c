@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Mnemonique/Mnemonique.c        Déclaration des fonctions pour la gestion des mnemoniques                         */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      dim 19 avr 2009 15:15:28 CEST */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                      dim 19 avr 2009 15:15:28 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

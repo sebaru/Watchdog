@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Teleinfo/Teleinfo.h        Déclaration structure internes des communication TELEINFO                             */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                    dim. 27 mai 2012 13:02:55 CEST  */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                    dim. 27 mai 2012 13:02:55 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

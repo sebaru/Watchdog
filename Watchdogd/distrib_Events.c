@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/distrib_Events.c        Distribution des changements d'etats motif                                               */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                    sam. 24 janv. 2015 13:53:26 CET */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                    sam. 24 janv. 2015 13:53:26 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
