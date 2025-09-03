@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/include/thread.h      Déclarations générales de gestion des threads                                              */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                30.01.2022 12:46:36 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                30.01.2022 12:46:36 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -41,10 +41,10 @@
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
-    SoupSession *Soup_session;
     struct mosquitto *MQTT_session;
     GSList *MQTT_messages;
     JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
+    gboolean MQTT_connected;                                       /* Report du status de la communication vers le MQTT local */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     JsonNode *ai_nbr_tour_par_sec;                                                                        /* Tour par seconde */
@@ -60,17 +60,14 @@
   };
 
 /************************************************ Définitions des prototypes **************************************************/
- extern void Stopper_fils ( void );                                                                          /* Dans thread.c */
- extern gboolean Demarrer_dls ( void );
+ extern gboolean Demarrer_dls ( void );                                                                      /* Dans thread.c */
  extern void Stopper_dls ( void );
- extern gboolean Demarrer_http ( void );
- extern gboolean Demarrer_arch ( void );
- extern void Charger_librairies ( void );
- extern void Decharger_librairies ( void );
- extern void Thread_Start_one_thread (JsonArray *array, guint index_, JsonNode *element, gpointer user_data );
- extern void Thread_Stop_one_thread ( JsonNode *element );
- extern void Thread_Push_API_message ( JsonNode *request );
- extern void Thread_Set_debug ( JsonNode *request );
+ extern void Thread_Start_all ( void );
+ extern void Thread_Start_by_thread_tech_id ( gchar *thread_tech_id );
+ extern void Thread_Stop_all ( void );
+ extern void Thread_Stop_by_thread_tech_id ( gchar *thread_tech_id );
+ extern void Thread_Restart_by_thread_tech_id ( gchar *thread_tech_id );
+ extern void Thread_Restart_by_classe ( gchar *thread_classe );
  extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );
  extern void Thread_loop ( struct THREAD *module );
  extern void Thread_init ( struct THREAD *module, gint sizeof_vars );

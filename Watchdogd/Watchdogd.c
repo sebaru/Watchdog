@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Watchdogd.c        Démarrage/Arret du systeme Watchdog, gestion des connexions clientes                          */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                       mar 14 fév 2006 15:56:40 CET */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                       mar 14 fév 2006 15:56:40 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -53,7 +53,7 @@
  static void Traitement_signaux( int num )
   { char chaine[50];
     if (num == SIGALRM)
-     { if (!(Partage && Partage->com_msrv.Thread_run)) return;
+     { if (!(Partage && Partage->Thread_run)) return;
        Partage->top++;
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "Timer: Partage->top = 0 !!" ); }
@@ -72,10 +72,10 @@
     switch (num)
      { case SIGQUIT:
        case SIGINT:  Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGINT" );
-                     Partage->com_msrv.Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
+                     Partage->Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
                      break;
        case SIGTERM: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGTERM" );
-                     Partage->com_msrv.Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
+                     Partage->Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
                      break;
        case SIGABRT: Info_new( __func__, Config.log_msrv, LOG_INFO, "Recu SIGABRT" );
                      break;
@@ -139,13 +139,17 @@
                  __func__, Json_get_string ( key, "tech_id" ), Json_get_string ( key, "acronyme" ) );
        return(FALSE);
      }
+
+    gboolean found = FALSE;
+    pthread_rwlock_rdlock(&Partage->Maps_synchro);
     JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, key );
     if (map && Json_has_member ( map, "thread_tech_id" ) && Json_has_member ( map, "thread_acronyme" ) )
      { Json_node_add_string ( key, "thread_tech_id",  Json_get_string ( map, "thread_tech_id" ) );
        Json_node_add_string ( key, "thread_acronyme", Json_get_string ( map, "thread_acronyme" ) );
-       return(TRUE);
+       found = TRUE;
      }
-    return(FALSE);
+    pthread_rwlock_unlock(&Partage->Maps_synchro);
+    return(found);
   }
 /******************************************************************************************************************************/
 /* MSRV_Map_to_thread: Met à jour à buffer json en mappant l'equivalent thread d'un bit interne local                         */
@@ -157,38 +161,33 @@
                  __func__, Json_get_string ( key, "thread_tech_id" ), Json_get_string ( key, "thread_acronyme" ) );
        return(FALSE);
      }
+
+    gboolean found = FALSE;
+    pthread_rwlock_rdlock(&Partage->Maps_synchro);
     JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, key );
     if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
      { Json_node_add_string ( key, "tech_id",  Json_get_string ( map, "tech_id" ) );
        Json_node_add_string ( key, "acronyme", Json_get_string ( map, "acronyme" ) );
-       return(TRUE);
+       found = TRUE;
      }
-    return(FALSE);
+    pthread_rwlock_unlock(&Partage->Maps_synchro);
+    return(found);
   }
 /******************************************************************************************************************************/
 /* MSRV_Remap: Charge les données de mapping en mémoire                                                                       */
 /* Entrée: néant                                                                                                              */
 /******************************************************************************************************************************/
  void MSRV_Remap( void )
-  { pthread_mutex_lock( &Partage->com_msrv.synchro );
-    if (Partage->Maps_from_thread)
-     { g_tree_destroy ( Partage->Maps_from_thread );
-       Partage->Maps_from_thread = NULL;
-     }
-    if (Partage->Maps_to_thread)
-     { g_tree_destroy ( Partage->Maps_to_thread );
-       Partage->Maps_to_thread = NULL;
-     }
-    if (Partage->Maps_root)
-     { Json_node_unref ( Partage->Maps_root );
-       Partage->Maps_root = NULL;
-     }
+  { pthread_rwlock_wrlock(&Partage->Maps_synchro);                                      /* Dechargement des données actuelles */
+    if (Partage->Maps_from_thread) { g_tree_destroy  ( Partage->Maps_from_thread ); Partage->Maps_from_thread = NULL; }
+    if (Partage->Maps_to_thread)   { g_tree_destroy  ( Partage->Maps_to_thread );   Partage->Maps_to_thread   = NULL; }
+    if (Partage->Maps_root)        { Json_node_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
 
     Partage->Maps_from_thread = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_thread );
     Partage->Maps_to_thread   = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_local );
 
     Partage->Maps_root = Http_Post_to_global_API ( "/run/mapping/list", NULL );
-    if (Partage->Maps_root && Json_get_int ( Partage->Maps_root, "api_status" ) == SOUP_STATUS_OK)
+    if (Partage->Maps_root && Json_get_int ( Partage->Maps_root, "http_code" ) == 200)
      { GList *Results = json_array_get_elements ( Json_get_array ( Partage->Maps_root, "mappings" ) );
        GList *results = Results;
        while(results)
@@ -199,7 +198,7 @@
         }
        g_list_free(Results);
      } else { Json_node_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    pthread_rwlock_unlock(&Partage->Maps_synchro);
   }
 /******************************************************************************************************************************/
 /* Drop_privileges: Passe sous un autre user que root                                                                         */
@@ -339,6 +338,9 @@
        goto first_stage_end;
      }
 
+/************************************************* Init HTTP  *****************************************************************/
+    Http_Init ();
+
 /************************************************* Test Connexion to Global API ***********************************************/
     JsonNode *API = Http_Get_from_global_API ( "status", NULL );
     if (!API)
@@ -360,7 +362,7 @@
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/agent/start", RootNode );
        Json_node_unref ( RootNode );
-       if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+       if (api_result && Json_get_int ( api_result, "http_code" ) == 200)
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "API Request for AGENT START OK." ); }
        else
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for AGENT START failed. Sleep 5s and stopping." );
@@ -431,10 +433,13 @@
 
 /************************************************ Initialisation des mutex ****************************************************/
     time ( &Partage->start_time );
-    pthread_mutex_init( &Partage->com_msrv.synchro, NULL );                            /* Initialisation des mutex de synchro */
-    pthread_mutex_init( &Partage->com_http.synchro, NULL );
+    pthread_rwlock_init( &Partage->Maps_synchro, NULL );                               /* Initialisation des mutex de synchro */
+    pthread_rwlock_init( &Partage->Liste_DO_synchro, NULL );                           /* Initialisation des mutex de synchro */
+    pthread_rwlock_init( &Partage->Liste_AO_synchro, NULL );                           /* Initialisation des mutex de synchro */
+    pthread_rwlock_init( &Partage->Threads_synchro, NULL );                            /* Initialisation des mutex de synchro */
+    pthread_rwlock_init( &Partage->Liste_visuel_synchro, NULL );                       /* Initialisation des mutex de synchro */
+    pthread_rwlock_init( &Partage->Liste_msg_synchro, NULL );                          /* Initialisation des mutex de synchro */
     pthread_mutex_init( &Partage->com_dls.synchro, NULL );
-    pthread_mutex_init( &Partage->com_db.synchro, NULL );
 
 /************************************************* Gestion des signaux ********************************************************/
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
@@ -442,20 +447,17 @@
 
 /********************************************* Active les threads principaux **************************************************/
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Debut boucle sans fin" );
-    Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
-
-    if (!Demarrer_http())                                                                                   /* Démarrage HTTP */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb HTTP" ); }
+    Partage->Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
-     { Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
+     { MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
+       Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
        Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
-       MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
      }
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
-    if (Config.single == FALSE) Charger_librairies();                                             /* Si demarrage des threads */
+    if (Config.single == FALSE) Thread_Start_all();                                               /* Si demarrage des threads */
     else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" );
 
 /*************************************** Mise en place de la gestion des signaux **********************************************/
@@ -469,7 +471,7 @@
     sigaction( SIGABRT, &sig, NULL );
     sigaction( SIGPIPE, &sig, NULL );                                                  /* Pour prevenir un segfault du client */
     sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
-    sigdelset ( &sig.sa_mask, SIGALRM );
+    sigdelset ( &sig.sa_mask, SIGALRM );                                                  /* Sauf ces signaux que l'on trappe */
     sigdelset ( &sig.sa_mask, SIGUSR1 );
     sigdelset ( &sig.sa_mask, SIGUSR2 );
     sigdelset ( &sig.sa_mask, SIGINT  );
@@ -491,21 +493,20 @@
        sleep(10);                                                                           /* On laisse les threads demarrer */
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting Master Thread" );
        if (!Demarrer_dls()) Info_new( __func__, Config.log_msrv, LOG_ERR, "Pb DLS" );
-       while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
+       while(Partage->Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
            { JsonNode *RootNode = Json_node_create();
              Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
              MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
-             Json_node_unref ( RootNode );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 
 /*---------------------------------------------- Report des visuels ----------------------------------------------------------*/
-          if (Partage->com_msrv.liste_visuel)  MQTT_Send_visuels_to_API ();                    /* Traitement des I dynamiques */
+          if (Partage->Liste_visuel)  MQTT_Send_visuels_to_API();                              /* Traitement des I dynamiques */
 /*---------------------------------------------- Report des messages ---------------------------------------------------------*/
-          if (Partage->com_msrv.liste_msg)     MQTT_Send_MSGS_to_API();
+          if (Partage->Liste_msg)     MQTT_Send_MSGS_to_API();                    /* Traitement des messages en fil d'attente */
 
           usleep(1000);
           sched_yield();
@@ -514,7 +515,7 @@
     else
      { prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Starting SLAVE Thread" );
-       while(Partage->com_msrv.Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
+       while(Partage->Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         {
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
            { JsonNode *RootNode = Json_node_create();
@@ -532,24 +533,35 @@
     Info_new( __func__, Config.log_msrv, LOG_INFO, "fin boucle sans fin" );
 
     Stopper_dls();                /* On arrete DLS avant les threads pour assurer la sauvegarde des bits internes sur l'API ! */
-    Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
-    Stopper_fils();                                                                        /* Arret de tous les fils watchdog */
+    Thread_Stop_all();                                                        /* Déchargement de toutes les librairies filles */
 
     if (Config.instance_is_master)                                        /* Dechargement DLS après les threads IO, dls, arch */
      { Dls_Decharger_plugins();                                                               /* Dechargement des modules DLS */
        Json_node_unref ( Partage->com_dls.HORLOGE_ticks );                                   /* Libération des bits d'horloge */
      }
 
-    if (Partage->Maps_from_thread) g_tree_destroy ( Partage->Maps_from_thread );
-    if (Partage->Maps_to_thread) g_tree_destroy ( Partage->Maps_to_thread );
-    Json_node_unref ( Partage->Maps_root );
-    g_slist_free ( Partage->com_msrv.liste_visuel );
-    g_slist_free_full ( Partage->com_msrv.liste_msg, (GDestroyNotify)g_free );
+    pthread_rwlock_wrlock(&Partage->Maps_synchro);
+    if (Partage->Maps_from_thread) { g_tree_destroy  ( Partage->Maps_from_thread ); Partage->Maps_from_thread = NULL; }
+    if (Partage->Maps_to_thread)   { g_tree_destroy  ( Partage->Maps_to_thread );   Partage->Maps_to_thread   = NULL; }
+    if (Partage->Maps_root)        { Json_node_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
+    pthread_rwlock_unlock(&Partage->Maps_synchro);
+
+    pthread_rwlock_wrlock(&Partage->Liste_visuel_synchro);
+    g_slist_free ( Partage->Liste_visuel ); Partage->Liste_visuel = NULL;
+    pthread_rwlock_unlock(&Partage->Liste_visuel_synchro);
+
+    pthread_rwlock_wrlock(&Partage->Liste_msg_synchro);
+    g_slist_free_full ( Partage->Liste_msg, (GDestroyNotify)g_free ); Partage->Liste_msg = NULL;
+    pthread_rwlock_unlock(&Partage->Liste_msg_synchro);
 
 /************************************************* Dechargement des mutex *****************************************************/
-    pthread_mutex_destroy( &Partage->com_msrv.synchro );
+    pthread_rwlock_destroy( &Partage->Maps_synchro );
+    pthread_rwlock_destroy( &Partage->Liste_DO_synchro );
+    pthread_rwlock_destroy( &Partage->Liste_AO_synchro );
+    pthread_rwlock_destroy( &Partage->Threads_synchro );
+    pthread_rwlock_destroy( &Partage->Liste_visuel_synchro );
+    pthread_rwlock_destroy( &Partage->Liste_msg_synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
-    pthread_mutex_destroy( &Partage->com_db.synchro );
 
 /****************************************************** Arret du timer ********************************************************/
     timer.it_value.tv_sec  = timer.it_interval.tv_sec  = 0;
@@ -569,6 +581,7 @@ third_stage_end:
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
 second_stage_end:
+    Http_End();
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
 first_stage_end:

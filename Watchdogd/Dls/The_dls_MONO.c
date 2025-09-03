@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_MONO.c        Déclaration des fonctions pour la gestion des booleans                                 */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                24.06.2019 22:07:06 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                24.06.2019 22:07:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -84,22 +84,25 @@
 /******************************************************************************************************************************/
  void Dls_data_set_MONO ( struct DLS_TO_PLUGIN *vars, struct DLS_MONO *mono, gboolean valeur )
   { if(!mono) return;
-    if (mono->etat == TRUE && valeur == FALSE)
-     { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                "ligne %04d: Changing DLS_MONO '%s:%s'=0",
-                (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
-       mono->etat = FALSE;
+    if (mono->etat == TRUE && valeur == FALSE)                                                            /* Front descendant */
+     { mono->etat = FALSE;
        Partage->com_dls.Set_Dls_MONO_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_down, mono );
-       if (vars && vars->debug) Dls_MONO_export_to_API ( mono );
      }
-    else if (mono->etat == FALSE && valeur == TRUE)
-     { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                "ligne %04d: Changing DLS_MONO '%s:%s'=1",
-                (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme );
-       mono->etat = TRUE;
+    else if (mono->etat == FALSE && valeur == TRUE)                                                          /* Front montant */
+     { mono->etat = TRUE;
        Partage->com_dls.Set_Dls_MONO_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_up, mono );
-       if (vars && vars->debug) Dls_MONO_export_to_API ( mono );
      }
+    else return; /* Pas de modification, on arrete la */
+    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "ligne %04d: Changing DLS_MONO '%s:%s'=%d",
+              (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme, mono->etat );
+    if ( (vars && vars->debug) ||
+         g_str_has_prefix ( mono->acronyme, "MEMSA_DEFAUT" ) ||
+         g_str_has_prefix ( mono->acronyme, "MEMSSB_VEILLE" ) ||
+         g_str_has_prefix ( mono->acronyme, "MEMSSB_ALERTE" ) ||
+         g_str_has_prefix ( mono->acronyme, "MEMSSP_DERANGEMENT" ) ||
+         g_str_has_prefix ( mono->acronyme, "MEMSSP_DANGER" ) )
+     { Dls_MONO_export_to_API ( mono ); }
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/

@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_local.c        Fonctions communes de gestion des requetes MQTT locales                                      */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                17.08.2024 12:31:26 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                17.08.2024 12:31:26 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -30,30 +30,13 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* MQTT_local_on_log_CB: Affiche un log de la librairie MQTT                                                                  */
-/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void MQTT_local_on_log_CB( struct mosquitto *mosq, void *obj, int level, const char *message )
-  { gint info_level;
-    switch(level)
-     { default:
-       case MOSQ_LOG_INFO:    info_level = LOG_INFO;    break;
-       case MOSQ_LOG_NOTICE:  info_level = LOG_NOTICE;  break;
-       case MOSQ_LOG_WARNING: info_level = LOG_WARNING; break;
-       case MOSQ_LOG_ERR:     info_level = LOG_ERR;     break;
-       case MOSQ_LOG_DEBUG:   info_level = LOG_DEBUG;   break;
-     }
-    Info_new( __func__, Config.log_bus, info_level, "LOCAL: %s", message );
-  }
-/******************************************************************************************************************************/
 /* MQTT_local_on_connect_CB: appelé par la librairie quand le broker est connecté                                             */
 /* Entrée: les parametres d'affichage de log de la librairie                                                                  */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MQTT_local_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Connected with return code %d: %s",
-              return_code, mosquitto_connack_string(	return_code ) );
+              return_code, mosquitto_connack_string( return_code ) );
   }
 /******************************************************************************************************************************/
 /* MQTT_local_on_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                        */
@@ -62,47 +45,50 @@
 /******************************************************************************************************************************/
  static void MQTT_local_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Disconnected with return code %d: %s",
-              return_code, mosquitto_connack_string(	return_code ) );
+              return_code, mosquitto_connack_string( return_code ) );
   }
 /******************************************************************************************************************************/
-/* MQTT_on_API_message_CB: Appelé par mosquitto lorsque l'on recoit un message MQTT de la part de l'API                       */
-/* Entrée: les parametres de la libsoup                                                                                       */
+/* MQTT_local_on_message_CB: Appelé par mosquitto lorsque l'on recoit un message MQTT de la part du MQTT local                */
+/* Entrée: les parametres MQTT                                                                                                */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void MQTT_on_mqtt_local_message_CB ( struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg )
-  { gchar **tokens = g_strsplit ( msg->topic, "/", 2 );
+ static void MQTT_local_on_message_CB ( struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg )
+  { gchar **tokens = g_strsplit ( msg->topic, "/", 3 );
     if (!tokens) return;
-    if (!tokens[0]) goto end; /* Normalement "agent"  */
-    if (!tokens[1]) goto end; /* Normalement "master" */
+    if (!tokens[0]) goto end; /* Le Tag */
+    if (!tokens[1]) goto end; /* Le tech_id */
+    if (!tokens[2]) goto end; /* L'acronyme */
 
     JsonNode *request = Json_get_from_string ( msg->payload );
     if (!request)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "MQTT Message from LOCAL dropped: not JSON" );
+     { Info_new( __func__, Config.log_bus, LOG_WARNING, "MQTT Message from LOCAL dropped: not JSON or no payload" );
        goto end;
      }
-    gchar *topic = Json_get_string ( request, "tag" );
-    if (!topic)
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "Requete sans tag reçue sur topic %s", msg->topic );
-       goto end_request;
-     }
 
-         if ( !strcmp ( topic, "SET_AI" ) )       Dls_data_set_AI_from_thread_ai ( request );
-    else if ( !strcmp ( topic, "SET_DI" ) )       Dls_data_set_DI_from_thread_di ( request );
-    else if ( !strcmp ( topic, "SET_WATCHDOG" ) ) Dls_data_set_WATCHDOG_from_thread_watchdog ( request );
+    gchar *topic = tokens[0];
+    if ( !strcmp ( topic, "SET_AI" ) )
+     { Json_node_add_string ( request, "thread_tech_id", tokens[1] );
+       Json_node_add_string ( request, "thread_acronyme", tokens[2] );
+       Dls_data_set_AI_from_thread_ai ( request );
+     }
+    else if ( !strcmp ( topic, "SET_DI" ) )
+     { Json_node_add_string ( request, "thread_tech_id", tokens[1] );
+       Json_node_add_string ( request, "thread_acronyme", tokens[2] );
+       Dls_data_set_DI_from_thread_di ( request );
+     }
+    else if ( !strcmp ( topic, "SET_WATCHDOG" ) )
+     { Json_node_add_string ( request, "thread_tech_id", tokens[1] );
+       Json_node_add_string ( request, "thread_acronyme", tokens[2] );
+       Dls_data_set_WATCHDOG_from_thread_watchdog ( request );
+     }
     else if ( !strcmp ( topic, "SET_DI_PULSE" ) )
-     { if (! (Json_has_member ( request, "tech_id" ) && Json_has_member ( request, "acronyme" ) ) )
-        { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI_PULSE: wrong parameters" ); }
-       else { gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
-              gchar *tech_id        = Json_get_string ( request, "tech_id" );
-              gchar *acronyme       = Json_get_string ( request, "acronyme" );
-              Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI_PULSE from '%s': '%s:%s'=1", thread_tech_id, tech_id, acronyme );
-              struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
-              Dls_data_set_DI_pulse ( NULL, bit );
-            }
+     { gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+       Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI_PULSE from '%s': '%s:%s'=PULSE", thread_tech_id, tokens[1], tokens[2] );
+       struct DLS_DI *bit = Dls_data_lookup_DI ( tokens[1], tokens[2] );
+       Dls_data_set_DI_pulse ( NULL, bit );
      }
     else Info_new( __func__, Config.log_bus, LOG_ERR, "tag inconnu: %s sur topic %s", topic, msg->topic );
 
-end_request:
     Json_node_unref ( request );
 end:
     g_strfreev( tokens );                                                                      /* Libération des tokens topic */
@@ -116,28 +102,32 @@ end:
   { gint retour;
     gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
 
-    Partage->com_msrv.MQTT_local_session = mosquitto_new( agent_uuid, FALSE, NULL );
-    if (!Partage->com_msrv.MQTT_local_session)
+    Partage->MQTT_local_session = mosquitto_new( agent_uuid, FALSE, NULL );
+    if (!Partage->MQTT_local_session)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local session error." ); return(FALSE); }
 
-    mosquitto_log_callback_set        ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_log_CB );
-    mosquitto_connect_callback_set    ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_connect_CB );
-    mosquitto_disconnect_callback_set ( Partage->com_msrv.MQTT_local_session, MQTT_local_on_disconnect_CB );
-    mosquitto_message_callback_set    ( Partage->com_msrv.MQTT_local_session, MQTT_on_mqtt_local_message_CB );
+    mosquitto_log_callback_set        ( Partage->MQTT_local_session, MQTT_on_log_CB );
+    mosquitto_connect_callback_set    ( Partage->MQTT_local_session, MQTT_local_on_connect_CB );
+    mosquitto_disconnect_callback_set ( Partage->MQTT_local_session, MQTT_local_on_disconnect_CB );
+    mosquitto_message_callback_set    ( Partage->MQTT_local_session, MQTT_local_on_message_CB );
+    mosquitto_username_pw_set         ( Partage->MQTT_local_session, Json_get_string ( Config.config, "agent_uuid" ), NULL );
 
     /*if (Config.mqtt_over_ssl)
-     { mosquitto_tls_set( Partage->com_msrv.MQTT_local_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }*/
+     { mosquitto_tls_set( Partage->MQTT_local_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }*/
 
-    retour = mosquitto_connect( Partage->com_msrv.MQTT_local_session, Config.master_hostname, 1883, 60 );
+    retour = mosquitto_connect( Partage->MQTT_local_session, Config.master_hostname, 1883, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local connection to '%s:1883' error: %s",
                  Config.master_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
      }
 
-    MQTT_Subscribe ( Partage->com_msrv.MQTT_local_session, "agent/master/#" );
+    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI/#" );
+    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI_PULSE/#" );
+    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_AI/#" );
+    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_WATCHDOG/#" );
 
-    retour = mosquitto_loop_start( Partage->com_msrv.MQTT_local_session );
+    retour = mosquitto_loop_start( Partage->MQTT_local_session );
     if ( retour != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local loop not started: %s", mosquitto_strerror ( retour ) );
        return(FALSE);
@@ -152,25 +142,42 @@ end:
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void MQTT_Stop_MQTT_LOCAL ( void )
-  { mosquitto_disconnect( Partage->com_msrv.MQTT_local_session );
-    mosquitto_loop_stop( Partage->com_msrv.MQTT_local_session, FALSE );
-    mosquitto_destroy( Partage->com_msrv.MQTT_local_session );
-    Partage->com_msrv.MQTT_local_session = NULL;
+  { mosquitto_disconnect( Partage->MQTT_local_session );
+    mosquitto_loop_stop( Partage->MQTT_local_session, FALSE );
+    mosquitto_destroy( Partage->MQTT_local_session );
+    Partage->MQTT_local_session = NULL;
   }
 /******************************************************************************************************************************/
-/* Mqtt_Send_to_topic: Envoie le node au broker                                                                               */
-/* Entrée: la structure MQTT, le topic, le node                                                                               */
+/* MQTT_Send_to_topic: Envoie un node sur un topic MQTT via le broker                                                     */
+/* Entrée: la structure MQTT, le topic, le node, le flag de retenu                                                            */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node )
-  { gboolean free_node=FALSE;
-    if (! (mqtt_session && topic && tag) ) return;
+ void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, JsonNode *node, gboolean retain, gchar *format, ... )
+  { va_list ap;
+    if (! (mqtt_session && format) ) return;
+
+    va_start( ap, format );
+    gsize taille = g_printf_string_upper_bound ( format, ap );
+    va_end ( ap );
+    gchar *topic = g_try_malloc(taille+1);
+    if (!topic)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Memory Error for '%s'", format );
+       return;
+     }
+
+    va_start( ap, format );
+    g_vsnprintf ( topic, taille, format, ap );
+    va_end ( ap );
+
+    gboolean free_node=FALSE;
     if (!node) { node = Json_node_create(); free_node = TRUE; }
-    Json_node_add_string ( node, "tag", tag );
     gchar *buffer = Json_node_to_string ( node );
-    mosquitto_publish(	mqtt_session, NULL, topic, strlen(buffer), buffer, 2, TRUE );
-    g_free(buffer);
+    if (buffer)
+     { mosquitto_publish( mqtt_session, NULL, topic, strlen(buffer), buffer, 2, retain );
+       g_free(buffer);
+     }
     if (free_node) Json_node_unref(node);
+    g_free(topic);
   }
 /******************************************************************************************************************************/
 /* Mqtt_Send_AI: Envoie le bit AI au master                                                                                   */
@@ -179,9 +186,24 @@ end:
 /******************************************************************************************************************************/
  void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range )
   { if (! (module && thread_ai)) return;
-    Json_node_add_double ( thread_ai, "valeur", valeur );
-    Json_node_add_bool   ( thread_ai, "in_range", in_range );
-    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_AI", thread_ai );
+    gdouble  old_valeur   = Json_get_double ( thread_ai, "valeur" );
+    gboolean old_in_range = Json_get_bool   ( thread_ai, "in_range" );
+    gboolean need_sync    = Json_get_bool   ( thread_ai, "need_sync" );
+
+    if ( need_sync || old_valeur != valeur || old_in_range != in_range )
+     { Json_node_add_double ( thread_ai, "valeur", valeur );
+       Json_node_add_bool   ( thread_ai, "in_range", in_range );
+       Json_node_add_bool   ( thread_ai, "need_sync", FALSE );
+       gchar *thread_tech_id = Json_get_string ( thread_ai, "thread_tech_id" );
+       gchar *thread_acronyme = Json_get_string ( thread_ai, "thread_acronyme" );
+       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f (in_range=%d)", thread_tech_id, thread_acronyme, valeur, in_range );
+       JsonNode *RootNode = Json_node_create();
+       if (!RootNode) return;
+       Json_node_add_double ( RootNode, "valeur", valeur );
+       Json_node_add_bool   ( RootNode, "in_range", in_range );
+       MQTT_Send_to_topic ( module->MQTT_session, RootNode, TRUE, "SET_AI/%s/%s", thread_tech_id, thread_acronyme );
+       Json_node_unref ( RootNode );
+     }
   }
 /******************************************************************************************************************************/
 /* MQTT_Send_DI: Envoie le bit DI au master                                                                                   */
@@ -190,8 +212,21 @@ end:
 /******************************************************************************************************************************/
  void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat )
   { if (! (module && thread_di)) return;
-    Json_node_add_bool ( thread_di, "etat", etat );
-    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_DI", thread_di );
+    gboolean old_etat   = Json_get_bool ( thread_di, "etat" );
+    gboolean need_sync  = Json_get_bool ( thread_di, "need_sync" );
+
+    if ( need_sync || (old_etat != etat) )
+     { Json_node_add_bool ( thread_di, "etat", (etat ? TRUE : FALSE) );
+       Json_node_add_bool ( thread_di, "need_sync", FALSE );
+       gchar *thread_tech_id = Json_get_string ( thread_di, "thread_tech_id" );
+       gchar *thread_acronyme = Json_get_string ( thread_di, "thread_acronyme" );
+       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, etat );
+       JsonNode *RootNode = Json_node_create();
+       if (!RootNode) return;
+       Json_node_add_bool ( RootNode, "etat", etat );
+       MQTT_Send_to_topic ( module->MQTT_session, RootNode, TRUE, "SET_DI/%s/%s", thread_tech_id, thread_acronyme );
+       Json_node_unref ( RootNode );
+     }
   }
 /******************************************************************************************************************************/
 /* MQTT_Send_DI: Envoie le bit DI au master, au format pulse                                                                  */
@@ -201,10 +236,11 @@ end:
  void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *tech_id, gchar *acronyme )
   { if (! (module && tech_id && acronyme)) return;
     JsonNode *thread_di = Json_node_create();
-    Json_node_add_string ( thread_di, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_string ( thread_di, "tech_id", tech_id );
-    Json_node_add_string ( thread_di, "acronyme", acronyme );
-    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_DI_PULSE", thread_di );
+    if (!thread_di) return;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Json_node_add_string ( thread_di, "thread_tech_id", thread_tech_id );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = PULSE", tech_id, acronyme );
+    MQTT_Send_to_topic ( module->MQTT_session, thread_di, FALSE, "SET_DI_PULSE/%s/%s", tech_id, acronyme );
     Json_node_unref ( thread_di );
   }
 /******************************************************************************************************************************/
@@ -216,10 +252,11 @@ end:
   { if (! (module && thread_acronyme)) return;
     JsonNode *thread_watchdog = Json_node_create ();
     if(!thread_watchdog) return;
-    Json_node_add_string ( thread_watchdog, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-    Json_node_add_string ( thread_watchdog, "thread_acronyme", thread_acronyme );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     Json_node_add_int    ( thread_watchdog, "consigne", consigne );
-    MQTT_Send_to_topic ( module->MQTT_session, "agent/master", "SET_WATCHDOG", thread_watchdog );
-    Json_node_unref(thread_watchdog);
+
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, consigne );
+    MQTT_Send_to_topic ( module->MQTT_session, thread_watchdog, TRUE, "SET_WATCHDOG/%s/%s", thread_tech_id, thread_acronyme );
+    Json_node_unref ( thread_watchdog );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

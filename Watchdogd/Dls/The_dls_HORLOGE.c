@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_HORLOGE.c        Déclaration des fonctions pour la gestion des Horloges                              */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                03.07.2018 21:25:00 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                03.07.2018 21:25:00 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -98,7 +98,7 @@
 /******************************************************************************************************************************/
  void Dls_data_clear_HORLOGE ()
   { if (Partage->com_dls.HORLOGE_actives)
-     { g_slist_free_full ( Partage->com_dls.HORLOGE_actives, (GDestroyNotify) g_free );
+     { g_slist_free ( Partage->com_dls.HORLOGE_actives );
        Partage->com_dls.HORLOGE_actives = NULL;
      }
   }
@@ -136,7 +136,7 @@
 /******************************************************************************************************************************/
  void Dls_Load_horloge_ticks ( void )
   { JsonNode *api_result = Http_Get_from_global_API ( "/run/horloges", NULL );
-    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+    if (api_result && Json_get_int ( api_result, "http_code" ) == 200)
      { pthread_mutex_lock ( &Partage->com_dls.synchro );
        Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
        Partage->com_dls.HORLOGE_ticks = api_result;

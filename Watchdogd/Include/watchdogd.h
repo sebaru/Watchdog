@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/watchdogd.h      Déclarations générales watchdog                                                                 */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      sam 11 avr 2009 12:23:32 CEST */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                      sam 11 avr 2009 12:23:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -31,7 +31,6 @@
  #include <glib.h>
  #include <string.h>
  #include <openssl/ssl.h>
- #include <libsoup/soup.h>
  #include <uuid/uuid.h>
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
@@ -40,7 +39,6 @@
  #include "Dls.h"
  #include "Thread.h"
  #include "config.h"
- #include "Http.h"
  #include "Config.h"
  #include "Mqtt.h"
 
@@ -52,31 +50,11 @@
 
  #define VERROU_SERVEUR              "watchdogd.lock"
 
- struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */
-  { pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    GSList *Liste;                                                              /* Liste des requetes en cours de realisation */
-  };
-
- struct COM_MSRV                                                            /* Communication entre DLS et le serveur Watchdog */
-  { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    pthread_t TID_arch_sync;                                                                         /* Identifiant du thread */
-                                                                       /* Distribution aux threads (par systeme d'abonnement) */
-    GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
-    GSList *liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
-    GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
-    GSList *Liste_AO;                                                            /* liste de A a traiter dans la distribution */
-    GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
-    struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
-    struct mosquitto *MQTT_API_session;                                                    /* Session MQTT vers le broker API */
-    gboolean MQTT_connected;                                                         /* TRUE si la connexion au broker est OK */
-    GSList *MQTT_messages;                                                               /* Liste des messages recus via MQTT */
-  };
-
- struct PARTAGE                                                                            /* Structure des données partagées */
+  struct PARTAGE                                                                            /* Structure des données partagées */
   { gint  taille_partage;
     gchar version[16];
     time_t start_time;                                                                         /* Date de start de l'instance */
+    gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     guint top;                                                                         /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                                        /* Top de chien de garde des plugins DLS */
     guint audit_bit_interne_per_sec;
@@ -84,14 +62,39 @@
     guint audit_tour_dls_per_sec;
     guint audit_tour_dls_per_sec_hold;
                                                                                                     /* Interfacage avec D.L.S */
-    struct COM_DB com_db;                                                      /* Interfaçage avec le code de gestion des BDD */
-    struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
-    struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
-    struct COM_HTTP com_http;                                                                       /* Zone mémoire pour HTTP */
+    struct mosquitto *MQTT_local_session;                                                /* Session MQTT vers le broker local */
+    struct mosquitto *MQTT_API_session;                                                    /* Session MQTT vers le broker API */
+    gboolean MQTT_connected;                                                         /* TRUE si la connexion au broker est OK */
+    GSList *MQTT_messages;                                                               /* Liste des messages recus via MQTT */
 
+    struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
+
+    pthread_rwlock_t Maps_synchro;                                                   /* Mutex de synchronisation des mappings */
     JsonNode *Maps_root;                                                                   /* Json Array de tous les mappings */
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
+
+    pthread_rwlock_t Liste_DO_synchro;                                          /* Mutex de synchronisation des DigitalOutput */
+    GSList *Liste_DO;                                                           /* liste de DO a traiter dans la distribution */
+
+    pthread_rwlock_t Liste_AO_synchro;                                           /* Mutex de synchronisation des AnalogOutput */
+    GSList *Liste_AO;                                                           /* liste de AO a traiter dans la distribution */
+
+    pthread_rwlock_t Threads_synchro;                                                 /* Mutex de synchronisation des Threads */
+    GSList *Threads;                                                               /* Liste des Threads chargés pour Watchdog */
+
+    pthread_rwlock_t Liste_visuel_synchro;                                            /* Mutex de synchronisation des Visuels */
+    GSList *Liste_visuel;                                            /* liste de I (dynamique) a traiter dans la distribution */
+
+    pthread_rwlock_t Liste_msg_synchro;                                              /* Mutex de synchronisation des Messages */
+    GSList *Liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
+  };
+
+ enum
+  { TXT_NOTIF_BY_DLS = -1,
+    TXT_NOTIF_NO  = 0,
+    TXT_NOTIF_YES = 1,
+    TXT_NOTIF_OVH_ONLY = 2
   };
 
 /************************************************ Définitions des prototypes **************************************************/
@@ -101,13 +104,7 @@
  extern gboolean Shm_stop ( struct PARTAGE *partage );
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
-
- extern void Convert_libelle_dynamique ( gchar *libelle, gint taille_max );
-
- extern void API_Send_ARCHIVE ( void );                                                                     /* Dans api_xxx.c */
- extern void API_Clear_ARCHIVE ( void );
- extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
- extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
+ extern gchar *Convert_libelle_dynamique ( gchar *libelle_src );
 
  extern gboolean Send_mail ( gchar *sujet, gchar *dest, gchar *body );                                         /* dans mail.c */
 
@@ -115,23 +112,29 @@
  extern gboolean MSRV_Map_from_thread ( JsonNode *key );
  extern void MSRV_Agent_upgrade_to ( gchar *branche );
 
+ extern void AUDIO_Send_to_zone ( gchar *zone, gchar *audio_libelle );                                        /* Dans audio.c */
+
  extern void UUID_New ( gchar *target );                                                                       /* Dans uuid.c */
  extern void UUID_Load ( gchar *thread, gchar *target );
 
- extern void Http_Add_Agent_signature ( SoupMessage *msg, gchar *buf, gint buf_size );                  /* Dans http_common.c */
- extern SoupSession *HTTP_New_session ( gchar *user_agent );
- extern gboolean Http_Accept_certificate ( SoupMessage* self, GTlsCertificate* tls_peer_certificate, GTlsCertificateFlags tls_peer_errors, gpointer user_data );
- extern JsonNode *Http_Send_json_request_from_agent ( SoupMessage *soup_msg, JsonNode *RootNode );
- extern JsonNode *Http_Send_json_request_from_thread ( struct THREAD *module, SoupMessage *soup_msg, JsonNode *RootNode );
- extern void Http_Send_json_response ( SoupServerMessage *msg, gint code, gchar *message, JsonNode *RootNode );
+ extern void Http_Init ( void );                                                                        /* Dans http_common.c */
+ extern void Http_End ( void );
+ extern JsonNode *Http_Request ( gchar *url, JsonNode *json_payload, GSList *headers );
+ extern JsonNode *Http_Post_to_global_API ( gchar *URI, JsonNode *RootNode );
+ extern JsonNode *Http_Get_from_global_API ( gchar *URI, gchar *format, ... );
 
- extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, gchar *topic, gchar *tag, JsonNode *node );
+                                                                                                           /* Dans mqtt_api.c */
+ extern void MQTT_Send_to_topic ( struct mosquitto *mqtt_session, JsonNode *node, gboolean retain, gchar *format, ... );
  extern void MQTT_Send_AI ( struct THREAD *module, JsonNode *thread_ai, gdouble valeur, gboolean in_range );
  extern void MQTT_Send_DI ( struct THREAD *module, JsonNode *thread_di, gboolean etat );
  extern void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme );
  extern void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne );
- extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *topic );
  extern void MQTT_Send_to_API ( JsonNode *node, gchar *topic, ... );
+                                                                                                               /* Dans mqtt.c */
+ extern void MQTT_on_log_CB( struct mosquitto *mosq, void *obj, int level, const char *message );
+ extern void MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code );
+ extern void MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code );
+ extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *format, ... );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

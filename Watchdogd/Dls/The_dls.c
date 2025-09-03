@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                                                 */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                   mar. 06 juil. 2010 18:31:32 CEST */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                   mar. 06 juil. 2010 18:31:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -169,64 +169,35 @@
     if (RootNode)
      { gchar topic[256];
        g_snprintf( topic, sizeof(topic), "thread/%s", target_tech_id );
-       MQTT_Send_to_topic ( Partage->com_msrv.MQTT_local_session, topic, "DLS", RootNode );
+       MQTT_Send_to_topic ( Partage->MQTT_local_session, RootNode, FALSE, "SET_BUS/%s", target_tech_id );
        Json_node_unref(RootNode);
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_reg: Remonte l'etat d'un registre                                                                             */
-/* Sortie : TRUE sur le regean est UP                                                                                         */
+/* Dls_PID_reset: Reset les données calculées du PID                                                                          */
+/* Sortie : les bits somme et prev sont mis à 0                                                                               */
 /******************************************************************************************************************************/
- void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input )
-  {
-#ifdef bouh
-    Dls_data_get_REGISTRE ( input_tech_id, input_acronyme, r_input );
-    if ( ! (r_input) ) return;
-
-    struct DLS_REGISTRE *input = *r_input;
-    if ( ! (input) ) return;
+ void Dls_PID_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *input )
+  { if (!input) return;
 
     input->pid_somme_erreurs = 0.0;
     input->pid_prev_erreur   = 0.0;
-#endif
   }
 /******************************************************************************************************************************/
-/* Dls_PID: Gestion du PID                                                                                                    */
-/* Sortie : TRUE sur le regean est UP                                                                                         */
+/* Dls_get_top: Récupètre la valeur de l'horloge                                                                              */
+/* Sortie : le top horloge                                                                                                    */
 /******************************************************************************************************************************/
  gint Dls_get_top ( void )
   { return (Partage->top); }
-#ifdef bouh
 /******************************************************************************************************************************/
 /* Dls_PID: Gestion du PID                                                                                                    */
 /* Sortie : TRUE sur le regean est UP                                                                                         */
 /******************************************************************************************************************************/
- gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,
-                   gchar *consigne_tech_id, gchar *consigne_acronyme, gpointer *r_consigne,
-                   gchar *kp_tech_id, gchar *kp_acronyme, gpointer *r_kp,
-                   gchar *ki_tech_id, gchar *ki_acronyme, gpointer *r_ki,
-                   gchar *kd_tech_id, gchar *kd_acronyme, gpointer *r_kd,
-                   gchar *outputmin_tech_id, gchar *outputmin_acronyme, gpointer *r_outputmin,
-                   gchar *outputmax_tech_id, gchar *outputmax_acronyme, gpointer *r_outputmax
-                 )
-  { Dls_data_get_REGISTRE ( input_tech_id, input_acronyme, r_input );
-    Dls_data_get_REGISTRE ( consigne_tech_id, consigne_acronyme, r_consigne );
-    Dls_data_get_REGISTRE ( kp_tech_id, kp_acronyme, r_kp );
-    Dls_data_get_REGISTRE ( kp_tech_id, ki_acronyme, r_ki );
-    Dls_data_get_REGISTRE ( kp_tech_id, kd_acronyme, r_kd );
-    Dls_data_get_REGISTRE ( outputmin_tech_id, outputmin_acronyme, r_outputmin );
-    Dls_data_get_REGISTRE ( outputmax_tech_id, outputmax_acronyme, r_outputmax );
-    if ( ! (r_input && r_consigne && r_kp && r_ki && r_kd && r_outputmin && r_outputmax) ) return(0.0);
-
-    struct DLS_REGISTRE *input = *r_input;
-    struct DLS_REGISTRE *consigne = *r_consigne;
-    struct DLS_REGISTRE *kp = *r_kp;
-    struct DLS_REGISTRE *ki = *r_ki;
-    struct DLS_REGISTRE *kd = *r_kd;
-    struct DLS_REGISTRE *outputmin = *r_outputmin;
-    struct DLS_REGISTRE *outputmax = *r_outputmax;
-
-    if ( ! (input && consigne && kp && ki && kd && outputmin && outputmax) ) return(0.0);
+ void Dls_PID ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *input, struct DLS_REGISTRE *consigne,
+                struct DLS_REGISTRE *kp,struct DLS_REGISTRE *ki, struct DLS_REGISTRE *kd,
+                struct DLS_REGISTRE *outputmin, struct DLS_REGISTRE *outputmax, struct DLS_REGISTRE *output
+              )
+  { if ( ! (input && consigne && kp && ki && kd && outputmin && outputmax && output ) ) return;
 
     gdouble erreur           = consigne->valeur - input->valeur;
     input->pid_somme_erreurs+= erreur;                                /* possibilité de débordement si trop long a stabiliser */
@@ -236,9 +207,43 @@
 
          if (result > outputmax->valeur ) result = outputmax->valeur;
     else if (result < outputmin->valeur ) result = outputmin->valeur;
-    return(result);
+    Dls_data_set_REGISTRE ( vars, output, result );
   }
-#endif
+/******************************************************************************************************************************/
+/* Dls_sync_all_output: Envoi une synchronisation globale de toutes les sorties DO et AO                                      */
+/* Entrée : le Dls_tree correspondant                                                                                         */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_sync_all_output ( gpointer user_data, struct DLS_PLUGIN *plugin )
+  { if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
+    GSList *liste = plugin->Dls_data_DO;
+    while ( liste )                                                   /* Calcul de la COMM du DLS a partir de ses dependances */
+     { struct DLS_DO *bit = liste->data;
+       JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Dls_DO_to_json ( RootNode, bit );
+          pthread_rwlock_wrlock ( &Partage->Liste_DO_synchro );
+          Partage->Liste_DO = g_slist_append ( Partage->Liste_DO, RootNode );
+          pthread_rwlock_unlock ( &Partage->Liste_DO_synchro );
+        }
+       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+       liste = g_slist_next ( liste );
+     }
+
+    liste = plugin->Dls_data_AO;
+    while ( liste )                                                   /* Calcul de la COMM du DLS a partir de ses dependances */
+     { struct DLS_AO *bit = liste->data;
+       JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Dls_AO_to_json ( RootNode, bit );
+          pthread_rwlock_wrlock ( &Partage->Liste_AO_synchro );
+          Partage->Liste_AO = g_slist_append ( Partage->Liste_AO, RootNode );
+          pthread_rwlock_unlock ( &Partage->Liste_AO_synchro );
+        }
+       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+       liste = g_slist_next ( liste );
+     }
+  }
 /******************************************************************************************************************************/
 /* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
 /* Entrée : le Dls_tree correspondant                                                                                         */
@@ -269,10 +274,7 @@
                                                   Dls_data_get_MONO( plugin->vars.dls_memsa_alarme ) ||
                                                   Dls_data_get_MONO( plugin->vars.dls_memsa_alarme_fixe )
                                                 );
-    if ( Dls_data_get_MONO ( plugin->vars.dls_memsa_ok ) != new_memsa_ok )                   /* Envoi à l'API si il y a écart */
-     { Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok, new_memsa_ok );
-       Dls_MONO_export_to_API ( plugin->vars.dls_memsa_ok );
-     }
+    Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok, new_memsa_ok );
 
 /*-------------------------------------------------- Calcul du MEMSSP_OK -----------------------------------------------------*/
     Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memssp_ok,
@@ -366,7 +368,7 @@
 /******************************************************************************************************************************/
        if (Partage->top-last_top_10sec>=100)                                                        /* Toutes les 10 secondes */
         { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
-          Dls_data_set_BI ( NULL, Partage->com_dls.sys_mqtt_connected, Partage->com_msrv.MQTT_connected );
+          Dls_data_set_BI ( NULL, Partage->com_dls.sys_mqtt_connected, Partage->MQTT_connected );
           last_top_10sec = Partage->top;
         }
 /******************************************************************************************************************************/

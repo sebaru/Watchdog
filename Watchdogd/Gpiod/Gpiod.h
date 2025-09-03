@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Gpiod/Gpiod.h        Déclaration structure internes des communication RASPBERRYPI                                */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                03.09.2021 18:52:35 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                03.09.2021 18:52:35 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -37,6 +37,7 @@
     gboolean mode_inout;
     gboolean mode_activelow;
     struct gpiod_line_request *gpio_ligne;
+    JsonNode *element; /* Issu du module->config au chargement */
   };
 
  struct GPIOD_VARS

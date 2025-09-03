@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Modbus.h   Header et constantes des modules MODBUS Watchdgo 2.0                                          */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      ven 13 jui 2007 16:14:03 CEST */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                      ven 13 jui 2007 16:14:03 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -27,7 +27,6 @@
 
 #ifndef _MODBUS_H_
  #define _MODBUS_H_
- #include <libsoup/soup.h>
  #include <json-glib/json-glib.h>
 
  enum
@@ -97,7 +96,6 @@
     gint connexion;                                                                                     /* FD de connexion IP */
     gint mode;                                                                    /* Mode dans le processus de connexion WAGO */
     gint nbr_oct_lu;                                                                                /* Nombre d'octet deja lu */
-    gboolean first_turn;
     guint16 transaction_id;
     guint nbr_entree_ana;                                                   /* Nombre de entree analogique donnée par le wago */
     guint nbr_sortie_ana;                                                   /* Nombre de sortie analogique donnée par le wago */

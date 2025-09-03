@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Onduleur/Onduleur.c  Gestion des upss UPS Watchdgo 2.0                                                        */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     mar. 10 nov. 2009 15:56:10 CET */
+/* Watchdogd/Onduleur/Onduleur.c  Gestion des ups Watchdog                                                                    */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                     mar. 10 nov. 2009 15:56:10 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -297,8 +297,8 @@
 /******************************************************************************************************************************/
  static void Ups_SET_DO ( struct THREAD *module, JsonNode *msg )
   { gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
-    gchar *msg_thread_tech_id  = Json_get_string ( msg, "thread_tech_id" );
-    gchar *msg_thread_acronyme = Json_get_string ( msg, "thread_acronyme" );
+    gchar *msg_thread_tech_id  = Json_get_string ( msg, "token_lvl1" );
+    gchar *msg_thread_acronyme = Json_get_string ( msg, "token_lvl2" );
     gchar *msg_tech_id         = Json_get_string ( msg, "tech_id" );
     gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
@@ -345,7 +345,7 @@
     vars->Ups_online      = Mnemo_create_thread_DI ( module, "UPS_ONLINE", "UPS Online" );
     vars->Ups_charging    = Mnemo_create_thread_DI ( module, "UPS_CHARGING", "UPS en charge" );
     vars->Ups_on_batt     = Mnemo_create_thread_DI ( module, "UPS_ON_BATT",  "UPS sur batterie" );
-    vars->Ups_replace_batt= Mnemo_create_thread_DI ( module, "UPS_REPLACE_BATT",  "Batteries UPS a changer" );
+    vars->Ups_replace_batt= Mnemo_create_thread_DI ( module, "UPS_REPLACE_BATT",  "Batteries UPS à changer" );
     vars->Ups_alarm       = Mnemo_create_thread_DI ( module, "UPS_ALARM",  "UPS en alarme !" );
 
     vars->Load            = Mnemo_create_thread_AI ( module, "LOAD", "Charge onduleur", "%", ARCHIVE_1_MIN );
@@ -377,8 +377,10 @@
           JsonNode *request = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *tag = Json_get_string ( request, "tag" );
-          if ( !strcasecmp (tag, "SET_DO") ) Ups_SET_DO ( module, request );
+          if (Json_has_member ( request, "token_lvl0" ))
+           { gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
+             if (!strcasecmp (token_lvl0, "SET_DO") ) Ups_SET_DO ( module, request );
+           }
           Json_node_unref ( request );
         }
 /********************************************* Début de l'interrogation du ups ************************************************/

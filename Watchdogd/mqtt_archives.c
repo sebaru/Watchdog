@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_archives.c  Gestion des archivages des bit_internes Watchdog                                                */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     mer. 09 mai 2012 12:44:56 CEST */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                     mer. 09 mai 2012 12:44:56 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -41,7 +41,7 @@
 /******************************************************************************************************************************/
  void MQTT_Send_archive_to_API( gchar *tech_id, gchar *acronyme, gdouble valeur )
   { if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
-    if (Partage->com_msrv.Thread_run  == FALSE) return;
+    if (Partage->Thread_run  == FALSE) return;
 
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Add Arch in list: '%s:%s'=%f", tech_id, acronyme, valeur );
     struct timeval tv;

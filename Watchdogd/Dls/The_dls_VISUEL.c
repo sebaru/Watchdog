@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_VISUEL.c             Gestion des visuels                                                             */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                22.03.2017 10:29:53 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                22.03.2017 10:29:53 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -86,7 +86,7 @@
  void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
                             gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
   { if (!visu) return;
-    if (Partage->com_msrv.Thread_run == FALSE) return;
+    if (Partage->Thread_run == FALSE) return;
     if (    strcmp ( visu->mode, mode )
          || strcmp ( visu->color, color )                     /* On ne peut pas checker le libellé car il peut etre dynamique */
          || visu->cligno  != cligno
@@ -96,12 +96,13 @@
        )
      { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
        g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
-       g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle );
-       Convert_libelle_dynamique ( visu->libelle, sizeof(visu->libelle) );
        visu->valeur  = valeur;
        visu->cligno  = cligno;
        visu->noshow  = noshow;
        visu->disable = disable;
+       gchar *libelle_new = Convert_libelle_dynamique ( libelle );
+       g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle_new );
+       g_free(libelle_new);
        visu->changed = TRUE;
        Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s') "
@@ -111,9 +112,9 @@
      }
 
     if (visu->changed && (Partage->top >= visu->next_send))
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );                                /* Ajout dans la liste de i a traiter */
-       Partage->com_msrv.liste_visuel = g_slist_append( Partage->com_msrv.liste_visuel, visu );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+     { pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );                         /* Ajout dans la liste de i a traiter */
+       Partage->Liste_visuel = g_slist_append( Partage->Liste_visuel, visu );
+       pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
        visu->changed = FALSE;
        visu->next_send = Partage->top + 10;
      }

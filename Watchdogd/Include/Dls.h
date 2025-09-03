@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Dls.h                  Définitions des constantes programme DLS                                          */
-/* Projet Abls-Habitat version 4.4                                                              sam 09 oct 2004 10:10:32 CEST */
+/* Projet Abls-Habitat version 4.5                                                              sam 09 oct 2004 10:10:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -135,7 +135,6 @@
 /************************************************ Prototypes de fonctions *****************************************************/
  extern void Dls_Importer_plugins ( void );                                                                 /* Dans plugins.c */
  extern struct DLS_PLUGIN *Dls_Importer_un_plugin ( gchar *tech_id );
- extern void Dls_Reseter_all_bit_interne ( struct DLS_PLUGIN *plugin );
  extern gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description, gchar *package );
  extern void Dls_Decharger_plugins ( void );
  extern void Dls_Debug_plugin ( gchar *tech_id, gboolean actif );
@@ -146,6 +145,7 @@
  extern void Dls_run_archivage ( gpointer user_data, struct DLS_PLUGIN *plugin );
 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
+ extern void Dls_sync_all_output ( gpointer user_data, struct DLS_PLUGIN *plugin );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
 
@@ -201,6 +201,7 @@
  extern void Dls_all_BI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_BI_export_to_API ( struct DLS_BI *bit );
                                                                                                     /* Dans The_dls_HORLOGE.c */
+ extern void Dls_data_HORLOGE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_data_clear_HORLOGE ();
  extern void Dls_data_activer_horloge ( void );
  extern void Dls_Load_horloge_ticks ( void );

@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/Ths_dls_MESSAGE.c        Déclaration des fonctions pour la gestion des message                               */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                     jeu. 29 déc. 2011 14:55:42 CET */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                     jeu. 29 déc. 2011 14:55:42 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -66,7 +66,7 @@
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
-    bit->etat = Json_get_bool ( element, "etat" );
+    bit->etat = FALSE;                                    /* A l'init, le message est OFF. Json_get_bool ( element, "etat" ); */
     bit->source_node = json_node_ref ( element );
     bit->last_on = 0;                                            /* A l'init, il n'y a pas de last on (en dixieme de seconde) */
     Json_node_add_string ( bit->source_node, "libelle_src",
@@ -118,9 +118,9 @@
        if (event)
         { event->etat = FALSE;                                                                        /* On eteint le message */
           event->msg  = msg;
-          pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Ajout dans la liste de msg a traiter */
-          Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                       /* Ajout dans la liste de msg a traiter */
+          Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
+          pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                       /* Ajout dans la liste de msg a traiter */
         } else Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_ERR,
                          "Memory error for MSG'%s:%s' = 0 (etat)", msg->tech_id, msg->acronyme );
      }
@@ -134,9 +134,9 @@
 
     event->etat = etat;                                                                 /* Recopie de l'état dans l'evenement */
     event->msg  = msg;
-    pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
-    Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+    pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                             /* Ajout dans la liste de msg a traiter */
+    Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
+    pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                             /* Ajout dans la liste de msg a traiter */
   }
 /******************************************************************************************************************************/
 /* Dls_MESSAGE_to_json : Formate un bit au format JSON                                                                        */

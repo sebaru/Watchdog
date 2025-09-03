@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_data.c  Impot/Export des dls_data vers l'API                                                         */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                01.11.2022 15:12:19 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                01.11.2022 15:12:19 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -81,7 +81,7 @@
     Json_node_add_int ( RootNode, "nbr_mnemos_CH", json_array_get_length ( CHArray ) );
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
-    if (api_result && Json_get_int ( api_result, "api_status" ) == SOUP_STATUS_OK)
+    if (api_result && Json_get_int ( api_result, "http_code" ) == 200)
      { Info_new( __func__, Config.log_dls, LOG_DEBUG,
                  "'%s': Save %d BI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_BI" ) );
        Info_new( __func__, Config.log_dls, LOG_DEBUG,

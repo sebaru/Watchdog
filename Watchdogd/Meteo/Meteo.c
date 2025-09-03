@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Meteo/Meteo.c        Gestion de l'méteo pour Watchdog v3.0                                        */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                12.03.2021 20:49:16 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                12.03.2021 20:49:16 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -48,13 +48,11 @@
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Start getting data for code_insee '%s'", code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg = soup_message_new ( "GET", query );
-    JsonNode *response    = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
-    gchar *reason_phrase  = soup_message_get_reason_phrase(soup_msg);
-    gint   status_code    = soup_message_get_status ( soup_msg );
+    JsonNode *response = Http_Request ( query, NULL, NULL );
+    gint http_code     = Json_get_int ( response, "http_code" );
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d, reason %s", status_code, reason_phrase );
-    if (status_code!=200) Thread_send_comm_to_master ( module, FALSE );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d", http_code );
+    if (http_code!=200) Thread_send_comm_to_master ( module, FALSE );
     else
      { gint heure, minute;
        JsonNode *city       = Json_get_object_as_node ( response, "city" );
@@ -75,7 +73,6 @@
        Thread_send_comm_to_master ( module, TRUE );
      }
     Json_node_unref ( response );
-    g_object_unref( soup_msg );
   }
 /******************************************************************************************************************************/
 /* Meteo_update_forecast: Met a jour le forecast auprès de meteoconcept                                                       */
@@ -120,16 +117,11 @@
     Info_new( __func__, module->Thread_debug, LOG_DEBUG,
              "%s: Starting getting data for code_insee '%s'", thread_tech_id, code_insee );
 /********************************************************* Envoi de la requete ************************************************/
-    SoupMessage *soup_msg  = soup_message_new ( "GET", query );
-    JsonNode *response = Http_Send_json_request_from_thread ( module, soup_msg, NULL );
+    JsonNode *response = Http_Request ( query, NULL, NULL );
+    gint http_code     = Json_get_int ( response, "http_code" );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d", http_code );
 
-    gchar *reason_phrase = soup_message_get_reason_phrase(soup_msg);
-    gint   status_code   = soup_message_get_status ( soup_msg );
-
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Status %d, reason %s", thread_tech_id, status_code, reason_phrase );
-    g_object_unref( soup_msg );
-
-    if (status_code==200) { Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module ); }
+    if (http_code==200) { Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module ); }
     Json_node_unref ( response );
   }
 /******************************************************************************************************************************/
@@ -141,7 +133,7 @@
   { Thread_init ( module, sizeof(struct METEO_VARS) );
     struct METEO_VARS *vars = module->vars;
 
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    /*gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );*/
 
     vars->sunrise = Mnemo_create_thread_HORLOGE ( module, "SUNRISE", "Horloge du levé du soleil" );
     vars->sunset  = Mnemo_create_thread_HORLOGE ( module, "SUNSET",  "Horloge du couché du soleil" );
@@ -185,9 +177,9 @@
           JsonNode *request = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *tag = Json_get_string ( request, "tag" );
+          gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
 
-          Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", thread_tech_id, tag );
+          Info_new( __func__, module->Thread_debug, LOG_DEBUG, "token_lvl0 '%s' not for this thread", token_lvl0 );
           Json_node_unref(request);
         }
 /****************************************************** Connexion ! ***********************************************************/

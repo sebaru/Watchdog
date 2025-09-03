@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Enocean/Enocean.h        Déclaration structure internes des communication ENOCEAN             */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                 dim. 28 déc. 2014 15:43:41 CET */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                 dim. 28 déc. 2014 15:43:41 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*

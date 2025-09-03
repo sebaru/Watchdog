@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/plugins.c  -> Gestion des plugins pour DLS                                                                   */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                    dim. 02 janv. 2011 19:04:47 CET */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                    dim. 02 janv. 2011 19:04:47 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
  /*****************************************************************************************************************************/
 /*
@@ -72,21 +72,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_stop_plugin_reel: Stoppe un plugin                                                                                     */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_stop_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = user_data;
-    if ( strcasecmp ( tech_id, plugin->tech_id ) ) return;
-
-    plugin->enable = FALSE;
-    plugin->start_date = 0;
-    plugin->conso  = 0.0;
-    Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' stopped (%s)",
-              plugin->tech_id, plugin->name );
-  }
-/******************************************************************************************************************************/
 /* Dls_auto_create_plugin: Créé automatiquement le plugin en parametre (tech_id, nom)                                         */
 /* Entrées: le tech_id (unique) et le nom associé                                                                             */
 /* Sortie: -1 si pb, id sinon                                                                                                 */
@@ -102,7 +87,7 @@
     if (package) Json_node_add_string ( RootNode, "package", package );
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/create", RootNode );
-    if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
+    if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info_new( __func__, Config.log_dls, LOG_ERR,
                  "API Request for DLS CREATE failed. '%s' not created.", tech_id );
        Json_node_unref ( api_result );
@@ -114,27 +99,33 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Dls_start_plugin_reel: Demarre le plugin en parametre                                                                      */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_start_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = user_data;
-    if ( strcasecmp ( tech_id, plugin->tech_id ) ) return;
-
-    plugin->enable = TRUE;
-    plugin->conso  = 0.0;
-    plugin->start_date = time(NULL);
-    Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' started (%s)", plugin->tech_id, plugin->name );
-  }
-/******************************************************************************************************************************/
 /* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
 /* Entrée: l'ID du plugin                                                                                                     */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Dls_Activer_plugin ( gchar *tech_id, gboolean actif )
-  { if (actif) Dls_foreach_plugins ( tech_id, Dls_start_plugin_reel );
-          else Dls_foreach_plugins ( tech_id, Dls_stop_plugin_reel );
+  { if (!tech_id)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "tech_id is null.");
+       return;
+     }
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
+    if (!plugin)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Plugin '%s' not found", tech_id );
+       return;
+     }
+
+    if (actif)
+     { plugin->enable = TRUE;
+       plugin->conso  = 0.0;
+       plugin->start_date = time(NULL);
+       Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' enabled (%s)", plugin->tech_id, plugin->name );
+     }
+    else
+     { plugin->enable = FALSE;
+       plugin->conso  = 0.0;
+       plugin->start_date = 0;
+       Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' disabled (%s)", plugin->tech_id, plugin->name );
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_Save_CodeC_to_disk: Enregistre un codec sur le disque pour le tech_id en parametre                                     */
@@ -271,52 +262,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Dls_Reseter_all_bit_interne: Met a 0 et decharge tous les bits interne d'un plugin                                         */
-/* Entrée: le plugin                                                                                                          */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Dls_Reseter_all_bit_interne ( struct DLS_PLUGIN *plugin )
-  { GSList *liste_bit;
-
-    liste_bit = plugin->Dls_data_TEMPO;
-    while(liste_bit)
-     { struct DLS_TEMPO *tempo = liste_bit->data;
-       tempo->status = DLS_TEMPO_NOT_COUNTING;                                              /* La tempo ne compte pas du tout */
-       tempo->state  = FALSE;
-       tempo->init   = FALSE;
-       liste_bit = g_slist_next(liste_bit);
-     }
-
-    liste_bit = plugin->Dls_data_MONO;                                             /* Decharge tous les monostables du module */
-    while(liste_bit)
-     { struct DLS_MONO *mono = liste_bit->data;
-       Dls_data_set_MONO ( &plugin->vars, mono, FALSE );
-       liste_bit = g_slist_next(liste_bit);
-     }
-
-/* 25/02/2024 désactivation pour garder l'état des bits groupés.
-    liste_bit = plugin->Dls_data_BI;
-    while(liste_bit)
-     { struct DLS_BI *bi = liste_bit->data;
-       Dls_data_set_BI   ( &plugin->vars, bi, FALSE );
-       liste_bit = g_slist_next(liste_bit);
-     }
-*/
-    liste_bit = plugin->Dls_data_WATCHDOG;                                           /* Decharge tous les watchdogs du module */
-    while(liste_bit)
-     { struct DLS_WATCHDOG *wtd = liste_bit->data;
-       Dls_data_set_WATCHDOG ( &plugin->vars, wtd, 0 );
-       liste_bit = g_slist_next(liste_bit);
-     }
-
-    liste_bit = plugin->Dls_data_MESSAGE;                                            /* Decharge tous les watchdogs du module */
-    while(liste_bit)
-     { struct DLS_MESSAGE *bit = liste_bit->data;
-       Dls_data_set_MESSAGE ( &plugin->vars, bit, FALSE );
-       liste_bit = g_slist_next(liste_bit);
-     }
-  }
-/******************************************************************************************************************************/
 /* Dls_plugins_remap_all_alias: remap les alias d'un plugin donné                                                             */
 /* Entrée: le plugin                                                                                                          */
 /* Sortie : les alias sont mappés                                                                                             */
@@ -380,7 +325,7 @@
     Info_new( __func__, Config.log_dls, LOG_INFO, "Starting import of plugin '%s'", tech_id );
                                                                                  /* Récupère les metadata du plugin à charger */
     JsonNode *api_result = Http_Get_from_global_API ( "/run/dls/load", "tech_id=%s", tech_id );
-    if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
+    if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': API Error.", tech_id );
        goto end;
      }
@@ -498,11 +443,14 @@
     if (plugin->Dls_data_TEMPO) { g_slist_free_full ( plugin->Dls_data_TEMPO, (GDestroyNotify) g_free ); plugin->Dls_data_TEMPO = NULL; }
     Json_node_foreach_array_element ( api_result, "mnemos_TEMPO", Dls_data_TEMPO_create_by_array, plugin );
 
+    if (plugin->Dls_data_HORLOGE) { g_slist_free_full ( plugin->Dls_data_HORLOGE, (GDestroyNotify) g_free ); plugin->Dls_data_HORLOGE = NULL; }
+    Json_node_foreach_array_element ( api_result, "mnemos_HORLOGE", Dls_data_HORLOGE_create_by_array, plugin );
+
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)               /* DlOpen before remap (sinon on mappe pas la bonne zone mémoire */
      { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
+
     Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */
 
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
 /****************************************** Calcul des Thread_tech_ids de dependances *****************************************/
     if (plugin->Thread_tech_ids) { g_slist_free_full ( plugin->Thread_tech_ids, (GDestroyNotify) g_free ); plugin->Thread_tech_ids = NULL; }
 
@@ -515,6 +463,7 @@
      }
     g_list_free(Thread_tech_ids);
 
+    pthread_mutex_unlock( &Partage->com_dls.synchro );                                              /* Libératin Verrou D.L.S */
 end:
     Json_node_unref(api_result);
     pthread_mutex_lock ( &Nbr_compil_mutex ); /* Decremente le compteur de thread (si fonction appelée en mode pthread_create */
@@ -566,7 +515,7 @@ end:
  void Dls_Importer_plugins ( void )
   { gint top = Partage->top;
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/plugins", NULL );
-    if (api_result == NULL || Json_get_int ( api_result, "api_status" ) != SOUP_STATUS_OK)
+    if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info_new( __func__, Config.log_dls, LOG_ERR, "API Request for /run/dls/plugins failed. No plugin loaded." );
        Json_node_unref ( api_result );
        return;
@@ -607,6 +556,7 @@ end:
        if (plugin->Dls_data_MONO)     g_slist_free_full ( plugin->Dls_data_MONO, (GDestroyNotify) g_free );
        if (plugin->Dls_data_REGISTRE) g_slist_free_full ( plugin->Dls_data_REGISTRE, (GDestroyNotify) g_free );
        if (plugin->Dls_data_TEMPO)    g_slist_free_full ( plugin->Dls_data_TEMPO, (GDestroyNotify) g_free );
+       if (plugin->Dls_data_HORLOGE)  g_slist_free_full ( plugin->Dls_data_HORLOGE, (GDestroyNotify) g_free );
        if (plugin->Dls_data_WATCHDOG) g_slist_free_full ( plugin->Dls_data_WATCHDOG, (GDestroyNotify) g_free );
        if (plugin->Dls_data_VISUEL)   g_slist_free_full ( plugin->Dls_data_VISUEL, (GDestroyNotify) g_free );
        Dls_data_MESSAGE_free_all ( plugin );
@@ -620,52 +570,28 @@ end:
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
-/* Dls_Debug_plugin_reel: Active le debug d'un plugin                                                                         */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_Debug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = (gchar *)user_data;
-    if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { Info_new( __func__, Config.log_dls, LOG_DEBUG, "'%s' debug started ('%s')",
-                 plugin->tech_id, plugin->name );
-       plugin->debug_time = Partage->top + 1200;                                                   /* Debug pendant 2 minutes */
-     }
-  }
-/******************************************************************************************************************************/
-/* Dls_Undebug_plugin_reel: Désactive le debug d'un plugin                                                                    */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_Undebug_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = (gchar *)user_data;
-    if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { Info_new( __func__, Config.log_dls, LOG_DEBUG, "'%s' debug stopped ('%s')",
-                 plugin->tech_id, plugin->name );
-       plugin->debug_time = 0;
-     }
-  }
-/******************************************************************************************************************************/
 /* Dls_Debug_plugin: Active ou non le debug d'un plugin                                                                       */
 /* Entrée: le tech_id et le choix actif ou non                                                                                */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Dls_Debug_plugin ( gchar *tech_id, gboolean actif )
-  { if (actif) Dls_foreach_plugins ( tech_id, Dls_Debug_plugin_reel );
-          else Dls_foreach_plugins ( tech_id, Dls_Undebug_plugin_reel );
-  }
-/******************************************************************************************************************************/
-/* Dls_Acquitter_plugin_reel: Acquitte le plugin DLS en parametre                                                             */
-/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Dls_Acquitter_plugin_reel ( gpointer user_data, struct DLS_PLUGIN *plugin )
-  { gchar *tech_id = user_data;
-    if ( ! strcasecmp ( plugin->tech_id, tech_id ) )
-     { Info_new( __func__, plugin->vars.debug, LOG_NOTICE,
-                 "'%s' acquitté ('%s')", plugin->tech_id, plugin->shortname );
-       struct DLS_DI *bit = Dls_data_lookup_DI ( plugin->tech_id, "OSYN_ACQUIT" );
-       Dls_data_set_DI_pulse ( &plugin->vars, bit );
+  { if (!tech_id)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "tech_id is null.");
+       return;
+     }
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
+    if (!plugin)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Plugin '%s' not found", tech_id );
+       return;
+     }
+
+    if(actif)
+     { Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' debug started ('%s')", plugin->tech_id, plugin->name );
+       plugin->debug_time = Partage->top + 1200;                                                   /* Debug pendant 2 minutes */
+     }
+    else
+     { Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s' debug stopped ('%s')", plugin->tech_id, plugin->name );
+       plugin->debug_time = 0;
      }
   }
 /******************************************************************************************************************************/
@@ -674,5 +600,18 @@ end:
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Dls_Acquitter_plugin ( gchar *tech_id )
-  { Dls_foreach_plugins ( tech_id, Dls_Acquitter_plugin_reel ); }
+  { if (!tech_id)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "tech_id is null.");
+       return;
+     }
+    struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( tech_id );
+    if (!plugin)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Plugin '%s' not found", tech_id );
+       return;
+     }
+
+    Info_new( __func__, plugin->vars.debug, LOG_NOTICE, "'%s' acquitté ('%s')", plugin->tech_id, plugin->shortname );
+    struct DLS_DI *bit = Dls_data_lookup_DI ( plugin->tech_id, "OSYN_ACQUIT" );
+    Dls_data_set_DI_pulse ( &plugin->vars, bit );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

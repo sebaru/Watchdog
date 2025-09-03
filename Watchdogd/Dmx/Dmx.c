@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dmx/Dmx.c  Gestion des modules MODBUS Watchdog 2.0                                                               */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                22.10.2019 23:42:08 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                22.10.2019 23:42:08 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -168,25 +168,22 @@
           JsonNode *request = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *tag = Json_get_string ( request, "tag" );
-          if ( !strcasecmp( tag, "SET_AO" ) &&
-               Json_get_bool ( request, "alive" ) == TRUE &&
-               Json_get_int  ( request, "type_sms" ) != TXT_NOTIF_NONE )
-           { gchar *tech_id  = Json_get_string ( request, "tech_id" );
-             gchar *acronyme = Json_get_string ( request, "acronyme" );
-             gint   valeur   = Json_get_int    ( request, "valeur" );
-             if (!tech_id)
-              { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque tech_id" ); }
-             else if (!acronyme)
-              { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque acronyme" ); }
+          if (Json_has_member ( request, "token_lvl0" ) && !strcasecmp( Json_get_string ( request, "token_lvl0" ), "SET_AO" ) )
+           { gchar *msg_thread_tech_id  = Json_get_string ( request, "token_lvl1" );
+             gchar *msg_thread_acronyme = Json_get_string ( request, "token_lvl2" );
+             gint   valeur              = Json_get_int    ( request, "valeur" );
+             if (!msg_thread_tech_id)
+              { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_tech_id" ); }
+             else if (!msg_thread_acronyme)
+              { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_acronyme" ); }
              else if (!valeur)
               { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque valeur" ); }
              else
               { for (gint num=0; num<DMX_CHANNEL; num++)
-                 { if (!strcasecmp( vars->Canal[num].tech_id, tech_id) &&
-                       !strcasecmp( vars->Canal[num].acronyme, acronyme))
+                 { if (!strcasecmp( vars->Canal[num].tech_id, msg_thread_tech_id) &&
+                       !strcasecmp( vars->Canal[num].acronyme, msg_thread_acronyme))
                     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Setting %s:%s=%f (Canal %d)",
-                                tech_id, acronyme, valeur, num );
+                                msg_thread_tech_id, msg_thread_acronyme, valeur, num );
                       vars->Canal[num].valeur = valeur;
                       break;
                     }

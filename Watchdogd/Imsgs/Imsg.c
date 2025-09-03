@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Imsg/Imsg.c  Gestion des Instant Messaging IMSG Watchdog 2.0                                                     */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                20.02.2018 17:58:31 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                20.02.2018 17:58:31 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -54,7 +54,7 @@
 
 /********************************************* Chargement des informations en bases *******************************************/
     JsonNode *UsersNode = Http_Get_from_global_API ( "/run/users/wanna_be_notified", NULL );
-    if (!UsersNode || Json_get_int ( UsersNode, "api_status" ) != 200)
+    if (!UsersNode || Json_get_int ( UsersNode, "http_code" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USERS from API", thread_tech_id );
        return;
      }
@@ -133,7 +133,7 @@
 
     JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt_cde", RootNode );
     Json_node_unref ( RootNode );
-    if (!UserNode || Json_get_int ( UserNode, "api_status" ) != 200)
+    if (!UserNode || Json_get_int ( UserNode, "http_code" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
        goto end_user;
      }
@@ -166,7 +166,7 @@
 
     JsonNode *MapNode = Http_Post_to_global_API ( "/run/mapping/search_txt", RootNode );
     Json_node_unref ( RootNode );
-    if (!MapNode || Json_get_int ( MapNode, "api_status" ) != 200)
+    if (!MapNode || Json_get_int ( MapNode, "http_code" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER '%s' from API for '%s'", thread_tech_id, from, message );
        goto end_map;
      }
@@ -327,6 +327,7 @@ end_message:
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *jabber_id = Json_get_string ( module->config, "jabberid" );
+    MQTT_Subscribe ( module->MQTT_session, "SEND_IMSG" );
 
     if ( ! (thread_tech_id && jabber_id) )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "No thread_tech_id Or Jabber_id. Stopping." );
@@ -367,23 +368,23 @@ reconnect:
           JsonNode *message = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, message );
           pthread_mutex_unlock ( &module->synchro );
-          gchar *tag = Json_get_string ( message, "tag" );
-          gint notif_chat = Json_get_int ( message, "notif_chat" );
-          if (notif_chat == IMSG_NOTIF_SET_BY_DLS) { notif_chat = Json_get_int ( message, "notif_chat_by_dls" ); }
 
-          if ( !strcasecmp( tag, "DLS_HISTO" ) && Json_get_bool ( message, "alive" ) == TRUE &&
-               notif_chat == IMSG_NOTIF_YES
-             )
-           { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Sending msg '%s:%s' (%s)",
-                       jabber_id,
-                       Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
-                       Json_get_string ( message, "libelle" ) );
-             gchar chaine[256];
-             g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( message, "dls_shortname" ), Json_get_string ( message, "libelle" ) );
-             Imsgs_Envoi_message_to_all_available ( module, chaine );
+          if (Json_has_member ( message, "token_lvl0" ))
+           { gchar *token_lvl0 = Json_get_string ( message, "token_lvl0" );
+             if (!strcasecmp (token_lvl0, "SEND_IMSG") &&
+                 Json_has_member ( message, "tech_id" ) &&  Json_has_member ( message, "acronyme" ) &&
+                 Json_has_member ( message, "libelle" )
+                )
+              { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Sending msg '%s:%s' (%s)", thread_tech_id,
+                          jabber_id,
+                          Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
+                          Json_get_string ( message, "libelle" ) );
+                gchar chaine[256];
+                g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( message, "dls_shortname" ), Json_get_string ( message, "libelle" ) );
+                Imsgs_Envoi_message_to_all_available ( module, chaine );
+              }
+             else if (!strcasecmp (token_lvl0, "THREAD_TEST")) { Imsgs_Envoi_message_to_all_available ( module, "Test OK" ); }
            }
-          else if ( !strcasecmp( tag, "test" ) ) Imsgs_Envoi_message_to_all_available ( module, "Test OK" );
-          else Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': tag '%s' not for this thread", thread_tech_id, tag );
           Json_node_unref(message);
         }
      }                                                                                         /* Fin du while partage->arret */

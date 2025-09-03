@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_DO.c        Déclaration des fonctions pour la gestion des Sorties TOR                                */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                25.03.2019 14:16:22 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                25.03.2019 14:16:22 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -107,20 +107,20 @@
     JsonNode *RootNode = Json_node_create ();
     if (RootNode)
      { Dls_DO_to_json ( RootNode, dout );
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                          /* Envoie au MSRV pour dispatch aux threads */
-       Partage->com_msrv.Liste_DO = g_slist_append ( Partage->com_msrv.Liste_DO, RootNode );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       pthread_rwlock_wrlock ( &Partage->Liste_DO_synchro );                      /* Envoie au MSRV pour dispatch aux threads */
+       Partage->Liste_DO = g_slist_append ( Partage->Liste_DO, RootNode );
+       pthread_rwlock_unlock ( &Partage->Liste_DO_synchro );
      }
     else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
 
-    if (etat == TRUE && dout->mono) /* Si sortie de type monostable, elle redescend tout de suite */
+    if (etat == TRUE && dout->mono)                             /* Si sortie de type monostable, elle redescend tout de suite */
      { JsonNode *RootNode = Json_node_create ();
        if (RootNode)
         { Dls_DO_to_json ( RootNode, dout );
           Json_node_add_bool ( RootNode, "etat", FALSE );                                    /* Passage a zero dans la foulée */
-          pthread_mutex_lock( &Partage->com_msrv.synchro );                       /* Envoie au MSRV pour dispatch aux threads */
-          Partage->com_msrv.Liste_DO = g_slist_append ( Partage->com_msrv.Liste_DO, RootNode );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          pthread_rwlock_wrlock ( &Partage->Liste_DO_synchro );                   /* Envoie au MSRV pour dispatch aux threads */
+          Partage->Liste_DO = g_slist_append ( Partage->Liste_DO, RootNode );
+          pthread_rwlock_unlock ( &Partage->Liste_DO_synchro );                   /* Envoie au MSRV pour dispatch aux threads */
         }
        else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
      }

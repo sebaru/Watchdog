@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Shelly/Shelly.c  Gestion des modules SHELLY Watchdgo 4.0                                                         */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                08.03.2024 23:35:42 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                08.03.2024 23:35:42 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -93,9 +93,7 @@
     else
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "Shelly type '%s' not recognized", string_id ); goto end; }
 
-    gchar topic_rpc[256];
-    g_snprintf ( topic_rpc, sizeof(topic_rpc), "%s/events/rpc", string_id );
-    MQTT_Subscribe ( module->MQTT_session, topic_rpc );
+    MQTT_Subscribe ( module->MQTT_session, "%s/events/rpc", string_id );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
@@ -105,9 +103,7 @@
           JsonNode *request = module->MQTT_messages->data;
           module->MQTT_messages = g_slist_remove ( module->MQTT_messages, request );
           pthread_mutex_unlock ( &module->synchro );
-          if (Json_has_member ( request, "topic" ) && !strcmp ( Json_get_string ( request, "topic" ), topic_rpc ) &&
-              Json_has_member ( request, "method" )
-             )
+          if (Json_has_member ( request, "method" ))
            { gchar *method = Json_get_string ( request, "method" );
              Info_new( __func__, Config.log_bus, LOG_DEBUG, "MQTT: received '%s'", method );
 /*---------------------------------------------------- Notify Status ---------------------------------------------------------*/

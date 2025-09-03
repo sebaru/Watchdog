@@ -33,7 +33,6 @@ LT_INIT
 
 AM_PATH_GLIB_2_0( 2.2.2 )
 GLIB_GSETTINGS
-PKG_CHECK_MODULES( LIBSOUP, libsoup-3.0 >= 3.3 )
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -47,6 +46,10 @@ AC_STRUCT_TM
 
 dnl Checks for library functions.
 AC_FUNC_MEMCMP
+# Vérifie libmosquitto
+PKG_CHECK_MODULES([MOSQUITTO], [libmosquitto >= 1.6.0], [], [
+    AC_MSG_ERROR([libmosquitto version 1.6.0 ou supérieure est requise.])
+])
 
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(gettimeofday select socket strdup strerror)
@@ -83,7 +86,6 @@ Watchdogd/Modbus/Makefile \
 Watchdogd/Imsgs/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Dls/Makefile \
-Watchdogd/Http/Makefile \
 Watchdogd/Radio/Makefile \
 Watchdogd/Dmx/Makefile \
 Watchdogd/Meteo/Makefile \

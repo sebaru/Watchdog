@@ -1,4 +1,8 @@
 ## Allows the user watchdog to execute these commands
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/apt update
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/apt upgrade
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/dnf upgrade
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/dnf upgrade -y
 %abls  ALL=(ALL) NOPASSWD: /usr/sbin/poweroff
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/make install
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop Watchdogd

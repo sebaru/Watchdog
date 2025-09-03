@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Imsgs/Imsg.h     Header et constantes des modules imsg Purple Watchdgog 2.0                                      */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                                25.02.2018 16:27:36 */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                25.02.2018 16:27:36 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -29,12 +29,6 @@
  #define _IMSGS_H_
 
  #include <strophe.h>
-
- enum
-  { IMSG_NOTIF_SET_BY_DLS = -1,
-    IMSG_NOTIF_NO  = 0,
-    IMSG_NOTIF_YES = 1
-  };
 
  #define IMSGS_DEFAUT_USERNAME      "defaultuser@jabber.fr"
  #define IMSGS_DEFAUT_PASSWORD      "defaultpassword"

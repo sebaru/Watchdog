@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Module_dls.h -> Déclaration des prototypes de fonctions                                                  */
-/* Projet Abls-Habitat version 4.4       Gestion d'habitat                                      jeu 31 jui 2003 11:49:36 CEST */
+/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                      jeu 31 jui 2003 11:49:36 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -286,16 +286,11 @@
  extern gboolean Dls_data_get_TEMPO     ( struct DLS_TEMPO *bit );
  extern gint     Dls_data_get_TEMPO_time ( struct DLS_TEMPO *bit );
 
-
- extern void Dls_PID_reset ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input );
- extern gdouble Dls_PID ( gchar *input_tech_id, gchar *input_acronyme, gpointer *r_input,
-                          gchar *consigne_tech_id, gchar *consigne_acronyme, gpointer *r_consigne,
-                          gchar *kp_tech_id, gchar *kp_acronyme, gpointer *r_kp,
-                          gchar *ki_tech_id, gchar *ki_acronyme, gpointer *r_ki,
-                          gchar *kd_tech_id, gchar *kd_acronyme, gpointer *r_kd,
-                          gchar *outputmin_tech_id, gchar *outputmin_acronyme, gpointer *r_outputmin,
-                          gchar *outputmax_tech_id, gchar *outputmax_acronyme, gpointer *r_outputmax
-                        );
+ extern void Dls_PID_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *r_input );
+ extern void Dls_PID ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *input, struct DLS_REGISTRE *consigne,
+                       struct DLS_REGISTRE *kp,struct DLS_REGISTRE *ki, struct DLS_REGISTRE *kd,
+                       struct DLS_REGISTRE *outputmin, struct DLS_REGISTRE *outputmax, struct DLS_REGISTRE *output
+                     );
 
  extern gint Dls_get_top( void );                                                                             /* donne le top */
  extern int Heure( int heure, int minute );                                                        /* Tester l'heure actuelle */
