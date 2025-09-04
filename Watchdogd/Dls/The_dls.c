@@ -377,6 +377,7 @@
           struct rusage conso;
           getrusage ( RUSAGE_SELF, &conso );
           Dls_data_set_AI ( Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
+          Dls_data_set_AI ( Partage->com_dls.sys_log_per_min, Info_log_par_min()*1.0, TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Dls_data_activer_horloge();
           last_top_1min = Partage->top;

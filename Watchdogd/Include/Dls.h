@@ -130,6 +130,7 @@
     struct DLS_AI *sys_tour_per_sec;
     struct DLS_AI *sys_dls_wait;
     struct DLS_AI *sys_maxrss;
+    struct DLS_AI *sys_log_per_min;
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/

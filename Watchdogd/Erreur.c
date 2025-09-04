@@ -47,7 +47,8 @@
     "INFO",
     "DEBUG"
   };
-
+ static gint Nbr_log_par_min = 0;                                                      /* Nombre de message de log par minute */
+ static gint Nbr_log_par_min_hold = 0;                                                 /* Nombre de message de log par minute */
 /******************************************************************************************************************************/
 /* Info_init: Initialisation du traitement d'erreur                                                                           */
 /* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                                                */
@@ -62,6 +63,7 @@
   { Config.log_level = (debug ? debug : LOG_INFO);
     on_exit( Info_stop, NULL );
     openlog( NULL, LOG_CONS | LOG_PID, LOG_USER );
+    Nbr_log_par_min = 0;
   }
 /******************************************************************************************************************************/
 /* Info_init: Initialisation du traitement d'erreur                                                                           */
@@ -72,11 +74,19 @@
     Info_new( __func__, TRUE, LOG_NOTICE, "log_level set to %d (%s)", Config.log_level, level_to_string[Config.log_level] );
   }
 /******************************************************************************************************************************/
+/* Info_log_par_min: Retourne le nombre de message de log par minute                                                          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Le nombre de messagede log a la minute                                                                             */
+/******************************************************************************************************************************/
+ gint Info_log_par_min ( void )
+  { return ( Nbr_log_par_min_hold ); }
+/******************************************************************************************************************************/
 /* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres                                 */
 /* Entrée: le niveau, le texte, et la chaine à afficher                                                                       */
 /******************************************************************************************************************************/
  void Info_new( gchar *function, gboolean override, guint level, gchar *format, ... )
   { gchar chaine[512], nom_thread[32];
+    static gint next_hold = 0;
     va_list ap;
 
     if ( override == TRUE || (level <= Config.log_level) )                                        /* LOG_EMERG = 0, DEBUG = 7 */
@@ -87,6 +97,12 @@
        va_start( ap, format );
        vsyslog ( level, chaine, ap );
        va_end ( ap );
+       Nbr_log_par_min++;
+     }
+    if ( next_hold <= Partage->top )
+     { next_hold = Partage->top + 600;
+       Nbr_log_par_min_hold = Nbr_log_par_min;
+       Nbr_log_par_min = 0;
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
