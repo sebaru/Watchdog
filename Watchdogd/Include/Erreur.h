@@ -37,6 +37,6 @@
  extern void Info_init( guint debug );
  extern void Info_change_log_level( guint debug );
  extern void Info_new( gchar *function, gboolean override, guint level, gchar *format, ... );
- extern gint Info_log_par_min ( void );
+ extern gint Info_reset_nbr_log ( void );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

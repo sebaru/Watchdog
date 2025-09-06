@@ -47,26 +47,6 @@
     Info_new( __func__, Config.log_msrv, info_level, "%s", message );
   }
 /******************************************************************************************************************************/
-/* MQTT_on_connect_CB: appelé par la librairie quand le broker est connecté                                                   */
-/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected with return code %d: %s",
-              return_code, mosquitto_connack_string( return_code ) );
-    if (return_code == 0) Partage->MQTT_connected = TRUE ;
-  }
-/******************************************************************************************************************************/
-/* MQTT_on_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                              */
-/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Disconnected with return code %d: %s",
-              return_code, mosquitto_connack_string( return_code ) );
-    Partage->MQTT_connected = FALSE;
-  }
-/******************************************************************************************************************************/
 /* MQTT_Subscribe: souscrit à un topic                                                                                        */
 /* Entrée: la structure MQTT, le topic                                                                                        */
 /* Sortie: néant                                                                                                              */

@@ -132,8 +132,6 @@
  extern void MQTT_Send_to_API ( JsonNode *node, gchar *topic, ... );
                                                                                                                /* Dans mqtt.c */
  extern void MQTT_on_log_CB( struct mosquitto *mosq, void *obj, int level, const char *message );
- extern void MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code );
- extern void MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code );
  extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *format, ... );
 
  #endif

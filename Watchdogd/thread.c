@@ -59,7 +59,7 @@
        Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
        Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
        Json_node_add_bool   ( RootNode, "io_comm",        module->comm_status );
-       Json_node_add_bool   ( RootNode, "mqtt_connected", module->MQTT_connected );
+       Json_node_add_bool   ( RootNode, "mqtt_connected", (etat ? module->MQTT_connected : FALSE) );
        MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
        Json_node_unref ( RootNode );
 

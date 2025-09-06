@@ -37,6 +37,12 @@
  static void MQTT_local_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Connected with return code %d: %s",
               return_code, mosquitto_connack_string( return_code ) );
+    if (return_code == 0)
+     { MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI/#" );
+       MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI_PULSE/#" );
+       MQTT_Subscribe ( Partage->MQTT_local_session, "SET_AI/#" );
+       MQTT_Subscribe ( Partage->MQTT_local_session, "SET_WATCHDOG/#" );
+     }
   }
 /******************************************************************************************************************************/
 /* MQTT_local_on_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                        */
@@ -121,11 +127,6 @@ end:
                  Config.master_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
      }
-
-    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI/#" );
-    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI_PULSE/#" );
-    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_AI/#" );
-    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_WATCHDOG/#" );
 
     retour = mosquitto_loop_start( Partage->MQTT_local_session );
     if ( retour != MOSQ_ERR_SUCCESS )

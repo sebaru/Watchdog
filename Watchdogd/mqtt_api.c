@@ -30,6 +30,50 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* MQTT_on_mqtt_api_connect_CB: appelé par la librairie quand le broker est connecté                                          */
+/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MQTT_on_mqtt_api_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
+  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected with return code %d: %s",
+              return_code, mosquitto_connack_string( return_code ) );
+    if (return_code == 0)
+     { Partage->MQTT_connected = TRUE ;
+       gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
+       gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
+/* Pour Master & Slave */
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/%s/SET", domain_uuid, agent_uuid );
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/%s/RESET", domain_uuid, agent_uuid );
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/%s/UPGRADE", domain_uuid, agent_uuid );
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/START", domain_uuid );
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/STOP", domain_uuid );
+       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/RESTART", domain_uuid );
+/* Pour Master uniquement */
+       if (Config.instance_is_master)                                                                       /* Démarrage MQTT */
+        { MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/TEST", domain_uuid );
+          MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/DEBUG", domain_uuid );
+          MQTT_Subscribe ( Partage->MQTT_API_session, "%s/SYNOPTIQUE/CLIC", domain_uuid );
+          MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/RELOAD", domain_uuid );
+          MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/SET", domain_uuid );
+          MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/RESTART", domain_uuid );
+          MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/ACQUIT", domain_uuid );
+          MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/REMAP", domain_uuid );
+          MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/RELOAD_HORLOGE_TICK", domain_uuid );
+          MQTT_Subscribe ( Partage->MQTT_API_session, "%s/AUDIO_ZONE/#", domain_uuid );
+        }
+     }
+  }
+/******************************************************************************************************************************/
+/* MQTT_on_mqtt_api_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                     */
+/* Entrée: les parametres d'affichage de log de la librairie                                                                  */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void MQTT_on_mqtt_api_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
+  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Disconnected with return code %d: %s",
+              return_code, mosquitto_connack_string( return_code ) );
+    Partage->MQTT_connected = FALSE;
+  }
+/******************************************************************************************************************************/
 /* MQTT_on_API_message_CB: Appelé par mosquitto lorsque l'on recoit un message MQTT de la part de l'API                       */
 /* Entrée: les parametres de la libsoup                                                                                       */
 /* Sortie: Néant                                                                                                              */
@@ -221,13 +265,13 @@ end:
     gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
     gchar *domain_uuid   = Json_get_string ( Config.config, "domain_uuid" );
 
-    Partage->MQTT_API_session = mosquitto_new( agent_uuid, FALSE, NULL );
+    Partage->MQTT_API_session = mosquitto_new( agent_uuid, TRUE, NULL );
     if (!Partage->MQTT_API_session)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API session error." ); return(FALSE); }
 
     mosquitto_log_callback_set        ( Partage->MQTT_API_session, MQTT_on_log_CB );
-    mosquitto_connect_callback_set    ( Partage->MQTT_API_session, MQTT_on_connect_CB );
-    mosquitto_disconnect_callback_set ( Partage->MQTT_API_session, MQTT_on_disconnect_CB );
+    mosquitto_connect_callback_set    ( Partage->MQTT_API_session, MQTT_on_mqtt_api_connect_CB );
+    mosquitto_disconnect_callback_set ( Partage->MQTT_API_session, MQTT_on_mqtt_api_disconnect_CB );
     mosquitto_message_callback_set    ( Partage->MQTT_API_session, MQTT_on_mqtt_api_message_CB );
     mosquitto_reconnect_delay_set     ( Partage->MQTT_API_session, 10, 60, TRUE );
 
@@ -242,28 +286,6 @@ end:
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API connection to '%s' error: %s",
                  Config.mqtt_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
-     }
-
-/* Pour Master & Slave */
-    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/%s/SET", domain_uuid, agent_uuid );
-    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/%s/RESET", domain_uuid, agent_uuid );
-    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/%s/UPGRADE", domain_uuid, agent_uuid );
-    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/START", domain_uuid );
-    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/STOP", domain_uuid );
-    MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/RESTART", domain_uuid );
-/* Pour Master uniquement */
-    if (Config.instance_is_master)                                                                          /* Démarrage MQTT */
-     {
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/TEST", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/THREAD/DEBUG", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/SYNOPTIQUE/CLIC", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/RELOAD", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/SET", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/RESTART", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/ACQUIT", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/REMAP", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/DLS/RELOAD_HORLOGE_TICK", domain_uuid );
-       MQTT_Subscribe ( Partage->MQTT_API_session, "%s/AUDIO_ZONE/#", domain_uuid );
      }
 
     retour = mosquitto_loop_start( Partage->MQTT_API_session );
