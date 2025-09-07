@@ -108,7 +108,7 @@ end:
   { gint retour;
     gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
 
-    Partage->MQTT_local_session = mosquitto_new( agent_uuid, FALSE, NULL );
+    Partage->MQTT_local_session = mosquitto_new( agent_uuid, TRUE, NULL );
     if (!Partage->MQTT_local_session)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local session error." ); return(FALSE); }
 
