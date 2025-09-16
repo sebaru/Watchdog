@@ -190,11 +190,14 @@
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
     g_free(upper_name);
 
+    gchar *thread_classe  =Json_get_string ( module->config, "thread_classe" );
+    mkdir ( thread_classe, S_IRUSR | S_IWUSR | S_IXUSR );
+
     if (sizeof_vars)
      { module->vars = g_try_malloc0 ( sizeof_vars );
        if (!module->vars)
         { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Memory error for vars.", thread_tech_id );
-          Thread_end ( module );                            /* Pas besoin de return : Thread_end fait un pthread_exit */
+          Thread_end ( module );                                    /* Pas besoin de return : Thread_end fait un pthread_exit */
         }
      }
 
@@ -220,7 +223,7 @@
     gchar *description = "Add description to database table";
     if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
     gchar package[128];
-    g_snprintf ( package, sizeof(package), "Thread_%s", Json_get_string ( module->config, "thread_classe" ) );
+    g_snprintf ( package, sizeof(package), "Thread_%s", thread_classe );
     if (Dls_auto_create_plugin( thread_tech_id, description, package ) == FALSE)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: DLS Create ERROR (%s)\n", thread_tech_id, description ); }
 
