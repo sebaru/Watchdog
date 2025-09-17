@@ -274,18 +274,18 @@
   { unlink ( filename );
     gint fd = creat ( filename, S_IWUSR | S_IRUSR );
     if (fd<0)
-     { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Creat %s to write Failed: %s", filename, strerror(errno) ); return(FALSE); }
+     { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Create '%s' failed: %s", filename, strerror(errno) ); return(FALSE); }
 
     gchar *buf = Json_node_to_string ( RootNode );
     if (!buf)
      { close(fd);
-       Info_new ( __func__, Config.log_msrv, LOG_ERR, "Json to Buf failed, writing to %s", filename );
+       Info_new ( __func__, Config.log_msrv, LOG_ERR, "Json to Buf failed, writing to '%s'", filename );
        return(FALSE);
      }
     gboolean retour = FALSE;
     gint taille = strlen(buf);
     if (write ( fd, buf, taille ) != taille)
-     { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Error writing %d bytes to %s: %s", taille, filename, strerror(errno) );
+     { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Error writing %d bytes to '%s': %s", taille, filename, strerror(errno) );
        retour = FALSE;
      } else retour = TRUE;
     close(fd);

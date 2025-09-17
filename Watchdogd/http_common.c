@@ -85,7 +85,7 @@
     gint http_code = 0;                                                                                     /* Code de retour */
 
     if (!url) return(NULL);
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Request to %s is starting", url );
+    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Request to %s is starting", url );
 /*------------------------------------------------ Init du cURL --------------------------------------------------------------*/
     CURL *curl = curl_easy_init();
     if(!curl) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: Curl_easy_init failed", url ); return(NULL); }
@@ -212,6 +212,22 @@ end:
     return(ResponseNode);
  }
 /******************************************************************************************************************************/
+/* Http_Query_to_cache: transforme une query en nom de fichier cache                                                          */
+/* Entrée: la query                                                                                                           */
+/* Sortie: le cache filename                                                                                                  */
+/******************************************************************************************************************************/
+ static gchar *Http_Query_to_cache ( gchar *query )
+  { gint taille_nom_fichier = 256;
+    gchar *nom_fichier = g_try_malloc0(taille_nom_fichier);
+    if (!nom_fichier)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Memory error for Caching %s", query );
+       return(NULL);
+     }
+    g_snprintf ( nom_fichier, taille_nom_fichier, "http_cache/%s", query );
+    g_strcanon ( nom_fichier+11, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYYZ", '_' );
+    return(nom_fichier);
+  }
+/******************************************************************************************************************************/
 /* Http_Get_from_global_API: Récupère la partie payload auprès de l'API                                                       */
 /* Entrée: le messages                                                                                                        */
 /* Sortie: le Json                                                                                                            */
@@ -234,19 +250,22 @@ end:
     gint http_code = Json_get_int ( ResponseNode, "http_code" );
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s Status %d for '%s'", URI, http_code, query );
 
-    gchar nom_fichier[256];
-    g_snprintf ( nom_fichier, sizeof(nom_fichier), "cache-%s", query );
-    g_strcanon ( nom_fichier+6, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYYZ", '_' );
-
     if (http_code!=200)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d for '%s'", URI, http_code, query );
        Json_node_unref ( ResponseNode );
-       ResponseNode = Json_read_from_file ( nom_fichier );
-       if (ResponseNode) Info_new( __func__, Config.log_msrv, LOG_WARNING, "Using cache for %s", query );
+       gchar *nom_fichier = Http_Query_to_cache ( query );
+       if (nom_fichier)
+        { ResponseNode = Json_read_from_file ( nom_fichier );
+          g_free(nom_fichier);
+          if (ResponseNode) Info_new( __func__, Config.log_msrv, LOG_INFO, "Using cache for %s OK", query );
+                       else Info_new( __func__, Config.log_msrv, LOG_ERR,  "Using cache for %s failed", query );
+        } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cache error for %s", query );
      }
     else
      { if (Json_has_member ( ResponseNode, "api_cache" ) && Json_get_bool ( ResponseNode, "api_cache" ) )
-        { Json_write_to_file ( nom_fichier, ResponseNode ); }
+        { gchar *nom_fichier = Http_Query_to_cache ( query );
+          if (nom_fichier) { Json_write_to_file ( nom_fichier, ResponseNode ); g_free(nom_fichier); }
+        }
      }
     return(ResponseNode);
  }
