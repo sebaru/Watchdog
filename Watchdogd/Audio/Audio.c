@@ -59,7 +59,7 @@
      }
 
     Info_new( __func__, module->Thread_debug, LOG_INFO, "Running mpg123 audio/%s.mp3", fichier );
-    g_snprintf ( commande, sizeof(commande), "mpg123 %s", fichier );
+    g_snprintf ( commande, sizeof(commande), "mpg123 audio/%s.mp3", fichier );
     system(commande);
 
     Thread_send_comm_to_master ( module, TRUE );

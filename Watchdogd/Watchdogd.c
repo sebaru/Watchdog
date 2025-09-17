@@ -207,6 +207,7 @@
 /******************************************************************************************************************************/
  static gboolean Drop_privileges( void )
   { struct passwd *pwd;
+    gchar chaine[256];
 
     if (getuid())
      { Info_new( __func__, Config.log_msrv, LOG_CRIT,
@@ -242,15 +243,14 @@
         }
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.", pwd->pw_name, pwd->pw_uid );
-    gchar usermod[256];
-    g_snprintf( usermod, sizeof(usermod), "usermod -a -G abls %s", pwd->pw_name );     system ( usermod );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", usermod );
-    g_snprintf( usermod, sizeof(usermod), "usermod -a -G audio  %s", pwd->pw_name );   system ( usermod );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", usermod );
-    g_snprintf( usermod, sizeof(usermod), "usermod -a -G dialout %s", pwd->pw_name );  system ( usermod );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", usermod );
-    g_snprintf( usermod, sizeof(usermod), "usermod -a -G gpio %s", pwd->pw_name );     system ( usermod );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", usermod );
+    g_snprintf( chaine, sizeof(chaine), "chaine -a -G abls %s", pwd->pw_name );     system ( chaine );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
+    g_snprintf( chaine, sizeof(chaine), "chaine -a -G audio  %s", pwd->pw_name );   system ( chaine );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
+    g_snprintf( chaine, sizeof(chaine), "chaine -a -G dialout %s", pwd->pw_name );  system ( chaine );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
+    g_snprintf( chaine, sizeof(chaine), "chaine -a -G gpio %s", pwd->pw_name );     system ( chaine );
+    Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
 
 /***************************************************** Set_groups *************************************************************/
     if (initgroups ( pwd->pw_name, pwd->pw_gid )==-1)                                               /* On drop les privilèges */
@@ -274,17 +274,20 @@
     else { g_snprintf(Config.home, sizeof(Config.home), "%s/.watchdog", pwd->pw_dir ); }
     mkdir (Config.home, S_IRUSR | S_IWUSR | S_IXUSR );
 
-    if (Config.instance_is_master)
-     { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), "%s/Dls", Config.home );
-       mkdir ( chaine, S_IRUSR | S_IWUSR | S_IXUSR );
-       Info_new( __func__, Config.log_msrv, LOG_INFO, "Created Dls '%s' directory'", chaine );
-     }
-
     if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
      { Info_new( __func__, Config.log_msrv, LOG_CRIT, "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
      { Info_new( __func__, Config.log_msrv, LOG_INFO, "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }
+
+    if (Config.instance_is_master)
+     { mkdir ( "Dls", S_IRUSR | S_IWUSR | S_IXUSR );
+       mkdir ( "http_cache", S_IRUSR | S_IWUSR | S_IXUSR );
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "SubDirectories created" );
+     }
+
+    g_snprintf ( chaine, sizeof(chaine), "/run/user/%d", pwd->pw_uid );               /* Prepare XDG_RUNTIME_DIR (for mpg123) */
+    setenv ( "XDG_RUNTIME_DIR", chaine, TRUE );
+
     return(TRUE);
   }
 /******************************************************************************************************************************/
