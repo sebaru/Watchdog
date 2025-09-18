@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Dls Smsg Modbus Audio Onduleur TeleinfoEDF Radio Imsgs Meteo Phidget Gpiod Shelly
 
-bin_SCRIPTS = Wtd_play_google.sh
+bin_SCRIPTS =
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c thread.c Erreur.c \
                     shm.c json.c Config.c http_common.c \
