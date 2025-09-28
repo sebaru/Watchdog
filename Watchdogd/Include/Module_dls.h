@@ -245,7 +245,7 @@
  extern gint     Dls_data_get_WATCHDOG_time ( struct DLS_WATCHDOG *bit );
  extern void     Dls_data_set_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_WATCHDOG *bit, gint consigne );
 
- extern void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gchar *target_tech_id, gchar *json_parametre );
+ extern void Dls_data_set_bus ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *commande );
 
  extern struct DLS_AI *Dls_data_lookup_AI ( gchar *tech_id, gchar *acronyme );
  extern gdouble  Dls_data_get_AI        ( struct DLS_AI *bit );

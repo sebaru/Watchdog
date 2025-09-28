@@ -429,7 +429,7 @@
     mosquitto_lib_init();
 
 /******************************************************* Ecoute du MQTT Local *************************************************/
-    if (Config.instance_is_master && !MQTT_Start_MQTT_LOCAL()) goto fourth_stage_end;
+    if (!MQTT_Start_MQTT_LOCAL()) goto fourth_stage_end;
 
 /******************************************************* Ecoute du MQTT API ***************************************************/
     if (!MQTT_Start_MQTT_API()) goto fourth_stage_end;
@@ -576,7 +576,7 @@
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
 fourth_stage_end:
-    if (Config.instance_is_master) MQTT_Stop_MQTT_LOCAL();
+    MQTT_Stop_MQTT_LOCAL();
     MQTT_Stop_MQTT_API();
     mosquitto_lib_cleanup();
 

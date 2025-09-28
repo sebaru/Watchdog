@@ -163,13 +163,11 @@
 /* Dls_data_set_bus : Envoi un message sur le bus système                                                                     */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et les paramètres du message                                  */
 /******************************************************************************************************************************/
- void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p,
-                         gchar *target_tech_id, gchar *json_parametre )
-  { JsonNode *RootNode = Json_get_from_string ( json_parametre );
+ void Dls_data_set_bus ( struct DLS_TO_PLUGIN *vars, gchar *thread_tech_id, gchar *commande )
+  { JsonNode *RootNode = Json_node_create ();
     if (RootNode)
-     { gchar topic[256];
-       g_snprintf( topic, sizeof(topic), "thread/%s", target_tech_id );
-       MQTT_Send_to_topic ( Partage->MQTT_local_session, RootNode, FALSE, "SET_BUS/%s", target_tech_id );
+     { Json_node_add_string ( RootNode, "commande", commande );
+       MQTT_Send_to_topic ( Partage->MQTT_local_session, RootNode, FALSE, "SET_BUS/%s", thread_tech_id );
        Json_node_unref(RootNode);
      }
   }
