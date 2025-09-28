@@ -28,14 +28,11 @@
 #ifndef _AUDIO_H_
  #define _AUDIO_H_
 
- #include <json-glib/json-glib.h>
-
  #define AUDIO_JINGLE                3000                                    /* Jingle si pas de message au bout de 5 minutes */
  #define AUDIO_DEFAUT_LANGUAGE       "fr"                                                  /* Language par défaut pour le TTS */
 
  struct AUDIO_VARS
   { gint last_audio;                                                                   /* Date de la derniere emission sonore */
-    gboolean diffusion_enabled;                                                       /* Diffusion autorisée pour le thread ? */
 /*********************************************************** Digital Input ****************************************************/
     /*JsonNode *p_all;
     JsonNode *p_none;*/

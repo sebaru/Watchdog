@@ -4,7 +4,7 @@
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Archive.c
+ * Audio.c
  * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2025 - Sebastien LEFEVRE
@@ -92,7 +92,6 @@
     g_list_free(Audio_zones);
 
     Jouer_google_speech( module, "Module audio démarré !" );
-    vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /******************************************************************************************************************************/
@@ -109,11 +108,11 @@
            { gchar *audio_zone_name = Json_get_string ( request, "token_lvl1" );
              gchar *audio_libelle   = Json_get_string ( request, "audio_libelle" );
              Info_new( __func__, module->Thread_debug, LOG_INFO, "Saying '%s' on audio_zone '%s'", audio_libelle, audio_zone_name );
-             if (vars->last_audio + AUDIO_JINGLE < Partage->top)                                  /* Si Pas de message depuis xx */
-              { Jouer_google_speech( module, "Attention"); }                                           /* On balance le jingle ! */
+             if (vars->last_audio + AUDIO_JINGLE < Partage->top)                               /* Si Pas de message depuis xx */
+              { Jouer_google_speech( module, "Attention"); }                                        /* On balance le jingle ! */
              vars->last_audio = Partage->top;
 
-             Jouer_google_speech( module, audio_libelle );                                                   /* Jouer le libelle */
+             Jouer_google_speech( module, audio_libelle );                                                /* Jouer le libelle */
            }
           else if (!strcasecmp ( token_lvl0, "SET_TEST" ) )
            { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Saying 'test'" );
