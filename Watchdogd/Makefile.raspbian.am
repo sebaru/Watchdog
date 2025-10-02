@@ -37,3 +37,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 install-data-local:
 # mkdir -p $(pkgdatadir)/IHM; cp -rv IHM/* $(pkgdatadir)/IHM/;	chown -R root.root $(pkgdatadir)/IHM
+
+install-exec-hook:
+	@echo "Exécution de ldconfig après l'installation..."
+	/sbin/ldconfig
