@@ -284,20 +284,21 @@
                       );
 
 /*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
-    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok,  bit_comm_module );
-    Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs, !bit_comm_module );
+   if (bit_comm_module) Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok );
+                   else Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs );
 
-    if (!plugin->enable) return;                                            /* si plugin a l'arret, on n'éxécute pas non plus */
-    if (!plugin->go)     return;                                          /* si pas de fonction GO, on n'éxécute pas non plus */
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
-    if(plugin->vars.resetted && plugin->init_visuels)
-     { Info_new( __func__, Config.log_dls, LOG_INFO, "Send '_START' to '%s', and Init_visuel", plugin->tech_id );
-       plugin->init_visuels(&plugin->vars);
-     }
     gettimeofday( &tv_avant, NULL );
-    plugin->go( &plugin->vars );                                                                        /* On appel le plugin */
+    if (plugin->enable && plugin->go)                                                  /* Si plugin enabled ET fonction go ok */
+     { if(plugin->vars.resetted && plugin->init_visuels)
+        { Info_new( __func__, Config.log_dls, LOG_INFO, "Send '_START' to '%s', and Init_visuel", plugin->tech_id );
+          plugin->init_visuels(&plugin->vars);
+        }
+       plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
+     }
     gettimeofday( &tv_apres, NULL );
     plugin->conso+=Chrono( &tv_avant, &tv_apres );
+    Dls_data_MESSAGE_apply ( plugin );                                             /* Application des nouveaux etats messages */
     plugin->vars.resetted = FALSE;
   }
 /******************************************************************************************************************************/

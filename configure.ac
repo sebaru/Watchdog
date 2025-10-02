@@ -57,15 +57,7 @@ AC_CHECK_FUNCS(gettimeofday select socket strdup strerror)
 dnl parametres par defaut
 CFLAGS="-Wall -Wno-unused-result -Wno-comment -Wno-pointer-sign -Wno-discarded-qualifiers -pipe -g -ggdb -fdiagnostics-color"
 
-LIBW_MAJOR_VERSION=6
-LIBW_MINOR_VERSION=0
-LIBW_MICRO_VERSION=0
-
-AC_SUBST(LIBW_MAJOR_VERSION)
-AC_SUBST(LIBW_MINOR_VERSION)
-AC_SUBST(LIBW_MICRO_VERSION)
-
-LIBDLS_MAJOR_VERSION=6
+LIBDLS_MAJOR_VERSION=7
 LIBDLS_MINOR_VERSION=0
 LIBDLS_MICRO_VERSION=0
 

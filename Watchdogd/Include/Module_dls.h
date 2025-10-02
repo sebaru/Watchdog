@@ -173,6 +173,7 @@
     gchar   tech_id[32];
     gchar   acronyme[64];
     gboolean etat;
+    gboolean new_etat;
     gint last_on;
   };
 
@@ -245,7 +246,7 @@
  extern gint     Dls_data_get_WATCHDOG_time ( struct DLS_WATCHDOG *bit );
  extern void     Dls_data_set_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_WATCHDOG *bit, gint consigne );
 
- extern void Dls_data_set_bus ( struct DLS_TO_PLUGIN *vars, gchar *tech_id, gchar *commande );
+ extern void Dls_data_set_bus ( struct DLS_TO_PLUGIN *vars, gchar *thread_tech_id, gchar *commande );
 
  extern struct DLS_AI *Dls_data_lookup_AI ( gchar *tech_id, gchar *acronyme );
  extern gdouble  Dls_data_get_AI        ( struct DLS_AI *bit );
@@ -278,7 +279,7 @@
  extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );
 
  extern struct DLS_MESSAGE *Dls_data_lookup_MESSAGE ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gboolean etat );
+ extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg );
 
  extern struct DLS_TEMPO *Dls_data_lookup_TEMPO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_TEMPO     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,
