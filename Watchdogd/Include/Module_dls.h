@@ -157,8 +157,9 @@
     gchar    tech_id[32];
     gchar    acronyme[64];
     gchar    libelle[128];                                                                                    /* Km, h, ° ... */
-    gchar    mode[32];
-    gchar    color[16];
+    gchar   *mode;
+    gchar   *color;
+    gchar   *badge;
     gdouble  valeur;
     gchar    unite[32];
     gboolean cligno;
@@ -267,6 +268,7 @@
  extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
                                    gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
+ extern void Dls_data_set_VISUEL_badge ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *badge );
  extern void Dls_data_set_VISUEL_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
                                                 gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
  extern void Dls_data_set_VISUEL_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,

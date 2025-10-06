@@ -86,39 +86,42 @@
  void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
                             gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
   { if (!visu) return;
-    if (Partage->Thread_run == FALSE) return;
-    if (    strcmp ( visu->mode, mode )
-         || strcmp ( visu->color, color )                     /* On ne peut pas checker le libellé car il peut etre dynamique */
+    if (    visu->mode    != mode
+         || visu->color   != color                            /* On ne peut pas checker le libellé car il peut etre dynamique */
          || visu->cligno  != cligno
          || visu->noshow  != noshow
          || visu->disable != disable
          || visu->valeur  != valeur
        )
-     { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
-       g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
+     { visu->mode    = mode;                                         /* Sinon on recopie ce qui est demandé par le plugin DLS */
+       visu->color   = color;
        visu->valeur  = valeur;
        visu->cligno  = cligno;
        visu->noshow  = noshow;
        visu->disable = disable;
-       gchar *libelle_new = Convert_libelle_dynamique ( libelle );
-       g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle_new );
-       g_free(libelle_new);
        visu->changed = TRUE;
        Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s') "
                  "cligno=%d noshow=%d libelle='%s', disable=%d",
                  (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
                   visu->mode, visu->color, visu->valeur, visu->unite, visu->cligno, visu->noshow, visu->libelle, visu->disable );
+       Partage->audit_bit_interne_per_sec++;
      }
-
-    if (visu->changed && (Partage->top >= visu->next_send))
-     { pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );                         /* Ajout dans la liste de i a traiter */
-       Partage->Liste_visuel = g_slist_append( Partage->Liste_visuel, visu );
-       pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
-       visu->changed = FALSE;
-       visu->next_send = Partage->top + 10;
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_VISUEL_bdage : Gestion du badge d'un visuel                                                                   */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_badge ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *badge )
+  { if (!visu) return;
+    if ( badge != visu->badge )                                      /* Comparaison possible car les chaines sont statiques ! */
+     { visu->badge = badge;
+       visu->changed = TRUE;
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> badge='%s'",
+                 (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, badge );
+       Partage->audit_bit_interne_per_sec++;
      }
-    Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_VISUEL_for_CI : Met un jour un visuel accroché a un compteur d'impulsion                                      */
@@ -188,5 +191,29 @@
     Json_node_add_bool   ( RootNode, "disable",   bit->disable );
     Json_node_add_string ( RootNode, "libelle",   bit->libelle );
     Json_node_add_string ( RootNode, "unite",     bit->unite );
+    Json_node_add_string ( RootNode, "badge",     bit->badge );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_VISUEL_apply: Met à jour les visuels du plugin                                                                    */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_VISUEL_apply ( struct DLS_PLUGIN *plugin )
+  { if (!plugin) return;
+
+    GSList *liste = plugin->Dls_data_VISUEL;
+    while ( liste )
+     { struct DLS_VISUEL *visu = liste->data;
+       if (visu->changed && (Partage->top >= visu->next_send))
+        { gchar *libelle_new = Convert_libelle_dynamique ( visu->libelle );               /* mise a jour du libelle dynamique */
+          g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle_new );
+          g_free(libelle_new);
+          pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );                      /* Ajout dans la liste de i a traiter */
+          Partage->Liste_visuel = g_slist_append( Partage->Liste_visuel, visu );
+          pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
+          visu->changed = FALSE;
+          visu->next_send = Partage->top + 10;                                                  /* Next update dans 1 seconde */
+        }
+       liste = g_slist_next(liste);
+     }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

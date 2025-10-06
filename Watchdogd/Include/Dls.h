@@ -209,7 +209,7 @@
                                                                                                      /* Dans The_dls_VISUEL.c */
  extern void Dls_data_VISUEL_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit );
-
+ extern void Dls_data_VISUEL_apply ( struct DLS_PLUGIN *plugin );
                                                                                                     /* Dans The_dls_MESSAGE.c */
  extern void Dls_data_MESSAGE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_data_MESSAGE_free_all ( struct DLS_PLUGIN *plugin );

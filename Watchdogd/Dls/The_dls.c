@@ -299,6 +299,7 @@
     gettimeofday( &tv_apres, NULL );
     plugin->conso+=Chrono( &tv_avant, &tv_apres );
     Dls_data_MESSAGE_apply ( plugin );                                             /* Application des nouveaux etats messages */
+    Dls_data_VISUEL_apply ( plugin );
     plugin->vars.resetted = FALSE;
   }
 /******************************************************************************************************************************/
