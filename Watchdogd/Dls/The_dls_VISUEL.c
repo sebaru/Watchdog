@@ -100,6 +100,9 @@
        visu->noshow  = noshow;
        visu->disable = disable;
        visu->changed = TRUE;
+       gchar *libelle_new = Convert_libelle_dynamique ( visu->libelle );                  /* mise a jour du libelle dynamique */
+       g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle_new );
+       g_free(libelle_new);
        Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s') "
                  "cligno=%d noshow=%d libelle='%s', disable=%d",
@@ -204,10 +207,7 @@
     while ( liste )
      { struct DLS_VISUEL *visu = liste->data;
        if (visu->changed && (Partage->top >= visu->next_send))
-        { gchar *libelle_new = Convert_libelle_dynamique ( visu->libelle );               /* mise a jour du libelle dynamique */
-          g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle_new );
-          g_free(libelle_new);
-          pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );                      /* Ajout dans la liste de i a traiter */
+        { pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );                      /* Ajout dans la liste de i a traiter */
           Partage->Liste_visuel = g_slist_append( Partage->Liste_visuel, visu );
           pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
           visu->changed = FALSE;
