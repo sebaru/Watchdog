@@ -306,7 +306,7 @@
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
-  { gint last_top_10sec, last_top_5sec, last_top_2sec, last_top_1sec, last_top_2hz, last_top_5hz, last_top_1min, last_top_10min;
+  { gint next_top_10sec, next_top_5sec, next_top_2sec, next_top_1sec, next_top_2hz, next_top_5hz, next_top_1min, next_top_10min;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
@@ -314,29 +314,31 @@
     Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
-    last_top_2sec = last_top_1sec = last_top_2hz = last_top_5hz = last_top_1min = last_top_10min = Partage->top;
+    next_top_2sec  = next_top_1sec = next_top_2hz = next_top_5hz = Partage->top;
+    next_top_1min  = Partage->top + 600;
+    next_top_10min = Partage->top + 6000;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { pthread_mutex_lock( &Partage->com_dls.synchro );                               /* Zone de protection des bits internes */
 /******************************************************************************************************************************/
-       if (Partage->top-last_top_5hz>=2)                                                           /* Toutes les 1/5 secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz, TRUE );
+       if (Partage->top>=next_top_5hz)                                                             /* Toutes les 1/5 secondes */
+        { next_top_5hz = Partage->top + 2;
+          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz, TRUE );
           Dls_data_set_BI   ( NULL, Partage->com_dls.sys_flipflop_5hz,
                              !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_5hz) );
-          last_top_5hz = Partage->top;
         }
 /******************************************************************************************************************************/
-       if (Partage->top-last_top_2hz>=5)                                                           /* Toutes les 1/2 secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_2hz, TRUE );
+       if (Partage->top>=next_top_2hz)                                                             /* Toutes les 1/2 secondes */
+         {next_top_2hz = Partage->top + 5;
+          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_2hz, TRUE );
           Dls_data_set_BI   ( NULL, Partage->com_dls.sys_flipflop_2hz,
                              !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_2hz) );
-          last_top_2hz = Partage->top;
         }
 /******************************************************************************************************************************/
-       if (Partage->top-last_top_1sec>=10)                                                             /* Toutes les secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1sec, TRUE );
+       if (Partage->top>=next_top_1sec)                                                                /* Toutes les secondes */
+        { next_top_1sec = Partage->top + 10;
+          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1sec, TRUE );
           Dls_data_set_BI   ( NULL, Partage->com_dls.sys_flipflop_1sec,
                              !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_1sec) );
-          last_top_1sec = Partage->top;
 
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
@@ -354,41 +356,41 @@
           Dls_data_set_AI ( Partage->com_dls.sys_dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE ); /* historique */
         }
 /******************************************************************************************************************************/
-       if (Partage->top-last_top_2sec>=20)                                                           /* Toutes les 2 secondes */
-        { Dls_data_set_BI ( NULL, Partage->com_dls.sys_flipflop_2sec,
+       if (Partage->top>=next_top_2sec)                                                              /* Toutes les 2 secondes */
+        { next_top_2sec = Partage->top+20;
+          Dls_data_set_BI ( NULL, Partage->com_dls.sys_flipflop_2sec,
                            !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_2sec) );
-          last_top_2sec = Partage->top;
         }
 /******************************************************************************************************************************/
-       if (Partage->top-last_top_5sec>=50)                                                           /* Toutes les 5 secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
+       if (Partage->top>=next_top_5sec)                                                              /* Toutes les 5 secondes */
+        { next_top_5sec = Partage->top + 50;
+          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
           Dls_foreach_plugins ( NULL, Dls_run_archivage );                        /* Archivage au mieux toutes les 5 secondes */
-          last_top_5sec = Partage->top;
         }
 /******************************************************************************************************************************/
-       if (Partage->top-last_top_10sec>=100)                                                        /* Toutes les 10 secondes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
+       if (Partage->top>=next_top_10sec)                                                            /* Toutes les 10 secondes */
+        { next_top_10sec = Partage->top + 100;
+          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
           Dls_data_set_BI ( NULL, Partage->com_dls.sys_mqtt_connected, Partage->MQTT_connected );
-          last_top_10sec = Partage->top;
         }
 /******************************************************************************************************************************/
-       if (Partage->top-last_top_1min>=600)                                                             /* Toutes les minutes */
-        { Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
+       if (Partage->top>=next_top_1min)                                                                 /* Toutes les minutes */
+        { next_top_1min = Partage->top + 600;
+          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
           struct rusage conso;
           getrusage ( RUSAGE_SELF, &conso );
           Dls_data_set_AI ( Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
           Dls_data_set_AI ( Partage->com_dls.sys_log_per_min, 1.0*Info_reset_nbr_log(), TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Dls_data_activer_horloge();
-          last_top_1min = Partage->top;
         }
 /******************************************************************************************************************************/
-       if (Partage->top-last_top_10min>=6000)                                                        /* Toutes les 10 minutes */
-        { last_top_10min = Partage->top;
+       if (Partage->top>=next_top_10min)                                                             /* Toutes les 10 minutes */
+        { next_top_10min = Partage->top + 6000;
         }
 
-       Set_edge();                                                                     /* Mise à zero des bit de egde up/down */
-       Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
+       Set_edge();                                                                    /* Mise à zero des bits de egde up/down */
+       Set_cde_exterieure();                                           /* Mise à un des bits de commande exterieure (furtifs) */
 
        Partage->top_cdg_plugin_dls = 0;                                                         /* On reset le cdg plugin DLS */
 
