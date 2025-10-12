@@ -100,7 +100,7 @@
        visu->noshow  = noshow;
        visu->disable = disable;
        visu->changed = TRUE;
-       gchar *libelle_new = Convert_libelle_dynamique ( visu->libelle );                  /* mise a jour du libelle dynamique */
+       gchar *libelle_new = Convert_libelle_dynamique ( libelle );                        /* mise a jour du libelle dynamique */
        g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle_new );
        g_free(libelle_new);
        Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
