@@ -314,7 +314,8 @@
     Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
-    next_top_2sec  = next_top_1sec = next_top_2hz = next_top_5hz = Partage->top;
+    next_top_5hz   = next_top_2hz  = Partage->top;                                                       /* Init des next top */
+    next_top_1sec  = next_top_2sec = next_top_5sec = Partage->top + 10;
     next_top_1min  = Partage->top + 600;
     next_top_10min = Partage->top + 6000;
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
