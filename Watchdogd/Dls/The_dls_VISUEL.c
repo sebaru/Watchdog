@@ -127,8 +127,22 @@
      }
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_VISUEL_for_AI : Met un jour un visuel accroché a une entrée analogique                                        */
+/* Entrée : le dls en cours, le visuel, le registre et les parametres du visuel                                               */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL_for_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_AI *src,
+                                   gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+  { if (!visu) return;
+    if (!src) return;
+
+    gboolean in_range = Dls_data_get_AI_inrange( src );
+    gint valeur       = Dls_data_get_AI ( src );
+    g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
+    Dls_data_set_VISUEL ( vars, visu, mode, color, 1.0*valeur, (in_range ? cligno : TRUE), noshow, libelle, disable );
+  }
+/******************************************************************************************************************************/
 /* Dls_data_set_VISUEL_for_CI : Met un jour un visuel accroché a un compteur d'impulsion                                      */
-/* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
+/* Entrée : le dls en cours, le visuel, le registre et les parametres du visuel                                               */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
                                    gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
@@ -141,7 +155,7 @@
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_visuel_for_registre : Met un jour un visuel accroché a un registre                                            */
-/* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
+/* Entrée : le dls en cours, le visuel, le registre et les parametres du visuel                                               */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
                                          gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
@@ -154,7 +168,7 @@
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_visuel_for_watchdog : Met un jour un visuel accroché a un watchdog                                            */
-/* Entrée : le dls en cours, le visuel, le watchdog et les parametre du visuel                                                */
+/* Entrée : le dls en cours, le visuel, le watchdog et les parametres du visuel                                               */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
                                          gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
@@ -167,7 +181,7 @@
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_visuel_for_tempo : Met un jour un visuel accroché a une temporisation                                         */
-/* Entrée : le dls en cours, le visuel, la temporisation et les parametre du visuel                                           */
+/* Entrée : le dls en cours, le visuel, la temporisation et les parametres du visuel                                          */
 /******************************************************************************************************************************/
  void Dls_data_set_VISUEL_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
                                       gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )

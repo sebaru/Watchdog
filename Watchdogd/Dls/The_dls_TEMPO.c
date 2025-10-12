@@ -215,7 +215,8 @@
 /******************************************************************************************************************************/
  gint Dls_data_get_TEMPO_time ( struct DLS_TEMPO *bit )
   { if (!bit) return(0);
-    return( ((bit->date_on - Partage->top) > 0 ? (bit->date_on - Partage->top) : 0) );
+    gint restant = bit->date_on - Partage->top;
+    return( (restant > 0 ? restant : 0) );
   }
 /******************************************************************************************************************************/
 /* Dls_TEMPO_to_json : Formate un bit au format JSON                                                                          */
