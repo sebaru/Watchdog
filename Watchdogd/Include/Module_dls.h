@@ -156,7 +156,7 @@
   { gchar    forme[32];
     gchar    tech_id[32];
     gchar    acronyme[64];
-    gchar    libelle[128];                                                                                    /* Km, h, ° ... */
+    gchar   *libelle;
     gchar   *mode;
     gchar   *color;
     gchar   *badge;
@@ -266,19 +266,21 @@
  extern gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg );
 
  extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
-                                   gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
- extern void Dls_data_set_VISUEL_badge ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *badge );
- extern void Dls_data_set_VISUEL_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
-                                                gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
- extern void Dls_data_set_VISUEL_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
-                                                gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
- extern void Dls_data_set_VISUEL_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
-                                             gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
- extern void Dls_data_set_VISUEL_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
-                                          gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
- extern void Dls_data_set_VISUEL_for_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_AI *src,
-                                          gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable );
+ extern void Dls_data_VISUEL_set ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
+                                   gdouble valeur, gboolean cligno, gboolean noshow, gboolean disable );
+ extern void Dls_data_VISUEL_set_badge ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *badge );
+ extern void Dls_data_VISUEL_set_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
+                                                gboolean cligno, gboolean noshow, gboolean disable );
+ extern void Dls_data_VISUEL_set_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
+                                                gboolean cligno, gboolean noshow, gboolean disable );
+ extern void Dls_data_VISUEL_set_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
+                                             gboolean cligno, gboolean noshow, gboolean disable );
+ extern void Dls_data_VISUEL_set_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
+                                          gboolean cligno, gboolean noshow, gboolean disable );
+ extern void Dls_data_VISUEL_set_for_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CH *src,
+                                          gboolean cligno, gboolean noshow, gboolean disable );
+ extern void Dls_data_VISUEL_set_for_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_AI *src,
+                                          gboolean cligno, gboolean noshowe, gboolean disable );
  extern struct DLS_HORLOGE *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );
 
