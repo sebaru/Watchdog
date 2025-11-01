@@ -269,6 +269,9 @@
  extern void Dls_data_VISUEL_set ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
                                    gdouble valeur, gboolean cligno, gboolean noshow, gboolean disable );
  extern void Dls_data_VISUEL_set_badge ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *badge );
+ extern void Dls_data_VISUEL_set_mode ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *mode );
+ extern void Dls_data_VISUEL_set_color ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *color );
+ extern void Dls_data_VISUEL_set_libelle ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *libelle );
  extern void Dls_data_VISUEL_set_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
                                                 gboolean cligno, gboolean noshow, gboolean disable );
  extern void Dls_data_VISUEL_set_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
