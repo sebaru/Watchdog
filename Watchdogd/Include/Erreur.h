@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
-/* Include/Erreur.h      Déclaration des constantes et prototypes de gestion de log                       */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                  lun 21 avr 2003 22:06:10 CEST */
+/* Include/Erreur.h      DÃ©claration des constantes et prototypes de gestion de log                       */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                  lun 21 avr 2003 22:06:10 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*

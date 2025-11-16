@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Onduleur/Onduleur.c  Gestion des ups Watchdog                                                                    */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                     mar. 10 nov. 2009 15:56:10 CET */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                     mar. 10 nov. 2009 15:56:10 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

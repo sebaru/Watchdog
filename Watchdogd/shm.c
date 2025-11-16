@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/shm.c        Gestion de la mémoire partagée                                                  */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                  dim 05 avr 2009 12:32:40 CEST */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                  dim 05 avr 2009 12:32:40 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*

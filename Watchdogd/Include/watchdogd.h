@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/watchdogd.h      Déclarations générales watchdog                                                                 */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                      sam 11 avr 2009 12:23:32 CEST */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                      sam 11 avr 2009 12:23:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

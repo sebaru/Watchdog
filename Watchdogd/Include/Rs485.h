@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Include/Rs485.h   Header et constantes des modules rs485 Watchdgo 2.0                        */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                  jeu 31 jui 2003 09:37:12 CEST */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                  jeu 31 jui 2003 09:37:12 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*

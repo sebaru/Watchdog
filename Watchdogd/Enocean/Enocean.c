@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Enocean/Enocean.c  Gestion des capteurs ENOCEAN Watchdog 2.0                                 */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                 dim. 28 déc. 2014 15:46:44 CET */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                 dim. 28 déc. 2014 15:46:44 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
