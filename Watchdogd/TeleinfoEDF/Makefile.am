@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/TeleinfoEDF/Makefile.am     Profil de compilation de l'interface RFXCOM pour Watchdog     */
-#* Projet Abls-Habitat version 4.5       Gestion d'habitat                       dim 25 mai 2012 18:13:27 */
+#* Projet Abls-Habitat version 4.6       Gestion d'habitat                       dim 25 mai 2012 18:13:27 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS=

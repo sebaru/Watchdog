@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Audio/Audio.c  Gestion des messages audio de Watchdog 2.0                                                        */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                     sam. 09 nov. 2013 13:49:53 CET */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                     sam. 09 nov. 2013 13:49:53 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Archive.c
+ * Audio.c
  * This file is part of Abls-Habitat
  *
  * Copyright (C) 1988-2025 - Sebastien LEFEVRE
@@ -42,31 +42,26 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Jouer_google_speech ( struct THREAD *module, gchar *audio_libelle )
-  { gint pid;
+  { gchar commande[256];
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Send '%s'", audio_libelle );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Sending '%s'", audio_libelle );
     gchar *language = Json_get_string ( module->config, "language" );
-    gchar *device   = Json_get_string ( module->config, "device" );
-    Info_new( __func__, module->Thread_debug, LOG_INFO,
-              "Running Wtd_play_google.sh %s %s %s", language, audio_libelle, device );
 
-    pid = fork();
-    if (pid<0)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                 "'%s' fork failed pid=%d (%s)", audio_libelle, pid, strerror(errno) );
-       Thread_send_comm_to_master ( module, FALSE );
-       return;
-     }
-    else if (!pid)
-     { execlp( "Wtd_play_google.sh", "Wtd_play_google", language, audio_libelle, device, NULL );
-       _exit(0);
+    gchar fichier[256];
+    g_snprintf( fichier, sizeof(fichier), "%s", audio_libelle );
+    g_strcanon ( fichier, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzéèê_", '_' );
+
+    struct stat stat_buf;
+    if (stat(fichier, &stat_buf)==-1)
+     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Creating file audio/%s.mp3", fichier );
+       g_snprintf ( commande, sizeof(commande), "gtts-cli -l %s \"%s\" -o audio/%s.mp3", language, audio_libelle, fichier );
+       system(commande);
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s' waiting to finish pid=%d", audio_libelle, pid );
-    waitpid(pid, NULL, 0 );
+    Info_new( __func__, module->Thread_debug, LOG_INFO, "Running mpg123 audio/%s.mp3", fichier );
+    g_snprintf ( commande, sizeof(commande), "mpg123 audio/%s.mp3", fichier );
+    system(commande);
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Wtd_play_google %s '%s' %s finished pid=%d",
-              language, audio_libelle, device, pid );
     Thread_send_comm_to_master ( module, TRUE );
   }
 /******************************************************************************************************************************/
@@ -77,15 +72,14 @@
  void Run_thread ( struct THREAD *module )
   { Thread_init ( module, sizeof(struct AUDIO_VARS) );
     struct AUDIO_VARS *vars = module->vars;
-
     /*gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );*/
-
     gint volume  = Json_get_int ( module->config, "volume" );
     gchar chaine[256];
     g_snprintf( chaine, sizeof(chaine), "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%", volume );
     system(chaine);
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Volume set to %d", volume );
 
+    Thread_send_comm_to_master ( module, TRUE );                                                  /* By default, comm is TRUE */
     GList *Audio_zones = json_array_get_elements ( Json_get_array ( module->config, "audio_zones" ) );
     GList *audio_zones = Audio_zones;
     while(audio_zones)
@@ -98,7 +92,6 @@
     g_list_free(Audio_zones);
 
     Jouer_google_speech( module, "Module audio démarré !" );
-    vars->diffusion_enabled = TRUE;                                                     /* A l'init, la diffusion est activée */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /******************************************************************************************************************************/
@@ -115,11 +108,11 @@
            { gchar *audio_zone_name = Json_get_string ( request, "token_lvl1" );
              gchar *audio_libelle   = Json_get_string ( request, "audio_libelle" );
              Info_new( __func__, module->Thread_debug, LOG_INFO, "Saying '%s' on audio_zone '%s'", audio_libelle, audio_zone_name );
-             if (vars->last_audio + AUDIO_JINGLE < Partage->top)                                  /* Si Pas de message depuis xx */
-              { Jouer_google_speech( module, "Attention"); }                                           /* On balance le jingle ! */
+             if (vars->last_audio + AUDIO_JINGLE < Partage->top)                               /* Si Pas de message depuis xx */
+              { Jouer_google_speech( module, "Attention"); }                                        /* On balance le jingle ! */
              vars->last_audio = Partage->top;
 
-             Jouer_google_speech( module, audio_libelle );                                                   /* Jouer le libelle */
+             Jouer_google_speech( module, audio_libelle );                                                /* Jouer le libelle */
            }
           else if (!strcasecmp ( token_lvl0, "SET_TEST" ) )
            { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Saying 'test'" );

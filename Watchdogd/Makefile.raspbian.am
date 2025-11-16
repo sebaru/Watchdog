@@ -1,11 +1,11 @@
 #**********************************************************************************************************/
 #* Watchdogd/Makefile.am          Profil de compilation du serveur Watchdog                               */
-#* Projet Abls-Habitat version 4.5    Gestion d'habitat                           lun 02 jun 2003 14:24:24 CEST */
+#* Projet Abls-Habitat version 4.6    Gestion d'habitat                           lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Dls Smsg Modbus Audio Onduleur TeleinfoEDF Radio Imsgs Meteo Phidget Gpiod Shelly
 
-bin_SCRIPTS = Wtd_play_google.sh
+bin_SCRIPTS =
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c thread.c Erreur.c \
                     shm.c json.c Config.c http_common.c \
@@ -16,7 +16,7 @@ Watchdogd_SOURCES = Watchdogd.c thread.c Erreur.c \
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la
 
-# rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
+# rdynamic pour autoriser l'utilisation des fonctions du thread principal par les librairies dlopened
 Watchdogd_LDFLAGS = -rdynamic -lpopt -ldl -lcurl \
                    `pkg-config --libs glib-2.0 gthread-2.0 openssl json-glib-1.0 uuid libsystemd libjwt libmosquitto`
 
@@ -37,3 +37,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 install-data-local:
 # mkdir -p $(pkgdatadir)/IHM; cp -rv IHM/* $(pkgdatadir)/IHM/;	chown -R root.root $(pkgdatadir)/IHM
+
+install-exec-hook:
+	@echo "Exécution de ldconfig après l'installation..."
+	/sbin/ldconfig

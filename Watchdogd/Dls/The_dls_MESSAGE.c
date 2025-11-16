@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/Ths_dls_MESSAGE.c        Déclaration des fonctions pour la gestion des message                               */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                     jeu. 29 déc. 2011 14:55:42 CET */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                     jeu. 29 déc. 2011 14:55:42 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -98,70 +98,59 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_MESSAGE: Emet le message en parametre                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg )
+  { if (!msg) return;
+    msg->new_etat = TRUE;                                                                  /* Sauvegarde de l'état du message */
+    if ( msg->etat == TRUE ) return;                                                            /* Si déjà activé, on return; */
+    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "ligne %04d: Changing DLS_MSG '%s:%s'=TRUE", (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme );
+    Partage->audit_bit_interne_per_sec++;
+  }
+/******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gboolean etat )
-  { if (!msg) return;
-    if ( msg->etat == etat ) return;
+ void Dls_data_MESSAGE_apply ( struct DLS_PLUGIN *plugin )
+  { if (!plugin) return;
 
-    msg->etat = etat;                                                                      /* Sauvegarde de l'état du message */
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-              "ligne %04d: Changing DLS_MSG '%s:%s'=%d",
-              (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme, msg->etat );
-    Partage->audit_bit_interne_per_sec++;
-
-    gint typologie = Json_get_int ( msg->source_node, "typologie" );
-    if ( typologie == MSG_NOTIF && msg->etat == 0) return;                      /* Un message de notification ne s'éteind pas */
-    if ( typologie == MSG_NOTIF && msg->etat == 1)             /* Si message de notification apparait, on eteint le précédent */
-     { struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
-       if (event)
-        { event->etat = FALSE;                                                                        /* On eteint le message */
-          event->msg  = msg;
-          pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                       /* Ajout dans la liste de msg a traiter */
-          Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
-          pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                       /* Ajout dans la liste de msg a traiter */
-        } else Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_ERR,
-                         "Memory error for MSG'%s:%s' = 0 (etat)", msg->tech_id, msg->acronyme );
-     }
-
-    struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );     /* Dans tous les cas, on traite */
-    if (!event)
-     { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_ERR,
-                "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
-       return;
-     }
-
-    event->etat = etat;                                                                 /* Recopie de l'état dans l'evenement */
-    event->msg  = msg;
-    pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                             /* Ajout dans la liste de msg a traiter */
-    Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
-    pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                             /* Ajout dans la liste de msg a traiter */
-  }
-/******************************************************************************************************************************/
-/* Dls_MESSAGE_to_json : Formate un bit au format JSON                                                                        */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_MESSAGE_to_json ( JsonNode *element, struct DLS_MESSAGE *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat",     bit->etat );
-  }
-/******************************************************************************************************************************/
-/* Dls_all_MESSAGE_to_json: Transforme tous les bits message d'un plugin en JSON                                              */
-/* Entrée: l'array destination et le plugin                                                                                   */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Dls_all_MESSAGE_to_json ( gpointer array, struct DLS_PLUGIN *plugin )
-  { JsonArray *RootArray = array;
-
-    GSList *liste = plugin->Dls_data_DI;
+    GSList *liste = plugin->Dls_data_MESSAGE;
     while ( liste )
-     { struct DLS_DI *bit = liste->data;
-       JsonNode *element = Json_node_create();
-       Dls_DI_to_json ( element, bit );
-       Json_array_add_element ( RootArray, element );
+     { struct DLS_MESSAGE *msg = liste->data;
+
+       if ( msg->etat != msg->new_etat )                                           /* si changement d'etat lors du run plugin */
+        { msg->etat = msg->new_etat;
+          gint typologie = Json_get_int ( msg->source_node, "typologie" );
+          if ( typologie == MSG_NOTIF && msg->etat == TRUE )   /* Si message de notification apparait, on eteint le précédent */
+           { struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
+             if (event)
+              { event->etat = FALSE;                                                                  /* On eteint le message */
+                event->msg  = msg;
+                pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
+                Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
+                pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
+              } else Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_ERR,
+                               "Memory error for MSG'%s:%s' = 0 (etat)", msg->tech_id, msg->acronyme );
+           }
+
+          if ( !(typologie == MSG_NOTIF && msg->etat == FALSE) )                /* Un message de notification ne s'éteint pas */
+           { struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );        /* sinon, on traite */
+             if (!event)
+              { Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_ERR,
+                         "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
+              }
+             else
+              { event->etat = msg->etat;                                                /* Recopie de l'état dans l'evenement */
+                event->msg  = msg;
+                pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
+                Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
+                pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
+              }
+           }
+        }
+       msg->new_etat = FALSE;                                             /* Prepare le prochain calcul avec etat initial à 0 */
        liste = g_slist_next(liste);
      }
   }

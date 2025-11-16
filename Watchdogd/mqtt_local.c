@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_local.c        Fonctions communes de gestion des requetes MQTT locales                                      */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                17.08.2024 12:31:26 */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                17.08.2024 12:31:26 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -37,6 +37,15 @@
  static void MQTT_local_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Connected with return code %d: %s",
               return_code, mosquitto_connack_string( return_code ) );
+    if (return_code == 0)
+     { if (Config.instance_is_master)
+        { MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI/#" );
+          MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI_PULSE/#" );
+          MQTT_Subscribe ( Partage->MQTT_local_session, "SET_AI/#" );
+          MQTT_Subscribe ( Partage->MQTT_local_session, "SET_WATCHDOG/#" );
+        }
+       MQTT_Subscribe ( Partage->MQTT_local_session, "SET_BUS/%s", g_get_host_name() );
+     }
   }
 /******************************************************************************************************************************/
 /* MQTT_local_on_disconnect_CB: appelé par la librairie quand le broker est déconnecté                                        */
@@ -54,10 +63,9 @@
 /******************************************************************************************************************************/
  static void MQTT_local_on_message_CB ( struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg )
   { gchar **tokens = g_strsplit ( msg->topic, "/", 3 );
-    if (!tokens) return;
-    if (!tokens[0]) goto end; /* Le Tag */
-    if (!tokens[1]) goto end; /* Le tech_id */
-    if (!tokens[2]) goto end; /* L'acronyme */
+    if (!tokens)    { Info_new( __func__, Config.log_bus, LOG_ERR, "Tokens is null" ); return; }
+    if (!tokens[0]) { Info_new( __func__, Config.log_bus, LOG_ERR, "Token[0] is null" ); goto end; }
+    if (!tokens[1]) { Info_new( __func__, Config.log_bus, LOG_ERR, "Token[0] is null" ); goto end; }
 
     JsonNode *request = Json_get_from_string ( msg->payload );
     if (!request)
@@ -67,29 +75,41 @@
 
     gchar *topic = tokens[0];
     if ( !strcmp ( topic, "SET_AI" ) )
-     { Json_node_add_string ( request, "thread_tech_id", tokens[1] );
+     { if (!tokens[2]) goto end; /* L'acronyme */
+       Json_node_add_string ( request, "thread_tech_id", tokens[1] );
        Json_node_add_string ( request, "thread_acronyme", tokens[2] );
        Dls_data_set_AI_from_thread_ai ( request );
      }
     else if ( !strcmp ( topic, "SET_DI" ) )
-     { Json_node_add_string ( request, "thread_tech_id", tokens[1] );
+     { if (!tokens[2]) goto end; /* L'acronyme */
+       Json_node_add_string ( request, "thread_tech_id", tokens[1] );
        Json_node_add_string ( request, "thread_acronyme", tokens[2] );
        Dls_data_set_DI_from_thread_di ( request );
      }
     else if ( !strcmp ( topic, "SET_WATCHDOG" ) )
-     { Json_node_add_string ( request, "thread_tech_id", tokens[1] );
+     { if (!tokens[2]) goto end; /* L'acronyme */
+       Json_node_add_string ( request, "thread_tech_id", tokens[1] );
        Json_node_add_string ( request, "thread_acronyme", tokens[2] );
        Dls_data_set_WATCHDOG_from_thread_watchdog ( request );
      }
     else if ( !strcmp ( topic, "SET_DI_PULSE" ) )
-     { gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+     { if (!tokens[2]) goto end; /* L'acronyme */
+       gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
        Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI_PULSE from '%s': '%s:%s'=PULSE", thread_tech_id, tokens[1], tokens[2] );
        struct DLS_DI *bit = Dls_data_lookup_DI ( tokens[1], tokens[2] );
        Dls_data_set_DI_pulse ( NULL, bit );
      }
+    else if ( !strcmp ( topic, "SET_BUS" ) )
+     { gchar *commande = Json_get_string ( request, "commande" );
+       if (commande)
+        { Info_new( __func__, Config.log_bus, LOG_NOTICE, "SET_BUS: Executing '%s'", commande );
+          system( commande );
+        }
+       else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_BUS: 'commande' is missing" );
+     }
     else Info_new( __func__, Config.log_bus, LOG_ERR, "tag inconnu: %s sur topic %s", topic, msg->topic );
-
     Json_node_unref ( request );
+
 end:
     g_strfreev( tokens );                                                                      /* Libération des tokens topic */
   }
@@ -100,9 +120,9 @@ end:
 /******************************************************************************************************************************/
  gboolean MQTT_Start_MQTT_LOCAL ( void )
   { gint retour;
-    gchar *agent_uuid    = Json_get_string ( Config.config, "agent_uuid" );
+    gchar *agent_uuid = Json_get_string ( Config.config, "agent_uuid" );
 
-    Partage->MQTT_local_session = mosquitto_new( agent_uuid, FALSE, NULL );
+    Partage->MQTT_local_session = mosquitto_new( agent_uuid, TRUE, NULL );
     if (!Partage->MQTT_local_session)
      { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local session error." ); return(FALSE); }
 
@@ -121,11 +141,6 @@ end:
                  Config.master_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
      }
-
-    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI/#" );
-    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI_PULSE/#" );
-    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_AI/#" );
-    MQTT_Subscribe ( Partage->MQTT_local_session, "SET_WATCHDOG/#" );
 
     retour = mosquitto_loop_start( Partage->MQTT_local_session );
     if ( retour != MOSQ_ERR_SUCCESS )

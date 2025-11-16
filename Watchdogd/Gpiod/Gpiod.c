@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Gpiod/Gpiod.c  Gestion des I/O Gpiod  Watchdog 3.0                                                               */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                03.09.2021 17:51:06 */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                03.09.2021 17:51:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -89,6 +89,7 @@
         }
        else                                                                                                /* Pour une sortie */
         { vars->lignes[num].etat = gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, vars->lignes[num].mode_activelow ); }
+       Json_node_add_int ( element, "etat", vars->lignes[num].etat );
      }
   }
 /******************************************************************************************************************************/

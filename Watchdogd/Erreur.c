@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Commun/Erreur.c        Gestion des logs systemes                                                                           */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                      jeu 09 avr 2009 22:08:19 CEST */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                      jeu 09 avr 2009 22:08:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -47,7 +47,7 @@
     "INFO",
     "DEBUG"
   };
-
+ static gint Nbr_log_par_min = 0;                                                      /* Nombre de message de log par minute */
 /******************************************************************************************************************************/
 /* Info_init: Initialisation du traitement d'erreur                                                                           */
 /* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                                                */
@@ -62,6 +62,7 @@
   { Config.log_level = (debug ? debug : LOG_INFO);
     on_exit( Info_stop, NULL );
     openlog( NULL, LOG_CONS | LOG_PID, LOG_USER );
+    Nbr_log_par_min = 0;
   }
 /******************************************************************************************************************************/
 /* Info_init: Initialisation du traitement d'erreur                                                                           */
@@ -70,6 +71,16 @@
  void Info_change_log_level( guint new_log_level )
   { Config.log_level = (new_log_level ? new_log_level : LOG_INFO);
     Info_new( __func__, TRUE, LOG_NOTICE, "log_level set to %d (%s)", Config.log_level, level_to_string[Config.log_level] );
+  }
+/******************************************************************************************************************************/
+/* Info_reset_nbr_log: Reset le nombre de log deja envoyé                                                                     */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Le nombre de message de log dernierement envoyés                                                                   */
+/******************************************************************************************************************************/
+ gint Info_reset_nbr_log ( void )
+  { gint result = Nbr_log_par_min;
+    Nbr_log_par_min = 0;
+    return ( result );
   }
 /******************************************************************************************************************************/
 /* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres                                 */
@@ -87,6 +98,7 @@
        va_start( ap, format );
        vsyslog ( level, chaine, ap );
        va_end ( ap );
+       Nbr_log_par_min++;
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

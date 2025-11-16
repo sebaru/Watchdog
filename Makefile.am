@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Makefile.am          Profil de compilation du projet Watchdog                                          */
-#* Projet Abls-Habitat version 4.5       Gestion d'habitat                           sam 05 avr 2003 19:38:16 CEST */
+#* Projet Abls-Habitat version 4.6       Gestion d'habitat                           sam 05 avr 2003 19:38:16 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 

@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_VISUEL.c             Gestion des visuels                                                             */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                22.03.2017 10:29:53 */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                22.03.2017 10:29:53 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -83,94 +83,161 @@
 /* Dls_data_set_visuel : Gestion du positionnement des visuels en mode dynamique                                              */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_VISUEL ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
-                            gchar *mode, gchar *color, gdouble valeur, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+ void Dls_data_VISUEL_set ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
+                            gdouble valeur, gboolean cligno, gboolean noshow, gboolean disable )
   { if (!visu) return;
-    if (Partage->Thread_run == FALSE) return;
-    if (    strcmp ( visu->mode, mode )
-         || strcmp ( visu->color, color )                     /* On ne peut pas checker le libellé car il peut etre dynamique */
-         || visu->cligno  != cligno
+    if (    visu->cligno  != cligno
          || visu->noshow  != noshow
          || visu->disable != disable
          || visu->valeur  != valeur
        )
-     { g_snprintf( visu->mode,    sizeof(visu->mode), "%s", mode );/* Sinon on recopie ce qui est demandé par le plugin DLS */
-       g_snprintf( visu->color,   sizeof(visu->color), "%s", color );
-       visu->valeur  = valeur;
+     { visu->valeur  = valeur;
        visu->cligno  = cligno;
        visu->noshow  = noshow;
        visu->disable = disable;
-       gchar *libelle_new = Convert_libelle_dynamique ( libelle );
-       g_snprintf( visu->libelle, sizeof(visu->libelle), "%s", libelle_new );
-       g_free(libelle_new);
        visu->changed = TRUE;
        Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s') "
                  "cligno=%d noshow=%d libelle='%s', disable=%d",
                  (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
                   visu->mode, visu->color, visu->valeur, visu->unite, visu->cligno, visu->noshow, visu->libelle, visu->disable );
+       Partage->audit_bit_interne_per_sec++;
      }
-
-    if (visu->changed && (Partage->top >= visu->next_send))
-     { pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );                         /* Ajout dans la liste de i a traiter */
-       Partage->Liste_visuel = g_slist_append( Partage->Liste_visuel, visu );
-       pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
-       visu->changed = FALSE;
-       visu->next_send = Partage->top + 10;
-     }
-    Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_VISUEL_for_CI : Met un jour un visuel accroché a un compteur d'impulsion                                      */
-/* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
+/* Dls_data_VISUEL_set_badge : Gestion du badge d'un visuel                                                                   */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur                                                  */
 /******************************************************************************************************************************/
- void Dls_data_set_VISUEL_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
-                                   gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+ void Dls_data_VISUEL_set_badge ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *badge )
+  { if (!visu) return;
+    if ( badge != visu->badge )                                      /* Comparaison possible car les chaines sont statiques ! */
+     { visu->badge = badge;
+       visu->changed = TRUE;
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> badge='%s'",
+                 (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, badge );
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_VISUEL_set_mode : Gestion du mode d'un visuel                                                                   */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur                                                  */
+/******************************************************************************************************************************/
+ void Dls_data_VISUEL_set_mode ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *mode )
+  { if (!visu) return;
+    if ( mode != visu->mode )                                      /* Comparaison possible car les chaines sont statiques ! */
+     { visu->mode = mode;
+       visu->changed = TRUE;
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s'",
+                 (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, mode );
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_VISUEL_set_color : Gestion du color d'un visuel                                                                   */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur                                                  */
+/******************************************************************************************************************************/
+ void Dls_data_VISUEL_set_color ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *color )
+  { if (!visu) return;
+    if ( color != visu->color )                                      /* Comparaison possible car les chaines sont statiques ! */
+     { visu->color = color;
+       visu->changed = TRUE;
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> color='%s'",
+                 (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, color );
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_VISUEL_set_libelle : Gestion du libelle d'un visuel                                                               */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur                                                  */
+/******************************************************************************************************************************/
+ void Dls_data_VISUEL_set_libelle ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *libelle )
+  { if (!visu) return;
+    if ( libelle != visu->libelle )                                  /* Comparaison possible car les chaines sont statiques ! */
+     { visu->libelle = libelle;
+       visu->changed = TRUE;
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_VISUEL '%s:%s'-> libelle='%s'",
+                 (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, libelle );
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_VISUEL_set_for_AI : Met un jour un visuel accroché a une entrée analogique                                        */
+/* Entrée : le dls en cours, le visuel, le registre et les parametres du visuel                                               */
+/******************************************************************************************************************************/
+ void Dls_data_VISUEL_set_for_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_AI *src,
+                                   gboolean cligno, gboolean noshow, gboolean disable )
+  { if (!visu) return;
+    if (!src) return;
+
+    gboolean in_range = Dls_data_get_AI_inrange( src );
+    gint valeur       = Dls_data_get_AI ( src );
+    g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
+    Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, (in_range ? cligno : TRUE), noshow, disable );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_VISUEL_set_for_CI : Met un jour un visuel accroché a un compteur d'impulsion                                      */
+/* Entrée : le dls en cours, le visuel, le registre et les parametres du visuel                                               */
+/******************************************************************************************************************************/
+ void Dls_data_VISUEL_set_for_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CI *src,
+                                   gboolean cligno, gboolean noshow, gboolean disable )
   { if (!visu) return;
     if (!src) return;
 
     gint valeur   = Dls_data_get_CI ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
-    Dls_data_set_VISUEL ( vars, visu, mode, color, 1.0*valeur, cligno, noshow, libelle, disable );
+    Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, cligno, noshow, disable );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_VISUEL_set_for_CH : Met un jour un visuel accroché a un compteur d'impulsion                                      */
+/* Entrée : le dls en cours, le visuel, le registre et les parametres du visuel                                               */
+/******************************************************************************************************************************/
+ void Dls_data_VISUEL_set_for_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_CH *src,
+                                   gboolean cligno, gboolean noshow, gboolean disable )
+  { if (!visu) return;
+    if (!src) return;
+
+    gint valeur   = Dls_data_get_CH ( src );
+    g_snprintf( visu->unite, sizeof(visu->unite), "s" );
+    Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_visuel_for_registre : Met un jour un visuel accroché a un registre                                            */
-/* Entrée : le dls en cours, le visuel, le registre et les parametre du visuel                                                */
+/* Entrée : le dls en cours, le visuel, le registre et les parametres du visuel                                               */
 /******************************************************************************************************************************/
- void Dls_data_set_VISUEL_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
-                                         gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+ void Dls_data_VISUEL_set_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
+                                         gboolean cligno, gboolean noshow, gboolean disable )
   { if (!visu) return;
     if (!src) return;
 
     gdouble valeur = Dls_data_get_REGISTRE ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
-    Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, noshow, libelle, disable );
+    Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_visuel_for_watchdog : Met un jour un visuel accroché a un watchdog                                            */
-/* Entrée : le dls en cours, le visuel, le watchdog et les parametre du visuel                                                */
+/* Entrée : le dls en cours, le visuel, le watchdog et les parametres du visuel                                               */
 /******************************************************************************************************************************/
- void Dls_data_set_VISUEL_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
-                                         gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+ void Dls_data_VISUEL_set_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
+                                         gboolean cligno, gboolean noshow, gboolean disable )
   { if (!visu) return;
     if (!src) return;
 
     gdouble valeur = Dls_data_get_WATCHDOG_time ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
-    Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, noshow, libelle, disable );
+    Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_visuel_for_tempo : Met un jour un visuel accroché a une temporisation                                         */
-/* Entrée : le dls en cours, le visuel, la temporisation et les parametre du visuel                                           */
+/* Entrée : le dls en cours, le visuel, la temporisation et les parametres du visuel                                          */
 /******************************************************************************************************************************/
- void Dls_data_set_VISUEL_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
-                                      gchar *mode, gchar *color, gboolean cligno, gboolean noshow, gchar *libelle, gboolean disable )
+ void Dls_data_VISUEL_set_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
+                                      gboolean cligno, gboolean noshow, gboolean disable )
   { if (!visu) return;
     if (!src) return;
 
     gdouble valeur = Dls_data_get_TEMPO_time ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
-    Dls_data_set_VISUEL ( vars, visu, mode, color, valeur, cligno, noshow, libelle, disable );
+    Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
 /* Dls_VISUEL_to_json : Formate un bit au format JSON                                                                         */
@@ -188,5 +255,27 @@
     Json_node_add_bool   ( RootNode, "disable",   bit->disable );
     Json_node_add_string ( RootNode, "libelle",   bit->libelle );
     Json_node_add_string ( RootNode, "unite",     bit->unite );
+    Json_node_add_string ( RootNode, "badge",     bit->badge );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_VISUEL_apply: Met à jour les visuels du plugin                                                                    */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_VISUEL_apply ( struct DLS_PLUGIN *plugin )
+  { if (!plugin) return;
+
+    GSList *liste = plugin->Dls_data_VISUEL;
+    while ( liste )
+     { struct DLS_VISUEL *visu = liste->data;
+       if (visu->changed && (Partage->top >= visu->next_send))
+        { pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );                      /* Ajout dans la liste de i a traiter */
+          Partage->Liste_visuel = g_slist_append( Partage->Liste_visuel, visu );
+          pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
+          visu->changed = FALSE;
+          visu->next_send = Partage->top + 10;                                                  /* Next update dans 1 seconde */
+          Partage->audit_bit_interne_per_sec++;
+        }
+       liste = g_slist_next(liste);
+     }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

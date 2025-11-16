@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_MSGxxx.c        Distribution des messages DLS à l'API                                                       */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                    mar. 14 août 2012 19:05:42 CEST */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                    mar. 14 août 2012 19:05:42 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -37,24 +37,30 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- static JsonNode *MSGS_Convert_msg_off_to_histo ( struct DLS_MESSAGE *msg )
-  { gchar chaine[256], date_fin[128];
+ static gchar *MSGS_Get_datetime_usec ( gchar *buffer, gint taille_buffer )
+  { gchar chaine[256];
     struct timeval tv;
-    struct tm *temps;
-
+    struct tm local;
     gettimeofday( &tv, NULL );
-    temps = localtime( (time_t *)&tv.tv_sec );
-    strftime( chaine, sizeof(chaine), "%F %T", temps );
+    localtime_r( (time_t *)&tv.tv_sec, &local );
+    strftime( chaine, sizeof(chaine), "%F %T", &local );
     gchar *date_utf8 = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( date_fin, sizeof(date_fin), "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
-    g_free( date_utf8 );
-
-    JsonNode *histo = Json_node_create ();
+    g_snprintf( buffer, taille_buffer, "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
+    return(buffer);
+  }
+/******************************************************************************************************************************/
+/* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
+ static JsonNode *MSGS_Convert_msg_off_to_histo ( struct DLS_MESSAGE *msg )
+  { JsonNode *histo = Json_node_create ();
     if (histo)
      { Json_node_add_string ( histo, "tech_id",  msg->tech_id );
        Json_node_add_string ( histo, "acronyme", msg->acronyme );
-       Json_node_add_string ( histo, "date_fin", date_fin );
        Json_node_add_bool   ( histo, "alive", FALSE );
+       gchar date_fin[256];
+       MSGS_Get_datetime_usec ( date_fin, sizeof(date_fin) );
+       Json_node_add_string ( histo, "date_fin", date_fin );
      }
     return( histo );
   }
@@ -78,17 +84,9 @@
        if (event->etat == 1)
         { gint rate_limit = Json_get_int ( msg->source_node, "rate_limit" );
           if ( !msg->last_on || (Partage->top >= msg->last_on + rate_limit*10 ) )
-           { gchar chaine[512], date_create[128];
-             struct timeval tv;
-             struct tm *temps;
-             msg->last_on = Partage->top;
-
-             gettimeofday( &tv, NULL );
-             temps = localtime( (time_t *)&tv.tv_sec );
-             strftime( chaine, sizeof(chaine), "%F %T", temps );
-             gchar *date_utf8 = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-             g_snprintf( date_create, sizeof(date_create), "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
-             g_free( date_utf8 );
+           { msg->last_on = Partage->top;
+             gchar date_create[128];
+             MSGS_Get_datetime_usec ( date_create, sizeof(date_create) );            /* Mise à jour de de la date de création */
              Json_node_add_string ( msg->source_node, "date_create", date_create );
 
                                                                                   /* Préparation du nouveau libelle dynamique */

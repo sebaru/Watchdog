@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Mnemonique/Mnemonique.c        Déclaration des fonctions pour la gestion des mnemoniques                         */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                      dim 19 avr 2009 15:15:28 CEST */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                      dim 19 avr 2009 15:15:28 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -56,6 +56,7 @@
                  "%s: Could not add AI %s to API", thread_tech_id, thread_acronyme );
      }
     Json_node_unref ( api_result );
+    Json_node_add_bool ( node, "in_range", FALSE );       /* Ajoute un flag first turn pour envoyer au master des le 1er tour */
     Json_node_add_bool ( node, "need_sync", TRUE );       /* Ajoute un flag first turn pour envoyer au master des le 1er tour */
     Json_array_add_element ( Json_get_array ( module->IOs, "IOs" ), node );
     return(node);

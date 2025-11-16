@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/json.c        Fonctions helper pour la manipulation des payload au format JSON                                   */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                27.06.2019 09:38:40 */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                27.06.2019 09:38:40 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -274,18 +274,18 @@
   { unlink ( filename );
     gint fd = creat ( filename, S_IWUSR | S_IRUSR );
     if (fd<0)
-     { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Creat %s to write Failed: %s", filename, strerror(errno) ); return(FALSE); }
+     { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Create '%s' failed: %s", filename, strerror(errno) ); return(FALSE); }
 
     gchar *buf = Json_node_to_string ( RootNode );
     if (!buf)
      { close(fd);
-       Info_new ( __func__, Config.log_msrv, LOG_ERR, "Json to Buf failed, writing to %s", filename );
+       Info_new ( __func__, Config.log_msrv, LOG_ERR, "Json to Buf failed, writing to '%s'", filename );
        return(FALSE);
      }
     gboolean retour = FALSE;
     gint taille = strlen(buf);
     if (write ( fd, buf, taille ) != taille)
-     { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Error writing %d bytes to %s: %s", taille, filename, strerror(errno) );
+     { Info_new ( __func__, Config.log_msrv, LOG_ERR, "Error writing %d bytes to '%s': %s", taille, filename, strerror(errno) );
        retour = FALSE;
      } else retour = TRUE;
     close(fd);

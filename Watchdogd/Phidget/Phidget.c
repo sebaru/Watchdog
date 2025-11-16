@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Phidget/Phidget.c  Gestion des modules PHIDGET Watchdgo 3.0                                                      */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                                18.03.2021 22:02:42 */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                18.03.2021 22:02:42 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -263,7 +263,7 @@
     canal->attached = FALSE;
   }
 /******************************************************************************************************************************/
-/* Charger_un_IO: Charge une IO dans la librairie                                                                             */
+/* Phidget_set_config: Zpplique la configuration a l'element en pj                                                            */
 /* Entrée: La structure Json representant l'i/o                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -289,11 +289,11 @@
      }
   }
 /******************************************************************************************************************************/
-/* Charger_un_AI: Charge une IO dans la librairie                                                                             */
+/* Phidget_Charger_un_IO: Charge les IO                                                                                       */
 /* Entrée: La structure Json representant l'i/o                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Charger_un_IO (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
+ static void Phidget_Charger_un_IO (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct THREAD *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
     gint serial    = Json_get_int   ( module->config, "serial" );
@@ -416,11 +416,11 @@ error:
     g_free(canal);
   }
 /******************************************************************************************************************************/
-/* Decharger_un_IO: Décharge une IO dans la librairie                                                                         */
+/* Phidget_Decharger_un_IO: Décharge une IO dans la librairie                                                                 */
 /* Entrée: Le canal representant l'i/o                                                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Decharger_un_IO ( struct PHIDGET_ELEMENT *canal )
+ static void Phidget_Decharger_un_IO ( struct PHIDGET_ELEMENT *canal )
   { Phidget_close ( (PhidgetHandle)canal->handle );
     gchar *capteur = Json_get_string( canal->element, "capteur" );
 
@@ -429,14 +429,14 @@ error:
     else if (!strcasecmp(capteur, "1130-PH"))              PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "1130-ORP"))             PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
     else if (!strcasecmp(capteur, "TMP1200_0-PT100-3850")) PhidgetTemperatureSensor_delete( (PhidgetTemperatureSensorHandle *)&canal->handle );
-    else if (!strcasecmp(capteur, "TMP1200_0-PT100-3920")) PhidgetTemperatureSensor_create( (PhidgetTemperatureSensorHandle *)&canal->handle );
-    else if (!strcasecmp(capteur, "AC-CURRENT-10A"))       PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
-    else if (!strcasecmp(capteur, "AC-CURRENT-25A"))       PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
-    else if (!strcasecmp(capteur, "AC-CURRENT-50A"))       PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
-    else if (!strcasecmp(capteur, "AC-CURRENT-100A"))      PhidgetVoltageInput_create     ( (PhidgetVoltageInputHandle *)&canal->handle );
-    else if (!strcasecmp(capteur, "TEMP_1124_0"))          PhidgetVoltageRatioInput_create( (PhidgetVoltageRatioInputHandle *)&canal->handle );
-    else if (!strcasecmp(capteur, "DIGITAL-INPUT"))        PhidgetDigitalInput_create     ( (PhidgetDigitalInputHandle *)&canal->handle );
-    else if (!strcasecmp(capteur, "REL2001_0"))            PhidgetDigitalOutput_create    ( (PhidgetDigitalOutputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "TMP1200_0-PT100-3920")) PhidgetTemperatureSensor_delete( (PhidgetTemperatureSensorHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "AC-CURRENT-10A"))       PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "AC-CURRENT-25A"))       PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "AC-CURRENT-50A"))       PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "AC-CURRENT-100A"))      PhidgetVoltageInput_delete     ( (PhidgetVoltageInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "TEMP_1124_0"))          PhidgetVoltageRatioInput_delete( (PhidgetVoltageRatioInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "DIGITAL-INPUT"))        PhidgetDigitalInput_delete     ( (PhidgetDigitalInputHandle *)&canal->handle );
+    else if (!strcasecmp(capteur, "REL2001_0"))            PhidgetDigitalOutput_delete    ( (PhidgetDigitalOutputHandle *)&canal->handle );
   }
 /******************************************************************************************************************************/
 /* Phidget_SET_DO: Met a jour une sortie TOR en fonction du jsonnode en parametre                                             */
@@ -521,7 +521,7 @@ error:
        Json_node_unref ( RootNode );
      }
 /* Chargement des I/O */
-    Json_node_foreach_array_element ( module->config, "IO", Charger_un_IO, module );
+    Json_node_foreach_array_element ( module->config, "IO", Phidget_Charger_un_IO, module );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
@@ -548,7 +548,7 @@ error:
      }
 
     PhidgetNet_removeServer( hostname );                                                /* Arrete la connexion au hub phidget */
-    g_slist_foreach ( vars->Liste_sensors, (GFunc) Decharger_un_IO, NULL );
+    g_slist_foreach ( vars->Liste_sensors, (GFunc) Phidget_Decharger_un_IO, NULL );
     /*Phidget_finalize(0); non thread_safe apres. */
     g_slist_foreach ( vars->Liste_sensors, (GFunc) g_free, NULL );
     g_slist_free ( vars->Liste_sensors );

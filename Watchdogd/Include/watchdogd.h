@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/watchdogd.h      Déclarations générales watchdog                                                                 */
-/* Projet Abls-Habitat version 4.5       Gestion d'habitat                                      sam 11 avr 2009 12:23:32 CEST */
+/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                      sam 11 avr 2009 12:23:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -132,8 +132,6 @@
  extern void MQTT_Send_to_API ( JsonNode *node, gchar *topic, ... );
                                                                                                                /* Dans mqtt.c */
  extern void MQTT_on_log_CB( struct mosquitto *mosq, void *obj, int level, const char *message );
- extern void MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code );
- extern void MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code );
  extern void MQTT_Subscribe ( struct mosquitto *mqtt_session, gchar *format, ... );
 
  #endif

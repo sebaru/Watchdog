@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Dls.h                  Définitions des constantes programme DLS                                          */
-/* Projet Abls-Habitat version 4.5                                                              sam 09 oct 2004 10:10:32 CEST */
+/* Projet Abls-Habitat version 4.6                                                              sam 09 oct 2004 10:10:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -130,6 +130,7 @@
     struct DLS_AI *sys_tour_per_sec;
     struct DLS_AI *sys_dls_wait;
     struct DLS_AI *sys_maxrss;
+    struct DLS_AI *sys_log_per_min;
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
@@ -208,12 +209,11 @@
                                                                                                      /* Dans The_dls_VISUEL.c */
  extern void Dls_data_VISUEL_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit );
-
+ extern void Dls_data_VISUEL_apply ( struct DLS_PLUGIN *plugin );
                                                                                                     /* Dans The_dls_MESSAGE.c */
  extern void Dls_data_MESSAGE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_data_MESSAGE_free_all ( struct DLS_PLUGIN *plugin );
- extern void Dls_MESSAGE_to_json ( JsonNode *element, struct DLS_MESSAGE *bit );
-
+ extern void Dls_data_MESSAGE_apply ( struct DLS_PLUGIN *plugin );
                                                                                                    /* Dans The_dls_WATCHDOG.c */
  extern void Dls_data_WATCHDOG_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_WATCHDOG_to_json ( JsonNode *element, struct DLS_WATCHDOG *bit );
