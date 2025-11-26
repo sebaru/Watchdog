@@ -100,32 +100,43 @@
     if (reset)
      { if (etat)
         { cpt_h->valeur = 0;
-          cpt_h->etat = FALSE;
+          cpt_h->etat   = FALSE;
+          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "ligne %04d: DLS_CH '%s:%s'=%d resetted",
+                   (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
+          if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                                 /* Si debug, envoi a l'API */
         }
      }
     else if (etat)
      { if ( ! cpt_h->etat )
-        { cpt_h->etat = TRUE;
+        { cpt_h->etat    = TRUE;
           cpt_h->old_top = Partage->top;
+          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "ligne %04d: DLS_CH '%s:%s'=%d is now counting",
+                   (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur, cpt_h->valeur );
+          if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                                 /* Si debug, envoi a l'API */
         }
        else
         { int new_top, delta;
           new_top = Partage->top;
           delta   = new_top - cpt_h->old_top;
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
-           { cpt_h->valeur +=delta;
+           { cpt_h->valeur += delta;
              cpt_h->old_top = new_top;
              if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                              /* Si debug, envoi a l'API */
-
-             Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                       "ligne %04d: Changing DLS_CH '%s:%s'=%d (1/10s)",
-                       (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
              Partage->audit_bit_interne_per_sec++;
            }
         }
      }
-    else
-     { cpt_h->etat = FALSE; }
+    else                                                                                        /* etat = FALSE, cpt_h is off */
+     { if ( cpt_h->etat )
+        { cpt_h->etat = FALSE;
+          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "ligne %04d: DLS_CH '%s:%s'=%d is not counting anymore",
+                   (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
+          if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                                 /* Si debug, envoi a l'API */
+        }
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_CH_export_to_API : Formate un bit au format JSON                                                                       */
