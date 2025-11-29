@@ -290,17 +290,15 @@
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
     gettimeofday( &tv_avant, NULL );
     if (plugin->enable && plugin->go)                                                  /* Si plugin enabled ET fonction go ok */
-     { if(plugin->vars.resetted && plugin->init_visuels)
-        { Info_new( __func__, Config.log_dls, LOG_INFO, "Send '_START' to '%s', and Init_visuel", plugin->tech_id );
-          plugin->init_visuels(&plugin->vars);
-        }
+     { if(plugin->vars.resetted)
+        { Info_new( __func__, Config.log_dls, LOG_INFO, "Send '_START' to '%s'", plugin->tech_id ); }
        plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
      }
-    gettimeofday( &tv_apres, NULL );
-    plugin->conso+=Chrono( &tv_avant, &tv_apres );
     Dls_data_MESSAGE_apply ( plugin );                                             /* Application des nouveaux etats messages */
     Dls_data_VISUEL_apply ( plugin );
     plugin->vars.resetted = FALSE;
+    gettimeofday( &tv_apres, NULL );
+    plugin->conso+=Chrono( &tv_avant, &tv_apres );                                                         /* Ajoute la conso */
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du DLS                                                                                           */

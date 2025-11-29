@@ -237,9 +237,9 @@
        return(FALSE);
      }
 
-    plugin->init_visuels = dlsym( plugin->handle, "init_visuels" );                               /* Recherche de la fonction */
-    if (!plugin->init_visuels)
-     { Info_new( __func__, Config.log_dls, LOG_WARNING, "'%s' does not provide init_visuels function", plugin->tech_id );
+    plugin->init = dlsym( plugin->handle, "Init" );                                          /* Recherche de la fonction Init */
+    if (!plugin->init)
+     { Info_new( __func__, Config.log_dls, LOG_WARNING, "'%s' does not provide init() function", plugin->tech_id );
        dlclose( plugin->handle );
        plugin->handle = NULL;
        return(FALSE);
@@ -451,6 +451,7 @@
      { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
 
     Dls_plugins_remap_all_alias();                                             /* Remap de tous les alias de tous les plugins */
+    if (plugin->init) plugin->init(&plugin->vars);                                     /* Appel de la fonction Init du plugin */
 
 /****************************************** Calcul des Thread_tech_ids de dependances *****************************************/
     if (plugin->Thread_tech_ids) { g_slist_free_full ( plugin->Thread_tech_ids, (GDestroyNotify) g_free ); plugin->Thread_tech_ids = NULL; }
@@ -464,7 +465,7 @@
      }
     g_list_free(Thread_tech_ids);
 
-    pthread_mutex_unlock( &Partage->com_dls.synchro );                                              /* Libératin Verrou D.L.S */
+    pthread_mutex_unlock( &Partage->com_dls.synchro );                                             /* Libération Verrou D.L.S */
 end:
     Json_node_unref(api_result);
     pthread_mutex_lock ( &Nbr_compil_mutex ); /* Decremente le compteur de thread (si fonction appelée en mode pthread_create */
