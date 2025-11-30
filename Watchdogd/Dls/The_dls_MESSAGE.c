@@ -69,8 +69,8 @@
     bit->etat = FALSE;                                    /* A l'init, le message est OFF. Json_get_bool ( element, "etat" ); */
     bit->source_node = json_node_ref ( element );
     bit->last_on = 0;                                            /* A l'init, il n'y a pas de last on (en dixieme de seconde) */
-    Json_node_add_string ( bit->source_node, "libelle_src",
-                           Json_get_string ( bit->source_node, "libelle" ) );            /* Recopie pour conversion dynamique */
+    bit->libelle_is_dynamic = ( g_utf8_strchr( Json_get_string ( element, "libelle" ), -1, '$') ? TRUE : FALSE );
+
     plugin->Dls_data_MESSAGE = g_slist_prepend ( plugin->Dls_data_MESSAGE, bit );
     Info_new( __func__, Config.log_dls, LOG_INFO,
               "Create bit DLS_MESSAGE '%s:%s'=%d", bit->tech_id, bit->acronyme, bit->etat );
@@ -103,11 +103,12 @@
 /******************************************************************************************************************************/
  void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg )
   { if (!msg) return;
-    msg->new_etat = TRUE;                                                                  /* Sauvegarde de l'état du message */
-    if ( msg->etat == TRUE ) return;                                                            /* Si déjà activé, on return; */
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-              "ligne %04d: Changing DLS_MSG '%s:%s'=TRUE", (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme );
-    Partage->audit_bit_interne_per_sec++;
+    if ( msg->etat == FALSE )                                                              /* Si pas encore activé, on le log */
+     { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                 "ligne %04d: Changing DLS_MSG '%s:%s'=TRUE", (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme );
+       Partage->audit_bit_interne_per_sec++;
+     }
+    msg->new_etat = TRUE;                                                         /* Sauvegarde de l'état souhaité du message */
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
@@ -119,38 +120,32 @@
     GSList *liste = plugin->Dls_data_MESSAGE;
     while ( liste )
      { struct DLS_MESSAGE *msg = liste->data;
-
-       if ( msg->etat != msg->new_etat )                                           /* si changement d'etat lors du run plugin */
-        { msg->etat = msg->new_etat;
-          gint typologie = Json_get_int ( msg->source_node, "typologie" );
-          if ( typologie == MSG_NOTIF && msg->etat == TRUE )   /* Si message de notification apparait, on eteint le précédent */
-           { struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
-             if (event)
-              { event->etat = FALSE;                                                                  /* On eteint le message */
-                event->msg  = msg;
-                pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
-                Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
-                pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
-              } else Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_ERR,
-                               "Memory error for MSG'%s:%s' = 0 (etat)", msg->tech_id, msg->acronyme );
+       if ( msg->etat == TRUE && msg->new_etat == FALSE && Json_get_int ( msg->source_node, "typologie" ) == MSG_NOTIF ) { /* no action */ }
+       else if (  (msg->etat != msg->new_etat)                                     /* si changement d'etat lors du run plugin */
+               || (msg->etat && msg->libelle_is_dynamic && msg->next_top_check_libelle <= Partage->top) )
+        { if (msg->libelle_is_dynamic)
+           { gchar *libelle_converted = Convert_libelle_dynamique ( Json_get_string(msg->source_node, "libelle") );
+             g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", libelle_converted );
+             g_free(libelle_converted);
+             msg->next_top_check_libelle = Partage->top + 10;
            }
+          else g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", Json_get_string(msg->source_node, "libelle") );
 
-          if ( !(typologie == MSG_NOTIF && msg->etat == FALSE) )                /* Un message de notification ne s'éteint pas */
-           { struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );        /* sinon, on traite */
-             if (!event)
-              { Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_ERR,
-                         "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
-              }
-             else
-              { event->etat = msg->etat;                                                /* Recopie de l'état dans l'evenement */
-                event->msg  = msg;
-                pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
-                Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
-                pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
-              }
+          struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
+          if (!event)
+           { Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_ERR,
+                      "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
+           }
+          else
+           { event->etat = msg->new_etat;                                               /* Recopie de l'état dans l'evenement */
+             event->msg  = msg;
+             pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                    /* Ajout dans la liste de msg a traiter */
+             Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
+             pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                    /* Ajout dans la liste de msg a traiter */
            }
         }
-       msg->new_etat = FALSE;                                             /* Prepare le prochain calcul avec etat initial à 0 */
+       msg->etat     = msg->new_etat;                                                            /* Sauvegarde du nouvel état */
+       msg->new_etat = FALSE;                                      /* Prepare le prochain calcul avec un new_etat initial à 0 */
        liste = g_slist_next(liste);
      }
   }

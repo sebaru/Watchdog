@@ -81,28 +81,19 @@
        Info_new( __func__, Config.log_msrv, LOG_INFO, "Handle MSG'%s:%s'=%d, Reste a %d a traiter",
                  msg->tech_id, msg->acronyme, event->etat, reste_a_faire );
 
-       if (event->etat == 1)
+       if (event->etat == TRUE)                                                                            /* Passage a  un ? */
         { gint rate_limit = Json_get_int ( msg->source_node, "rate_limit" );
-          if ( !msg->last_on || (Partage->top >= msg->last_on + rate_limit*10 ) )
+          if ( !msg->last_on || (Partage->top >= msg->last_on + rate_limit*10 ) )     /* Si dans les clous du rate_limiting ? */
            { msg->last_on = Partage->top;
              gchar date_create[128];
              MSGS_Get_datetime_usec ( date_create, sizeof(date_create) );            /* Mise à jour de de la date de création */
-             Json_node_add_string ( msg->source_node, "date_create", date_create );
-
-                                                                                  /* Préparation du nouveau libelle dynamique */
-             gchar *libelle_new = Convert_libelle_dynamique ( Json_get_string(msg->source_node, "libelle_src") );
-             Json_node_add_string ( msg->source_node, "libelle", libelle_new );
-             g_free(libelle_new);
-             gchar *tech_id       = Json_get_string ( msg->source_node, "tech_id" );
-             gchar *acronyme      = Json_get_string ( msg->source_node, "acronyme" );
              gchar *dls_shortname = Json_get_string ( msg->source_node, "dls_shortname" );
-             gchar *libelle       = Json_get_string ( msg->source_node, "libelle" );
 /*------------------------------------------------ Envoi vers API ------------------------------------------------------------*/
              JsonNode *MSGNode = Json_node_create();
              if (MSGNode)
-              { Json_node_add_string ( MSGNode, "tech_id", tech_id );
-                Json_node_add_string ( MSGNode, "acronyme", acronyme );
-                Json_node_add_string ( MSGNode, "libelle", libelle );
+              { Json_node_add_string ( MSGNode, "tech_id", msg->tech_id );
+                Json_node_add_string ( MSGNode, "acronyme", msg->acronyme );
+                Json_node_add_string ( MSGNode, "libelle", msg->libelle_converted );
                 Json_node_add_string ( MSGNode, "date_create", date_create );
                 Json_node_add_bool   ( MSGNode, "alive", TRUE );
                 MQTT_Send_to_API ( MSGNode, "DLS_HISTO" );
@@ -115,14 +106,14 @@
              if (notif_chat == TXT_NOTIF_YES)
               { JsonNode *IMSGNode = Json_node_create();
                 if (IMSGNode)
-                 { Json_node_add_string ( IMSGNode, "tech_id", tech_id );
-                   Json_node_add_string ( IMSGNode, "acronyme", acronyme );
+                 { Json_node_add_string ( IMSGNode, "tech_id", msg->tech_id );
+                   Json_node_add_string ( IMSGNode, "acronyme", msg->acronyme );
                    Json_node_add_string ( IMSGNode, "dls_shortname", dls_shortname );
-                   Json_node_add_string ( IMSGNode, "libelle", libelle );
+                   Json_node_add_string ( IMSGNode, "libelle", msg->libelle_converted );
                    MQTT_Send_to_topic ( Partage->MQTT_local_session, IMSGNode, FALSE, "SEND_IMSG" );
                    Json_node_unref ( IMSGNode );
                  }
-                else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send SMS: memory error" );
+                else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send IMSG: memory error" );
               }
 /*---------------------------------------------------- Envoi SMS -------------------------------------------------------------*/
              gint notif_sms = Json_get_int ( msg->source_node, "notif_sms" );
@@ -130,10 +121,10 @@
              if (notif_sms == TXT_NOTIF_YES || notif_sms == TXT_NOTIF_OVH_ONLY)
               { JsonNode *SMSNode = Json_node_create();
                 if (SMSNode)
-                 { Json_node_add_string ( SMSNode, "tech_id", tech_id );
-                   Json_node_add_string ( SMSNode, "acronyme", acronyme );
+                 { Json_node_add_string ( SMSNode, "tech_id", msg->tech_id );
+                   Json_node_add_string ( SMSNode, "acronyme", msg->acronyme );
                    Json_node_add_string ( SMSNode, "dls_shortname", dls_shortname );
-                   Json_node_add_string ( SMSNode, "libelle", libelle );
+                   Json_node_add_string ( SMSNode, "libelle", msg->libelle_converted );
                    Json_node_add_int    ( SMSNode, "notif_sms", notif_sms );
                    MQTT_Send_to_topic ( Partage->MQTT_local_session, SMSNode, FALSE, "SEND_SMS" );
                    Json_node_unref ( SMSNode );
@@ -144,6 +135,7 @@
              gchar *audio_zone_name = Json_get_string ( msg->source_node, "audio_zone_name" );
              if (strcasecmp ( audio_zone_name, "ZD_NONE"))
               { gchar *audio_libelle = Json_get_string ( msg->source_node, "audio_libelle" );
+#warning replace audio_libelle by libelle ?
                 if (strlen(audio_libelle)) AUDIO_Send_to_zone ( audio_zone_name, audio_libelle );
               }
            }

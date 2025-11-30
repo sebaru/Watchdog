@@ -173,9 +173,12 @@
   { JsonNode *source_node;
     gchar   tech_id[32];
     gchar   acronyme[64];
+    gchar   libelle_converted[256];
     gboolean etat;
     gboolean new_etat;
     gint last_on;
+    gboolean libelle_is_dynamic;
+    gint next_top_check_libelle;
   };
 
  struct DLS_REGISTRE
