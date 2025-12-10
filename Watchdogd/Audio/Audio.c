@@ -47,19 +47,22 @@
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Sending '%s'", audio_libelle );
     gchar *language = Json_get_string ( module->config, "language" );
 
-    gchar fichier[256];
-    g_snprintf( fichier, sizeof(fichier), "%s", audio_libelle );
-    g_strcanon ( fichier, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzéèê_", '_' );
+    gchar nom_fichier_brut[256];
+    g_snprintf( nom_fichier_brut, sizeof(nom_fichier_brut), "%s", audio_libelle );
+    g_strcanon ( nom_fichier_brut, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzéèê_", '_' );
+
+    gchar nom_fichier_full[256];
+    g_snprintf( nom_fichier_full, sizeof(nom_fichier_full), "audio/%s.mp3", nom_fichier_brut );
 
     struct stat stat_buf;
-    if (stat(fichier, &stat_buf)==-1)
-     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Creating file audio/%s.mp3", fichier );
-       g_snprintf ( commande, sizeof(commande), "gtts-cli -l %s \"%s\" -o audio/%s.mp3", language, audio_libelle, fichier );
+    if ( stat( nom_fichier_full, &stat_buf )== -1 )
+     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Creating file '%s'", nom_fichier_full );
+       g_snprintf ( commande, sizeof(commande), "gtts-cli -l %s \"%s\" -o %s", language, audio_libelle, nom_fichier_full );
        system(commande);
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Running mpg123 audio/%s.mp3", fichier );
-    g_snprintf ( commande, sizeof(commande), "mpg123 audio/%s.mp3", fichier );
+    Info_new( __func__, module->Thread_debug, LOG_INFO, "Running mpg123 '%s'", nom_fichier_full );
+    g_snprintf ( commande, sizeof(commande), "mpg123 %s", nom_fichier_full );
     system(commande);
 
     Thread_send_comm_to_master ( module, TRUE );
