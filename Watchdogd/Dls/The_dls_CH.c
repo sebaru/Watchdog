@@ -99,11 +99,13 @@
 
     if (reset)
      { if (etat)
-        { cpt_h->valeur = 0;
+        { if (cpt_h->valeur > 0)
+           { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                      "ligne %04d: DLS_CH '%s:%s'=0 resetted",
+                      (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme );
+           }
+          cpt_h->valeur = 0;
           cpt_h->etat   = FALSE;
-          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                    "ligne %04d: DLS_CH '%s:%s'=%d resetted",
-                   (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
           if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                                 /* Si debug, envoi a l'API */
         }
      }
