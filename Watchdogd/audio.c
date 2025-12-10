@@ -41,7 +41,7 @@
        return;
      }
     Json_node_add_string ( AudioNode, "audio_libelle", audio_libelle );
-    struct DLS_DI *bit = Dls_data_lookup_DI ( Json_get_string ( Config.config, "audio_tech_id" ), audio_zone_name );
+    struct DLS_DI *bit = Dls_data_lookup_DI ( Config.audio_tech_id, audio_zone_name );
     Dls_data_set_DI_pulse ( NULL, bit );
     MQTT_Send_to_topic ( Partage->MQTT_local_session, AudioNode, FALSE, "AUDIO_ZONE/%s", audio_zone_name );
     Json_node_unref ( AudioNode );
