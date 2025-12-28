@@ -261,7 +261,7 @@
  extern gint Dls_data_get_CI ( struct DLS_CI *bit );
 
  extern struct DLS_CH *Dls_data_lookup_CH ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *cpt_h, gboolean etat, gint reset );
+ extern void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit, gboolean etat, gint reset );
  extern gint Dls_data_get_CH ( struct DLS_CH *cpt_h );
 
  extern struct DLS_REGISTRE *Dls_data_lookup_REGISTRE ( gchar *tech_id, gchar *acronyme );

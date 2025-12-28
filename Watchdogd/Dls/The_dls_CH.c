@@ -94,49 +94,48 @@
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *cpt_h, gboolean etat, gint reset )
-  { if (!cpt_h) return;
+ void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit, gboolean etat, gint reset )
+  { if (!bit) return;
 
-    if (reset)
-     { if (etat)
-        { if (cpt_h->valeur > 0)
+    if (etat)
+     { if (reset)
+        { if (bit->valeur > 0)
            { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                       "ligne %04d: DLS_CH '%s:%s'=0 resetted",
-                      (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme );
+                      (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme );
+             MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->valeur );                     /* Archivage si besoin */
            }
-          cpt_h->valeur = 0;
-          cpt_h->etat   = FALSE;
-          if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                                 /* Si debug, envoi a l'API */
+          bit->valeur = 0;
+          bit->etat   = FALSE;
+          if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
         }
-     }
-    else if (etat)
-     { if ( ! cpt_h->etat )
-        { cpt_h->etat    = TRUE;
-          cpt_h->old_top = Partage->top;
+       else if ( ! bit->etat )
+        { bit->etat    = TRUE;
+          bit->old_top = Partage->top;
           Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                     "ligne %04d: DLS_CH '%s:%s'=%d is now counting",
-                   (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur, cpt_h->valeur );
-          if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                                 /* Si debug, envoi a l'API */
+                   (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur, bit->valeur );
+          if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
         }
        else
         { int new_top, delta;
           new_top = Partage->top;
-          delta   = new_top - cpt_h->old_top;
+          delta   = new_top - bit->old_top;
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
-           { cpt_h->valeur += delta;
-             cpt_h->old_top = new_top;
-             if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                              /* Si debug, envoi a l'API */
+           { bit->valeur += delta;
+             bit->old_top = new_top;
+             if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                /* Si debug, envoi a l'API */
              Partage->audit_bit_interne_per_sec++;
            }
         }
      }
-    else                                                                                        /* etat = FALSE, cpt_h is off */
-     { if ( cpt_h->etat )
-        { cpt_h->etat = FALSE;
+    else                                                                                          /* etat = FALSE, bit is off */
+     { if ( bit->etat )
+        { bit->etat = FALSE;
           Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                     "ligne %04d: DLS_CH '%s:%s'=%d is not counting anymore",
-                   (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
-          if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                                 /* Si debug, envoi a l'API */
+                   (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
+          if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
         }
      }
   }
