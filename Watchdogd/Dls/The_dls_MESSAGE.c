@@ -139,6 +139,7 @@
     GSList *liste = plugin->Dls_data_MESSAGE;
     while ( liste )
      { struct DLS_MESSAGE *msg = liste->data;
+       gint freeze = Json_get_int ( msg->source_node, "freeze" );
        if ( msg->etat == TRUE && msg->new_etat == FALSE && Json_get_int ( msg->source_node, "typologie" ) == MSG_NOTIF ) { /* no action */ }
        else if ( msg->etat != msg->new_etat)                                       /* si changement d'etat lors du run plugin */
         { msg->etat = msg->new_etat;                                                             /* Sauvegarde du nouvel état */
@@ -147,12 +148,13 @@
            { gchar *libelle_converted = Convert_libelle_dynamique ( libelle_source );
              g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", libelle_converted );
              g_free(libelle_converted);
-             msg->next_top_check_libelle = Partage->top + 20;                                 /* Update toutes les 2 secondes */
+             msg->next_top_check_libelle = Partage->top + freeze;                                              /* Freeze time */
            }
           else g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", libelle_source ); /* Pas de conversion */
           Dls_Add_message_to_master_list ( plugin, msg );
         }
-       else if ( msg->etat && msg->libelle_is_dynamic && msg->next_top_check_libelle <= Partage->top) /* Update periodique du msg dynamique */
+       else if ( msg->etat && msg->libelle_is_dynamic && freeze >=0 &&                  /* Update periodique du msg dynamique */
+                 msg->next_top_check_libelle <= Partage->top)
         { gchar *libelle_converted = Convert_libelle_dynamique ( Json_get_string(msg->source_node, "libelle") );
           gboolean libelle_changed = strcmp ( libelle_converted, msg->libelle_converted );
           if (libelle_changed)
@@ -160,7 +162,7 @@
              Dls_Add_message_to_master_list ( plugin, msg );
            }
           g_free(libelle_converted);
-          msg->next_top_check_libelle = Partage->top + 20;                                    /* Update toutes les 2 secondes */
+          msg->next_top_check_libelle = Partage->top + freeze;                                                 /* freeze time */
         }
        msg->new_etat = FALSE;                                      /* Prepare le prochain calcul avec un new_etat initial à 0 */
        liste = g_slist_next(liste);
