@@ -76,7 +76,6 @@ encore:
        g_snprintf( libelle, sizeof(libelle), "%s", result );                              /* recopie pour prochaine itération */
        goto encore;
      }
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Message parsé final: %s", result );
     return(result);
   }
 /******************************************************************************************************************************/

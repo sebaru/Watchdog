@@ -99,16 +99,13 @@
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_MESSAGE: Emet le message en parametre                                                                         */
+/* Entrée : les plugin vars, le message et l'etat attendu                                                                     */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg )
+ void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gint etat )
   { if (!msg) return;
-    if ( msg->etat == FALSE )                                                              /* Si pas encore activé, on le log */
-     { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                 "ligne %04d: Changing DLS_MSG '%s:%s'=TRUE", (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme );
-       Partage->audit_bit_interne_per_sec++;
-     }
-    msg->new_etat = TRUE;                                                         /* Sauvegarde de l'état souhaité du message */
+    msg->new_etat = etat;                                                         /* Sauvegarde de l'état souhaité du message */
+    msg->new_etat_by_line = vars->num_ligne;                                                 /* Sauvegarde du numéro de ligne */
   }
 /******************************************************************************************************************************/
 /* Dls_Add_message_to_master_list: Ajoute un message dans la liste des messages a traiter par le master                       */
@@ -123,7 +120,7 @@
                 "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
        return;
      }
-    event->etat = msg->etat;                                                            /* Recopie de l'état dans l'evenement */
+    event->etat = msg->new_etat;                                                        /* Recopie de l'état dans l'evenement */
     event->msg  = msg;
     pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                             /* Ajout dans la liste de msg a traiter */
     Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
@@ -140,10 +137,11 @@
     while ( liste )
      { struct DLS_MESSAGE *msg = liste->data;
        gint freeze = Json_get_int ( msg->source_node, "freeze" );
-       if ( msg->etat == TRUE && msg->new_etat == FALSE && Json_get_int ( msg->source_node, "typologie" ) == MSG_NOTIF ) { /* no action */ }
-       else if ( msg->etat != msg->new_etat)                                       /* si changement d'etat lors du run plugin */
-        { msg->etat = msg->new_etat;                                                             /* Sauvegarde du nouvel état */
-          gchar *libelle_source = Json_get_string(msg->source_node, "libelle");
+       if ( msg->etat == TRUE && msg->new_etat == FALSE && Json_get_int ( msg->source_node, "typologie" ) == MSG_NOTIF )
+        { /* no action */
+        }
+       else if ( msg->etat == FALSE && msg->new_etat == TRUE )                     /* si changement d'etat lors du run plugin */
+        { gchar *libelle_source = Json_get_string(msg->source_node, "libelle");
           if (msg->libelle_is_dynamic)                                                     /* Conversion du libelle dynamique */
            { gchar *libelle_converted = Convert_libelle_dynamique ( libelle_source );
              g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", libelle_converted );
@@ -152,8 +150,17 @@
            }
           else g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", libelle_source ); /* Pas de conversion */
           Dls_Add_message_to_master_list ( plugin, msg );
+          Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_DEBUG,
+                    "ligne %04d: Changing DLS_MSG '%s:%s'=TRUE", msg->new_etat_by_line, msg->tech_id, msg->acronyme );
+          Partage->audit_bit_interne_per_sec++;
         }
-       else if ( msg->etat && msg->libelle_is_dynamic && freeze >=0 &&                  /* Update periodique du msg dynamique */
+       else if ( msg->etat == TRUE && msg->new_etat == FALSE )                     /* si changement d'etat lors du run plugin */
+        { Dls_Add_message_to_master_list ( plugin, msg );
+          Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_DEBUG,
+                    "ligne %04d: Changing DLS_MSG '%s:%s'=FALSE", msg->new_etat_by_line, msg->tech_id, msg->acronyme );
+          Partage->audit_bit_interne_per_sec++;
+        }
+       else if ( msg->etat && msg->libelle_is_dynamic && freeze >=0 &&              /* Update periodique du libelle dynamique */
                  msg->next_top_check_libelle <= Partage->top)
         { gchar *libelle_converted = Convert_libelle_dynamique ( Json_get_string(msg->source_node, "libelle") );
           gboolean libelle_changed = strcmp ( libelle_converted, msg->libelle_converted );
@@ -164,7 +171,7 @@
           g_free(libelle_converted);
           msg->next_top_check_libelle = Partage->top + freeze;                                                 /* freeze time */
         }
-       msg->new_etat = FALSE;                                      /* Prepare le prochain calcul avec un new_etat initial à 0 */
+       msg->etat = msg->new_etat;                                                                /* Sauvegarde du nouvel état */
        liste = g_slist_next(liste);
      }
   }

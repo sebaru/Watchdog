@@ -173,12 +173,13 @@
   { JsonNode *source_node;
     gchar   tech_id[32];
     gchar   acronyme[64];
-    gchar   libelle_converted[256];
-    gboolean etat;
-    gboolean new_etat;
-    gint last_on;
-    gboolean libelle_is_dynamic;
-    gint next_top_check_libelle;
+    gchar   libelle_converted[256];                                                      /* Le libelle converti selon les "$" */
+    gboolean etat;                                                                          /* Etat avant execution du plugin */
+    gboolean new_etat;                                                                      /* Etat après execution du plugin */
+    gint new_etat_by_line;                                                    /* Numéro de ligne du dernier changement d'état */
+    gint last_on;                                                                        /* Date du dernier changement d'état */
+    gboolean libelle_is_dynamic;                                                       /* TRUE si le libelle dispose d'un "$" */
+    gint next_top_check_libelle;                        /* Date a laquelle réaliser le prochain controle du libelle dynamique */
   };
 
  struct DLS_REGISTRE
@@ -291,7 +292,7 @@
  extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );
 
  extern struct DLS_MESSAGE *Dls_data_lookup_MESSAGE ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg );
+ extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gint etat );
 
  extern struct DLS_TEMPO *Dls_data_lookup_TEMPO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_TEMPO     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,
