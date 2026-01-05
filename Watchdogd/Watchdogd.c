@@ -243,13 +243,13 @@
         }
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.", pwd->pw_name, pwd->pw_uid );
-    g_snprintf( chaine, sizeof(chaine), "chaine -a -G abls %s", pwd->pw_name );     system ( chaine );
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G abls %s", pwd->pw_name );     system ( chaine );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
-    g_snprintf( chaine, sizeof(chaine), "chaine -a -G audio  %s", pwd->pw_name );   system ( chaine );
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G audio  %s", pwd->pw_name );   system ( chaine );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
-    g_snprintf( chaine, sizeof(chaine), "chaine -a -G dialout %s", pwd->pw_name );  system ( chaine );
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G dialout %s", pwd->pw_name );  system ( chaine );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
-    g_snprintf( chaine, sizeof(chaine), "chaine -a -G gpio %s", pwd->pw_name );     system ( chaine );
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G gpio %s", pwd->pw_name );     system ( chaine );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
 
 /***************************************************** Set_groups *************************************************************/

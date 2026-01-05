@@ -52,7 +52,8 @@
 /* Sortie: aucune                                                                                                             */
 /******************************************************************************************************************************/
  void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat )
-  { if (module->comm_status != etat || module->comm_next_update <= Partage->top)
+  { if (module->MQTT_connected == FALSE) return;                                           /* Si pas de connexion, on return; */
+    if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { MQTT_Send_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
 
        JsonNode *RootNode = Json_node_create();
@@ -118,6 +119,16 @@
  void Thread_loop ( struct THREAD *module )
   { Thread_send_comm_to_master ( module, module->comm_status );
 
+/********************************************* Reconnexion au broker MQTT local ***********************************************/
+    if (module->MQTT_connected == FALSE && module->MQTT_next_top_connect <= Partage->top )        /* tentative de reconnexion */
+     { gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+       Info_new( __func__, module->Thread_debug, LOG_INFO,
+                    "'%s': Retrying MQTT connection to '%s'.",
+                    thread_tech_id, Config.master_hostname );
+       mosquitto_reconnect_async(	module->MQTT_session	);
+       module->MQTT_next_top_connect = Partage->top + THREAD_MQTT_RECONNECT_DELAY;
+     }
+
 /********************************************************* tour par secondes **************************************************/
     if (Partage->top >= module->nbr_tour_top+10)                                                     /* Toutes les 1 secondes */
      { module->nbr_tour_par_sec = module->nbr_tour;
@@ -172,9 +183,10 @@
  static void Thread_MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { struct THREAD *module = obj;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Disconnected with return code %d: %s",
-              thread_tech_id, return_code, mosquitto_connack_string( return_code ) );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Disconnected with return code %d: %s. Retry in %ds.",
+              thread_tech_id, return_code, mosquitto_connack_string( return_code ), THREAD_MQTT_RECONNECT_DELAY/10 );
     module->MQTT_connected = FALSE;
+    module->MQTT_next_top_connect = Partage->top + THREAD_MQTT_RECONNECT_DELAY;
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
@@ -207,14 +219,18 @@
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
     else
      { mosquitto_message_callback_set    ( module->MQTT_session, Thread_MQTT_on_message_CB );
-       mosquitto_reconnect_delay_set     ( module->MQTT_session, 10, 60, TRUE );
+       /*mosquitto_reconnect_delay_set     ( module->MQTT_session, 10, 60, TRUE );*/
        mosquitto_log_callback_set        ( module->MQTT_session, MQTT_on_log_CB );
        mosquitto_connect_callback_set    ( module->MQTT_session, Thread_MQTT_on_connect_CB );
        mosquitto_disconnect_callback_set ( module->MQTT_session, Thread_MQTT_on_disconnect_CB );
        mosquitto_username_pw_set         ( module->MQTT_session, thread_tech_id, NULL );
 
        if ( mosquitto_connect( module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
-        { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT connection to '%s' error.", thread_tech_id, Config.master_hostname ); }
+        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                    "'%s': MQTT connection to '%s' error. Retry in %ds.",
+                    thread_tech_id, Config.master_hostname, THREAD_MQTT_RECONNECT_DELAY/10 );
+          module->MQTT_next_top_connect = Partage->top + THREAD_MQTT_RECONNECT_DELAY;
+        }
      }
 
     if ( mosquitto_loop_start( module->MQTT_session ) != MOSQ_ERR_SUCCESS )

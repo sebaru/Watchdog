@@ -35,6 +35,8 @@
  #include <json-glib/json-glib.h>
  #include <mosquitto.h>
 
+ #define THREAD_MQTT_RECONNECT_DELAY  300
+
  struct THREAD
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
@@ -42,9 +44,10 @@
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
     struct mosquitto *MQTT_session;
-    GSList *MQTT_messages;
-    JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
     gboolean MQTT_connected;                                       /* Report du status de la communication vers le MQTT local */
+    GSList  *MQTT_messages;
+    gint     MQTT_next_top_connect;                                                          /* Date de prochaine reconnexion */
+    JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     JsonNode *ai_nbr_tour_par_sec;                                                                        /* Tour par seconde */

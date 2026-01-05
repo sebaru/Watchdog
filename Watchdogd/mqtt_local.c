@@ -188,7 +188,9 @@ end:
     if (!node) { node = Json_node_create(); free_node = TRUE; }
     gchar *buffer = Json_node_to_string ( node );
     if (buffer)
-     { mosquitto_publish( mqtt_session, NULL, topic, strlen(buffer), buffer, 2, retain );
+     { gint retour = mosquitto_publish( mqtt_session, NULL, topic, strlen(buffer), buffer, 2, retain );
+       if (retour != MOSQ_ERR_SUCCESS)
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when publishing '%s'", mosquitto_strerror ( retour ) ); }
        g_free(buffer);
      }
     if (free_node) Json_node_unref(node);
