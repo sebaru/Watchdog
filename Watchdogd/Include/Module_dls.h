@@ -245,7 +245,6 @@
  extern void     Dls_data_set_AO        ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *bi, gdouble valeur );
  extern gdouble  Dls_data_get_AO        ( struct DLS_AO *bit );
 
-
  extern struct DLS_WATCHDOG *Dls_data_lookup_WATCHDOG ( gchar *tech_id, gchar *acronyme );
  extern gboolean Dls_data_get_WATCHDOG ( struct DLS_WATCHDOG *bit );
  extern gint     Dls_data_get_WATCHDOG_time ( struct DLS_WATCHDOG *bit );
@@ -292,7 +291,7 @@
  extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );
 
  extern struct DLS_MESSAGE *Dls_data_lookup_MESSAGE ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg, gint etat );
+ extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg );
 
  extern struct DLS_TEMPO *Dls_data_lookup_TEMPO ( gchar *tech_id, gchar *acronyme );
  extern void     Dls_data_set_TEMPO     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,

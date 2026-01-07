@@ -392,7 +392,7 @@
        if (mqtt_password) g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "%s", mqtt_password );
                      else g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "nopassword" );
 
-       gchar *audio_tech_id    = Json_get_string ( api_result, "audio_tech_id" );
+       gchar *audio_tech_id      = Json_get_string ( api_result, "audio_tech_id" );
        if (audio_tech_id) g_snprintf( Config.audio_tech_id, sizeof(Config.audio_tech_id), "%s", audio_tech_id );
                      else g_snprintf( Config.audio_tech_id, sizeof(Config.audio_tech_id), "AUDIO" );
 

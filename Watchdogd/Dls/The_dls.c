@@ -284,8 +284,8 @@
                       );
 
 /*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
-   Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok,  bit_comm_module );
-   Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs, !bit_comm_module );
+   if (bit_comm_module) Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok );
+                   else Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs );
 
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
     gettimeofday( &tv_avant, NULL );
