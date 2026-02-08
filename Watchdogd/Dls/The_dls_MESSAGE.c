@@ -139,7 +139,7 @@
        gint freeze = Json_get_int ( msg->source_node, "freeze" );
        if ( msg->etat == TRUE && msg->new_etat == FALSE && Json_get_int ( msg->source_node, "typologie" ) == MSG_NOTIF )
         { /* pas de desactivation msg quand typologie = 0, donc no action */ }
-       if ( msg->etat == TRUE && msg->new_etat == FALSE && Json_get_int ( msg->source_node, "groupe" ) )
+       else if ( msg->etat == TRUE && msg->new_etat == FALSE && Json_get_int ( msg->source_node, "groupe" ) )
         { /* pas de desactivation msg quand dans un groupe, donc no action */ }
        else if ( msg->etat == TRUE && msg->new_etat == FALSE )             /* si le message est désactivé après run du plugin */
         { Dls_Add_message_to_master_list ( plugin, msg );
