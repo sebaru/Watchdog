@@ -254,7 +254,6 @@
     Json_node_add_bool   ( RootNode, "noshow",    bit->noshow );
     Json_node_add_bool   ( RootNode, "disable",   bit->disable );
     Json_node_add_string ( RootNode, "libelle",   bit->libelle );
-    Json_node_add_string ( RootNode, "unite",     bit->unite );
     Json_node_add_string ( RootNode, "badge",     bit->badge );
   }
 /******************************************************************************************************************************/
