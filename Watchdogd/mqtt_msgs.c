@@ -46,6 +46,7 @@
     strftime( chaine, sizeof(chaine), "%F %T", &local );
     gchar *date_utf8 = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
     g_snprintf( buffer, taille_buffer, "%s.%02d", date_utf8, (gint)tv.tv_usec/10000 );
+    g_free(date_utf8);
     return(buffer);
   }
 /******************************************************************************************************************************/
