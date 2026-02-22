@@ -109,7 +109,8 @@
         }
      }
     else
-     { if (reset==0) bit->etat = FALSE; }
+     { if (reset) { /* no action */ }
+       else bit->etat = FALSE; }
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_CI : Recupere la valeur du compteur en parametre                                                              */

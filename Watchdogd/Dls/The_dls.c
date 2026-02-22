@@ -205,6 +205,13 @@
 
          if (result > outputmax->valeur ) result = outputmax->valeur;
     else if (result < outputmin->valeur ) result = outputmin->valeur;
+    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "ligne %04d: Changing DLS_PID for '%s:%s'=> '%s:%s'=%f. Somme_Erreur = %f, Variation_Erreur = %f",
+              (vars ? vars->num_ligne : -1),
+              input->tech_id, input->acronyme,
+              output->tech_id, output->acronyme, result,
+              input->pid_somme_erreurs, variation_erreur
+            );
     Dls_data_set_REGISTRE ( vars, output, result );
   }
 /******************************************************************************************************************************/
@@ -215,7 +222,7 @@
  void Dls_sync_all_output ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
     GSList *liste = plugin->Dls_data_DO;
-    while ( liste )                                                   /* Calcul de la COMM du DLS a partir de ses dependances */
+    while ( liste )                                                                                     /* Pour toutes les DO */
      { struct DLS_DO *bit = liste->data;
        JsonNode *RootNode = Json_node_create ();
        if (RootNode)
@@ -229,7 +236,7 @@
      }
 
     liste = plugin->Dls_data_AO;
-    while ( liste )                                                   /* Calcul de la COMM du DLS a partir de ses dependances */
+    while ( liste )                                                                                     /* Pour toutes les AO */
      { struct DLS_AO *bit = liste->data;
        JsonNode *RootNode = Json_node_create ();
        if (RootNode)

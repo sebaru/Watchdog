@@ -64,7 +64,7 @@
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_CH *Dls_data_lookup_CH ( gchar *tech_id, gchar *acronyme )
+ struct DLS_CH *Dls_data_CH_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -85,7 +85,7 @@
 /* Dls_data_get_CH : Recupere la valeur du compteur en parametre                                                              */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gint Dls_data_get_CH ( struct DLS_CH *cpt_h )
+ gint Dls_data_CH_get ( struct DLS_CH *cpt_h )
   { if (cpt_h) return( cpt_h->valeur );
     return(0);
   }
@@ -94,22 +94,11 @@
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit, gboolean etat, gint reset )
+ void Dls_data_CH_set ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit, gboolean etat )
   { if (!bit) return;
 
     if (etat)
-     { if (reset)
-        { if (bit->valeur > 0)
-           { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                      "ligne %04d: DLS_CH '%s:%s'=0 resetted",
-                      (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme );
-             MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->valeur );                     /* Archivage si besoin */
-           }
-          bit->valeur = 0;
-          bit->etat   = FALSE;
-          if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
-        }
-       else if ( ! bit->etat )
+     { if ( ! bit->etat )                                                                            /* Démarrage du comptage */
         { bit->etat    = TRUE;
           bit->old_top = Partage->top;
           Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
@@ -117,7 +106,7 @@
                    (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur, bit->valeur );
           if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
         }
-       else
+       else                                                                                                       /* Comptage */
         { int new_top, delta;
           new_top = Partage->top;
           delta   = new_top - bit->old_top;
@@ -130,13 +119,30 @@
         }
      }
     else                                                                                          /* etat = FALSE, bit is off */
-     { if ( bit->etat )
+     { if ( bit->etat )                                                                                  /* Arret du comptage */
         { bit->etat = FALSE;
           Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                     "ligne %04d: DLS_CH '%s:%s'=%d is not counting anymore",
                    (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
           if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
         }
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_CH_reset: Reset un compteur d'horaire                                                                             */
+/* Entrée: les DLS_VARS, le bit                                                                                               */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_CH_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit )
+  { if (!bit) return;
+    if (bit->valeur > 0)
+     { MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->valeur );                           /* Archivage si besoin */
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                "ligne %04d: DLS_CH '%s:%s'=%d resetted",
+                (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
+       bit->valeur = 0;
+       bit->etat   = FALSE;
+       if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                      /* Si debug, envoi a l'API */
      }
   }
 /******************************************************************************************************************************/

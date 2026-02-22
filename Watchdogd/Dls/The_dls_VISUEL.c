@@ -58,11 +58,11 @@
               "Create bit DLS_VISUEL '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_VISUEL: Recherche un VISUEL dans les plugins DLS                                                           */
+/* Dls_data_VISUEL_lookup: Recherche un VISUEL dans les plugins DLS                                                           */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme )
+ struct DLS_VISUEL *Dls_data_VISUEL_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -196,7 +196,7 @@
   { if (!visu) return;
     if (!src) return;
 
-    gint valeur   = Dls_data_get_CH ( src );
+    gint valeur   = Dls_data_CH_get ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
     Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, cligno, noshow, disable );
   }

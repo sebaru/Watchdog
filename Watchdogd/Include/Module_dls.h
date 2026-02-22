@@ -260,15 +260,16 @@
  extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat, gint reset );
  extern gint Dls_data_get_CI ( struct DLS_CI *bit );
 
- extern struct DLS_CH *Dls_data_lookup_CH ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit, gboolean etat, gint reset );
- extern gint Dls_data_get_CH ( struct DLS_CH *cpt_h );
+ extern struct DLS_CH *Dls_data_CH_lookup ( gchar *tech_id, gchar *acronyme );
+ extern void Dls_data_CH_set ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit, gboolean etat );
+ extern gint Dls_data_CH_get ( struct DLS_CH *cpt_h );
+ extern void Dls_data_CH_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit );
 
  extern struct DLS_REGISTRE *Dls_data_lookup_REGISTRE ( gchar *tech_id, gchar *acronyme );
  extern void    Dls_data_set_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *reg, gdouble valeur );
  extern gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg );
 
- extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
+ extern struct DLS_VISUEL *Dls_data_VISUEL_lookup ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_VISUEL_set ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
                                    gdouble valeur, gboolean cligno, gboolean noshow, gboolean disable );
  extern void Dls_data_VISUEL_set_badge ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *badge );
