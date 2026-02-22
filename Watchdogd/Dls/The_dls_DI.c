@@ -51,11 +51,11 @@
                bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->archivage );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_DI: Recherche un DI dans les plugins DLS                                                                   */
+/* Dls_data_DI_lookup: Recherche un DI dans les plugins DLS                                                                   */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_DI *Dls_data_lookup_DI ( gchar *tech_id, gchar *acronyme )
+ struct DLS_DI *Dls_data_DI_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -73,26 +73,26 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_DI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Dls_data_DI_get : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_DI ( struct DLS_DI *bit )
+ gboolean Dls_data_DI_get ( struct DLS_DI *bit )
   { if (!bit) return(FALSE);
     return( bit->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_DI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Dls_data_DI_get : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_DI_up ( struct DLS_DI *bit )
+ gboolean Dls_data_DI_get_up ( struct DLS_DI *bit )
   { if (!bit) return(FALSE);
     return( bit->edge_up );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_DI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Dls_data_DI_get : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_DI_down ( struct DLS_DI *bit )
+ gboolean Dls_data_DI_get_down ( struct DLS_DI *bit )
   { if (!bit) return(FALSE);
     return( bit->edge_down );
   }
@@ -100,7 +100,7 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_DI ( struct DLS_DI *bit, gboolean valeur )
+ void Dls_data_DI_set ( struct DLS_DI *bit, gboolean valeur )
   { if (!bit) return;
 
     if (bit->etat != valeur)
@@ -116,21 +116,21 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_DI_pulse: Envoi une impulsion sur une DI                                                                      */
+/* Dls_data_DI_set_pulse: Envoi une impulsion sur une DI                                                                      */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_DI_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit )
+ void Dls_data_DI_set_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit )
   { if (!bit) return;
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bit );
     Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_NOTICE,
               "Mise a un du bit DI '%s:%s' demandée", bit->tech_id, bit->acronyme );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_DI_from_thread_di: Positionne une DI dans DLS depuis une DI 'thread'                                          */
+/* Dls_data_DI_set_from_thread_di: Positionne une DI dans DLS depuis une DI 'thread'                                          */
 /* Entrées: la structure JSON                                                                                                 */
 /* Sortie : TRUE si OK, sinon FALSE                                                                                           */
 /******************************************************************************************************************************/
- gboolean Dls_data_set_DI_from_thread_di ( JsonNode *request )
+ gboolean Dls_data_DI_set_from_thread_di ( JsonNode *request )
   { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
            Json_has_member ( request, "etat" )
           )
@@ -146,7 +146,7 @@
        acronyme = Json_get_string ( request, "acronyme" );
      }
 
-    struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
+    struct DLS_DI *bit = Dls_data_DI_lookup ( tech_id, acronyme );
     if (!bit)
      { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_DI from '%s': '%s:%s'/'%s:%s' not found",
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
@@ -156,7 +156,7 @@
     Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI from '%s': '%s:%s'/'%s:%s'=%d (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_bool ( request, "etat" ), bit->libelle );
-    Dls_data_set_DI ( bit, Json_get_bool ( request, "etat" ) );
+    Dls_data_DI_set ( bit, Json_get_bool ( request, "etat" ) );
     return(TRUE);
   }
 /******************************************************************************************************************************/

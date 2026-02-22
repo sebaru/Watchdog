@@ -78,26 +78,26 @@
      { if (!tokens[2]) goto end; /* L'acronyme */
        Json_node_add_string ( request, "thread_tech_id", tokens[1] );
        Json_node_add_string ( request, "thread_acronyme", tokens[2] );
-       Dls_data_set_AI_from_thread_ai ( request );
+       Dls_data_AI_set_from_thread_ai ( request );
      }
     else if ( !strcmp ( topic, "SET_DI" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
        Json_node_add_string ( request, "thread_tech_id", tokens[1] );
        Json_node_add_string ( request, "thread_acronyme", tokens[2] );
-       Dls_data_set_DI_from_thread_di ( request );
+       Dls_data_DI_set_from_thread_di ( request );
      }
     else if ( !strcmp ( topic, "SET_WATCHDOG" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
        Json_node_add_string ( request, "thread_tech_id", tokens[1] );
        Json_node_add_string ( request, "thread_acronyme", tokens[2] );
-       Dls_data_set_WATCHDOG_from_thread_watchdog ( request );
+       Dls_data_WATCHDOG_set_from_thread_watchdog ( request );
      }
     else if ( !strcmp ( topic, "SET_DI_PULSE" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
        gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
        Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI_PULSE from '%s': '%s:%s'=PULSE", thread_tech_id, tokens[1], tokens[2] );
-       struct DLS_DI *bit = Dls_data_lookup_DI ( tokens[1], tokens[2] );
-       Dls_data_set_DI_pulse ( NULL, bit );
+       struct DLS_DI *bit = Dls_data_DI_lookup ( tokens[1], tokens[2] );
+       Dls_data_DI_set_pulse ( NULL, bit );
      }
     else if ( !strcmp ( topic, "SET_BUS" ) )
      { gchar *commande = Json_get_string ( request, "commande" );

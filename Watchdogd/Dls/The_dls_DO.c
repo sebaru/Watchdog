@@ -60,11 +60,11 @@
                bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->mono, bit->archivage );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_DO: Recherche un DO dans les plugins DLS                                                                   */
+/* Dls_data_DO_lookup: Recherche un DO dans les plugins DLS                                                                   */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_DO *Dls_data_lookup_DO ( gchar *tech_id, gchar *acronyme )
+ struct DLS_DO *Dls_data_DO_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -82,18 +82,18 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_DO: Remonte l'etat d'une sortie tor                                                                           */
+/* Dls_data_DO_get: Remonte l'etat d'une sortie tor                                                                           */
 /* Sortie : TRUE sur la sortie est UP                                                                                         */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_DO ( struct DLS_DO *dout )
+ gboolean Dls_data_DO_get ( struct DLS_DO *dout )
   { if (!dout) return(FALSE);
     return( dout->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_DO: Positionne une bit de sortie TOR                                                                          */
+/* Dls_data_DO_set: Positionne une bit de sortie TOR                                                                          */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_DO ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *dout, gboolean etat )
+ void Dls_data_DO_set ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *dout, gboolean etat )
   { if (!dout) return;
     if (dout->etat == etat) return;
     dout->etat = etat;
@@ -130,7 +130,7 @@
 /* Dls_data_get_bool_up: Remonte le front montant d'un boolean                                                                */
 /* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_DO_up ( struct DLS_DO *dout )
+ gboolean Dls_data_DO_get_up ( struct DLS_DO *dout )
   { if (!dout) return(FALSE);
     return( dout->edge_up );
   }
@@ -138,7 +138,7 @@
 /* Dls_data_get_bool_down: Remonte le front descendant d'un boolean                                                           */
 /* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_DO_down ( struct DLS_DO *dout )
+ gboolean Dls_data_DO_get_down ( struct DLS_DO *dout )
   { if (!dout) return(FALSE);
     return( dout->edge_down );
   }

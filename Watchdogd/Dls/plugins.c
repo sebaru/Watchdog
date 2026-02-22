@@ -277,41 +277,41 @@
        else Info_new( __func__, Config.log_dls, LOG_ERR, "Remapping Alias for '%s' Failed", plugin->tech_id );
 
        if (!strcasecmp ( plugin->tech_id, "SYS" ) )                         /* Mapping des bits internes pour le plugin "SYS" */
-        { Partage->com_dls.sys_flipflop_5hz        = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_5HZ" );
-          Partage->com_dls.sys_flipflop_2hz        = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2HZ" );
-          Partage->com_dls.sys_flipflop_1sec       = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_1SEC" );
-          Partage->com_dls.sys_flipflop_2sec       = Dls_data_lookup_BI   ( "SYS", "FLIPFLOP_2SEC" );
-          Partage->com_dls.sys_mqtt_connected      = Dls_data_lookup_BI   ( "SYS", "MQTT_CONNECTED" );
-          Partage->com_dls.sys_top_5hz             = Dls_data_lookup_MONO ( "SYS", "TOP_5HZ" );
-          Partage->com_dls.sys_top_2hz             = Dls_data_lookup_MONO ( "SYS", "TOP_2HZ" );
-          Partage->com_dls.sys_top_1sec            = Dls_data_lookup_MONO ( "SYS", "TOP_1SEC" );
-          Partage->com_dls.sys_top_5sec            = Dls_data_lookup_MONO ( "SYS", "TOP_5SEC" );
-          Partage->com_dls.sys_top_10sec           = Dls_data_lookup_MONO ( "SYS", "TOP_10SEC" );
-          Partage->com_dls.sys_top_1min            = Dls_data_lookup_MONO ( "SYS", "TOP_1MIN" );
-          Partage->com_dls.sys_bit_per_sec         = Dls_data_lookup_AI   ( "SYS", "DLS_BIT_PER_SEC" );
-          Partage->com_dls.sys_tour_per_sec        = Dls_data_lookup_AI   ( "SYS", "DLS_TOUR_PER_SEC" );
-          Partage->com_dls.sys_dls_wait            = Dls_data_lookup_AI   ( "SYS", "DLS_WAIT" );
-          Partage->com_dls.sys_maxrss              = Dls_data_lookup_AI   ( "SYS", "MAXRSS" );
-          Partage->com_dls.sys_log_per_min         = Dls_data_lookup_AI   ( "SYS", "LOG_PER_MIN" );
+        { Partage->com_dls.sys_flipflop_5hz        = Dls_data_BI_lookup   ( "SYS", "FLIPFLOP_5HZ" );
+          Partage->com_dls.sys_flipflop_2hz        = Dls_data_BI_lookup   ( "SYS", "FLIPFLOP_2HZ" );
+          Partage->com_dls.sys_flipflop_1sec       = Dls_data_BI_lookup   ( "SYS", "FLIPFLOP_1SEC" );
+          Partage->com_dls.sys_flipflop_2sec       = Dls_data_BI_lookup   ( "SYS", "FLIPFLOP_2SEC" );
+          Partage->com_dls.sys_mqtt_connected      = Dls_data_BI_lookup   ( "SYS", "MQTT_CONNECTED" );
+          Partage->com_dls.sys_top_5hz             = Dls_data_MONO_lookup ( "SYS", "TOP_5HZ" );
+          Partage->com_dls.sys_top_2hz             = Dls_data_MONO_lookup ( "SYS", "TOP_2HZ" );
+          Partage->com_dls.sys_top_1sec            = Dls_data_MONO_lookup ( "SYS", "TOP_1SEC" );
+          Partage->com_dls.sys_top_5sec            = Dls_data_MONO_lookup ( "SYS", "TOP_5SEC" );
+          Partage->com_dls.sys_top_10sec           = Dls_data_MONO_lookup ( "SYS", "TOP_10SEC" );
+          Partage->com_dls.sys_top_1min            = Dls_data_MONO_lookup ( "SYS", "TOP_1MIN" );
+          Partage->com_dls.sys_bit_per_sec         = Dls_data_AI_lookup   ( "SYS", "DLS_BIT_PER_SEC" );
+          Partage->com_dls.sys_tour_per_sec        = Dls_data_AI_lookup   ( "SYS", "DLS_TOUR_PER_SEC" );
+          Partage->com_dls.sys_dls_wait            = Dls_data_AI_lookup   ( "SYS", "DLS_WAIT" );
+          Partage->com_dls.sys_maxrss              = Dls_data_AI_lookup   ( "SYS", "MAXRSS" );
+          Partage->com_dls.sys_log_per_min         = Dls_data_AI_lookup   ( "SYS", "LOG_PER_MIN" );
         }
 
-       plugin->vars.dls_osyn_acquit             = Dls_data_lookup_DI   ( plugin->tech_id, "OSYN_ACQUIT" );
-       plugin->vars.dls_comm                    = Dls_data_lookup_MONO ( plugin->tech_id, "COMM" );
-       plugin->vars.dls_memsa_ok                = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_OK" );
-       plugin->vars.dls_memsa_defaut            = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT" );
-       plugin->vars.dls_memsa_defaut_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_DEFAUT_FIXE" );
-       plugin->vars.dls_memsa_alarme            = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME" );
-       plugin->vars.dls_memsa_alarme_fixe       = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSA_ALARME_FIXE" );
-       plugin->vars.dls_memssb_veille           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_VEILLE" );
-       plugin->vars.dls_memssb_alerte           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE" );
-       plugin->vars.dls_memssb_alerte_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSB_ALERTE_FIXE" );
-       plugin->vars.dls_memssp_ok               = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_OK" );
-       plugin->vars.dls_memssp_derangement      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT" );
-       plugin->vars.dls_memssp_derangement_fixe = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DERANGEMENT_FIXE" );
-       plugin->vars.dls_memssp_danger           = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER" );
-       plugin->vars.dls_memssp_danger_fixe      = Dls_data_lookup_MONO ( plugin->tech_id, "MEMSSP_DANGER_FIXE" );
-       plugin->vars.dls_msg_comm_ok             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_OK" );
-       plugin->vars.dls_msg_comm_hs             = Dls_data_lookup_MESSAGE ( plugin->tech_id, "MSG_COMM_HS" );
+       plugin->vars.dls_osyn_acquit             = Dls_data_DI_lookup   ( plugin->tech_id, "OSYN_ACQUIT" );
+       plugin->vars.dls_comm                    = Dls_data_MONO_lookup ( plugin->tech_id, "COMM" );
+       plugin->vars.dls_memsa_ok                = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSA_OK" );
+       plugin->vars.dls_memsa_defaut            = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSA_DEFAUT" );
+       plugin->vars.dls_memsa_defaut_fixe       = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSA_DEFAUT_FIXE" );
+       plugin->vars.dls_memsa_alarme            = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSA_ALARME" );
+       plugin->vars.dls_memsa_alarme_fixe       = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSA_ALARME_FIXE" );
+       plugin->vars.dls_memssb_veille           = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSSB_VEILLE" );
+       plugin->vars.dls_memssb_alerte           = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSSB_ALERTE" );
+       plugin->vars.dls_memssb_alerte_fixe      = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSSB_ALERTE_FIXE" );
+       plugin->vars.dls_memssp_ok               = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSSP_OK" );
+       plugin->vars.dls_memssp_derangement      = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSSP_DERANGEMENT" );
+       plugin->vars.dls_memssp_derangement_fixe = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSSP_DERANGEMENT_FIXE" );
+       plugin->vars.dls_memssp_danger           = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSSP_DANGER" );
+       plugin->vars.dls_memssp_danger_fixe      = Dls_data_MONO_lookup ( plugin->tech_id, "MEMSSP_DANGER_FIXE" );
+       plugin->vars.dls_msg_comm_ok             = Dls_data_MESSAGE_lookup ( plugin->tech_id, "MSG_COMM_OK" );
+       plugin->vars.dls_msg_comm_hs             = Dls_data_MESSAGE_lookup ( plugin->tech_id, "MSG_COMM_HS" );
 
        liste = g_slist_next(liste);
      }
@@ -613,7 +613,7 @@ end:
      }
 
     Info_new( __func__, plugin->vars.debug, LOG_NOTICE, "'%s' acquitté ('%s')", plugin->tech_id, plugin->shortname );
-    struct DLS_DI *bit = Dls_data_lookup_DI ( plugin->tech_id, "OSYN_ACQUIT" );
-    Dls_data_set_DI_pulse ( &plugin->vars, bit );
+    struct DLS_DI *bit = Dls_data_DI_lookup ( plugin->tech_id, "OSYN_ACQUIT" );
+    Dls_data_DI_set_pulse ( &plugin->vars, bit );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

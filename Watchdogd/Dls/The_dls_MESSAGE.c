@@ -76,11 +76,11 @@
               "Create bit DLS_MESSAGE '%s:%s'=%d", bit->tech_id, bit->acronyme, bit->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_MESSAGE: Recherche un MESSAGE dans les plugins DLS                                                         */
+/* Dls_data_MESSAGE_lookup: Recherche un MESSAGE dans les plugins DLS                                                         */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_MESSAGE *Dls_data_lookup_MESSAGE ( gchar *tech_id, gchar *acronyme )
+ struct DLS_MESSAGE *Dls_data_MESSAGE_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -98,11 +98,11 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_MESSAGE: Emet le message en parametre                                                                         */
+/* Dls_data_MESSAGE_set: Emet le message en parametre                                                                         */
 /* Entrée : les plugin vars, le message                                                                                       */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg )
+ void Dls_data_MESSAGE_set ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg )
   { if (!msg) return;
     msg->new_etat = TRUE;                                                         /* Sauvegarde de l'état souhaité du message */
     msg->new_etat_by_line = vars->num_ligne;                                                 /* Sauvegarde du numéro de ligne */

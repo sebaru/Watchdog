@@ -61,10 +61,10 @@
               "Create bit DLS_CI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_CI : Recherche un CH dans les plugins DLS                                                                  */
+/* Dls_data_CI_lookup : Recherche un CH dans les plugins DLS                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- struct DLS_CI *Dls_data_lookup_CI ( gchar *tech_id, gchar *acronyme )
+ struct DLS_CI *Dls_data_CI_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -82,41 +82,46 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_CI: Positionne un compteur d'impulsion                                                                        */
+/* Dls_data_CI_set: Positionne un compteur d'impulsion                                                                        */
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat, gint reset )
+ void Dls_data_CI_set ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat )
   { if (!bit) return;
     if (etat)
-     { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
-        { if (bit->valeur!=0)
-           { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                      "ligne %04d: DLS_CI '%s:%s'=0 resetted",
-                      (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme );
-             MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->valeur );                     /* Archivage si besoin */
-             bit->valeur = 0;                                                                    /* Valeur réelle du compteur */
-           }
-        }
-       else if ( bit->etat == FALSE )                                                                     /* Passage en actif */
+     { if ( bit->etat == FALSE )                                                                          /* Passage en actif */
         { bit->etat = TRUE;
           Partage->audit_bit_interne_per_sec++;
           bit->valeur++;
           Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                     "ligne %04d: Changing DLS_CI '%s:%s'=%d",
                     (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
-          if (vars && vars->debug) Dls_CI_export_to_API ( bit );                               /* Si debug, envoi à l'API */
+          if (vars && vars->debug) Dls_CI_export_to_API ( bit );                                   /* Si debug, envoi à l'API */
         }
      }
     else
-     { if (reset) { /* no action */ }
-       else bit->etat = FALSE; }
+     { bit->etat = FALSE; }
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_CI : Recupere la valeur du compteur en parametre                                                              */
+/* Dls_data_CI_reset: Reset un compteur d'impulsion                                                                           */
+/* Entrée: le DLS_VARS et le compteur                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_CI_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit )
+  { if (!bit) return;
+    if (bit->valeur!=0)
+     { MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->valeur );                           /* Archivage si besoin */
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                "ligne %04d: DLS_CI '%s:%s'=%d resetted",
+                (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
+       bit->valeur = 0;                                                                          /* Valeur réelle du compteur */
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_CI_get : Recupere la valeur du compteur en parametre                                                              */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gint Dls_data_get_CI ( struct DLS_CI *cpt_imp )
+ gint Dls_data_CI_get ( struct DLS_CI *cpt_imp )
   { if (!cpt_imp) return(0);
     return( cpt_imp->valeur );
   }

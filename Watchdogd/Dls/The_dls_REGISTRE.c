@@ -60,11 +60,11 @@
               "Create bit DLS_REGISTRE '%s:%s'=%f (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_REGISTRE: Recherche un REGISTRE dans les plugins DLS                                                       */
+/* Dls_data_REGISTRE_lookup: Recherche un REGISTRE dans les plugins DLS                                                       */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_REGISTRE *Dls_data_lookup_REGISTRE ( gchar *tech_id, gchar *acronyme )
+ struct DLS_REGISTRE *Dls_data_REGISTRE_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -82,10 +82,10 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_REGISTRE: Positionne un registre                                                                              */
+/* Dls_data_REGISTRE_set: Positionne un registre                                                                              */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *registre, gdouble valeur )
+ void Dls_data_REGISTRE_set ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *registre, gdouble valeur )
   { if (!registre) return;
     if (valeur != registre->valeur)
      { registre->valeur = valeur;
@@ -97,10 +97,10 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_REGISTRE: Remonte la valeur d'un registre                                                                     */
+/* Dls_data_REGISTRE_get: Remonte la valeur d'un registre                                                                     */
 /* Sortie : la valeur double du registre                                                                                      */
 /******************************************************************************************************************************/
- gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg )
+ gdouble Dls_data_REGISTRE_get ( struct DLS_REGISTRE *reg )
   { if (!reg) return(0.0);
     return( reg->valeur );
   }

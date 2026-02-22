@@ -60,10 +60,10 @@
                bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle, bit->archivage );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_AO : Recherche un CH dans les plugins DLS                                                                  */
+/* Dls_data_AO_lookup : Recherche un CH dans les plugins DLS                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- struct DLS_AO *Dls_data_lookup_AO ( gchar *tech_id, gchar *acronyme )
+ struct DLS_AO *Dls_data_AO_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -81,10 +81,10 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_AO : Recupere la valeur de l'AO en parametre                                                                  */
+/* Dls_data_AO_get : Recupere la valeur de l'AO en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gdouble Dls_data_get_AO ( struct DLS_AO *ao )
+ gdouble Dls_data_AO_get ( struct DLS_AO *ao )
   { if (!ao) return(0.0);
     return( ao->valeur );
   }
@@ -92,7 +92,7 @@
 /* Met à jour la sortie analogique à partir de sa valeur avant mise a l'echelle                                               */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AO ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *bit, gdouble valeur )
+ void Dls_data_AO_set ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *bit, gdouble valeur )
   { if (!bit) return;
     if (bit->valeur == valeur) return;
     bit->valeur = valeur;                                                           /* Archive au mieux toutes les 5 secondes */

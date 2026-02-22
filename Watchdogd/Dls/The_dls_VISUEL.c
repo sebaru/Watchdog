@@ -169,8 +169,8 @@
   { if (!visu) return;
     if (!src) return;
 
-    gboolean in_range = Dls_data_get_AI_inrange( src );
-    gint valeur       = Dls_data_get_AI ( src );
+    gboolean in_range = Dls_data_AI_get_inrange( src );
+    gint valeur       = Dls_data_AI_get ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
     Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, (in_range ? cligno : TRUE), noshow, disable );
   }
@@ -183,7 +183,7 @@
   { if (!visu) return;
     if (!src) return;
 
-    gint valeur   = Dls_data_get_CI ( src );
+    gint valeur   = Dls_data_CI_get ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
     Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, cligno, noshow, disable );
   }
@@ -209,7 +209,7 @@
   { if (!visu) return;
     if (!src) return;
 
-    gdouble valeur = Dls_data_get_REGISTRE ( src );
+    gdouble valeur = Dls_data_REGISTRE_get ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
     Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
@@ -222,7 +222,7 @@
   { if (!visu) return;
     if (!src) return;
 
-    gdouble valeur = Dls_data_get_WATCHDOG_time ( src );
+    gdouble valeur = Dls_data_WATCHDOG_get_time ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
     Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
@@ -235,7 +235,7 @@
   { if (!visu) return;
     if (!src) return;
 
-    gdouble valeur = Dls_data_get_TEMPO_time ( src );
+    gdouble valeur = Dls_data_TEMPO_get_time ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
     Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
