@@ -98,7 +98,7 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_BI_get: Remonte l'etat d'un bistable                                                                             */
+/* Dls_data_BI_get: Remonte l'etat d'un bistable                                                                              */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
  gboolean Dls_data_BI_get ( struct DLS_BI *bi )
@@ -106,16 +106,16 @@
     return( bi->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bi_up: Remonte le front montant d'un boolean                                                                    */
-/* Sortie : TRUE sur le boolean vient de passer à UP                                                                            */
+/* Dls_data_BI_get_up: Remonte le front montant d'un boolean                                                                  */
+/* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
 /******************************************************************************************************************************/
  gboolean Dls_data_BI_get_up ( struct DLS_BI *bi )
   { if (!bi) return(FALSE);
     return( bi->edge_up );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bi_down: Remonte le front descendant d'un boolean                                                               */
-/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                          */
+/* Dls_data_BI_get_down: Remonte le front descendant d'un boolean                                                             */
+/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
 /******************************************************************************************************************************/
  gboolean Dls_data_BI_get_down ( struct DLS_BI *bi )
   { if (!bi) return(FALSE);

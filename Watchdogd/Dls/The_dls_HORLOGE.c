@@ -78,10 +78,10 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_HORLOGE : Recupere la valeur de l'horloge en parametre                                                        */
+/* Dls_data_HORLOGE_get : Recupere la valeur de l'horloge en parametre                                                        */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit )
+ gboolean Dls_data_HORLOGE_get ( struct DLS_HORLOGE *bit )
   { if (!bit) return(FALSE);
     gboolean found = FALSE;
     GSList *Horloges = Partage->com_dls.HORLOGE_actives;
@@ -93,10 +93,10 @@
     return(found);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_HORLOGE : Active une horloge                                                                                  */
+/* Dls_data_HORLOGE_clear : Reset les horloges                                                                                */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_HOROGE_clear ()
+ void Dls_data_HORLOGE_clear ()
   { if (Partage->com_dls.HORLOGE_actives)
      { g_slist_free ( Partage->com_dls.HORLOGE_actives );
        Partage->com_dls.HORLOGE_actives = NULL;

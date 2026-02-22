@@ -313,7 +313,7 @@
     else
      { gboolean etat = Json_get_bool ( msg, "etat" );
        pthread_mutex_lock ( &module->synchro );
-       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': SET_DO '%s:%s'/'%s:%s'=%d",
+       Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': SET_DO '%s:%s'/'%s:%s'=%d",
                  thread_tech_id, msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
        if (etat)
         { if (!strcasecmp(msg_thread_acronyme, "LOAD_OFF"))        Onduleur_set_instcmd ( module, "load.off" );

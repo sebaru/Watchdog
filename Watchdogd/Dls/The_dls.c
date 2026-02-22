@@ -406,7 +406,7 @@
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
 
-       Dls_data_HOROGE_clear();
+       Dls_data_HOROLGE_clear();
        Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_5hz,   FALSE );                     /* RaZ des Mono du plugin 'SYS' */
        Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_2hz,   FALSE );
        Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_1sec,  FALSE );

@@ -124,7 +124,7 @@
 
     struct DLS_AI *bit = Dls_data_AI_lookup ( tech_id, acronyme );
     if (!bit)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_AI '%s:%s'/'%s:%s' not found",
+     { Info_new( __func__, Config.log_bus, LOG_DEBUG, "SET_AI '%s:%s'/'%s:%s' not found",
                  thread_tech_id, thread_acronyme, tech_id, acronyme );
        return(FALSE);
      }

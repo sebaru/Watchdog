@@ -106,7 +106,7 @@
     return( (Partage->top < bit->top ? (bit->top - Partage->top) : 0) );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_WATHDOG_from_thread_watchdog: Positionne un Watchdog dans DLS depuis un Watchdog 'thread'                     */
+/* Dls_data_WATCHDOG_set_from_thread_watchdog: Positionne un Watchdog dans DLS depuis un Watchdog 'thread'                    */
 /* Entrées: la structure JSON                                                                                                 */
 /* Sortie : TRUE si OK, sinon FALSE                                                                                           */
 /******************************************************************************************************************************/

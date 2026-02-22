@@ -127,7 +127,7 @@
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bool_up: Remonte le front montant d'un boolean                                                                */
+/* Dls_data_DO_get_up: Remonte le front montant d'un boolean                                                                  */
 /* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
 /******************************************************************************************************************************/
  gboolean Dls_data_DO_get_up ( struct DLS_DO *dout )
@@ -135,7 +135,7 @@
     return( dout->edge_up );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bool_down: Remonte le front descendant d'un boolean                                                           */
+/* Dls_data_DO_get_down: Remonte le front descendant d'un boolean                                                             */
 /* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
 /******************************************************************************************************************************/
  gboolean Dls_data_DO_get_down ( struct DLS_DO *dout )

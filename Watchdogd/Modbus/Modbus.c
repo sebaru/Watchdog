@@ -71,7 +71,7 @@
        for (gint num=0; num<vars->nbr_sortie_tor; num++)
         { if ( vars->DO && vars->DO[num] &&
                !strcasecmp ( Json_get_string(vars->DO[num], "thread_acronyme"), msg_thread_acronyme ) )
-           { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
+           { Info_new( __func__, module->Thread_debug, LOG_INFO, "SET_DO '%s:%s'/'%s:%s'=%d",
                        msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
              Json_node_add_bool ( vars->DO[num], "etat", etat );
              break;

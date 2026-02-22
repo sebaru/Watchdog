@@ -80,7 +80,7 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_visuel : Gestion du positionnement des visuels en mode dynamique                                              */
+/* Dls_data_VISUEL_set : Gestion du positionnement des visuels en mode dynamique                                              */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
  void Dls_data_VISUEL_set ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
@@ -201,7 +201,7 @@
     Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_visuel_for_registre : Met un jour un visuel accroché a un registre                                            */
+/* Dls_data_VISUEL_set_for_REGISTRE : Met un jour un visuel accroché a un registre                                            */
 /* Entrée : le dls en cours, le visuel, le registre et les parametres du visuel                                               */
 /******************************************************************************************************************************/
  void Dls_data_VISUEL_set_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
@@ -214,7 +214,7 @@
     Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_visuel_for_watchdog : Met un jour un visuel accroché a un watchdog                                            */
+/* Dls_data_VISUEL_set_for_WATCHDOG : Met un jour un visuel accroché a un watchdog                                            */
 /* Entrée : le dls en cours, le visuel, le watchdog et les parametres du visuel                                               */
 /******************************************************************************************************************************/
  void Dls_data_VISUEL_set_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
@@ -227,7 +227,7 @@
     Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_visuel_for_tempo : Met un jour un visuel accroché a une temporisation                                         */
+/* Dls_data_VISUEL_set_for_TEMPO : Met un jour un visuel accroché a une temporisation                                         */
 /* Entrée : le dls en cours, le visuel, la temporisation et les parametres du visuel                                          */
 /******************************************************************************************************************************/
  void Dls_data_VISUEL_set_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,

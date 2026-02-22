@@ -116,7 +116,7 @@
     return( mono->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_mono_up: Remonte le front montant d'un boolean                                                                */
+/* Dls_data_MONO_get_up: Remonte le front montant d'un boolean                                                                */
 /* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
 /******************************************************************************************************************************/
  gboolean Dls_data_MONO_get_up ( struct DLS_MONO *mono )
@@ -124,7 +124,7 @@
     return( mono->edge_up );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_mono_down: Remonte le front descendant d'un boolean                                                           */
+/* Dls_data_MONO_get_down: Remonte le front descendant d'un boolean                                                           */
 /* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
 /******************************************************************************************************************************/
  gboolean Dls_data_MONO_get_down ( struct DLS_MONO *mono )

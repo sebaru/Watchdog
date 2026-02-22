@@ -82,7 +82,7 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_CH : Recupere la valeur du compteur en parametre                                                              */
+/* Dls_data_CH_get : Recupere la valeur du compteur en parametre                                                              */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  gint Dls_data_CH_get ( struct DLS_CH *cpt_h )
@@ -90,7 +90,7 @@
     return(0);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_CH: Positionne un CH dans la mémoire DLS                                                                      */
+/* Dls_data_CH_set: Positionne un CH dans la mémoire DLS                                                                      */
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
