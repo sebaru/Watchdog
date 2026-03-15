@@ -38,7 +38,6 @@
  #include "Json.h"
  #include "Dls.h"
  #include "Thread.h"
- #include "config.h"
  #include "Config.h"
  #include "Mqtt.h"
 
