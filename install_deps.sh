@@ -16,7 +16,6 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y systemd-devel libjwt-devel mosquitto-devel
   dnf install -y popt-devel libcurl-devel
   dnf install -y gammu-devel libgpiod-devel nut-devel libstrophe-devel
-  curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
   dnf install -y libphidget22 libphidget22-devel
 
 fi
