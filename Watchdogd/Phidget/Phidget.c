@@ -511,7 +511,7 @@ error:
        Phidget_getErrorDescription ( result, &error );
        Info_new( __func__, module->Thread_debug, LOG_ERR, "PhidgetNet_addServer failed: '%s'", error );
        goto connect_failed;
-     }
+     } else Info_new ( __func__, module->Thread_debug, LOG_INFO, "PhidgetNet_addServer '%s' success: '%s'", hostname );
 
     JsonNode *RootNode = Json_node_create ();                                                     /* Envoi de la conf a l'API */
     if (RootNode)

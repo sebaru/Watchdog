@@ -269,7 +269,7 @@
     pthread_exit(0);
   }
 /******************************************************************************************************************************/
-/* Thread_List_by_classe: Récupère la liste des thread_tech_id de classe en parametre, sous forme de liste                         */
+/* Thread_List_by_classe: Récupère la liste des thread_tech_id de classe en parametre, sous forme de liste                    */
 /* Entrée: La classe a chercher                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
