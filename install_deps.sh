@@ -15,7 +15,7 @@ if [ "$SOCLE" = "fedora" ]
   dnf install -y glib2-devel openssl-devel json-glib-devel libuuid-devel
   dnf install -y systemd-devel libjwt-devel mosquitto-devel
   dnf install -y popt-devel libcurl-devel
-  dnf install -y gammu-devel libgpiod-devel nut-devel
+  dnf install -y gammu-devel libgpiod-devel nut-devel libstrophe-devel
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
   dnf install -y libphidget22 libphidget22-devel
 
@@ -43,7 +43,7 @@ if [ "$SOCLE" = "debian" ] || [ "$SOCLE" = "raspbian" ] || [ "$SOCLE" = "ubuntu"
   apt install -y libglib2.0-dev libssl-dev libjson-glib-dev uuid-dev
   apt install -y libsystemd-dev libjwt-dev libmosquitto-dev
   apt install -y libpopt-dev libcurl4-openssl-dev
-  apt install -y libgammu-dev libgpiod-dev libupsclient-dev
+  apt install -y libgammu-dev libgpiod-dev libupsclient-dev libstrophe-dev
   curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash -
   apt install -y libphidget22 libphidget22-dev
 fi
