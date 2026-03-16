@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Module_dls.h -> Déclaration des prototypes de fonctions                                                  */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                      jeu 31 jui 2003 11:49:36 CEST */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                      jeu 31 jui 2003 11:49:36 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

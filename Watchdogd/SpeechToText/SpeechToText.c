@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/SpeechToText/SpeechToText.c  Gestion de la reconnaissance vocale Watchdog                                        */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                29.05.2025 19:49:37 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                29.05.2025 19:49:37 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

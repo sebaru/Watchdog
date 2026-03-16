@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Gpiod/Gpiod.h        Déclaration structure internes des communication RASPBERRYPI                                */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                03.09.2021 18:52:35 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                03.09.2021 18:52:35 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

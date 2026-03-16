@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/SpeechToText/SpeechToText.h   Header et constantes des modules SpeechToText                                      */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                29.05.2025 19:50:25 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                29.05.2025 19:50:25 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

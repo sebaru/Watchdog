@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_WATCHDOG.c        Déclaration des fonctions pour la gestion des Watchdogs                            */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                25.03.2019 14:16:22 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                25.03.2019 14:16:22 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

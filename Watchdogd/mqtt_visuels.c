@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_visuels.c        Distribution des Visuels à l'API                                                           */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                      lun 10 mai 2004 11:31:17 CEST */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                      lun 10 mai 2004 11:31:17 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
