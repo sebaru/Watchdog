@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Module_dls.h -> Déclaration des prototypes de fonctions                                                  */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                      jeu 31 jui 2003 11:49:36 CEST */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                      jeu 31 jui 2003 11:49:36 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -173,9 +173,13 @@
   { JsonNode *source_node;
     gchar   tech_id[32];
     gchar   acronyme[64];
-    gboolean etat;
-    gboolean new_etat;
-    gint last_on;
+    gchar   libelle_converted[256];                                                      /* Le libelle converti selon les "$" */
+    gboolean etat;                                                                          /* Etat avant execution du plugin */
+    gboolean new_etat;                                                                      /* Etat après execution du plugin */
+    gint new_etat_by_line;                                                    /* Numéro de ligne du dernier changement d'état */
+    gint last_on;                                                                        /* Date du dernier changement d'état */
+    gboolean libelle_is_dynamic;                                                       /* TRUE si le libelle dispose d'un "$" */
+    gint next_top_check_libelle;                        /* Date a laquelle réaliser le prochain controle du libelle dynamique */
   };
 
  struct DLS_REGISTRE
@@ -213,59 +217,60 @@
     struct DLS_MESSAGE *dls_msg_comm_hs;
   };
 
- extern struct DLS_BI *Dls_data_lookup_BI ( gchar *tech_id, gchar *acronyme );
- extern gboolean Dls_data_get_BI        ( struct DLS_BI *bit );
- extern gboolean Dls_data_get_BI_up     ( struct DLS_BI *bit );
- extern gboolean Dls_data_get_BI_down   ( struct DLS_BI *bit );
- extern void     Dls_data_set_BI        ( struct DLS_TO_PLUGIN *vars, struct DLS_BI *bit, gboolean valeur );
+ extern struct DLS_BI *Dls_data_BI_lookup ( gchar *tech_id, gchar *acronyme );
+ extern gboolean Dls_data_BI_get        ( struct DLS_BI *bit );
+ extern gboolean Dls_data_BI_get_up     ( struct DLS_BI *bit );
+ extern gboolean Dls_data_BI_get_down   ( struct DLS_BI *bit );
+ extern void     Dls_data_BI_set        ( struct DLS_TO_PLUGIN *vars, struct DLS_BI *bit, gboolean valeur );
 
- extern struct DLS_MONO *Dls_data_lookup_MONO ( gchar *tech_id, gchar *acronyme );
- extern gboolean Dls_data_get_MONO      ( struct DLS_MONO *bit );
- extern gboolean Dls_data_get_MONO_up   ( struct DLS_MONO *bit );
- extern gboolean Dls_data_get_MONO_down ( struct DLS_MONO *bit );
- extern void     Dls_data_set_MONO      ( struct DLS_TO_PLUGIN *vars, struct DLS_MONO *bit, gboolean valeur );
+ extern struct DLS_MONO *Dls_data_MONO_lookup ( gchar *tech_id, gchar *acronyme );
+ extern gboolean Dls_data_MONO_get      ( struct DLS_MONO *bit );
+ extern gboolean Dls_data_MONO_get_up   ( struct DLS_MONO *bit );
+ extern gboolean Dls_data_MONO_get_down ( struct DLS_MONO *bit );
+ extern void     Dls_data_MONO_set      ( struct DLS_TO_PLUGIN *vars, struct DLS_MONO *bit, gboolean valeur );
 
- extern struct DLS_DI *Dls_data_lookup_DI ( gchar *tech_id, gchar *acronyme );
- extern gboolean Dls_data_get_DI        ( struct DLS_DI *bit );
- extern gboolean Dls_data_get_DI_up     ( struct DLS_DI *bit );
- extern gboolean Dls_data_get_DI_down   ( struct DLS_DI *bit );
- extern void Dls_data_set_DI_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit );
+ extern struct DLS_DI *Dls_data_DI_lookup ( gchar *tech_id, gchar *acronyme );
+ extern gboolean Dls_data_DI_get        ( struct DLS_DI *bit );
+ extern gboolean Dls_data_DI_get_up     ( struct DLS_DI *bit );
+ extern gboolean Dls_data_DI_get_down   ( struct DLS_DI *bit );
+ extern void Dls_data_DI_set_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit );
 
- extern struct DLS_DO *Dls_data_lookup_DO ( gchar *tech_id, gchar *acronyme );
- extern void     Dls_data_set_DO        ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *bit, gboolean valeur );
- extern gboolean Dls_data_get_DO        ( struct DLS_DO *bit );
- extern gboolean Dls_data_get_DO_up     ( struct DLS_DO *bit );
- extern gboolean Dls_data_get_DO_down   ( struct DLS_DO *bit );
+ extern struct DLS_DO *Dls_data_DO_lookup ( gchar *tech_id, gchar *acronyme );
+ extern void     Dls_data_DO_set        ( struct DLS_TO_PLUGIN *vars, struct DLS_DO *bit, gboolean valeur );
+ extern gboolean Dls_data_DO_get        ( struct DLS_DO *bit );
+ extern gboolean Dls_data_DO_get_up     ( struct DLS_DO *bit );
+ extern gboolean Dls_data_DO_get_down   ( struct DLS_DO *bit );
 
- extern struct DLS_AO *Dls_data_lookup_AO ( gchar *tech_id, gchar *acronyme );
- extern void     Dls_data_set_AO        ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *bi, gdouble valeur );
- extern gdouble  Dls_data_get_AO        ( struct DLS_AO *bit );
+ extern struct DLS_AO *Dls_data_AO_lookup ( gchar *tech_id, gchar *acronyme );
+ extern void     Dls_data_AO_set        ( struct DLS_TO_PLUGIN *vars, struct DLS_AO *bi, gdouble valeur );
+ extern gdouble  Dls_data_AO_get        ( struct DLS_AO *bit );
 
-
- extern struct DLS_WATCHDOG *Dls_data_lookup_WATCHDOG ( gchar *tech_id, gchar *acronyme );
- extern gboolean Dls_data_get_WATCHDOG ( struct DLS_WATCHDOG *bit );
- extern gint     Dls_data_get_WATCHDOG_time ( struct DLS_WATCHDOG *bit );
- extern void     Dls_data_set_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_WATCHDOG *bit, gint consigne );
+ extern struct DLS_WATCHDOG *Dls_data_WATCHDOG_lookup ( gchar *tech_id, gchar *acronyme );
+ extern gboolean Dls_data_WATCHDOG_get ( struct DLS_WATCHDOG *bit );
+ extern gint     Dls_data_WATCHDOG_get_time ( struct DLS_WATCHDOG *bit );
+ extern void     Dls_data_WATCHDOG_set ( struct DLS_TO_PLUGIN *vars, struct DLS_WATCHDOG *bit, gint consigne );
 
  extern void Dls_data_set_bus ( struct DLS_TO_PLUGIN *vars, gchar *thread_tech_id, gchar *commande );
 
- extern struct DLS_AI *Dls_data_lookup_AI ( gchar *tech_id, gchar *acronyme );
- extern gdouble  Dls_data_get_AI        ( struct DLS_AI *bit );
- extern gboolean Dls_data_get_AI_inrange ( struct DLS_AI *bit );
+ extern struct DLS_AI *Dls_data_AI_lookup ( gchar *tech_id, gchar *acronyme );
+ extern gdouble  Dls_data_AI_get        ( struct DLS_AI *bit );
+ extern gboolean Dls_data_AI_get_inrange ( struct DLS_AI *bit );
 
- extern struct DLS_CI *Dls_data_lookup_CI ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_CI ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat, gint reset );
- extern gint Dls_data_get_CI ( struct DLS_CI *bit );
+ extern struct DLS_CI *Dls_data_CI_lookup ( gchar *tech_id, gchar *acronyme );
+ extern void Dls_data_CI_set ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat );
+ extern gint Dls_data_CI_get ( struct DLS_CI *bit );
+ extern void Dls_data_CI_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit );
 
- extern struct DLS_CH *Dls_data_lookup_CH ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *cpt_h, gboolean etat, gint reset );
- extern gint Dls_data_get_CH ( struct DLS_CH *cpt_h );
+ extern struct DLS_CH *Dls_data_CH_lookup ( gchar *tech_id, gchar *acronyme );
+ extern void Dls_data_CH_set ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit, gboolean etat );
+ extern gint Dls_data_CH_get ( struct DLS_CH *cpt_h );
+ extern void Dls_data_CH_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit );
 
- extern struct DLS_REGISTRE *Dls_data_lookup_REGISTRE ( gchar *tech_id, gchar *acronyme );
- extern void    Dls_data_set_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *reg, gdouble valeur );
- extern gdouble Dls_data_get_REGISTRE ( struct DLS_REGISTRE *reg );
+ extern struct DLS_REGISTRE *Dls_data_REGISTRE_lookup ( gchar *tech_id, gchar *acronyme );
+ extern void    Dls_data_REGISTRE_set ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *reg, gdouble valeur );
+ extern gdouble Dls_data_REGISTRE_get ( struct DLS_REGISTRE *reg );
 
- extern struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme );
+ extern struct DLS_VISUEL *Dls_data_VISUEL_lookup ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_VISUEL_set ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
                                    gdouble valeur, gboolean cligno, gboolean noshow, gboolean disable );
  extern void Dls_data_VISUEL_set_badge ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *badge );
@@ -284,17 +289,17 @@
                                           gboolean cligno, gboolean noshow, gboolean disable );
  extern void Dls_data_VISUEL_set_for_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_AI *src,
                                           gboolean cligno, gboolean noshowe, gboolean disable );
- extern struct DLS_HORLOGE *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme );
- extern gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit );
+ extern struct DLS_HORLOGE *Dls_data_HORLOGE_lookup ( gchar *tech_id, gchar *acronyme );
+ extern gboolean HORLOGE_get ( struct DLS_HORLOGE *bit );
 
- extern struct DLS_MESSAGE *Dls_data_lookup_MESSAGE ( gchar *tech_id, gchar *acronyme );
- extern void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg );
+ extern struct DLS_MESSAGE *Dls_data_MESSAGE_lookup ( gchar *tech_id, gchar *acronyme );
+ extern void Dls_data_MESSAGE_set ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg );
 
- extern struct DLS_TEMPO *Dls_data_lookup_TEMPO ( gchar *tech_id, gchar *acronyme );
- extern void     Dls_data_set_TEMPO     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,
+ extern struct DLS_TEMPO *Dls_data_TEMPO_lookup ( gchar *tech_id, gchar *acronyme );
+ extern void     Dls_data_TEMPO_set     ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *bit, gboolean etat,
                                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
- extern gboolean Dls_data_get_TEMPO     ( struct DLS_TEMPO *bit );
- extern gint     Dls_data_get_TEMPO_time ( struct DLS_TEMPO *bit );
+ extern gboolean Dls_data_TEMPO_get     ( struct DLS_TEMPO *bit );
+ extern gint     Dls_data_TEMPO_get_time ( struct DLS_TEMPO *bit );
 
  extern void Dls_PID_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *r_input );
  extern void Dls_PID ( struct DLS_TO_PLUGIN *vars, struct DLS_REGISTRE *input, struct DLS_REGISTRE *consigne,

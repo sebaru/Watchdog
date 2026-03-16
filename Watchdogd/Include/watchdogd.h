@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/watchdogd.h      Déclarations générales watchdog                                                                 */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                      sam 11 avr 2009 12:23:32 CEST */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                      sam 11 avr 2009 12:23:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -38,7 +38,6 @@
  #include "Json.h"
  #include "Dls.h"
  #include "Thread.h"
- #include "config.h"
  #include "Config.h"
  #include "Mqtt.h"
 

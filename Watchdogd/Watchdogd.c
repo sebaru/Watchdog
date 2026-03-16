@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Watchdogd.c        Démarrage/Arret du systeme Watchdog, gestion des connexions clientes                          */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                       mar 14 fév 2006 15:56:40 CET */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                       mar 14 fév 2006 15:56:40 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -243,13 +243,13 @@
         }
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Target User '%s' (uid %d) found.", pwd->pw_name, pwd->pw_uid );
-    g_snprintf( chaine, sizeof(chaine), "chaine -a -G abls %s", pwd->pw_name );     system ( chaine );
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G abls %s", pwd->pw_name );     system ( chaine );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
-    g_snprintf( chaine, sizeof(chaine), "chaine -a -G audio  %s", pwd->pw_name );   system ( chaine );
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G audio  %s", pwd->pw_name );   system ( chaine );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
-    g_snprintf( chaine, sizeof(chaine), "chaine -a -G dialout %s", pwd->pw_name );  system ( chaine );
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G dialout %s", pwd->pw_name );  system ( chaine );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
-    g_snprintf( chaine, sizeof(chaine), "chaine -a -G gpio %s", pwd->pw_name );     system ( chaine );
+    g_snprintf( chaine, sizeof(chaine), "usermod -a -G gpio %s", pwd->pw_name );     system ( chaine );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Add group: %s", chaine );
 
 /***************************************************** Set_groups *************************************************************/
@@ -392,7 +392,7 @@
        if (mqtt_password) g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "%s", mqtt_password );
                      else g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "nopassword" );
 
-       gchar *audio_tech_id    = Json_get_string ( api_result, "audio_tech_id" );
+       gchar *audio_tech_id      = Json_get_string ( api_result, "audio_tech_id" );
        if (audio_tech_id) g_snprintf( Config.audio_tech_id, sizeof(Config.audio_tech_id), "%s", audio_tech_id );
                      else g_snprintf( Config.audio_tech_id, sizeof(Config.audio_tech_id), "AUDIO" );
 
@@ -503,6 +503,7 @@
            { JsonNode *RootNode = Json_node_create();
              Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
              MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
+             Json_node_unref ( RootNode );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 

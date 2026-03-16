@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_HORLOGE.c        Déclaration des fonctions pour la gestion des Horloges                              */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                03.07.2018 21:25:00 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                03.07.2018 21:25:00 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -56,11 +56,11 @@
               "Create bit DLS_HORLOGE '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_HORLOGE: Recherche un HORLOGE dans les plugins DLS                                                         */
+/* Dls_data_HORLOGE_lookup: Recherche un HORLOGE dans les plugins DLS                                                         */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_HORLOGE *Dls_data_lookup_HORLOGE ( gchar *tech_id, gchar *acronyme )
+ struct DLS_HORLOGE *Dls_data_HORLOGE_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -78,10 +78,10 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_HORLOGE : Recupere la valeur de l'horloge en parametre                                                        */
+/* Dls_data_HORLOGE_get : Recupere la valeur de l'horloge en parametre                                                        */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_HORLOGE ( struct DLS_HORLOGE *bit )
+ gboolean Dls_data_HORLOGE_get ( struct DLS_HORLOGE *bit )
   { if (!bit) return(FALSE);
     gboolean found = FALSE;
     GSList *Horloges = Partage->com_dls.HORLOGE_actives;
@@ -93,10 +93,10 @@
     return(found);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_HORLOGE : Active une horloge                                                                                  */
+/* Dls_data_HORLOGE_clear : Reset les horloges                                                                                */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_clear_HORLOGE ()
+ void Dls_data_HORLOGE_clear ()
   { if (Partage->com_dls.HORLOGE_actives)
      { g_slist_free ( Partage->com_dls.HORLOGE_actives );
        Partage->com_dls.HORLOGE_actives = NULL;
@@ -117,7 +117,7 @@
     if (heure == tm.tm_hour && minute == tm.tm_min)   /*num_jour_semaine = tm.tm_wday;*/
      { gchar *tech_id  = Json_get_string ( element, "tech_id" );
        gchar *acronyme = Json_get_string ( element, "acronyme" );
-       struct DLS_HORLOGE *bit = Dls_data_lookup_HORLOGE ( tech_id, acronyme );
+       struct DLS_HORLOGE *bit = Dls_data_HORLOGE_lookup ( tech_id, acronyme );
        if (bit) Partage->com_dls.HORLOGE_actives = g_slist_append ( Partage->com_dls.HORLOGE_actives, bit );
        Info_new( __func__, Config.log_dls, LOG_NOTICE, "Mise à un de l'horloge %s:%s", tech_id, acronyme );
      }

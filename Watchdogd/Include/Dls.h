@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Include/Dls.h                  Définitions des constantes programme DLS                                          */
-/* Projet Abls-Habitat version 4.6                                                              sam 09 oct 2004 10:10:32 CEST */
+/* Projet Abls-Habitat version 4.7                                                              sam 09 oct 2004 10:10:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -67,7 +67,7 @@
     gdouble conso;                                                                       /* Consommation temporelle du plugin */
     gchar *(*version)(void);                                                       /* Retourne le numéro de version du plugin */
     void (*remap_all_alias)(struct DLS_TO_PLUGIN *);                                                 /* Set all Alias to NULL */
-    void (*init_visuels)(struct DLS_TO_PLUGIN *);                                                    /* Set all Alias to NULL */
+    void (*init)(struct DLS_TO_PLUGIN *);                                                      /* Init all plugin bit interne */
     struct DLS_TO_PLUGIN vars;
     GSList *Arbre_Comm;                         /* Liste tech_id des dependances du module pour le calcul de sa communication */
   };
@@ -164,8 +164,8 @@
  extern void Dls_data_AI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_AI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit );
- extern void Dls_data_set_AI ( struct DLS_AI *bit, gdouble valeur, gboolean in_range );
- extern gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request );
+ extern void Dls_data_AI_set ( struct DLS_AI *bit, gdouble valeur, gboolean in_range );
+ extern gboolean Dls_data_AI_set_from_thread_ai ( JsonNode *request );
  extern void Dls_AI_export_to_API ( struct DLS_AI *bit );
 
                                                                                                          /* Dans The_dls_AO.c */
@@ -185,8 +185,8 @@
  extern void Dls_data_DI_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_all_DI_to_json ( gpointer array, struct DLS_PLUGIN *plugin );
  extern void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit );
- extern void Dls_data_set_DI ( struct DLS_DI *bit, gboolean valeur );
- extern gboolean Dls_data_set_DI_from_thread_di ( JsonNode *request );
+ extern void Dls_data_DI_set ( struct DLS_DI *bit, gboolean valeur );
+ extern gboolean Dls_data_DI_set_from_thread_di ( JsonNode *request );
  extern void Dls_DI_export_to_API ( struct DLS_DI *bit );
                                                                                                          /* Dans The_dls_DO.c */
  extern void Dls_data_DO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
@@ -203,7 +203,7 @@
  extern void Dls_BI_export_to_API ( struct DLS_BI *bit );
                                                                                                     /* Dans The_dls_HORLOGE.c */
  extern void Dls_data_HORLOGE_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
- extern void Dls_data_clear_HORLOGE ();
+ extern void Dls_data_HORLOGE_clear ();
  extern void Dls_data_activer_horloge ( void );
  extern void Dls_Load_horloge_ticks ( void );
                                                                                                      /* Dans The_dls_VISUEL.c */
@@ -217,6 +217,6 @@
                                                                                                    /* Dans The_dls_WATCHDOG.c */
  extern void Dls_data_WATCHDOG_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data );
  extern void Dls_WATCHDOG_to_json ( JsonNode *element, struct DLS_WATCHDOG *bit );
- extern gboolean Dls_data_set_WATCHDOG_from_thread_watchdog ( JsonNode *request );
+ extern gboolean Dls_data_WATCHDOG_set_from_thread_watchdog ( JsonNode *request );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

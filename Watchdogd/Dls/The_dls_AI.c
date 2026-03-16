@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_AI.c  Gestion des Analog Input                                                                       */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                30.01.2022 14:07:24 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                30.01.2022 14:07:24 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -53,10 +53,10 @@
               bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle, bit->archivage );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_AI : Recherche un CH dans les plugins DLS                                                                  */
+/* Dls_data_AI_lookup : Recherche un CH dans les plugins DLS                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- struct DLS_AI *Dls_data_lookup_AI ( gchar *tech_id, gchar *acronyme )
+ struct DLS_AI *Dls_data_AI_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -74,18 +74,18 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Dls_data_AI_get : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gdouble Dls_data_get_AI ( struct DLS_AI *bit )
+ gdouble Dls_data_AI_get ( struct DLS_AI *bit )
   { if (!bit) return(0.0);
     return( bit->valeur );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Dls_data_AI_get : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_AI_inrange ( struct DLS_AI *bit )
+ gboolean Dls_data_AI_get_inrange ( struct DLS_AI *bit )
   { if (!bit) return(FALSE);
     return( bit->in_range );
   }
@@ -93,7 +93,7 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( struct DLS_AI *bit, gdouble valeur, gboolean in_range )
+ void Dls_data_AI_set ( struct DLS_AI *bit, gdouble valeur, gboolean in_range )
   { if (!bit) return;
     bit->valeur   = valeur;
     bit->in_range = in_range;
@@ -102,11 +102,11 @@
     Dls_AI_export_to_API ( bit );                                                                            /* envoi a l'API */
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_AI_from_thread_ai: Positionne une AI dans DLS depuis une AI 'thread'                                          */
+/* Dls_data_AI_set_from_thread_ai: Positionne une AI dans DLS depuis une AI 'thread'                                          */
 /* Entrées: la structure JSON                                                                                                 */
 /* Sortie : TRUE si OK, sinon FALSE                                                                                           */
 /******************************************************************************************************************************/
- gboolean Dls_data_set_AI_from_thread_ai ( JsonNode *request )
+ gboolean Dls_data_AI_set_from_thread_ai ( JsonNode *request )
   { if (! (Json_has_member ( request, "thread_tech_id" ) && Json_has_member ( request, "thread_acronyme" ) &&
            Json_has_member ( request, "valeur" ) && Json_has_member ( request, "in_range" )
           )
@@ -122,9 +122,9 @@
        acronyme = Json_get_string ( request, "acronyme" );
      }
 
-    struct DLS_AI *bit = Dls_data_lookup_AI ( tech_id, acronyme );
+    struct DLS_AI *bit = Dls_data_AI_lookup ( tech_id, acronyme );
     if (!bit)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_AI '%s:%s'/'%s:%s' not found",
+     { Info_new( __func__, Config.log_bus, LOG_DEBUG, "SET_AI '%s:%s'/'%s:%s' not found",
                  thread_tech_id, thread_acronyme, tech_id, acronyme );
        return(FALSE);
      }
@@ -133,7 +133,7 @@
               thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_double ( request, "valeur" ), bit->unite,
               Json_get_bool ( request, "in_range" ), bit->libelle );
-    Dls_data_set_AI ( bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
+    Dls_data_AI_set ( bit, Json_get_double ( request, "valeur" ), Json_get_bool ( request, "in_range" ) );
     return(TRUE);
   }
 /******************************************************************************************************************************/

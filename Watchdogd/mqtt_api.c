@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/mqtt_api.c        Fonctions communes de gestion des requetes HTTP                                             */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                30.12.2020 22:03:58 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                30.12.2020 22:03:58 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -222,9 +222,9 @@
            { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end_request; }
           gchar *tech_id  = Json_get_string ( request, "tech_id" );
           gchar *acronyme = Json_get_string ( request, "acronyme" );
-          struct DLS_DI *bit = Dls_data_lookup_DI ( tech_id, acronyme );
+          struct DLS_DI *bit = Dls_data_DI_lookup ( tech_id, acronyme );
           if (!bit) Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: '%s:%s' not found. Dropping.", tech_id, acronyme );
-          else Dls_data_set_DI_pulse ( NULL, bit );
+          else Dls_data_DI_set_pulse ( NULL, bit );
         }
      }
 

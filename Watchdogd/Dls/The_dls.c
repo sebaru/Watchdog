@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                                                 */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                   mar. 06 juil. 2010 18:31:32 CEST */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                   mar. 06 juil. 2010 18:31:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -62,7 +62,7 @@
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, di );
        Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, di );
-       Dls_data_set_DI ( di, TRUE );                                                             /* Mise a un du bit d'entrée */
+       Dls_data_DI_set ( di, TRUE );                                                             /* Mise a un du bit d'entrée */
      }
   }
 /******************************************************************************************************************************/
@@ -76,7 +76,7 @@
        Info_new( __func__, Config.log_dls, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, di );
-       Dls_data_set_DI ( di, FALSE );                                                          /* Mise a zero du bit d'entrée */
+       Dls_data_DI_set ( di, FALSE );                                                          /* Mise a zero du bit d'entrée */
      }
   }
 /******************************************************************************************************************************/
@@ -205,7 +205,14 @@
 
          if (result > outputmax->valeur ) result = outputmax->valeur;
     else if (result < outputmin->valeur ) result = outputmin->valeur;
-    Dls_data_set_REGISTRE ( vars, output, result );
+    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+              "ligne %04d: Changing DLS_PID for '%s:%s'=> '%s:%s'=%f. Somme_Erreur = %f, Variation_Erreur = %f",
+              (vars ? vars->num_ligne : -1),
+              input->tech_id, input->acronyme,
+              output->tech_id, output->acronyme, result,
+              input->pid_somme_erreurs, variation_erreur
+            );
+    Dls_data_REGISTRE_set ( vars, output, result );
   }
 /******************************************************************************************************************************/
 /* Dls_sync_all_output: Envoi une synchronisation globale de toutes les sorties DO et AO                                      */
@@ -215,7 +222,7 @@
  void Dls_sync_all_output ( gpointer user_data, struct DLS_PLUGIN *plugin )
   { if (!plugin->handle) return;                                                 /* si plugin non chargé, on ne l'éxecute pas */
     GSList *liste = plugin->Dls_data_DO;
-    while ( liste )                                                   /* Calcul de la COMM du DLS a partir de ses dependances */
+    while ( liste )                                                                                     /* Pour toutes les DO */
      { struct DLS_DO *bit = liste->data;
        JsonNode *RootNode = Json_node_create ();
        if (RootNode)
@@ -229,7 +236,7 @@
      }
 
     liste = plugin->Dls_data_AO;
-    while ( liste )                                                   /* Calcul de la COMM du DLS a partir de ses dependances */
+    while ( liste )                                                                                     /* Pour toutes les AO */
      { struct DLS_AO *bit = liste->data;
        JsonNode *RootNode = Json_node_create ();
        if (RootNode)
@@ -257,50 +264,48 @@
     GSList *liste = plugin->Arbre_Comm;
     while ( liste )                                                   /* Calcul de la COMM du DLS a partir de ses dependances */
      { struct DLS_WATCHDOG *bit = liste->data;
-       bit_comm_module &= Dls_data_get_WATCHDOG( bit );
+       bit_comm_module &= Dls_data_WATCHDOG_get( bit );
        liste = g_slist_next ( liste );
      }
 
-    if ( Dls_data_get_MONO ( plugin->vars.dls_comm ) != bit_comm_module )                    /* Envoi à l'API si il y a écart */
-     { Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_comm, bit_comm_module );
+    if ( Dls_data_MONO_get ( plugin->vars.dls_comm ) != bit_comm_module )                    /* Envoi à l'API si il y a écart */
+     { Dls_data_MONO_set ( &plugin->vars, plugin->vars.dls_comm, bit_comm_module );
        Dls_MONO_export_to_API ( plugin->vars.dls_comm );
      }
 
 /*-------------------------------------------------- Calcul du MEMSA_OK ------------------------------------------------------*/
-    gboolean new_memsa_ok = bit_comm_module && !( Dls_data_get_MONO( plugin->vars.dls_memsa_defaut ) ||
-                                                  Dls_data_get_MONO( plugin->vars.dls_memsa_defaut_fixe ) ||
-                                                  Dls_data_get_MONO( plugin->vars.dls_memsa_alarme ) ||
-                                                  Dls_data_get_MONO( plugin->vars.dls_memsa_alarme_fixe )
+    gboolean new_memsa_ok = bit_comm_module && !( Dls_data_MONO_get( plugin->vars.dls_memsa_defaut ) ||
+                                                  Dls_data_MONO_get( plugin->vars.dls_memsa_defaut_fixe ) ||
+                                                  Dls_data_MONO_get( plugin->vars.dls_memsa_alarme ) ||
+                                                  Dls_data_MONO_get( plugin->vars.dls_memsa_alarme_fixe )
                                                 );
-    Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memsa_ok, new_memsa_ok );
+    Dls_data_MONO_set ( &plugin->vars, plugin->vars.dls_memsa_ok, new_memsa_ok );
 
 /*-------------------------------------------------- Calcul du MEMSSP_OK -----------------------------------------------------*/
-    Dls_data_set_MONO ( &plugin->vars, plugin->vars.dls_memssp_ok,
-                        !( Dls_data_get_MONO( plugin->vars.dls_memssp_derangement ) ||
-                           Dls_data_get_MONO( plugin->vars.dls_memssp_derangement_fixe ) ||
-                           Dls_data_get_MONO( plugin->vars.dls_memssp_danger ) ||
-                           Dls_data_get_MONO( plugin->vars.dls_memssp_danger_fixe )
+    Dls_data_MONO_set ( &plugin->vars, plugin->vars.dls_memssp_ok,
+                        !( Dls_data_MONO_get( plugin->vars.dls_memssp_derangement ) ||
+                           Dls_data_MONO_get( plugin->vars.dls_memssp_derangement_fixe ) ||
+                           Dls_data_MONO_get( plugin->vars.dls_memssp_danger ) ||
+                           Dls_data_MONO_get( plugin->vars.dls_memssp_danger_fixe )
                          )
                       );
 
 /*----------------------------------------------- Mise a jour des messages de comm -------------------------------------------*/
-   if (bit_comm_module) Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_ok );
-                   else Dls_data_set_MESSAGE ( &plugin->vars, plugin->vars.dls_msg_comm_hs );
+   if (bit_comm_module) Dls_data_MESSAGE_set ( &plugin->vars, plugin->vars.dls_msg_comm_ok );
+                   else Dls_data_MESSAGE_set ( &plugin->vars, plugin->vars.dls_msg_comm_hs );
 
 /*----------------------------------------------- Lancement du plugin --------------------------------------------------------*/
     gettimeofday( &tv_avant, NULL );
     if (plugin->enable && plugin->go)                                                  /* Si plugin enabled ET fonction go ok */
-     { if(plugin->vars.resetted && plugin->init_visuels)
-        { Info_new( __func__, Config.log_dls, LOG_INFO, "Send '_START' to '%s', and Init_visuel", plugin->tech_id );
-          plugin->init_visuels(&plugin->vars);
-        }
+     { if(plugin->vars.resetted)
+        { Info_new( __func__, Config.log_dls, LOG_INFO, "Send '_START' to '%s'", plugin->tech_id ); }
        plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
      }
-    gettimeofday( &tv_apres, NULL );
-    plugin->conso+=Chrono( &tv_avant, &tv_apres );
     Dls_data_MESSAGE_apply ( plugin );                                             /* Application des nouveaux etats messages */
     Dls_data_VISUEL_apply ( plugin );
     plugin->vars.resetted = FALSE;
+    gettimeofday( &tv_apres, NULL );
+    plugin->conso+=Chrono( &tv_avant, &tv_apres );                                                         /* Ajoute la conso */
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du DLS                                                                                           */
@@ -323,65 +328,65 @@
 /******************************************************************************************************************************/
        if (Partage->top>=next_top_5hz)                                                             /* Toutes les 1/5 secondes */
         { next_top_5hz = Partage->top + 2;
-          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz, TRUE );
-          Dls_data_set_BI   ( NULL, Partage->com_dls.sys_flipflop_5hz,
-                             !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_5hz) );
+          Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_5hz, TRUE );
+          Dls_data_BI_set   ( NULL, Partage->com_dls.sys_flipflop_5hz,
+                             !Dls_data_BI_get ( Partage->com_dls.sys_flipflop_5hz) );
         }
 /******************************************************************************************************************************/
        if (Partage->top>=next_top_2hz)                                                             /* Toutes les 1/2 secondes */
          {next_top_2hz = Partage->top + 5;
-          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_2hz, TRUE );
-          Dls_data_set_BI   ( NULL, Partage->com_dls.sys_flipflop_2hz,
-                             !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_2hz) );
+          Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_2hz, TRUE );
+          Dls_data_BI_set   ( NULL, Partage->com_dls.sys_flipflop_2hz,
+                             !Dls_data_BI_get ( Partage->com_dls.sys_flipflop_2hz) );
         }
 /******************************************************************************************************************************/
        if (Partage->top>=next_top_1sec)                                                                /* Toutes les secondes */
         { next_top_1sec = Partage->top + 10;
-          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1sec, TRUE );
-          Dls_data_set_BI   ( NULL, Partage->com_dls.sys_flipflop_1sec,
-                             !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_1sec) );
+          Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_1sec, TRUE );
+          Dls_data_BI_set   ( NULL, Partage->com_dls.sys_flipflop_1sec,
+                             !Dls_data_BI_get ( Partage->com_dls.sys_flipflop_1sec) );
 
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;                                                               /* historique */
-          Dls_data_set_AI ( Partage->com_dls.sys_bit_per_sec, (gdouble)Partage->audit_bit_interne_per_sec_hold, TRUE );
+          Dls_data_AI_set ( Partage->com_dls.sys_bit_per_sec, (gdouble)Partage->audit_bit_interne_per_sec_hold, TRUE );
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          Dls_data_set_AI ( Partage->com_dls.sys_tour_per_sec, (gdouble)Partage->audit_tour_dls_per_sec_hold, TRUE );
+          Dls_data_AI_set ( Partage->com_dls.sys_tour_per_sec, (gdouble)Partage->audit_tour_dls_per_sec_hold, TRUE );
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Dls_data_set_AI ( Partage->com_dls.sys_dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE ); /* historique */
+          Dls_data_AI_set ( Partage->com_dls.sys_dls_wait, (gdouble)Partage->com_dls.temps_sched, TRUE ); /* historique */
         }
 /******************************************************************************************************************************/
        if (Partage->top>=next_top_2sec)                                                              /* Toutes les 2 secondes */
         { next_top_2sec = Partage->top+20;
-          Dls_data_set_BI ( NULL, Partage->com_dls.sys_flipflop_2sec,
-                           !Dls_data_get_BI ( Partage->com_dls.sys_flipflop_2sec) );
+          Dls_data_BI_set ( NULL, Partage->com_dls.sys_flipflop_2sec,
+                           !Dls_data_BI_get ( Partage->com_dls.sys_flipflop_2sec) );
         }
 /******************************************************************************************************************************/
        if (Partage->top>=next_top_5sec)                                                              /* Toutes les 5 secondes */
         { next_top_5sec = Partage->top + 50;
-          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
+          Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_5sec, TRUE );
           Dls_foreach_plugins ( NULL, Dls_run_archivage );                        /* Archivage au mieux toutes les 5 secondes */
         }
 /******************************************************************************************************************************/
        if (Partage->top>=next_top_10sec)                                                            /* Toutes les 10 secondes */
         { next_top_10sec = Partage->top + 100;
-          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
-          Dls_data_set_BI ( NULL, Partage->com_dls.sys_mqtt_connected, Partage->MQTT_connected );
+          Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_10sec, TRUE );
+          Dls_data_BI_set ( NULL, Partage->com_dls.sys_mqtt_connected, Partage->MQTT_connected );
         }
 /******************************************************************************************************************************/
        if (Partage->top>=next_top_1min)                                                                 /* Toutes les minutes */
         { next_top_1min = Partage->top + 600;
-          Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min, TRUE );
+          Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_1min, TRUE );
           struct rusage conso;
           getrusage ( RUSAGE_SELF, &conso );
-          Dls_data_set_AI ( Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
-          Dls_data_set_AI ( Partage->com_dls.sys_log_per_min, 1.0*Info_reset_nbr_log(), TRUE );
+          Dls_data_AI_set ( Partage->com_dls.sys_maxrss, (gdouble)conso.ru_maxrss, TRUE );
+          Dls_data_AI_set ( Partage->com_dls.sys_log_per_min, 1.0*Info_reset_nbr_log(), TRUE );
           Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Dls_data_activer_horloge();
         }
@@ -401,13 +406,13 @@
        Reset_edge();                                                                   /* Mise à zero des bit de egde up/down */
        Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
 
-       Dls_data_clear_HORLOGE();
-       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5hz,   FALSE );                     /* RaZ des Mono du plugin 'SYS' */
-       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_2hz,   FALSE );
-       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1sec,  FALSE );
-       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_5sec,  FALSE );
-       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_10sec, FALSE );
-       Dls_data_set_MONO ( NULL, Partage->com_dls.sys_top_1min,  FALSE );
+       Dls_data_HORLOGE_clear();
+       Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_5hz,   FALSE );                     /* RaZ des Mono du plugin 'SYS' */
+       Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_2hz,   FALSE );
+       Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_1sec,  FALSE );
+       Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_5sec,  FALSE );
+       Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_10sec, FALSE );
+       Dls_data_MONO_set ( NULL, Partage->com_dls.sys_top_1min,  FALSE );
 
        pthread_mutex_unlock( &Partage->com_dls.synchro );                      /* Fin de Zone de protection des bits internes */
 /******************************************** Gestion des 1000 tours DLS par seconde ******************************************/

@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Imsg/Imsg.c  Gestion des Instant Messaging IMSG Watchdog 2.0                                                     */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                20.02.2018 17:58:31 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                20.02.2018 17:58:31 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -344,7 +344,7 @@ reconnect:
     if (!vars->conn)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "Connection New failed" ); goto end; }
 
-    xmpp_conn_set_keepalive(vars->conn, 60, 1);
+    xmpp_conn_set_sockopt_callback(vars->conn, xmpp_sockopt_cb_keepalive);
     xmpp_conn_set_jid (vars->conn, jabber_id );
     xmpp_conn_set_pass(vars->conn, Json_get_string ( module->config, "password" ));
 

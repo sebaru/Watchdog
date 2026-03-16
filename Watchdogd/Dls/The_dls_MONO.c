@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_MONO.c        Déclaration des fonctions pour la gestion des booleans                                 */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                24.06.2019 22:07:06 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                24.06.2019 22:07:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -57,11 +57,11 @@
               "Create bit DLS_MONO '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_MONO: Recherche un MONO dans les plugins DLS                                                                   */
+/* Dls_data_MONO_lookup: Recherche un MONO dans les plugins DLS                                                                   */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_MONO *Dls_data_lookup_MONO ( gchar *tech_id, gchar *acronyme )
+ struct DLS_MONO *Dls_data_MONO_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -79,10 +79,10 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_MONO: Positionne un monostable                                                                                */
+/* Dls_data_MONO_set: Positionne un monostable                                                                                */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- void Dls_data_set_MONO ( struct DLS_TO_PLUGIN *vars, struct DLS_MONO *mono, gboolean valeur )
+ void Dls_data_MONO_set ( struct DLS_TO_PLUGIN *vars, struct DLS_MONO *mono, gboolean valeur )
   { if(!mono) return;
     if (mono->etat == TRUE && valeur == FALSE)                                                            /* Front descendant */
      { mono->etat = FALSE;
@@ -106,28 +106,28 @@
     Partage->audit_bit_interne_per_sec++;
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_MONO: Remonte l'etat d'un monostable                                                                          */
+/* Dls_data_MONO_get: Remonte l'etat d'un monostable                                                                          */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_MONO ( struct DLS_MONO *mono )
+ gboolean Dls_data_MONO_get ( struct DLS_MONO *mono )
   { if (!mono) return(FALSE);
     /* Test 24/04/2023: Etat = etat|edge_up.  */
     /* 20/06/2023: mauvaise idée. retour arrière + impose set_mono only within one dls */
     return( mono->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_mono_up: Remonte le front montant d'un boolean                                                                */
+/* Dls_data_MONO_get_up: Remonte le front montant d'un boolean                                                                */
 /* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_MONO_up ( struct DLS_MONO *mono )
+ gboolean Dls_data_MONO_get_up ( struct DLS_MONO *mono )
   { if (!mono) return(FALSE);
     return( mono->edge_up );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_mono_down: Remonte le front descendant d'un boolean                                                           */
+/* Dls_data_MONO_get_down: Remonte le front descendant d'un boolean                                                           */
 /* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_MONO_down ( struct DLS_MONO *mono )
+ gboolean Dls_data_MONO_get_down ( struct DLS_MONO *mono )
   { if (!mono) return(FALSE);
     return( mono->edge_down );
   }

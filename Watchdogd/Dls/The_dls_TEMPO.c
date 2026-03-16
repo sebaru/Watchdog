@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_TEMPO.c              Déclaration des fonctions pour la gestion des tempo.c                           */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                     sam. 09 mars 2013 11:47:18 CET */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                     sam. 09 mars 2013 11:47:18 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -56,11 +56,11 @@
               "Create bit DLS_TEMPO '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_TEMPO: Recherche un TEMPO dans les plugins DLS                                                             */
+/* Dls_data_TEMPO_lookup: Recherche un TEMPO dans les plugins DLS                                                             */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_TEMPO *Dls_data_lookup_TEMPO ( gchar *tech_id, gchar *acronyme )
+ struct DLS_TEMPO *Dls_data_TEMPO_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -183,10 +183,10 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_TEMPO : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* Dls_data_TEMPO_set : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *tempo, gboolean etat,
+ void Dls_data_TEMPO_set ( struct DLS_TO_PLUGIN *vars, struct DLS_TEMPO *tempo, gboolean etat,
                            gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
   { if (!tempo) return;
     if (tempo->init == FALSE)
@@ -202,18 +202,18 @@
     ST_local ( vars, tempo, etat );                                                               /* Recopie dans la variable */
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_TEMPO : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* Dls_data_TEMPO_get : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_TEMPO ( struct DLS_TEMPO *tempo )
+ gboolean Dls_data_TEMPO_get ( struct DLS_TEMPO *tempo )
   { if (!tempo) return(FALSE);
     return( tempo->state );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_TEMPO_time: Renvoie le temps de decompte restant de la tempo                                                  */
+/* Dls_data_TEMPO_get_time: Renvoie le temps de decompte restant de la tempo                                                  */
 /* Sortie : le temps, ou 0 si pas trouvé                                                                                      */
 /******************************************************************************************************************************/
- gint Dls_data_get_TEMPO_time ( struct DLS_TEMPO *bit )
+ gint Dls_data_TEMPO_get_time ( struct DLS_TEMPO *bit )
   { if (!bit) return(0);
     gint restant = bit->date_on - Partage->top;
     return( (restant > 0 ? restant : 0) );

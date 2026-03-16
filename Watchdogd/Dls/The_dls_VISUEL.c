@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_VISUEL.c             Gestion des visuels                                                             */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                22.03.2017 10:29:53 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                22.03.2017 10:29:53 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -58,11 +58,11 @@
               "Create bit DLS_VISUEL '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_VISUEL: Recherche un VISUEL dans les plugins DLS                                                           */
+/* Dls_data_VISUEL_lookup: Recherche un VISUEL dans les plugins DLS                                                           */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_VISUEL *Dls_data_lookup_VISUEL ( gchar *tech_id, gchar *acronyme )
+ struct DLS_VISUEL *Dls_data_VISUEL_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -80,7 +80,7 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_visuel : Gestion du positionnement des visuels en mode dynamique                                              */
+/* Dls_data_VISUEL_set : Gestion du positionnement des visuels en mode dynamique                                              */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
  void Dls_data_VISUEL_set ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu,
@@ -169,8 +169,8 @@
   { if (!visu) return;
     if (!src) return;
 
-    gboolean in_range = Dls_data_get_AI_inrange( src );
-    gint valeur       = Dls_data_get_AI ( src );
+    gboolean in_range = Dls_data_AI_get_inrange( src );
+    gint valeur       = Dls_data_AI_get ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
     Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, (in_range ? cligno : TRUE), noshow, disable );
   }
@@ -183,7 +183,7 @@
   { if (!visu) return;
     if (!src) return;
 
-    gint valeur   = Dls_data_get_CI ( src );
+    gint valeur   = Dls_data_CI_get ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
     Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, cligno, noshow, disable );
   }
@@ -196,12 +196,12 @@
   { if (!visu) return;
     if (!src) return;
 
-    gint valeur   = Dls_data_get_CH ( src );
+    gint valeur   = Dls_data_CH_get ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
     Dls_data_VISUEL_set ( vars, visu, 1.0*valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_visuel_for_registre : Met un jour un visuel accroché a un registre                                            */
+/* Dls_data_VISUEL_set_for_REGISTRE : Met un jour un visuel accroché a un registre                                            */
 /* Entrée : le dls en cours, le visuel, le registre et les parametres du visuel                                               */
 /******************************************************************************************************************************/
  void Dls_data_VISUEL_set_for_REGISTRE ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_REGISTRE *src,
@@ -209,12 +209,12 @@
   { if (!visu) return;
     if (!src) return;
 
-    gdouble valeur = Dls_data_get_REGISTRE ( src );
+    gdouble valeur = Dls_data_REGISTRE_get ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "%s", src->unite );
     Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_visuel_for_watchdog : Met un jour un visuel accroché a un watchdog                                            */
+/* Dls_data_VISUEL_set_for_WATCHDOG : Met un jour un visuel accroché a un watchdog                                            */
 /* Entrée : le dls en cours, le visuel, le watchdog et les parametres du visuel                                               */
 /******************************************************************************************************************************/
  void Dls_data_VISUEL_set_for_WATCHDOG ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_WATCHDOG *src,
@@ -222,12 +222,12 @@
   { if (!visu) return;
     if (!src) return;
 
-    gdouble valeur = Dls_data_get_WATCHDOG_time ( src );
+    gdouble valeur = Dls_data_WATCHDOG_get_time ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
     Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_visuel_for_tempo : Met un jour un visuel accroché a une temporisation                                         */
+/* Dls_data_VISUEL_set_for_TEMPO : Met un jour un visuel accroché a une temporisation                                         */
 /* Entrée : le dls en cours, le visuel, la temporisation et les parametres du visuel                                          */
 /******************************************************************************************************************************/
  void Dls_data_VISUEL_set_for_TEMPO ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_TEMPO *src,
@@ -235,7 +235,7 @@
   { if (!visu) return;
     if (!src) return;
 
-    gdouble valeur = Dls_data_get_TEMPO_time ( src );
+    gdouble valeur = Dls_data_TEMPO_get_time ( src );
     g_snprintf( visu->unite, sizeof(visu->unite), "s" );
     Dls_data_VISUEL_set ( vars, visu, valeur, cligno, noshow, disable );
   }
@@ -254,7 +254,6 @@
     Json_node_add_bool   ( RootNode, "noshow",    bit->noshow );
     Json_node_add_bool   ( RootNode, "disable",   bit->disable );
     Json_node_add_string ( RootNode, "libelle",   bit->libelle );
-    Json_node_add_string ( RootNode, "unite",     bit->unite );
     Json_node_add_string ( RootNode, "badge",     bit->badge );
   }
 /******************************************************************************************************************************/

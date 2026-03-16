@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/Ths_dls_MESSAGE.c        Déclaration des fonctions pour la gestion des message                               */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                     jeu. 29 déc. 2011 14:55:42 CET */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                     jeu. 29 déc. 2011 14:55:42 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -69,18 +69,18 @@
     bit->etat = FALSE;                                    /* A l'init, le message est OFF. Json_get_bool ( element, "etat" ); */
     bit->source_node = json_node_ref ( element );
     bit->last_on = 0;                                            /* A l'init, il n'y a pas de last on (en dixieme de seconde) */
-    Json_node_add_string ( bit->source_node, "libelle_src",
-                           Json_get_string ( bit->source_node, "libelle" ) );            /* Recopie pour conversion dynamique */
+    bit->libelle_is_dynamic = ( g_utf8_strchr( Json_get_string ( element, "libelle" ), -1, '$') ? TRUE : FALSE );
+
     plugin->Dls_data_MESSAGE = g_slist_prepend ( plugin->Dls_data_MESSAGE, bit );
     Info_new( __func__, Config.log_dls, LOG_INFO,
               "Create bit DLS_MESSAGE '%s:%s'=%d", bit->tech_id, bit->acronyme, bit->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_MESSAGE: Recherche un MESSAGE dans les plugins DLS                                                         */
+/* Dls_data_MESSAGE_lookup: Recherche un MESSAGE dans les plugins DLS                                                         */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_MESSAGE *Dls_data_lookup_MESSAGE ( gchar *tech_id, gchar *acronyme )
+ struct DLS_MESSAGE *Dls_data_MESSAGE_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -98,16 +98,33 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_MESSAGE: Emet le message en parametre                                                                         */
+/* Dls_data_MESSAGE_set: Emet le message en parametre                                                                         */
+/* Entrée : les plugin vars, le message                                                                                       */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MESSAGE ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg )
+ void Dls_data_MESSAGE_set ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg )
   { if (!msg) return;
-    msg->new_etat = TRUE;                                                                  /* Sauvegarde de l'état du message */
-    if ( msg->etat == TRUE ) return;                                                            /* Si déjà activé, on return; */
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-              "ligne %04d: Changing DLS_MSG '%s:%s'=TRUE", (vars ? vars->num_ligne : -1), msg->tech_id, msg->acronyme );
-    Partage->audit_bit_interne_per_sec++;
+    msg->new_etat = TRUE;                                                         /* Sauvegarde de l'état souhaité du message */
+    msg->new_etat_by_line = vars->num_ligne;                                                 /* Sauvegarde du numéro de ligne */
+  }
+/******************************************************************************************************************************/
+/* Dls_Add_message_to_master_list: Ajoute un message dans la liste des messages a traiter par le master                       */
+/* Entrée: Le plugin DLS source du message, le message                                                                        */
+/* Sortie : La liste est mise à jour                                                                                          */
+/******************************************************************************************************************************/
+ static void Dls_Add_message_to_master_list ( struct DLS_PLUGIN *plugin, struct DLS_MESSAGE *msg )
+  { if (! (plugin && msg)) return;
+    struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
+    if (!event)
+     { Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_ERR,
+                "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
+       return;
+     }
+    event->etat = msg->new_etat;                                                        /* Recopie de l'état dans l'evenement */
+    event->msg  = msg;
+    pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                             /* Ajout dans la liste de msg a traiter */
+    Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
+    pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                             /* Ajout dans la liste de msg a traiter */
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
@@ -119,38 +136,61 @@
     GSList *liste = plugin->Dls_data_MESSAGE;
     while ( liste )
      { struct DLS_MESSAGE *msg = liste->data;
-
-       if ( msg->etat != msg->new_etat )                                           /* si changement d'etat lors du run plugin */
-        { msg->etat = msg->new_etat;
-          gint typologie = Json_get_int ( msg->source_node, "typologie" );
-          if ( typologie == MSG_NOTIF && msg->etat == TRUE )   /* Si message de notification apparait, on eteint le précédent */
-           { struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
-             if (event)
-              { event->etat = FALSE;                                                                  /* On eteint le message */
-                event->msg  = msg;
-                pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
-                Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
-                pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
-              } else Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_ERR,
-                               "Memory error for MSG'%s:%s' = 0 (etat)", msg->tech_id, msg->acronyme );
-           }
-
-          if ( !(typologie == MSG_NOTIF && msg->etat == FALSE) )                /* Un message de notification ne s'éteint pas */
-           { struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );        /* sinon, on traite */
-             if (!event)
-              { Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_ERR,
-                         "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
-              }
-             else
-              { event->etat = msg->etat;                                                /* Recopie de l'état dans l'evenement */
-                event->msg  = msg;
-                pthread_rwlock_wrlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
-                Partage->Liste_msg  = g_slist_append( Partage->Liste_msg, event );
-                pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                 /* Ajout dans la liste de msg a traiter */
-              }
-           }
+       gint freeze = Json_get_int ( msg->source_node, "freeze" );
+       if ( msg->etat == TRUE && msg->new_etat == FALSE && Json_get_int ( msg->source_node, "typologie" ) == MSG_NOTIF )
+        { /* pas de desactivation msg quand typologie = 0, donc no action */ }
+       else if ( msg->etat == TRUE && msg->new_etat == FALSE && Json_get_int ( msg->source_node, "groupe" ) )
+        { /* pas de desactivation msg quand dans un groupe, donc no action */ }
+       else if ( msg->etat == TRUE && msg->new_etat == FALSE )             /* si le message est désactivé après run du plugin */
+        { Dls_Add_message_to_master_list ( plugin, msg );
+          Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_DEBUG,
+                    "ligne %04d: Changing DLS_MSG '%s:%s'=FALSE", msg->new_etat_by_line, msg->tech_id, msg->acronyme );
+          Partage->audit_bit_interne_per_sec++;
         }
-       msg->new_etat = FALSE;                                             /* Prepare le prochain calcul avec etat initial à 0 */
+       else if ( msg->etat == FALSE && msg->new_etat == TRUE )                       /* si message activé après run du plugin */
+        { /* On commence par mettre a 0 les messages du meme groupe, s'il y en a /*/
+          gint groupe = Json_get_int ( msg->source_node, "groupe" );
+          if (groupe)
+           { GSList *search = plugin->Dls_data_MESSAGE;
+             while ( search )
+              { struct DLS_MESSAGE *search_msg = search->data;
+                if (search_msg != msg && Json_get_int ( search_msg->source_node, "groupe" ) == groupe )
+                 { search_msg->new_etat = search_msg->etat = FALSE;
+                   Dls_Add_message_to_master_list ( plugin, search_msg );
+                   Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_DEBUG,
+                    "ligne %04d: Changing DLS_MSG '%s:%s'=FALSE (via groupe %d)", msg->new_etat_by_line, msg->tech_id, msg->acronyme, groupe );
+                   Partage->audit_bit_interne_per_sec++;
+                 }
+                search = g_slist_next ( search );
+              }
+           }
+                                                                                      /* Calcul du libelle du nouveau message */
+          gchar *libelle_source = Json_get_string(msg->source_node, "libelle");
+          if (msg->libelle_is_dynamic)                                                     /* Conversion du libelle dynamique */
+           { gchar *libelle_converted = Convert_libelle_dynamique ( libelle_source );
+             g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", libelle_converted );
+             g_free(libelle_converted);
+             msg->next_top_check_libelle = Partage->top + freeze;                                              /* Freeze time */
+           }
+          else g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", libelle_source ); /* Pas de conversion */
+          Dls_Add_message_to_master_list ( plugin, msg );
+          Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_DEBUG,
+                    "ligne %04d: Changing DLS_MSG '%s:%s'=TRUE", msg->new_etat_by_line, msg->tech_id, msg->acronyme );
+          Partage->audit_bit_interne_per_sec++;
+        }
+       else if ( msg->etat && msg->libelle_is_dynamic && freeze >=0 &&              /* Update periodique du libelle dynamique */
+                 msg->next_top_check_libelle <= Partage->top)
+        { gchar *libelle_converted = Convert_libelle_dynamique ( Json_get_string(msg->source_node, "libelle") );
+          gboolean libelle_changed = strcmp ( libelle_converted, msg->libelle_converted );
+          if (libelle_changed)
+           { g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", libelle_converted );
+             Dls_Add_message_to_master_list ( plugin, msg );
+           }
+          g_free(libelle_converted);
+          msg->next_top_check_libelle = Partage->top + freeze;                                                 /* freeze time */
+        }
+       msg->etat = msg->new_etat;                                                                /* Sauvegarde du nouvel état */
+       msg->new_etat = FALSE;                                             /* Préparation du futur calcul de l'état du message */
        liste = g_slist_next(liste);
      }
   }

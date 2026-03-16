@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_CH.c      Déclaration des fonctions pour la gestion des cpt_h                                        */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                       mar 14 fév 2006 15:03:51 CET */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                       mar 14 fév 2006 15:03:51 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -64,7 +64,7 @@
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- struct DLS_CH *Dls_data_lookup_CH ( gchar *tech_id, gchar *acronyme )
+ struct DLS_CH *Dls_data_CH_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -82,50 +82,68 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_CH : Recupere la valeur du compteur en parametre                                                              */
+/* Dls_data_CH_get : Recupere la valeur du compteur en parametre                                                              */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gint Dls_data_get_CH ( struct DLS_CH *cpt_h )
+ gint Dls_data_CH_get ( struct DLS_CH *cpt_h )
   { if (cpt_h) return( cpt_h->valeur );
     return(0);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_CH: Positionne un CH dans la mémoire DLS                                                                      */
+/* Dls_data_CH_set: Positionne un CH dans la mémoire DLS                                                                      */
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_CH ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *cpt_h, gboolean etat, gint reset )
-  { if (!cpt_h) return;
+ void Dls_data_CH_set ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit, gboolean etat )
+  { if (!bit) return;
 
-    if (reset)
-     { if (etat)
-        { cpt_h->valeur = 0;
-          cpt_h->etat = FALSE;
+    if (etat)
+     { if ( ! bit->etat )                                                                            /* Démarrage du comptage */
+        { bit->etat    = TRUE;
+          bit->old_top = Partage->top;
+          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "ligne %04d: DLS_CH '%s:%s'=%d is now counting",
+                   (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur, bit->valeur );
+          if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
         }
-     }
-    else if (etat)
-     { if ( ! cpt_h->etat )
-        { cpt_h->etat = TRUE;
-          cpt_h->old_top = Partage->top;
-        }
-       else
+       else                                                                                                       /* Comptage */
         { int new_top, delta;
           new_top = Partage->top;
-          delta   = new_top - cpt_h->old_top;
+          delta   = new_top - bit->old_top;
           if (delta >= 10)                                                              /* On compte +1 toutes les secondes ! */
-           { cpt_h->valeur +=delta;
-             cpt_h->old_top = new_top;
-             if (vars && vars->debug) Dls_CH_export_to_API ( cpt_h );                              /* Si debug, envoi a l'API */
-
-             Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
-                       "ligne %04d: Changing DLS_CH '%s:%s'=%d (1/10s)",
-                       (vars ? vars->num_ligne : -1), cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur );
+           { bit->valeur += delta;
+             bit->old_top = new_top;
+             if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                /* Si debug, envoi a l'API */
              Partage->audit_bit_interne_per_sec++;
            }
         }
      }
-    else
-     { cpt_h->etat = FALSE; }
+    else                                                                                          /* etat = FALSE, bit is off */
+     { if ( bit->etat )                                                                                  /* Arret du comptage */
+        { bit->etat = FALSE;
+          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                    "ligne %04d: DLS_CH '%s:%s'=%d is not counting anymore",
+                   (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
+          if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
+        }
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_CH_reset: Reset un compteur d'horaire                                                                             */
+/* Entrée: les DLS_VARS, le bit                                                                                               */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_CH_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_CH *bit )
+  { if (!bit) return;
+    if (bit->valeur > 0)
+     { MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->valeur );                           /* Archivage si besoin */
+       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+                "ligne %04d: DLS_CH '%s:%s'=%d resetted",
+                (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
+       bit->valeur = 0;
+       bit->etat   = FALSE;
+       if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                      /* Si debug, envoi a l'API */
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_CH_export_to_API : Formate un bit au format JSON                                                                       */

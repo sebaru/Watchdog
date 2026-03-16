@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Phidget/Phidget.c  Gestion des modules PHIDGET Watchdgo 3.0                                                      */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                18.03.2021 22:02:42 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                18.03.2021 22:02:42 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -511,7 +511,7 @@ error:
        Phidget_getErrorDescription ( result, &error );
        Info_new( __func__, module->Thread_debug, LOG_ERR, "PhidgetNet_addServer failed: '%s'", error );
        goto connect_failed;
-     }
+     } else Info_new ( __func__, module->Thread_debug, LOG_INFO, "PhidgetNet_addServer '%s' success: '%s'", hostname );
 
     JsonNode *RootNode = Json_node_create ();                                                     /* Envoi de la conf a l'API */
     if (RootNode)

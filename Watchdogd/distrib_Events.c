@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/distrib_Events.c        Distribution des changements d'etats motif                                               */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                    sam. 24 janv. 2015 13:53:26 CET */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                    sam. 24 janv. 2015 13:53:26 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -62,13 +62,13 @@ encore:
      { struct DLS_REGISTRE *reg;
        struct DLS_AI *ai;
        g_snprintf( result, taille_result, "%s", prefixe );                                                        /* Prologue */
-       if ( (ai = Dls_data_lookup_AI ( tech_id, acronyme )) != NULL )
+       if ( (ai = Dls_data_AI_lookup ( tech_id, acronyme )) != NULL )
         { /*if (ai->val_ech-roundf(ai->val_ech) == 0.0)
            { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
           else*/
            { g_snprintf( chaine, sizeof(chaine), "%.02f %s", ai->valeur, ai->unite ); }
         }
-       else if ( (reg = Dls_data_lookup_REGISTRE ( tech_id, acronyme )) != NULL )
+       else if ( (reg = Dls_data_REGISTRE_lookup ( tech_id, acronyme )) != NULL )
         { g_snprintf( chaine, sizeof(chaine), "%.02f %s", reg->valeur, reg->unite ); }
        else g_snprintf( chaine, sizeof(chaine), "bit inconnu" );
        g_strlcat ( result, chaine, taille_result );
@@ -76,7 +76,6 @@ encore:
        g_snprintf( libelle, sizeof(libelle), "%s", result );                              /* recopie pour prochaine itération */
        goto encore;
      }
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Message parsé final: %s", result );
     return(result);
   }
 /******************************************************************************************************************************/

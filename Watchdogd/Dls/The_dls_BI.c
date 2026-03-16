@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls_BI.c        Déclaration des fonctions pour la gestion des booleans                                   */
-/* Projet Abls-Habitat version 4.6       Gestion d'habitat                                                24.06.2019 22:07:06 */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                24.06.2019 22:07:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -57,10 +57,10 @@
               "Create bit DLS_BI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_lookup_BI : Recherche un CH dans les plugins DLS                                                                  */
+/* Dls_data_BI_lookup : Recherche un CH dans les plugins DLS                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- struct DLS_BI *Dls_data_lookup_BI ( gchar *tech_id, gchar *acronyme )
+ struct DLS_BI *Dls_data_BI_lookup ( gchar *tech_id, gchar *acronyme )
   { if (!(tech_id && acronyme)) return(NULL);
     GSList *plugins = Partage->com_dls.Dls_plugins;
     while (plugins)
@@ -78,10 +78,10 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Dls_data_set_BI: Positionne un bistable                                                                                    */
+/* Dls_data_BI_set: Positionne un bistable                                                                                    */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- void Dls_data_set_BI ( struct DLS_TO_PLUGIN *vars, struct DLS_BI *bi, gboolean valeur )
+ void Dls_data_BI_set ( struct DLS_TO_PLUGIN *vars, struct DLS_BI *bi, gboolean valeur )
   { if (!bi) return;
 
     if (bi->etat != valeur)
@@ -98,26 +98,26 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_BI: Remonte l'etat d'un bistable                                                                             */
+/* Dls_data_BI_get: Remonte l'etat d'un bistable                                                                              */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_BI ( struct DLS_BI *bi )
+ gboolean Dls_data_BI_get ( struct DLS_BI *bi )
   { if (!bi) return(FALSE);
     return( bi->etat );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bi_up: Remonte le front montant d'un boolean                                                                    */
-/* Sortie : TRUE sur le boolean vient de passer à UP                                                                            */
+/* Dls_data_BI_get_up: Remonte le front montant d'un boolean                                                                  */
+/* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_BI_up ( struct DLS_BI *bi )
+ gboolean Dls_data_BI_get_up ( struct DLS_BI *bi )
   { if (!bi) return(FALSE);
     return( bi->edge_up );
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_bi_down: Remonte le front descendant d'un boolean                                                               */
-/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                          */
+/* Dls_data_BI_get_down: Remonte le front descendant d'un boolean                                                             */
+/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_BI_down ( struct DLS_BI *bi )
+ gboolean Dls_data_BI_get_down ( struct DLS_BI *bi )
   { if (!bi) return(FALSE);
     return( bi->edge_down );
   }
