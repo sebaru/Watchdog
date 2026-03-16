@@ -4,7 +4,7 @@
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/dnf upgrade
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/dnf upgrade -y
 %abls  ALL=(ALL) NOPASSWD: /usr/sbin/poweroff
-%abls  ALL=(ALL) NOPASSWD: /usr/bin/make install
+%abls  ALL=(ALL) NOPASSWD: /usr/bin/cmake --install .
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop Watchdogd
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/systemctl start Watchdogd
 %abls  ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart Watchdogd
