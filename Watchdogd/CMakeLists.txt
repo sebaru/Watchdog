@@ -1,6 +1,6 @@
 ##################################################################################################################################
 # Watchdogd/CMakeLists.txt    Profil de compilation du daemon Watchdog et de ses sous-modules
-# Projet Abls-Habitat version 4.6      Gestion d'habitat
+# Projet Abls-Habitat version 4.7      Gestion d'habitat
 # Auteur: LEFEVRE Sebastien
 ##################################################################################################################################
 

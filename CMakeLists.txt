@@ -1,6 +1,6 @@
 ##################################################################################################################################
 # CMakeLists.txt    Profil de compilation du projet Watchdog
-# Projet Abls-Habitat version 4.6      Gestion d'habitat
+# Projet Abls-Habitat version 4.7      Gestion d'habitat
 # Auteur: LEFEVRE Sebastien
 ##################################################################################################################################
 
