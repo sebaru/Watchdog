@@ -73,6 +73,9 @@
     GTree *Maps_from_thread;                                                          /* GTree des mappings thread vers local */
     GTree *Maps_to_thread;                                                            /* GTree des mappings local vers thread */
 
+    pthread_rwlock_t Users_synchro;                                                      /* Mutex de synchronisation des users */
+    JsonNode *Users_root;                                                                     /* Json Array de tous les users */
+
     pthread_rwlock_t Liste_DO_synchro;                                          /* Mutex de synchronisation des DigitalOutput */
     GSList *Liste_DO;                                                           /* liste de DO a traiter dans la distribution */
 

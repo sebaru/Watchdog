@@ -199,6 +199,14 @@
        g_list_free(Results);
      } else { Json_node_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
     pthread_rwlock_unlock(&Partage->Maps_synchro);
+
+    pthread_rwlock_wrlock(&Partage->Users_synchro);                                      /* Dechargement des données actuelles */
+    if (Partage->Users_root) { Json_node_unref ( Partage->Users_root ); Partage->Users_root = NULL; }
+
+    Partage->Users_root = Http_Get_from_global_API ( "/run/user/list", NULL );
+    if (!( Partage->Users_root && Json_get_int ( Partage->Users_root, "http_code" ) == 200 ))
+     { Json_node_unref ( Partage->Users_root ); Partage->Users_root = NULL; }
+    pthread_rwlock_unlock(&Partage->Users_synchro);
   }
 /******************************************************************************************************************************/
 /* Drop_privileges: Passe sous un autre user que root                                                                         */
@@ -437,6 +445,7 @@
 /************************************************ Initialisation des mutex ****************************************************/
     time ( &Partage->start_time );
     pthread_rwlock_init( &Partage->Maps_synchro, NULL );                               /* Initialisation des mutex de synchro */
+    pthread_rwlock_init( &Partage->Users_synchro, NULL );                              /* Initialisation des mutex de synchro */
     pthread_rwlock_init( &Partage->Liste_DO_synchro, NULL );                           /* Initialisation des mutex de synchro */
     pthread_rwlock_init( &Partage->Liste_AO_synchro, NULL );                           /* Initialisation des mutex de synchro */
     pthread_rwlock_init( &Partage->Threads_synchro, NULL );                            /* Initialisation des mutex de synchro */
@@ -550,6 +559,10 @@
     if (Partage->Maps_root)        { Json_node_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
     pthread_rwlock_unlock(&Partage->Maps_synchro);
 
+    pthread_rwlock_wrlock(&Partage->Users_synchro);
+    if (Partage->Users_root) { Json_node_unref ( Partage->Users_root ); Partage->Users_root = NULL; }
+    pthread_rwlock_unlock(&Partage->Users_synchro);
+
     pthread_rwlock_wrlock(&Partage->Liste_visuel_synchro);
     g_slist_free ( Partage->Liste_visuel ); Partage->Liste_visuel = NULL;
     pthread_rwlock_unlock(&Partage->Liste_visuel_synchro);
@@ -560,6 +573,7 @@
 
 /************************************************* Dechargement des mutex *****************************************************/
     pthread_rwlock_destroy( &Partage->Maps_synchro );
+    pthread_rwlock_destroy( &Partage->Users_synchro );
     pthread_rwlock_destroy( &Partage->Liste_DO_synchro );
     pthread_rwlock_destroy( &Partage->Liste_AO_synchro );
     pthread_rwlock_destroy( &Partage->Threads_synchro );
