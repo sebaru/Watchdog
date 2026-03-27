@@ -133,7 +133,8 @@
                 else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send SMS: memory error" );
               }
 /*---------------------------------------------------- Envoi AUDIO -----------------------------------------------------------*/
-             gchar *audio_zone_name = Json_get_string ( msg->source_node, "audio_zone_name" );
+             gchar *audio_zone_by_dls = Json_get_string ( msg->source_node, "audio_zone_by_dls" );
+             gchar *audio_zone_name = (strlen(audio_zone_by_dls) ? audio_zone_by_dls : Json_get_string ( msg->source_node, "audio_zone_name" ));
              if (strcasecmp ( audio_zone_name, "ZD_NONE"))
               { gchar *audio_libelle = Json_get_string ( msg->source_node, "audio_libelle" );
 #warning replace audio_libelle by libelle ?
