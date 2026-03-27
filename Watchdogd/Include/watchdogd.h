@@ -87,6 +87,8 @@
 
     pthread_rwlock_t Liste_msg_synchro;                                              /* Mutex de synchronisation des Messages */
     GSList *Liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
+
+    JsonNode *Users_GPS;                                                          /* Json Object des positions GPS des users */
   };
 
  enum

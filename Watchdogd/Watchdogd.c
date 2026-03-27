@@ -457,6 +457,7 @@
      { MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
        Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
        Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
+       Partage->Users_GPS = Json_node_create ();
      }
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
@@ -549,6 +550,8 @@
     if (Partage->Maps_to_thread)   { g_tree_destroy  ( Partage->Maps_to_thread );   Partage->Maps_to_thread   = NULL; }
     if (Partage->Maps_root)        { Json_node_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
     pthread_rwlock_unlock(&Partage->Maps_synchro);
+
+    if (Partage->Users_GPS)        { Json_node_unref ( Partage->Users_GPS );        Partage->Users_GPS        = NULL; }
 
     pthread_rwlock_wrlock(&Partage->Liste_visuel_synchro);
     g_slist_free ( Partage->Liste_visuel ); Partage->Liste_visuel = NULL;

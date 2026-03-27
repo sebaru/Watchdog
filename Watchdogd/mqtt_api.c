@@ -227,6 +227,24 @@
           else Dls_data_DI_set_pulse ( NULL, bit );
         }
      }
+/*-------------------------------------------------- topic SET_GPS -----------------------------------------------------------*/
+    else if ( !strcasecmp( tokens[1], "SET_GPS") )
+     { if ( !Json_has_member ( request, "email" ) || !Json_has_member ( request, "latitude" ) ||
+            !Json_has_member ( request, "longitude" ) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SET_GPS: missing fields. Dropping." );
+          goto end_request;
+        }
+       gchar *email = Json_get_string ( request, "email" );
+       JsonNode *user_gps = Json_node_add_objet ( Partage->Users_GPS, email );
+       if (user_gps)
+        { gdouble latitude = Json_get_double ( request, "latitude" );
+          gdouble longitude = Json_get_double ( request, "longitude" );
+          Json_node_add_double ( user_gps, "latitude",  latitude );
+          Json_node_add_double ( user_gps, "longitude", longitude );
+          Info_new( __func__, Config.log_msrv, LOG_INFO, 
+                    "SET_GPS: Updated GPS for user '%s': latitude=%f, longitude=%f", email, latitude, longitude );
+        }
+     }
 
 end_request:
     Json_node_unref ( request );
