@@ -1,0 +1,7 @@
+/* Allow members of group "abls" to use ModemManager D-Bus actions. */
+polkit.addRule(function(action, subject) {
+  if (action.id.indexOf("org.freedesktop.ModemManager1.") === 0 &&
+      subject.isInGroup("abls")) {
+    return polkit.Result.YES;
+  }
+});
