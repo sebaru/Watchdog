@@ -29,110 +29,160 @@
  #include <sys/prctl.h>
  #include <string.h>
  #include <unistd.h>
+ #include <gio/gio.h>
 
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sms.h"
 
 /******************************************************************************************************************************/
-/* Smsg_Send_CB: Appelé par le téléphone quand le SMS est parti                                                               */
-/* Entrée: le message à envoyer sateur                                                                                        */
-/* Sortie: Niet                                                                                                               */
+/* ModemManager D-Bus constants                                                                                              */
 /******************************************************************************************************************************/
- static void Smsg_Send_CB (GSM_StateMachine *sm, int status, int MessageReference, void * user_data)
-  { struct THREAD *module = user_data;
-    struct SMS_VARS *vars = module->vars;
-    if (status==0) { vars->gammu_send_status = ERR_NONE; }
-    else vars->gammu_send_status = ERR_UNKNOWN;
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
-              "status = %d, vars->gammu_send_status=%d", status, vars->gammu_send_status );
-  }
+ #define MM_DBUS_SERVICE "org.freedesktop.ModemManager1"
+ #define MM_DBUS_ROOT_OBJECT "/org/freedesktop/ModemManager1"
+ #define MM_DBUS_OBJ_MANAGER_IFACE "org.freedesktop.DBus.ObjectManager"
+ #define MM_DBUS_PROPERTIES_IFACE "org.freedesktop.DBus.Properties"
+ #define MM_DBUS_MODEM_IFACE "org.freedesktop.ModemManager1.Modem"
+ #define MM_DBUS_MESSAGING_IFACE "org.freedesktop.ModemManager1.Modem.Messaging"
+ #define MM_DBUS_SMS_IFACE "org.freedesktop.ModemManager1.Sms"
+
 /******************************************************************************************************************************/
-/* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
+/* Smsg_get_modem_path: Cherche un modem avec interface Messaging via ObjectManager                                          */
 /******************************************************************************************************************************/
- static void Smsg_disconnect ( struct THREAD *module )
+ static gboolean Smsg_get_modem_path ( struct THREAD *module, gchar **modem_path )
   { struct SMS_VARS *vars = module->vars;
-    GSM_Error error;
+    GDBusConnection *system_bus;
+    GVariant *reply;
+    GVariantIter *objects;
+    const gchar *object_path;
+    GVariant *interfaces;
+    GError *error = NULL;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    if (GSM_IsConnected(vars->gammu_machine))
-     { error = GSM_TerminateConnection(vars->gammu_machine);                                  /* Terminate connection */
-       if (error != ERR_NONE)
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                   "%s: TerminateConnection Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
+
+    if (vars->mm_modem_path)
+     { *modem_path = g_strdup(vars->mm_modem_path);
+       return(TRUE);
+     }
+
+    system_bus = g_bus_get_sync ( G_BUS_TYPE_SYSTEM, NULL, &error );
+    if (!system_bus)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: Cannot connect to system D-Bus (%s)", thread_tech_id, error ? error->message : "unknown" );
+       g_clear_error(&error);
+       return(FALSE);
+     }
+
+    reply = g_dbus_connection_call_sync ( system_bus,
+                                          MM_DBUS_SERVICE,
+                                          MM_DBUS_ROOT_OBJECT,
+                                          MM_DBUS_OBJ_MANAGER_IFACE,
+                                          "GetManagedObjects",
+                                          NULL,
+                                          G_VARIANT_TYPE("(a{oa{sa{sv}}})"),
+                                          G_DBUS_CALL_FLAGS_NONE,
+                                          10000,
+                                          NULL,
+                                          &error );
+
+    if (!reply)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: GetManagedObjects failed (%s)", thread_tech_id, error ? error->message : "unknown" );
+       g_clear_error(&error);
+       g_object_unref(system_bus);
+       return(FALSE);
+     }
+
+    g_variant_get ( reply, "(a{oa{sa{sv}}})", &objects );
+    while ( g_variant_iter_next ( objects, "{&o@a{sa{sv}}}", &object_path, &interfaces ) )
+     { GVariant *messaging = g_variant_lookup_value ( interfaces, MM_DBUS_MESSAGING_IFACE, NULL );
+       if (messaging)
+        { vars->mm_modem_path = g_strdup(object_path);
+          *modem_path = g_strdup(object_path);
+          g_variant_unref(messaging);
+          g_variant_unref(interfaces);
+          break;
         }
+       g_variant_unref(interfaces);
      }
-    GSM_FreeStateMachine(vars->gammu_machine);                                                 /* Free up used memory */
-    vars->gammu_machine = NULL;
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Disconnected", thread_tech_id );
+
+    g_variant_iter_free(objects);
+    g_variant_unref(reply);
+    g_object_unref(system_bus);
+
+    if (*modem_path == NULL)
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                 "%s: No ModemManager modem with Messaging interface found", thread_tech_id );
+       return(FALSE);
+     }
+    return(TRUE);
   }
-/******************************************************************************************************************************/
-/* smsg_connect: Ouvre une connexion vers le téléphone ou la clef 3G                                                          */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static gboolean Smsg_connect ( struct THREAD *module )
-  { struct SMS_VARS *vars = module->vars;
-    GSM_Error error;
 
+/******************************************************************************************************************************/
+/* Smsg_get_signal_quality: Lit la qualité du signal modem via D-Bus                                                         */
+/******************************************************************************************************************************/
+ static gboolean Smsg_get_signal_quality ( struct THREAD *module, gdouble *signal_quality )
+  { gchar *modem_path = NULL;
+    GDBusConnection *system_bus;
+    GVariant *reply;
+    GVariant *value;
+    GError *error = NULL;
+    guint32 quality = 0;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Trying to connect", thread_tech_id );
 
-    GSM_InitLocales(NULL);
-    if ( (vars->gammu_machine = GSM_AllocStateMachine()) == NULL )                         /* Allocates state machine */
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: AllocStateMachine Error", thread_tech_id );
-       return(FALSE);
-     }
+    if (!Smsg_get_modem_path(module, &modem_path)) return(FALSE);
 
-    error = GSM_FindGammuRC(&vars->gammu_cfg, NULL);
-    if (error != ERR_NONE)
+    system_bus = g_bus_get_sync ( G_BUS_TYPE_SYSTEM, NULL, &error );
+    if (!system_bus)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                 "%s: FindGammuRC Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
-       Smsg_disconnect(module);
+                 "%s: Cannot connect to system D-Bus (%s)", thread_tech_id, error ? error->message : "unknown" );
+       g_clear_error(&error);
+       g_free(modem_path);
        return(FALSE);
      }
 
-    error = GSM_ReadConfig(vars->gammu_cfg, GSM_GetConfig(vars->gammu_machine, 0), 0);
-    if (error != ERR_NONE)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                "%s: ReadConfig Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
-       Smsg_disconnect(module);
+    reply = g_dbus_connection_call_sync ( system_bus,
+                                          MM_DBUS_SERVICE,
+                                          modem_path,
+                                          MM_DBUS_PROPERTIES_IFACE,
+                                          "Get",
+                                          g_variant_new ( "(ss)", MM_DBUS_MODEM_IFACE, "SignalQuality" ),
+                                          G_VARIANT_TYPE("(v)"),
+                                          G_DBUS_CALL_FLAGS_NONE,
+                                          10000,
+                                          NULL,
+                                          &error );
+
+    if (!reply)
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                 "%s: Cannot read signal quality (%s)", thread_tech_id, error ? error->message : "unknown" );
+       g_clear_error(&error);
+       g_object_unref(system_bus);
+       g_free(modem_path);
        return(FALSE);
      }
 
-    INI_Free(vars->gammu_cfg);
-    GSM_SetConfigNum(vars->gammu_machine, 1);
-
-    error = GSM_InitConnection(vars->gammu_machine, 1);
-    if (error != ERR_NONE)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                 "%s: InitConnection Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
-       Smsg_disconnect(module);
-       return(FALSE);
+    g_variant_get ( reply, "(v)", &value );
+    if ( g_variant_is_of_type(value, G_VARIANT_TYPE("(ub)")) )
+     { gboolean recent;
+       g_variant_get ( value, "(ub)", &quality, &recent );
      }
-    GSM_SetSendSMSStatusCallback(vars->gammu_machine, Smsg_Send_CB, module);
-
-    gchar constructeur[64];
-    error = GSM_GetManufacturer(vars->gammu_machine, constructeur);
-    if (error != ERR_NONE)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                 "%s: GSM_GetManufacturer Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
-       Smsg_disconnect(module);
+    else if ( g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32) )
+     { quality = g_variant_get_uint32(value); }
+    else
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                 "%s: Unsupported SignalQuality type '%s'", thread_tech_id, g_variant_get_type_string(value) );
+       g_variant_unref(value);
+       g_variant_unref(reply);
+       g_object_unref(system_bus);
+       g_free(modem_path);
        return(FALSE);
      }
 
-    gchar model[64];
-    error = GSM_GetModel(vars->gammu_machine, model);
-    if (error != ERR_NONE)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                 "%s: GSM_GetModel Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
-       Smsg_disconnect(module);
-       return(FALSE);
-     }
-
-    Info_new( __func__, module->Thread_debug, LOG_INFO,
-              "%s: Connection OK with '%s/%s'", thread_tech_id, constructeur, model );
+    *signal_quality = quality;
+    g_variant_unref(value);
+    g_variant_unref(reply);
+    g_object_unref(system_bus);
+    g_free(modem_path);
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -142,10 +192,13 @@
 /******************************************************************************************************************************/
  static gboolean Envoi_sms_gsm ( struct THREAD *module, JsonNode *msg, gchar *telephone )
   { struct SMS_VARS *vars = module->vars;
-    GSM_SMSMessage sms;
-    GSM_SMSC PhoneSMSC;
+    GDBusConnection *system_bus;
+    gchar *modem_path = NULL;
+    gchar *sms_path = NULL;
+    GVariantBuilder builder;
+    GVariant *reply;
     gchar libelle[256];
-    GSM_Error error;
+    GError *error = NULL;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
@@ -154,64 +207,102 @@
        return(FALSE);
      }
 
-    if (!Smsg_connect(module))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Connect failed, cannot send SMS to '%s'", thread_tech_id, telephone );
+    if (!Smsg_get_modem_path(module, &modem_path))
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: No modem available, cannot send SMS to '%s'", thread_tech_id, telephone );
        return(FALSE);
      }
 
-    memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
-    sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
-    sms.UDH.Type = UDH_NoUDH;                                                                 /* No UDH, just a plain message */
-    sms.Coding = SMS_Coding_Unicode_No_Compression;                                        /* We used default coding for text */
-    sms.Class = 1;                                                                                /* Class 1 message (normal) */
     gchar *dls_shortname = Json_get_string ( msg, "dls_shortname" );
     if (dls_shortname) g_snprintf( libelle, sizeof(libelle), "%s: %s", dls_shortname, Json_get_string( msg, "libelle") );
                   else g_snprintf( libelle, sizeof(libelle), "%s", Json_get_string( msg, "libelle") );
-    EncodeUnicode( sms.Text, libelle, strlen(libelle));                                                /* Encode message text */
-    EncodeUnicode( sms.Number, telephone, strlen(telephone));
-
- /*debug_info = GSM_GetDebug(s);
- GSM_SetDebugGlobal(FALSE, debug_info);
- GSM_SetDebugFileDescriptor(stderr, TRUE, debug_info);
- GSM_SetDebugLevel("textall", debug_info);*/
-
-    PhoneSMSC.Location = 1;                                                                    /* We need to know SMSC number */
-    error = GSM_GetSMSC(vars->gammu_machine, &PhoneSMSC);
-    if (error != ERR_NONE)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                "%s: GetSMSC Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
-       Smsg_disconnect(module);
-       return(FALSE);
-     }
-
-    CopyUnicodeString(sms.SMSC.Number, PhoneSMSC.Number);                                       /* Set SMSC number in message */
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG,
               "%s: Try to send to %s (%s)", thread_tech_id, telephone, libelle );
 
-    vars->gammu_send_status = ERR_TIMEOUT;
-    error = GSM_SendSMS(vars->gammu_machine, &sms);                                                        /* Send message */
-    if (error != ERR_NONE)
+    system_bus = g_bus_get_sync ( G_BUS_TYPE_SYSTEM, NULL, &error );
+    if (!system_bus)
      { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                 "%s: SendSMS Failed (%s)", thread_tech_id, GSM_ErrorString(error) );
-       Smsg_disconnect(module);
+                 "%s: Cannot connect to system D-Bus (%s)", thread_tech_id, error ? error->message : "unknown" );
+       g_clear_error(&error);
+       g_free(modem_path);
        return(FALSE);
      }
 
-    while ( module->Thread_run == TRUE && vars->gammu_send_status == ERR_TIMEOUT )
-     { GSM_ReadDevice(vars->gammu_machine, TRUE); }
+    g_variant_builder_init ( &builder, G_VARIANT_TYPE("a{sv}") );
+    g_variant_builder_add ( &builder, "{sv}", "number", g_variant_new_string(telephone) );
+    g_variant_builder_add ( &builder, "{sv}", "text",   g_variant_new_string(libelle) );
 
-    Smsg_disconnect(module);
+    reply = g_dbus_connection_call_sync ( system_bus,
+                                          MM_DBUS_SERVICE,
+                                          modem_path,
+                                          MM_DBUS_MESSAGING_IFACE,
+                                          "Create",
+                                          g_variant_new ( "(a{sv})", &builder ),
+                                          G_VARIANT_TYPE("(o)"),
+                                          G_DBUS_CALL_FLAGS_NONE,
+                                          10000,
+                                          NULL,
+                                          &error );
 
-    if (vars->gammu_send_status == ERR_NONE)
-     { Info_new( __func__, module->Thread_debug, LOG_NOTICE,
-                 "%s: Envoi SMS Ok to %s (%s)", thread_tech_id, telephone, libelle );
-       vars->nbr_sms++;
-       return(TRUE);
+    if (!reply)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: ModemManager Create failed (%s)", thread_tech_id, error ? error->message : "unknown" );
+       g_clear_error(&error);
+       g_object_unref(system_bus);
+       g_free(modem_path);
+       return(FALSE);
      }
-    Info_new( __func__, module->Thread_debug, LOG_WARNING,
-             "%s: Envoi SMS Nok to %s (%s) -> error '%s'", thread_tech_id, telephone, libelle, GSM_ErrorString(error) );
-    return(FALSE);
+
+    const gchar *sms_path_tmp;
+    g_variant_get ( reply, "(&o)", &sms_path_tmp );
+    sms_path = g_strdup(sms_path_tmp);
+    g_variant_unref(reply);
+
+    reply = g_dbus_connection_call_sync ( system_bus,
+                                          MM_DBUS_SERVICE,
+                                          sms_path,
+                                          MM_DBUS_SMS_IFACE,
+                                          "Send",
+                                          NULL,
+                                          NULL,
+                                          G_DBUS_CALL_FLAGS_NONE,
+                                          10000,
+                                          NULL,
+                                          &error );
+
+    if (!reply)
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                 "%s: Envoi SMS Nok to %s (%s) -> %s", thread_tech_id, telephone, libelle,
+                 error ? error->message : "unknown" );
+       g_clear_error(&error);
+       g_object_unref(system_bus);
+       g_free(modem_path);
+       g_free(sms_path);
+       return(FALSE);
+     }
+    g_variant_unref(reply);
+
+    reply = g_dbus_connection_call_sync ( system_bus,
+                                          MM_DBUS_SERVICE,
+                                          modem_path,
+                                          MM_DBUS_MESSAGING_IFACE,
+                                          "Delete",
+                                          g_variant_new ( "(o)", sms_path ),
+                                          NULL,
+                                          G_DBUS_CALL_FLAGS_NONE,
+                                          10000,
+                                          NULL,
+                                          NULL );
+    if (reply) g_variant_unref(reply);
+
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE,
+              "%s: Envoi SMS Ok to %s (%s)", thread_tech_id, telephone, libelle );
+    vars->nbr_sms++;
+    g_object_unref(system_bus);
+    g_free(modem_path);
+    g_free(sms_path);
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Envoi_sms_smsbox: Envoi un sms par OVH                                                                                     */
@@ -421,6 +512,11 @@
     pthread_mutex_unlock ( &module->synchro );
   }
 /******************************************************************************************************************************/
+/* Valeurs de state SMS ModemManager                                                                                          */
+/******************************************************************************************************************************/
+ #define MM_SMS_STATE_RECEIVED 3
+
+/******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
 /* Entrée: le message text à traiter                                                                                          */
 /* Sortie : Néant                                                                                                             */
@@ -536,56 +632,125 @@
        g_list_free(Results);
      }
 end_map:
-    Json_node_unref ( MapNode );
+  if (MapNode) Json_node_unref ( MapNode );
 end_user:
-    Json_node_unref ( UserNode );
+  if (UserNode) Json_node_unref ( UserNode );
   }
+
 /******************************************************************************************************************************/
-/* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                                               */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
+/* Smsg_sms_get_property: Lit une propriété d'un objet SMS ModemManager                                                      */
+/******************************************************************************************************************************/
+ static GVariant *Smsg_sms_get_property ( struct THREAD *module, GDBusConnection *system_bus, gchar *sms_path, gchar *property )
+  { GError *error = NULL;
+    GVariant *reply;
+    GVariant *value;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+
+    reply = g_dbus_connection_call_sync ( system_bus,
+                                          MM_DBUS_SERVICE,
+                                          sms_path,
+                                          MM_DBUS_PROPERTIES_IFACE,
+                                          "Get",
+                                          g_variant_new ( "(ss)", MM_DBUS_SMS_IFACE, property ),
+                                          G_VARIANT_TYPE("(v)"),
+                                          G_DBUS_CALL_FLAGS_NONE,
+                                          10000,
+                                          NULL,
+                                          &error );
+    if (!reply)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: Cannot read SMS property '%s' (%s)", thread_tech_id, property, error ? error->message : "unknown" );
+       g_clear_error(&error);
+       return(NULL);
+     }
+    g_variant_get ( reply, "(v)", &value );
+    g_variant_unref(reply);
+    return(value);
+  }
+
+/******************************************************************************************************************************/
+/* Lire_sms_gsm: Lecture des SMS entrants via ModemManager D-Bus                                                             */
 /******************************************************************************************************************************/
  static gboolean Lire_sms_gsm ( struct THREAD *module )
-  { struct SMS_VARS *vars = module->vars;
-    gchar from[80], texte[180];
-    GSM_MultiSMSMessage sms;
-    GSM_Error error;
-
+  { GDBusConnection *system_bus;
+    gchar *modem_path = NULL;
+    GError *error = NULL;
+    GVariant *reply;
+    GVariantIter *sms_iter;
+    const gchar *sms_path;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
 
-/* Read all messages */
-    error = ERR_NONE;
-    sms.Number = 0;
-    sms.SMS[0].Location = 0;
-    sms.SMS[0].Folder = 0;
-    error = GSM_GetNextSMS(vars->gammu_machine, &sms, TRUE);
-    if (error == ERR_NONE)
-     { gint i;
-       for (i = 0; i < sms.Number; i++)
-        { g_snprintf( from, sizeof(from), "%s", DecodeUnicodeConsole(sms.SMS[i].Number) );
-          g_snprintf( texte, sizeof(texte), "%s", DecodeUnicodeConsole(sms.SMS[i].Text) );
-          sms.SMS[0].Folder = 0;/* https://github.com/gammu/gammu/blob/ed2fec4a382e7ac4b5dfc92f5b10811f76f4817e/gammu/message.c */
-          if (sms.SMS[i].State == SMS_UnRead)                                /* Pour tout nouveau message, nous le processons */
-           { Info_new( __func__, module->Thread_debug, LOG_NOTICE,
-                      "%s: Recu '%s' from '%s' Location %d/%d Folder %d !",
-                       thread_tech_id, texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder );
-             Traiter_commande_sms ( module, from, texte );
+    if (!Smsg_get_modem_path(module, &modem_path)) return(FALSE);
+
+    system_bus = g_bus_get_sync ( G_BUS_TYPE_SYSTEM, NULL, &error );
+    if (!system_bus)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+                 "%s: Cannot connect to system D-Bus (%s)", thread_tech_id, error ? error->message : "unknown" );
+       g_clear_error(&error);
+       g_free(modem_path);
+       return(FALSE);
+     }
+
+    reply = g_dbus_connection_call_sync ( system_bus,
+                                          MM_DBUS_SERVICE,
+                                          modem_path,
+                                          MM_DBUS_MESSAGING_IFACE,
+                                          "List",
+                                          NULL,
+                                          G_VARIANT_TYPE("(ao)"),
+                                          G_DBUS_CALL_FLAGS_NONE,
+                                          10000,
+                                          NULL,
+                                          &error );
+    if (!reply)
+     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+                 "%s: Cannot list SMS (%s)", thread_tech_id, error ? error->message : "unknown" );
+       g_clear_error(&error);
+       g_object_unref(system_bus);
+       g_free(modem_path);
+       return(FALSE);
+     }
+
+    g_variant_get ( reply, "(ao)", &sms_iter );
+    while ( g_variant_iter_next ( sms_iter, "&o", &sms_path ) )
+     { GVariant *state_v = Smsg_sms_get_property ( module, system_bus, (gchar *)sms_path, "State" );
+       if (!state_v) continue;
+       guint32 state = g_variant_get_uint32(state_v);
+       g_variant_unref(state_v);
+
+       if (state == MM_SMS_STATE_RECEIVED)
+        { GVariant *number_v = Smsg_sms_get_property ( module, system_bus, (gchar *)sms_path, "Number" );
+          GVariant *text_v   = Smsg_sms_get_property ( module, system_bus, (gchar *)sms_path, "Text" );
+          if (number_v && text_v)
+           { const gchar *from = g_variant_get_string(number_v, NULL);
+             const gchar *texte = g_variant_get_string(text_v, NULL);
+             Info_new( __func__, module->Thread_debug, LOG_NOTICE,
+                      "%s: Recu '%s' from '%s' via %s", thread_tech_id, texte, from, sms_path );
+             Traiter_commande_sms ( module, (gchar *)from, (gchar *)texte );
            }
-          error = GSM_DeleteSMS( vars->gammu_machine, &sms.SMS[i] );
-          if (error != ERR_NONE)
-           { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                      "%s: Delete '%s' from '%s' Location %d/%d Folder %d Failed ('%s')!",
-                       thread_tech_id, texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder, GSM_ErrorString(error) );
-           }
-         }
-      }
-     else if (error != ERR_EMPTY)
-      { Info_new( __func__, module->Thread_debug, LOG_ERR,
-                  "%s: Error Reading SMS: '%s' !", thread_tech_id, GSM_ErrorString(error) );
-      }
-    if ( (error == ERR_NONE) || (error == ERR_EMPTY) ) { return(TRUE); }
-    return(FALSE);
+          if (number_v) g_variant_unref(number_v);
+          if (text_v) g_variant_unref(text_v);
+
+          GVariant *delete_reply = g_dbus_connection_call_sync ( system_bus,
+                                                                  MM_DBUS_SERVICE,
+                                                                  modem_path,
+                                                                  MM_DBUS_MESSAGING_IFACE,
+                                                                  "Delete",
+                                                                  g_variant_new ( "(o)", sms_path ),
+                                                                  NULL,
+                                                                  G_DBUS_CALL_FLAGS_NONE,
+                                                                  10000,
+                                                                  NULL,
+                                                                  NULL );
+          if (delete_reply) g_variant_unref(delete_reply);
+        }
+     }
+
+    g_variant_iter_free(sms_iter);
+    g_variant_unref(reply);
+    g_object_unref(system_bus);
+    g_free(modem_path);
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
@@ -637,20 +802,17 @@ end_user:
         }
 /****************************************************** Lecture de SMS ********************************************************/
        if (Partage->top < next_read) continue;
-       if (module->Thread_run && Smsg_connect(module))
+       gdouble signal_quality;
+       if (module->Thread_run && Smsg_get_signal_quality(module, &signal_quality))
         { Thread_send_comm_to_master ( module, TRUE );
+          MQTT_Send_AI ( module, vars->ai_signal_quality, signal_quality, TRUE );
           Lire_sms_gsm(module);
-          GSM_SignalQuality sig;
-          GSM_GetSignalQuality( vars->gammu_machine, &sig );
-          MQTT_Send_AI ( module, vars->ai_signal_quality, 1.0*sig.SignalPercent, TRUE );
         }
        else
-        { Info_new( __func__, module->Thread_debug, LOG_INFO, "Connect failed" );
-          Thread_send_comm_to_master ( module, FALSE );
-        }
-       Smsg_disconnect(module);
+        { Thread_send_comm_to_master ( module, FALSE ); }
        next_read = Partage->top + 50;
      }
+    g_clear_pointer ( &vars->mm_modem_path, g_free );
     Thread_end(module);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
