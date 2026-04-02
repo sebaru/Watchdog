@@ -306,7 +306,7 @@
        gchar chaine[256];
        g_snprintf ( chaine, sizeof(chaine), "nice -20 git clone -b %s https://github.com/sebaru/Watchdog.git temp_src", branche );
        system(chaine);
-       system("cd temp_src; nice -20 ./autogen.sh; sudo make install; cd ..; rm -rf temp_src;" );
+       system("cd temp_src; nice -20 ./build.sh; nice -20 ./install.sh; cd ..; rm -rf temp_src;" );
        Info_new( __func__, Config.log_msrv, LOG_WARNING, "Fils: UPGRADE: done. Restarting." );
        kill (pid, SIGTERM);                                                                             /* Stop old processes */
        exit(0);
