@@ -42,6 +42,7 @@
  #include <fcntl.h>
  #include <errno.h>
  #include <dlfcn.h>
+ #include <link.h>
 
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
@@ -403,7 +404,7 @@
      }
 
     gchar nom_fichier[256];
-    g_snprintf( nom_fichier,  sizeof(nom_fichier), "%s/libwatchdog-server-%s.so", Config.librairie_dir, thread_classe );
+    g_snprintf( nom_fichier,  sizeof(nom_fichier), "libwatchdog-server-%s.so", thread_classe );
 
     module->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW );
     if (!module->dl_handle)
@@ -412,6 +413,13 @@
        g_free(module);
        return;
      }
+    struct link_map *map;
+    if (dlinfo(module->dl_handle, RTLD_DI_LINKMAP, &map) != 0)
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': dl_info failed for '%s': '%s'",
+                thread_tech_id, nom_fichier, dlerror() );
+                  
+     }
+    else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': using file '%s'", thread_tech_id, map->l_name );
 
     module->Run_thread = dlsym( module->dl_handle, "Run_thread" );                        /* Recherche de la fonction */
     if (!module->Run_thread)

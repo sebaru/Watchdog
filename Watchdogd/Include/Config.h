@@ -40,7 +40,6 @@
     gboolean headless;                                                                          /* Headless instance or not ? */
 
     gchar home [ TAILLE_HOME+1 ];                                                              /* Repertoire maison du daemon */
-    gchar librairie_dir [ TAILLE_HOME+1 ];                                   /* Repertoire de stockage des libraires watchdog */
     gboolean instance_is_master;                                               /* TRUE si l'instance est l'instance maitresse */
     gchar master_hostname[ 32 ];
     gchar mqtt_hostname[ 32 ];                                                                /* Hostname du serveur MQTT_API */
@@ -55,11 +54,11 @@
     gboolean single;                                                                                /* Demarrage des thread ? */
   };
 
- #define DEFAUT_PROCESS_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
+ #define DEFAUT_LIBRARY_DIR           "/usr/local/lib64"        /* Ne pas depasser TAILLE_HOME caracteres */
 
-/******************************************* Prototypes de fonctions **************************************/
+/*************************************************** Prototypes de fonctions **************************************************/
  extern void Lire_config ( int argc, char *argv[] );
  extern void Print_config ( void );
 #endif
 
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
