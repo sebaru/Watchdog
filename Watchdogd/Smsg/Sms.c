@@ -36,18 +36,19 @@
  #include "Sms.h"
 
 /******************************************************************************************************************************/
-/* ModemManager D-Bus constants                                                                                              */
+/* ModemManager D-Bus constants                                                                                               */
 /******************************************************************************************************************************/
- #define MM_DBUS_SERVICE "org.freedesktop.ModemManager1"
- #define MM_DBUS_ROOT_OBJECT "/org/freedesktop/ModemManager1"
+ #define MM_DBUS_SERVICE           "org.freedesktop.ModemManager1"
+ #define MM_DBUS_ROOT_OBJECT       "/org/freedesktop/ModemManager1"
  #define MM_DBUS_OBJ_MANAGER_IFACE "org.freedesktop.DBus.ObjectManager"
- #define MM_DBUS_PROPERTIES_IFACE "org.freedesktop.DBus.Properties"
- #define MM_DBUS_MODEM_IFACE "org.freedesktop.ModemManager1.Modem"
- #define MM_DBUS_MESSAGING_IFACE "org.freedesktop.ModemManager1.Modem.Messaging"
- #define MM_DBUS_SMS_IFACE "org.freedesktop.ModemManager1.Sms"
+ #define MM_DBUS_PROPERTIES_IFACE  "org.freedesktop.DBus.Properties"
+ #define MM_DBUS_MODEM_IFACE       "org.freedesktop.ModemManager1.Modem"
+ #define MM_DBUS_MESSAGING_IFACE   "org.freedesktop.ModemManager1.Modem.Messaging"
+ #define MM_DBUS_SMS_IFACE         "org.freedesktop.ModemManager1.Sms"
+ #define MM_SMS_STATE_RECEIVED     3
 
 /******************************************************************************************************************************/
-/* Smsg_get_modem_path: Cherche un modem avec interface Messaging via ObjectManager                                          */
+/* Smsg_get_modem_path: Cherche un modem avec interface Messaging via ObjectManager                                           */
 /******************************************************************************************************************************/
  static gboolean Smsg_get_modem_path ( struct THREAD *module, gchar **modem_path )
   { struct SMS_VARS *vars = module->vars;
@@ -487,9 +488,12 @@
  static void Envoyer_smsg_ovh_text ( struct THREAD *module, gchar *texte )
   { JsonNode *RootNode = Json_node_create();
     if (!RootNode) return;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     Json_node_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
+    Json_node_add_string ( RootNode, "tech_id", thread_tech_id );
+    Json_node_add_string ( RootNode, "acronyme", "TEST_OVH" );
     Json_node_add_string ( RootNode, "libelle", texte );
-    Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_node_add_string ( RootNode, "dls_shortname", thread_tech_id );
     Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_OVH_ONLY );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
@@ -503,19 +507,17 @@
  static void Envoyer_smsg_gsm_text ( struct THREAD *module, gchar *texte )
   { JsonNode *RootNode = Json_node_create();
     if (!RootNode) return;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     Json_node_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
+    Json_node_add_string ( RootNode, "tech_id", thread_tech_id );
+    Json_node_add_string ( RootNode, "acronyme", "TEST_GSM" );
     Json_node_add_string ( RootNode, "libelle", texte );
-    Json_node_add_string ( RootNode, "dls_shortname", Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_node_add_string ( RootNode, "dls_shortname", thread_tech_id );
     Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_YES );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
   }
-/******************************************************************************************************************************/
-/* Valeurs de state SMS ModemManager                                                                                          */
-/******************************************************************************************************************************/
- #define MM_SMS_STATE_RECEIVED 3
-
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
 /* Entrée: le message text à traiter                                                                                          */
@@ -767,7 +769,6 @@ end_user:
     vars->sending_is_disabled = FALSE;                                               /* A l'init, l'envoi de SMS est autorisé */
     vars->ai_nbr_sms        = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyés", "sms", ARCHIVE_1_HEURE );
     vars->ai_signal_quality = Mnemo_create_thread_AI ( module, "SIGNAL_QUALITY", "Qualité du signal", "%", ARCHIVE_1_HEURE );
-    vars->nbr_sms  = 0;
     gint next_read = 0;
     Envoyer_smsg_gsm_text ( module, "SMS System is running" );
 
@@ -792,10 +793,10 @@ end_user:
                           Json_get_string ( message, "libelle" ) );
                 Smsg_send_to_all_authorized_recipients( module, message );
               }
-             else if (!strcasecmp (token_lvl0, "THREAD_TEST") && Json_has_member ( message, "test_mode" ) )
+             else if (!strcasecmp (token_lvl0, "SET_TEST") && Json_has_member ( message, "test_mode" ) )
               { gchar *test_mode  = Json_get_string ( message, "test_mode" );
-                if ( !strcasecmp ( test_mode, "test_gsm" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
-                if ( !strcasecmp ( test_mode, "test_ovh" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
+                if ( !strcasecmp ( test_mode, "GSM" ) ) Envoyer_smsg_gsm_text ( module, "Test SMS GSM OK !" );
+                if ( !strcasecmp ( test_mode, "OVH" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
               }
            }
           Json_node_unref(message);

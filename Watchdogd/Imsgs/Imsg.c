@@ -383,7 +383,7 @@ reconnect:
                 g_snprintf( chaine, sizeof(chaine), "%s: %s", Json_get_string ( message, "dls_shortname" ), Json_get_string ( message, "libelle" ) );
                 Imsgs_Envoi_message_to_all_available ( module, chaine );
               }
-             else if (!strcasecmp (token_lvl0, "THREAD_TEST")) { Imsgs_Envoi_message_to_all_available ( module, "Test OK" ); }
+             else if (!strcasecmp (token_lvl0, "SET_TEST")) { Imsgs_Envoi_message_to_all_available ( module, "Test OK" ); }
            }
           Json_node_unref(message);
         }
