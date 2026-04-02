@@ -106,6 +106,9 @@ install(FILES watchdogd.abls.conf.sample DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}
 install(FILES watchdogd_sudo
         DESTINATION /etc/sudoers.d
         PERMISSIONS OWNER_READ GROUP_READ)
+install(FILES 49-modemmanager-abls.rules
+  DESTINATION /etc/polkit-1/rules.d
+  PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 
 # En-tête publique
 install(FILES Include/Module_dls.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

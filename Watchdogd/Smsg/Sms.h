@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Smsg/Sms.h        Déclaration structure internes des SMS avec Gammu                                              */
+/* Watchdogd/Smsg/Sms.h        Déclaration structure internes des SMS                                                         */
 /* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                18.02.2018 11:59:59 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -28,13 +28,9 @@
 #ifndef _SMSG_H_
  #define _SMSG_H_
 
- #include <gammu.h>
-
  struct SMS_VARS
   { gboolean sending_is_disabled;                                  /* Variable permettant d'interdire l'envoi de sms si panic */
-    GSM_Error gammu_send_status;
-    GSM_StateMachine *gammu_machine;
-    INI_Section *gammu_cfg;
+    gchar *mm_modem_path;
     JsonNode *ai_nbr_sms;
     JsonNode *ai_signal_quality;
     guint nbr_sms;

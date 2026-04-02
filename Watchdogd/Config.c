@@ -45,7 +45,6 @@
 
     memset ( &Config, 0, sizeof(struct CONFIG) );
     g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "localhost" );
-    g_snprintf( Config.librairie_dir,   sizeof(Config.librairie_dir),   "%s", DEFAUT_PROCESS_DIR   );
     Config.instance_is_master = TRUE;
     Config.log_level = LOG_INFO;
 
@@ -177,6 +176,5 @@
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Config.master_hostname );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
