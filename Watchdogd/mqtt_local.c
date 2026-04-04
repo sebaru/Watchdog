@@ -65,7 +65,7 @@
   { gchar **tokens = g_strsplit ( msg->topic, "/", 3 );
     if (!tokens)    { Info_new( __func__, Config.log_bus, LOG_ERR, "Tokens is null" ); return; }
     if (!tokens[0]) { Info_new( __func__, Config.log_bus, LOG_ERR, "Token[0] is null" ); goto end; }
-    if (!tokens[1]) { Info_new( __func__, Config.log_bus, LOG_ERR, "Token[0] is null" ); goto end; }
+    if (!tokens[1]) { Info_new( __func__, Config.log_bus, LOG_ERR, "Token[1] is null" ); goto end; }
 
     JsonNode *request = Json_get_from_string ( msg->payload );
     if (!request)
@@ -95,9 +95,12 @@
     else if ( !strcmp ( topic, "SET_DI_PULSE" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
        gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
-       Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI_PULSE from '%s': '%s:%s'=PULSE", thread_tech_id, tokens[1], tokens[2] );
-       struct DLS_DI *bit = Dls_data_DI_lookup ( tokens[1], tokens[2] );
-       Dls_data_DI_set_pulse ( NULL, bit );
+       if (thread_tech_id)
+        { Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI_PULSE from '%s': '%s:%s'=PULSE",
+                    thread_tech_id, tokens[1], tokens[2] );
+          struct DLS_DI *bit = Dls_data_DI_lookup ( tokens[1], tokens[2] );
+          Dls_data_DI_set_pulse ( NULL, bit );
+        } else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI_PULSE: 'thread_tech_id' is missing" );
      }
     else if ( !strcmp ( topic, "SET_BUS" ) )
      { gchar *commande = Json_get_string ( request, "commande" );
