@@ -31,9 +31,8 @@
  struct SMS_VARS
   { gboolean sending_is_disabled;                                  /* Variable permettant d'interdire l'envoi de sms si panic */
     gchar *mm_modem_path;
-    JsonNode *ai_nbr_sms;
+    JsonNode *ci_nbr_sms;
     JsonNode *ai_signal_quality;
-    guint nbr_sms;
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/

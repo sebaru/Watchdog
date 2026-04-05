@@ -478,7 +478,7 @@
      }
     g_list_free(Recipients);
     Json_node_unref ( UsersNode );
-    MQTT_Send_AI ( module, vars->ai_nbr_sms, vars->nbr_sms, TRUE );
+    MQTT_Send_CI_pulse ( module, vars->ci_nbr_sms );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -767,7 +767,7 @@ end_user:
     MQTT_Subscribe ( module->MQTT_session, "SEND_SMS" );
 
     vars->sending_is_disabled = FALSE;                                               /* A l'init, l'envoi de SMS est autorisé */
-    vars->ai_nbr_sms        = Mnemo_create_thread_AI ( module, "NBR_SMS", "Nombre de SMS envoyés", "sms", ARCHIVE_1_HEURE );
+    vars->ci_nbr_sms        = Mnemo_create_thread_CI ( module, "NBR_SMS", "Nombre de SMS envoyés", "sms", ARCHIVE_1_HEURE );
     vars->ai_signal_quality = Mnemo_create_thread_AI ( module, "SIGNAL_QUALITY", "Qualité du signal", "%", ARCHIVE_1_HEURE );
     gint next_read = 0;
     Envoyer_smsg_gsm_text ( module, "SMS System is running" );

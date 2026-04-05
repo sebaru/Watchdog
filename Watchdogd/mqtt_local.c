@@ -275,6 +275,22 @@ end:
     Json_node_unref ( thread_di );
   }
 /******************************************************************************************************************************/
+/* MQTT_Send_CI_pulse: Envoie une impulsion CI au master                                                                       */
+/* Entrée: la structure THREAD, le noeud CI                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void MQTT_Send_CI_pulse ( struct THREAD *module, JsonNode *thread_ci )
+  { if (! (module && thread_ci)) return;
+    gchar *thread_tech_id  = Json_get_string ( thread_ci, "thread_tech_id" );
+    gchar *thread_acronyme = Json_get_string ( thread_ci, "thread_acronyme" );
+    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = PULSE", thread_tech_id, thread_acronyme );
+    JsonNode *RootNode = Json_node_create();
+    if (!RootNode) return;
+    Json_node_add_string ( RootNode, "from_thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+    MQTT_Send_to_topic ( module->MQTT_session, RootNode, FALSE, "SET_CI_PULSE/%s/%s", thread_tech_id, thread_acronyme );
+    Json_node_unref ( RootNode );
+  }
+/******************************************************************************************************************************/
 /* MQTT_Send_WATCHDOG: Envoie le WATCHDOG au master                                                                           */
 /* Entrée: la structure MQTT, le watchdog, la consigne                                                                        */
 /* Sortie: néant                                                                                                              */
