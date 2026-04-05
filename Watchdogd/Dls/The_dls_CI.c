@@ -103,6 +103,16 @@
      { bit->etat = FALSE; }
   }
 /******************************************************************************************************************************/
+/* Dls_data_CI_set_pulse: Envoi une impulsion sur une CI (TRUE puis FALSE)                                                     */
+/* Entrée: le DLS_VARS et le compteur                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_CI_set_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit )
+  { if (!bit) return;
+    Dls_data_CI_set ( vars, bit, TRUE );
+    Dls_data_CI_set ( vars, bit, FALSE );
+  }
+/******************************************************************************************************************************/
 /* Dls_data_CI_reset: Reset un compteur d'impulsion                                                                           */
 /* Entrée: le DLS_VARS et le compteur                                                                                         */
 /* Sortie : Néant                                                                                                             */

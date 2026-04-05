@@ -41,6 +41,7 @@
      { if (Config.instance_is_master)
         { MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI/#" );
           MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI_PULSE/#" );
+          MQTT_Subscribe ( Partage->MQTT_local_session, "SET_CI_PULSE/#" ); 
           MQTT_Subscribe ( Partage->MQTT_local_session, "SET_AI/#" );
           MQTT_Subscribe ( Partage->MQTT_local_session, "SET_WATCHDOG/#" );
         }
@@ -101,6 +102,16 @@
           struct DLS_DI *bit = Dls_data_DI_lookup ( tokens[1], tokens[2] );
           Dls_data_DI_set_pulse ( NULL, bit );
         } else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI_PULSE: 'thread_tech_id' is missing" );
+     }
+    else if ( !strcmp ( topic, "SET_CI_PULSE" ) )
+     { if (!tokens[2]) goto end; /* L'acronyme */
+       gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
+       if (thread_tech_id)
+        { Info_new( __func__, Config.log_bus, LOG_INFO, "SET_CI_PULSE from '%s': '%s:%s'=PULSE",
+                    thread_tech_id, tokens[1], tokens[2] );
+          struct DLS_CI *bit = Dls_data_CI_lookup ( tokens[1], tokens[2] );
+          Dls_data_CI_set_pulse ( NULL, bit );
+        } else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_CI_PULSE: 'thread_tech_id' is missing" );
      }
     else if ( !strcmp ( topic, "SET_BUS" ) )
      { gchar *commande = Json_get_string ( request, "commande" );

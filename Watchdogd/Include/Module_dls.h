@@ -258,6 +258,7 @@
 
  extern struct DLS_CI *Dls_data_CI_lookup ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_CI_set ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit, gboolean etat );
+ extern void Dls_data_CI_set_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit );
  extern gint Dls_data_CI_get ( struct DLS_CI *bit );
  extern void Dls_data_CI_reset ( struct DLS_TO_PLUGIN *vars, struct DLS_CI *bit );
 
