@@ -95,23 +95,23 @@
      }
     else if ( !strcmp ( topic, "SET_DI_PULSE" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
-       gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
-       if (thread_tech_id)
+       gchar *from_thread_tech_id = Json_get_string ( request, "from_thread_tech_id" );
+       if (from_thread_tech_id)
         { Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI_PULSE from '%s': '%s:%s'=PULSE",
-                    thread_tech_id, tokens[1], tokens[2] );
+                    from_thread_tech_id, tokens[1], tokens[2] );
           struct DLS_DI *bit = Dls_data_DI_lookup ( tokens[1], tokens[2] );
           Dls_data_DI_set_pulse ( NULL, bit );
-        } else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI_PULSE: 'thread_tech_id' is missing" );
+        } else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI_PULSE: 'from_thread_tech_id' is missing" );
      }
     else if ( !strcmp ( topic, "SET_CI_PULSE" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
-       gchar *thread_tech_id = Json_get_string ( request, "thread_tech_id" );
-       if (thread_tech_id)
+       gchar *from_thread_tech_id = Json_get_string ( request, "from_thread_tech_id" );
+       if (from_thread_tech_id)
         { Info_new( __func__, Config.log_bus, LOG_INFO, "SET_CI_PULSE from '%s': '%s:%s'=PULSE",
-                    thread_tech_id, tokens[1], tokens[2] );
+                    from_thread_tech_id, tokens[1], tokens[2] );
           struct DLS_CI *bit = Dls_data_CI_lookup ( tokens[1], tokens[2] );
           Dls_data_CI_set_pulse ( NULL, bit );
-        } else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_CI_PULSE: 'thread_tech_id' is missing" );
+        } else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_CI_PULSE: 'from_thread_tech_id' is missing" );
      }
     else if ( !strcmp ( topic, "SET_BUS" ) )
      { gchar *commande = Json_get_string ( request, "commande" );
@@ -269,7 +269,7 @@ end:
     JsonNode *thread_di = Json_node_create();
     if (!thread_di) return;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Json_node_add_string ( thread_di, "thread_tech_id", thread_tech_id );
+    Json_node_add_string ( thread_di, "from_thread_tech_id", thread_tech_id );
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = PULSE", tech_id, acronyme );
     MQTT_Send_to_topic ( module->MQTT_session, thread_di, FALSE, "SET_DI_PULSE/%s/%s", tech_id, acronyme );
     Json_node_unref ( thread_di );
