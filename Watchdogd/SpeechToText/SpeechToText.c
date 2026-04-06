@@ -39,7 +39,7 @@
  #include "SpeechToText.h"
 
 /******************************************************************************************************************************/
-/* Deconnecter: Deconnexion du ups                                                                                         */
+/* Deconnecter: Deconnexion du ups                                                                                            */
 /* Entrée: un id                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -156,7 +156,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* SpeechToText_set_instcmd: Envoi d'une instant commande à l'ups                                                                 */
+/* SpeechToText_set_instcmd: Envoi d'une instant commande à l'ups                                                             */
 /* Entrée : l'ups, le nom de la commande                                                                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
@@ -189,7 +189,7 @@
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending '%s' OK", thread_tech_id, nom_cmd );
   }
 /******************************************************************************************************************************/
-/* SpeechToText_get_var: Recupere une valeur de la variable en parametre                                                          */
+/* SpeechToText_get_var: Recupere une valeur de la variable en parametre                                                      */
 /* Entrée : l'ups, le nom de variable, la variable a renseigner                                                               */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/

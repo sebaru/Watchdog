@@ -177,7 +177,7 @@ end:
     Partage->MQTT_local_session = NULL;
   }
 /******************************************************************************************************************************/
-/* MQTT_Send_to_topic: Envoie un node sur un topic MQTT via le broker                                                     */
+/* MQTT_Send_to_topic: Envoie un node sur un topic MQTT via le broker                                                         */
 /* Entrée: la structure MQTT, le topic, le node, le flag de retenu                                                            */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
@@ -275,7 +275,7 @@ end:
     Json_node_unref ( thread_di );
   }
 /******************************************************************************************************************************/
-/* MQTT_Send_CI_pulse: Envoie une impulsion CI au master                                                                       */
+/* MQTT_Send_CI_pulse: Envoie une impulsion CI au master                                                                      */
 /* Entrée: la structure THREAD, le noeud CI                                                                                   */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/

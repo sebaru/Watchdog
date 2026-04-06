@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Meteo/Meteo.c        Gestion de l'méteo pour Watchdog v3.0                                        */
+/* Watchdogd/Meteo/Meteo.c        Gestion de l'méteo pour Watchdog v3.0                                                       */
 /* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                12.03.2021 20:49:16 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/

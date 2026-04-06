@@ -119,7 +119,7 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_data_VISUEL_set_mode : Gestion du mode d'un visuel                                                                   */
+/* Dls_data_VISUEL_set_mode : Gestion du mode d'un visuel                                                                     */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur                                                  */
 /******************************************************************************************************************************/
  void Dls_data_VISUEL_set_mode ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, gchar *mode )

@@ -103,7 +103,7 @@
      { bit->etat = FALSE; }
   }
 /******************************************************************************************************************************/
-/* Dls_data_CI_set_pulse: Envoi une impulsion sur une CI (TRUE puis FALSE)                                                     */
+/* Dls_data_CI_set_pulse: Envoi une impulsion sur une CI (TRUE puis FALSE)                                                    */
 /* Entrée: le DLS_VARS et le compteur                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/

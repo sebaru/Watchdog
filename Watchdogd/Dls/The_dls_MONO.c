@@ -36,7 +36,7 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Dls_data_MONO_create_by_array : Création d'un MONO pour le plugin                                                              */
+/* Dls_data_MONO_create_by_array : Création d'un MONO pour le plugin                                                          */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  void Dls_data_MONO_create_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data )
@@ -57,7 +57,7 @@
               "Create bit DLS_MONO '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
-/* Dls_data_MONO_lookup: Recherche un MONO dans les plugins DLS                                                                   */
+/* Dls_data_MONO_lookup: Recherche un MONO dans les plugins DLS                                                               */
 /* Entrée: le tech_id, l'acronyme                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
@@ -150,7 +150,7 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_MONO_export_to_API : Formate un bit au format JSON                                                                       */
+/* Dls_MONO_export_to_API : Formate un bit au format JSON                                                                     */
 /* Entrées: le JsonNode et le bit                                                                                             */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/

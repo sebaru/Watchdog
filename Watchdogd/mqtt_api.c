@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/mqtt_api.c        Fonctions communes de gestion des requetes HTTP                                             */
+/* Watchdogd/mqtt_api.c        Fonctions communes de gestion des requetes HTTP                                                */
 /* Projet Abls-Habitat version 4.7       Gestion d'habitat                                                30.12.2020 22:03:58 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/

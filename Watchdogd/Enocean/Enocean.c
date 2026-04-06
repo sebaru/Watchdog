@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Enocean/Enocean.c  Gestion des capteurs ENOCEAN Watchdog 2.0                                 */
-/* Projet Abls-Habitat version 4.7       Gestion d'habitat                 dim. 28 déc. 2014 15:46:44 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Enocean/Enocean.c  Gestion des capteurs ENOCEAN Watchdog 2.0                                                     */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                 dim. 28 déc. 2014 15:46:44 CET                     */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Enocean.c
  * This file is part of Abls-Habitat
@@ -73,11 +73,11 @@
     0xe6, 0xe1, 0xe8, 0xef, 0xfa, 0xfd, 0xf4, 0xf3
   };
 
-/**********************************************************************************************************/
-/* Enocean_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
-/* Entrée: le pointeur sur la PROCESS                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Enocean_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                */
+/* Entrée: le pointeur sur la PROCESS                                                                                         */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  gboolean Enocean_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
@@ -108,10 +108,10 @@
      }
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Init_enocean: Initialisation de la ligne TTY ENOCEAN                                                   */
-/* Sortie: l'identifiant de la connexion                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Init_enocean: Initialisation de la ligne TTY ENOCEAN                                                                       */
+/* Sortie: l'identifiant de la connexion                                                                                      */
+/******************************************************************************************************************************/
  static int Init_enocean ( void )
   { struct termios oldtio;
     int fd;
@@ -138,11 +138,11 @@
      }
     return(fd);
   }
-/**********************************************************************************************************/
-/* Chercher_enocean: Retrouve un module/capteur dans la liste gérée en fonction des paramètres             */
-/* Entrée: les paramètres de critères de recherche                                                        */
-/* Sortie: le module, ou NULL si erreur                                                                   */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Chercher_enocean: Retrouve un module/capteur dans la liste gérée en fonction des paramètres                                */
+/* Entrée: les paramètres de critères de recherche                                                                            */
+/* Sortie: le module, ou NULL si erreur                                                                                       */
+/******************************************************************************************************************************/
  static void Enocean_Envoyer_sortie ( gint num_a )
   {
 #ifdef bouh
@@ -190,11 +190,11 @@
     pthread_mutex_unlock ( &Cfg_enocean.lib->synchro );
 #endif
   }
-/**********************************************************************************************************/
-/* Enocean_crc_header: Calcul le Header CRC de la trame en parametre                                      */
-/* Entrée: la trame recue                                                                                 */
-/* Sortie: le CRC sur 8 bits !                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Enocean_crc_header: Calcul le Header CRC de la trame en parametre                                                          */
+/* Entrée: la trame recue                                                                                                     */
+/* Sortie: le CRC sur 8 bits !                                                                                                */
+/******************************************************************************************************************************/
  static unsigned char Enocean_crc_header( struct TRAME_ENOCEAN *trame )
   { unsigned char resultCRC = 0;
     unsigned char *ptr;
@@ -204,11 +204,11 @@
      { resultCRC = ENOCEAN_CRC8TABLE[ resultCRC ^ ptr[i] ]; }
     return( resultCRC );
   }
-/**********************************************************************************************************/
-/* Enocean_crc_data: Calcul le Data CRC de la trame en parametre                                          */
-/* Entrée: la trame recue                                                                                 */
-/* Sortie: le CRC sur 8 bits !                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Enocean_crc_data: Calcul le Data CRC de la trame en parametre                                                              */
+/* Entrée: la trame recue                                                                                                     */
+/* Sortie: le CRC sur 8 bits !                                                                                                */
+/******************************************************************************************************************************/
  static unsigned char Enocean_crc_data( struct TRAME_ENOCEAN *trame )
   { unsigned char resultCRC = 0;
     unsigned char *ptr;
@@ -218,11 +218,11 @@
      { resultCRC = ENOCEAN_CRC8TABLE[ resultCRC ^ ptr[i] ]; }
     return( resultCRC );
   }
-/**********************************************************************************************************/
-/* Processer_trame_ERP1: traitement de la trame ERP1 recue par le controleur EnOcean                      */
-/* Entrée: la trame a recue                                                                               */
-/* Sortie: TRUE si processed                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Processer_trame_ERP1: traitement de la trame ERP1 recue par le controleur EnOcean                                          */
+/* Entrée: la trame a recue                                                                                                   */
+/* Sortie: TRUE si processed                                                                                                  */
+/******************************************************************************************************************************/
  static gboolean Processer_trame_ERP1( struct TRAME_ENOCEAN *trame )
   { gchar *action, *button = "unknown", chaine[128];
 
@@ -263,11 +263,11 @@
      }
     return(FALSE);
   }
-/**********************************************************************************************************/
-/* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
-/* Entrée: la trame a recue                                                                               */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
+/* Entrée: la trame a recue                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Processer_trame( struct TRAME_ENOCEAN *trame )
   { gchar chaine[32];
     gint cpt;
@@ -283,10 +283,10 @@
              "Processer_trame: Unmanaged telegram: packet type %0X - %02X-%02X-%02X",
               trame->packet_type, trame->data[0], trame->data[1], trame->data[2] );
   }
-/**********************************************************************************************************/
-/* Enocean_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois ENOCEAN                   */
-/* Entrées: le numéro de la sortie                                                                        */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Enocean_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois ENOCEAN                                       */
+/* Entrées: le numéro de la sortie                                                                                            */
+/******************************************************************************************************************************/
  void Enocean_Gerer_sortie( gint num_a )                                   /* Num_a est l'id de la sortie */
   {
 #ifdef bouh
@@ -305,11 +305,11 @@
     pthread_mutex_unlock( &Cfg_enocean.lib->synchro );
 #endif
   }
-/**********************************************************************************************************/
-/* Enocean_select: Permet d'estimer la disponibilité d'une information reçue à traiter                    */
-/* Entrée : Néant                                                                                         */
-/* Sortie : 0 - pas d'info, 1 presence d'info, -1, erreur                                                 */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Enocean_select: Permet d'estimer la disponibilité d'une information reçue à traiter                                        */
+/* Entrée : Néant                                                                                                             */
+/* Sortie : 0 - pas d'info, 1 presence d'info, -1, erreur                                                                     */
+/******************************************************************************************************************************/
  static gint Enocean_select ( void )
   { struct timeval tv;
     fd_set fdselect;
@@ -329,9 +329,9 @@
              "Enocean_select: Error %d (%s)", errno, strerror(errno) );
     return(-1);
   }
-/**********************************************************************************************************/
-/* Main: Fonction principale du thread Enocean                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Main: Fonction principale du thread Enocean                                                                                */
+/******************************************************************************************************************************/
  void Run_process ( struct PROCESS *lib )
   { struct TRAME_ENOCEAN Trame;
 
@@ -355,7 +355,7 @@
        goto end;
      }
 
-/*  Abonner_distribution_sortie ( Enocean_Gerer_sortie );     /* Desabonnement de la diffusion des sorties */
+/*  Abonner_distribution_sortie ( Enocean_Gerer_sortie );     /* Desabonnement de la diffusion des sorties                    */
     Cfg_enocean.nbr_oct_lu = 0;
     Cfg_enocean.comm_status = ENOCEAN_CONNECT;
     while( lib->Thread_run == TRUE )                                     /* On tourne tant que necessaire */
@@ -484,7 +484,7 @@
            }
           default: Cfg_enocean.comm_status = ENOCEAN_CONNECT;
         }
-/********************************************** Transmission des trames aux sorties ***********************/
+/********************************************** Transmission des trames aux sorties *******************************************/
 #ifdef bouh
        if (Cfg_enocean.Liste_sortie)                            /* Si pas de message, on tourne */
         { gint num_a;
@@ -501,7 +501,7 @@
 #endif
      }                                                                     /* Fin du while partage->arret */
 
-/*  Desabonner_distribution_sortie ( Enocean_Gerer_sortie );  /* Desabonnement de la diffusion des sorties */
+/*  Desabonner_distribution_sortie ( Enocean_Gerer_sortie );  /* Desabonnement de la diffusion des sorties                    */
 /*    Decharger_tous_enocean ();*/
     close(Cfg_enocean.fd);                                                 /* Fermeture de la connexion FD */
 end:
@@ -511,4 +511,4 @@ end:
     Cfg_enocean.lib->TID = 0;                              /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

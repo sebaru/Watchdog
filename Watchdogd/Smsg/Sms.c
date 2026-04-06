@@ -119,7 +119,7 @@
   }
 
 /******************************************************************************************************************************/
-/* Smsg_get_signal_quality: Lit la qualité du signal modem via D-Bus                                                         */
+/* Smsg_get_signal_quality: Lit la qualité du signal modem via D-Bus                                                          */
 /******************************************************************************************************************************/
  static gboolean Smsg_get_signal_quality ( struct THREAD *module, gdouble *signal_quality )
   { gchar *modem_path = NULL;
@@ -640,7 +640,7 @@ end_user:
   }
 
 /******************************************************************************************************************************/
-/* Smsg_sms_get_property: Lit une propriété d'un objet SMS ModemManager                                                      */
+/* Smsg_sms_get_property: Lit une propriété d'un objet SMS ModemManager                                                       */
 /******************************************************************************************************************************/
  static GVariant *Smsg_sms_get_property ( struct THREAD *module, GDBusConnection *system_bus, gchar *sms_path, gchar *property )
   { GError *error = NULL;
@@ -671,7 +671,7 @@ end_user:
   }
 
 /******************************************************************************************************************************/
-/* Lire_sms_gsm: Lecture des SMS entrants via ModemManager D-Bus                                                             */
+/* Lire_sms_gsm: Lecture des SMS entrants via ModemManager D-Bus                                                              */
 /******************************************************************************************************************************/
  static gboolean Lire_sms_gsm ( struct THREAD *module )
   { GDBusConnection *system_bus;

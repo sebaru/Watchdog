@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Enocean/admin_enocean.c        Gestion des connexions Admin ENOCEAN au serveur watchdog      */
-/* Projet Abls-Habitat version 4.7       Gestion d'habitat                 dim. 28 déc. 2014 15:45:35 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Enocean/admin_enocean.c        Gestion des connexions Admin ENOCEAN au serveur watchdog                          */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                 dim. 28 déc. 2014 15:45:35 CET                     */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * admin_enocean.c
  * This file is part of Abls-Habitat
@@ -40,11 +40,11 @@
     "WAIT_BEFORE_RECONNECT",
   };
 
-/**********************************************************************************************************/
-/* Admin_enocean_print : Affiche en details les infos d'un onduleur en parametre                          */
-/* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_enocean_print : Affiche en details les infos d'un onduleur en parametre                                              */
+/* Entrée: La connexion connexion ADMIN et l'onduleur                                                                         */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                                           */
+/******************************************************************************************************************************/
  static gchar *Admin_enocean_status ( gchar *response )
   { gchar chaine[1024];
     g_snprintf( chaine, sizeof(chaine),
@@ -62,11 +62,11 @@
     return(Admin_write ( response, chaine ));
   }
 #ifdef bouh
-/**********************************************************************************************************/
-/* Admin_enocean_print : Affiche en details les infos d'un onduleur en parametre                          */
-/* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_enocean_print : Affiche en details les infos d'un onduleur en parametre                                              */
+/* Entrée: La connexion connexion ADMIN et l'onduleur                                                                         */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                                           */
+/******************************************************************************************************************************/
  static void Admin_enocean_print ( gchar *response, struct MODULE_ENOCEAN *module )
   { gchar chaine[1024];
     g_snprintf( chaine, sizeof(chaine),
@@ -85,11 +85,11 @@
               );
     response = Admin_write ( response, chaine );
   }
-/**********************************************************************************************************/
-/* Admin_enocean_list: Liste l'ensemble des capteurs enocean présent dans la conf                         */
-/* Entrée: le connexion                                                                                   */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_enocean_list: Liste l'ensemble des capteurs enocean présent dans la conf                                             */
+/* Entrée: le connexion                                                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_enocean_list ( gchar *response )
   { GSList *liste_modules;
     pthread_mutex_lock ( &Cfg_enocean.lib->synchro );
@@ -102,11 +102,11 @@
      }
     pthread_mutex_unlock ( &Cfg_enocean.lib->synchro );
   }
-/**********************************************************************************************************/
-/* Admin_enocean_list: Liste l'ensemble des capteurs enocean présent dans la conf                         */
-/* Entrée: le connexion                                                                                   */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_enocean_list: Liste l'ensemble des capteurs enocean présent dans la conf                                             */
+/* Entrée: le connexion                                                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_enocean_show ( gchar *response, gint id )
   { GSList *liste_modules;
     pthread_mutex_lock ( &Cfg_enocean.lib->synchro );
@@ -122,11 +122,11 @@
      }
     pthread_mutex_unlock ( &Cfg_enocean.lib->synchro );
   }
-/**********************************************************************************************************/
-/* Admin_enocean_del: Retire le capteur/module enocean dont l'id est en parametre                         */
-/* Entrée: le connexion et l'id                                                                           */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_enocean_del: Retire le capteur/module enocean dont l'id est en parametre                                             */
+/* Entrée: le connexion et l'id                                                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_enocean_del ( gchar *response, gint id )
   { gchar chaine[128];
 
@@ -139,11 +139,11 @@
      { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT erased.", id ); }
     response = Admin_write ( response, chaine );
   }
-/**********************************************************************************************************/
-/* Admin_enocean_add: Ajoute un capteur/module ENOCEAN                                                    */
-/* Entrée: le connexion et la structure de reference du capteur                                           */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_enocean_add: Ajoute un capteur/module ENOCEAN                                                                        */
+/* Entrée: le connexion et la structure de reference du capteur                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_enocean_add ( gchar *response, struct ENOCEANDB *enocean )
   { gchar chaine[128];
     gint last_id;
@@ -158,11 +158,11 @@
      { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added." ); }
     response = Admin_write ( response, chaine );
   }
-/**********************************************************************************************************/
-/* Admin_enocean_change: Modifie la configuration d'un capteur ENOCEAN                                    */
-/* Entrée: le connexion et la structure de reference du capteur                                           */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_enocean_change: Modifie la configuration d'un capteur ENOCEAN                                                        */
+/* Entrée: le connexion et la structure de reference du capteur                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_enocean_set ( gchar *response, struct ENOCEANDB *enocean )
   { gchar chaine[128];
 
@@ -176,11 +176,11 @@
     response = Admin_write ( response, chaine );
   }
 #endif
-/**********************************************************************************************************/
-/* Admin_enocean: Fonction gerant les différentes commandes possible pour l'administration enocean        */
-/* Entrée: le connexion d'admin et la ligne de commande                                                   */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_enocean: Fonction gerant les différentes commandes possible pour l'administration enocean                            */
+/* Entrée: le connexion d'admin et la ligne de commande                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  gchar *Admin_command( gchar *response, gchar *ligne )
   { gchar commande[128];
 
@@ -294,4 +294,4 @@
      }
     return(response);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

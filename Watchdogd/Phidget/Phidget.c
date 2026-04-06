@@ -214,7 +214,7 @@
         { Phidget_print_error(canal); }
      }
   }
-/***************************************************************************************************************************/
+/******************************************************************************************************************************/
 /* Phidget_onAttachHandler: Appelé quand un canal estmodule I/O VoltageRatio a changé de valeur                               */
 /* Entrée: le channel, le contexte                                                                                            */
 /* Sortie: néant                                                                                                              */

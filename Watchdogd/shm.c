@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/shm.c        Gestion de la mémoire partagée                                                  */
-/* Projet Abls-Habitat version 4.7       Gestion d'habitat                  dim 05 avr 2009 12:32:40 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/shm.c        Gestion de la mémoire partagée                                                                      */
+/* Projet Abls-Habitat version 4.7       Gestion d'habitat                  dim 05 avr 2009 12:32:40 CEST                     */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * shm.c
  * This file is part of Abls-Habitat
@@ -30,11 +30,11 @@
  #include <sys/shm.h>
 
  #include "watchdogd.h"
-/**********************************************************************************************************/
-/* Shm_init: initialisation de la mémoire partagée                                                        */
-/* Entrée: rien                                                                                           */
-/* Sortie: un pointeur sur la zone mémoire partagée                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Shm_init: initialisation de la mémoire partagée                                                                            */
+/* Entrée: rien                                                                                                               */
+/* Sortie: un pointeur sur la zone mémoire partagée                                                                           */
+/******************************************************************************************************************************/
  struct PARTAGE *Shm_init ( void )
   { struct PARTAGE *partage;
     gint taille;
@@ -45,14 +45,14 @@
     partage = g_try_malloc0( taille );
     return(partage);
   }
-/**********************************************************************************************************/
-/* Shm_stop: Stoppe l'utilisation de la mémoire partagée                                                  */
-/* Entrée: une structure de mémoire partagée                                                              */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Shm_stop: Stoppe l'utilisation de la mémoire partagée                                                                      */
+/* Entrée: une structure de mémoire partagée                                                                                  */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
  gboolean Shm_stop ( struct PARTAGE *partage )
   { Info_new( __func__, Config.log_msrv, LOG_INFO, "Shm_stop: freeing memory" );
     g_free(Partage); Partage=NULL;
     return(TRUE);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
