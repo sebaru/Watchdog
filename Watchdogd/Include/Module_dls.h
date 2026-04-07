@@ -291,7 +291,7 @@
  extern void Dls_data_VISUEL_set_for_AI ( struct DLS_TO_PLUGIN *vars, struct DLS_VISUEL *visu, struct DLS_AI *src,
                                           gboolean cligno, gboolean noshowe, gboolean disable );
  extern struct DLS_HORLOGE *Dls_data_HORLOGE_lookup ( gchar *tech_id, gchar *acronyme );
- extern gboolean HORLOGE_get ( struct DLS_HORLOGE *bit );
+ extern gboolean Dls_data_HORLOGE_get ( struct DLS_HORLOGE *bit );
 
  extern struct DLS_MESSAGE *Dls_data_MESSAGE_lookup ( gchar *tech_id, gchar *acronyme );
  extern void Dls_data_MESSAGE_set ( struct DLS_TO_PLUGIN *vars, struct DLS_MESSAGE *msg );
