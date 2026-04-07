@@ -192,7 +192,7 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean Envoi_sms_gsm ( struct THREAD *module, JsonNode *msg, gchar *telephone )
-  { struct SMS_VARS *vars = module->vars;
+  { /*struct SMS_VARS *vars = module->vars;*/
     GDBusConnection *system_bus;
     gchar *modem_path = NULL;
     gchar *sms_path = NULL;
@@ -299,7 +299,6 @@
 
     Info_new( __func__, module->Thread_debug, LOG_NOTICE,
               "%s: Envoi SMS Ok to %s (%s)", thread_tech_id, telephone, libelle );
-    vars->nbr_sms++;
     g_object_unref(system_bus);
     g_free(modem_path);
     g_free(sms_path);
