@@ -19,6 +19,29 @@ if [ ! -d "$BUILD_DIR" ]; then
     exit 1
 fi
 
+# Création du groupe abls et de l'utilisateur watchdog
+echo "Creating group 'abls' and user 'watchdog'..."
+if ! getent group abls > /dev/null 2>&1; then
+    sudo groupadd abls
+    echo "  Group 'abls' created."
+else
+    echo "  Group 'abls' already exists."
+fi
+
+if ! id -u watchdog > /dev/null 2>&1; then
+    sudo useradd --system --no-create-home --shell /usr/sbin/nologin --gid abls watchdog
+    echo "  User 'watchdog' created."
+else
+    echo "  User 'watchdog' already exists."
+fi
+
+if ! id -nG watchdog | grep -qw abls; then
+    sudo usermod -aG abls watchdog
+    echo "  User 'watchdog' added to group 'abls'."
+else
+    echo "  User 'watchdog' is already in group 'abls'."
+fi
+
 # Navigate to build directory
 cd "$BUILD_DIR"
 
