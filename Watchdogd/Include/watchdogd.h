@@ -29,6 +29,7 @@
  #define _WATCHDOGD_H_
 
  #include <glib.h>
+ #include <glib/gstdio.h>
  #include <string.h>
  #include <openssl/ssl.h>
  #include <uuid/uuid.h>
