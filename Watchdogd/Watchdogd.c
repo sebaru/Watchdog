@@ -279,11 +279,6 @@
     else
      { Info_new( __func__, Config.log_msrv, LOG_INFO, "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }
 
-    if (Config.instance_is_master)
-     { mkdir ( "Dls", S_IRUSR | S_IWUSR | S_IXUSR );
-       mkdir ( "http_cache", S_IRUSR | S_IWUSR | S_IXUSR );
-       Info_new( __func__, Config.log_msrv, LOG_INFO, "SubDirectories created" );
-     }
 
     g_snprintf ( chaine, sizeof(chaine), "/run/user/%d", pwd->pw_uid );               /* Prepare XDG_RUNTIME_DIR (for mpg123) */
     setenv ( "XDG_RUNTIME_DIR", chaine, TRUE );
