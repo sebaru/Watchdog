@@ -127,16 +127,4 @@
     if (bit) Dls_data_WATCHDOG_set ( NULL, bit, consigne );
     return(TRUE);
   }
-/******************************************************************************************************************************/
-/* Dls_DI_to_json : Formate un bit au format JSON                                                                             */
-/* Entrées: le JsonNode et le bit                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Dls_WATCHDOG_to_json ( JsonNode *element, struct DLS_WATCHDOG *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat",     Dls_data_WATCHDOG_get (bit) );
-    gint decompte = bit->top - Partage->top;
-    Json_node_add_int    ( element, "decompte", (decompte > 0 ? decompte : 0) );
-  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
