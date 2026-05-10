@@ -57,4 +57,10 @@ pkg_check_modules(MOSQUITTO REQUIRED libmosquitto)
 
 include(GNUInstallDirs)
 
+# Déclarer le répertoire de bibliothèques à ldconfig
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/watchdogd.conf" "${CMAKE_INSTALL_FULL_LIBDIR}\n")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/watchdogd.conf"
+        DESTINATION /etc/ld.so.conf.d
+        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+
 add_subdirectory(Watchdogd)

@@ -25,6 +25,7 @@ cd "$BUILD_DIR"
 # Install the project
 echo "Installing project..."
 sudo cmake --install .
+sudo ldconfig
 sudo systemctl daemon-reload
 
 echo ""
