@@ -1,0 +1,7 @@
+{ "domain_uuid":   "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "domain_secret": "yoursecrethere",
+  "agent_uuid":    "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "api_url":       "api.abls-habitat.fr",
+  "mqtt_ca_file":  "",
+  "mqtt_ca_path":  ""
+}

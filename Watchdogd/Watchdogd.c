@@ -387,6 +387,11 @@
        if (mqtt_password) g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "%s", mqtt_password );
                      else g_snprintf( Config.mqtt_password, sizeof(Config.mqtt_password), "nopassword" );
 
+       gchar *mqtt_ca_file       = Json_get_string ( Config.config, "mqtt_ca_file" );
+       if (mqtt_ca_file) g_snprintf( Config.mqtt_ca_file, sizeof(Config.mqtt_ca_file), "%s", mqtt_ca_file );
+       gchar *mqtt_ca_path       = Json_get_string ( Config.config, "mqtt_ca_path" );
+       if (mqtt_ca_path) g_snprintf( Config.mqtt_ca_path, sizeof(Config.mqtt_ca_path), "%s", mqtt_ca_path );
+
        gchar *audio_tech_id      = Json_get_string ( api_result, "audio_tech_id" );
        if (audio_tech_id) g_snprintf( Config.audio_tech_id, sizeof(Config.audio_tech_id), "%s", audio_tech_id );
                      else g_snprintf( Config.audio_tech_id, sizeof(Config.audio_tech_id), "AUDIO" );

@@ -30,6 +30,39 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* MQTT_API_default_ca_file: Recherche le fichier CA systeme par defaut pour la validation TLS MQTT                           */
+/* Entrées: néant                                                                                                             */
+/* Sortie : le chemin du fichier CA, ou NULL si aucun fichier n'est disponible                                                */
+/******************************************************************************************************************************/
+ static const gchar *MQTT_API_default_ca_file ( void )
+  { if ( g_file_test ( "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem", G_FILE_TEST_IS_REGULAR ) )
+     { return("/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"); }
+
+   if ( g_file_test ( "/etc/ssl/certs/ca-certificates.crt", G_FILE_TEST_IS_REGULAR ) )
+     { return("/etc/ssl/certs/ca-certificates.crt"); }
+
+   if ( g_file_test ( "/etc/ssl/certs/ca-bundle.crt", G_FILE_TEST_IS_REGULAR ) )
+     { return("/etc/ssl/certs/ca-bundle.crt"); }
+
+    return(NULL);
+  }
+
+/******************************************************************************************************************************/
+/* MQTT_API_default_ca_path: Recherche le repertoire CA systeme par defaut pour la validation TLS MQTT                        */
+/* Entrées: néant                                                                                                             */
+/* Sortie : le chemin du repertoire CA, ou NULL si aucun repertoire n'est disponible                                          */
+/******************************************************************************************************************************/
+ static const gchar *MQTT_API_default_ca_path ( void )
+  { if ( g_file_test ( "/etc/pki/tls/certs", G_FILE_TEST_IS_DIR ) )
+     { return("/etc/pki/tls/certs"); }
+
+    if ( g_file_test ( "/etc/ssl/certs", G_FILE_TEST_IS_DIR ) )
+     { return("/etc/ssl/certs"); }
+
+    return(NULL);
+  }
+
+/******************************************************************************************************************************/
 /* MQTT_on_mqtt_api_connect_CB: appelé par la librairie quand le broker est connecté                                          */
 /* Entrée: les parametres d'affichage de log de la librairie                                                                  */
 /* Sortie: Néant                                                                                                              */
@@ -294,7 +327,22 @@ end:
     mosquitto_reconnect_delay_set     ( Partage->MQTT_API_session, 10, 60, TRUE );
 
     if (Config.mqtt_over_ssl)
-     { mosquitto_tls_set( Partage->MQTT_API_session, NULL, "/etc/ssl/certs", NULL, NULL, NULL ); }
+     { const gchar *ca_file = Config.mqtt_ca_file[0] ? Config.mqtt_ca_file : MQTT_API_default_ca_file();
+       const gchar *ca_path = Config.mqtt_ca_path[0] ? Config.mqtt_ca_path : MQTT_API_default_ca_path();
+
+       if (! (ca_file || ca_path) )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT TLS setup error: no CA file or CA path found." );
+          return(FALSE);
+        }
+
+       gint retour_tls = mosquitto_tls_set( Partage->MQTT_API_session, ca_file, ca_path, NULL, NULL, NULL );
+       if ( retour_tls != MOSQ_ERR_SUCCESS )
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT TLS setup error: %s", mosquitto_strerror(retour_tls) );
+          return(FALSE);
+        }
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "MQTT TLS trust store: cafile='%s', capath='%s'",
+                 ca_file ? ca_file : "", ca_path ? ca_path : "" );
+     }
 
     gchar mqtt_username[128];
     g_snprintf( mqtt_username, sizeof(mqtt_username), "%s-agent", domain_uuid );

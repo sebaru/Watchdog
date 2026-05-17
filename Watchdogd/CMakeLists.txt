@@ -102,7 +102,7 @@ endif()
 
 install(TARGETS Watchdogd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES Watchdogd.service DESTINATION ${SYSTEMD_SYSTEM_UNIT_DIR})
-install(FILES watchdogd.abls.conf.sample DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
+install(FILES abls-habitat-agent.conf.sample DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
 install(FILES watchdogd_sudo
         DESTINATION /etc/sudoers.d
         PERMISSIONS OWNER_READ GROUP_READ)
