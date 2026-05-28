@@ -452,6 +452,26 @@
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Debut boucle sans fin" );
     Partage->Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
 
+/* ------------------------------------------- Création du plugin Agent ----------------------------------------------------- */
+    gchar *tech_id = g_get_host_name();
+    JsonNode *DlsAgentNode = Json_node_create();
+    if (DlsAgentNode)
+     { Json_node_add_string ( DlsAgentNode, "tech_id", tech_id );
+       gchar name[256];
+       g_snprintf ( name, sizeof ( name ), "D.L.S Agent sur %s", tech_id );
+       Json_node_add_string ( DlsAgentNode, "name", name );
+       gchar shortname[256];
+       g_snprintf ( shortname, sizeof ( shortname ), "Agent %s", tech_id );
+       Json_node_add_string ( DlsAgentNode, "shortname", shortname );
+       Json_node_add_string ( DlsAgentNode, "package", "Abls-Agent" );
+       Json_node_add_int   ( DlsAgentNode, "syn_id", 1 );
+       if (Dls_auto_create_plugin( DlsAgentNode ) == FALSE)
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Unable to create plugin DLS '%s'.", tech_id ); }
+       else Info_new( __func__, Config.log_msrv, LOG_INFO, "Plugin DLS '%s' created.", tech_id ); 
+        Json_node_unref ( DlsAgentNode );
+     }
+    else Info_new( __func__, Config.log_msrv, LOG_ERR, "Unable to create plugin DLS '%s': Memory error.", tech_id );
+
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */
      { MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */

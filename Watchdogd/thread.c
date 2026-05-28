@@ -214,7 +214,7 @@
         }
      }
 
-/******************************************************* Ecoute du MQTT *******************************************************/
+/* ----------------------------------------------------- Ecoute du MQTT ----------------------------------------------------- */
     module->MQTT_session = mosquitto_new( thread_tech_id, TRUE, module );
     if (!module->MQTT_session)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
@@ -237,13 +237,25 @@
     if ( mosquitto_loop_start( module->MQTT_session ) != MOSQ_ERR_SUCCESS )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
 
-    gchar *description = "Add description to database table";
-    if (Json_has_member ( module->config, "description" )) description = Json_get_string ( module->config, "description" );
-    gchar package[128];
-    g_snprintf ( package, sizeof(package), "Thread_%s", thread_classe );
-    if (Dls_auto_create_plugin( thread_tech_id, description, package ) == FALSE)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: DLS Create ERROR (%s)\n", thread_tech_id, description ); }
+/* ------------------------------------------- Création du plugin dans l'api ------------------------------------------------ */
+    JsonNode *RootNode = Json_node_create();
+    if (RootNode)
+     { Json_node_add_string ( RootNode, "tech_id", thread_tech_id );
+       Json_node_add_string ( RootNode, "thread_classe", thread_classe ); 
+       Json_node_add_int    ( RootNode, "syn_id", 1 ); 
+       gchar *name = Json_get_string ( module->config, "description" );
+       Json_node_add_string ( RootNode, "name", name );
+       Json_node_add_string ( RootNode, "shortname", name );
+       gchar package[128];
+       g_snprintf ( package, sizeof(package), "Thread_%s", thread_classe );
+       Json_node_add_string ( RootNode, "package", package );
+       if (Dls_auto_create_plugin( RootNode ) == FALSE)
+        { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: DLS Create ERROR (%s)\n", thread_tech_id, name ); }
+       Json_node_unref ( RootNode );
+     }
+    else Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory error while creating DLS RootNode", thread_tech_id );
 
+/* ------------------------------------------------ Création des IOs --------------------------------------------------------- */
     module->IOs = Json_node_create();
     Json_node_add_array ( module->IOs, "IOs" );
 

@@ -72,30 +72,30 @@
      }
   }
 /******************************************************************************************************************************/
-/* Dls_auto_create_plugin: Créé automatiquement le plugin en parametre (tech_id, nom)                                         */
-/* Entrées: le tech_id (unique) et le nom associé                                                                             */
-/* Sortie: -1 si pb, id sinon                                                                                                 */
+/* Dls_auto_create_plugin: Créé automatiquement le plugin en parametre via un JsonNode                                        */
+/* Entrées: Le JsonNode associé avec tous les champs necessaires                                                              */
+/* Sortie: FALSE si pb, TRUE sinon                                                                                            */
 /******************************************************************************************************************************/
- gboolean Dls_auto_create_plugin( gchar *tech_id, gchar *description, gchar *package )
-  { JsonNode *RootNode = Json_node_create ();
-    if (!RootNode)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for DLS create %s", tech_id );
+ gboolean Dls_auto_create_plugin( JsonNode *RootNode )
+  { if (!RootNode)
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Dls_auto_create_plugin called with NULL RootNode");
        return(FALSE);
      }
-    Json_node_add_string ( RootNode, "tech_id", tech_id );
-    Json_node_add_string ( RootNode, "description", description );
-    if (package) Json_node_add_string ( RootNode, "package", package );
+    if (!Json_has_member( RootNode, "tech_id" ))
+     { Info_new( __func__, Config.log_dls, LOG_ERR, "Dls_auto_create_plugin: missing 'tech_id' in RootNode");
+       return(FALSE);
+     }
+
+    const gchar *tech_id = Json_get_string( RootNode, "tech_id" );
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/create", RootNode );
     if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info_new( __func__, Config.log_dls, LOG_ERR,
                  "API Request for DLS CREATE failed. '%s' not created.", tech_id );
-       Json_node_unref ( api_result );
-       Json_node_unref ( RootNode );
+       if (api_result) Json_node_unref ( api_result );
        return(FALSE);
      }
-    Json_node_unref ( api_result );
-    Json_node_unref ( RootNode );
+    if (api_result) Json_node_unref ( api_result );
     return(TRUE);
   }
 /******************************************************************************************************************************/
