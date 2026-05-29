@@ -120,21 +120,36 @@
     if (vars->num_lines > GPIOD_MAX_LINE) vars->num_lines = GPIOD_MAX_LINE;
     Info_new( __func__, module->Thread_debug, LOG_INFO, "Found %d lines", vars->num_lines );
 
-    JsonNode *RootNode = Json_node_create ();                                                     /* Envoi de la conf a l'API */
-    if (!RootNode) goto end;
-    Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-    Json_node_add_int    ( RootNode, "nbr_lignes",     vars->num_lines );
-    JsonNode *API_result = Http_Post_to_global_API ( "/run/gpiod/add/io", RootNode );
-    Json_node_unref ( API_result );
-    Json_node_unref ( RootNode );
-
     vars->lignes = g_try_malloc0 ( sizeof( struct GPIOD_LIGNE ) * vars->num_lines );
     if (!vars->lignes)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error while loading lignes" );
        goto end;
      }
 
-    Json_node_foreach_array_element ( module->config, "IO", Charger_un_gpio, module );
+/************************************** Chargement des IOs pour chaque tech_id de la classe **********************************/
+    JsonArray *tech_ids_list = Json_get_array ( module->config, "tech_ids_list" );
+    if (!tech_ids_list)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Missing tech_ids_list in config", thread_tech_id );
+       goto end;
+     }
+    GList *tech_id_configs = json_array_get_elements ( tech_ids_list );
+    GList *tc = tech_id_configs;
+    while (tc)
+     { JsonNode *sub_config = tc->data;
+       gchar *sub_tech_id = Json_get_string ( sub_config, "thread_tech_id" );
+       JsonNode *RootNode = Json_node_create ();
+       if (RootNode)
+        { Json_node_add_string ( RootNode, "thread_tech_id", sub_tech_id );
+          Json_node_add_int    ( RootNode, "nbr_lignes",     vars->num_lines );
+          JsonNode *API_result = Http_Post_to_global_API ( "/run/gpiod/add/io", RootNode );
+          Json_node_unref ( API_result );
+          Json_node_unref ( RootNode );
+        }
+       Json_node_foreach_array_element ( sub_config, "IO", Charger_un_gpio, module );
+       tc = g_list_next ( tc );
+     }
+    g_list_free ( tech_id_configs );
+
     Thread_send_comm_to_master ( module, TRUE );                                            /* On est bien accroché aux GPIOs */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */

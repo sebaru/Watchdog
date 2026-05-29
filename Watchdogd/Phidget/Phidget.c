@@ -448,8 +448,6 @@ error:
     gchar *thread_tech_id      = Json_get_string ( module->config, "thread_tech_id" );
     gchar *msg_thread_tech_id  = Json_get_string ( msg, "token_lvl1" );
     gchar *msg_thread_acronyme = Json_get_string ( msg, "token_lvl2" );
-    gchar *msg_tech_id         = Json_get_string ( msg, "tech_id" );
-    gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
     if (!msg_thread_tech_id)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque msg_thread_tech_id" );
@@ -461,7 +459,21 @@ error:
        return;
      }
 
-    if (strcasecmp (msg_thread_tech_id, thread_tech_id))
+    gboolean is_for_us = FALSE;
+    if (Json_has_member ( module->config, "tech_ids_list" ))        /* Thread de classe: vérifier parmi tous les tech_ids */
+     { JsonArray *list = Json_get_array ( module->config, "tech_ids_list" );
+       GList *els = json_array_get_elements ( list );
+       GList *el = els;
+       while (el)
+        { gchar *sub_tid = Json_get_string ( el->data, "thread_tech_id" );
+          if (!strcasecmp ( msg_thread_tech_id, sub_tid )) { is_for_us = TRUE; break; }
+          el = g_list_next ( el );
+        }
+       g_list_free ( els );
+     }
+    else { is_for_us = !strcasecmp ( msg_thread_tech_id, thread_tech_id ); }
+
+    if (!is_for_us)
      { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Pas pour nous" );
        return;
      }
@@ -472,8 +484,8 @@ error:
      }
 
     gboolean etat = Json_get_bool ( msg, "etat" );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
-              msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
+    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'=%d",
+              msg_thread_tech_id, msg_thread_acronyme, etat );
 
     GSList *liste = vars->Liste_sensors;
     while (liste)
@@ -500,28 +512,49 @@ error:
     struct PHIDGET_VARS *vars = module->vars;
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    gchar *hostname    = Json_get_string ( module->config, "hostname" );
-    gchar *description = Json_get_string ( module->config, "description" );
 
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Loading %s('%s')", thread_tech_id, hostname, description );
-
-    PhidgetReturnCode result = PhidgetNet_addServer( hostname, hostname, 5661, Json_get_string(module->config, "password"), 0);
-    if (result != EPHIDGET_OK)
-     { const gchar *error;
-       Phidget_getErrorDescription ( result, &error );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "PhidgetNet_addServer failed: '%s'", error );
+/************************************** Connexion et chargement des IOs pour chaque tech_id de la classe *********************/
+    JsonArray *tech_ids_list = Json_get_array ( module->config, "tech_ids_list" );
+    if (!tech_ids_list)
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Missing tech_ids_list in config", thread_tech_id );
        goto connect_failed;
-     } else Info_new ( __func__, module->Thread_debug, LOG_INFO, "PhidgetNet_addServer '%s' success: '%s'", hostname );
-
-    JsonNode *RootNode = Json_node_create ();                                                     /* Envoi de la conf a l'API */
-    if (RootNode)
-     { Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-       JsonNode *API_result = Http_Post_to_global_API ( "/run/phidget/add/io", RootNode );
-       Json_node_unref ( API_result );
-       Json_node_unref ( RootNode );
      }
-/* Chargement des I/O */
-    Json_node_foreach_array_element ( module->config, "IO", Phidget_Charger_un_IO, module );
+
+    GList *tech_id_configs = json_array_get_elements ( tech_ids_list );
+    GList *tc = tech_id_configs;
+    while (tc)
+     { JsonNode *sub_config = tc->data;
+       gchar *sub_tech_id = Json_get_string ( sub_config, "thread_tech_id" );
+       gchar *hostname    = Json_get_string ( sub_config, "hostname" );
+       gchar *description = Json_get_string ( sub_config, "description" );
+
+       Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': Loading phidget '%s' (%s)",
+                 sub_tech_id, hostname, description );
+
+       PhidgetReturnCode result = PhidgetNet_addServer( hostname, hostname, 5661,
+                                                        Json_get_string(sub_config, "password"), 0);
+       if (result != EPHIDGET_OK)
+        { const gchar *error;
+          Phidget_getErrorDescription ( result, &error );
+          Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': PhidgetNet_addServer failed: '%s'", sub_tech_id, error );
+        }
+       else
+        { Info_new ( __func__, module->Thread_debug, LOG_INFO, "'%s': PhidgetNet_addServer '%s' success", sub_tech_id, hostname );
+          JsonNode *RootNode = Json_node_create ();                                               /* Envoi de la conf a l'API */
+          if (RootNode)
+           { Json_node_add_string ( RootNode, "thread_tech_id", sub_tech_id );
+             JsonNode *API_result = Http_Post_to_global_API ( "/run/phidget/add/io", RootNode );
+             Json_node_unref ( API_result );
+             Json_node_unref ( RootNode );
+           }
+          JsonNode *saved_config = module->config;          /* Swap temporaire pour Phidget_Charger_un_IO (lit module->config) */
+          module->config = sub_config;
+          Json_node_foreach_array_element ( sub_config, "IO", Phidget_Charger_un_IO, module );
+          module->config = saved_config;
+        }
+       tc = g_list_next ( tc );
+     }
+    g_list_free ( tech_id_configs );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
@@ -547,7 +580,16 @@ error:
         }
      }
 
-    PhidgetNet_removeServer( hostname );                                                /* Arrete la connexion au hub phidget */
+/****************************************** Déconnexion de tous les serveurs Phidget *****************************************/
+    tech_id_configs = json_array_get_elements ( tech_ids_list );
+    tc = tech_id_configs;
+    while (tc)
+     { JsonNode *sub_config = tc->data;
+       gchar *hostname = Json_get_string ( sub_config, "hostname" );
+       PhidgetNet_removeServer ( hostname );
+       tc = g_list_next ( tc );
+     }
+    g_list_free ( tech_id_configs );
     g_slist_foreach ( vars->Liste_sensors, (GFunc) Phidget_Decharger_un_IO, NULL );
     /*Phidget_finalize(0); non thread_safe apres. */
     g_slist_foreach ( vars->Liste_sensors, (GFunc) g_free, NULL );

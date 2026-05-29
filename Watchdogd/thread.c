@@ -170,10 +170,27 @@
               thread_tech_id, Config.master_hostname, return_code, mosquitto_connack_string( return_code ) );
     if (return_code == 0)
      { module->MQTT_connected = TRUE;
-       MQTT_Subscribe ( module->MQTT_session, "SET_AO/%s/#", thread_tech_id );
-       MQTT_Subscribe ( module->MQTT_session, "SET_DO/%s/#", thread_tech_id );
-       MQTT_Subscribe ( module->MQTT_session, "SET_TEST/%s/#", thread_tech_id );
-       MQTT_Subscribe ( module->MQTT_session, "SET_DEBUG/%s/#", thread_tech_id );
+       if (Json_has_member ( module->config, "tech_ids_list" ))    /* Thread de classe: souscription pour chaque tech_id */
+        { JsonArray *list = Json_get_array ( module->config, "tech_ids_list" );
+          GList *elements = json_array_get_elements ( list );
+          GList *elem = elements;
+          while (elem)
+           { JsonNode *sub_config = elem->data;
+             gchar *sub_tech_id = Json_get_string ( sub_config, "thread_tech_id" );
+             MQTT_Subscribe ( module->MQTT_session, "SET_AO/%s/#",    sub_tech_id );
+             MQTT_Subscribe ( module->MQTT_session, "SET_DO/%s/#",    sub_tech_id );
+             MQTT_Subscribe ( module->MQTT_session, "SET_TEST/%s/#",  sub_tech_id );
+             MQTT_Subscribe ( module->MQTT_session, "SET_DEBUG/%s/#", sub_tech_id );
+             elem = g_list_next ( elem );
+           }
+          g_list_free ( elements );
+        }
+       else
+        { MQTT_Subscribe ( module->MQTT_session, "SET_AO/%s/#",    thread_tech_id );
+          MQTT_Subscribe ( module->MQTT_session, "SET_DO/%s/#",    thread_tech_id );
+          MQTT_Subscribe ( module->MQTT_session, "SET_TEST/%s/#",  thread_tech_id );
+          MQTT_Subscribe ( module->MQTT_session, "SET_DEBUG/%s/#", thread_tech_id );
+        }
      }
   }
 /******************************************************************************************************************************/
@@ -519,6 +536,97 @@
     g_slist_free_full ( Threads, g_free );
   }
 /******************************************************************************************************************************/
+/* Thread_Start_classe_singleton: Démarre un unique thread pour toute la classe (gpiod, phidget, ...)                         */
+/* Entrée: La classe et le tableau des infos de threads pour cette classe (retournés par /run/thread/load)                    */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Thread_Start_classe_singleton ( const gchar *thread_classe, JsonArray *class_info_array )
+  { struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
+    if (!module)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': Not Enough Memory", thread_classe ); return; }
+
+    JsonNode *combined_config = Json_node_create();
+    Json_node_add_string ( combined_config, "thread_classe",  (gchar *)thread_classe );
+    Json_node_add_string ( combined_config, "thread_tech_id", (gchar *)thread_classe );
+    Json_node_add_bool   ( combined_config, "enable", TRUE );
+    Json_node_add_bool   ( combined_config, "debug",  FALSE );
+    JsonArray *tech_ids_list = Json_node_add_array ( combined_config, "tech_ids_list" );
+
+    gboolean any_enabled = FALSE;
+    GList *elements = json_array_get_elements ( class_info_array );
+    GList *elem = elements;
+    while (elem)
+     { JsonNode *thread_info = elem->data;
+       if (Json_get_bool ( thread_info, "enable" ))
+        { gchar *tech_id = Json_get_string ( thread_info, "thread_tech_id" );
+          JsonNode *full_config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", tech_id );
+          if (full_config && Json_get_int ( full_config, "http_code" ) == 200)
+           { json_array_add_element ( tech_ids_list, full_config );
+             any_enabled = TRUE;
+           }
+          else if (full_config) Json_node_unref ( full_config );
+        }
+       elem = g_list_next ( elem );
+     }
+    g_list_free ( elements );
+
+    if (!any_enabled)
+     { Info_new( __func__, Config.log_msrv, LOG_INFO, "'%s': No enabled tech_id found, class thread not started.", thread_classe );
+       Json_node_unref ( combined_config );
+       g_free ( module );
+       return;
+     }
+
+    module->config       = combined_config;
+    module->Thread_debug = FALSE;
+    module->Thread_run   = TRUE;
+
+    gchar nom_fichier[256];
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "libwatchdog-server-%s.so", thread_classe );
+    module->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW );
+    if (!module->dl_handle)
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': '%s' loading failed (%s)",
+                 thread_classe, nom_fichier, dlerror() );
+       Json_node_unref ( combined_config );
+       g_free ( module );
+       return;
+     }
+
+    module->Run_thread = dlsym( module->dl_handle, "Run_thread" );
+    if (!module->Run_thread)
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': '%s' rejected (Run_thread not found)",
+                 thread_classe, nom_fichier );
+       dlclose ( module->dl_handle );
+       Json_node_unref ( combined_config );
+       g_free ( module );
+       return;
+     }
+
+    pthread_attr_t attr;
+    if ( pthread_attr_init(&attr) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_attr_init failed.", thread_classe );
+       Thread_Stop_safe ( module ); return;
+     }
+    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_setdetachstate failed.", thread_classe );
+       Thread_Stop_safe ( module ); return;
+     }
+    pthread_mutexattr_t param;
+    pthread_mutexattr_init( &param );
+    pthread_mutexattr_setpshared( &param, PTHREAD_PROCESS_SHARED );
+    pthread_mutex_init( &module->synchro, &param );
+
+    if ( pthread_create( &module->TID, &attr, (void *)module->Run_thread, module ) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_create failed.", thread_classe );
+       Thread_Stop_safe ( module ); return;
+     }
+    pthread_attr_destroy(&attr);
+    pthread_rwlock_wrlock ( &Partage->Threads_synchro );
+    Partage->Threads = g_slist_append ( Partage->Threads, module );
+    pthread_rwlock_unlock ( &Partage->Threads_synchro );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Class '%s' singleton thread started", thread_classe );
+  }
+/******************************************************************************************************************************/
 /* Thread_Start_all: Ouverture de toutes les librairies possibles pour Watchdog                                               */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
@@ -527,18 +635,38 @@
   { JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/load", NULL );
     if (!api_result) { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Error for /run/thread LOAD",__func__ ); return; }
 
-    if (Json_get_int ( api_result, "http_code" ) == 200)                                           /* Chargement des modules */
-     { JsonArray *array = Json_get_array ( api_result, "threads" );
-       Info_new( __func__, Config.log_msrv, LOG_INFO, "Loading %d thread(s)", json_array_get_length(array) );
-       GList *Threads = json_array_get_elements ( array );
-       GList *threads = Threads;
-       while(threads)
-        { JsonNode *element = threads->data;
-          gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
-          if (Json_get_bool ( element, "enable" )) Thread_Start_by_thread_tech_id ( thread_tech_id );
-          threads = g_list_next(threads);
+    if (Json_get_int ( api_result, "http_code" ) == 200)
+     { JsonNode *threads_node = Json_get_object_as_node ( api_result, "threads" );
+       if (!threads_node)
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Missing 'threads' object in API response" );
+          Json_node_unref ( api_result ); return;
         }
-       g_list_free(Threads);
+       JsonObject *threads_obj = json_node_get_object ( threads_node );
+       JsonObjectIter iter;
+       const gchar *thread_classe;
+       JsonNode *class_node;
+       json_object_iter_init ( &iter, threads_obj );
+       while ( json_object_iter_next ( &iter, &thread_classe, &class_node ) )
+        { JsonArray *class_array = json_node_get_array ( class_node );
+          if (!class_array) continue;
+          Info_new( __func__, Config.log_msrv, LOG_INFO, "Loading %d thread(s) of class '%s'",
+                    json_array_get_length(class_array), thread_classe );
+          gboolean is_singleton = ( !strcasecmp ( thread_classe, "gpiod"   ) ||
+                                    !strcasecmp ( thread_classe, "phidget" ) );
+          if (is_singleton)
+           { Thread_Start_classe_singleton ( thread_classe, class_array ); }
+          else
+           { GList *class_elements = json_array_get_elements ( class_array );
+             GList *class_elem = class_elements;
+             while (class_elem)
+              { JsonNode *element = class_elem->data;
+                gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
+                if (Json_get_bool ( element, "enable" )) Thread_Start_by_thread_tech_id ( thread_tech_id );
+                class_elem = g_list_next ( class_elem );
+              }
+             g_list_free ( class_elements );
+           }
+        }
      }
     Json_node_unref(api_result);
   }
