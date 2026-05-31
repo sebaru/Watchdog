@@ -46,6 +46,86 @@
     return(RootNode);
   }
 /******************************************************************************************************************************/
+/* Json_to_log: Dump JsonNode to log                                                                                          */
+/* Entrée: Le node json a dumper                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Json_to_log ( JsonNode *RootNode, gchar *prefix )
+  { const char *name;
+    JsonObjectIter iter;
+    JsonNode *ObjectMemberNode;
+    if (!RootNode) return;
+    if (!prefix) prefix = "";
+
+    JsonNodeType node_type = json_node_get_node_type ( RootNode );
+    if (node_type == JSON_NODE_OBJECT)
+     { JsonObject *RootObject = json_node_get_object ( RootNode );
+       if (!RootObject) return;
+
+       json_object_iter_init ( &iter, RootObject );
+       while ( json_object_iter_next ( &iter, &name, &ObjectMemberNode ) )
+        { JsonNodeType value_json_type = json_node_get_node_type ( ObjectMemberNode );
+          switch (value_json_type)
+           { default:
+             case JSON_NODE_NULL:   break;
+             case JSON_NODE_OBJECT:
+              { gchar *new_prefix = g_strdup_printf ( "%s.%s", prefix, name );
+                Json_to_log ( ObjectMemberNode, new_prefix );
+                g_free ( new_prefix );
+                break;
+              }
+             case JSON_NODE_ARRAY:
+              { JsonArray *array = json_node_get_array ( ObjectMemberNode );
+                if (array)
+                 { guint array_length = json_array_get_length ( array );
+                   for (guint index = 0; index < array_length; index++)
+                    { JsonNode *array_node = json_array_get_element ( array, index );
+                      gchar *array_prefix = g_strdup_printf ( "%s.%s[%u]", prefix, name, index );
+                      Json_to_log ( array_node, array_prefix );
+                      g_free ( array_prefix );
+                    }
+                 }
+                break;
+              }
+             case JSON_NODE_VALUE:
+              { GType valueType = json_node_get_value_type ( ObjectMemberNode );
+                if (valueType == G_TYPE_INT64)
+                 { Info_new ( __func__, FALSE, LOG_DEBUG, "%s: %s = '%" G_GINT64_FORMAT "'", prefix, name,
+                              json_node_get_int ( ObjectMemberNode ) );
+                 }
+                else if (valueType == G_TYPE_DOUBLE)
+                 { Info_new ( __func__, FALSE, LOG_DEBUG, "%s: %s = '%f'", prefix, name,
+                              json_node_get_double ( ObjectMemberNode ) );
+                 }
+                else if (valueType == G_TYPE_BOOLEAN)
+                 { Info_new ( __func__, FALSE, LOG_DEBUG, "%s: %s = '%s'", prefix, name,
+                              ( json_node_get_boolean ( ObjectMemberNode ) ? "true" : "false" ) );
+                 }
+                else if (valueType == G_TYPE_STRING)
+                 { if (g_strrstr ( name, "password" ))
+                    { Info_new ( __func__, FALSE, LOG_DEBUG, "%s: %s = '******'", prefix, name ); }
+                   else
+                    { Info_new ( __func__, FALSE, LOG_DEBUG, "%s: %s = '%s'", prefix, name,
+                                 json_node_get_string ( ObjectMemberNode ) );
+                    }
+                 }
+              }
+           }
+        }
+     }
+    else if (node_type == JSON_NODE_ARRAY)
+     { JsonArray *array = json_node_get_array ( RootNode );
+       if (!array) return;
+       guint array_length = json_array_get_length ( array );
+       for (guint index = 0; index < array_length; index++)
+        { JsonNode *array_node = json_array_get_element ( array, index );
+          gchar *array_prefix = g_strdup_printf ( "%s[%u]", prefix, index );
+          Json_to_log ( array_node, array_prefix );
+          g_free ( array_prefix );
+        }
+     }
+  }
+/******************************************************************************************************************************/
 /* Json_add_string: Ajoute un enregistrement name/string dans le RootNode                                                     */
 /* Entrée: le RootNode, le nom du parametre, la valeur                                                                        */
 /* Sortie: néant                                                                                                              */
