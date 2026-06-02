@@ -175,7 +175,7 @@
        else if ( !strcasecmp( tokens[2], "START") )
              { Thread_Start_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
        else if ( !strcasecmp( tokens[2], "RESTART") )
-             { Thread_Restart_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
+             { Thread_Restart ( Json_get_string ( request, "thread_classe" ), Json_get_string ( request, "thread_tech_id" ) ); }
        else if ( Config.instance_is_master && !strcasecmp( tokens[2], "TEST") )
              { MQTT_Send_to_topic ( Partage->MQTT_local_session, request, FALSE, "SET_TEST/%s", Json_get_string ( request, "thread_tech_id" ) ); }
        else if ( Config.instance_is_master && !strcasecmp( tokens[2], "DEBUG") )

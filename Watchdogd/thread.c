@@ -47,6 +47,8 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
 
+ const gchar *THREAD_BY_CLASSE[] = { "gpiod", "phidget", NULL };
+
 /******************************************************************************************************************************/
 /* Thread_send_comm_to_master: Envoi le statut de la comm au master                                                           */
 /* Entrée: La structure afférente                                                                                             */
@@ -299,45 +301,32 @@
     pthread_exit(0);
   }
 /******************************************************************************************************************************/
-/* Thread_List_by_classe: Récupère la liste des thread_tech_id de classe en parametre, sous forme de liste                    */
+/* Thread_Take_module_by_tech_classe: Récupère le premier (et unique) thread de la classe en parametre                        */
 /* Entrée: La classe a chercher                                                                                               */
-/* Sortie: Rien                                                                                                               */
+/* Sortie: Le pointeur vers le thread trouvé, ou NULL si aucun thread trouvé                                                  */
 /******************************************************************************************************************************/
- static GSList *Thread_List_by_classe ( gchar *thread_classe )
+ static struct THREAD *Thread_Take_module_by_thread_classe ( gchar *thread_classe )
   { if (!thread_classe) return(NULL);
-    GSList *results = NULL;
+    struct THREAD *result = NULL;
     pthread_rwlock_rdlock ( &Partage->Threads_synchro );
     GSList *liste = Partage->Threads;                                                                 /* Parcours de la liste */
     while(liste)
      { struct THREAD *module = liste->data;
        if (!strcasecmp ( thread_classe, Json_get_string ( module->config, "thread_classe" ) ) )
-        { results = g_slist_append ( results, strdup ( Json_get_string ( module->config, "thread_tech_id" ) ) );
+        { result = module;
           break;
         }
        liste = liste->next;
      }
     pthread_rwlock_unlock ( &Partage->Threads_synchro );
-    return(results);
+    return(result);
   }
 /******************************************************************************************************************************/
-/* Thread_take_first_module: Récupère le premier thread, en le supprimant de la liste des modules                             */
+/* Thread_take_module_by_tech_id: Récupère le pointeur du thread, en le supprimant de la liste des modules                  */
 /* Entrée: Le tech_id du thread                                                                                               */
-/* Sortie: Rien                                                                                                               */
+/* Sortie: Le pointeur vers le thread trouvé, ou NULL si aucun thread trouvé                                                  */
 /******************************************************************************************************************************/
- static struct THREAD *Thread_take_first_module ( void )
-  { if (!Partage->Threads) return(NULL);
-    pthread_rwlock_wrlock ( &Partage->Threads_synchro );
-    struct THREAD *module = Partage->Threads->data;                                                  /* On a trouvé le thread */
-    Partage->Threads = g_slist_remove( Partage->Threads, module );
-    pthread_rwlock_unlock ( &Partage->Threads_synchro );
-    return(module);
-  }
-/******************************************************************************************************************************/
-/* Thread_take_module_by_tech_id: Récupère le pointeur du thread, en le supprimant de la liste des modules                    */
-/* Entrée: Le tech_id du thread                                                                                               */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- static struct THREAD *Thread_take_module_by_tech_id ( gchar *thread_tech_id )
+ static struct THREAD *Thread_Take_module_by_thread_tech_id ( gchar *thread_tech_id )
   { if (!thread_tech_id) return(NULL);
     struct THREAD *module = NULL;
     pthread_rwlock_wrlock ( &Partage->Threads_synchro );
@@ -390,85 +379,54 @@
     pthread_rwlock_unlock ( &Partage->Threads_synchro );
 
     while(Partage->Threads)                                                                 /* Liberation mémoire des modules */
-     { struct THREAD *module = Thread_take_first_module();
+     { pthread_rwlock_wrlock ( &Partage->Threads_synchro );
+       struct THREAD *module = Partage->Threads->data;                                               /* On a trouvé le thread */
+       Partage->Threads = g_slist_remove( Partage->Threads, module );
+       pthread_rwlock_unlock ( &Partage->Threads_synchro );
        Thread_Stop_safe ( module );
      }
   }
 /******************************************************************************************************************************/
-/* Thread_Start_by_thread_tech_id: Création d'un thread                                                                       */
-/* Entrée: La classe et le tech_id                                                                                            */
+/* Thread_Load_library: Chargement d'une librairie                                                                            */
+/* Entrée: Le module a charger                                                                                                */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Thread_Start_by_thread_tech_id ( gchar *thread_tech_id )
-  { if (!thread_tech_id) { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_tech_id'" ); return; }
-
-    struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
-    if (!module)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': Not Enought Memory", thread_tech_id );
-       return;
-     }
-
-    module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
-    if (module->config && Json_get_int ( module->config, "http_code" ) == 200)
-     { module->Thread_debug = Json_get_bool ( module->config, "debug" );
-       module->Thread_run   = Json_get_bool ( module->config, "enable" );
-     }
-    else
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': GET_CONFIG from API Failed. Unloading.", thread_tech_id );
-       Thread_Stop_safe ( module );
-       return;
-     }
-
-    if (!module->Thread_run)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s' is not enabled. Unloading.", thread_tech_id );
-       Thread_Stop_safe ( module );
-       return;
-     }
-
-    gchar *thread_classe = Json_get_string ( module->config, "thread_classe" );
-    if (!thread_classe)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_classe' in Json" );
-       Thread_Stop_safe ( module );
-       return;
-     }
-
+ static void Thread_Load_library ( struct THREAD *module )
+  { gchar *thread_classe = Json_get_string ( module->config, "thread_classe" );
     gchar nom_fichier[256];
     g_snprintf( nom_fichier,  sizeof(nom_fichier), "libwatchdog-server-%s.so", thread_classe );
 
     module->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW );
     if (!module->dl_handle)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': Thread '%s' loading failed (%s)",
-                 thread_tech_id, nom_fichier, dlerror() );
-       g_free(module);
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Thread '%s' dlopen failed (%s) : ", nom_fichier, dlerror() );
+       Thread_Stop_safe ( module );
        return;
      }
     struct link_map *map;
     if (dlinfo(module->dl_handle, RTLD_DI_LINKMAP, &map) != 0)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': dl_info failed for '%s': '%s'",
-                thread_tech_id, nom_fichier, dlerror() );
-                  
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Thread '%s' dl_info failed (%s)", nom_fichier, dlerror() );
+       Thread_Stop_safe ( module );
+       return;
      }
-    else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': using file '%s'", thread_tech_id, map->l_name );
+    else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread '%s' : using file '%s'", thread_classe, map->l_name );
 
-    module->Run_thread = dlsym( module->dl_handle, "Run_thread" );                        /* Recherche de la fonction */
+    module->Run_thread = dlsym( module->dl_handle, "Run_thread" );                                /* Recherche de la fonction */
     if (!module->Run_thread)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': Thread '%s' rejected (Run_thread not found)",
-                 thread_tech_id, nom_fichier );
-       dlclose( module->dl_handle );
-       g_free(module);
+     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Thread '%s': File '%s' rejected (Run_thread not found)",
+                 thread_classe, nom_fichier );
+       Thread_Stop_safe ( module );
        return;
      }
 
-
     pthread_attr_t attr;                                                       /* Attribut de mutex pour parametrer le module */
     if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_attr_init failed. Unloading.", thread_tech_id );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread '%s': pthread_attr_init failed. Unloading.", thread_classe );
        Thread_Stop_safe ( module );
        return;
      }
 
     if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )                       /* On le laisse joinable au boot */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_setdetachstate failed. Unloading.", thread_tech_id );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread '%s': pthread_setdetachstate failed. Unloading.", thread_classe );
        Thread_Stop_safe ( module );
        return;
      }
@@ -479,7 +437,7 @@
     pthread_mutex_init( &module->synchro, &param );
 
     if ( module->Thread_run && pthread_create( &module->TID, &attr, (void *)module->Run_thread, module ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_create failed. Unloading.", thread_tech_id );
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread '%s': pthread_create failed. Unloading.", thread_classe );
        Thread_Stop_safe ( module );
        return;
      }
@@ -487,8 +445,114 @@
     pthread_rwlock_wrlock ( &Partage->Threads_synchro );
     Partage->Threads = g_slist_append ( Partage->Threads, module );
     pthread_rwlock_unlock ( &Partage->Threads_synchro );
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread '%s' of class '%s' loaded with enable='%d'",
-              thread_tech_id, thread_classe, module->Thread_run );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread '%s' loaded", thread_classe );
+  }
+/******************************************************************************************************************************/
+/* Thread_Start_by_thread_tech_id: Création d'un thread                                                                       */
+/* Entrée: La classe et le tech_id                                                                                            */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Thread_Start_by_thread_tech_id ( gchar *thread_tech_id )
+  { if (!thread_tech_id)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_tech_id'" ); return; }
+
+    struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
+    if (!module)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': Not Enought Memory", thread_tech_id );
+       return;
+     }
+
+    module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
+    if ( ! (module->config && Json_get_int ( module->config, "http_code" ) == 200) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s': GET_CONFIG from API Failed. Unloading.", thread_tech_id );
+       Thread_Stop_safe ( module );
+       return;
+     }
+
+    module->Thread_debug = Json_get_bool ( module->config, "debug" );
+    module->Thread_run   = Json_get_bool ( module->config, "enable" );
+
+    if (!Json_has_member ( module->config, "thread_classe" ) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s': Missing 'thread_classe' in API response. Unloading.", thread_tech_id );
+       Thread_Stop_safe ( module );
+       return;
+     }
+
+    if (module->Thread_run==FALSE)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s' is not enabled. Unloading.", thread_tech_id );
+       Thread_Stop_safe ( module );
+       return;
+     }
+    if (!Json_has_member ( module->config, "thread_tech_id" ) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s': Missing 'thread_tech_id' in API response. Unloading.", thread_tech_id );
+       Thread_Stop_safe ( module );
+       return;
+     }
+    if (strcasecmp ( thread_tech_id, Json_get_string ( module->config, "thread_tech_id" ) ) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s': Thread_tech_id is not the same as API Thread_id. Unloading.", thread_tech_id );
+       Thread_Stop_safe ( module );
+       return;
+     }
+
+    Thread_Load_library ( module );
+  }
+/******************************************************************************************************************************/
+/* Thread_Start_by_thread_classe: Création d'un thread                                                                       */
+/* Entrée: La classe et le tech_id                                                                                            */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Thread_Start_by_thread_classe ( gchar *thread_classe )
+  { if (!thread_classe)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_classe' provided" ); return; }
+
+    struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
+    if (!module)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s': Not Enough Memory", thread_classe );
+       return;
+     }
+
+    module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_classe=%s", thread_classe );
+    if ( ! (module->config && Json_get_int ( module->config, "http_code" ) == 200) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s': GET_CONFIG from API Failed. Unloading.", thread_classe );
+       Thread_Stop_safe ( module );
+       return;
+     }
+    module->Thread_debug = Json_get_bool ( module->config, "debug" );
+    module->Thread_run   = Json_get_bool ( module->config, "enable" );
+
+    if (!Json_has_member ( module->config, "thread_classe" ) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s': Missing 'thread_classe' in API response. Unloading.", thread_classe );
+       Thread_Stop_safe ( module );
+       return;
+     }
+
+    if (strcasecmp ( thread_classe, Json_get_string ( module->config, "thread_classe" ) ) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s': Root Class is not the same as API Class. Unloading.", thread_classe );
+       Thread_Stop_safe ( module );
+       return;
+     }
+       
+    if (!Json_has_member ( module->config, "tech_ids" ) )
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s': Missing 'tech_ids' in API response. Unloading.", thread_classe );
+       Thread_Stop_safe ( module );
+       return;
+     }
+    Thread_Load_library ( module );
+  }
+/******************************************************************************************************************************/
+/* Thread_Stop_by_thread_classe: Decharge un seul et unique thread                                                           */
+/* Entrée: La classe du thread                                                                                               */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Thread_Stop_by_thread_classe ( gchar *thread_classe )
+  { if (!thread_classe)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "thread_classe not provided" ); return; }
+
+    struct THREAD *module = Thread_Take_module_by_thread_classe ( thread_classe );/* Sortie de la structure de la liste des Threads */
+    if (!module)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s' not found, so not stopped.", thread_classe ); return; }
+
+    Thread_Stop_safe ( module );                                     /* Arret du module hors liste, a l'issue module is freed */
   }
 /******************************************************************************************************************************/
 /* Thread_Stop_by_thread_tech_id: Decharge un seul et unique thread                                                           */
@@ -499,132 +563,35 @@
   { if (!thread_tech_id)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "thread_tech_id not provided" ); return; }
 
-    struct THREAD *module = Thread_take_module_by_tech_id ( thread_tech_id );/* Sortie de la structure de la liste des Threads */
+    struct THREAD *module = Thread_Take_module_by_thread_tech_id ( thread_tech_id );/* Sortie de la structure de la liste des Threads */
     if (!module)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': thread not found, so not stopped.", thread_tech_id ); return; }
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread '%s' not found, so not stopped.", thread_tech_id ); return; }
 
     Thread_Stop_safe ( module );                                     /* Arret du module hors liste, a l'issue module is freed */
   }
 /******************************************************************************************************************************/
-/* Thread_Restart_by_thread_tech_id: Decharge et recharge un thread par thread_tech_id                                        */
-/* Entrée: Le tech_id du thread                                                                                               */
+/* Thread_Restart: Decharge et recharge les threads d'une classe en parametre                                                 */
+/* Entrée: Le thread_classe et thread_tech_id a restarter                                                                     */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- void Thread_Restart_by_thread_tech_id ( gchar *thread_tech_id )
-  { if (!thread_tech_id)
+ void Thread_Restart ( gchar *thread_classe, gchar *thread_tech_id )
+  { gboolean start_by_classe = g_strv_contains ( THREAD_BY_CLASSE, thread_classe );
+    if (start_by_classe)
+     { if (!thread_classe)
+        { Info_new( __func__, Config.log_msrv, LOG_ERR, "thread_classe not provided" ); return; }
+       else
+        { Info_new( __func__, Config.log_msrv, LOG_INFO, "Restarting thread classe '%s'", thread_classe );
+          Thread_Stop_by_thread_classe ( thread_classe );
+          Thread_Start_by_thread_classe ( thread_classe );
+        }
+     }
+    else if (!thread_tech_id)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "thread_tech_id not provided" ); return; }
-
-    Thread_Stop_by_thread_tech_id ( thread_tech_id );
-    Thread_Start_by_thread_tech_id ( thread_tech_id );
-  }
-/******************************************************************************************************************************/
-/* Thread_Restart_by_classe: Decharge et recharge les threads d'une classe en parametre                                       */
-/* Entrée: Le thread_classe a restarter                                                                                       */
-/* Sortie: Rien                                                                                                               */
-/******************************************************************************************************************************/
- void Thread_Restart_by_classe ( gchar *thread_classe )
-  { if (!thread_classe)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "thread_classe not provided" ); return; }
-
-    GSList *Threads = Thread_List_by_classe ( thread_classe );
-    GSList *liste = Threads;
-    while (liste)
-     { gchar *thread_tech_id = liste->data;
+    else
+     { Info_new( __func__, Config.log_msrv, LOG_INFO, "Restarting thread '%s' of class '%s'", thread_tech_id, thread_classe );
        Thread_Stop_by_thread_tech_id ( thread_tech_id );
        Thread_Start_by_thread_tech_id ( thread_tech_id );
      }
-    g_slist_free_full ( Threads, g_free );
-  }
-/******************************************************************************************************************************/
-/* Thread_Start_classe_singleton: Démarre un unique thread pour toute la classe (gpiod, phidget, ...)                         */
-/* Entrée: La classe et le tableau des infos de threads pour cette classe (retournés par /run/thread/load)                    */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Thread_Start_classe_singleton ( const gchar *thread_classe, JsonArray *class_info_array )
-  { struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
-    if (!module)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': Not Enough Memory", thread_classe ); return; }
-
-    JsonNode *combined_config = Json_node_create();
-    Json_node_add_string ( combined_config, "thread_classe",  (gchar *)thread_classe );
-    Json_node_add_string ( combined_config, "thread_tech_id", (gchar *)thread_classe );
-    Json_node_add_bool   ( combined_config, "enable", TRUE );
-    Json_node_add_bool   ( combined_config, "debug",  FALSE );
-    JsonArray *tech_ids_list = Json_node_add_array ( combined_config, "tech_ids_list" );
-
-    gboolean any_enabled = FALSE;
-    GList *elements = json_array_get_elements ( class_info_array );
-    GList *elem = elements;
-    while (elem)
-     { JsonNode *thread_info = elem->data;
-       if (Json_get_bool ( thread_info, "enable" ))
-        { gchar *tech_id = Json_get_string ( thread_info, "thread_tech_id" );
-          JsonNode *full_config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", tech_id );
-          if (full_config && Json_get_int ( full_config, "http_code" ) == 200)
-           { json_array_add_element ( tech_ids_list, full_config );
-             any_enabled = TRUE;
-           }
-          else if (full_config) Json_node_unref ( full_config );
-        }
-       elem = g_list_next ( elem );
-     }
-    g_list_free ( elements );
-
-    if (!any_enabled)
-     { Info_new( __func__, Config.log_msrv, LOG_INFO, "'%s': No enabled tech_id found, class thread not started.", thread_classe );
-       Json_node_unref ( combined_config );
-       g_free ( module );
-       return;
-     }
-
-    module->config       = combined_config;
-    module->Thread_debug = FALSE;
-    module->Thread_run   = TRUE;
-
-    gchar nom_fichier[256];
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "libwatchdog-server-%s.so", thread_classe );
-    module->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW );
-    if (!module->dl_handle)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': '%s' loading failed (%s)",
-                 thread_classe, nom_fichier, dlerror() );
-       Json_node_unref ( combined_config );
-       g_free ( module );
-       return;
-     }
-
-    module->Run_thread = dlsym( module->dl_handle, "Run_thread" );
-    if (!module->Run_thread)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': '%s' rejected (Run_thread not found)",
-                 thread_classe, nom_fichier );
-       dlclose ( module->dl_handle );
-       Json_node_unref ( combined_config );
-       g_free ( module );
-       return;
-     }
-
-    pthread_attr_t attr;
-    if ( pthread_attr_init(&attr) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_attr_init failed.", thread_classe );
-       Thread_Stop_safe ( module ); return;
-     }
-    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_setdetachstate failed.", thread_classe );
-       Thread_Stop_safe ( module ); return;
-     }
-    pthread_mutexattr_t param;
-    pthread_mutexattr_init( &param );
-    pthread_mutexattr_setpshared( &param, PTHREAD_PROCESS_SHARED );
-    pthread_mutex_init( &module->synchro, &param );
-
-    if ( pthread_create( &module->TID, &attr, (void *)module->Run_thread, module ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_create failed.", thread_classe );
-       Thread_Stop_safe ( module ); return;
-     }
-    pthread_attr_destroy(&attr);
-    pthread_rwlock_wrlock ( &Partage->Threads_synchro );
-    Partage->Threads = g_slist_append ( Partage->Threads, module );
-    pthread_rwlock_unlock ( &Partage->Threads_synchro );
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Class '%s' singleton thread started", thread_classe );
   }
 /******************************************************************************************************************************/
 /* Thread_Start_all: Ouverture de toutes les librairies possibles pour Watchdog                                               */
@@ -635,39 +602,46 @@
   { JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/load", NULL );
     if (!api_result) { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Error for /run/thread LOAD",__func__ ); return; }
 
-    if (Json_get_int ( api_result, "http_code" ) == 200)
-     { JsonNode *threads_node = Json_get_object_as_node ( api_result, "threads" );
-       if (!threads_node)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Missing 'threads' object in API response" );
-          Json_node_unref ( api_result ); return;
-        }
-       JsonObject *threads_obj = json_node_get_object ( threads_node );
-       JsonObjectIter iter;
-       const gchar *thread_classe;
-       JsonNode *class_node;
-       json_object_iter_init ( &iter, threads_obj );
-       while ( json_object_iter_next ( &iter, &thread_classe, &class_node ) )
-        { JsonArray *class_array = json_node_get_array ( class_node );
-          if (!class_array) continue;
-          Info_new( __func__, Config.log_msrv, LOG_INFO, "Loading %d thread(s) of class '%s'",
-                    json_array_get_length(class_array), thread_classe );
-          gboolean is_singleton = ( !strcasecmp ( thread_classe, "gpiod"   ) ||
-                                    !strcasecmp ( thread_classe, "phidget" ) );
-          if (is_singleton)
-           { Thread_Start_classe_singleton ( thread_classe, class_array ); }
-          else
-           { GList *class_elements = json_array_get_elements ( class_array );
-             GList *class_elem = class_elements;
-             while (class_elem)
-              { JsonNode *element = class_elem->data;
-                gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
-                if (Json_get_bool ( element, "enable" )) Thread_Start_by_thread_tech_id ( thread_tech_id );
-                class_elem = g_list_next ( class_elem );
-              }
-             g_list_free ( class_elements );
+    if (Json_get_int ( api_result, "http_code" ) != 200)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Error for /run/thread LOAD: http_code=%d",__func__, Json_get_int ( api_result, "http_code" ) );
+       goto end;
+     }
+
+    Json_to_log ( api_result, "API /run/thread/load result" );                                     /* Print API result to log */
+
+    JsonNode *threads_node = Json_get_object_as_node ( api_result, "threads" );
+    if (!threads_node)
+     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Missing 'threads' object in API response" );
+       goto end;
+     }
+
+    JsonObject *threads_obj = json_node_get_object ( threads_node );  /* Pour tous les objets du node (ie des nodes 'classe') */
+    JsonObjectIter iter;
+    const gchar *thread_classe;                                                              /* Le nom de la classe de thread */
+    JsonNode *class_node;                                                      /* le node de la classe contenant les tech_ids */
+    json_object_iter_init ( &iter, threads_obj );
+    while ( json_object_iter_next ( &iter, &thread_classe, &class_node ) ) /*Pour tous les noeudes de classe, recup nom + node*/
+     { JsonArray *class_array = json_node_get_array ( class_node );                 /* Un class_node est un array de tech_ids */
+       if (!class_array) continue;
+       gint nbr_thread_tech_ids = json_array_get_length(class_array);
+       gboolean start_by_classe = g_strv_contains ( THREAD_BY_CLASSE, thread_classe );
+       Info_new( __func__, Config.log_msrv, LOG_INFO, "Starting %d thread_tech_ids of class '%s' by %s",
+                 nbr_thread_tech_ids, thread_classe, (start_by_classe ? "thread_classe" : "thread_tech_id") );
+       if (start_by_classe)
+        { Thread_Start_by_thread_classe ( thread_classe ); }
+       else
+        { GList *tech_ids = json_array_get_elements ( class_array );                      /* Pour chaque tech_id de la classe */
+          GList *tech_id = tech_ids;
+          while (tech_id)
+           { JsonNode *element = tech_id->data;
+             gchar *thread_tech_id = Json_get_string ( element, "thread_tech_id" );
+             if (Json_get_bool ( element, "enable" )) Thread_Start_by_thread_tech_id ( thread_tech_id );
+             tech_id = g_list_next ( tech_id );
            }
+          g_list_free ( tech_ids );
         }
      }
+end:
     Json_node_unref(api_result);
   }
 /******************************************************************************************************************************/

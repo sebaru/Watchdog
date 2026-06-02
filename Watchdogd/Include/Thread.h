@@ -69,8 +69,7 @@
  extern void Thread_Start_by_thread_tech_id ( gchar *thread_tech_id );
  extern void Thread_Stop_all ( void );
  extern void Thread_Stop_by_thread_tech_id ( gchar *thread_tech_id );
- extern void Thread_Restart_by_thread_tech_id ( gchar *thread_tech_id );
- extern void Thread_Restart_by_classe ( gchar *thread_classe );
+ extern void Thread_Restart ( gchar *thread_classe, gchar *thread_tech_id );
  extern void Thread_send_comm_to_master ( struct THREAD *module, gboolean etat );
  extern void Thread_loop ( struct THREAD *module );
  extern void Thread_init ( struct THREAD *module, gint sizeof_vars );
