@@ -169,7 +169,8 @@
         }
      }
 /*-------------------------------------------------- topic Thread pour le master et les slaves -------------------------------*/
-    else if ( !strcasecmp( tokens[1], "THREAD") )
+#warning next step
+/*    else if ( !strcasecmp( tokens[1], "THREAD") )
      {      if ( !strcasecmp( tokens[2], "STOP") )
              { Thread_Stop_by_thread_tech_id ( Json_get_string ( request, "thread_tech_id" ) ); }
        else if ( !strcasecmp( tokens[2], "START") )
