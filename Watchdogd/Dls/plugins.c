@@ -94,7 +94,8 @@
                  "API Request for DLS CREATE failed. '%s' not created.", tech_id );
        if (api_result) Json_node_unref ( api_result );
        return(FALSE);
-     }
+     } else Info_new( __func__, Config.log_dls, LOG_NOTICE, "API Request for DLS CREATE succeeded. '%s' created.", tech_id );
+
     if (api_result) Json_node_unref ( api_result );
     return(TRUE);
   }
