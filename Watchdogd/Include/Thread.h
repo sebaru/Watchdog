@@ -47,7 +47,7 @@
     gboolean MQTT_connected;                                       /* Report du status de la communication vers le MQTT local */
     GSList  *MQTT_messages;
     gint     MQTT_next_top_connect;                                                          /* Date de prochaine reconnexion */
-    JsonNode *config;                               /* Pointeur vers un element du tableau lib->config spécifique a ce thread */
+    JsonNode *config_all;                                     /* Pointeur vers l'ensemble de la config spécifique a ce thread */
     gboolean comm_status;                                                       /* Report local du status de la communication */
     gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
     JsonNode *ai_nbr_tour_par_sec;                                                                        /* Tour par seconde */
@@ -58,8 +58,13 @@
     gint nbr_tour_delai;
     gint telemetrie_top;
     gint hour_top;
-    void *vars;                                                               /* Pointeur vers les variables de run du module */
+    GSList *vars_all;                                        /* Pointeur vers les variables de run du module (un par tech_id) */
     void (*Run_thread)( struct THREAD *module );                                  /* Fonction principale de gestion du module */
+
+    guint nb_thread_tech_ids;                                                /* Nombre de tech_ids dans la liste des tech_ids */
+    guint current_thread_tech_id_index;                                /* Index du tech_id courant dans la liste des tech_ids */
+    JsonNode *config;                                                 /* Pointeur vers la config du tech_id courant du thread */
+    gpointer vars;                                    /* Pointeur vers les variables de run du module pour le tech_id courant */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

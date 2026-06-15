@@ -47,8 +47,6 @@
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
 
- const gchar *THREAD_MONO_CLASSE[] = { "gpiod", "phidget", NULL };
-
 /******************************************************************************************************************************/
 /* Thread_send_comm_to_master: Envoi le statut de la comm au master                                                           */
 /* Entrée: La structure afférente                                                                                             */
@@ -147,6 +145,10 @@
      { MQTT_Send_AI ( module, module->ai_nbr_tour_par_sec, module->nbr_tour_par_sec, TRUE );
        module->telemetrie_top = Partage->top;
      }
+/*************************************************Passage au tech_id suivant **************************************************/
+    module->current_thread_tech_id_index++;
+    if (module->current_thread_tech_id_index >= module->nb_thread_tech_ids) module->current_thread_tech_id_index = 0;
+    if (module->vars_all) module->vars = g_slist_nth_data ( module->vars_all, module->current_thread_tech_id_index );
   }
 /******************************************************************************************************************************/
 /* Thread_every_hour: Renvoie TRUE une fois par heure                                                                         */
@@ -208,6 +210,23 @@
     module->MQTT_connected = FALSE;
     module->MQTT_next_top_connect = Partage->top + THREAD_MQTT_RECONNECT_DELAY;
   }
+
+ static void Thread_del_one_slot ( struct THREAD *module, gint id )
+  {
+     #warning to be updated
+    /*Json_array_del_one_element ( module->config_all, "thread_tech_ids", id );*/
+    gpointer vars = g_slist_nth_data ( module->vars_all, id );
+    if (vars) g_free(vars);
+    module->vars_all = g_slist_remove ( module->vars_all, vars );
+  }
+
+ static gboolean Thread_add_one_slot ( struct THREAD *module, gint sizeof_vars )
+  { gpointer vars = g_try_malloc0 ( sizeof_vars );
+    if (!vars) 
+     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory error for one new slot." ); return(FALSE); }
+    module->vars_all = g_slist_append ( module->vars_all, vars );
+    return(TRUE);
+  }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
 /* Entrée: La structure afférente                                                                                             */
@@ -216,24 +235,32 @@
  void Thread_init ( struct THREAD *module, gint sizeof_vars )
   { gchar chaine[128];
     setlocale( LC_ALL, "C" );                                             /* Pour le formatage correct des , . dans les float */
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    g_snprintf( chaine, sizeof(chaine), "W-%s", thread_tech_id );                                  /* Positionne le nom noyau */
+
+    gchar *thread_classe = Json_get_string ( module->config, "thread_classe" );
+    mkdir ( thread_classe, S_IRUSR | S_IWUSR | S_IXUSR );
+    g_snprintf( chaine, sizeof(chaine), "W-%s", thread_classe );                                   /* Positionne le nom noyau */
     gchar *upper_name = g_ascii_strup ( chaine, -1 );
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
     g_free(upper_name);
 
-    gchar *thread_classe  =Json_get_string ( module->config, "thread_classe" );
-    mkdir ( thread_classe, S_IRUSR | S_IWUSR | S_IXUSR );
+    module->current_thread_tech_id_index = 0;
+    module->config = Json_array_get_element ( module->config_all, "thread_tech_ids", module->current_thread_tech_id_index );
 
     if (sizeof_vars)
-     { module->vars = g_try_malloc0 ( sizeof_vars );
-       if (!module->vars)
-        { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Memory error for vars.", thread_tech_id );
-          Thread_end ( module );                                    /* Pas besoin de return : Thread_end fait un pthread_exit */
+     { for ( gint i = 0; i<Json_array_get_length ( module->config_all, "thread_tech_ids" ); i++ )
+        { gchar *thread_tech_idNode = Json_array_get_element ( module->config_all, "thread_tech_ids", i );
+          gchar *thread_tech_id = Json_get_string ( thread_tech_idNode, "thread_tech_id" );
+          Info_new( __func__, module->Thread_debug, LOG_INFO, "Adding memory slot for thread '%s'", thread_tech_id );
+          if (Thread_add_one_slot ( module, sizeof_vars ) == FALSE)
+           { Info_new( __func__, module->Thread_debug, LOG_ERR, "Adding memory slot error for thread '%s'", thread_tech_id );
+
+             Thread_end ( module );                                 /* Pas besoin de return : Thread_end fait un pthread_exit */
+           }
         }
+       module->vars = g_slist_nth_data ( module->vars_all, module->current_thread_tech_id_index );
      }
 
-/* ----------------------------------------------------- Ecoute du MQTT ----------------------------------------------------- */
+/* ----------------------------------------------------- Ecoute du MQTT local------------------------------------------------ */
     module->MQTT_session = mosquitto_new( thread_tech_id, TRUE, module );
     if (!module->MQTT_session)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
@@ -294,7 +321,7 @@
     mosquitto_destroy( module->MQTT_session );
     g_slist_foreach ( module->MQTT_messages, (GFunc) Json_node_unref, NULL );
     g_slist_free    ( module->MQTT_messages );   module->MQTT_messages = NULL;
-    if (module->vars) { g_free(module->vars);  module->vars   = NULL; }
+    if (module->vars) { g_slist_free_full (module->vars, g_free);  module->vars   = NULL; }
     Json_node_unref ( module->IOs );           module->IOs    = NULL;
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
     sleep(1);                       /* le temps d'un appel libsoup a Thread_ws_on_master_connected si Operation was cancelled */
@@ -405,64 +432,11 @@
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread '%s' loaded", thread_classe );
   }
 /******************************************************************************************************************************/
-/* Thread_Start_by_thread_tech_id: Création d'un thread                                                                       */
-/* Entrée: La classe et le tech_id                                                                                            */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Thread_Start_one_thread_tech_id ( gchar *thread_tech_id )
-  { if (!thread_tech_id)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_tech_id'" ); return; }
-
-    struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
-    if (!module)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': Not Enought Memory", thread_tech_id );
-       return;
-     }
-
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Thread '%s': Requesting config from API", thread_tech_id );
-    module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
-    if ( ! (module->config && Json_get_int ( module->config, "http_code" ) == 200) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s': GET_CONFIG from API Failed. Unloading.", thread_tech_id );
-       Thread_Stop_safe ( module );
-       return;
-     }
-    Json_to_log ( module->config, thread_tech_id );
-
-    if (!Json_has_member ( module->config, "thread_classe" ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s': Missing 'thread_classe' in API response. Unloading.", thread_tech_id );
-       Thread_Stop_safe ( module );
-       return;
-     }
-
-    if (!Json_has_member ( module->config, "nbr_thread_tech_ids" ) || Json_get_int ( module->config, "nbr_thread_tech_ids" ) != 1 )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s': Wrong number of thread_tech_ids. Unloading.", thread_tech_id );
-       Thread_Stop_safe ( module );
-       return;
-     }
-
-    if (!Json_has_member ( module->config, thread_tech_id ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s': Missing 'thread_tech_id' in API response. Unloading.", thread_tech_id );
-       Thread_Stop_safe ( module );
-       return;
-     }
-
-    module->Thread_debug = Json_get_bool ( module->config, "debug" );
-    module->Thread_run   = Json_get_bool ( module->config, "enable" );
-
-    if (module->Thread_run==FALSE)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread tech_id '%s' is not enabled. Unloading.", thread_tech_id );
-       Thread_Stop_safe ( module );
-       return;
-     }
-
-    Thread_Load_library ( module );
-  }
-/******************************************************************************************************************************/
-/* Thread_Start_one_mono_thread_classe: Création d'un thread mono pour une classe spécifique                                  */
+/* Thread_Start_one_thread_classe: Création d'un thread pour une classe spécifique                                            */
 /* Entrée: La classe du thread                                                                                                */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Thread_Start_one_mono_thread_classe ( gchar *thread_classe )
+ static void Thread_Start_one_thread_classe ( gchar *thread_classe )
   { if (!thread_classe)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_classe' provided" ); return; }
 
@@ -488,40 +462,32 @@
      }
 
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Thread Class '%s': Requesting config from API", thread_classe );
-    module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_classe=%s", thread_classe );
-    if ( ! (module->config && Json_get_int ( module->config, "http_code" ) == 200) )
+    module->config_all = Http_Get_from_global_API ( "/run/thread/config", "thread_classe=%s", thread_classe );
+    if ( ! (module->config_all && Json_get_int ( module->config_all, "http_code" ) == 200) )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s': GET_CONFIG from API Failed. Unloading.", thread_classe );
        Thread_Stop_safe ( module );
        return;
      }
-    module->Thread_debug = Json_get_bool ( module->config, "debug" );
-    module->Thread_run   = Json_get_bool ( module->config, "enable" );
+    module->Thread_debug = Json_get_bool ( module->config_all, "debug" );
+    module->Thread_run   = Json_get_bool ( module->config_all, "enable" );
 
-    if (!Json_has_member ( module->config, "thread_classe" ) )
+    if (!Json_has_member ( module->config_all, "thread_classe" ) )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s': Missing 'thread_classe' in API response. Unloading.", thread_classe );
        Thread_Stop_safe ( module );
        return;
      }
 
-    if (strcasecmp ( thread_classe, Json_get_string ( module->config, "thread_classe" ) ) )
+    if (strcasecmp ( thread_classe, Json_get_string ( module->config_all, "thread_classe" ) ) )
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s': Root Class is not the same as API Class. Unloading.", thread_classe );
        Thread_Stop_safe ( module );
        return;
      }
-       
-    if (!Json_has_member ( module->config, "nbr_thread_tech_ids" ) || Json_get_int ( module->config, "nbr_thread_tech_ids" ) == 0 )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Thread Class '%s': Wrong number of thread_tech_ids. Unloading.", thread_classe );
-       Thread_Stop_safe ( module );
-       return;
-     }
-
+    module->nbr_thread_tech_ids = Json_get_int ( module->config_all, "nbr_thread_tech_ids" );
+    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread Class '%s': Loading class for '%d' thread_tech_ids",
+              thread_classe, module->nbr_thread_tech_ids );
+    
     Thread_Load_library ( module );
   }
-/******************************************************************************************************************************/
-/* Thread_Start_all_one_classe: Demarre une classe complete depuis un element du tableau de l'API                             */
-/******************************************************************************************************************************/
- static void Thread_Start_one_thread_tech_id_by_array ( JsonArray *array, guint index, JsonNode *element, gpointer user_data )
-  { Thread_Start_one_thread_tech_id ( Json_get_string ( element, "thread_tech_id" ) ); }
 /******************************************************************************************************************************/
 /* Thread_Start_one_classe_by_array: Demarre une classe complete depuis un element du tableau de l'API                        */
 /******************************************************************************************************************************/
@@ -533,15 +499,7 @@
        return;
      }
 
-    gboolean is_mono_class = g_strv_contains ( THREAD_MONO_CLASSE, thread_classe );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Starting thread_tech_ids of %s-class '%s'",
-              (is_mono_class ? "mono" : "multi"), thread_classe );
-
-    if (is_mono_class)
-         { Thread_Start_one_mono_thread_classe ( thread_classe ); }
-    else { Json_node_foreach_array_element ( class_node, "thread_tech_ids",
-                                             Thread_Start_one_thread_tech_id_by_array, thread_classe );
-         }
+    Thread_Start_one_thread_classe ( thread_classe );
   }
 /******************************************************************************************************************************/
 /* Thread_Start_all: Ouverture de toutes les librairies possibles pour Watchdog                                               */
