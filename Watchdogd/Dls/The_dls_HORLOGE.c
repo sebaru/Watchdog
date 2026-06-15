@@ -128,7 +128,7 @@
 /* Sortie: Les horloges sont directement pilotées dans la structure DLS_DATA                                                  */
 /******************************************************************************************************************************/
  void Dls_data_activer_horloge ( void )
-  { Json_node_foreach_array_element ( Partage->com_dls.HORLOGE_ticks, "horloges", Dls_data_activer_une_horloge, NULL ); }
+  { Json_foreach_array_element ( Partage->com_dls.HORLOGE_ticks, "horloges", Dls_data_activer_une_horloge, NULL ); }
 /******************************************************************************************************************************/
 /* Dls_Load_horloge_ticks: Charge les horloges depuis l'API                                                                   */
 /* Entrée: rien                                                                                                               */
@@ -138,7 +138,7 @@
   { JsonNode *api_result = Http_Get_from_global_API ( "/run/horloges", NULL );
     if (api_result && Json_get_int ( api_result, "http_code" ) == 200)
      { pthread_mutex_lock ( &Partage->com_dls.synchro );
-       Json_node_unref ( Partage->com_dls.HORLOGE_ticks );
+       Json_unref ( Partage->com_dls.HORLOGE_ticks );
        Partage->com_dls.HORLOGE_ticks = api_result;
        pthread_mutex_unlock ( &Partage->com_dls.synchro );
        Info_new( __func__, Config.log_msrv, LOG_INFO, "%03d HORLOGE ticks loaded.",
@@ -146,7 +146,7 @@
      }
     else
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for HORLOGE TICKS failed." );
-       Json_node_unref ( api_result );
+       Json_unref ( api_result );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

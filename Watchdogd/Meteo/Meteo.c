@@ -72,7 +72,7 @@
         }
        Thread_send_comm_to_master ( module, TRUE );
      }
-    Json_node_unref ( response );
+    Json_unref ( response );
   }
 /******************************************************************************************************************************/
 /* Meteo_update_forecast: Met a jour le forecast auprès de meteoconcept                                                       */
@@ -121,8 +121,8 @@
     gint http_code     = Json_get_int ( response, "http_code" );
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d", http_code );
 
-    if (http_code==200) { Json_node_foreach_array_element ( response, "forecast", Meteo_update_forecast, module ); }
-    Json_node_unref ( response );
+    if (http_code==200) { Json_foreach_array_element ( response, "forecast", Meteo_update_forecast, module ); }
+    Json_unref ( response );
   }
 /******************************************************************************************************************************/
 /* Run_thread: Prend en charge un des sous thread de l'agent                                                                  */
@@ -180,7 +180,7 @@
           gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
 
           Info_new( __func__, module->Thread_debug, LOG_DEBUG, "token_lvl0 '%s' not for this thread", token_lvl0 );
-          Json_node_unref(request);
+          Json_unref(request);
         }
 /****************************************************** Connexion ! ***********************************************************/
        if (Partage->top - vars->last_request >= polling_consigne)

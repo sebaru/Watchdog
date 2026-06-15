@@ -114,10 +114,10 @@
     GSList *liste = plugin->Dls_data_REGISTRE;
     while ( liste )
      { struct DLS_REGISTRE *bit = liste->data;
-       JsonNode *element = Json_node_create();
-       Json_node_add_string ( element, "tech_id",   bit->tech_id );
-       Json_node_add_string ( element, "acronyme",  bit->acronyme );
-       Json_node_add_double ( element, "valeur",    bit->valeur );
+       JsonNode *element = Json_create();
+       Json_add_string ( element, "tech_id",   bit->tech_id );
+       Json_add_string ( element, "acronyme",  bit->acronyme );
+       Json_add_double ( element, "valeur",    bit->valeur );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
      }
@@ -128,11 +128,11 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_REGISTRE_export_to_API ( struct DLS_REGISTRE *bit )
-  { JsonNode *element = Json_node_create ();
+  { JsonNode *element = Json_create ();
     if (element)
-     { Json_node_add_double ( element, "valeur", bit->valeur );
+     { Json_add_double ( element, "valeur", bit->valeur );
        MQTT_Send_to_API     ( element, "DLS_REPORT/REGISTRE/%s/%s", bit->tech_id, bit->acronyme );
-       Json_node_unref      ( element );
+       Json_unref      ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

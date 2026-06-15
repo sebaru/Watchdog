@@ -381,7 +381,7 @@
            { gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
              if (!strcasecmp (token_lvl0, "SET_DO") ) Ups_SET_DO ( module, request );
            }
-          Json_node_unref ( request );
+          Json_unref ( request );
         }
 /********************************************* Début de l'interrogation du ups ************************************************/
        if ( Partage->top >= vars->date_next_connexion )                               /* Si attente retente, on change de ups */

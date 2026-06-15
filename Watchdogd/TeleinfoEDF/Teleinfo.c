@@ -222,7 +222,7 @@
            { gchar *token_lvl0 = Json_get_string ( message, "token_lvl0" );
              Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: token_lvl0 '%s' not for this thread", thread_tech_id, token_lvl0 );
            }
-          Json_node_unref(message);
+          Json_unref(message);
         }
 /************************************************* Traitement opérationnel ****************************************************/
        if (vars->mode == TINFO_WAIT_BEFORE_RETRY)

@@ -164,11 +164,11 @@
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et les paramètres du message                                  */
 /******************************************************************************************************************************/
  void Dls_data_set_bus ( struct DLS_TO_PLUGIN *vars, gchar *thread_tech_id, gchar *commande )
-  { JsonNode *RootNode = Json_node_create ();
+  { JsonNode *RootNode = Json_create ();
     if (RootNode)
-     { Json_node_add_string ( RootNode, "commande", commande );
+     { Json_add_string ( RootNode, "commande", commande );
        MQTT_Send_to_topic ( Partage->MQTT_local_session, RootNode, FALSE, "SET_BUS/%s", thread_tech_id );
-       Json_node_unref(RootNode);
+       Json_unref(RootNode);
      }
   }
 /******************************************************************************************************************************/
@@ -224,7 +224,7 @@
     GSList *liste = plugin->Dls_data_DO;
     while ( liste )                                                                                     /* Pour toutes les DO */
      { struct DLS_DO *bit = liste->data;
-       JsonNode *RootNode = Json_node_create ();
+       JsonNode *RootNode = Json_create ();
        if (RootNode)
         { Dls_DO_to_json ( RootNode, bit );
           pthread_rwlock_wrlock ( &Partage->Liste_DO_synchro );
@@ -238,7 +238,7 @@
     liste = plugin->Dls_data_AO;
     while ( liste )                                                                                     /* Pour toutes les AO */
      { struct DLS_AO *bit = liste->data;
-       JsonNode *RootNode = Json_node_create ();
+       JsonNode *RootNode = Json_create ();
        if (RootNode)
         { Dls_AO_to_json ( RootNode, bit );
           pthread_rwlock_wrlock ( &Partage->Liste_AO_synchro );

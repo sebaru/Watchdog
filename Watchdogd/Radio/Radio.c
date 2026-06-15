@@ -113,7 +113,7 @@
            }
           else
            { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", tech_id, tag ); }
-          Json_node_unref(request);
+          Json_unref(request);
         }
      }
     Stopper_radio( module );

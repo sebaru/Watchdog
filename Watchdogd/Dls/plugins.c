@@ -92,11 +92,11 @@
     if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info_new( __func__, Config.log_dls, LOG_ERR,
                  "API Request for DLS CREATE failed. '%s' not created.", tech_id );
-       if (api_result) Json_node_unref ( api_result );
+       if (api_result) Json_unref ( api_result );
        return(FALSE);
      } else Info_new( __func__, Config.log_dls, LOG_NOTICE, "API Request for DLS CREATE succeeded. '%s' created.", tech_id );
 
-    if (api_result) Json_node_unref ( api_result );
+    if (api_result) Json_unref ( api_result );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -365,22 +365,22 @@
 /********************************* Chargement des nouveaux CI *****************************************************************/
     g_slist_free_full ( plugin->Dls_data_CI, (GDestroyNotify) g_free );
     plugin->Dls_data_CI = NULL;
-    Json_node_foreach_array_element ( api_result, "mnemos_CI", Dls_data_CI_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_CI", Dls_data_CI_create_by_array, plugin );
 
 /********************************* Chargement des nouveaux CH *****************************************************************/
     g_slist_free_full ( plugin->Dls_data_CH, (GDestroyNotify) g_free );
     plugin->Dls_data_CH = NULL;
-    Json_node_foreach_array_element ( api_result, "mnemos_CH", Dls_data_CH_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_CH", Dls_data_CH_create_by_array, plugin );
 
 /********************************* Chargement des nouveaux REGISTRE ***********************************************************/
     g_slist_free_full ( plugin->Dls_data_REGISTRE, (GDestroyNotify) g_free );
     plugin->Dls_data_REGISTRE = NULL;
-    Json_node_foreach_array_element ( api_result, "mnemos_REGISTRE", Dls_data_REGISTRE_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_REGISTRE", Dls_data_REGISTRE_create_by_array, plugin );
 
 /********************************* Chargement des nouveaux AI *****************************************************************/
     g_slist_free_full ( plugin->Dls_data_AI, (GDestroyNotify) g_free );
     plugin->Dls_data_AI = NULL;
-    Json_node_foreach_array_element ( api_result, "mnemos_AI", Dls_data_AI_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_AI", Dls_data_AI_create_by_array, plugin );
 
 /********************************* Chargement des nouveaux autres bits ********************************************************/
     if (plugin->Dls_data_DI)
@@ -397,13 +397,13 @@
        g_slist_free_full ( plugin->Dls_data_DI, (GDestroyNotify) g_free );
        plugin->Dls_data_DI = NULL;
      }
-    Json_node_foreach_array_element ( api_result, "mnemos_DI", Dls_data_DI_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_DI", Dls_data_DI_create_by_array, plugin );
 
     if (plugin->Dls_data_DO) { g_slist_free_full ( plugin->Dls_data_DO, (GDestroyNotify) g_free ); plugin->Dls_data_DO = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_DO", Dls_data_DO_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_DO", Dls_data_DO_create_by_array, plugin );
 
     if (plugin->Dls_data_AO) { g_slist_free_full ( plugin->Dls_data_AO, (GDestroyNotify) g_free ); plugin->Dls_data_AO = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_AO", Dls_data_AO_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_AO", Dls_data_AO_create_by_array, plugin );
 
     if (plugin->Dls_data_MONO)
      { GSList *liste = plugin->Dls_data_MONO;
@@ -417,7 +417,7 @@
        g_slist_free_full ( plugin->Dls_data_MONO, (GDestroyNotify) g_free );
        plugin->Dls_data_MONO = NULL;
      }
-    Json_node_foreach_array_element ( api_result, "mnemos_MONO", Dls_data_MONO_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_MONO", Dls_data_MONO_create_by_array, plugin );
 
     if (plugin->Dls_data_BI)
      { GSList *liste = plugin->Dls_data_BI;
@@ -431,22 +431,22 @@
        g_slist_free_full ( plugin->Dls_data_BI, (GDestroyNotify) g_free );
        plugin->Dls_data_BI = NULL;
      }
-    Json_node_foreach_array_element ( api_result, "mnemos_BI", Dls_data_BI_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_BI", Dls_data_BI_create_by_array, plugin );
 
     if (plugin->Dls_data_VISUEL) { g_slist_free_full ( plugin->Dls_data_VISUEL, (GDestroyNotify) g_free ); plugin->Dls_data_VISUEL = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_VISUEL", Dls_data_VISUEL_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_VISUEL", Dls_data_VISUEL_create_by_array, plugin );
 
     Dls_data_MESSAGE_free_all ( plugin );
-    Json_node_foreach_array_element ( api_result, "mnemos_MESSAGE", Dls_data_MESSAGE_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_MESSAGE", Dls_data_MESSAGE_create_by_array, plugin );
 
     if (plugin->Dls_data_WATCHDOG) { g_slist_free_full ( plugin->Dls_data_WATCHDOG, (GDestroyNotify) g_free ); plugin->Dls_data_WATCHDOG = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_WATCHDOG", Dls_data_WATCHDOG_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_WATCHDOG", Dls_data_WATCHDOG_create_by_array, plugin );
 
     if (plugin->Dls_data_TEMPO) { g_slist_free_full ( plugin->Dls_data_TEMPO, (GDestroyNotify) g_free ); plugin->Dls_data_TEMPO = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_TEMPO", Dls_data_TEMPO_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_TEMPO", Dls_data_TEMPO_create_by_array, plugin );
 
     if (plugin->Dls_data_HORLOGE) { g_slist_free_full ( plugin->Dls_data_HORLOGE, (GDestroyNotify) g_free ); plugin->Dls_data_HORLOGE = NULL; }
-    Json_node_foreach_array_element ( api_result, "mnemos_HORLOGE", Dls_data_HORLOGE_create_by_array, plugin );
+    Json_foreach_array_element ( api_result, "mnemos_HORLOGE", Dls_data_HORLOGE_create_by_array, plugin );
 
     if (Dls_Dlopen_plugin ( plugin ) == FALSE)               /* DlOpen before remap (sinon on mappe pas la bonne zone mémoire */
      { Info_new( __func__, Config.log_dls, LOG_ERR, "'%s' Error when dlopening", tech_id ); }
@@ -468,7 +468,7 @@
 
     pthread_mutex_unlock( &Partage->com_dls.synchro );                                             /* Libération Verrou D.L.S */
 end:
-    Json_node_unref(api_result);
+    Json_unref(api_result);
     pthread_mutex_lock ( &Nbr_compil_mutex ); /* Decremente le compteur de thread (si fonction appelée en mode pthread_create */
     if (Nbr_compil) Nbr_compil--;
     pthread_mutex_unlock ( &Nbr_compil_mutex );
@@ -520,7 +520,7 @@ end:
     JsonNode *api_result = Http_Post_to_global_API ( "/run/dls/plugins", NULL );
     if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info_new( __func__, Config.log_dls, LOG_ERR, "API Request for /run/dls/plugins failed. No plugin loaded." );
-       Json_node_unref ( api_result );
+       Json_unref ( api_result );
        return;
      }
     Info_new( __func__, Config.log_dls, LOG_INFO, "API Request for /run/dls/plugins OK." );
@@ -528,11 +528,11 @@ end:
     pthread_mutexattr_t param;                                                                /* Creation du mutex de synchro */
     pthread_mutexattr_init( &param );                                                         /* Creation du mutex de synchro */
     pthread_mutex_init( &Nbr_compil_mutex, &param );
-    Json_node_foreach_array_element ( api_result, "plugins", Dls_Importer_un_plugin_by_array, NULL );
+    Json_foreach_array_element ( api_result, "plugins", Dls_Importer_un_plugin_by_array, NULL );
     while (Nbr_compil) sched_yield();                                         /* Tant que des threads de compilation tournent */
     Info_new( __func__, Config.log_dls, LOG_NOTICE, "%03d plugins loaded in %06.1fs (with %02d proc)",
               Json_get_int ( api_result, "nbr_plugins" ), (Partage->top-top)/10.0, get_nprocs() );
-    Json_node_unref ( api_result );
+    Json_unref ( api_result );
   }
 /******************************************************************************************************************************/
 /* Decharger_plugins: Decharge tous les plugins DLS                                                                           */

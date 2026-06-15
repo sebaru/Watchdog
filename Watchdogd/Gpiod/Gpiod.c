@@ -46,7 +46,7 @@
                  Json_get_string ( element, "thread_acronyme" ), num, vars->num_lines );
        return;
      }
-    Json_node_add_bool ( element, "need_sync", TRUE );
+    Json_add_bool ( element, "need_sync", TRUE );
     vars->lignes[num].element        = element;
     vars->lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
     vars->lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );
@@ -89,7 +89,7 @@
         }
        else                                                                                                /* Pour une sortie */
         { vars->lignes[num].etat = gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, vars->lignes[num].mode_activelow ); }
-       Json_node_add_int ( element, "etat", vars->lignes[num].etat );
+       Json_add_int ( element, "etat", vars->lignes[num].etat );
      }
   }
 /******************************************************************************************************************************/
@@ -137,15 +137,15 @@
     while (tc)
      { JsonNode *sub_config = tc->data;
        gchar *sub_tech_id = Json_get_string ( sub_config, "thread_tech_id" );
-       JsonNode *RootNode = Json_node_create ();
+       JsonNode *RootNode = Json_create ();
        if (RootNode)
-        { Json_node_add_string ( RootNode, "thread_tech_id", sub_tech_id );
-          Json_node_add_int    ( RootNode, "nbr_lignes",     vars->num_lines );
+        { Json_add_string ( RootNode, "thread_tech_id", sub_tech_id );
+          Json_add_int    ( RootNode, "nbr_lignes",     vars->num_lines );
           JsonNode *API_result = Http_Post_to_global_API ( "/run/gpiod/add/io", RootNode );
-          Json_node_unref ( API_result );
-          Json_node_unref ( RootNode );
+          Json_unref ( API_result );
+          Json_unref ( RootNode );
         }
-       Json_node_foreach_array_element ( sub_config, "IO", Charger_un_gpio, module );
+       Json_foreach_array_element ( sub_config, "IO", Charger_un_gpio, module );
        tc = g_list_next ( tc );
      }
     g_list_free ( tech_id_configs );
@@ -184,7 +184,7 @@
                  }
               }
            }
-          Json_node_unref (request);
+          Json_unref (request);
         }
      }
 

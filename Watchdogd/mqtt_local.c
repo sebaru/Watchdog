@@ -77,20 +77,20 @@
     gchar *topic = tokens[0];
     if ( !strcmp ( topic, "SET_AI" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
-       Json_node_add_string ( request, "thread_tech_id", tokens[1] );
-       Json_node_add_string ( request, "thread_acronyme", tokens[2] );
+       Json_add_string ( request, "thread_tech_id", tokens[1] );
+       Json_add_string ( request, "thread_acronyme", tokens[2] );
        Dls_data_AI_set_from_thread_ai ( request );
      }
     else if ( !strcmp ( topic, "SET_DI" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
-       Json_node_add_string ( request, "thread_tech_id", tokens[1] );
-       Json_node_add_string ( request, "thread_acronyme", tokens[2] );
+       Json_add_string ( request, "thread_tech_id", tokens[1] );
+       Json_add_string ( request, "thread_acronyme", tokens[2] );
        Dls_data_DI_set_from_thread_di ( request );
      }
     else if ( !strcmp ( topic, "SET_WATCHDOG" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
-       Json_node_add_string ( request, "thread_tech_id", tokens[1] );
-       Json_node_add_string ( request, "thread_acronyme", tokens[2] );
+       Json_add_string ( request, "thread_tech_id", tokens[1] );
+       Json_add_string ( request, "thread_acronyme", tokens[2] );
        Dls_data_WATCHDOG_set_from_thread_watchdog ( request );
      }
     else if ( !strcmp ( topic, "SET_DI_PULSE" ) )
@@ -122,7 +122,7 @@
        else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_BUS: 'commande' is missing" );
      }
     else Info_new( __func__, Config.log_bus, LOG_ERR, "tag inconnu: %s sur topic %s", topic, msg->topic );
-    Json_node_unref ( request );
+    Json_unref ( request );
 
 end:
     g_strfreev( tokens );                                                                      /* Libération des tokens topic */
@@ -199,15 +199,15 @@ end:
     va_end ( ap );
 
     gboolean free_node=FALSE;
-    if (!node) { node = Json_node_create(); free_node = TRUE; }
-    gchar *buffer = Json_node_to_string ( node );
+    if (!node) { node = Json_create(); free_node = TRUE; }
+    gchar *buffer = Json_to_string ( node );
     if (buffer)
      { gint retour = mosquitto_publish( mqtt_session, NULL, topic, strlen(buffer), buffer, 2, retain );
        if (retour != MOSQ_ERR_SUCCESS)
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when publishing '%s'", mosquitto_strerror ( retour ) ); }
        g_free(buffer);
      }
-    if (free_node) Json_node_unref(node);
+    if (free_node) Json_unref(node);
     g_free(topic);
   }
 /******************************************************************************************************************************/
@@ -222,18 +222,18 @@ end:
     gboolean need_sync    = Json_get_bool   ( thread_ai, "need_sync" );
 
     if ( need_sync || old_valeur != valeur || old_in_range != in_range )
-     { Json_node_add_double ( thread_ai, "valeur", valeur );
-       Json_node_add_bool   ( thread_ai, "in_range", in_range );
-       Json_node_add_bool   ( thread_ai, "need_sync", FALSE );
+     { Json_add_double ( thread_ai, "valeur", valeur );
+       Json_add_bool   ( thread_ai, "in_range", in_range );
+       Json_add_bool   ( thread_ai, "need_sync", FALSE );
        gchar *thread_tech_id = Json_get_string ( thread_ai, "thread_tech_id" );
        gchar *thread_acronyme = Json_get_string ( thread_ai, "thread_acronyme" );
        Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f (in_range=%d)", thread_tech_id, thread_acronyme, valeur, in_range );
-       JsonNode *RootNode = Json_node_create();
+       JsonNode *RootNode = Json_create();
        if (!RootNode) return;
-       Json_node_add_double ( RootNode, "valeur", valeur );
-       Json_node_add_bool   ( RootNode, "in_range", in_range );
+       Json_add_double ( RootNode, "valeur", valeur );
+       Json_add_bool   ( RootNode, "in_range", in_range );
        MQTT_Send_to_topic ( module->MQTT_session, RootNode, TRUE, "SET_AI/%s/%s", thread_tech_id, thread_acronyme );
-       Json_node_unref ( RootNode );
+       Json_unref ( RootNode );
      }
   }
 /******************************************************************************************************************************/
@@ -247,16 +247,16 @@ end:
     gboolean need_sync  = Json_get_bool ( thread_di, "need_sync" );
 
     if ( need_sync || (old_etat != etat) )
-     { Json_node_add_bool ( thread_di, "etat", (etat ? TRUE : FALSE) );
-       Json_node_add_bool ( thread_di, "need_sync", FALSE );
+     { Json_add_bool ( thread_di, "etat", (etat ? TRUE : FALSE) );
+       Json_add_bool ( thread_di, "need_sync", FALSE );
        gchar *thread_tech_id = Json_get_string ( thread_di, "thread_tech_id" );
        gchar *thread_acronyme = Json_get_string ( thread_di, "thread_acronyme" );
        Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, etat );
-       JsonNode *RootNode = Json_node_create();
+       JsonNode *RootNode = Json_create();
        if (!RootNode) return;
-       Json_node_add_bool ( RootNode, "etat", etat );
+       Json_add_bool ( RootNode, "etat", etat );
        MQTT_Send_to_topic ( module->MQTT_session, RootNode, TRUE, "SET_DI/%s/%s", thread_tech_id, thread_acronyme );
-       Json_node_unref ( RootNode );
+       Json_unref ( RootNode );
      }
   }
 /******************************************************************************************************************************/
@@ -266,13 +266,13 @@ end:
 /******************************************************************************************************************************/
  void MQTT_Send_DI_pulse ( struct THREAD *module, gchar *tech_id, gchar *acronyme )
   { if (! (module && tech_id && acronyme)) return;
-    JsonNode *thread_di = Json_node_create();
+    JsonNode *thread_di = Json_create();
     if (!thread_di) return;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Json_node_add_string ( thread_di, "from_thread_tech_id", thread_tech_id );
+    Json_add_string ( thread_di, "from_thread_tech_id", thread_tech_id );
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = PULSE", tech_id, acronyme );
     MQTT_Send_to_topic ( module->MQTT_session, thread_di, FALSE, "SET_DI_PULSE/%s/%s", tech_id, acronyme );
-    Json_node_unref ( thread_di );
+    Json_unref ( thread_di );
   }
 /******************************************************************************************************************************/
 /* MQTT_Send_CI_pulse: Envoie une impulsion CI au master                                                                      */
@@ -284,11 +284,11 @@ end:
     gchar *thread_tech_id  = Json_get_string ( thread_ci, "thread_tech_id" );
     gchar *thread_acronyme = Json_get_string ( thread_ci, "thread_acronyme" );
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = PULSE", thread_tech_id, thread_acronyme );
-    JsonNode *RootNode = Json_node_create();
+    JsonNode *RootNode = Json_create();
     if (!RootNode) return;
-    Json_node_add_string ( RootNode, "from_thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+    Json_add_string ( RootNode, "from_thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
     MQTT_Send_to_topic ( module->MQTT_session, RootNode, FALSE, "SET_CI_PULSE/%s/%s", thread_tech_id, thread_acronyme );
-    Json_node_unref ( RootNode );
+    Json_unref ( RootNode );
   }
 /******************************************************************************************************************************/
 /* MQTT_Send_WATCHDOG: Envoie le WATCHDOG au master                                                                           */
@@ -297,13 +297,13 @@ end:
 /******************************************************************************************************************************/
  void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne )
   { if (! (module && thread_acronyme)) return;
-    JsonNode *thread_watchdog = Json_node_create ();
+    JsonNode *thread_watchdog = Json_create ();
     if(!thread_watchdog) return;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Json_node_add_int    ( thread_watchdog, "consigne", consigne );
+    Json_add_int    ( thread_watchdog, "consigne", consigne );
 
     Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, consigne );
     MQTT_Send_to_topic ( module->MQTT_session, thread_watchdog, TRUE, "SET_WATCHDOG/%s/%s", thread_tech_id, thread_acronyme );
-    Json_node_unref ( thread_watchdog );
+    Json_unref ( thread_watchdog );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

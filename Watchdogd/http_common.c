@@ -93,7 +93,7 @@
 
 /*------------------------------------------------ Préparation du payload ----------------------------------------------------*/
     if (json_payload)
-     { payload = Json_node_to_string ( json_payload );
+     { payload = Json_to_string ( json_payload );
        if (!payload) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: Json to string failed", url ); goto end; }
      }
 
@@ -173,9 +173,9 @@
      }
     else Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: HttpCode = %d", url, http_code );
 
-    if (!ResponseNode) ResponseNode = Json_node_create ();                       /* Si pas de body en response, on en créé un */
+    if (!ResponseNode) ResponseNode = Json_create ();                       /* Si pas de body en response, on en créé un */
     if (ResponseNode)
-     { Json_node_add_int ( ResponseNode, "http_code", http_code ); }
+     { Json_add_int ( ResponseNode, "http_code", http_code ); }
     else Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: ResponseNode Error", url );
 
 end:
@@ -199,11 +199,11 @@ end:
 
     g_snprintf( query, sizeof(query), "https://%s%s", Json_get_string ( Config.config, "api_url" ), URI );
 /********************************************************* Envoi de la requete ************************************************/
-    if (!RootNode) { RootNode = Json_node_create(); unref_RootNode = TRUE; }
+    if (!RootNode) { RootNode = Json_create(); unref_RootNode = TRUE; }
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending to API %s", query );
 
     JsonNode *ResponseNode = Http_Request ( query, RootNode, NULL );
-    if (unref_RootNode) Json_node_unref(RootNode);
+    if (unref_RootNode) Json_unref(RootNode);
 
     gint http_code = Json_get_int ( ResponseNode, "http_code" );
     Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s: Status %d", query, http_code );
@@ -253,7 +253,7 @@ end:
 
     if (http_code!=200)
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d for '%s'", URI, http_code, query );
-       Json_node_unref ( ResponseNode );
+       Json_unref ( ResponseNode );
        gchar *nom_fichier = Http_Query_to_cache ( query );
        if (nom_fichier)
         { ResponseNode = Json_read_from_file ( nom_fichier );

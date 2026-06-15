@@ -205,7 +205,7 @@
               }
              Thread_send_comm_to_master ( module, TRUE );
            }
-          Json_node_unref ( request );
+          Json_unref ( request );
         }
      }
 end:

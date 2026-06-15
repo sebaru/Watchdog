@@ -540,16 +540,16 @@ error:
         }
        else
         { Info_new ( __func__, module->Thread_debug, LOG_INFO, "'%s': PhidgetNet_addServer '%s' success", sub_tech_id, hostname );
-          JsonNode *RootNode = Json_node_create ();                                               /* Envoi de la conf a l'API */
+          JsonNode *RootNode = Json_create ();                                               /* Envoi de la conf a l'API */
           if (RootNode)
-           { Json_node_add_string ( RootNode, "thread_tech_id", sub_tech_id );
+           { Json_add_string ( RootNode, "thread_tech_id", sub_tech_id );
              JsonNode *API_result = Http_Post_to_global_API ( "/run/phidget/add/io", RootNode );
-             Json_node_unref ( API_result );
-             Json_node_unref ( RootNode );
+             Json_unref ( API_result );
+             Json_unref ( RootNode );
            }
           JsonNode *saved_config = module->config;          /* Swap temporaire pour Phidget_Charger_un_IO (lit module->config) */
           module->config = sub_config;
-          Json_node_foreach_array_element ( sub_config, "IO", Phidget_Charger_un_IO, module );
+          Json_foreach_array_element ( sub_config, "IO", Phidget_Charger_un_IO, module );
           module->config = saved_config;
         }
        tc = g_list_next ( tc );
@@ -576,7 +576,7 @@ error:
            { gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
              if ( !strcasecmp( token_lvl0, "SET_DO" ) ) { Phidget_SET_DO ( module, request ); }
            }
-          Json_node_unref (request);
+          Json_unref (request);
         }
      }
 

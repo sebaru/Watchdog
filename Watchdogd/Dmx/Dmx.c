@@ -192,7 +192,7 @@
                 Envoyer_trame_dmx_request(module);
               }
            }
-          Json_node_unref(request);
+          Json_unref(request);
         }
 
 /************************************************* Traitement opérationnel ****************************************************/

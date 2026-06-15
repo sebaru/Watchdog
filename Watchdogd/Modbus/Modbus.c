@@ -73,7 +73,7 @@
                !strcasecmp ( Json_get_string(vars->DO[num], "thread_acronyme"), msg_thread_acronyme ) )
            { Info_new( __func__, module->Thread_debug, LOG_INFO, "SET_DO '%s:%s'/'%s:%s'=%d",
                        msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
-             Json_node_add_bool ( vars->DO[num], "etat", etat );
+             Json_add_bool ( vars->DO[num], "etat", etat );
              break;
            }
         }
@@ -122,7 +122,7 @@
                                   break;*/
                 default: new_val_int = 0;
               }
-             Json_node_add_int ( vars->AO[num], "val_int", new_val_int );
+             Json_add_int ( vars->AO[num], "val_int", new_val_int );
              Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_AO '%s:%s'/'%s:%s'=%f (val_int=%d)",
                        msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, valeur, new_val_int );
              break;
@@ -141,10 +141,10 @@
     struct MODBUS_VARS *vars = module->vars;
 
     for ( gint cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
-     { if (vars->DI[cpt]) Json_node_add_bool ( vars->DI[cpt], "need_sync", TRUE ); }
+     { if (vars->DI[cpt]) Json_add_bool ( vars->DI[cpt], "need_sync", TRUE ); }
 
     for ( gint cpt = 0; cpt<vars->nbr_entree_ana; cpt++)
-     { if (vars->AI[cpt]) Json_node_add_bool ( vars->AI[cpt], "need_sync", TRUE ); }
+     { if (vars->AI[cpt]) Json_add_bool ( vars->AI[cpt], "need_sync", TRUE ); }
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -720,9 +720,9 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_entree_ana )
               { vars->AI[num] = element;
-                Json_node_add_double ( vars->AI[num], "valeur", 0.0 );
-                Json_node_add_bool   ( vars->AI[num], "in_range", FALSE );
-                Json_node_add_bool   ( vars->AI[num], "need_sync", TRUE );
+                Json_add_double ( vars->AI[num], "valeur", 0.0 );
+                Json_add_bool   ( vars->AI[num], "in_range", FALSE );
+                Json_add_bool   ( vars->AI[num], "need_sync", TRUE );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AI '%s' (%s, %s)",
                           Json_get_string ( vars->AI[num], "thread_acronyme" ),
                           Json_get_string ( vars->AI[num], "libelle" ),
@@ -744,8 +744,8 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_entree_tor )
               { vars->DI[num] = element;
-                Json_node_add_bool ( vars->DI[num], "etat", FALSE );
-                Json_node_add_bool ( vars->DI[num], "need_sync", TRUE );
+                Json_add_bool ( vars->DI[num], "etat", FALSE );
+                Json_add_bool ( vars->DI[num], "need_sync", TRUE );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New DI '%s' (%s), flip=%d",
                           Json_get_string ( vars->DI[num], "thread_acronyme" ),
                           Json_get_string ( vars->DI[num], "libelle" ),
@@ -767,8 +767,8 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_sortie_ana )
               { vars->AO[num] = element;
-                Json_node_add_double ( vars->AO[num], "valeur", 0.0 );
-                Json_node_add_int    ( vars->AO[num], "val_int", 0 );
+                Json_add_double ( vars->AO[num], "valeur", 0.0 );
+                Json_add_int    ( vars->AO[num], "val_int", 0 );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AO '%s' (%s, %s)",
                           Json_get_string ( vars->AO[num], "thread_acronyme" ),
                           Json_get_string ( vars->AI[num], "libelle" ),
@@ -790,7 +790,7 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_sortie_tor )
               { vars->DO[num] = element;
-                Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
+                Json_add_bool   ( vars->DO[num], "etat", FALSE );
                 Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New DO '%s' (%s)",
                           Json_get_string ( vars->DO[num], "thread_acronyme" ),
                           Json_get_string ( vars->DO[num], "libelle" ));
@@ -962,16 +962,16 @@
              { vars->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
                Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Sortie TOR", vars->nbr_sortie_tor );
                Modbus_load_io_config( module );                                                  /* Initialise les IO modules */
-               JsonNode *RootNode = Json_node_create ();                                          /* Envoi de la conf a l'API */
+               JsonNode *RootNode = Json_create ();                                          /* Envoi de la conf a l'API */
                if (!RootNode) break;
-               Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-               Json_node_add_int    ( RootNode, "nbr_entree_tor", vars->nbr_entree_tor );
-               Json_node_add_int    ( RootNode, "nbr_entree_ana", vars->nbr_entree_ana );
-               Json_node_add_int    ( RootNode, "nbr_sortie_tor", vars->nbr_sortie_tor );
-               Json_node_add_int    ( RootNode, "nbr_sortie_ana", vars->nbr_sortie_ana );
+               Json_add_string ( RootNode, "thread_tech_id", thread_tech_id );
+               Json_add_int    ( RootNode, "nbr_entree_tor", vars->nbr_entree_tor );
+               Json_add_int    ( RootNode, "nbr_entree_ana", vars->nbr_entree_ana );
+               Json_add_int    ( RootNode, "nbr_sortie_tor", vars->nbr_sortie_tor );
+               Json_add_int    ( RootNode, "nbr_sortie_ana", vars->nbr_sortie_ana );
                JsonNode *API_result = Http_Post_to_global_API ( "/run/modbus/add/io", RootNode );
-               Json_node_unref ( API_result );
-               Json_node_unref ( RootNode );
+               Json_unref ( API_result );
+               Json_unref ( RootNode );
                vars->mode = MODBUS_GET_DI;
              }
             break;
@@ -1056,7 +1056,7 @@
              else if ( !strcasecmp (token_lvl0, "SET_AO") )  Modbus_SET_AO ( module, request );
              else if ( !strcasecmp (token_lvl0, "SYNC_INPUT") ) Modbus_Sync_INPUT_to_master ( module );
            }
-          Json_node_unref ( request );
+          Json_unref ( request );
         }
 /********************************************* Début de l'interrogation du module *********************************************/
        if ( vars->started == FALSE )                                               /* Si attente retente, on change de module */

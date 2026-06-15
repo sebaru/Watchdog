@@ -397,7 +397,7 @@ goto end;
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute de l'API *******************************************************/
        if (module->Test_request)
-        { Json_node_unref ( module->Test_request );
+        { Json_unref ( module->Test_request );
           module->Test_request = NULL;
         }
 /****************************************************** Ecoute du master ******************************************************/
@@ -408,7 +408,7 @@ goto end;
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
           /*if ( !strcasecmp (tag, "SET_DO") ) Ups_SET_DO ( module, request );*/
-          Json_node_unref ( request );
+          Json_unref ( request );
         }
 /********************************************* Début de l'interrogation du ups ************************************************/
        if (pa_simple_read(s, pcm, sizeof(pcm), &error) < 0) {

@@ -245,16 +245,16 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_VISUEL_to_json ( JsonNode *RootNode, struct DLS_VISUEL *bit )
-  { Json_node_add_string ( RootNode, "tech_id",   bit->tech_id );
-    Json_node_add_string ( RootNode, "acronyme",  bit->acronyme );
-    Json_node_add_string ( RootNode, "mode",      bit->mode  );
-    Json_node_add_string ( RootNode, "color",     bit->color );
-    Json_node_add_double ( RootNode, "valeur",    bit->valeur );
-    Json_node_add_bool   ( RootNode, "cligno",    bit->cligno );
-    Json_node_add_bool   ( RootNode, "noshow",    bit->noshow );
-    Json_node_add_bool   ( RootNode, "disable",   bit->disable );
-    Json_node_add_string ( RootNode, "libelle",   bit->libelle );
-    Json_node_add_string ( RootNode, "badge",     bit->badge );
+  { Json_add_string ( RootNode, "tech_id",   bit->tech_id );
+    Json_add_string ( RootNode, "acronyme",  bit->acronyme );
+    Json_add_string ( RootNode, "mode",      bit->mode  );
+    Json_add_string ( RootNode, "color",     bit->color );
+    Json_add_double ( RootNode, "valeur",    bit->valeur );
+    Json_add_bool   ( RootNode, "cligno",    bit->cligno );
+    Json_add_bool   ( RootNode, "noshow",    bit->noshow );
+    Json_add_bool   ( RootNode, "disable",   bit->disable );
+    Json_add_string ( RootNode, "libelle",   bit->libelle );
+    Json_add_string ( RootNode, "badge",     bit->badge );
   }
 /******************************************************************************************************************************/
 /* Dls_data_VISUEL_apply: Met à jour les visuels du plugin                                                                    */

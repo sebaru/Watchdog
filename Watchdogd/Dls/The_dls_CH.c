@@ -151,12 +151,12 @@
 /* Sortie : le JSON                                                                                                           */
 /******************************************************************************************************************************/
  void Dls_CH_export_to_API ( struct DLS_CH *bit )
-  { JsonNode *element = Json_node_create ();
+  { JsonNode *element = Json_create ();
     if (element)
-     { Json_node_add_int  ( element, "valeur", bit->valeur );
-       Json_node_add_bool ( element, "etat",   bit->etat );
+     { Json_add_int  ( element, "valeur", bit->valeur );
+       Json_add_bool ( element, "etat",   bit->etat );
        MQTT_Send_to_API   ( element, "DLS_REPORT/CH/%s/%s", bit->tech_id, bit->acronyme );
-       Json_node_unref    ( element );
+       Json_unref    ( element );
      }
   }
 /******************************************************************************************************************************/
@@ -169,11 +169,11 @@
     GSList *liste = plugin->Dls_data_CH;
     while ( liste )
      { struct DLS_CH *bit = liste->data;
-       JsonNode *element = Json_node_create();
-       Json_node_add_string ( element, "tech_id",   bit->tech_id );
-       Json_node_add_string ( element, "acronyme",  bit->acronyme );
-       Json_node_add_int    ( element, "valeur",    bit->valeur );
-       Json_node_add_bool   ( element, "etat",      bit->etat );
+       JsonNode *element = Json_create();
+       Json_add_string ( element, "tech_id",   bit->tech_id );
+       Json_add_string ( element, "acronyme",  bit->acronyme );
+       Json_add_int    ( element, "valeur",    bit->valeur );
+       Json_add_bool   ( element, "etat",      bit->etat );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
      }

@@ -99,7 +99,7 @@
     Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
               "ligne %04d: Changing DLS_AO '%s:%s'=%f %s",
               (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
-    JsonNode *RootNode = Json_node_create ();
+    JsonNode *RootNode = Json_create ();
     if (RootNode)
      { Dls_AO_to_json ( RootNode, bit );
        pthread_rwlock_wrlock( &Partage->Liste_AO_synchro );                           /* Ajout dans la liste des AO a traiter */
@@ -116,12 +116,12 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_AO_to_json ( JsonNode *element, struct DLS_AO *bit )
-  { Json_node_add_string ( element, "classe",       "AO" );
-    Json_node_add_string ( element, "tech_id",      bit->tech_id );
-    Json_node_add_string ( element, "acronyme",     bit->acronyme );
-    Json_node_add_string ( element, "unite",        bit->unite );
-    Json_node_add_double ( element, "valeur",       bit->valeur );
-    Json_node_add_int    ( element, "archivage",    bit->archivage );
+  { Json_add_string ( element, "classe",       "AO" );
+    Json_add_string ( element, "tech_id",      bit->tech_id );
+    Json_add_string ( element, "acronyme",     bit->acronyme );
+    Json_add_string ( element, "unite",        bit->unite );
+    Json_add_double ( element, "valeur",       bit->valeur );
+    Json_add_int    ( element, "archivage",    bit->archivage );
   }
 /******************************************************************************************************************************/
 /* Dls_all_AO_to_json: Transforme tous les bits en JSON                                                                       */
@@ -133,7 +133,7 @@
     GSList *liste = plugin->Dls_data_AO;
     while ( liste )
      { struct DLS_AO *bit = liste->data;
-       JsonNode *element = Json_node_create();
+       JsonNode *element = Json_create();
        Dls_AO_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
@@ -145,11 +145,11 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_AO_export_to_API ( struct DLS_AO *bit )
-  { JsonNode *element = Json_node_create ();
+  { JsonNode *element = Json_create ();
     if (element)
-     { Json_node_add_double ( element, "valeur", bit->valeur );
+     { Json_add_double ( element, "valeur", bit->valeur );
        MQTT_Send_to_API ( element, "DLS_REPORT/AO/%s/%s", bit->tech_id, bit->acronyme );
-       Json_node_unref ( element );
+       Json_unref ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

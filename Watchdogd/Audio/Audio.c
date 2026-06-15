@@ -122,7 +122,7 @@
              Jouer_google_speech( module, "Ceci est un test" );
            }
         }
-       Json_node_unref ( request );
+       Json_unref ( request );
      }
     Thread_end(module);
   }

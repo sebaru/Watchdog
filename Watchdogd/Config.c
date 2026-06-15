@@ -50,14 +50,14 @@
 
 /********************************************** Read from config file first ***************************************************/
     Config.config = Json_read_from_file ( "/etc/abls-habitat-agent.conf" );
-    if (!Config.config) Config.config = Json_node_create();
+    if (!Config.config) Config.config = Json_create();
 
 /********************************************** Then read from environ ********************************************************/
     chaine = getenv ( "ABLS_DOMAIN_UUID" );
-    if (chaine) Json_node_add_string ( Config.config, "domain_uuid", chaine );
+    if (chaine) Json_add_string ( Config.config, "domain_uuid", chaine );
 
     chaine = getenv ( "ABLS_DOMAIN_SECRET" );
-    if (chaine) Json_node_add_string ( Config.config, "domain_secret", chaine );
+    if (chaine) Json_add_string ( Config.config, "domain_secret", chaine );
 
     chaine = getenv ( "ABLS_API_URL" );
     if (chaine)
@@ -65,11 +65,11 @@
        if ( g_str_has_prefix ( chaine, "http://"  ) ) chaine+=7;
        if ( g_str_has_prefix ( chaine, "wss://"   ) ) chaine+=6;
        if ( g_str_has_prefix ( chaine, "ws://"    ) ) chaine+=5;
-       Json_node_add_string ( Config.config, "api_url", chaine );
+       Json_add_string ( Config.config, "api_url", chaine );
      }
 
     chaine = getenv ( "ABLS_AGENT_UUID" );
-    if (chaine) Json_node_add_string ( Config.config, "agent_uuid", chaine );
+    if (chaine) Json_add_string ( Config.config, "agent_uuid", chaine );
 
 /********************************************** Finally from command line *****************************************************/
     gint help = 0, log_level = -1, single = 0, version = 0, save = 0;
@@ -110,19 +110,19 @@
        exit(EXIT_OK);
      }
 
-    if ( domain_uuid )   Json_node_add_string ( Config.config, "domain_uuid",   domain_uuid );
-    if ( domain_secret ) Json_node_add_string ( Config.config, "domain_secret", domain_secret );
-    if ( agent_uuid )    Json_node_add_string ( Config.config, "agent_uuid",    agent_uuid );
+    if ( domain_uuid )   Json_add_string ( Config.config, "domain_uuid",   domain_uuid );
+    if ( domain_secret ) Json_add_string ( Config.config, "domain_secret", domain_secret );
+    if ( agent_uuid )    Json_add_string ( Config.config, "agent_uuid",    agent_uuid );
     if ( api_url )
      { if ( g_str_has_prefix ( api_url, "https://" ) ) api_url+=8;
        if ( g_str_has_prefix ( api_url, "http://"  ) ) api_url+=7;
        if ( g_str_has_prefix ( api_url, "wss://"   ) ) api_url+=6;
        if ( g_str_has_prefix ( api_url, "ws://"    ) ) api_url+=5;
-       Json_node_add_string ( Config.config, "api_url", api_url );
+       Json_add_string ( Config.config, "api_url", api_url );
      }
 
 /******************************************* Controle final *******************************************************************/
-    if (!Json_has_member ( Config.config, "api_url" )) Json_node_add_string ( Config.config, "api_url", "api.abls-habitat.fr" );
+    if (!Json_has_member ( Config.config, "api_url" )) Json_add_string ( Config.config, "api_url", "api.abls-habitat.fr" );
     if (!Json_has_member ( Config.config, "domain_uuid" ))
      { printf(" Error: domain_uuid is missing. Add it in environ, config file or command line options\n" );
        exit ( EXIT_ERREUR );
@@ -135,21 +135,21 @@
      { printf(" Creating new agent_uuid\n" );
        gchar agent_uuid_new[37];
        UUID_New ( agent_uuid_new );
-       Json_node_add_string ( Config.config, "agent_uuid", agent_uuid_new );
+       Json_add_string ( Config.config, "agent_uuid", agent_uuid_new );
      }
 
 /******************************************* Création fichier de config *******************************************************/
     if (save)
-     { JsonNode *RootNode = Json_node_create ();
+     { JsonNode *RootNode = Json_create ();
        if (RootNode)
-        { Json_node_add_string( RootNode, "domain_uuid",   Json_get_string ( Config.config, "domain_uuid" ) );
-          Json_node_add_string( RootNode, "domain_secret", Json_get_string ( Config.config, "domain_secret" ) );
-          Json_node_add_string( RootNode, "agent_uuid",    Json_get_string ( Config.config, "agent_uuid" ) );
-          Json_node_add_string( RootNode, "api_url",       Json_get_string ( Config.config, "api_url" ) );
-          Json_node_add_string( RootNode, "product",       "agent" );
-          Json_node_add_string( RootNode, "vendor",        "abls-habitat.fr" );
+        { Json_add_string( RootNode, "domain_uuid",   Json_get_string ( Config.config, "domain_uuid" ) );
+          Json_add_string( RootNode, "domain_secret", Json_get_string ( Config.config, "domain_secret" ) );
+          Json_add_string( RootNode, "agent_uuid",    Json_get_string ( Config.config, "agent_uuid" ) );
+          Json_add_string( RootNode, "api_url",       Json_get_string ( Config.config, "api_url" ) );
+          Json_add_string( RootNode, "product",       "agent" );
+          Json_add_string( RootNode, "vendor",        "abls-habitat.fr" );
           Json_write_to_file ( "/etc/abls-habitat-agent.conf", RootNode );
-          Json_node_unref(RootNode);
+          Json_unref(RootNode);
         }
        else { printf ("Writing config failed: Memory Error.\n" ); exit (EXIT_ERREUR); }
        printf(" Config file created, you can restart agent.\n" );

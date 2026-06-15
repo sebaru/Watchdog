@@ -317,19 +317,19 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    JsonNode *RootNode = Json_node_create();
-    Json_node_add_bool  ( RootNode, "noStopClause", TRUE );
-    Json_node_add_string( RootNode, "priority", "high" );
-    Json_node_add_bool  ( RootNode, "senderForResponse", TRUE );
-    Json_node_add_int   ( RootNode, "validityPeriod", 2880 ); /* 2 jours */
-    Json_node_add_string( RootNode, "charset", "UTF-8" );
+    JsonNode *RootNode = Json_create();
+    Json_add_bool  ( RootNode, "noStopClause", TRUE );
+    Json_add_string( RootNode, "priority", "high" );
+    Json_add_bool  ( RootNode, "senderForResponse", TRUE );
+    Json_add_int   ( RootNode, "validityPeriod", 2880 ); /* 2 jours */
+    Json_add_string( RootNode, "charset", "UTF-8" );
 
-    JsonArray *receivers = Json_node_add_array ( RootNode, "receivers" );
+    JsonArray *receivers = Json_add_array ( RootNode, "receivers" );
     Json_array_add_element ( receivers, json_node_init_string ( json_node_alloc(), telephone ) );
 
     gchar libelle[256];
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
-    Json_node_add_string( RootNode, "message", libelle );
+    Json_add_string( RootNode, "message", libelle );
 
     gchar *method = "POST";
     g_snprintf( query, sizeof(query), "https://eu.api.ovh.com/1.0/sms/%s/jobs", Json_get_string ( module->config, "ovh_service_name" ) );
@@ -337,7 +337,7 @@
     g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
 
 /******************************************************* Calcul signature *****************************************************/
-    gchar *body = Json_node_to_string( RootNode );
+    gchar *body = Json_to_string( RootNode );
     g_snprintf( clair, sizeof(clair), "%s+%s+%s+%s+%s+%s",
                 Json_get_string ( module->config, "ovh_application_secret" ),
                 Json_get_string ( module->config, "ovh_consumer_key" ),
@@ -376,14 +376,14 @@
     JsonNode *response = Http_Request ( query, RootNode, liste );
     gint http_code = Json_get_int ( response, "http_code" );
     g_slist_free_full ( liste, g_free );
-    Json_node_unref ( RootNode );
+    Json_unref ( RootNode );
 
     if (http_code!=200)
      { /*gchar *reason_phrase = soup_message_get_reason_phrase ( soup_msg );*/
        Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Status %d", thread_tech_id, http_code );
      }
     else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, telephone );
-    Json_node_unref ( response );
+    Json_unref ( response );
   }
 /******************************************************************************************************************************/
 /* Envoi_sms_smsbox: Envoi un sms par SMSBOX                                                                                  */
@@ -408,7 +408,7 @@
 /********************************************************* Envoi de la requete ************************************************/
     JsonNode *response = Http_Request ( target_uri, NULL, NULL );
     gint http_code = Json_get_int ( response, "http_code" );
-    Json_node_unref ( response );
+    Json_unref ( response );
 
     if (http_code!=200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "Status %d for '%s' to '%s'",
@@ -476,7 +476,7 @@
        recipients = g_list_next(recipients);
      }
     g_list_free(Recipients);
-    Json_node_unref ( UsersNode );
+    Json_unref ( UsersNode );
     MQTT_Send_CI_pulse ( module, vars->ci_nbr_sms );
   }
 /******************************************************************************************************************************/
@@ -485,15 +485,15 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_ovh_text ( struct THREAD *module, gchar *texte )
-  { JsonNode *RootNode = Json_node_create();
+  { JsonNode *RootNode = Json_create();
     if (!RootNode) return;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Json_node_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
-    Json_node_add_string ( RootNode, "tech_id", thread_tech_id );
-    Json_node_add_string ( RootNode, "acronyme", "TEST_OVH" );
-    Json_node_add_string ( RootNode, "libelle", texte );
-    Json_node_add_string ( RootNode, "dls_shortname", thread_tech_id );
-    Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_OVH_ONLY );
+    Json_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
+    Json_add_string ( RootNode, "tech_id", thread_tech_id );
+    Json_add_string ( RootNode, "acronyme", "TEST_OVH" );
+    Json_add_string ( RootNode, "libelle", texte );
+    Json_add_string ( RootNode, "dls_shortname", thread_tech_id );
+    Json_add_int    ( RootNode, "notif_sms", TXT_NOTIF_OVH_ONLY );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
@@ -504,15 +504,15 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_gsm_text ( struct THREAD *module, gchar *texte )
-  { JsonNode *RootNode = Json_node_create();
+  { JsonNode *RootNode = Json_create();
     if (!RootNode) return;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Json_node_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
-    Json_node_add_string ( RootNode, "tech_id", thread_tech_id );
-    Json_node_add_string ( RootNode, "acronyme", "TEST_GSM" );
-    Json_node_add_string ( RootNode, "libelle", texte );
-    Json_node_add_string ( RootNode, "dls_shortname", thread_tech_id );
-    Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_YES );
+    Json_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
+    Json_add_string ( RootNode, "tech_id", thread_tech_id );
+    Json_add_string ( RootNode, "acronyme", "TEST_GSM" );
+    Json_add_string ( RootNode, "libelle", texte );
+    Json_add_string ( RootNode, "dls_shortname", thread_tech_id );
+    Json_add_int    ( RootNode, "notif_sms", TXT_NOTIF_YES );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
@@ -527,15 +527,15 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    JsonNode *RootNode = Json_node_create();
+    JsonNode *RootNode = Json_create();
     if ( RootNode == NULL )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory Error for '%s'", thread_tech_id, from );
        return;
      }
-    Json_node_add_string ( RootNode, "phone", from );
+    Json_add_string ( RootNode, "phone", from );
 
     JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt_cde", RootNode );
-    Json_node_unref ( RootNode );
+    Json_unref ( RootNode );
     if (!UserNode || Json_get_int ( UserNode, "http_code" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
        goto end_user;
@@ -574,16 +574,16 @@
        goto end_user;
      }
 
-    RootNode = Json_node_create();
+    RootNode = Json_create();
     if ( RootNode == NULL )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: MapNode Error for '%s'", thread_tech_id, from );
        goto end_user;
      }
-    Json_node_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
-    Json_node_add_string ( RootNode, "thread_acronyme", texte );
+    Json_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
+    Json_add_string ( RootNode, "thread_acronyme", texte );
 
     JsonNode *MapNode = Http_Post_to_global_API ( "/run/mapping/search_txt", RootNode );
-    Json_node_unref ( RootNode );
+    Json_unref ( RootNode );
     if (!MapNode || Json_get_int ( MapNode, "http_code" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
        goto end_map;
@@ -633,9 +633,9 @@
        g_list_free(Results);
      }
 end_map:
-  if (MapNode) Json_node_unref ( MapNode );
+  if (MapNode) Json_unref ( MapNode );
 end_user:
-  if (UserNode) Json_node_unref ( UserNode );
+  if (UserNode) Json_unref ( UserNode );
   }
 
 /******************************************************************************************************************************/
@@ -798,7 +798,7 @@ end_user:
                 if ( !strcasecmp ( test_mode, "OVH" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
               }
            }
-          Json_node_unref(message);
+          Json_unref(message);
         }
 /****************************************************** Lecture de SMS ********************************************************/
        if (Partage->top < next_read) continue;

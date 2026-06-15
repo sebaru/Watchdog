@@ -57,13 +57,13 @@
     if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { MQTT_Send_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
 
-       JsonNode *RootNode = Json_node_create();
-       Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
-       Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-       Json_node_add_bool   ( RootNode, "io_comm",        module->comm_status );
-       Json_node_add_bool   ( RootNode, "mqtt_connected", (etat ? module->MQTT_connected : FALSE) );
+       JsonNode *RootNode = Json_create();
+       Json_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
+       Json_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+       Json_add_bool   ( RootNode, "io_comm",        module->comm_status );
+       Json_add_bool   ( RootNode, "mqtt_connected", (etat ? module->MQTT_connected : FALSE) );
        MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
-       Json_node_unref ( RootNode );
+       Json_unref ( RootNode );
 
        module->comm_next_update = Partage->top + 600;                                                   /* Toutes les minutes */
        module->comm_status = etat;
@@ -88,7 +88,7 @@
     gchar **tokens = g_strsplit ( msg->topic, "/", 3 );
     if (!tokens)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT token split failed at %s: %s", thread_tech_id, msg->topic, msg->payload );
-       Json_node_unref ( response );
+       Json_unref ( response );
        return;
      }
 
@@ -96,7 +96,7 @@
     while(tokens[token_num])
      { gchar token_name[16];
        g_snprintf ( token_name, sizeof ( token_name ), "token_lvl%d", token_num );
-       Json_node_add_string ( response, token_name, tokens[token_num] );
+       Json_add_string ( response, token_name, tokens[token_num] );
        token_num++;
      }
     g_strfreev ( tokens );
@@ -104,7 +104,7 @@
     if (!strcasecmp (Json_get_string ( response, "token_lvl0" ), "SET_DEBUG"))
      { module->Thread_debug = Json_get_bool ( response, "debug" );
        Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': debug set to %d", thread_tech_id, module->Thread_debug );
-       Json_node_unref ( response );
+       Json_unref ( response );
        return;
      }
 
@@ -244,11 +244,12 @@
     g_free(upper_name);
 
     module->current_thread_tech_id_index = 0;
-    module->config = Json_array_get_element ( module->config_all, "thread_tech_ids", module->current_thread_tech_id_index );
+    module->config = Json_array_get_element_at ( module->config_all, "thread_tech_ids", module->current_thread_tech_id_index );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (sizeof_vars)
      { for ( gint i = 0; i<Json_array_get_length ( module->config_all, "thread_tech_ids" ); i++ )
-        { gchar *thread_tech_idNode = Json_array_get_element ( module->config_all, "thread_tech_ids", i );
+      { JsonNode *thread_tech_idNode = Json_array_get_element_at ( module->config_all, "thread_tech_ids", i );
           gchar *thread_tech_id = Json_get_string ( thread_tech_idNode, "thread_tech_id" );
           Info_new( __func__, module->Thread_debug, LOG_INFO, "Adding memory slot for thread '%s'", thread_tech_id );
           if (Thread_add_one_slot ( module, sizeof_vars ) == FALSE)
@@ -284,26 +285,26 @@
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
 
 /* ------------------------------------------- Création du plugin dans l'api ------------------------------------------------ */
-    JsonNode *RootNode = Json_node_create();
+    JsonNode *RootNode = Json_create();
     if (RootNode)
-     { Json_node_add_string ( RootNode, "tech_id", thread_tech_id );
-       Json_node_add_string ( RootNode, "thread_classe", thread_classe ); 
-       Json_node_add_int    ( RootNode, "syn_id", 1 ); 
+     { Json_add_string ( RootNode, "tech_id", thread_tech_id );
+       Json_add_string ( RootNode, "thread_classe", thread_classe ); 
+       Json_add_int    ( RootNode, "syn_id", 1 ); 
        gchar *name = Json_get_string ( module->config, "description" );
-       Json_node_add_string ( RootNode, "name", name );
-       Json_node_add_string ( RootNode, "shortname", name );
+       Json_add_string ( RootNode, "name", name );
+       Json_add_string ( RootNode, "shortname", name );
        gchar package[128];
        g_snprintf ( package, sizeof(package), "Thread_%s", thread_classe );
-       Json_node_add_string ( RootNode, "package", package );
+       Json_add_string ( RootNode, "package", package );
        if (Dls_auto_create_plugin( RootNode ) == FALSE)
         { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: DLS Create ERROR (%s)\n", thread_tech_id, name ); }
-       Json_node_unref ( RootNode );
+       Json_unref ( RootNode );
      }
     else Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory error while creating DLS RootNode", thread_tech_id );
 
 /* ------------------------------------------------ Création des IOs --------------------------------------------------------- */
-    module->IOs = Json_node_create();
-    Json_node_add_array ( module->IOs, "IOs" );
+    module->IOs = Json_create();
+    Json_add_array ( module->IOs, "IOs" );
 
     module->ai_nbr_tour_par_sec = Mnemo_create_thread_AI ( module, "THREAD_TOUR_PAR_SEC", "Nombre de tour par seconde", "t/s", ARCHIVE_5_MIN );
     Mnemo_create_thread_WATCHDOG ( module, "IO_COMM", "Statut de la communication" );
@@ -319,10 +320,10 @@
     mosquitto_disconnect( module->MQTT_session );
     mosquitto_loop_stop( module->MQTT_session, FALSE );
     mosquitto_destroy( module->MQTT_session );
-    g_slist_foreach ( module->MQTT_messages, (GFunc) Json_node_unref, NULL );
+    g_slist_foreach ( module->MQTT_messages, (GFunc) Json_unref, NULL );
     g_slist_free    ( module->MQTT_messages );   module->MQTT_messages = NULL;
     if (module->vars) { g_slist_free_full (module->vars, g_free);  module->vars   = NULL; }
-    Json_node_unref ( module->IOs );           module->IOs    = NULL;
+    Json_unref ( module->IOs );           module->IOs    = NULL;
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
     sleep(1);                       /* le temps d'un appel libsoup a Thread_ws_on_master_connected si Operation was cancelled */
     pthread_exit(0);
@@ -344,7 +345,7 @@
     if (module->dl_handle) dlclose( module->dl_handle );
     pthread_mutex_destroy( &module->synchro );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': Unloaded and freed", thread_classe );
-    if (module->config) Json_node_unref ( module->config );
+    if (module->config) Json_unref ( module->config );
     g_free( module );
   }
 /******************************************************************************************************************************/
@@ -482,9 +483,9 @@
        Thread_Stop_safe ( module );
        return;
      }
-    module->nbr_thread_tech_ids = Json_get_int ( module->config_all, "nbr_thread_tech_ids" );
+    module->nb_thread_tech_ids = Json_get_int ( module->config_all, "nbr_thread_tech_ids" );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread Class '%s': Loading class for '%d' thread_tech_ids",
-              thread_classe, module->nbr_thread_tech_ids );
+          thread_classe, module->nb_thread_tech_ids );
     
     Thread_Load_library ( module );
   }
@@ -514,9 +515,9 @@
      { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Error for /run/thread LOAD: http_code=%d",__func__, Json_get_int ( api_result, "http_code" ) ); }
     else
      { Json_to_log ( api_result, "API /run/thread/load result" );                                  /* Print API result to log */
-       Json_node_foreach_array_element ( api_result, "threads", Thread_Start_one_thread_classe_by_array, NULL );
+       Json_foreach_array_element ( api_result, "threads", Thread_Start_one_thread_classe_by_array, NULL );
      }
-    Json_node_unref(api_result);
+    Json_unref(api_result);
   }
 /******************************************************************************************************************************/
 /* Demarrer_dls: Processus D.L.S                                                                                              */

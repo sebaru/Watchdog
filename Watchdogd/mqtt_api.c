@@ -269,19 +269,19 @@
           goto end_request;
         }
        gchar *email = Json_get_string ( request, "email" );
-       JsonNode *user_gps = Json_node_add_objet ( Partage->Users_GPS, email );
+       JsonNode *user_gps = Json_add_objet ( Partage->Users_GPS, email );
        if (user_gps)
         { gdouble latitude = Json_get_double ( request, "latitude" );
           gdouble longitude = Json_get_double ( request, "longitude" );
-          Json_node_add_double ( user_gps, "latitude",  latitude );
-          Json_node_add_double ( user_gps, "longitude", longitude );
+          Json_add_double ( user_gps, "latitude",  latitude );
+          Json_add_double ( user_gps, "longitude", longitude );
           Info_new( __func__, Config.log_msrv, LOG_INFO, 
                     "SET_GPS: Updated GPS for user '%s': latitude=%f, longitude=%f", email, latitude, longitude );
         }
      }
 
 end_request:
-    Json_node_unref ( request );
+    Json_unref ( request );
 end:
     g_strfreev( tokens );                                                                      /* Libération des tokens topic */
   }
@@ -301,11 +301,11 @@ end:
     va_end ( ap );
 
     gboolean free_node=FALSE;
-    if (!node) { node = Json_node_create(); free_node = TRUE; }
-    gchar *buffer = Json_node_to_string ( node );
+    if (!node) { node = Json_create(); free_node = TRUE; }
+    gchar *buffer = Json_to_string ( node );
     mosquitto_publish( Partage->MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 2, TRUE );
     g_free(buffer);
-    if (free_node) Json_node_unref(node);
+    if (free_node) Json_unref(node);
   }
 /******************************************************************************************************************************/
 /* MQTT_Start_MQTT_API: Appelé pour démarrer les interactions MQTT du master avec l'API                                       */

@@ -76,7 +76,7 @@
        recipients = g_list_next(recipients);
      }
     g_list_free(Recipients);
-    Json_node_unref ( UsersNode );
+    Json_unref ( UsersNode );
   }
 /******************************************************************************************************************************/
 /* Imsgs_handle_message_CB : CB appellé lorsque l'on recoit un message xmpp                                                   */
@@ -118,7 +118,7 @@
 
     Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': From '%s' -> '%s'", thread_tech_id, from, message );
 
-    JsonNode *RootNode = Json_node_create();
+    JsonNode *RootNode = Json_create();
     if ( RootNode == NULL )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory Error for '%s'", thread_tech_id, from );
        goto end_message;
@@ -129,10 +129,10 @@
     gchar *ptr = strstr( hostonly, "/" );
     if (ptr) *ptr=0;
 
-    Json_node_add_string ( RootNode, "xmpp", hostonly );
+    Json_add_string ( RootNode, "xmpp", hostonly );
 
     JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt_cde", RootNode );
-    Json_node_unref ( RootNode );
+    Json_unref ( RootNode );
     if (!UserNode || Json_get_int ( UserNode, "http_code" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
        goto end_user;
@@ -156,16 +156,16 @@
        goto end_user;
      }
 
-    RootNode = Json_node_create();
+    RootNode = Json_create();
     if ( RootNode == NULL )
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: MapNode Error for '%s'", thread_tech_id, from );
        goto end_user;
      }
-    Json_node_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
-    Json_node_add_string ( RootNode, "thread_acronyme", message );
+    Json_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
+    Json_add_string ( RootNode, "thread_acronyme", message );
 
     JsonNode *MapNode = Http_Post_to_global_API ( "/run/mapping/search_txt", RootNode );
-    Json_node_unref ( RootNode );
+    Json_unref ( RootNode );
     if (!MapNode || Json_get_int ( MapNode, "http_code" ) != 200)
      { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER '%s' from API for '%s'", thread_tech_id, from, message );
        goto end_map;
@@ -216,9 +216,9 @@
      }
 
 end_map:
-    Json_node_unref ( MapNode );
+    Json_unref ( MapNode );
 end_user:
-    Json_node_unref ( UserNode );
+    Json_unref ( UserNode );
 end_message:
     xmpp_free(vars->ctx, message);
     return(1);
@@ -385,7 +385,7 @@ reconnect:
               }
              else if (!strcasecmp (token_lvl0, "SET_TEST")) { Imsgs_Envoi_message_to_all_available ( module, "Test OK" ); }
            }
-          Json_node_unref(message);
+          Json_unref(message);
         }
      }                                                                                         /* Fin du while partage->arret */
 

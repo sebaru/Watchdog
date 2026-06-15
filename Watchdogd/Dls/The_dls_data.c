@@ -40,45 +40,45 @@
 
     gint top = Partage->top;
 
-    JsonNode *RootNode = Json_node_create();
+    JsonNode *RootNode = Json_create();
     if (!RootNode)
      { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data to API." ); return; }
 
-    JsonArray *BIArray = Json_node_add_array ( RootNode, "mnemos_BI" );
+    JsonArray *BIArray = Json_add_array ( RootNode, "mnemos_BI" );
     Dls_all_BI_to_json ( BIArray, plugin );
-    Json_node_add_int ( RootNode, "nbr_mnemos_BI", json_array_get_length ( BIArray ) );
+    Json_add_int ( RootNode, "nbr_mnemos_BI", json_array_get_length ( BIArray ) );
 
-    JsonArray *MONOArray = Json_node_add_array ( RootNode, "mnemos_MONO" );
+    JsonArray *MONOArray = Json_add_array ( RootNode, "mnemos_MONO" );
     Dls_all_MONO_to_json ( MONOArray, plugin );
-    Json_node_add_int ( RootNode, "nbr_mnemos_MONO", json_array_get_length ( MONOArray ) );
+    Json_add_int ( RootNode, "nbr_mnemos_MONO", json_array_get_length ( MONOArray ) );
 
-    JsonArray *REGISTREArray = Json_node_add_array ( RootNode, "mnemos_REGISTRE" );
+    JsonArray *REGISTREArray = Json_add_array ( RootNode, "mnemos_REGISTRE" );
     Dls_all_REGISTRE_to_json ( REGISTREArray, plugin );
-    Json_node_add_int ( RootNode, "nbr_mnemos_REGISTRE", json_array_get_length ( REGISTREArray ) );
+    Json_add_int ( RootNode, "nbr_mnemos_REGISTRE", json_array_get_length ( REGISTREArray ) );
 
-    JsonArray *AIArray = Json_node_add_array ( RootNode, "mnemos_AI" );
+    JsonArray *AIArray = Json_add_array ( RootNode, "mnemos_AI" );
     Dls_all_AI_to_json ( AIArray, plugin );
-    Json_node_add_int ( RootNode, "nbr_mnemos_AI", json_array_get_length ( AIArray ) );
+    Json_add_int ( RootNode, "nbr_mnemos_AI", json_array_get_length ( AIArray ) );
 
-    JsonArray *AOArray = Json_node_add_array ( RootNode, "mnemos_AO" );
+    JsonArray *AOArray = Json_add_array ( RootNode, "mnemos_AO" );
     Dls_all_AO_to_json ( AOArray, plugin );
-    Json_node_add_int ( RootNode, "nbr_mnemos_AO", json_array_get_length ( AOArray ) );
+    Json_add_int ( RootNode, "nbr_mnemos_AO", json_array_get_length ( AOArray ) );
 
-    JsonArray *DIArray = Json_node_add_array ( RootNode, "mnemos_DI" );
+    JsonArray *DIArray = Json_add_array ( RootNode, "mnemos_DI" );
     Dls_all_DI_to_json ( DIArray, plugin );
-    Json_node_add_int ( RootNode, "nbr_mnemos_DI", json_array_get_length ( DIArray ) );
+    Json_add_int ( RootNode, "nbr_mnemos_DI", json_array_get_length ( DIArray ) );
 
-    JsonArray *DOArray = Json_node_add_array ( RootNode, "mnemos_DO" );
+    JsonArray *DOArray = Json_add_array ( RootNode, "mnemos_DO" );
     Dls_all_DO_to_json ( DOArray, plugin );
-    Json_node_add_int ( RootNode, "nbr_mnemos_DO", json_array_get_length ( DOArray ) );
+    Json_add_int ( RootNode, "nbr_mnemos_DO", json_array_get_length ( DOArray ) );
 
-    JsonArray *CIArray = Json_node_add_array ( RootNode, "mnemos_CI" );
+    JsonArray *CIArray = Json_add_array ( RootNode, "mnemos_CI" );
     Dls_all_CI_to_json ( CIArray, plugin );
-    Json_node_add_int ( RootNode, "nbr_mnemos_CI", json_array_get_length ( CIArray ) );
+    Json_add_int ( RootNode, "nbr_mnemos_CI", json_array_get_length ( CIArray ) );
 
-    JsonArray *CHArray = Json_node_add_array ( RootNode, "mnemos_CH" );
+    JsonArray *CHArray = Json_add_array ( RootNode, "mnemos_CH" );
     Dls_all_CH_to_json ( CHArray, plugin );
-    Json_node_add_int ( RootNode, "nbr_mnemos_CH", json_array_get_length ( CHArray ) );
+    Json_add_int ( RootNode, "nbr_mnemos_CH", json_array_get_length ( CHArray ) );
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
     if (api_result && Json_get_int ( api_result, "http_code" ) == 200)
@@ -104,7 +104,7 @@
      }
     else
      { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving '%s' dls_data to API.", plugin->tech_id ); }
-    Json_node_unref ( api_result );
-    Json_node_unref ( RootNode );
+    Json_unref ( api_result );
+    Json_unref ( RootNode );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

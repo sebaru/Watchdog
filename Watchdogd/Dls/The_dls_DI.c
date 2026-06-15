@@ -165,9 +165,9 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat", bit->etat );
+  { Json_add_string ( element, "tech_id",  bit->tech_id );
+    Json_add_string ( element, "acronyme", bit->acronyme );
+    Json_add_bool   ( element, "etat", bit->etat );
   }
 /******************************************************************************************************************************/
 /* Dls_all_DI_to_json: Transforme tous les bits en JSON                                                                       */
@@ -179,7 +179,7 @@
     GSList *liste = plugin->Dls_data_DI;
     while ( liste )
      { struct DLS_DI *bit = liste->data;
-       JsonNode *element = Json_node_create();
+       JsonNode *element = Json_create();
        Dls_DI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
@@ -191,11 +191,11 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_DI_export_to_API ( struct DLS_DI *bit )
-  { JsonNode *element = Json_node_create ();
+  { JsonNode *element = Json_create ();
     if (element)
-     { Json_node_add_bool ( element, "etat", bit->etat );
+     { Json_add_bool ( element, "etat", bit->etat );
        MQTT_Send_to_API   ( element, "DLS_REPORT/DI/%s/%s", bit->tech_id, bit->acronyme );
-       Json_node_unref    ( element );
+       Json_unref    ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

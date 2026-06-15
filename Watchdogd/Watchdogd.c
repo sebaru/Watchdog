@@ -144,8 +144,8 @@
     pthread_rwlock_rdlock(&Partage->Maps_synchro);
     JsonNode *map = g_tree_lookup ( Partage->Maps_to_thread, key );
     if (map && Json_has_member ( map, "thread_tech_id" ) && Json_has_member ( map, "thread_acronyme" ) )
-     { Json_node_add_string ( key, "thread_tech_id",  Json_get_string ( map, "thread_tech_id" ) );
-       Json_node_add_string ( key, "thread_acronyme", Json_get_string ( map, "thread_acronyme" ) );
+     { Json_add_string ( key, "thread_tech_id",  Json_get_string ( map, "thread_tech_id" ) );
+       Json_add_string ( key, "thread_acronyme", Json_get_string ( map, "thread_acronyme" ) );
        found = TRUE;
      }
     pthread_rwlock_unlock(&Partage->Maps_synchro);
@@ -166,8 +166,8 @@
     pthread_rwlock_rdlock(&Partage->Maps_synchro);
     JsonNode *map = g_tree_lookup ( Partage->Maps_from_thread, key );
     if (map && Json_has_member ( map, "tech_id" ) && Json_has_member ( map, "acronyme" ) )
-     { Json_node_add_string ( key, "tech_id",  Json_get_string ( map, "tech_id" ) );
-       Json_node_add_string ( key, "acronyme", Json_get_string ( map, "acronyme" ) );
+     { Json_add_string ( key, "tech_id",  Json_get_string ( map, "tech_id" ) );
+       Json_add_string ( key, "acronyme", Json_get_string ( map, "acronyme" ) );
        found = TRUE;
      }
     pthread_rwlock_unlock(&Partage->Maps_synchro);
@@ -181,7 +181,7 @@
   { pthread_rwlock_wrlock(&Partage->Maps_synchro);                                      /* Dechargement des données actuelles */
     if (Partage->Maps_from_thread) { g_tree_destroy  ( Partage->Maps_from_thread ); Partage->Maps_from_thread = NULL; }
     if (Partage->Maps_to_thread)   { g_tree_destroy  ( Partage->Maps_to_thread );   Partage->Maps_to_thread   = NULL; }
-    if (Partage->Maps_root)        { Json_node_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
+    if (Partage->Maps_root)        { Json_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
 
     Partage->Maps_from_thread = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_thread );
     Partage->Maps_to_thread   = g_tree_new ( (GCompareFunc)MSRV_Comparer_clef_local );
@@ -197,7 +197,7 @@
           results = g_list_next(results);
         }
        g_list_free(Results);
-     } else { Json_node_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
+     } else { Json_unref ( Partage->Maps_root ); Partage->Maps_root = NULL; }
     pthread_rwlock_unlock(&Partage->Maps_synchro);
   }
 /******************************************************************************************************************************/
@@ -348,23 +348,23 @@
        goto second_stage_end;
      }
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Connected with API %s", Json_get_string ( API, "version" ) );
-    Json_node_unref ( API );
+    Json_unref ( API );
 /************************************************* Tell Global API thread is UP ***********************************************/
-    JsonNode *RootNode = Json_node_create();
+    JsonNode *RootNode = Json_create();
     if (RootNode)
-     { Json_node_add_int    ( RootNode, "start_time", time(NULL) );
-       Json_node_add_string ( RootNode, "agent_hostname", g_get_host_name() );
-       Json_node_add_string ( RootNode, "version", WTD_VERSION );
-       Json_node_add_string ( RootNode, "branche", WTD_BRANCHE );
-       Json_node_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
+     { Json_add_int    ( RootNode, "start_time", time(NULL) );
+       Json_add_string ( RootNode, "agent_hostname", g_get_host_name() );
+       Json_add_string ( RootNode, "version", WTD_VERSION );
+       Json_add_string ( RootNode, "branche", WTD_BRANCHE );
+       Json_add_string ( RootNode, "install_time", Json_get_string ( Config.config, "install_time" ) );
 
        JsonNode *api_result = Http_Post_to_global_API ( "/run/agent/start", RootNode );
-       Json_node_unref ( RootNode );
+       Json_unref ( RootNode );
        if (api_result && Json_get_int ( api_result, "http_code" ) == 200)
         { Info_new( __func__, Config.log_msrv, LOG_INFO, "API Request for AGENT START OK." ); }
        else
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "API Request for AGENT START failed. Sleep 5s and stopping." );
-          Json_node_unref ( api_result );
+          Json_unref ( api_result );
           sleep(5);
           error_code = EXIT_FAILURE;
           goto second_stage_end;
@@ -397,7 +397,7 @@
                      else g_snprintf( Config.audio_tech_id, sizeof(Config.audio_tech_id), "AUDIO" );
 
        Info_change_log_level ( Json_get_int ( api_result, "log_level" ) );
-       Json_node_unref ( api_result );
+       Json_unref ( api_result );
      }
 /******************************************************* Drop privileges ******************************************************/
     if (!Drop_privileges()) { sleep(5); goto second_stage_end; }
@@ -454,21 +454,21 @@
 
 /* ------------------------------------------- Création du plugin Agent ----------------------------------------------------- */
     gchar *tech_id = g_get_host_name();
-    JsonNode *DlsAgentNode = Json_node_create();
+    JsonNode *DlsAgentNode = Json_create();
     if (DlsAgentNode)
-     { Json_node_add_string ( DlsAgentNode, "tech_id", tech_id );
+     { Json_add_string ( DlsAgentNode, "tech_id", tech_id );
        gchar name[256];
        g_snprintf ( name, sizeof ( name ), "D.L.S Agent sur %s", tech_id );
-       Json_node_add_string ( DlsAgentNode, "name", name );
+       Json_add_string ( DlsAgentNode, "name", name );
        gchar shortname[256];
        g_snprintf ( shortname, sizeof ( shortname ), "Agent %s", tech_id );
-       Json_node_add_string ( DlsAgentNode, "shortname", shortname );
-       Json_node_add_string ( DlsAgentNode, "package", "Abls-Agent" );
-       Json_node_add_int   ( DlsAgentNode, "syn_id", 1 );
+       Json_add_string ( DlsAgentNode, "shortname", shortname );
+       Json_add_string ( DlsAgentNode, "package", "Abls-Agent" );
+       Json_add_int   ( DlsAgentNode, "syn_id", 1 );
        if (Dls_auto_create_plugin( DlsAgentNode ) == FALSE)
         { Info_new( __func__, Config.log_msrv, LOG_ERR, "Unable to create plugin DLS '%s'.", tech_id ); }
        else Info_new( __func__, Config.log_msrv, LOG_INFO, "Plugin DLS '%s' created.", tech_id ); 
-        Json_node_unref ( DlsAgentNode );
+        Json_unref ( DlsAgentNode );
      }
     else Info_new( __func__, Config.log_msrv, LOG_ERR, "Unable to create plugin DLS '%s': Memory error.", tech_id );
 
@@ -477,7 +477,7 @@
      { MSRV_Remap();                                                       /* Mappage des bits avant de charger les thread IO */
        Dls_Importer_plugins();                                                 /* Chargement des modules dls avec compilation */
        Dls_Load_horloge_ticks();                                                             /* Chargement des ticks horloges */
-       Partage->Users_GPS = Json_node_create ();
+       Partage->Users_GPS = Json_create ();
      }
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
@@ -521,10 +521,10 @@
         { Gerer_arrive_Axxx_dls();                                        /* Distribution des changements d'etats sorties TOR */
 
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
-           { JsonNode *RootNode = Json_node_create();
-             Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
+           { JsonNode *RootNode = Json_create();
+             Json_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
              MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
-             Json_node_unref ( RootNode );
+             Json_unref ( RootNode );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 
@@ -543,10 +543,10 @@
        while(Partage->Thread_run == TRUE)                                        /* On tourne tant que l'on a besoin */
         {
           if (cpt_1_minute < Partage->top)                                                    /* Update DB toutes les minutes */
-           { JsonNode *RootNode = Json_node_create();
-             Json_node_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
+           { JsonNode *RootNode = Json_create();
+             Json_add_string ( RootNode, "agent_uuid", Json_get_string ( Config.config, "agent_uuid" ) );
              MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
-             Json_node_unref ( RootNode );
+             Json_unref ( RootNode );
              cpt_1_minute += 600;                                                            /* Sauvegarde toutes les minutes */
            }
 
@@ -562,16 +562,16 @@
 
     if (Config.instance_is_master)                                        /* Dechargement DLS après les threads IO, dls, arch */
      { Dls_Decharger_plugins();                                                               /* Dechargement des modules DLS */
-       Json_node_unref ( Partage->com_dls.HORLOGE_ticks );                                   /* Libération des bits d'horloge */
+       Json_unref ( Partage->com_dls.HORLOGE_ticks );                                   /* Libération des bits d'horloge */
      }
 
     pthread_rwlock_wrlock(&Partage->Maps_synchro);
     if (Partage->Maps_from_thread) { g_tree_destroy  ( Partage->Maps_from_thread ); Partage->Maps_from_thread = NULL; }
     if (Partage->Maps_to_thread)   { g_tree_destroy  ( Partage->Maps_to_thread );   Partage->Maps_to_thread   = NULL; }
-    if (Partage->Maps_root)        { Json_node_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
+    if (Partage->Maps_root)        { Json_unref ( Partage->Maps_root );        Partage->Maps_root        = NULL; }
     pthread_rwlock_unlock(&Partage->Maps_synchro);
 
-    if (Partage->Users_GPS)        { Json_node_unref ( Partage->Users_GPS );        Partage->Users_GPS        = NULL; }
+    if (Partage->Users_GPS)        { Json_unref ( Partage->Users_GPS );        Partage->Users_GPS        = NULL; }
 
     pthread_rwlock_wrlock(&Partage->Liste_visuel_synchro);
     g_slist_free ( Partage->Liste_visuel ); Partage->Liste_visuel = NULL;
@@ -612,7 +612,7 @@ second_stage_end:
     Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
 
 first_stage_end:
-    if (Config.config) Json_node_unref ( Config.config );
+    if (Config.config) Json_unref ( Config.config );
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Stopped" );
     return(error_code);
   }

@@ -33,10 +33,10 @@
  #include <string.h>
  #include <openssl/ssl.h>
  #include <uuid/uuid.h>
+ #include <abls-libs/abls-libs.h>
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
  #include "Erreur.h"
- #include "Json.h"
  #include "Dls.h"
  #include "Thread.h"
  #include "Config.h"
@@ -50,7 +50,7 @@
 
  #define VERROU_SERVEUR              "watchdogd.lock"
 
-  struct PARTAGE                                                                            /* Structure des données partagées */
+ struct PARTAGE                                                                            /* Structure des données partagées */
   { gint  taille_partage;
     gchar version[16];
     time_t start_time;                                                                         /* Date de start de l'instance */

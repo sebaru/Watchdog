@@ -40,7 +40,7 @@
 /* Entrée : le pointeur vers la structure du message                                                                          */
 /******************************************************************************************************************************/
  static void Dls_data_MESSAGE_free_one ( struct DLS_MESSAGE *bit )
-  { Json_node_unref ( bit->source_node );
+  { Json_unref ( bit->source_node );
     g_free(bit);
   }
 /******************************************************************************************************************************/
