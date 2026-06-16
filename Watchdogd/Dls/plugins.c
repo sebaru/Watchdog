@@ -275,7 +275,7 @@
         { plugin->remap_all_alias(&plugin->vars);
           Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG, "Remapping Alias for '%s' OK", plugin->tech_id );
         }
-       else Info_new( __func__, Config.log_dls, LOG_ERR, "Remapping Alias for '%s' Failed", plugin->tech_id );
+       else Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_ERR, "Remapping Alias for '%s' Failed", plugin->tech_id );
 
        if (!strcasecmp ( plugin->tech_id, "SYS" ) )                         /* Mapping des bits internes pour le plugin "SYS" */
         { Partage->com_dls.sys_flipflop_5hz        = Dls_data_BI_lookup   ( "SYS", "FLIPFLOP_5HZ" );
