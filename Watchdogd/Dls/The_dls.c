@@ -437,7 +437,7 @@
     g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_up );
     g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_down );
 
-    Info_with_prefix( __func__, "dls", LOG_NOTICE, "DLS Down (%p)", pthread_self() );
+    Info( __func__, "dls", LOG_NOTICE, "DLS Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

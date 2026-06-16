@@ -121,7 +121,7 @@
   { if (!bit) return;
     if (bit->valeur!=0)
      { MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->valeur );                           /* Archivage si besoin */
-       Info_with_prefix( __func__, "dls", bit->tech_id, bit->tech_id, LOG_DEBUG,
+       Info_with_prefix( __func__, "dls", bit->tech_id, LOG_DEBUG,
                 "ligne %04d: DLS_CI '%s:%s'=%d resetted",
                 (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
        bit->valeur = 0;                                                                          /* Valeur réelle du compteur */

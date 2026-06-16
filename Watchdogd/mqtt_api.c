@@ -269,15 +269,14 @@
           goto end_request;
         }
        gchar *email = Json_get_string ( request, "email" );
-       JsonNode *user_gps = Json_add_objet ( Partage->Users_GPS, email );
+       JsonNode *user_gps = Json_add_object ( Partage->Users_GPS, email );
        if (user_gps)
         { gdouble latitude = Json_get_double ( request, "latitude" );
           gdouble longitude = Json_get_double ( request, "longitude" );
           Json_add_double ( user_gps, "latitude",  latitude );
           Json_add_double ( user_gps, "longitude", longitude );
           Info_with_prefix( __func__, "mqtt", "api", LOG_INFO, 
-
-                    "SET_GPS: Updated GPS for user '%s': latitude=%f, longitude=%f", email, latitude, longitude );
+                           "SET_GPS: Updated GPS for user '%s': latitude=%f, longitude=%f", email, latitude, longitude );
         }
      }
 

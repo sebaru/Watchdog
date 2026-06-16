@@ -42,7 +42,7 @@
     gint taille_result = 256;
     gchar *result = g_try_malloc0 ( taille_result );
     if (!result)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Memory error for '%s'", libelle_src );
+     { Info( __func__, "events", LOG_ERR, "Memory error for '%s'", libelle_src );
        return(NULL);
      }
     g_snprintf ( result, taille_result, "%s", libelle_src );
@@ -100,11 +100,11 @@
                                       Json_get_string ( RootNode, "thread_acronyme" ) );
              Json_unref ( Node );
            }
-          else Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s:%s': Json node create error",
+          else Info_with_prefix( __func__, "events", Json_get_string ( RootNode, "thread_tech_id" ), LOG_ERR, "'%s:%s': Json node create error",
                          Json_get_string ( RootNode, "thread_tech_id" ),
                          Json_get_string ( RootNode, "thread_acronyme" ) );
         }
-       else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
+       else Info_with_prefix( __func__, "events", Json_get_string ( RootNode, "thread_tech_id" ), LOG_NOTICE,
                       "'%s:%s' is not mapped. dropping",
                        Json_get_string ( RootNode, "tech_id" ), Json_get_string ( RootNode, "acronyme" ) );
        Json_unref ( RootNode );
@@ -129,11 +129,11 @@
                                       Json_get_string ( RootNode, "thread_acronyme" ) );
              Json_unref ( Node );
            }
-          else Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s:%s': Json node create error",
+          else Info_with_prefix( __func__, "events", Json_get_string ( RootNode, "thread_tech_id" ), LOG_ERR, "'%s:%s': Json node create error",
                          Json_get_string ( RootNode, "thread_tech_id" ),
                          Json_get_string ( RootNode, "thread_acronyme" ) );
         }
-       else Info_new( __func__, Config.log_msrv, LOG_NOTICE,
+       else Info_with_prefix( __func__, "events", Json_get_string ( RootNode, "thread_tech_id" ), LOG_NOTICE,
                       "'%s:%s' is not mapped. dropping",
                        Json_get_string ( RootNode, "tech_id" ), Json_get_string ( RootNode, "acronyme" ) );
        Json_unref ( RootNode );

@@ -85,7 +85,7 @@
   { if (!bi) return;
 
     if (bi->etat != valeur)
-     { Info_with_prefix( __func__, "dls", bi->tech_id, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+     { Info_with_prefix( __func__, "dls", bi->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d",
                  (vars ? vars->num_ligne : -1), bi->tech_id, bi->acronyme, valeur, bi->edge_up, bi->edge_down );
        bi->etat = valeur;

@@ -79,7 +79,7 @@
        Partage->Liste_msg = g_slist_remove ( Partage->Liste_msg, event );
        gint reste_a_faire = g_slist_length(Partage->Liste_msg);
        pthread_rwlock_unlock( &Partage->Liste_msg_synchro );                          /* Ajout dans la liste de msg a traiter */
-       Info_new( __func__, Config.log_msrv, LOG_INFO, "Handle MSG'%s:%s'=%d, Reste a %d a traiter",
+       Info_with_prefix( __func__, "mqtt", msg->tech_id, LOG_INFO, "Handle MSG'%s:%s'=%d, Reste a %d a traiter",
                  msg->tech_id, msg->acronyme, event->etat, reste_a_faire );
 
        if (event->etat == TRUE)                                                                            /* Passage a  un ? */
@@ -100,7 +100,7 @@
                 MQTT_Send_to_API ( MSGNode, "DLS_HISTO" );
                 Json_unref ( MSGNode );
               }
-             else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send DLS_HISTO: memory error" );
+             else Info_with_prefix( __func__, "mqtt", msg->tech_id, LOG_ERR, "Cannot send DLS_HISTO: memory error" );
 /*---------------------------------------------------- Envoi IMSG ------------------------------------------------------------*/
              gint notif_chat = Json_get_int ( msg->source_node, "notif_chat" );
              if (notif_chat == TXT_NOTIF_BY_DLS) { notif_chat = Json_get_int ( msg->source_node, "notif_chat_by_dls" ); }
@@ -114,7 +114,7 @@
                    MQTT_Send_to_topic ( Partage->MQTT_local_session, IMSGNode, FALSE, "SEND_IMSG" );
                    Json_unref ( IMSGNode );
                  }
-                else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send IMSG: memory error" );
+                else Info_with_prefix( __func__, "mqtt", msg->tech_id, LOG_ERR, "Cannot send IMSG: memory error" );
               }
 /*---------------------------------------------------- Envoi SMS -------------------------------------------------------------*/
              gint notif_sms = Json_get_int ( msg->source_node, "notif_sms" );
@@ -130,7 +130,7 @@
                    MQTT_Send_to_topic ( Partage->MQTT_local_session, SMSNode, FALSE, "SEND_SMS" );
                    Json_unref ( SMSNode );
                  }
-                else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send SMS: memory error" );
+                else Info_with_prefix( __func__, "mqtt", msg->tech_id, LOG_ERR, "Cannot send SMS: memory error" );
               }
 /*---------------------------------------------------- Envoi AUDIO -----------------------------------------------------------*/
              gchar *audio_zone_by_dls = Json_get_string ( msg->source_node, "audio_zone_by_dls" );
@@ -142,7 +142,7 @@
               }
            }
           else
-           { Info_new( __func__, Config.log_msrv, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
+           { Info_with_prefix( __func__, "mqtt", msg->tech_id, LOG_WARNING, "Rate limit (=%d) for '%s:%s' reached: not sending",
                        rate_limit, msg->tech_id, msg->acronyme );
            }
         }
@@ -151,7 +151,7 @@
           if(histo)
            { MQTT_Send_to_API ( histo, "DLS_HISTO" );
              Json_unref ( histo );
-           } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
+           } else Info_with_prefix( __func__, "mqtt", msg->tech_id, LOG_ERR, "Error when convert '%s:%s' from msg off to histo",
                             msg->tech_id, msg->acronyme );
         }
        g_free(event);

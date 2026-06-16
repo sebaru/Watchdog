@@ -105,7 +105,7 @@
 
     if (bit->etat != valeur)
      { bit->etat = valeur;
-       Info_with_prefix( __func__, "dls", bit->tech_id, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_NOTICE,
+       Info_with_prefix( __func__, "dls", bit->tech_id, LOG_NOTICE,
                  "Changing DLS_DI '%s:%s'=%d up %d down %d",
                  bit->tech_id, bit->acronyme, valeur, bit->edge_up, bit->edge_down );
        if (valeur) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up,   bit );
@@ -123,7 +123,7 @@
  void Dls_data_DI_set_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit )
   { if (!bit) return;
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bit );
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_NOTICE,
+    Info_with_prefix( __func__, "dls", bit->tech_id, LOG_NOTICE,
               "Mise a un du bit DI '%s:%s' demandée", bit->tech_id, bit->acronyme );
   }
 /******************************************************************************************************************************/
@@ -149,12 +149,12 @@
 
     struct DLS_DI *bit = Dls_data_DI_lookup ( tech_id, acronyme );
     if (!bit)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_DI from '%s': '%s:%s'/'%s:%s' not found",
+     { Info_with_prefix( __func__, "dls", tech_id, LOG_WARNING, "SET_DI from '%s': '%s:%s'/'%s:%s' not found",
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
        return(FALSE);
      }
 
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI from '%s': '%s:%s'/'%s:%s'=%d (%s)",
+    Info_with_prefix( __func__, "dls", tech_id, LOG_INFO, "SET_DI from '%s': '%s:%s'/'%s:%s'=%d (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_bool ( request, "etat" ), bit->libelle );
     Dls_data_DI_set ( bit, Json_get_bool ( request, "etat" ) );
