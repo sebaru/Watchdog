@@ -28,6 +28,7 @@
 #ifndef _METEO_H_
  #define _METEO_H_
 
+ #define THREAD_CLASSE "meteo"
  #define METEO_POLLING                 36000                                             /* Polling du site toutes les heures */
 
  struct METEO_VARS

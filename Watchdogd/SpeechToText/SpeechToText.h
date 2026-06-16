@@ -32,6 +32,8 @@
  #include <pulse/error.h>
  #include "porcupine.h"
 
+ #define THREAD_CLASSE "speechtotext"
+
  struct SPEECHTOTEXT_VARS
   { /*SPEECHTOTEXTCONN_t upsconn;                                                                               /* Connexion SPEECHTOTEXT à l'ups */
     gboolean started;                                                                                      /* Est-il actif ?? */

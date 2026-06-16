@@ -29,6 +29,8 @@
  #define _MODBUS_H_
  #include <json-glib/json-glib.h>
 
+ #define THREAD_CLASSE "modbus"
+
  enum
   { WAGO_UNUSED_1, /* a virer */
     WAGO_UNUSED_2,

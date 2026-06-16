@@ -30,6 +30,8 @@
 
  #include <strophe.h>
 
+ #define THREAD_CLASSE "imsgs"
+
  #define IMSGS_DEFAUT_USERNAME      "defaultuser@jabber.fr"
  #define IMSGS_DEFAUT_PASSWORD      "defaultpassword"
  #define IMSGS_TIME_RECONNECT      600                                              /* 1 minute avant reconnexion si probleme */

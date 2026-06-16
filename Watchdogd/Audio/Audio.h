@@ -28,6 +28,8 @@
 #ifndef _AUDIO_H_
  #define _AUDIO_H_
 
+ #define THREAD_CLASSE "audio"
+
  #define AUDIO_JINGLE                3000                                    /* Jingle si pas de message au bout de 5 minutes */
  #define AUDIO_DEFAUT_LANGUAGE       "fr"                                                  /* Language par défaut pour le TTS */
 

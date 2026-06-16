@@ -34,7 +34,6 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
 
 /******************************************************************************************************************************/
 /* Dls_data_CH_create_by_array : Création d'un CH pour le plugin                                                              */
@@ -46,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_CH *bit = g_try_malloc0 ( sizeof(struct DLS_CH) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_with_prefix( __func__, "dls", LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -56,7 +55,7 @@
     bit->etat   = Json_get_bool   ( element, "etat" );
     bit->archivage = Json_get_int ( element, "archivage" );
     plugin->Dls_data_CH = g_slist_prepend ( plugin->Dls_data_CH, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info_with_prefix( __func__, "dls", LOG_INFO,
               "Create bit DLS_CH '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -101,7 +100,7 @@
      { if ( ! bit->etat )                                                                            /* Démarrage du comptage */
         { bit->etat    = TRUE;
           bit->old_top = Partage->top;
-          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+          Info_with_prefix( __func__, "dls", (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                     "ligne %04d: DLS_CH '%s:%s'=%d is now counting",
                    (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur, bit->valeur );
           if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
@@ -121,7 +120,7 @@
     else                                                                                          /* etat = FALSE, bit is off */
      { if ( bit->etat )                                                                                  /* Arret du comptage */
         { bit->etat = FALSE;
-          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+          Info_with_prefix( __func__, "dls", LOG_DEBUG,
                     "ligne %04d: DLS_CH '%s:%s'=%d is not counting anymore",
                    (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
           if (vars && vars->debug) Dls_CH_export_to_API ( bit );                                   /* Si debug, envoi a l'API */
@@ -137,7 +136,7 @@
   { if (!bit) return;
     if (bit->valeur > 0)
      { MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->valeur );                           /* Archivage si besoin */
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+       Info_with_prefix( __func__, "dls", LOG_DEBUG,
                 "ligne %04d: DLS_CH '%s:%s'=%d resetted",
                 (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
        bit->valeur = 0;

@@ -28,6 +28,8 @@
 #ifndef _SMSG_H_
  #define _SMSG_H_
 
+ #define THREAD_CLASSE "smsg"
+
  struct SMS_VARS
   { gboolean sending_is_disabled;                                  /* Variable permettant d'interdire l'envoi de sms si panic */
     gchar *mm_modem_path;

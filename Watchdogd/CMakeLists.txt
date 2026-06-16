@@ -28,7 +28,6 @@ add_subdirectory(Shelly)
 add_executable(Watchdogd
   Watchdogd.c
   thread.c
-  Erreur.c
   shm.c
   Config.c
   http_common.c

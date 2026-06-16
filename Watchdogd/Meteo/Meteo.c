@@ -46,12 +46,12 @@
     gchar *code_insee = Json_get_string ( module->config, "code_insee" );
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/ephemeride/0?token=%s&insee=%s", token, code_insee );
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Start getting data for code_insee '%s'", code_insee );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG, "Start getting data for code_insee '%s'", code_insee );
 /********************************************************* Envoi de la requete ************************************************/
     JsonNode *response = Http_Request ( query, NULL, NULL );
     gint http_code     = Json_get_int ( response, "http_code" );
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d", http_code );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG, "Status %d", http_code );
     if (http_code!=200) Thread_send_comm_to_master ( module, FALSE );
     else
      { gint heure, minute;
@@ -61,12 +61,12 @@
        gchar *sunrise       = Json_get_string ( ephemeride, "sunrise" );
        gchar *sunset        = Json_get_string ( ephemeride, "sunset" );
        if ( sscanf ( sunrise, "%d:%d", &heure, &minute ) == 2)
-        { Info_new( __func__, module->Thread_debug, LOG_INFO, "%s -> sunrise at %02d:%02d", city_name, heure, minute );
+        { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "%s -> sunrise at %02d:%02d", city_name, heure, minute );
           Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunrise );
           Mnemo_create_thread_HORLOGE_tick ( module, vars->sunrise, heure, minute );
         }
        if ( sscanf ( sunset, "%d:%d", &heure, &minute ) == 2)
-        { Info_new( __func__, module->Thread_debug, LOG_INFO, "%s ->  sunset at %02d:%02d", city_name, heure, minute );
+        { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "%s ->  sunset at %02d:%02d", city_name, heure, minute );
           Mnemo_delete_thread_HORLOGE_tick ( module, vars->sunset );
           Mnemo_create_thread_HORLOGE_tick ( module, vars->sunset, heure, minute );
         }
@@ -86,7 +86,7 @@
     gint day       = Json_get_int ( element, "day" );
     gint temp_min  = Json_get_int ( element, "tmin" );
     gint temp_max  = Json_get_int ( element, "tmax" );
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG,
               "day %02d -> temp_min=%02d, temp_max=%02d", day, temp_min, temp_max );
 
     MQTT_Send_AI ( module, vars->Weather[day],          1.0*Json_get_int ( element, "weather" ), TRUE );
@@ -114,12 +114,12 @@
     gchar *code_insee = Json_get_string ( module->config, "code_insee" );
     g_snprintf( query, sizeof(query), "https://api.meteo-concept.com/api/forecast/daily?token=%s&insee=%s", token, code_insee );
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG,
              "%s: Starting getting data for code_insee '%s'", thread_tech_id, code_insee );
 /********************************************************* Envoi de la requete ************************************************/
     JsonNode *response = Http_Request ( query, NULL, NULL );
     gint http_code     = Json_get_int ( response, "http_code" );
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Status %d", http_code );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG, "Status %d", http_code );
 
     if (http_code==200) { Json_foreach_array_element ( response, "forecast", Meteo_update_forecast, module ); }
     Json_unref ( response );
@@ -179,7 +179,7 @@
           pthread_mutex_unlock ( &module->synchro );
           gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
 
-          Info_new( __func__, module->Thread_debug, LOG_DEBUG, "token_lvl0 '%s' not for this thread", token_lvl0 );
+          Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG, "token_lvl0 '%s' not for this thread", token_lvl0 );
           Json_unref(request);
         }
 /****************************************************** Connexion ! ***********************************************************/

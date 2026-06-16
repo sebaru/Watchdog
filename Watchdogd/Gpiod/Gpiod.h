@@ -30,6 +30,8 @@
 
  #include <gpiod.h>
 
+ #define THREAD_CLASSE "gpiod"
+
  #define GPIOD_MAX_LINE    28                                                         /* 28 Lignes maximums d'entrées/sorties */
 
  struct GPIOD_LIGNE

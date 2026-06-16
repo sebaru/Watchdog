@@ -44,7 +44,7 @@
  static void Jouer_google_speech ( struct THREAD *module, gchar *audio_libelle )
   { gchar commande[256];
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Sending '%s'", audio_libelle );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "Sending '%s'", audio_libelle );
     gchar *language = Json_get_string ( module->config, "language" );
 
     gchar nom_fichier_brut[256];
@@ -56,12 +56,12 @@
 
     struct stat stat_buf;
     if ( stat( nom_fichier_full, &stat_buf )== -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Creating file '%s'", nom_fichier_full );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "Creating file '%s'", nom_fichier_full );
        g_snprintf ( commande, sizeof(commande), "gtts-cli -l %s \"%s\" -o %s", language, audio_libelle, nom_fichier_full );
        system(commande);
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Running mpg123 '%s'", nom_fichier_full );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "Running mpg123 '%s'", nom_fichier_full );
     g_snprintf ( commande, sizeof(commande), "mpg123 %s", nom_fichier_full );
     system(commande);
 
@@ -80,7 +80,7 @@
     gchar chaine[256];
     g_snprintf( chaine, sizeof(chaine), "wpctl set-volume @DEFAULT_AUDIO_SINK@ %d%%", volume );
     system(chaine);
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Volume set to %d", volume );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "Volume set to %d", volume );
 
     Thread_send_comm_to_master ( module, TRUE );                                                  /* By default, comm is TRUE */
     GList *Audio_zones = json_array_get_elements ( Json_get_array ( module->config, "audio_zones" ) );
@@ -88,7 +88,7 @@
     while(audio_zones)
      { JsonNode *element = audio_zones->data;
        gchar *audio_zone_name = Json_get_string ( element, "audio_zone_name" );
-       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Listening to AudioZone '%s'", audio_zone_name );
+       Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "Listening to AudioZone '%s'", audio_zone_name );
        MQTT_Subscribe ( module->MQTT_session, "AUDIO_ZONE/%s", audio_zone_name );
        audio_zones = g_list_next(audio_zones);
      }
@@ -110,7 +110,7 @@
              )
            { gchar *audio_zone_name = Json_get_string ( request, "token_lvl1" );
              gchar *audio_libelle   = Json_get_string ( request, "audio_libelle" );
-             Info_new( __func__, module->Thread_debug, LOG_INFO, "Saying '%s' on audio_zone '%s'", audio_libelle, audio_zone_name );
+             Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "Saying '%s' on audio_zone '%s'", audio_libelle, audio_zone_name );
              if (vars->last_audio + AUDIO_JINGLE < Partage->top)                               /* Si Pas de message depuis xx */
               { Jouer_google_speech( module, "Attention"); }                                        /* On balance le jingle ! */
              vars->last_audio = Partage->top;
@@ -118,7 +118,7 @@
              Jouer_google_speech( module, audio_libelle );                                                /* Jouer le libelle */
            }
           else if (!strcasecmp ( token_lvl0, "SET_TEST" ) )
-           { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Saying 'test'" );
+           { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "Saying 'test'" );
              Jouer_google_speech( module, "Ceci est un test" );
            }
         }

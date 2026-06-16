@@ -64,6 +64,7 @@
     guint nb_thread_tech_ids;                                                /* Nombre de tech_ids dans la liste des tech_ids */
     guint current_thread_tech_id_index;                                /* Index du tech_id courant dans la liste des tech_ids */
     JsonNode *config;                                                 /* Pointeur vers la config du tech_id courant du thread */
+    gchar *current_thread_tech_id;                                         /* tech_id courant derive de config_all/thread_tech_ids */
     gpointer vars;                                    /* Pointeur vers les variables de run du module pour le tech_id courant */
   };
 

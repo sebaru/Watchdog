@@ -41,7 +41,7 @@
     xmpp_message_set_body ( stanza, message );
     xmpp_send ( vars->conn, stanza ) ;
     xmpp_stanza_release ( stanza );
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Send '%s' to '%s'", message, dest );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "Send '%s' to '%s'", message, dest );
   }
 /******************************************************************************************************************************/
 /* Imsgs_Envoi_message_to_all_available : Envoi un message aux contacts disponibles                                           */
@@ -55,7 +55,7 @@
 /********************************************* Chargement des informations en bases *******************************************/
     JsonNode *UsersNode = Http_Get_from_global_API ( "/run/users/wanna_be_notified", NULL );
     if (!UsersNode || Json_get_int ( UsersNode, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USERS from API", thread_tech_id );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "%s: Could not get USERS from API", thread_tech_id );
        return;
      }
 
@@ -65,11 +65,11 @@
      { JsonNode *user = recipients->data;
        gchar *xmpp = Json_get_string ( user, "xmpp" );
        if (!xmpp)
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+        { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR,
                     "%s: Warning: User %s does not have an XMPP id", thread_tech_id, Json_get_string ( user, "email" ) );
         }
        else if (!strlen(xmpp))
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+        { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR,
                     "%s: Warning: User %s has an empty XMPP id", thread_tech_id, Json_get_string ( user, "email" ) );
         }
        else Imsgs_Envoi_message_to ( module, xmpp, message );
@@ -91,7 +91,7 @@
 
     const gchar *from = xmpp_stanza_get_attribute ( stanza, "from" );
     if (!from)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Error: from is NULL", thread_tech_id );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "'%s': Error: from is NULL", thread_tech_id );
        return(1);
      }
 
@@ -101,26 +101,26 @@
        const gchar   *error_type     = xmpp_stanza_get_attribute ( error, "type" );
        xmpp_stanza_t *condition      = xmpp_stanza_get_children ( error );
        const gchar   *condition_name = xmpp_stanza_get_name ( condition );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': From '%s' -> Stanza Error '%s'->'%s'",
+       Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "'%s': From '%s' -> Stanza Error '%s'->'%s'",
                  thread_tech_id, from, error_type, condition_name );
        return(1);
      }
 
     gchar *message    = xmpp_message_get_body ( stanza );
     if (!message)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': From '%s' -> Error: message is NULL", thread_tech_id, from );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "'%s': From '%s' -> Error: message is NULL", thread_tech_id, from );
        gchar *buf; size_t buflen;
        xmpp_stanza_to_text ( stanza, &buf, &buflen );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': From '%s' -> Received Stanza '%s'", thread_tech_id, from, buf );
+       Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "'%s': From '%s' -> Received Stanza '%s'", thread_tech_id, from, buf );
        xmpp_free(vars->ctx, buf);
        return(1);
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': From '%s' -> '%s'", thread_tech_id, from, message );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "'%s': From '%s' -> '%s'", thread_tech_id, from, message );
 
     JsonNode *RootNode = Json_create();
     if ( RootNode == NULL )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory Error for '%s'", thread_tech_id, from );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "%s: Memory Error for '%s'", thread_tech_id, from );
        goto end_message;
      }
 
@@ -134,18 +134,18 @@
     JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt_cde", RootNode );
     Json_unref ( RootNode );
     if (!UserNode || Json_get_int ( UserNode, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
        goto end_user;
      }
 
     if ( !Json_has_member ( UserNode, "email" ) )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR,
                 "%s: %s is not an known user. Dropping command '%s'...", thread_tech_id, from, message );
        goto end_user;
      }
 
     if ( !Json_has_member ( UserNode, "can_send_txt_cde" ) || Json_get_bool ( UserNode, "can_send_txt_cde" ) == FALSE )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_WARNING,
                 "%s: %s ('%s') is not allowed to send txt_cde. Dropping command '%s'...", thread_tech_id,
                 from, Json_get_string ( UserNode, "email" ), message );
        goto end_user;
@@ -158,7 +158,7 @@
 
     RootNode = Json_create();
     if ( RootNode == NULL )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: MapNode Error for '%s'", thread_tech_id, from );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "%s: MapNode Error for '%s'", thread_tech_id, from );
        goto end_user;
      }
     Json_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
@@ -167,12 +167,12 @@
     JsonNode *MapNode = Http_Post_to_global_API ( "/run/mapping/search_txt", RootNode );
     Json_unref ( RootNode );
     if (!MapNode || Json_get_int ( MapNode, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER '%s' from API for '%s'", thread_tech_id, from, message );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "%s: Could not get USER '%s' from API for '%s'", thread_tech_id, from, message );
        goto end_map;
      }
 
     if ( Json_has_member ( MapNode, "nbr_results" ) == FALSE )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Error searching Database for user '%s', '%s'", thread_tech_id, from, message );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "'%s': Error searching Database for user '%s', '%s'", thread_tech_id, from, message );
        Imsgs_Envoi_message_to( module, from,"Error searching Database .. Sorry .." );
        goto end_map;
      }
@@ -193,7 +193,7 @@
              gchar *tech_id         = Json_get_string ( element, "tech_id" );
              gchar *acronyme        = Json_get_string ( element, "acronyme" );
              gchar *libelle         = Json_get_string ( element, "libelle" );
-             Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': From '%s' map found for '%s' -> '%s:%s' - %s",
+             Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "'%s': From '%s' map found for '%s' -> '%s:%s' - %s",
                        thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
              Imsgs_Envoi_message_to ( module, from, thread_acronyme );                          /* Envoi des différents choix */
              results = g_list_next(results);
@@ -205,7 +205,7 @@
           gchar *tech_id         = Json_get_string ( element, "tech_id" );
           gchar *acronyme        = Json_get_string ( element, "acronyme" );
           gchar *libelle         = Json_get_string ( element, "libelle" );
-          Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': From '%s' map found for '%s' (%s)-> '%s:%s' - %s",
+          Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "'%s': From '%s' map found for '%s' (%s)-> '%s:%s' - %s",
                     thread_tech_id, from, Json_get_string( UserNode, "email" ), thread_acronyme, tech_id, acronyme, libelle );
           MQTT_Send_DI_pulse ( module, tech_id, acronyme );
           gchar chaine[256];
@@ -249,7 +249,7 @@ end_message:
 
     gchar *buf; size_t buflen;
     xmpp_stanza_to_text ( pres, &buf, &buflen );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': '%s'", thread_tech_id, buf );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "'%s': '%s'", thread_tech_id, buf );
     xmpp_free(vars->ctx, buf);
 
     xmpp_send(vars->conn, pres);
@@ -270,7 +270,7 @@ end_message:
 
     gchar *buf; size_t buflen;
     xmpp_stanza_to_text ( stanza, &buf, &buflen );
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': From '%s' -> Received Stanza '%s'", thread_tech_id, from, buf );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "'%s': From '%s' -> Received Stanza '%s'", thread_tech_id, from, buf );
     xmpp_free(vars->ctx, buf);
 
 
@@ -286,7 +286,7 @@ end_message:
        xmpp_stanza_set_type( pres, "subscribe" );
        xmpp_send(vars->conn, pres);
        xmpp_stanza_release(pres);
-       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Sending 'subscribe' to '%s'", thread_tech_id, from );
+       Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "'%s': Sending 'subscribe' to '%s'", thread_tech_id, from );
      }
 
     return(1);
@@ -301,7 +301,7 @@ end_message:
     struct IMSGS_VARS *vars = module->vars;
     if (status == XMPP_CONN_CONNECT)
      {
-       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s': Account connected and %s secure",
+       Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "%s: '%s': Account connected and %s secure",
                  __func__, Json_get_string ( module->config, "jabberid" ), (xmpp_conn_is_secured (conn) ? "IS" : "IS NOT") );
        xmpp_handler_add ( vars->conn, Imsgs_handle_message_CB,  NULL, "message",  NULL, module );
        xmpp_handler_add ( vars->conn, Imsgs_handle_presence_CB, NULL, "presence", NULL, module );
@@ -311,7 +311,7 @@ end_message:
        Imsgs_Envoi_message_to_all_available ( module, "Agent démarré. A l'écoute !" );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s': Account disconnected",
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "%s: '%s': Account disconnected",
                  __func__, Json_get_string ( module->config, "jabberid" ) );
        vars->signed_off = TRUE;
      }
@@ -330,7 +330,7 @@ end_message:
     MQTT_Subscribe ( module->MQTT_session, "SEND_IMSG" );
 
     if ( ! (thread_tech_id && jabber_id) )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "No thread_tech_id Or Jabber_id. Stopping." );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "No thread_tech_id Or Jabber_id. Stopping." );
        goto end;
      }
 
@@ -338,11 +338,11 @@ reconnect:
     vars->signed_off = FALSE;
     vars->ctx  = xmpp_ctx_new(NULL, xmpp_get_default_logger(XMPP_LEVEL_INFO));
     if (!vars->ctx)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Ctx Init failed" ); goto end; }
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "Ctx Init failed" ); goto end; }
 
     vars->conn = xmpp_conn_new(vars->ctx);
     if (!vars->conn)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Connection New failed" ); goto end; }
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "Connection New failed" ); goto end; }
 
     xmpp_conn_set_sockopt_callback(vars->conn, xmpp_sockopt_cb_keepalive);
     xmpp_conn_set_jid (vars->conn, jabber_id );
@@ -350,12 +350,12 @@ reconnect:
 
     gint retour = xmpp_connect_client ( vars->conn, NULL, 0, Imsgs_connexion_CB, module );
     if ( retour != XMPP_EOK)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR,
                   "'%s': Connexion failed with error %d", jabber_id, retour );
        vars->signed_off = TRUE;
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': Connexion in progress.", jabber_id );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "'%s': Connexion in progress.", jabber_id );
        Thread_send_comm_to_master ( module, TRUE );
      }
 
@@ -375,7 +375,7 @@ reconnect:
                  Json_has_member ( message, "tech_id" ) &&  Json_has_member ( message, "acronyme" ) &&
                  Json_has_member ( message, "libelle" )
                 )
-              { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Sending msg '%s:%s' (%s)", thread_tech_id,
+              { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "'%s': Sending msg '%s:%s' (%s)", thread_tech_id,
                           jabber_id,
                           Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
                           Json_get_string ( message, "libelle" ) );
@@ -392,19 +392,19 @@ reconnect:
 end:
     if (vars->conn)
      { xmpp_disconnect(vars->conn);
-       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': Disconnect OK", jabber_id );
+       Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG, "'%s': Disconnect OK", jabber_id );
        xmpp_conn_release(vars->conn);
-       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': Connection Release OK", jabber_id );
+       Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG, "'%s': Connection Release OK", jabber_id );
      }
     if (vars->ctx)
      { xmpp_ctx_free(vars->ctx);
-       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': Ctx Free OK", jabber_id );
+       Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG, "'%s': Ctx Free OK", jabber_id );
      }
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': XMPPshutdown OK", jabber_id );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG, "'%s': XMPPshutdown OK", jabber_id );
     Thread_send_comm_to_master ( module, FALSE );
 
     if (module->Thread_run == TRUE && vars->signed_off == TRUE)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Account signed off. Why ?? Reconnect in 2s!", jabber_id );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "'%s': Account signed off. Why ?? Reconnect in 2s!", jabber_id );
        vars->signed_off = FALSE;
        sleep(2);
        goto reconnect;

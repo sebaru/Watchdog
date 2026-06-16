@@ -42,7 +42,7 @@
 
     gint num = Json_get_int ( element, "num" );
     if (num >= vars->num_lines)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: num %d is out of range (>=%d)",
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "%s: num %d is out of range (>=%d)",
                  Json_get_string ( element, "thread_acronyme" ), num, vars->num_lines );
        return;
      }
@@ -50,13 +50,13 @@
     vars->lignes[num].element        = element;
     vars->lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
     vars->lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );
-    Info_new( __func__, module->Thread_debug, LOG_INFO,
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO,
               "Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d",
               num, vars->lignes[num].mode_inout, vars->lignes[num].mode_activelow );
 
     struct gpiod_line_settings *settings = gpiod_line_settings_new();
     if (!settings)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d: gpiod_line_settings_new error", num );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "GPIO%02d: gpiod_line_settings_new error", num );
        return;
      }
 
@@ -65,7 +65,7 @@
 
     struct gpiod_line_config *line_cfg = gpiod_line_config_new();
     if (!line_cfg)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d: gpiod_line_config_new error", num );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "GPIO%02d: gpiod_line_config_new error", num );
        return;
      }
 
@@ -75,7 +75,7 @@
        if (req_cfg) gpiod_request_config_set_consumer(req_cfg, "WATCHDOG GPIO Thread");
        vars->lignes[num].gpio_ligne = gpiod_chip_request_lines(vars->chip, req_cfg, line_cfg);
        if (!vars->lignes[num].gpio_ligne)
-        { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d: gpiod_chip_request_lines error", num );
+        { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "GPIO%02d: gpiod_chip_request_lines error", num );
           return;
         }
        if (req_cfg) gpiod_request_config_free(req_cfg);
@@ -104,32 +104,32 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     vars->chip = gpiod_chip_open("/dev/gpiochip0");
     if (!vars->chip)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error while loading chip 'gpiochip0'" );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "Error while loading chip 'gpiochip0'" );
        goto end;
      }
-    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Chip 'gpiochip0' loaded" );
+    else Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "Chip 'gpiochip0' loaded" );
 
     struct gpiod_chip_info *info = gpiod_chip_get_info(vars->chip);
     if (!info) goto end;
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s [%s] %d lines",
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "%s [%s] %d lines",
               gpiod_chip_info_get_name(info), gpiod_chip_info_get_label(info), gpiod_chip_info_get_num_lines(info) );
     vars->num_lines = gpiod_chip_info_get_num_lines(info);
     gpiod_chip_info_free(info);
 
     if (vars->num_lines > GPIOD_MAX_LINE) vars->num_lines = GPIOD_MAX_LINE;
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Found %d lines", vars->num_lines );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "Found %d lines", vars->num_lines );
 
     vars->lignes = g_try_malloc0 ( sizeof( struct GPIOD_LIGNE ) * vars->num_lines );
     if (!vars->lignes)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error while loading lignes" );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "Memory Error while loading lignes" );
        goto end;
      }
 
 /************************************** Chargement des IOs pour chaque tech_id de la classe **********************************/
     JsonArray *tech_ids_list = Json_get_array ( module->config, "tech_ids_list" );
     if (!tech_ids_list)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Missing tech_ids_list in config", thread_tech_id );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "'%s': Missing tech_ids_list in config", thread_tech_id );
        goto end;
      }
     GList *tech_id_configs = json_array_get_elements ( tech_ids_list );
@@ -176,7 +176,7 @@
              for (gint num=0; num<vars->num_lines; num++)
               { if ( vars->lignes[num].gpio_ligne &&
                      !strcasecmp ( Json_get_string( vars->lignes[num].element, "thread_acronyme"), msg_thread_acronyme ) )
-                 { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
+                 { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
                              msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
                    vars->lignes[num].etat = etat;
                    gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, etat );

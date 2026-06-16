@@ -29,6 +29,7 @@
  #define _SHELLY_H_
 
 /************************************************** Gestion des shelly ********************************************************/
+ #define THREAD_CLASSE "shelly"
  #define SHELLY_PRO_EM_50   "shellyproem50"
  #define SHELLY_PRO_3_EM    "shellypro3em"
 

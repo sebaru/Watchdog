@@ -3,8 +3,7 @@
 #* Projet Abls-Habitat version 4.7       Gestion d'habitat                  jeu 31 jui 2003 13:11:59 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-noinst_HEADERS    = Erreur.h \
-                    Config.h \
+noinst_HEADERS    = Config.h \
                     Json.h Thread.h \
                     watchdogd.h Dls.h \
                     Mqtt.h

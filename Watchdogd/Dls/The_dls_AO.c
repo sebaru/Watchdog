@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_AO *bit = g_try_malloc0 ( sizeof(struct DLS_AO) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info( __func__, "dls", LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -55,7 +55,7 @@
     bit->archivage = Json_get_int    ( element, "archivage" );
     bit->valeur    = Json_get_double ( element, "valeur" );
     plugin->Dls_data_AO = g_slist_prepend ( plugin->Dls_data_AO, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info( __func__, "dls", LOG_INFO,
               "Create bit DLS_AO '%s:%s'=%f %s (%s) archivage=%d",
                bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle, bit->archivage );
   }

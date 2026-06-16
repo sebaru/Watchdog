@@ -30,6 +30,8 @@
 
  #include <json-glib/json-glib.h>
 
+ #define THREAD_CLASSE "dmx"
+
  enum
   { DMX_Reprogram_Firmware_Request = 1,
     DMX_Program_Flash_Page_Request = 2,

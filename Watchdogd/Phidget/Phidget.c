@@ -45,7 +45,7 @@
     const gchar* errorString;
     gchar errorDetail[errorDetailLen];
     Phidget_getLastError(&errorCode, &errorString, errorDetail, &errorDetailLen);
-    Info_new( __func__, canal->module->Thread_debug, LOG_ERR, "Phidget Error %d for '%s' (%s) : %s - %s",
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_ERR, "Phidget Error %d for '%s' (%s) : %s - %s",
               errorCode, capteur, classe, errorString, errorDetail );
   }
 /******************************************************************************************************************************/
@@ -61,12 +61,12 @@
     gchar *classe          = Json_get_string(canal->element, "classe");
 
     if ( !strcmp ( classe, "AI" ) )
-     { Info_new( __func__, canal->module->Thread_debug, LOG_ERR, "Error for '%s:%s' : '%s' (code %X). Set in_range = FALSE.",
+     { Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_ERR, "Error for '%s:%s' : '%s' (code %X). Set in_range = FALSE.",
                  thread_tech_id, thread_acronyme, description, code );
        MQTT_Send_AI ( canal->module, canal->element, 0.0, FALSE );
      }
     else
-     { Info_new( __func__, canal->module->Thread_debug, LOG_ERR, "Error for '%s:%s' : '%s' (code %X).",
+     { Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_ERR, "Error for '%s:%s' : '%s' (code %X).",
                  thread_tech_id, thread_acronyme, description, code );
      }
   }
@@ -79,7 +79,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -91,7 +91,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -103,7 +103,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -116,7 +116,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -129,7 +129,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -141,7 +141,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, valeur );
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_DI ( canal->module, canal->element, (valeur ? TRUE : FALSE) );
   }
 /******************************************************************************************************************************/
@@ -153,7 +153,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f %s", thread_tech_id, thread_acronyme, valeur, sensorUnit->symbol );
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_DEBUG, "'%s:%s' = %f %s", thread_tech_id, thread_acronyme, valeur, sensorUnit->symbol );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -234,7 +234,7 @@
 
     if ( !strcmp ( classe, "AI" ) ) { Phidget_AnalogAttach ( canal ); }
 
-    Info_new( __func__, canal->module->Thread_debug, LOG_NOTICE,
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_NOTICE,
               "'%s:%s' Phidget S/N '%d' Port '%d' capteur '%s' (canal '%d') attached. %d channels available.",
               thread_tech_id, thread_acronyme, serial_number, port, capteur, num_canal, nbr_canaux );
 
@@ -257,7 +257,7 @@
     Phidget_getHubPort( handle, &port );
     Phidget_getChannel( handle, &num_canal );
 
-    Info_new( __func__, canal->module->Thread_debug, LOG_NOTICE,
+    Info_with_prefix( __func__, THREAD_CLASSE, canal->module->current_thread_tech_id, LOG_NOTICE,
               "'%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
               thread_tech_id, thread_acronyme, serial_number, port, classe, num_canal, nbr_canaux );
     canal->attached = FALSE;
@@ -300,11 +300,11 @@
     gchar *capteur = Json_get_string( element, "capteur" );
     gint port      = Json_get_int   ( element, "port" );
 
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Loading S/N %d, port '%d', capteur '%s'", serial, port, capteur );
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "Loading S/N %d, port '%d', capteur '%s'", serial, port, capteur );
 
     struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
     if (!canal)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "Memory Error on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
        return;
      }
 
@@ -400,7 +400,7 @@
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_INFO,
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO,
                  "capteur phidget inconnue on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
        goto error;
      }
@@ -450,12 +450,12 @@ error:
     gchar *msg_thread_acronyme = Json_get_string ( msg, "token_lvl2" );
 
     if (!msg_thread_tech_id)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque msg_thread_tech_id" );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "Requete mal formée manque msg_thread_tech_id" );
        return;
      }
 
     if (!msg_thread_acronyme)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque msg_thread_acronyme" );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "Requete mal formée manque msg_thread_acronyme" );
        return;
      }
 
@@ -474,17 +474,17 @@ error:
     else { is_for_us = !strcasecmp ( msg_thread_tech_id, thread_tech_id ); }
 
     if (!is_for_us)
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Pas pour nous" );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_DEBUG, "Pas pour nous" );
        return;
      }
 
     if (!Json_has_member ( msg, "etat" ))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque etat" );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "Requete mal formée manque etat" );
        return;
      }
 
     gboolean etat = Json_get_bool ( msg, "etat" );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'=%d",
+    Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_NOTICE, "SET_DO '%s:%s'=%d",
               msg_thread_tech_id, msg_thread_acronyme, etat );
 
     GSList *liste = vars->Liste_sensors;
@@ -516,7 +516,7 @@ error:
 /************************************** Connexion et chargement des IOs pour chaque tech_id de la classe *********************/
     JsonArray *tech_ids_list = Json_get_array ( module->config, "tech_ids_list" );
     if (!tech_ids_list)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Missing tech_ids_list in config", thread_tech_id );
+     { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "'%s': Missing tech_ids_list in config", thread_tech_id );
        goto connect_failed;
      }
 
@@ -528,7 +528,7 @@ error:
        gchar *hostname    = Json_get_string ( sub_config, "hostname" );
        gchar *description = Json_get_string ( sub_config, "description" );
 
-       Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': Loading phidget '%s' (%s)",
+       Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO, "'%s': Loading phidget '%s' (%s)",
                  sub_tech_id, hostname, description );
 
        PhidgetReturnCode result = PhidgetNet_addServer( hostname, hostname, 5661,
@@ -536,10 +536,11 @@ error:
        if (result != EPHIDGET_OK)
         { const gchar *error;
           Phidget_getErrorDescription ( result, &error );
-          Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': PhidgetNet_addServer failed: '%s'", sub_tech_id, error );
+          Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_ERR, "'%s': PhidgetNet_addServer failed: '%s'", sub_tech_id, error );
         }
        else
-        { Info_new ( __func__, module->Thread_debug, LOG_INFO, "'%s': PhidgetNet_addServer '%s' success", sub_tech_id, hostname );
+        { Info_with_prefix( __func__, THREAD_CLASSE, module->current_thread_tech_id, LOG_INFO,
+                "'%s': PhidgetNet_addServer '%s' success", sub_tech_id, hostname );
           JsonNode *RootNode = Json_create ();                                               /* Envoi de la conf a l'API */
           if (RootNode)
            { Json_add_string ( RootNode, "thread_tech_id", sub_tech_id );

@@ -36,7 +36,6 @@
  #include <abls-libs/abls-libs.h>
 
 /*---------------------------------------------------- dépendances -----------------------------------------------------------*/
- #include "Erreur.h"
  #include "Dls.h"
  #include "Thread.h"
  #include "Config.h"

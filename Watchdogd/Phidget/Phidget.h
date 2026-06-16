@@ -30,6 +30,8 @@
  #include <phidget22.h>
  #include "watchdogd.h"
 
+ #define THREAD_CLASSE "phidget"
+
  struct PHIDGET_VARS                                                                 /* Communication entre DLS et la Phidget */
   { GSList *Liste_sensors; /* List of Phidget Elements */
   };

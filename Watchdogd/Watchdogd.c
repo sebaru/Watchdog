@@ -323,7 +323,7 @@
     umask(022);                                                                              /* Masque de creation de fichier */
 
     Lire_config( argc, argv );                                         /* Lecture sur le fichier /etc/abls-habitat-agent.conf */
-    Info_init( LOG_INFO );                                               /* Init msgs d'erreurs, par défaut, en mode LOG_INFO */
+    Info_init( "W-Agent", "perimetre", LOG_INFO );                       /* Init msgs d'erreurs, par défaut, en mode LOG_INFO */
     Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Start %s, branche '%s'", WTD_VERSION, WTD_BRANCHE );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config domain_uuid: %s", Json_get_string ( Config.config, "domain_uuid" ) );
     Info_new( __func__, Config.log_msrv, LOG_INFO, "Config agent_uuid : %s", Json_get_string ( Config.config, "agent_uuid" ) );

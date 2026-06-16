@@ -30,6 +30,8 @@
 
  #include <json-glib/json-glib.h>
 
+ #define THREAD_CLASSE "radio"
+
  struct RADIO_VARS
   { gchar radio_en_cours;
     gint  radio_pid;
