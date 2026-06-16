@@ -54,8 +54,8 @@
 /******************************************************************************************************************************/
  static void Thread_update_current_context ( struct THREAD *module )
   { module->config = Json_array_get_element_at ( module->config_all, "thread_tech_ids", module->current_thread_tech_id_index );
-    module->current_thread_tech_id = NULL;
-    if (module->config) module->current_thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    module->vars = g_slist_nth_data ( module->vars_all, module->current_thread_tech_id_index );
+    module->current_thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
   }
 
 /******************************************************************************************************************************/
@@ -236,8 +236,7 @@
   { struct THREAD *module = obj;
     gchar *thread_tech_id = module->current_thread_tech_id;
     Info_with_prefix( __func__, "mqtt", thread_tech_id, LOG_NOTICE,
-                      "'%s': Disconnected with return code %d: %s. Retry in %ds.",
-     }
+                      "'%s': Disconnected with return code %d: %s. Retry in %ds.", thread_tech_id, return_code, mosquitto_connack_string(return_code), THREAD_MQTT_RECONNECT_DELAY );
     module->MQTT_connected = FALSE;
     module->MQTT_next_top_connect = Partage->top + THREAD_MQTT_RECONNECT_DELAY;
   }
@@ -251,14 +250,20 @@
     module->vars_all = g_slist_remove ( module->vars_all, vars );
   }
 
- static gboolean Thread_add_one_slot ( struct THREAD *module, gint sizeof_vars )
-  { gpointer vars = g_try_malloc0 ( sizeof_vars );
+/******************************************************************************************************************************/
+/* Thread_Start_one_tech_id: appelé pour démarrer un tech_id dans le thread                                                   */
+/* Entrée: La structure afférente, l'index a demarrer                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Thread_Start_one_tech_id ( struct THREAD *module, guint index )
+  { JsonNode *thread_tech_idNode = Json_array_get_element_at ( module->config_all, "thread_tech_ids", index );
+    gchar *thread_tech_id = Json_get_string ( thread_tech_idNode, "thread_tech_id" );
+    Info_with_prefix( __func__, "msrv", thread_tech_id, LOG_INFO, "Adding memory slot for thread '%s'", thread_tech_id );
+#warnning a passer avec hash ? ou en vars{10]}
+    gpointer vars = g_try_malloc0 ( sizeof_vars );
     if (!vars) 
-     { Info_with_prefix( __func__, "msrv", module->current_thread_tech_id, LOG_ERR, "Memory error for one new slot." );
-       return(FALSE);
-     }
-    module->vars_all = g_slist_append ( module->vars_all, vars );
-    return(TRUE);
+     { Info_with_prefix( __func__, "msrv", module->current_thread_tech_id, LOG_ERR, "Memory error for one new slot." ); }
+    else module->vars_all = g_slist_append ( module->vars_all, vars );
   }
 /******************************************************************************************************************************/
 /* Thread_init: appelé par chaque thread, lors de son démarrage                                                               */
@@ -276,48 +281,35 @@
     prctl(PR_SET_NAME, upper_name, 0, 0, 0 );
     g_free(upper_name);
 
-    xxx set_slot
-
     module->current_thread_tech_id_index = 0;
-    gchar *thread_tech_id = module->current_thread_tech_id;
-
-    if (sizeof_vars)
-     { for ( gint i = 0; i<Json_array_get_length ( module->config_all, "thread_tech_ids" ); i++ )
-      { JsonNode *thread_tech_idNode = Json_array_get_element_at ( module->config_all, "thread_tech_ids", i );
-          gchar *thread_tech_id = Json_get_string ( thread_tech_idNode, "thread_tech_id" );
-          Info_with_prefix( __func__, "msrv", thread_tech_id, LOG_INFO, "Adding memory slot for thread '%s'", thread_tech_id );
-          if (Thread_add_one_slot ( module, sizeof_vars ) == FALSE)
-           { Info_with_prefix( __func__, "msrv", thread_tech_id, LOG_ERR, "Adding memory slot error for thread '%s'", thread_tech_id );
-
-             Thread_end ( module );                                 /* Pas besoin de return : Thread_end fait un pthread_exit */
-           }
-        }
-       module->vars = g_slist_nth_data ( module->vars_all, module->current_thread_tech_id_index );
-     }
+    module->sizeof_vars = sizeof_vars;
+    for ( gint i = 0; i<Json_array_get_length ( module->config_all, "thread_tech_ids" ); i++ )
+     { Thread_Start_one_tech_id ( module, i ); }
+    Thread_update_current_context ( module );
 
 /* ----------------------------------------------------- Ecoute du MQTT local------------------------------------------------ */
-    module->MQTT_session = mosquitto_new( thread_tech_id, TRUE, module );
+    module->MQTT_session = mosquitto_new( thread_classe, TRUE, module );
     if (!module->MQTT_session)
-    { Info_with_prefix( __func__, "mqtt", thread_tech_id, LOG_ERR, "'%s': MQTT session error.", thread_tech_id );
-    }
+     { Info_with_prefix( __func__, "mqtt", thread_classe, LOG_ERR, "'%s': MQTT session error.", thread_classe ); }
     else
      { mosquitto_message_callback_set    ( module->MQTT_session, Thread_MQTT_on_message_CB );
        /*mosquitto_reconnect_delay_set     ( module->MQTT_session, 10, 60, TRUE );*/
        mosquitto_log_callback_set        ( module->MQTT_session, MQTT_on_log_CB );
        mosquitto_connect_callback_set    ( module->MQTT_session, Thread_MQTT_on_connect_CB );
        mosquitto_disconnect_callback_set ( module->MQTT_session, Thread_MQTT_on_disconnect_CB );
-       mosquitto_username_pw_set         ( module->MQTT_session, thread_tech_id, NULL );
+       mosquitto_username_pw_set         ( module->MQTT_session, thread_classe, NULL );
+#warning ajouter thread_uuid
 
        if ( mosquitto_connect( module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
-        { Info_with_prefix( __func__, "mqtt", thread_tech_id, LOG_ERR,
+        { Info_with_prefix( __func__, "mqtt", thread_classe, LOG_ERR,
                        "'%s': MQTT connection to '%s' error. Retry in %ds.",
-                       thread_tech_id, Config.master_hostname, THREAD_MQTT_RECONNECT_DELAY/10 );
+                       thread_classe, Config.master_hostname, THREAD_MQTT_RECONNECT_DELAY/10 );
           module->MQTT_next_top_connect = Partage->top + THREAD_MQTT_RECONNECT_DELAY;
         }
      }
 
     if ( mosquitto_loop_start( module->MQTT_session ) != MOSQ_ERR_SUCCESS )
-      { Info_with_prefix( __func__, "mqtt", thread_tech_id, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id );
+      { Info_with_prefix( __func__, "mqtt", thread_classe, LOG_ERR, "'%s': MQTT loop not started.", thread_classe );
       }
 
 /* ------------------------------------------- Création du plugin dans l'api ------------------------------------------------ */
@@ -553,7 +545,7 @@
     if (Json_get_int ( api_result, "http_code" ) != 200)
      { Info( __func__, "msrv", LOG_ERR, "%s: API Error for /run/thread LOAD: http_code=%d",__func__, Json_get_int ( api_result, "http_code" ) ); }
     else
-     { Json_to_log ( api_result, "API /run/thread/load result" );                                  /* Print API result to log */
+     { Json_to_log ( "API /run/thread/load result", "config", api_result );                        /* Print API result to log */
        Json_foreach_array_element ( api_result, "threads", Thread_Start_one_thread_classe_by_array, NULL );
      }
     Json_unref(api_result);

@@ -47,11 +47,11 @@
        Partage->Liste_visuel = g_slist_remove ( Partage->Liste_visuel, visuel );
        pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
 
-       Info_new( __func__, Config.log_msrv, LOG_DEBUG,
-                "Send VISUEL %s:%s mode=%s, color=%s, valeur='%f', cligno=%d, noshow=%d, libelle='%s', disable=%d",
-                 visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->valeur, visuel->cligno, visuel->noshow,
-                 visuel->libelle, visuel->disable
-               );
+       Info( __func__, "visuel", LOG_DEBUG,
+             "Send VISUEL %s:%s mode=%s, color=%s, valeur='%f', cligno=%d, noshow=%d, libelle='%s', disable=%d",
+              visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->valeur, visuel->cligno, visuel->noshow,
+              visuel->libelle, visuel->disable
+            );
        Dls_VISUEL_to_json ( element, visuel );
        MQTT_Send_to_API ( element, "DLS_VISUEL" );
        cpt++;

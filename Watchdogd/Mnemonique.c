@@ -52,7 +52,7 @@
     Json_add_int    ( node, "archivage", archivage );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/ai", node );
     if (!api_result || Json_get_int ( api_result, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, "dls", module->current_thread_tech_id, LOG_ERR,
                  "%s: Could not add AI %s to API", thread_tech_id, thread_acronyme );
      }
     Json_unref ( api_result );
@@ -76,7 +76,7 @@
     Json_add_string ( node, "libelle", libelle );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/di", node );
     if (!api_result || Json_get_int ( api_result, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, "dls", module->current_thread_tech_id, LOG_ERR,
                  "%s: Could not add DI %s to API", thread_tech_id, thread_acronyme );
      }
     Json_unref ( api_result );
@@ -101,7 +101,7 @@
     Json_add_int    ( node, "archivage", archivage );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/ci", node );
     if (!api_result || Json_get_int ( api_result, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, "dls", module->current_thread_tech_id, LOG_ERR,
                  "%s: Could not add CI %s to API", thread_tech_id, thread_acronyme );
      }
     Json_unref ( api_result );
@@ -124,7 +124,7 @@
     Json_add_bool   ( node, "mono", mono );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/do", node );
     if (!api_result || Json_get_int ( api_result, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, "dls", module->current_thread_tech_id, LOG_ERR,
                  "%s: Could not add DO %s to API", thread_tech_id, thread_acronyme );
      }
     Json_unref ( api_result );
@@ -148,7 +148,7 @@
     Json_add_int    ( node, "archivage", archivage );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/ao", node );
     if (!api_result || Json_get_int ( api_result, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, "dls", module->current_thread_tech_id, LOG_ERR,
                  "%s: Could not add AO %s to API", thread_tech_id, thread_acronyme );
      }
     Json_unref ( api_result );
@@ -170,7 +170,7 @@
     Json_add_string ( node, "libelle", libelle );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/add", node );
     if (!api_result || Json_get_int ( api_result, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, "dls", module->current_thread_tech_id, LOG_ERR,
                  "%s: Could not add HORLOGE %s to API", tech_id, acronyme );
      }
     Json_unref ( api_result );
@@ -192,7 +192,7 @@
     Json_add_int    ( node, "minute", minute );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/add/tick", node );
     if (!api_result || Json_get_int ( api_result, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, "dls", module->current_thread_tech_id, LOG_ERR,
                  "%s: Could not add HORLOGE tick %s:%d:%d to API",
                  Json_get_string ( bit, "tech_id" ), Json_get_string ( bit, "acronyme" ), heure, minute );
      }
@@ -209,7 +209,7 @@
     Json_add_string ( bit, "classe", "HORLOGE" );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/horloge/del/tick", bit );
     if (!api_result || Json_get_int ( api_result, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, "dls", module->current_thread_tech_id, LOG_ERR,
                  "%s: Could not DEL HORLOGE tick for '%s'",
                  Json_get_string ( bit, "tech_id" ), Json_get_string ( bit, "acronyme" ) );
      }
@@ -230,7 +230,7 @@
     Json_add_string ( node, "libelle", libelle );
     JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/add/watchdog", node );
     if (!api_result || Json_get_int ( api_result, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info_with_prefix( __func__, "dls", module->current_thread_tech_id, LOG_ERR,
                  "%s: Could not add WATCHDOG %s to API", thread_tech_id, thread_acronyme );
      }
     Json_unref ( api_result );

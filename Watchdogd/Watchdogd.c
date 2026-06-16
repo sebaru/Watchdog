@@ -67,7 +67,7 @@
      }
 
     prctl(PR_GET_NAME, chaine, 0, 0, 0 );
-    Info_with_prefix( __func__, "msrv", LOG_INFO, "handled by %s", chaine );
+    Info( __func__, "msrv", LOG_INFO, "handled by %s", chaine );
 
     switch (num)
      { case SIGQUIT:
@@ -371,8 +371,6 @@
         }
 
        Config.headless           = Json_get_bool ( api_result, "headless" );
-       Config.log_bus            = Json_get_bool ( api_result, "log_bus" );
-       Config.log_msrv           = Json_get_bool ( api_result, "log_msrv" );
        Config.instance_is_master = Json_get_bool ( api_result, "is_master" );
        gchar *master_hostname    = Json_get_string ( api_result, "master_hostname" );
        if (master_hostname) g_snprintf( Config.master_hostname, sizeof(Config.master_hostname), "%s", master_hostname );

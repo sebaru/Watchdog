@@ -139,15 +139,13 @@
            { Info_with_prefix( __func__, "mqtt", "api", LOG_ERR, "AGENT_SET: wrong parameters" );
              goto end;
            }
-          Config.log_bus    = Json_get_bool ( request, "log_bus" );
-          Config.log_msrv   = Json_get_bool ( request, "log_msrv" );
-          Config.log_dls    = Json_get_bool ( request, "log_dls" );
+#warning ajouter les debug facility depuis APO
           gboolean headless = Json_get_bool ( request, "headless" );
           gint log_level    = Json_get_int  ( request, "log_level" );
           gchar *branche    = Json_get_string ( request, "branche" );
           Info_change_log_level ( log_level );
-          Info_with_prefix( __func__, "mqtt", "api", LOG_NOTICE, "AGENT_SET: log_msrv=%d, log_bus=%d, log_dls=%d, log_level=%d, headless=%d",
-                    Config.log_msrv, Config.log_bus, Config.log_dls, log_level, headless );
+          Info_with_prefix( __func__, "mqtt", "api", LOG_NOTICE, "AGENT_SET: log_level=%d, headless=%d",
+                            log_level, headless );
           if (Config.headless != headless)
            { Info_with_prefix( __func__, "mqtt", "api", LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
              Partage->Thread_run = FALSE;
