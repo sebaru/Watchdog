@@ -35,7 +35,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MQTT_local_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Connected with return code %d: %s",
+  { Info_with_prefix( __func__, "mqtt", "local", LOG_NOTICE, "Connected with return code %d: %s",
               return_code, mosquitto_connack_string( return_code ) );
     if (return_code == 0)
      { if (Config.instance_is_master)
@@ -54,7 +54,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MQTT_local_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_bus, LOG_NOTICE, "Disconnected with return code %d: %s",
+  { Info_with_prefix( __func__, "mqtt", "local", LOG_NOTICE, "Disconnected with return code %d: %s",
               return_code, mosquitto_connack_string( return_code ) );
   }
 /******************************************************************************************************************************/
@@ -64,13 +64,13 @@
 /******************************************************************************************************************************/
  static void MQTT_local_on_message_CB ( struct mosquitto *MQTT_session, void *obj, const struct mosquitto_message *msg )
   { gchar **tokens = g_strsplit ( msg->topic, "/", 3 );
-    if (!tokens)    { Info_new( __func__, Config.log_bus, LOG_ERR, "Tokens is null" ); return; }
-    if (!tokens[0]) { Info_new( __func__, Config.log_bus, LOG_ERR, "Token[0] is null" ); goto end; }
-    if (!tokens[1]) { Info_new( __func__, Config.log_bus, LOG_ERR, "Token[1] is null" ); goto end; }
+    if (!tokens)    { Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "Tokens is null" ); return; }
+    if (!tokens[0]) { Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "Token[0] is null" ); goto end; }
+    if (!tokens[1]) { Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "Token[1] is null" ); goto end; }
 
     JsonNode *request = Json_get_from_string ( msg->payload );
     if (!request)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "MQTT Message from LOCAL dropped: not JSON or no payload" );
+     { Info_with_prefix( __func__, "mqtt", "local", LOG_WARNING, "MQTT Message from LOCAL dropped: not JSON or no payload" );
        goto end;
      }
 
@@ -97,31 +97,31 @@
      { if (!tokens[2]) goto end; /* L'acronyme */
        gchar *from_thread_tech_id = Json_get_string ( request, "from_thread_tech_id" );
        if (from_thread_tech_id)
-        { Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI_PULSE from '%s': '%s:%s'=PULSE",
+        { Info_with_prefix( __func__, "mqtt", "local", LOG_INFO, "SET_DI_PULSE from '%s': '%s:%s'=PULSE",
                     from_thread_tech_id, tokens[1], tokens[2] );
           struct DLS_DI *bit = Dls_data_DI_lookup ( tokens[1], tokens[2] );
           Dls_data_DI_set_pulse ( NULL, bit );
-        } else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_DI_PULSE: 'from_thread_tech_id' is missing" );
+        } else Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "SET_DI_PULSE: 'from_thread_tech_id' is missing" );
      }
     else if ( !strcmp ( topic, "SET_CI_PULSE" ) )
      { if (!tokens[2]) goto end; /* L'acronyme */
        gchar *from_thread_tech_id = Json_get_string ( request, "from_thread_tech_id" );
        if (from_thread_tech_id)
-        { Info_new( __func__, Config.log_bus, LOG_INFO, "SET_CI_PULSE from '%s': '%s:%s'=PULSE",
+        { Info_with_prefix( __func__, "mqtt", "local", LOG_INFO, "SET_CI_PULSE from '%s': '%s:%s'=PULSE",
                     from_thread_tech_id, tokens[1], tokens[2] );
           struct DLS_CI *bit = Dls_data_CI_lookup ( tokens[1], tokens[2] );
           Dls_data_CI_set_pulse ( NULL, bit );
-        } else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_CI_PULSE: 'from_thread_tech_id' is missing" );
+        } else Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "SET_CI_PULSE: 'from_thread_tech_id' is missing" );
      }
     else if ( !strcmp ( topic, "SET_BUS" ) )
      { gchar *commande = Json_get_string ( request, "commande" );
        if (commande)
-        { Info_new( __func__, Config.log_bus, LOG_NOTICE, "SET_BUS: Executing '%s'", commande );
+        { Info_with_prefix( __func__, "mqtt", "local", LOG_NOTICE, "SET_BUS: Executing '%s'", commande );
           system( commande );
         }
-       else Info_new( __func__, Config.log_bus, LOG_ERR, "SET_BUS: 'commande' is missing" );
+       else Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "SET_BUS: 'commande' is missing" );
      }
-    else Info_new( __func__, Config.log_bus, LOG_ERR, "tag inconnu: %s sur topic %s", topic, msg->topic );
+    else Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "tag inconnu: %s sur topic %s", topic, msg->topic );
     Json_unref ( request );
 
 end:
@@ -138,7 +138,7 @@ end:
 
     Partage->MQTT_local_session = mosquitto_new( agent_uuid, TRUE, NULL );
     if (!Partage->MQTT_local_session)
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local session error." ); return(FALSE); }
+     { Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "MQTT_local session error." ); return(FALSE); }
 
     mosquitto_log_callback_set        ( Partage->MQTT_local_session, MQTT_on_log_CB );
     mosquitto_connect_callback_set    ( Partage->MQTT_local_session, MQTT_local_on_connect_CB );
@@ -151,18 +151,18 @@ end:
 
     retour = mosquitto_connect( Partage->MQTT_local_session, Config.master_hostname, 1883, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local connection to '%s:1883' error: %s",
+     { Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "MQTT_local connection to '%s:1883' error: %s",
                  Config.master_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
      }
 
     retour = mosquitto_loop_start( Partage->MQTT_local_session );
     if ( retour != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "MQTT_local loop not started: %s", mosquitto_strerror ( retour ) );
+     { Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "MQTT_local loop not started: %s", mosquitto_strerror ( retour ) );
        return(FALSE);
      }
 
-    Info_new( __func__, Config.log_bus, LOG_NOTICE, "MQTT_local loop started" );
+    Info_with_prefix( __func__, "mqtt", "local", LOG_NOTICE, "MQTT_local loop started" );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -190,7 +190,7 @@ end:
     va_end ( ap );
     gchar *topic = g_try_malloc(taille+1);
     if (!topic)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Memory Error for '%s'", format );
+     { Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "Memory Error for '%s'", format );
        return;
      }
 
@@ -204,7 +204,7 @@ end:
     if (buffer)
      { gint retour = mosquitto_publish( mqtt_session, NULL, topic, strlen(buffer), buffer, 2, retain );
        if (retour != MOSQ_ERR_SUCCESS)
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "Error when publishing '%s'", mosquitto_strerror ( retour ) ); }
+        { Info_with_prefix( __func__, "mqtt", "local", LOG_ERR, "Error when publishing '%s'", mosquitto_strerror ( retour ) ); }
        g_free(buffer);
      }
     if (free_node) Json_unref(node);

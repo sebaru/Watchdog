@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_AO *bit = g_try_malloc0 ( sizeof(struct DLS_AO) );
     if (!bit)
-     { Info( __func__, "dls", LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_with_prefix( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -55,7 +55,7 @@
     bit->archivage = Json_get_int    ( element, "archivage" );
     bit->valeur    = Json_get_double ( element, "valeur" );
     plugin->Dls_data_AO = g_slist_prepend ( plugin->Dls_data_AO, bit );
-    Info( __func__, "dls", LOG_INFO,
+    Info_with_prefix( __func__, "dls", bit->tech_id, LOG_INFO,
               "Create bit DLS_AO '%s:%s'=%f %s (%s) archivage=%d",
                bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle, bit->archivage );
   }
@@ -96,7 +96,7 @@
   { if (!bit) return;
     if (bit->valeur == valeur) return;
     bit->valeur = valeur;                                                           /* Archive au mieux toutes les 5 secondes */
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info_with_prefix( __func__, "dls", bit->tech_id, LOG_DEBUG,
               "ligne %04d: Changing DLS_AO '%s:%s'=%f %s",
               (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
     JsonNode *RootNode = Json_create ();
@@ -106,7 +106,7 @@
        Partage->Liste_AO = g_slist_append( Partage->Liste_AO, RootNode );
        pthread_rwlock_unlock( &Partage->Liste_AO_synchro );
      }
-    else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+    else Info_with_prefix( __func__, "dls", bit->tech_id, LOG_ERR, "JSon RootNode creation failed" );
     Partage->audit_bit_interne_per_sec++;
     Dls_AO_export_to_API ( bit );                                                                            /* envoi a l'API */
   }

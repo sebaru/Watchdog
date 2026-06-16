@@ -34,15 +34,15 @@
 /******************************************************************************************************************************/
  void Dls_Save_Data_to_API ( struct DLS_PLUGIN *plugin )
   { if (!plugin)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data: plugin is NULL." ); return; }
+     { Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_ERR, "Error when saving dls_data: plugin is NULL." ); return; }
     if (Config.instance_is_master == FALSE)                                        /* Seul le master sauvegarde les compteurs */
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data: instance is not Master." ); return; }
+     { Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_ERR, "Error when saving dls_data: instance is not Master." ); return; }
 
     gint top = Partage->top;
 
     JsonNode *RootNode = Json_create();
     if (!RootNode)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving dls_data to API." ); return; }
+     { Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_ERR, "Error when saving dls_data to API." ); return; }
 
     JsonArray *BIArray = Json_add_array ( RootNode, "mnemos_BI" );
     Dls_all_BI_to_json ( BIArray, plugin );
@@ -82,28 +82,28 @@
 
     JsonNode *api_result = Http_Post_to_global_API ( "/run/mnemos/save", RootNode );
     if (api_result && Json_get_int ( api_result, "http_code" ) == 200)
-     { Info_new( __func__, Config.log_dls, LOG_DEBUG,
-                 "'%s': Save %d BI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_BI" ) );
-       Info_new( __func__, Config.log_dls, LOG_DEBUG,
-                 "'%s': Save %d MONO to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_MONO" ) );
-       Info_new( __func__, Config.log_dls, LOG_DEBUG,
-                 "'%s': Save %d REGISTRE to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_REGISTRE" ) );
-       Info_new( __func__, Config.log_dls, LOG_DEBUG,
-                 "'%s': Save %d DI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_DI" ) );
-       Info_new( __func__, Config.log_dls, LOG_DEBUG,
-                 "'%s': Save %d DO to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_DO" ) );
-       Info_new( __func__, Config.log_dls, LOG_DEBUG,
-                 "'%s': Save %d AI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_AI" ) );
-       Info_new( __func__, Config.log_dls, LOG_DEBUG,
-                 "'%s': Save %d AO to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_AO" ) );
-       Info_new( __func__, Config.log_dls, LOG_DEBUG,
-                 "'%s': Save %d CI to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_CI" ) );
-       Info_new( __func__, Config.log_dls, LOG_DEBUG,
-                 "'%s': Save %d CH to API.", plugin->tech_id, Json_get_int ( RootNode, "nbr_mnemos_CH" ) );
-       Info_new( __func__, Config.log_dls, LOG_NOTICE, "Saved '%s' DLS_DATA in %06.1fs", plugin->tech_id, (Partage->top-top)/10.0 );
+     { Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                 "Save %d BI to API.", Json_get_int ( RootNode, "nbr_mnemos_BI" ) );
+       Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                 "Save %d MONO to API.", Json_get_int ( RootNode, "nbr_mnemos_MONO" ) );
+       Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                 "Save %d REGISTRE to API.", Json_get_int ( RootNode, "nbr_mnemos_REGISTRE" ) );
+       Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                 "Save %d DI to API.", Json_get_int ( RootNode, "nbr_mnemos_DI" ) );
+       Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                 "Save %d DO to API.", Json_get_int ( RootNode, "nbr_mnemos_DO" ) );
+       Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                 "Save %d AI to API.", Json_get_int ( RootNode, "nbr_mnemos_AI" ) );
+       Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                 "Save %d AO to API.", Json_get_int ( RootNode, "nbr_mnemos_AO" ) );
+       Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                 "Save %d CI to API.", Json_get_int ( RootNode, "nbr_mnemos_CI" ) );
+       Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                 "Save %d CH to API.", Json_get_int ( RootNode, "nbr_mnemos_CH" ) );
+       Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_NOTICE, "Saved DLS_DATA in %06.1fs", (Partage->top-top)/10.0 );
      }
     else
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Error when saving '%s' dls_data to API.", plugin->tech_id ); }
+     { Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_ERR, "Error when saving dls_data to API." ); }
     Json_unref ( api_result );
     Json_unref ( RootNode );
   }

@@ -46,7 +46,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_REGISTRE *bit = g_try_malloc0 ( sizeof(struct DLS_REGISTRE) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_with_prefix( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -56,7 +56,7 @@
     bit->valeur    = Json_get_double ( element, "valeur" );
     bit->archivage = Json_get_int    ( element, "archivage" );
     plugin->Dls_data_REGISTRE = g_slist_prepend ( plugin->Dls_data_REGISTRE, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info_with_prefix( __func__, "dls", tech_id, LOG_INFO,
               "Create bit DLS_REGISTRE '%s:%s'=%f (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -90,7 +90,7 @@
     if (valeur != registre->valeur)
      { registre->valeur = valeur;
        if (vars && vars->debug) Dls_REGISTRE_export_to_API ( registre );
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+       Info_with_prefix( __func__, "dls", registre->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_REGISTRE '%s:%s'=%f",
                  (vars ? vars->num_ligne : -1), registre->tech_id, registre->acronyme, registre->valeur );
        Partage->audit_bit_interne_per_sec++;

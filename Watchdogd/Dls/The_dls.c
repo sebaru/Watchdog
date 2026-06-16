@@ -58,7 +58,7 @@
  static void Set_cde_exterieure ( void )
   { while( Partage->com_dls.Set_Dls_Data )                                                  /* A-t-on une entrée a allumer ?? */
      { struct DLS_DI *di = Partage->com_dls.Set_Dls_Data->data;
-       Info_new( __func__, Config.log_dls, LOG_NOTICE, "%s: Mise a 1 du bit DI %s:%s",
+       Info_with_prefix( __func__, "dls", di->tech_id, LOG_NOTICE, "%s: Mise a 1 du bit DI %s:%s",
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, di );
        Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, di );
@@ -73,7 +73,7 @@
  static void Reset_cde_exterieure ( void )
   { while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { struct DLS_DI *di = Partage->com_dls.Reset_Dls_Data->data;
-       Info_new( __func__, Config.log_dls, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
+       Info_with_prefix( __func__, "dls", di->tech_id, LOG_DEBUG, "%s: Mise a 0 du bit DI %s:%s",
                  __func__, di->tech_id, di->acronyme );
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, di );
        Dls_data_DI_set ( di, FALSE );                                                          /* Mise a zero du bit d'entrée */
@@ -205,7 +205,7 @@
 
          if (result > outputmax->valeur ) result = outputmax->valeur;
     else if (result < outputmin->valeur ) result = outputmin->valeur;
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info_with_prefix( __func__, "dls", input->tech_id, LOG_DEBUG,
               "ligne %04d: Changing DLS_PID for '%s:%s'=> '%s:%s'=%f. Somme_Erreur = %f, Variation_Erreur = %f",
               (vars ? vars->num_ligne : -1),
               input->tech_id, input->acronyme,
@@ -231,7 +231,7 @@
           Partage->Liste_DO = g_slist_append ( Partage->Liste_DO, RootNode );
           pthread_rwlock_unlock ( &Partage->Liste_DO_synchro );
         }
-       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+       else Info_with_prefix( __func__, "dls", bit->tech_id, LOG_ERR, "JSon RootNode creation failed" );
        liste = g_slist_next ( liste );
      }
 
@@ -245,7 +245,7 @@
           Partage->Liste_AO = g_slist_append ( Partage->Liste_AO, RootNode );
           pthread_rwlock_unlock ( &Partage->Liste_AO_synchro );
         }
-       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+       else Info_with_prefix( __func__, "dls", bit->tech_id, LOG_ERR, "JSon RootNode creation failed" );
        liste = g_slist_next ( liste );
      }
   }
@@ -298,7 +298,7 @@
     gettimeofday( &tv_avant, NULL );
     if (plugin->enable && plugin->go)                                                  /* Si plugin enabled ET fonction go ok */
      { if(plugin->vars.resetted)
-        { Info_new( __func__, Config.log_dls, LOG_INFO, "Send '_START' to '%s'", plugin->tech_id ); }
+        { Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_INFO, "Send '_START' to '%s'", plugin->tech_id ); }
        plugin->go( &plugin->vars );                                                                     /* On appel le plugin */
      }
     Dls_data_MESSAGE_apply ( plugin );                                             /* Application des nouveaux etats messages */
@@ -316,7 +316,7 @@
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     g_mkdir ( "Dls", 0700 );
-    Info_new( __func__, Config.log_dls, LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
+    Info( __func__, "dls", LOG_NOTICE, "Demarrage . . . TID = %p", pthread_self() );
     Partage->com_dls.Thread_run = TRUE;                                                                 /* Le thread tourne ! */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
 
@@ -437,7 +437,7 @@
     g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_up );
     g_slist_free ( Partage->com_dls.Reset_Dls_BI_Edge_down );
 
-    Info_new( __func__, Config.log_dls, LOG_NOTICE, "DLS Down (%p)", pthread_self() );
+    Info_with_prefix( __func__, "dls", LOG_NOTICE, "DLS Down (%p)", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

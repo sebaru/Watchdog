@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_BI *bit = g_try_malloc0 ( sizeof(struct DLS_BI) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_with_prefix( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -53,7 +53,7 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_BI = g_slist_prepend ( plugin->Dls_data_BI, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info_with_prefix( __func__, "dls", bit->tech_id, LOG_INFO,
               "Create bit DLS_BI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -85,7 +85,7 @@
   { if (!bi) return;
 
     if (bi->etat != valeur)
-     { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+     { Info_with_prefix( __func__, "dls", bi->tech_id, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
                  "ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d",
                  (vars ? vars->num_ligne : -1), bi->tech_id, bi->acronyme, valeur, bi->edge_up, bi->edge_down );
        bi->etat = valeur;

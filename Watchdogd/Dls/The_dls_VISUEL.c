@@ -46,7 +46,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_VISUEL *bit = g_try_malloc0 ( sizeof(struct DLS_VISUEL) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_with_prefix( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -54,7 +54,7 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     g_snprintf( bit->forme,    sizeof(bit->forme),    "%s", Json_get_string ( element, "forme" ) );
     plugin->Dls_data_VISUEL = g_slist_prepend ( plugin->Dls_data_VISUEL, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info_with_prefix( __func__, "dls", bit->tech_id, LOG_INFO,
               "Create bit DLS_VISUEL '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -96,7 +96,7 @@
        visu->noshow  = noshow;
        visu->disable = disable;
        visu->changed = TRUE;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+       Info_with_prefix( __func__, "dls", visu->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s' color='%s' valeur='%f' ('%s') "
                  "cligno=%d noshow=%d libelle='%s', disable=%d",
                  (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme,
@@ -113,7 +113,7 @@
     if ( badge != visu->badge )                                      /* Comparaison possible car les chaines sont statiques ! */
      { visu->badge = badge;
        visu->changed = TRUE;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+       Info_with_prefix( __func__, "dls", visu->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> badge='%s'",
                  (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, badge );
      }
@@ -127,7 +127,7 @@
     if ( mode != visu->mode )                                      /* Comparaison possible car les chaines sont statiques ! */
      { visu->mode = mode;
        visu->changed = TRUE;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+       Info_with_prefix( __func__, "dls", visu->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> mode='%s'",
                  (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, mode );
      }
@@ -141,7 +141,7 @@
     if ( color != visu->color )                                      /* Comparaison possible car les chaines sont statiques ! */
      { visu->color = color;
        visu->changed = TRUE;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+       Info_with_prefix( __func__, "dls", visu->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> color='%s'",
                  (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, color );
      }
@@ -155,7 +155,7 @@
     if ( libelle != visu->libelle )                                  /* Comparaison possible car les chaines sont statiques ! */
      { visu->libelle = libelle;
        visu->changed = TRUE;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+       Info_with_prefix( __func__, "dls", visu->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_VISUEL '%s:%s'-> libelle='%s'",
                  (vars ? vars->num_ligne : -1), visu->tech_id, visu->acronyme, libelle );
      }

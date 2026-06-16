@@ -166,15 +166,13 @@
 /******************************************************************************************************************************/
  void Print_config ( void )
   {
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config headless             %d", Config.headless );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_bus              %d", Config.log_bus );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config log_msrv             %d", Config.log_msrv );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Config.master_hostname );
+    Info_with_prefix( __func__, "config", Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
+    Info_with_prefix( __func__, "config", Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
+    Info_with_prefix( __func__, "config", Config.log_msrv, LOG_INFO, "Config headless             %d", Config.headless );
+    Info_with_prefix( __func__, "config", Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
+    Info_with_prefix( __func__, "config", Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
+    Info_with_prefix( __func__, "config", Config.log_msrv, LOG_INFO, "Config instance             %s", g_get_host_name() );
+    Info_with_prefix( __func__, "config", Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
+    Info_with_prefix( __func__, "config", Config.log_msrv, LOG_INFO, "Config master_hostname      %s", Config.master_hostname );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -44,7 +44,7 @@
  void Http_Init ( void )
   { curl_global_init(CURL_GLOBAL_DEFAULT);
     g_mkdir ( "http_cache", 0755 );
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "lib cURL initialized" );
+    Info_with_prefix( __func__, "http", "common", LOG_DEBUG, "lib cURL initialized" );
   }
 /******************************************************************************************************************************/
 /* Http_End: Désactive la librairie HTTP                                                                                      */
@@ -53,7 +53,7 @@
 /******************************************************************************************************************************/
  void Http_End ( void )
   { curl_global_cleanup();
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "lib cURL un-initialized" );
+    Info_with_prefix( __func__, "http", "common", LOG_DEBUG, "lib cURL un-initialized" );
   }
 /******************************************************************************************************************************/
 /* Http_Write_CB: Fonction d'écriture du callback                                                                             */
@@ -66,7 +66,7 @@
 
     char *ptr = g_try_realloc( buffer->body, buffer->size + chunksize + 1 );
     if(!ptr)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Realloc failed" ); return(0); }
+     { Info_with_prefix( __func__, "http", "common", LOG_ERR, "Realloc failed" ); return(0); }
 
     buffer->body = ptr;
     memcpy( buffer->body + buffer->size, contents, chunksize );
@@ -86,20 +86,20 @@
     gint http_code = 0;                                                                                     /* Code de retour */
 
     if (!url) return(NULL);
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Request to %s is starting", url );
+    Info_with_prefix( __func__, "http", "common", LOG_DEBUG, "Request to %s is starting", url );
 /*------------------------------------------------ Init du cURL --------------------------------------------------------------*/
     CURL *curl = curl_easy_init();
-    if(!curl) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: Curl_easy_init failed", url ); return(NULL); }
+    if(!curl) { Info_with_prefix( __func__, "http", "common", LOG_ERR, "Request to %s: Curl_easy_init failed", url ); return(NULL); }
 
 /*------------------------------------------------ Préparation du payload ----------------------------------------------------*/
     if (json_payload)
      { payload = Json_to_string ( json_payload );
-       if (!payload) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: Json to string failed", url ); goto end; }
+       if (!payload) { Info_with_prefix( __func__, "http", "common", LOG_ERR, "Request to %s: Json to string failed", url ); goto end; }
      }
 
 /*------------------------------------------------ Préparation du cURL -------------------------------------------------------*/
     struct HTTP_BUFFER *buffer = g_try_malloc0( sizeof(struct HTTP_BUFFER) );
-    if (!buffer) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: Malloc buffer failed", url ); goto end; }
+    if (!buffer) { Info_with_prefix( __func__, "http", "common", LOG_ERR, "Request to %s: Malloc buffer failed", url ); goto end; }
 
     curl_easy_setopt( curl, CURLOPT_URL, url );
     if (payload)
@@ -160,23 +160,23 @@
 /*------------------------------------------- Réalisation de la requete ------------------------------------------------------*/
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);                               /* Recupération du code retour */
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Request to %s: HttpCode = %d", url, http_code );
+    Info_with_prefix( __func__, "http", "common", LOG_DEBUG, "Request to %s: HttpCode = %d", url, http_code );
 
     if( res != CURLE_OK )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: Curl_easy_perform failed: %s", url, curl_easy_strerror(res) ); }
+     { Info_with_prefix( __func__, "http", "common", LOG_ERR, "Request to %s: Curl_easy_perform failed: %s", url, curl_easy_strerror(res) ); }
     else if (http_code == 200)
      { if (buffer->body)
         { ResponseNode = Json_get_from_string ( buffer->body );
-          if (!ResponseNode) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: Response is not json", url ); }
+          if (!ResponseNode) { Info_with_prefix( __func__, "http", "common", LOG_ERR, "Request to %s: Response is not json", url ); }
         }
-       else Info_new( __func__, Config.log_msrv, LOG_ERR, "No body received" );
+       else Info_with_prefix( __func__, "http", "common", LOG_ERR, "No body received" );
      }
-    else Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: HttpCode = %d", url, http_code );
+    else Info_with_prefix( __func__, "http", "common", LOG_ERR, "Request to %s: HttpCode = %d", url, http_code );
 
     if (!ResponseNode) ResponseNode = Json_create ();                       /* Si pas de body en response, on en créé un */
     if (ResponseNode)
      { Json_add_int ( ResponseNode, "http_code", http_code ); }
-    else Info_new( __func__, Config.log_msrv, LOG_ERR, "Request to %s: ResponseNode Error", url );
+    else Info_with_prefix( __func__, "http", "common", LOG_ERR, "Request to %s: ResponseNode Error", url );
 
 end:
     if (all_headers) curl_slist_free_all(all_headers);                                                 /* Cleanup the headers */
@@ -200,16 +200,16 @@ end:
     g_snprintf( query, sizeof(query), "https://%s%s", Json_get_string ( Config.config, "api_url" ), URI );
 /********************************************************* Envoi de la requete ************************************************/
     if (!RootNode) { RootNode = Json_create(); unref_RootNode = TRUE; }
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Sending to API %s", query );
+    Info_with_prefix( __func__, "http", "common", LOG_DEBUG, "Sending to API %s", query );
 
     JsonNode *ResponseNode = Http_Request ( query, RootNode, NULL );
     if (unref_RootNode) Json_unref(RootNode);
 
     gint http_code = Json_get_int ( ResponseNode, "http_code" );
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s: Status %d", query, http_code );
+    Info_with_prefix( __func__, "http", "common", LOG_DEBUG, "%s: Status %d", query, http_code );
 
     if (http_code!=200)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d", query, http_code ); }
+     { Info_with_prefix( __func__, "http", "common", LOG_ERR, "%s Error %d", query, http_code ); }
     return(ResponseNode);
  }
 /******************************************************************************************************************************/
@@ -221,7 +221,7 @@ end:
   { gint taille_nom_fichier = 256;
     gchar *nom_fichier = g_try_malloc0(taille_nom_fichier);
     if (!nom_fichier)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Memory error for Caching %s", query );
+     { Info_with_prefix( __func__, "http", "common", LOG_ERR, "Memory error for Caching %s", query );
        return(NULL);
      }
     g_snprintf ( nom_fichier, taille_nom_fichier, "http_cache/%s", query );
@@ -247,20 +247,20 @@ end:
     else g_snprintf( query, sizeof(query), "https://%s/%s", Json_get_string ( Config.config, "api_url"), URI );
 /********************************************************* Envoi de la requete ************************************************/
     JsonNode *ResponseNode = Http_Request ( query, NULL, NULL );
-    if (!ResponseNode) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Error with Http_Get %s", query ); return(NULL); }
+    if (!ResponseNode) { Info_with_prefix( __func__, "http", "common", LOG_ERR, "Error with Http_Get %s", query ); return(NULL); }
     gint http_code = Json_get_int ( ResponseNode, "http_code" );
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "%s Status %d for '%s'", URI, http_code, query );
+    Info_with_prefix( __func__, "http", "common", LOG_DEBUG, "%s Status %d for '%s'", URI, http_code, query );
 
     if (http_code!=200)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s Error %d for '%s'", URI, http_code, query );
+     { Info_with_prefix( __func__, "http", "common", LOG_ERR, "%s Error %d for '%s'", URI, http_code, query );
        Json_unref ( ResponseNode );
        gchar *nom_fichier = Http_Query_to_cache ( query );
        if (nom_fichier)
         { ResponseNode = Json_read_from_file ( nom_fichier );
           g_free(nom_fichier);
-          if (ResponseNode) Info_new( __func__, Config.log_msrv, LOG_INFO, "Using cache for %s OK", query );
-                       else Info_new( __func__, Config.log_msrv, LOG_ERR,  "Using cache for %s failed", query );
-        } else Info_new( __func__, Config.log_msrv, LOG_ERR, "Cache error for %s", query );
+          if (ResponseNode) Info_with_prefix( __func__, "http", "common", LOG_INFO, "Using cache for %s OK", query );
+                       else Info_with_prefix( __func__, "http", "common", LOG_ERR,  "Using cache for %s failed", query );
+        } else Info_with_prefix( __func__, "http", "common", LOG_ERR, "Cache error for %s", query );
      }
     else
      { if (Json_has_member ( ResponseNode, "api_cache" ) && Json_get_bool ( ResponseNode, "api_cache" ) )

@@ -46,7 +46,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_CI *bit = g_try_malloc0 ( sizeof(struct DLS_CI) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_with_prefix( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -57,7 +57,7 @@
     bit->archivage = Json_get_int ( element, "archivage" );
     bit->etat      = Json_get_bool ( element, "etat" );
     plugin->Dls_data_CI = g_slist_prepend ( plugin->Dls_data_CI, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info_with_prefix( __func__, "dls", bit->tech_id, LOG_INFO,
               "Create bit DLS_CI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->valeur, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -93,7 +93,7 @@
         { bit->etat = TRUE;
           Partage->audit_bit_interne_per_sec++;
           bit->valeur++;
-          Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+          Info_with_prefix( __func__, "dls", bit->tech_id, LOG_DEBUG,
                     "ligne %04d: Changing DLS_CI '%s:%s'=%d",
                     (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
           if (vars && vars->debug) Dls_CI_export_to_API ( bit );                                   /* Si debug, envoi à l'API */
@@ -121,7 +121,7 @@
   { if (!bit) return;
     if (bit->valeur!=0)
      { MQTT_Send_archive_to_API( bit->tech_id, bit->acronyme, bit->valeur );                           /* Archivage si besoin */
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+       Info_with_prefix( __func__, "dls", bit->tech_id, bit->tech_id, LOG_DEBUG,
                 "ligne %04d: DLS_CI '%s:%s'=%d resetted",
                 (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, bit->valeur );
        bit->valeur = 0;                                                                          /* Valeur réelle du compteur */
@@ -145,7 +145,7 @@
     if (element)
      { Json_add_int  ( element, "valeur", bit->valeur );
        Json_add_bool ( element, "etat",   bit->etat );
-       MQTT_Send_to_API   ( element, "DLS_REPORT/CI/%s/%s", bit->tech_id, bit->acronyme );
+       MQTT_Send_to_API ( element, "DLS_REPORT/CI/%s/%s", bit->tech_id, bit->acronyme );
        Json_unref    ( element );
      }
   }

@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_DO *bit = g_try_malloc0 ( sizeof(struct DLS_DO) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+     { Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -55,7 +55,7 @@
     bit->etat      = Json_get_bool ( element, "etat" );
     bit->mono = Json_get_bool ( element, "mono" );
     plugin->Dls_data_DO = g_slist_prepend ( plugin->Dls_data_DO, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info_with_prefix( __func__, "dls", plugin->tech_id, LOG_INFO,
               "Create bit DLS_DO '%s:%s'=%d (%s) mono=%d  archivage=%d",
                bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->mono, bit->archivage );
   }
@@ -97,7 +97,7 @@
   { if (!dout) return;
     if (dout->etat == etat) return;
     dout->etat = etat;
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info_with_prefix( __func__, "dls", dout->tech_id, LOG_DEBUG,
               "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
               (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, dout->etat );
     Dls_DO_export_to_API ( dout );                                                                           /* envoi a l'API */
@@ -111,7 +111,7 @@
        Partage->Liste_DO = g_slist_append ( Partage->Liste_DO, RootNode );
        pthread_rwlock_unlock ( &Partage->Liste_DO_synchro );
      }
-    else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+    else Info_with_prefix( __func__, "dls", dout->tech_id, LOG_ERR, "JSon RootNode creation failed" );
 
     if (etat == TRUE && dout->mono)                             /* Si sortie de type monostable, elle redescend tout de suite */
      { JsonNode *RootNode = Json_create ();
@@ -122,7 +122,7 @@
           Partage->Liste_DO = g_slist_append ( Partage->Liste_DO, RootNode );
           pthread_rwlock_unlock ( &Partage->Liste_DO_synchro );                   /* Envoie au MSRV pour dispatch aux threads */
         }
-       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+       else Info_with_prefix( __func__, "dls", dout->tech_id, LOG_ERR, "JSon RootNode creation failed" );
      }
     Partage->audit_bit_interne_per_sec++;
   }

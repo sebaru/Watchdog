@@ -50,9 +50,6 @@
     gchar mqtt_password[ 129 ];
     gchar audio_tech_id[ 32 ];                     /* TechID du thread principal AUDIO pour piloter les sorties Haut-Parleurs */
     guint    log_level;                                                                       /* Niveau de debug du programme */
-    gboolean log_msrv;                                                                                    /* TRUE si log_msrv */
-    gboolean log_bus;                                                                                      /* TRUE si log_bus */
-    gboolean log_dls;                                                                                      /* TRUE si log_dls */
     gboolean single;                                                                                /* Demarrage des thread ? */
   };
 
