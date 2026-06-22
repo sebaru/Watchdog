@@ -451,6 +451,7 @@
     pthread_mutexattr_init( &param );                                                         /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &param, PTHREAD_PROCESS_SHARED );
     pthread_mutex_init( &module->synchro, &param );
+    module->Thread_run = TRUE;                                                           /* Le thread est runnning by default */
 
     if ( module->Thread_run && pthread_create( &module->TID, &attr, (void *)module->Run_thread, module ) )
      { Info( __func__, "msrv", LOG_ERR, "Thread '%s': pthread_create failed. Unloading.", thread_classe );
@@ -483,39 +484,44 @@
      }
     pthread_rwlock_unlock ( &Partage->Threads_synchro );
     if (found)
-     { Info( __func__, "msrv", LOG_ERR, "Thread Class '%s': Cannot start, already running", thread_classe );
+     { Info_with_prefix( __func__, "msrv", thread_classe, LOG_ERR,
+                         "Thread Class '%s': Cannot start, already running", thread_classe );
        return;
      }
 
     struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
     if (!module)
-     { Info( __func__, "msrv", LOG_ERR, "Thread Class '%s': Not Enough Memory", thread_classe );
+     { Info_with_prefix( __func__, "msrv", thread_classe, LOG_ERR,
+                         "Thread Class '%s': Not Enough Memory", thread_classe );
        return;
      }
 
-    Info( __func__, "msrv", LOG_INFO, "Thread Class '%s': Requesting config from API", thread_classe );
+    Info_with_prefix( __func__, "msrv", thread_classe, LOG_INFO,
+                      "Thread Class '%s': Requesting config from API", thread_classe );
     module->config_all = Http_Get_from_global_API ( "/run/thread/config", "thread_classe=%s", thread_classe );
     if ( ! (module->config_all && Json_get_int ( module->config_all, "http_code" ) == 200) )
-     { Info( __func__, "msrv", LOG_ERR, "Thread Class '%s': GET_CONFIG from API Failed. Unloading.", thread_classe );
+     { Info_with_prefix( __func__, "msrv", thread_classe, LOG_ERR,
+                         "Thread Class '%s': GET_CONFIG from API Failed. Unloading.", thread_classe );
        Thread_Stop_safe ( module );
        return;
      }
-    module->Thread_debug = Json_get_bool ( module->config_all, "debug" );
-    module->Thread_run   = Json_get_bool ( module->config_all, "enable" );
 
     if (!Json_has_member ( module->config_all, "thread_classe" ) )
-     { Info( __func__, "msrv", LOG_ERR, "Thread Class '%s': Missing 'thread_classe' in API response. Unloading.", thread_classe );
+     { Info_with_prefix( __func__, "msrv", thread_classe, LOG_ERR,
+                         "Thread Class '%s': Missing 'thread_classe' in API response. Unloading.", thread_classe );
        Thread_Stop_safe ( module );
        return;
      }
 
     if (strcasecmp ( thread_classe, Json_get_string ( module->config_all, "thread_classe" ) ) )
-     { Info( __func__, "msrv", LOG_ERR, "Thread Class '%s': Root Class is not the same as API Class. Unloading.", thread_classe );
+     { Info_with_prefix( __func__, "msrv", thread_classe, LOG_ERR,
+                         "Thread Class '%s': Root Class is not the same as API Class. Unloading.", thread_classe );
        Thread_Stop_safe ( module );
        return;
      }
     module->nb_thread_tech_ids = Json_get_int ( module->config_all, "nbr_thread_tech_ids" );
-    Info( __func__, "msrv", LOG_NOTICE, "Thread Class '%s': Loading class for '%d' thread_tech_ids",
+    Info_with_prefix( __func__, "msrv", thread_classe, LOG_NOTICE,
+                      "Thread Class '%s': Loading class for '%d' thread_tech_ids",
           thread_classe, module->nb_thread_tech_ids );
     
     Thread_Load_library ( module );
