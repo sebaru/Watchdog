@@ -42,14 +42,11 @@
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
     struct mosquitto *MQTT_session;
     gboolean MQTT_connected;                                       /* Report du status de la communication vers le MQTT local */
     GSList  *MQTT_messages;
     gint     MQTT_next_top_connect;                                                          /* Date de prochaine reconnexion */
-    JsonNode *config_all;                                     /* Pointeur vers l'ensemble de la config spécifique a ce thread */
-    gboolean comm_status;                                                       /* Report local du status de la communication */
-    gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
+    JsonNode *config;                                         /* Pointeur vers l'ensemble de la config spécifique a ce thread */
     JsonNode *ai_nbr_tour_par_sec;                                                                        /* Tour par seconde */
     JsonNode *IOs;
     gint nbr_tour;
@@ -58,16 +55,24 @@
     gint nbr_tour_delai;
     gint telemetrie_top;
     gint hour_top;
-    GSList *vars_all;                                        /* Pointeur vers les variables de run du module (un par tech_id) */
     void (*Run_thread)( struct THREAD *module );                                  /* Fonction principale de gestion du module */
 
-    guint nb_thread_tech_ids;                                                /* Nombre de tech_ids dans la liste des tech_ids */
-    guint current_thread_tech_id_index;                                /* Index du tech_id courant dans la liste des tech_ids */
-    JsonNode *config;                                                 /* Pointeur vers la config du tech_id courant du thread */
-    gchar *current_thread_tech_id;                                         /* tech_id courant derive de config_all/thread_tech_ids */
-    gpointer vars;                                    /* Pointeur vers les variables de run du module pour le tech_id courant */
+    guint sizeof_vars;
+    GRWLock sub_threads_lock;
+    GSList *sub_threads;                                                        /* Liste des sous-threads pour chaque tech_id */
+    GSList *cur_thread_link;                                                                 /* Link GSLIST du Thread courant */
+    struct SUB_THREAD *cur_thread;                                                     /* Pointeur vers le sub_thread courant */
   };
 
+ struct SUB_THREAD                                                                         /* composants du champ sub_threads */
+  { gchar    thread_tech_id[32];                                                                     /* Tech_id du sub_thread */
+    gchar    description[128];                                                                       /* description du thread */ 
+    gpointer vars;                                                    /* Pointeur vers la zone mémoire vars du current thread */
+    gboolean stopped;                                                                     /* TRUE si le sub_thread est arrêté */
+    gboolean stopping;                                                          /* TRUE si le sub_thread est en cours d'arrêt */
+    gboolean comm_status;                                                       /* Report local du status de la communication */
+    gint     comm_next_update;                                        /* Date du prochain update Watchdog COMM vers le master */
+  };
 /************************************************ Définitions des prototypes **************************************************/
  extern gboolean Demarrer_dls ( void );                                                                      /* Dans thread.c */
  extern void Stopper_dls ( void );

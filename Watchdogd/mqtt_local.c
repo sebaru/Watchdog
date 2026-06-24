@@ -295,12 +295,11 @@ end:
 /* Entrée: la structure MQTT, le watchdog, la consigne                                                                        */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_acronyme, gint consigne )
-  { if (! (module && thread_acronyme)) return;
+ void MQTT_Send_WATCHDOG ( struct THREAD *module, gchar *thread_tech_id, gchar *thread_acronyme, gint consigne )
+  { if (! (module && thread_tech_id && thread_acronyme)) return;
     JsonNode *thread_watchdog = Json_create ();
     if(!thread_watchdog) return;
-    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Json_add_int    ( thread_watchdog, "consigne", consigne );
+    Json_add_int ( thread_watchdog, "consigne", consigne );
 
     Info_with_prefix( __func__, "mqtt", thread_tech_id, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, consigne );
     MQTT_Send_to_topic ( module->MQTT_session, thread_watchdog, TRUE, "SET_WATCHDOG/%s/%s", thread_tech_id, thread_acronyme );
