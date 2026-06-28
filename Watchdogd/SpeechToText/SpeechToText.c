@@ -65,7 +65,7 @@
     MQTT_Send_AI ( module, vars->Output_hz, 0.0, FALSE );
     MQTT_Send_AI ( module, vars->Output_voltage, 0.0, FALSE );
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s disconnected (host='%s')", thread_tech_id, host );
+    Info( __func__, "stt", thread_tech_id, LOG_NOTICE, "%s disconnected (host='%s')", thread_tech_id, host );
     Thread_send_comm_to_master ( module, FALSE );
   }
 /******************************************************************************************************************************/
@@ -85,23 +85,23 @@
     gchar *admin_password = Json_get_string ( module->config, "admin_password" );
 
     if ( (connexion = upscli_connect( &vars->upsconn, host, UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "stt", thread_tech_id, LOG_WARNING,
                 "%s: connexion refused by ups (host '%s' -> %s)", thread_tech_id, host,
                  (char *)upscli_strerror(&vars->upsconn) );
        return(FALSE);
      }
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s connected (host='%s')", thread_tech_id, host );
+    Info( __func__, "stt", thread_tech_id, LOG_NOTICE, "%s connected (host='%s')", thread_tech_id, host );
 /********************************************************* UPSDESC ************************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", name );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "stt", thread_tech_id, LOG_WARNING,
                 "%s: Sending GET UPSDESC failed (%s)", thread_tech_id,
                 (char *)upscli_strerror(&vars->upsconn) );
      }
     else
      { if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+        { Info( __func__, "stt", thread_tech_id, LOG_WARNING,
                    "%s: Reading GET UPSDESC failed (%s)", thread_tech_id,
                    (char *)upscli_strerror(&vars->upsconn) );
         }
@@ -109,24 +109,24 @@
         { gchar description[128];
           g_snprintf( description, sizeof(description), "%s", buffer + strlen(name) + 10 );
           description [ strlen(description) - 1 ] = 0; /* supprime les " du début/fin */
-          Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Reading GET UPSDESC %s", thread_tech_id, description );
+          Info( __func__, "stt", thread_tech_id, LOG_DEBUG, "%s: Reading GET UPSDESC %s", thread_tech_id, description );
         }
      }
 /**************************************************** USERNAME ****************************************************************/
     g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", admin_username );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "stt", thread_tech_id, LOG_WARNING,
                 "%s: Sending USERNAME failed %s", thread_tech_id,
                 (char *)upscli_strerror(&vars->upsconn) );
      }
     else
      { if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+        { Info( __func__, "stt", thread_tech_id, LOG_WARNING,
                    "%s: Reading USERNAME failed %s", thread_tech_id,
                    (char *)upscli_strerror(&vars->upsconn) );
         }
        else
-        { Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+        { Info( __func__, "stt", thread_tech_id, LOG_DEBUG,
                    "%s: Reading USERNAME %s", thread_tech_id, buffer );
         }
      }
@@ -134,25 +134,25 @@
 /******************************************************* PASSWORD *************************************************************/
     g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", admin_password );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "stt", thread_tech_id, LOG_WARNING,
                 "%s: Sending PASSWORD failed %s", thread_tech_id,
                 (char *)upscli_strerror(&vars->upsconn) );
      }
     else
      { if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+        { Info( __func__, "stt", thread_tech_id, LOG_WARNING,
                    "%s: Reading PASSWORD failed %s", thread_tech_id,
                    (char *)upscli_strerror(&vars->upsconn) );
         }
        else
-        { Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+        { Info( __func__, "stt", thread_tech_id, LOG_DEBUG,
                    "%s: Reading PASSWORD %s", thread_tech_id, buffer );
         }
      }
 
     vars->date_next_connexion = 0;
     vars->started = TRUE;
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s connected (host='%s')", thread_tech_id, host );
+    Info( __func__, "stt", thread_tech_id, LOG_NOTICE, "%s connected (host='%s')", thread_tech_id, host );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -170,9 +170,9 @@
     gchar *name    = Json_get_string ( module->config, "name" );
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", name, nom_cmd );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending '%s'", thread_tech_id, buffer );
+    Info( __func__, "stt", thread_tech_id, LOG_NOTICE, "%s: Sending '%s'", thread_tech_id, buffer );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "stt", thread_tech_id, LOG_WARNING,
                  "%s: Sending INSTCMD failed with error '%s' for '%s'", thread_tech_id,
                  (char *)upscli_strerror(&vars->upsconn), buffer );
        Deconnecter_UPS ( module );
@@ -180,13 +180,13 @@
      }
 
     if ( upscli_readline( &vars->upsconn, buffer, sizeof(buffer) ) == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "stt", thread_tech_id, LOG_WARNING,
                 "%s: Reading INSTCMD result failed (%s) error %s", thread_tech_id,
                  nom_cmd, (char *)upscli_strerror(&vars->upsconn) );
        Deconnecter_UPS ( module );
        return;
      }
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending '%s' OK", thread_tech_id, nom_cmd );
+    Info( __func__, "stt", thread_tech_id, LOG_NOTICE, "%s: Sending '%s' OK", thread_tech_id, nom_cmd );
   }
 /******************************************************************************************************************************/
 /* SpeechToText_get_var: Recupere une valeur de la variable en parametre                                                      */
@@ -204,31 +204,31 @@
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", name, nom_var );
     if ( upscli_sendline( &vars->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING, "%s: Sending GET VAR failed (%s) error=%s", thread_tech_id,
+    { Info( __func__, "stt", thread_tech_id, LOG_WARNING, "%s: Sending GET VAR failed (%s) error=%s", thread_tech_id,
                  buffer, (char *)upscli_strerror(&vars->upsconn) );
        Deconnecter_UPS ( module );
        return(NULL);
      }
 
     retour_read = upscli_readline( &vars->upsconn, buffer, sizeof(buffer) );
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+    Info( __func__, "stt", thread_tech_id, LOG_DEBUG,
              "%s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", thread_tech_id,
               nom_var, retour_read, upscli_upserror(&vars->upsconn), buffer );
     if ( retour_read == -1 )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING, "%s: Reading GET VAR result failed (%s) error=%s", thread_tech_id,
+    { Info( __func__, "stt", thread_tech_id, LOG_WARNING, "%s: Reading GET VAR result failed (%s) error=%s", thread_tech_id,
                  nom_var, (char *)upscli_strerror(&vars->upsconn) );
        Deconnecter_UPS ( module );
        return(NULL);
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )                                    /* si Réponse numérique de la part du UPS daemon */
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+    { Info( __func__, "stt", thread_tech_id, LOG_DEBUG,
                 "%s: Reading GET VAR %s OK = %s", thread_tech_id, nom_var, buffer );
        return(buffer + 6 + strlen(name) + strlen(nom_var));
      }
 
     if ( ! strncmp ( buffer, "ERR", 3 ) )                                            /* Detection des erreurs type DATA-STALE */
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "stt", thread_tech_id, LOG_ERR,
                 "%s: Reading GET VAR %s ERROR = %s", thread_tech_id, nom_var, buffer );
      }
 
@@ -303,17 +303,17 @@
     gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
     if (!msg_thread_tech_id)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': requete mal formée manque msg_thread_tech_id", thread_tech_id ); }
+    { Info( __func__, "stt", thread_tech_id, LOG_ERR, "'%s': requete mal formée manque msg_thread_tech_id", thread_tech_id ); }
     else if (!msg_thread_acronyme)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': requete mal formée manque msg_thread_acronyme", thread_tech_id ); }
+    { Info( __func__, "stt", thread_tech_id, LOG_ERR, "'%s': requete mal formée manque msg_thread_acronyme", thread_tech_id ); }
     else if (strcasecmp (msg_thread_tech_id, thread_tech_id))
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': Pas pour nous", thread_tech_id ); }
+    { Info( __func__, "stt", thread_tech_id, LOG_DEBUG, "'%s': Pas pour nous", thread_tech_id ); }
     else if (!Json_has_member ( msg, "etat" ))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': requete mal formée manque etat", thread_tech_id ); }
+    { Info( __func__, "stt", thread_tech_id, LOG_ERR, "'%s': requete mal formée manque etat", thread_tech_id ); }
     else
      { gboolean etat = Json_get_bool ( msg, "etat" );
        pthread_mutex_lock ( &module->synchro );
-       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': SET_DO '%s:%s'/'%s:%s'=%d",
+      Info( __func__, "stt", thread_tech_id, LOG_NOTICE, "'%s': SET_DO '%s:%s'/'%s:%s'=%d",
                  thread_tech_id, msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
        if (etat)
         { if (!strcasecmp(msg_thread_acronyme, "LOAD_OFF"))        SpeechToText_set_instcmd ( module, "load.off" );
@@ -397,7 +397,7 @@ goto end;
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
 /****************************************************** Ecoute de l'API *******************************************************/
        if (module->Test_request)
-        { Json_node_unref ( module->Test_request );
+        { Json_unref ( module->Test_request );
           module->Test_request = NULL;
         }
 /****************************************************** Ecoute du master ******************************************************/
@@ -408,7 +408,7 @@ goto end;
           pthread_mutex_unlock ( &module->synchro );
           gchar *tag = Json_get_string ( request, "tag" );
           /*if ( !strcasecmp (tag, "SET_DO") ) Ups_SET_DO ( module, request );*/
-          Json_node_unref ( request );
+          Json_unref ( request );
         }
 /********************************************* Début de l'interrogation du ups ************************************************/
        if (pa_simple_read(s, pcm, sizeof(pcm), &error) < 0) {

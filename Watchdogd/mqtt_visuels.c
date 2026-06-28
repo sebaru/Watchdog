@@ -40,14 +40,14 @@
 /******************************************************************************************************************************/
  void MQTT_Send_visuels_to_API ( void )
   { gint cpt = 0;
-    JsonNode *element = Json_node_create ();
+    JsonNode *element = Json_create();
     while (Partage->Liste_visuel && Partage->Thread_run == TRUE && cpt<100)
      { pthread_rwlock_wrlock( &Partage->Liste_visuel_synchro );
        struct DLS_VISUEL *visuel = Partage->Liste_visuel->data;                                     /* Recuperation du visuel */
        Partage->Liste_visuel = g_slist_remove ( Partage->Liste_visuel, visuel );
        pthread_rwlock_unlock( &Partage->Liste_visuel_synchro );
 
-       Info_new( __func__, Config.log_msrv, LOG_DEBUG,
+      Info( __func__, "mqtt", visuel->tech_id, LOG_DEBUG,
                 "Send VISUEL %s:%s mode=%s, color=%s, valeur='%f', cligno=%d, noshow=%d, libelle='%s', disable=%d",
                  visuel->tech_id, visuel->acronyme, visuel->mode, visuel->color, visuel->valeur, visuel->cligno, visuel->noshow,
                  visuel->libelle, visuel->disable
@@ -56,6 +56,6 @@
        MQTT_Send_to_API ( element, "DLS_VISUEL" );
        cpt++;
      }
-    Json_node_unref ( element );
+    Json_unref( element );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

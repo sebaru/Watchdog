@@ -39,9 +39,10 @@
   { Thread_init ( module, sizeof(struct SHELLY_VARS) );
     struct SHELLY_VARS *vars = module->vars;
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *string_id = Json_get_string ( module->config, "string_id" );
     if (!string_id)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "ERROR: No string_id, stopping thread" ); goto end; }
+     { Info( __func__, "shelly", thread_tech_id, LOG_ERR, "ERROR: No string_id, stopping thread" ); goto end; }
     else if (g_str_has_prefix ( string_id, SHELLY_PRO_EM_50 ))                                          /* Monophasé 2 canaux */
      { vars->EM10_ACT_POWER  = Mnemo_create_thread_AI ( module, "EM10_ACT_POWER",  "EM10 Puissance active", "W",     ARCHIVE_1_MIN );
        vars->EM10_APRT_POWER = Mnemo_create_thread_AI ( module, "EM10_APRT_POWER", "EM10 Puissance apparente", "VA", ARCHIVE_1_MIN );
@@ -91,7 +92,7 @@
        vars->INJECTION3  = Mnemo_create_thread_AI ( module, "INJECTION3",   "Energie injectée Phase 3", "Wh",    ARCHIVE_1_MIN );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Shelly type '%s' not recognized", string_id ); goto end; }
+      { Info( __func__, "shelly", thread_tech_id, LOG_ERR, "Shelly type '%s' not recognized", string_id ); goto end; }
 
     MQTT_Subscribe ( module->MQTT_session, "%s/events/rpc", string_id );
 
@@ -105,7 +106,7 @@
           pthread_mutex_unlock ( &module->synchro );
           if (Json_has_member ( request, "method" ))
            { gchar *method = Json_get_string ( request, "method" );
-             Info_new( __func__, Config.log_bus, LOG_DEBUG, "MQTT: received '%s'", method );
+             Info( __func__, "mqtt", "local", LOG_DEBUG, "MQTT: received '%s'", method );
 /*---------------------------------------------------- Notify Status ---------------------------------------------------------*/
              if (!strcmp ( method, "NotifyStatus" ) && Json_has_member ( request, "params" ) )
               { JsonNode *params = Json_get_object_as_node ( request, "params" );
@@ -205,7 +206,7 @@
               }
              Thread_send_comm_to_master ( module, TRUE );
            }
-          Json_node_unref ( request );
+          Json_unref ( request );
         }
      }
 end:

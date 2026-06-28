@@ -42,7 +42,6 @@
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
     struct mosquitto *MQTT_session;
     gboolean MQTT_connected;                                       /* Report du status de la communication vers le MQTT local */
     GSList  *MQTT_messages;

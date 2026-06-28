@@ -57,13 +57,13 @@
     if (module->comm_status != etat || module->comm_next_update <= Partage->top)
      { MQTT_Send_WATCHDOG ( module, "IO_COMM", (etat ? 900 : 0) );
 
-       JsonNode *RootNode = Json_node_create();
-       Json_node_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
-       Json_node_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
-       Json_node_add_bool   ( RootNode, "io_comm",        module->comm_status );
-       Json_node_add_bool   ( RootNode, "mqtt_connected", (etat ? module->MQTT_connected : FALSE) );
+       JsonNode *RootNode = Json_create();
+       Json_add_string ( RootNode, "thread_classe",  Json_get_string ( module->config, "thread_classe"  ) );
+       Json_add_string ( RootNode, "thread_tech_id", Json_get_string ( module->config, "thread_tech_id" ) );
+       Json_add_bool   ( RootNode, "io_comm",        module->comm_status );
+       Json_add_bool   ( RootNode, "mqtt_connected", (etat ? module->MQTT_connected : FALSE) );
        MQTT_Send_to_API ( RootNode, "HEARTBEAT" );
-       Json_node_unref ( RootNode );
+       Json_unref ( RootNode );
 
        module->comm_next_update = Partage->top + 600;                                                   /* Toutes les minutes */
        module->comm_status = etat;
@@ -80,15 +80,15 @@
     if (module->Thread_run == FALSE) return;                     /* Si le module est en arret, on ne lui donne pas le message */
     JsonNode *response = Json_get_from_string ( msg->payload );
     if (!response)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "'%s': MQTT Message Dropped (not JSON) !", thread_tech_id );
+     { Info( __func__, "mqtt", "local", LOG_WARNING, "'%s': MQTT Message Dropped (not JSON) !", thread_tech_id );
        return;
      }
-    else Info_new( __func__, module->Thread_debug, LOG_DEBUG, "'%s': MQTT Message received at %s: %s", thread_tech_id, msg->topic, msg->payload );
+    else Info( __func__, "mqtt", thread_tech_id, LOG_DEBUG, "'%s': MQTT Message received at %s: %s", thread_tech_id, msg->topic, msg->payload );
 
     gchar **tokens = g_strsplit ( msg->topic, "/", 3 );
     if (!tokens)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT token split failed at %s: %s", thread_tech_id, msg->topic, msg->payload );
-       Json_node_unref ( response );
+    { Info( __func__, "mqtt", thread_tech_id, LOG_ERR, "'%s': MQTT token split failed at %s: %s", thread_tech_id, msg->topic, msg->payload );
+       Json_unref ( response );
        return;
      }
 
@@ -96,15 +96,15 @@
     while(tokens[token_num])
      { gchar token_name[16];
        g_snprintf ( token_name, sizeof ( token_name ), "token_lvl%d", token_num );
-       Json_node_add_string ( response, token_name, tokens[token_num] );
+       Json_add_string ( response, token_name, tokens[token_num] );
        token_num++;
      }
     g_strfreev ( tokens );
 
     if (!strcasecmp (Json_get_string ( response, "token_lvl0" ), "SET_DEBUG"))
-     { module->Thread_debug = Json_get_bool ( response, "debug" );
-       Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': debug set to %d", thread_tech_id, module->Thread_debug );
-       Json_node_unref ( response );
+     { /***module->Thread_debug = Json_get_bool ( response, "debug" );
+       Info( __func__, "mqtt", NULL, LOG_NOTICE, "'%s': debug set to %d", thread_tech_id, module->Thread_debug );*/
+       Json_unref ( response );
        return;
      }
 
@@ -123,7 +123,7 @@
 /********************************************* Reconnexion au broker MQTT local ***********************************************/
     if (module->MQTT_connected == FALSE && module->MQTT_next_top_connect <= Partage->top )        /* tentative de reconnexion */
      { gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-       Info_new( __func__, module->Thread_debug, LOG_INFO,
+      Info( __func__, "thread", thread_tech_id, LOG_INFO,
                     "'%s': Retrying MQTT connection to '%s'.",
                     thread_tech_id, Config.master_hostname );
        mosquitto_reconnect_async(	module->MQTT_session	);
@@ -166,7 +166,7 @@
  static void Thread_MQTT_on_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { struct THREAD *module = obj;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Connection to '%s': return code %d: %s",
+    Info( __func__, "thread", thread_tech_id, LOG_NOTICE, "'%s': Connection to '%s': return code %d: %s",
               thread_tech_id, Config.master_hostname, return_code, mosquitto_connack_string( return_code ) );
     if (return_code == 0)
      { module->MQTT_connected = TRUE;
@@ -184,7 +184,7 @@
  static void Thread_MQTT_on_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
   { struct THREAD *module = obj;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s': Disconnected with return code %d: %s. Retry in %ds.",
+    Info( __func__, "thread", thread_tech_id, LOG_NOTICE, "'%s': Disconnected with return code %d: %s. Retry in %ds.",
               thread_tech_id, return_code, mosquitto_connack_string( return_code ), THREAD_MQTT_RECONNECT_DELAY/10 );
     module->MQTT_connected = FALSE;
     module->MQTT_next_top_connect = Partage->top + THREAD_MQTT_RECONNECT_DELAY;
@@ -209,7 +209,7 @@
     if (sizeof_vars)
      { module->vars = g_try_malloc0 ( sizeof_vars );
        if (!module->vars)
-        { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Memory error for vars.", thread_tech_id );
+        { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': Memory error for vars.", thread_tech_id );
           Thread_end ( module );                                    /* Pas besoin de return : Thread_end fait un pthread_exit */
         }
      }
@@ -217,7 +217,7 @@
 /* ----------------------------------------------------- Ecoute du MQTT ----------------------------------------------------- */
     module->MQTT_session = mosquitto_new( thread_tech_id, TRUE, module );
     if (!module->MQTT_session)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': MQTT session error.", thread_tech_id ); }
     else
      { mosquitto_message_callback_set    ( module->MQTT_session, Thread_MQTT_on_message_CB );
        /*mosquitto_reconnect_delay_set     ( module->MQTT_session, 10, 60, TRUE );*/
@@ -227,7 +227,7 @@
        mosquitto_username_pw_set         ( module->MQTT_session, thread_tech_id, NULL );
 
        if ( mosquitto_connect( module->MQTT_session, Config.master_hostname, 1883, 60 ) != MOSQ_ERR_SUCCESS )
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+        { Info( __func__, "thread", thread_tech_id, LOG_ERR,
                     "'%s': MQTT connection to '%s' error. Retry in %ds.",
                     thread_tech_id, Config.master_hostname, THREAD_MQTT_RECONNECT_DELAY/10 );
           module->MQTT_next_top_connect = Partage->top + THREAD_MQTT_RECONNECT_DELAY;
@@ -235,33 +235,33 @@
      }
 
     if ( mosquitto_loop_start( module->MQTT_session ) != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': MQTT loop not started.", thread_tech_id ); }
 
 /* ------------------------------------------- Création du plugin dans l'api ------------------------------------------------ */
-    JsonNode *RootNode = Json_node_create();
+    JsonNode *RootNode = Json_create();
     if (RootNode)
-     { Json_node_add_string ( RootNode, "tech_id", thread_tech_id );
-       Json_node_add_string ( RootNode, "thread_classe", thread_classe ); 
-       Json_node_add_int    ( RootNode, "syn_id", 1 ); 
+     { Json_add_string ( RootNode, "tech_id", thread_tech_id );
+       Json_add_string ( RootNode, "thread_classe", thread_classe );
+       Json_add_int    ( RootNode, "syn_id", 1 );
        gchar *name = Json_get_string ( module->config, "description" );
-       Json_node_add_string ( RootNode, "name", name );
-       Json_node_add_string ( RootNode, "shortname", name );
+       Json_add_string ( RootNode, "name", name );
+       Json_add_string ( RootNode, "shortname", name );
        gchar package[128];
        g_snprintf ( package, sizeof(package), "Thread_%s", thread_classe );
-       Json_node_add_string ( RootNode, "package", package );
+       Json_add_string ( RootNode, "package", package );
        if (Dls_auto_create_plugin( RootNode ) == FALSE)
-        { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: DLS Create ERROR (%s)\n", thread_tech_id, name ); }
-       Json_node_unref ( RootNode );
+        { Info( __func__, "thread", thread_tech_id, LOG_ERR, "%s: DLS Create ERROR (%s)\n", thread_tech_id, name ); }
+       Json_unref ( RootNode );
      }
-    else Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory error while creating DLS RootNode", thread_tech_id );
+    else Info( __func__, "thread", thread_tech_id, LOG_ERR, "%s: Memory error while creating DLS RootNode", thread_tech_id );
 
 /* ------------------------------------------------ Création des IOs --------------------------------------------------------- */
-    module->IOs = Json_node_create();
-    Json_node_add_array ( module->IOs, "IOs" );
+    module->IOs = Json_create();
+    Json_add_array ( module->IOs, "IOs" );
 
     module->ai_nbr_tour_par_sec = Mnemo_create_thread_AI ( module, "THREAD_TOUR_PAR_SEC", "Nombre de tour par seconde", "t/s", ARCHIVE_5_MIN );
     Mnemo_create_thread_WATCHDOG ( module, "IO_COMM", "Statut de la communication" );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Thread '%s' is UP", thread_tech_id );
+    Info( __func__, "thread", thread_tech_id, LOG_NOTICE, "Thread '%s' is UP", thread_tech_id );
   }
 /******************************************************************************************************************************/
 /* Thread_end: appelé par chaque thread, lors de son arret                                                                    */
@@ -273,11 +273,11 @@
     mosquitto_disconnect( module->MQTT_session );
     mosquitto_loop_stop( module->MQTT_session, FALSE );
     mosquitto_destroy( module->MQTT_session );
-    g_slist_foreach ( module->MQTT_messages, (GFunc) Json_node_unref, NULL );
+    g_slist_foreach ( module->MQTT_messages, (GFunc) Json_unref, NULL );
     g_slist_free    ( module->MQTT_messages );   module->MQTT_messages = NULL;
-    if (module->vars) { g_free(module->vars);  module->vars   = NULL; }
-    Json_node_unref ( module->IOs );           module->IOs    = NULL;
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
+    if (module->vars) { g_free(module->vars);    module->vars   = NULL; }
+    Json_unref ( module->IOs );                  module->IOs    = NULL;
+    Info( __func__, "thread", Json_get_string ( module->config, "thread_tech_id" ), LOG_NOTICE, "'%s' is DOWN", Json_get_string ( module->config, "thread_tech_id") );
     sleep(1);                       /* le temps d'un appel libsoup a Thread_ws_on_master_connected si Operation was cancelled */
     pthread_exit(0);
   }
@@ -343,18 +343,18 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Thread_Stop_safe ( struct THREAD *module )
-  { if (!module) { Info_new( __func__, Config.log_msrv, LOG_ERR, "Module is NULL" ); return; }
+  { if (!module) { Info( __func__, "thread", NULL, LOG_ERR, "Module is NULL" ); return; }
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     module->Thread_run = FALSE;
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "'%s': Stopping", thread_tech_id );
+    Info( __func__, "thread", thread_tech_id, LOG_INFO, "'%s': Stopping", thread_tech_id );
     if (module->TID) pthread_join( module->TID, NULL );                                                /* Attente fin du fils */
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "'%s': Stopped", thread_tech_id );
+    Info( __func__, "thread", thread_tech_id, LOG_INFO, "'%s': Stopped", thread_tech_id );
 
     if (module->dl_handle) dlclose( module->dl_handle );
     pthread_mutex_destroy( &module->synchro );
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': Unloaded and freed", thread_tech_id );
-    if (module->config) Json_node_unref ( module->config );
+    Info( __func__, "thread", thread_tech_id, LOG_NOTICE, "'%s': Unloaded and freed", thread_tech_id );
+    if (module->config) Json_unref ( module->config );
     g_free( module );
   }
 /******************************************************************************************************************************/
@@ -383,34 +383,33 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Thread_Start_by_thread_tech_id ( gchar *thread_tech_id )
-  { if (!thread_tech_id) { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_tech_id'" ); return; }
+  { if (!thread_tech_id) { Info( __func__, "thread", NULL, LOG_ERR, "no 'thread_tech_id'" ); return; }
 
     struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
     if (!module)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': Not Enought Memory", thread_tech_id );
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': Not Enought Memory", thread_tech_id );
        return;
      }
 
     module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
     if (module->config && Json_get_int ( module->config, "http_code" ) == 200)
-     { module->Thread_debug = Json_get_bool ( module->config, "debug" );
-       module->Thread_run   = Json_get_bool ( module->config, "enable" );
+     { module->Thread_run   = Json_get_bool ( module->config, "enable" );
      }
     else
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': GET_CONFIG from API Failed. Unloading.", thread_tech_id );
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': GET_CONFIG from API Failed. Unloading.", thread_tech_id );
        Thread_Stop_safe ( module );
        return;
      }
 
     if (!module->Thread_run)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s' is not enabled. Unloading.", thread_tech_id );
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s' is not enabled. Unloading.", thread_tech_id );
        Thread_Stop_safe ( module );
        return;
      }
 
     gchar *thread_classe = Json_get_string ( module->config, "thread_classe" );
     if (!thread_classe)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "no 'thread_classe' in Json" );
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "no 'thread_classe' in Json" );
        Thread_Stop_safe ( module );
        return;
      }
@@ -420,22 +419,22 @@
 
     module->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW );
     if (!module->dl_handle)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': Thread '%s' loading failed (%s)",
+    { Info( __func__, "thread", thread_tech_id, LOG_WARNING, "'%s': Thread '%s' loading failed (%s)",
                  thread_tech_id, nom_fichier, dlerror() );
        g_free(module);
        return;
      }
     struct link_map *map;
     if (dlinfo(module->dl_handle, RTLD_DI_LINKMAP, &map) != 0)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': dl_info failed for '%s': '%s'",
+    { Info( __func__, "thread", thread_tech_id, LOG_WARNING, "'%s': dl_info failed for '%s': '%s'",
                 thread_tech_id, nom_fichier, dlerror() );
-                  
+
      }
-    else Info_new( __func__, Config.log_msrv, LOG_NOTICE, "'%s': using file '%s'", thread_tech_id, map->l_name );
+    else Info( __func__, "thread", thread_tech_id, LOG_NOTICE, "'%s': using file '%s'", thread_tech_id, map->l_name );
 
     module->Run_thread = dlsym( module->dl_handle, "Run_thread" );                        /* Recherche de la fonction */
     if (!module->Run_thread)
-     { Info_new( __func__, Config.log_msrv, LOG_WARNING, "'%s': Thread '%s' rejected (Run_thread not found)",
+    { Info( __func__, "thread", thread_tech_id, LOG_WARNING, "'%s': Thread '%s' rejected (Run_thread not found)",
                  thread_tech_id, nom_fichier );
        dlclose( module->dl_handle );
        g_free(module);
@@ -445,13 +444,13 @@
 
     pthread_attr_t attr;                                                       /* Attribut de mutex pour parametrer le module */
     if ( pthread_attr_init(&attr) )                                                 /* Initialisation des attributs du thread */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_attr_init failed. Unloading.", thread_tech_id );
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': pthread_attr_init failed. Unloading.", thread_tech_id );
        Thread_Stop_safe ( module );
        return;
      }
 
     if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) )                       /* On le laisse joinable au boot */
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_setdetachstate failed. Unloading.", thread_tech_id );
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': pthread_setdetachstate failed. Unloading.", thread_tech_id );
        Thread_Stop_safe ( module );
        return;
      }
@@ -462,7 +461,7 @@
     pthread_mutex_init( &module->synchro, &param );
 
     if ( module->Thread_run && pthread_create( &module->TID, &attr, (void *)module->Run_thread, module ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': pthread_create failed. Unloading.", thread_tech_id );
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': pthread_create failed. Unloading.", thread_tech_id );
        Thread_Stop_safe ( module );
        return;
      }
@@ -470,7 +469,7 @@
     pthread_rwlock_wrlock ( &Partage->Threads_synchro );
     Partage->Threads = g_slist_append ( Partage->Threads, module );
     pthread_rwlock_unlock ( &Partage->Threads_synchro );
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Thread '%s' of class '%s' loaded with enable='%d'",
+    Info( __func__, "thread", thread_tech_id, LOG_NOTICE, "Thread '%s' of class '%s' loaded with enable='%d'",
               thread_tech_id, thread_classe, module->Thread_run );
   }
 /******************************************************************************************************************************/
@@ -480,11 +479,11 @@
 /******************************************************************************************************************************/
  void Thread_Stop_by_thread_tech_id ( gchar *thread_tech_id )
   { if (!thread_tech_id)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "thread_tech_id not provided" ); return; }
+     { Info( __func__, "thread", NULL, LOG_ERR, "thread_tech_id not provided" ); return; }
 
     struct THREAD *module = Thread_take_module_by_tech_id ( thread_tech_id );/* Sortie de la structure de la liste des Threads */
     if (!module)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "'%s': thread not found, so not stopped.", thread_tech_id ); return; }
+    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': thread not found, so not stopped.", thread_tech_id ); return; }
 
     Thread_Stop_safe ( module );                                     /* Arret du module hors liste, a l'issue module is freed */
   }
@@ -495,7 +494,7 @@
 /******************************************************************************************************************************/
  void Thread_Restart_by_thread_tech_id ( gchar *thread_tech_id )
   { if (!thread_tech_id)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "thread_tech_id not provided" ); return; }
+     { Info( __func__, "thread", NULL, LOG_ERR, "thread_tech_id not provided" ); return; }
 
     Thread_Stop_by_thread_tech_id ( thread_tech_id );
     Thread_Start_by_thread_tech_id ( thread_tech_id );
@@ -507,7 +506,7 @@
 /******************************************************************************************************************************/
  void Thread_Restart_by_classe ( gchar *thread_classe )
   { if (!thread_classe)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "thread_classe not provided" ); return; }
+     { Info( __func__, "thread", NULL, LOG_ERR, "thread_classe not provided" ); return; }
 
     GSList *Threads = Thread_List_by_classe ( thread_classe );
     GSList *liste = Threads;
@@ -525,11 +524,11 @@
 /******************************************************************************************************************************/
  void Thread_Start_all ( void )
   { JsonNode *api_result = Http_Post_to_global_API ( "/run/thread/load", NULL );
-    if (!api_result) { Info_new( __func__, Config.log_msrv, LOG_ERR, "%s: API Error for /run/thread LOAD",__func__ ); return; }
+    if (!api_result) { Info( __func__, "thread", NULL, LOG_ERR, "%s: API Error for /run/thread LOAD",__func__ ); return; }
 
     if (Json_get_int ( api_result, "http_code" ) == 200)                                           /* Chargement des modules */
      { JsonArray *array = Json_get_array ( api_result, "threads" );
-       Info_new( __func__, Config.log_msrv, LOG_INFO, "Loading %d thread(s)", json_array_get_length(array) );
+       Info( __func__, "thread", NULL, LOG_INFO, "Loading %d thread(s)", json_array_get_length(array) );
        GList *Threads = json_array_get_elements ( array );
        GList *threads = Threads;
        while(threads)
@@ -540,7 +539,7 @@
         }
        g_list_free(Threads);
      }
-    Json_node_unref(api_result);
+    Json_unref(api_result);
   }
 /******************************************************************************************************************************/
 /* Demarrer_dls: Processus D.L.S                                                                                              */
@@ -548,12 +547,12 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Demarrer_dls ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Demande de demarrage DLS %d", getpid() );
+  { Info( __func__, "thread", NULL, LOG_DEBUG, "Demande de demarrage DLS %d", getpid() );
     if ( pthread_create( &Partage->com_dls.TID, NULL, (void *)Run_dls, NULL ) )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "pthread_create failed" );
+     { Info( __func__, "thread", NULL, LOG_ERR, "pthread_create failed" );
        return(FALSE);
      }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "thread dls (%p) seems to be running", Partage->com_dls.TID );
+    Info( __func__, "thread", NULL, LOG_NOTICE, "thread dls (%p) seems to be running", Partage->com_dls.TID );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -561,9 +560,9 @@
 /* Entré/Sortie: néant                                                                                                        */
 /******************************************************************************************************************************/
  void Stopper_dls ( void )
-  { Info_new( __func__, Config.log_msrv, LOG_INFO, "Waiting for DLS (%p) to finish", Partage->com_dls.TID );
+  { Info( __func__, "thread", NULL, LOG_INFO, "Waiting for DLS (%p) to finish", Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;
     if ( Partage->com_dls.TID ) pthread_join ( Partage->com_dls.TID, NULL );                               /* Attente fin DLS */
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "ok, DLS is down" );
+    Info( __func__, "thread", NULL, LOG_NOTICE, "ok, DLS is down" );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -68,7 +68,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MQTT_on_mqtt_api_connect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected with return code %d: %s",
+  { Info( __func__, "mqtt", "api", LOG_NOTICE, "Connected with return code %d: %s",
               return_code, mosquitto_connack_string( return_code ) );
     if (return_code == 0)
      { Partage->MQTT_connected = TRUE ;
@@ -102,7 +102,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void MQTT_on_mqtt_api_disconnect_CB( struct mosquitto *mosq, void *obj, int return_code )
-  { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Disconnected with return code %d: %s",
+  { Info( __func__, "mqtt", "api", LOG_NOTICE, "Disconnected with return code %d: %s",
               return_code, mosquitto_connack_string( return_code ) );
     Partage->MQTT_connected = FALSE;
   }
@@ -119,9 +119,9 @@
     if (!tokens[2]) goto end; /* Normalement l'operation  */
 
     if ( strcasecmp( tokens[0], Json_get_string ( Config.config, "domain_uuid" ) ) )
-     { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Wrong domain_uuid '%s'. Dropping.", tokens[0] ); goto end; }
+     { Info( __func__, "mqtt", "api", LOG_NOTICE, "Wrong domain_uuid '%s'. Dropping.", tokens[0] ); goto end; }
 
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "MQTT Message received from API: %s/%s", tokens[1], tokens[2] );
+    Info( __func__, "mqtt", "api", LOG_DEBUG, "MQTT Message received from API: %s/%s", tokens[1], tokens[2] );
 
 /*-------------------------------------------------- Message with payload ----------------------------------------------------*/
     JsonNode *request = NULL;                                      /* Request peut etre nulle si mal formée ou pas de payload */
@@ -136,7 +136,7 @@
                   Json_has_member ( request, "log_msrv" ) && Json_has_member ( request, "headless" )
                 )
              )
-           { Info_new( __func__, Config.log_msrv, LOG_ERR, "AGENT_SET: wrong parameters" );
+           { Info( __func__, "mqtt", "api", LOG_ERR, "AGENT_SET: wrong parameters" );
              goto end;
            }
           Config.log_bus    = Json_get_bool ( request, "log_bus" );
@@ -146,24 +146,24 @@
           gint log_level    = Json_get_int  ( request, "log_level" );
           gchar *branche    = Json_get_string ( request, "branche" );
           Info_change_log_level ( log_level );
-          Info_new( __func__, TRUE, LOG_NOTICE, "AGENT_SET: log_msrv=%d, log_bus=%d, log_dls=%d, log_level=%d, headless=%d",
+          Info( __func__, "mqtt", "api", LOG_NOTICE, "AGENT_SET: log_msrv=%d, log_bus=%d, log_dls=%d, log_level=%d, headless=%d",
                     Config.log_msrv, Config.log_bus, Config.log_dls, log_level, headless );
           if (Config.headless != headless)
-           { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
+           { Info( __func__, "mqtt", "api", LOG_NOTICE, "AGENT_SET: headless has changed, rebooting" );
              Partage->Thread_run = FALSE;
            }
           if (strcmp ( WTD_BRANCHE, branche ))
-           { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "AGENT_SET: branche has changed, upgrading and rebooting" );
+           { Info( __func__, "mqtt", "api", LOG_NOTICE, "AGENT_SET: branche has changed, upgrading and rebooting" );
              MSRV_Agent_upgrade_to ( branche );
            }
         }
        else if ( !strcasecmp( tokens[2], "RESET") )
-        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "RESET: Stopping in progress" );
+        { Info( __func__, "mqtt", "api", LOG_NOTICE, "RESET: Stopping in progress" );
           Partage->Thread_run = FALSE;
           goto end;
         }
        else if ( !strcasecmp( tokens[2], "UPGRADE") )
-        { Info_new( __func__, Config.log_msrv, LOG_NOTICE, "UPGRADE: Upgrading in progress" );
+        { Info( __func__, "mqtt", "api", LOG_NOTICE, "UPGRADE: Upgrading in progress" );
           MSRV_Agent_upgrade_to ( WTD_BRANCHE );
           goto end;
         }
@@ -185,23 +185,24 @@
     else if ( !strcasecmp( tokens[1], "DLS") )
      { if ( !strcasecmp( tokens[2], "RELOAD") )
         { if ( !Json_has_member ( request, "tech_id" ) )
-           { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_RELOAD: tech_id is missing" );
+           { Info( __func__, "mqtt", "api", LOG_ERR, "DLS_RELOAD: tech_id is missing" );
              goto end_request;
            }
           gchar *target_tech_id = Json_get_string ( request, "tech_id" );
           struct DLS_PLUGIN *found = Dls_get_plugin_by_tech_id ( target_tech_id );
           if (found) Dls_Save_Data_to_API ( found );     /* Si trouvé, on sauve les valeurs des bits internes avant rechargement */
           struct DLS_PLUGIN *dls = Dls_Importer_un_plugin ( target_tech_id );
-          if (dls) Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': imported", target_tech_id );
-              else Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': error when importing", target_tech_id );
+            if (dls) Info( __func__, "mqtt", target_tech_id, LOG_NOTICE, "'%s': imported", target_tech_id );
+              else Info( __func__, "mqtt", target_tech_id, LOG_ERR, "'%s': error when importing", target_tech_id );
           Dls_Load_horloge_ticks();
         }
        else if ( !strcasecmp( tokens[2], "SET") )
         { if ( ! Json_has_member ( request, "tech_id" )  )
-           { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_SET: wrong parameters" );
+           { Info( __func__, "mqtt", "api", LOG_ERR, "DLS_SET: wrong parameters" );
              goto end_request;
            }
           gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
+          Info( __func__, "mqtt", plugin_tech_id, LOG_NOTICE, "DLS_SET: apply debug/enable update" );
           pthread_mutex_lock( &Partage->com_dls.synchro );               /* On stoppe DLS pour éviter la compilation multiple */
           if (Json_has_member ( request, "debug"  )) Dls_Debug_plugin   ( plugin_tech_id, Json_get_bool ( request, "debug" ) );
           if (Json_has_member ( request, "enable" )) Dls_Activer_plugin ( plugin_tech_id, Json_get_bool ( request, "enable" ) );
@@ -209,23 +210,24 @@
         }
        else if ( !strcasecmp( tokens[2], "RESTART") )
         { if ( !Json_has_member ( request, "tech_id" ) )
-           { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_RESTART: tech_id is missing" );
+           { Info( __func__, "mqtt", "api", LOG_ERR, "DLS_RESTART: tech_id is missing" );
              goto end_request;
            }
           gchar *target_tech_id = Json_get_string ( request, "tech_id" );
           struct DLS_PLUGIN *plugin = Dls_get_plugin_by_tech_id ( target_tech_id );
           if (plugin)
            { plugin->vars.resetted = TRUE;                                         /* au chargement, le bit de start vaut 1 ! */
-             Info_new( __func__, Config.log_dls, LOG_NOTICE, "'%s': _START sent to plugin", target_tech_id );
+             Info( __func__, "mqtt", target_tech_id, LOG_NOTICE, "'%s': _START sent to plugin", target_tech_id );
            }
-          else Info_new( __func__, Config.log_dls, LOG_ERR, "'%s': error when resetting: plugin not found.", target_tech_id );
+          else Info( __func__, "mqtt", target_tech_id, LOG_ERR, "'%s': error when resetting: plugin not found.", target_tech_id );
         }
        else if ( !strcasecmp( tokens[2], "ACQUIT") )
         { if ( !Json_has_member ( request, "tech_id" ) )
-           { Info_new( __func__, Config.log_msrv, LOG_ERR, "DLS_ACQUIT: tech_id is missing" );
+           { Info( __func__, "mqtt", "api", LOG_ERR, "DLS_ACQUIT: tech_id is missing" );
              goto end_request;
            }
           gchar *plugin_tech_id = Json_get_string ( request, "tech_id" );
+          Info( __func__, "mqtt", plugin_tech_id, LOG_NOTICE, "DLS_ACQUIT: acquit requested" );
           Dls_Acquitter_plugin ( plugin_tech_id );
         }
        else if ( !strcasecmp( tokens[2], "REMAP") )
@@ -250,13 +252,13 @@
     else if ( !strcasecmp( tokens[1], "SYNOPTIQUE") )
      { if ( !strcasecmp( tokens[2], "CLIC") )
         { if ( !Json_has_member ( request, "tech_id" ) )
-           { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end_request; }
+           { Info( __func__, "mqtt", "api", LOG_ERR, "SYN_CLIC: tech_id is missing" ); goto end_request; }
           if ( !Json_has_member ( request, "acronyme" ) )
-           { Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end_request; }
+           { Info( __func__, "mqtt", "api", LOG_ERR, "SYN_CLIC: acronyme is missing" ); goto end_request; }
           gchar *tech_id  = Json_get_string ( request, "tech_id" );
           gchar *acronyme = Json_get_string ( request, "acronyme" );
           struct DLS_DI *bit = Dls_data_DI_lookup ( tech_id, acronyme );
-          if (!bit) Info_new( __func__, Config.log_msrv, LOG_ERR, "SYN_CLIC: '%s:%s' not found. Dropping.", tech_id, acronyme );
+          if (!bit) Info( __func__, "mqtt", tech_id, LOG_ERR, "SYN_CLIC: '%s:%s' not found. Dropping.", tech_id, acronyme );
           else Dls_data_DI_set_pulse ( NULL, bit );
         }
      }
@@ -264,23 +266,23 @@
     else if ( !strcasecmp( tokens[1], "SET_GPS") )
      { if ( !Json_has_member ( request, "email" ) || !Json_has_member ( request, "latitude" ) ||
             !Json_has_member ( request, "longitude" ) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "SET_GPS: missing fields. Dropping." );
+        { Info( __func__, "mqtt", "api", LOG_ERR, "SET_GPS: missing fields. Dropping." );
           goto end_request;
         }
        gchar *email = Json_get_string ( request, "email" );
-       JsonNode *user_gps = Json_node_add_objet ( Partage->Users_GPS, email );
+       JsonNode *user_gps = Json_add_object( Partage->Users_GPS, email );
        if (user_gps)
         { gdouble latitude = Json_get_double ( request, "latitude" );
           gdouble longitude = Json_get_double ( request, "longitude" );
-          Json_node_add_double ( user_gps, "latitude",  latitude );
-          Json_node_add_double ( user_gps, "longitude", longitude );
-          Info_new( __func__, Config.log_msrv, LOG_INFO, 
+          Json_add_double( user_gps, "latitude",  latitude );
+          Json_add_double( user_gps, "longitude", longitude );
+          Info( __func__, "mqtt", "api", LOG_INFO, 
                     "SET_GPS: Updated GPS for user '%s': latitude=%f, longitude=%f", email, latitude, longitude );
         }
      }
 
 end_request:
-    Json_node_unref ( request );
+    Json_unref( request );
 end:
     g_strfreev( tokens );                                                                      /* Libération des tokens topic */
   }
@@ -300,11 +302,11 @@ end:
     va_end ( ap );
 
     gboolean free_node=FALSE;
-    if (!node) { node = Json_node_create(); free_node = TRUE; }
-    gchar *buffer = Json_node_to_string ( node );
+    if (!node) { node = Json_create(); free_node = TRUE; }
+    gchar *buffer = Json_to_string( node );
     mosquitto_publish( Partage->MQTT_API_session, NULL, topic_full, strlen(buffer), buffer, 2, TRUE );
     g_free(buffer);
-    if (free_node) Json_node_unref(node);
+    if (free_node) Json_unref(node);
   }
 /******************************************************************************************************************************/
 /* MQTT_Start_MQTT_API: Appelé pour démarrer les interactions MQTT du master avec l'API                                       */
@@ -318,7 +320,7 @@ end:
 
     Partage->MQTT_API_session = mosquitto_new( agent_uuid, TRUE, NULL );
     if (!Partage->MQTT_API_session)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API session error." ); return(FALSE); }
+     { Info( __func__, "mqtt", "api", LOG_ERR, "MQTT_API session error." ); return(FALSE); }
 
     mosquitto_log_callback_set        ( Partage->MQTT_API_session, MQTT_on_log_CB );
     mosquitto_connect_callback_set    ( Partage->MQTT_API_session, MQTT_on_mqtt_api_connect_CB );
@@ -331,16 +333,16 @@ end:
        const gchar *ca_path = Config.mqtt_ca_path[0] ? Config.mqtt_ca_path : MQTT_API_default_ca_path();
 
        if (! (ca_file || ca_path) )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT TLS setup error: no CA file or CA path found." );
+        { Info( __func__, "mqtt", "api", LOG_ERR, "MQTT TLS setup error: no CA file or CA path found." );
           return(FALSE);
         }
 
        gint retour_tls = mosquitto_tls_set( Partage->MQTT_API_session, ca_file, ca_path, NULL, NULL, NULL );
        if ( retour_tls != MOSQ_ERR_SUCCESS )
-        { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT TLS setup error: %s", mosquitto_strerror(retour_tls) );
+        { Info( __func__, "mqtt", "api", LOG_ERR, "MQTT TLS setup error: %s", mosquitto_strerror(retour_tls) );
           return(FALSE);
         }
-       Info_new( __func__, Config.log_msrv, LOG_INFO, "MQTT TLS trust store: cafile='%s', capath='%s'",
+       Info( __func__, "mqtt", "api", LOG_INFO, "MQTT TLS trust store: cafile='%s', capath='%s'",
                  ca_file ? ca_file : "", ca_path ? ca_path : "" );
      }
 
@@ -349,17 +351,17 @@ end:
     mosquitto_username_pw_set( Partage->MQTT_API_session, mqtt_username, Config.mqtt_password );
     retour = mosquitto_connect( Partage->MQTT_API_session, Config.mqtt_hostname, Config.mqtt_port, 60 );
     if ( retour != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT_API connection to '%s' error: %s",
+     { Info( __func__, "mqtt", "api", LOG_ERR, "MQTT_API connection to '%s' error: %s",
                  Config.mqtt_hostname, mosquitto_strerror ( retour ) );
        return(FALSE);
      }
 
     retour = mosquitto_loop_start( Partage->MQTT_API_session );
     if ( retour != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "MQTT loop not started: ", mosquitto_strerror ( retour ) );
+     { Info( __func__, "mqtt", "api", LOG_ERR, "MQTT loop not started: ", mosquitto_strerror ( retour ) );
        return(FALSE);
      }
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Connected as %s with id %s on %s.",
+    Info( __func__, "mqtt", "api", LOG_NOTICE, "Connected as %s with id %s on %s.",
               mqtt_username, agent_uuid, Config.mqtt_hostname );
     return(TRUE);
   }

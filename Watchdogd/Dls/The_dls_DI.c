@@ -37,7 +37,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_DI *bit = g_try_malloc0 ( sizeof(struct DLS_DI) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+    { Info( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -46,7 +46,7 @@
     bit->archivage = Json_get_int ( element, "archivage" );
     bit->etat      = Json_get_bool ( element, "etat" );
     plugin->Dls_data_DI = g_slist_prepend ( plugin->Dls_data_DI, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info( __func__, "dls", tech_id, LOG_INFO,
               "Create bit DLS_DI '%s:%s'=%d (%s) archivage=%d",
                bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->archivage );
   }
@@ -105,7 +105,7 @@
 
     if (bit->etat != valeur)
      { bit->etat = valeur;
-       Info_new( __func__, Config.log_dls, LOG_NOTICE, "Changing DLS_DI '%s:%s'=%d up %d down %d",
+      Info( __func__, "dls", bit->tech_id, LOG_NOTICE, "Changing DLS_DI '%s:%s'=%d up %d down %d",
                  bit->tech_id, bit->acronyme, valeur, bit->edge_up, bit->edge_down );
        if (valeur) Partage->com_dls.Set_Dls_DI_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_up,   bit );
               else Partage->com_dls.Set_Dls_DI_Edge_down = g_slist_prepend ( Partage->com_dls.Set_Dls_DI_Edge_down, bit );
@@ -122,7 +122,7 @@
  void Dls_data_DI_set_pulse ( struct DLS_TO_PLUGIN *vars, struct DLS_DI *bit )
   { if (!bit) return;
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bit );
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_NOTICE,
+    Info( __func__, "dls", bit->tech_id, LOG_NOTICE,
               "Mise a un du bit DI '%s:%s' demandée", bit->tech_id, bit->acronyme );
   }
 /******************************************************************************************************************************/
@@ -148,12 +148,12 @@
 
     struct DLS_DI *bit = Dls_data_DI_lookup ( tech_id, acronyme );
     if (!bit)
-     { Info_new( __func__, Config.log_bus, LOG_WARNING, "SET_DI from '%s': '%s:%s'/'%s:%s' not found",
+     { Info( __func__, "mqtt", "local", LOG_WARNING, "SET_DI from '%s': '%s:%s'/'%s:%s' not found",
                  thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme );
        return(FALSE);
      }
 
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_DI from '%s': '%s:%s'/'%s:%s'=%d (%s)",
+    Info( __func__, "mqtt", "local", LOG_INFO, "SET_DI from '%s': '%s:%s'/'%s:%s'=%d (%s)",
               thread_tech_id, thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_bool ( request, "etat" ), bit->libelle );
     Dls_data_DI_set ( bit, Json_get_bool ( request, "etat" ) );
@@ -165,9 +165,9 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_DI_to_json ( JsonNode *element, struct DLS_DI *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat", bit->etat );
+  { Json_add_string ( element, "tech_id",  bit->tech_id );
+    Json_add_string ( element, "acronyme", bit->acronyme );
+    Json_add_bool   ( element, "etat", bit->etat );
   }
 /******************************************************************************************************************************/
 /* Dls_all_DI_to_json: Transforme tous les bits en JSON                                                                       */
@@ -179,7 +179,7 @@
     GSList *liste = plugin->Dls_data_DI;
     while ( liste )
      { struct DLS_DI *bit = liste->data;
-       JsonNode *element = Json_node_create();
+       JsonNode *element = Json_create();
        Dls_DI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
@@ -191,11 +191,11 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_DI_export_to_API ( struct DLS_DI *bit )
-  { JsonNode *element = Json_node_create ();
+  { JsonNode *element = Json_create ();
     if (element)
-     { Json_node_add_bool ( element, "etat", bit->etat );
+     { Json_add_bool ( element, "etat", bit->etat );
        MQTT_Send_to_API   ( element, "DLS_REPORT/DI/%s/%s", bit->tech_id, bit->acronyme );
-       Json_node_unref    ( element );
+       Json_unref    ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

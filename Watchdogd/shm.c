@@ -40,7 +40,7 @@
     gint taille;
 
     taille = sizeof( struct PARTAGE );                                      /* Le jeton, les comms, les I */
-    Info_new( __func__, Config.log_msrv, LOG_INFO, "Shm_init: size required = %d", taille );
+    Info( __func__, "shm", NULL, LOG_INFO, "Shm_init: size required = %d", taille );
 
     partage = g_try_malloc0( taille );
     return(partage);
@@ -51,7 +51,7 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Shm_stop ( struct PARTAGE *partage )
-  { Info_new( __func__, Config.log_msrv, LOG_INFO, "Shm_stop: freeing memory" );
+  { Info( __func__, "shm", NULL, LOG_INFO, "Shm_stop: freeing memory" );
     g_free(Partage); Partage=NULL;
     return(TRUE);
   }

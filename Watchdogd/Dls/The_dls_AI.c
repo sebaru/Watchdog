@@ -37,7 +37,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_AI *bit = g_try_malloc0 ( sizeof(struct DLS_AI) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+    { Info( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -48,7 +48,7 @@
     bit->valeur    = Json_get_double ( element, "valeur"    );
     bit->in_range  = Json_get_bool   ( element, "in_range"  );
     plugin->Dls_data_AI = g_slist_prepend ( plugin->Dls_data_AI, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info( __func__, "dls", tech_id, LOG_INFO,
               "Create bit DLS_AI '%s:%s'=%f %s (%s) archivage=%d",
               bit->tech_id, bit->acronyme, bit->valeur, bit->unite, bit->libelle, bit->archivage );
   }
@@ -97,7 +97,7 @@
   { if (!bit) return;
     bit->valeur   = valeur;
     bit->in_range = in_range;
-    Info_new( __func__, Config.log_dls, LOG_DEBUG,
+    Info( __func__, "dls", bit->tech_id, LOG_DEBUG,
               "Changing DLS_AI '%s:%s'=%f %s", bit->tech_id, bit->acronyme, bit->valeur, bit->unite );
     Dls_AI_export_to_API ( bit );                                                                            /* envoi a l'API */
   }
@@ -124,12 +124,12 @@
 
     struct DLS_AI *bit = Dls_data_AI_lookup ( tech_id, acronyme );
     if (!bit)
-     { Info_new( __func__, Config.log_bus, LOG_DEBUG, "SET_AI '%s:%s'/'%s:%s' not found",
+     { Info( __func__, "mqtt", "local", LOG_DEBUG, "SET_AI '%s:%s'/'%s:%s' not found",
                  thread_tech_id, thread_acronyme, tech_id, acronyme );
        return(FALSE);
      }
 
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_AI '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
+    Info( __func__, "mqtt", "local", LOG_INFO, "SET_AI '%s:%s'/'%s:%s'=%f %s (range=%d) (%s)",
               thread_tech_id, thread_acronyme, tech_id, acronyme,
               Json_get_double ( request, "valeur" ), bit->unite,
               Json_get_bool ( request, "in_range" ), bit->libelle );
@@ -142,14 +142,14 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_AI_to_json ( JsonNode *element, struct DLS_AI *bit )
-  { Json_node_add_string ( element, "classe",    "AI" );
-    Json_node_add_string ( element, "tech_id",   bit->tech_id );
-    Json_node_add_string ( element, "acronyme",  bit->acronyme );
-    Json_node_add_double ( element, "valeur",    bit->valeur );
-    Json_node_add_string ( element, "unite",     bit->unite );
-    Json_node_add_bool   ( element, "in_range",  bit->in_range );
-    Json_node_add_int    ( element, "archivage", bit->archivage );
-    Json_node_add_string ( element, "libelle",   bit->libelle );
+  { Json_add_string ( element, "classe",    "AI" );
+    Json_add_string ( element, "tech_id",   bit->tech_id );
+    Json_add_string ( element, "acronyme",  bit->acronyme );
+    Json_add_double ( element, "valeur",    bit->valeur );
+    Json_add_string ( element, "unite",     bit->unite );
+    Json_add_bool   ( element, "in_range",  bit->in_range );
+    Json_add_int    ( element, "archivage", bit->archivage );
+    Json_add_string ( element, "libelle",   bit->libelle );
   }
 /******************************************************************************************************************************/
 /* Dls_all_AI_to_json: Transforme tous les bits en JSON                                                                       */
@@ -161,7 +161,7 @@
     GSList *liste = plugin->Dls_data_AI;
     while ( liste )
      { struct DLS_AI *bit = liste->data;
-       JsonNode *element = Json_node_create();
+       JsonNode *element = Json_create();
        Dls_AI_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
@@ -173,12 +173,12 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_AI_export_to_API ( struct DLS_AI *bit )
-  { JsonNode *element = Json_node_create ();
+  { JsonNode *element = Json_create ();
     if (element)
-     { Json_node_add_double ( element, "valeur",    bit->valeur );
-       Json_node_add_bool   ( element, "in_range",  bit->in_range );
+     { Json_add_double ( element, "valeur",    bit->valeur );
+       Json_add_bool   ( element, "in_range",  bit->in_range );
        MQTT_Send_to_API     ( element, "DLS_REPORT/AI/%s/%s", bit->tech_id, bit->acronyme );
-       Json_node_unref      ( element );
+       Json_unref      ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

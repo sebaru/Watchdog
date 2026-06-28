@@ -44,7 +44,7 @@
        case MOSQ_LOG_WARNING: info_level = LOG_WARNING; break;
        case MOSQ_LOG_ERR:     info_level = LOG_ERR;     break;
      }
-    Info_new( __func__, Config.log_msrv, info_level, "%s", message );
+    Info( __func__, "mqtt", "mqtt", info_level, "%s", message );
   }
 /******************************************************************************************************************************/
 /* MQTT_Subscribe: souscrit à un topic                                                                                        */
@@ -59,7 +59,7 @@
     va_end ( ap );
     gchar *topic = g_try_malloc(taille+1);
     if (!topic)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Memory Error for '%s'", format );
+     { Info( __func__, "mqtt", "mqtt", LOG_ERR, "Memory Error for '%s'", format );
        return;
      }
 
@@ -68,9 +68,9 @@
     va_end ( ap );
 
     if ( mosquitto_subscribe( mqtt_session, NULL, topic, 2 ) != MOSQ_ERR_SUCCESS )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "Subscribe to topic '%s' FAILED", topic ); }
+     { Info( __func__, "mqtt", "mqtt", LOG_ERR, "Subscribe to topic '%s' FAILED", topic ); }
     else
-     { Info_new( __func__, Config.log_bus, LOG_INFO, "Subscribe to topic '%s' OK", topic ); }
+     { Info( __func__, "mqtt", "mqtt", LOG_INFO, "Subscribe to topic '%s' OK", topic ); }
 
     g_free(topic);
   }

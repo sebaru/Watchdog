@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_BI *bit = g_try_malloc0 ( sizeof(struct DLS_BI) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+    { Info( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -53,7 +53,7 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_BI = g_slist_prepend ( plugin->Dls_data_BI, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info( __func__, "dls", tech_id, LOG_INFO,
               "Create bit DLS_BI '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -85,7 +85,7 @@
   { if (!bi) return;
 
     if (bi->etat != valeur)
-     { Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    { Info( __func__, "dls", bi->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_BI '%s:%s'=%d up %d down %d",
                  (vars ? vars->num_ligne : -1), bi->tech_id, bi->acronyme, valeur, bi->edge_up, bi->edge_down );
        bi->etat = valeur;
@@ -127,11 +127,11 @@
 /* Sortie : le JSON                                                                                                           */
 /******************************************************************************************************************************/
  void Dls_BI_export_to_API ( struct DLS_BI *bit )
-  { JsonNode *element = Json_node_create ();
+  { JsonNode *element = Json_create ();
     if (element)
-     { Json_node_add_bool ( element, "etat", bit->etat );
+     { Json_add_bool ( element, "etat", bit->etat );
        MQTT_Send_to_API   ( element, "DLS_REPORT/BI/%s/%s", bit->tech_id, bit->acronyme );
-       Json_node_unref    ( element );
+       Json_unref    ( element );
      }
   }
 /******************************************************************************************************************************/
@@ -144,10 +144,10 @@
     GSList *liste = plugin->Dls_data_BI;
     while ( liste )
      { struct DLS_BI *bit = liste->data;
-       JsonNode *element = Json_node_create();
-       Json_node_add_string ( element, "tech_id",  bit->tech_id );
-       Json_node_add_string ( element, "acronyme", bit->acronyme );
-       Json_node_add_bool   ( element, "etat",     bit->etat );
+       JsonNode *element = Json_create();
+       Json_add_string ( element, "tech_id",  bit->tech_id );
+       Json_add_string ( element, "acronyme", bit->acronyme );
+       Json_add_bool   ( element, "etat",     bit->etat );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
      }

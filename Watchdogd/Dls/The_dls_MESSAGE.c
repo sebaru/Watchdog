@@ -40,7 +40,7 @@
 /* Entrée : le pointeur vers la structure du message                                                                          */
 /******************************************************************************************************************************/
  static void Dls_data_MESSAGE_free_one ( struct DLS_MESSAGE *bit )
-  { Json_node_unref ( bit->source_node );
+  { Json_unref ( bit->source_node );
     g_free(bit);
   }
 /******************************************************************************************************************************/
@@ -61,7 +61,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_MESSAGE *bit = g_try_malloc0 ( sizeof(struct DLS_MESSAGE) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+    { Info( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -72,7 +72,7 @@
     bit->libelle_is_dynamic = ( g_utf8_strchr( Json_get_string ( element, "libelle" ), -1, '$') ? TRUE : FALSE );
 
     plugin->Dls_data_MESSAGE = g_slist_prepend ( plugin->Dls_data_MESSAGE, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info( __func__, "dls", tech_id, LOG_INFO,
               "Create bit DLS_MESSAGE '%s:%s'=%d", bit->tech_id, bit->acronyme, bit->etat );
   }
 /******************************************************************************************************************************/
@@ -116,7 +116,7 @@
   { if (! (plugin && msg)) return;
     struct DLS_MESSAGE_EVENT *event = g_try_malloc0( sizeof (struct DLS_MESSAGE_EVENT) );
     if (!event)
-     { Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_ERR,
+    { Info( __func__, "dls", plugin->tech_id, LOG_ERR,
                 "Memory error for MSG'%s:%s' = %d", msg->tech_id, msg->acronyme, msg->etat );
        return;
      }
@@ -143,7 +143,7 @@
         { /* pas de desactivation msg quand dans un groupe, donc no action */ }
        else if ( msg->etat == TRUE && msg->new_etat == FALSE )             /* si le message est désactivé après run du plugin */
         { Dls_Add_message_to_master_list ( plugin, msg );
-          Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_DEBUG,
+          Info( __func__, "dls", plugin->tech_id, LOG_DEBUG,
                     "ligne %04d: Changing DLS_MSG '%s:%s'=FALSE", msg->new_etat_by_line, msg->tech_id, msg->acronyme );
           Partage->audit_bit_interne_per_sec++;
         }
@@ -157,7 +157,7 @@
                 if (search_msg != msg && Json_get_int ( search_msg->source_node, "groupe" ) == groupe )
                  { search_msg->new_etat = search_msg->etat = FALSE;
                    Dls_Add_message_to_master_list ( plugin, search_msg );
-                   Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_DEBUG,
+                   Info( __func__, "dls", plugin->tech_id, LOG_DEBUG,
                     "ligne %04d: Changing DLS_MSG '%s:%s'=FALSE (via groupe %d)", msg->new_etat_by_line, msg->tech_id, msg->acronyme, groupe );
                    Partage->audit_bit_interne_per_sec++;
                  }
@@ -174,8 +174,8 @@
            }
           else g_snprintf ( msg->libelle_converted, sizeof(msg->libelle_converted), "%s", libelle_source ); /* Pas de conversion */
           Dls_Add_message_to_master_list ( plugin, msg );
-          Info_new( __func__, (Config.log_dls || plugin->vars.debug), LOG_DEBUG,
-                    "ligne %04d: Changing DLS_MSG '%s:%s'=TRUE", msg->new_etat_by_line, msg->tech_id, msg->acronyme );
+          Info( __func__, "dls", plugin->tech_id, LOG_DEBUG,
+                    "ligne %04d: Changing DLS_MSG '%s:%s'=TRUE", msg->new_etat_by_line, plugin->tech_id, msg->acronyme );
           Partage->audit_bit_interne_per_sec++;
         }
        else if ( msg->etat && msg->libelle_is_dynamic && freeze >=0 &&              /* Update periodique du libelle dynamique */

@@ -38,14 +38,14 @@
 /******************************************************************************************************************************/
  static void Phidget_print_error ( struct PHIDGET_ELEMENT *canal )
   { PhidgetReturnCode errorCode;
-    /*gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");*/
+    gchar *thread_tech_id = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *capteur = Json_get_string(canal->element, "capteur");
     gchar *classe  = Json_get_string(canal->element, "classe");
     size_t errorDetailLen = 256;
     const gchar* errorString;
     gchar errorDetail[errorDetailLen];
     Phidget_getLastError(&errorCode, &errorString, errorDetail, &errorDetailLen);
-    Info_new( __func__, canal->module->Thread_debug, LOG_ERR, "Phidget Error %d for '%s' (%s) : %s - %s",
+    Info( __func__, "phidget", thread_tech_id, LOG_ERR, "Phidget Error %d for '%s' (%s) : %s - %s",
               errorCode, capteur, classe, errorString, errorDetail );
   }
 /******************************************************************************************************************************/
@@ -61,12 +61,12 @@
     gchar *classe          = Json_get_string(canal->element, "classe");
 
     if ( !strcmp ( classe, "AI" ) )
-     { Info_new( __func__, canal->module->Thread_debug, LOG_ERR, "Error for '%s:%s' : '%s' (code %X). Set in_range = FALSE.",
+    { Info( __func__, "phidget", thread_tech_id, LOG_ERR, "Error for '%s:%s' : '%s' (code %X). Set in_range = FALSE.",
                  thread_tech_id, thread_acronyme, description, code );
        MQTT_Send_AI ( canal->module, canal->element, 0.0, FALSE );
      }
     else
-     { Info_new( __func__, canal->module->Thread_debug, LOG_ERR, "Error for '%s:%s' : '%s' (code %X).",
+    { Info( __func__, "phidget", thread_tech_id, LOG_ERR, "Error for '%s:%s' : '%s' (code %X).",
                  thread_tech_id, thread_acronyme, description, code );
      }
   }
@@ -79,7 +79,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info( __func__, "phidget", thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -91,7 +91,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info( __func__, "phidget", thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -103,7 +103,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info( __func__, "phidget", thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -116,7 +116,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info( __func__, "phidget", thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -129,7 +129,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
+    Info( __func__, "phidget", thread_tech_id, LOG_DEBUG, "'%s:%s' = %f", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -141,7 +141,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, valeur );
+    Info( __func__, "phidget", thread_tech_id, LOG_DEBUG, "'%s:%s' = %d", thread_tech_id, thread_acronyme, valeur );
     MQTT_Send_DI ( canal->module, canal->element, (valeur ? TRUE : FALSE) );
   }
 /******************************************************************************************************************************/
@@ -153,7 +153,7 @@
   { struct PHIDGET_ELEMENT *canal = ctx;
     gchar *thread_tech_id  = Json_get_string(canal->module->config, "thread_tech_id");
     gchar *thread_acronyme = Json_get_string(canal->element, "thread_acronyme");
-    Info_new( __func__, canal->module->Thread_debug, LOG_DEBUG, "'%s:%s' = %f %s", thread_tech_id, thread_acronyme, valeur, sensorUnit->symbol );
+    Info( __func__, "phidget", thread_tech_id, LOG_DEBUG, "'%s:%s' = %f %s", thread_tech_id, thread_acronyme, valeur, sensorUnit->symbol );
     MQTT_Send_AI ( canal->module, canal->element, valeur, TRUE );
   }
 /******************************************************************************************************************************/
@@ -234,7 +234,7 @@
 
     if ( !strcmp ( classe, "AI" ) ) { Phidget_AnalogAttach ( canal ); }
 
-    Info_new( __func__, canal->module->Thread_debug, LOG_NOTICE,
+    Info( __func__, "phidget", thread_tech_id, LOG_NOTICE,
               "'%s:%s' Phidget S/N '%d' Port '%d' capteur '%s' (canal '%d') attached. %d channels available.",
               thread_tech_id, thread_acronyme, serial_number, port, capteur, num_canal, nbr_canaux );
 
@@ -257,7 +257,7 @@
     Phidget_getHubPort( handle, &port );
     Phidget_getChannel( handle, &num_canal );
 
-    Info_new( __func__, canal->module->Thread_debug, LOG_NOTICE,
+    Info( __func__, "phidget", thread_tech_id, LOG_NOTICE,
               "'%s:%s' Phidget S/N '%d' Port '%d' classe '%s' (canal '%d') detached . %d channels available.",
               thread_tech_id, thread_acronyme, serial_number, port, classe, num_canal, nbr_canaux );
     canal->attached = FALSE;
@@ -296,15 +296,16 @@
  static void Phidget_Charger_un_IO (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct THREAD *module = user_data;
     struct PHIDGET_VARS *vars = module->vars;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gint serial    = Json_get_int   ( module->config, "serial" );
     gchar *capteur = Json_get_string( element, "capteur" );
     gint port      = Json_get_int   ( element, "port" );
 
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Loading S/N %d, port '%d', capteur '%s'", serial, port, capteur );
+    Info( __func__, "phidget", thread_tech_id, LOG_INFO, "Loading S/N %d, port '%d', capteur '%s'", serial, port, capteur );
 
     struct PHIDGET_ELEMENT *canal = g_try_malloc0 ( sizeof(struct PHIDGET_ELEMENT) );
     if (!canal)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
+    { Info( __func__, "phidget", thread_tech_id, LOG_ERR, "Memory Error on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
        return;
      }
 
@@ -400,7 +401,7 @@
        Phidget_set_config ( canal, serial, port, TRUE );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_INFO,
+    { Info( __func__, "phidget", thread_tech_id, LOG_INFO,
                  "capteur phidget inconnue on S/N %d, port '%d' capteur '%s'", serial, port, capteur );
        goto error;
      }
@@ -452,27 +453,27 @@ error:
     gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
     if (!msg_thread_tech_id)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque msg_thread_tech_id" );
+    { Info( __func__, "phidget", thread_tech_id, LOG_ERR, "Requete mal formée manque msg_thread_tech_id" );
        return;
      }
 
     if (!msg_thread_acronyme)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque msg_thread_acronyme" );
+    { Info( __func__, "phidget", thread_tech_id, LOG_ERR, "Requete mal formée manque msg_thread_acronyme" );
        return;
      }
 
     if (strcasecmp (msg_thread_tech_id, thread_tech_id))
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Pas pour nous" );
+    { Info( __func__, "phidget", thread_tech_id, LOG_DEBUG, "Pas pour nous" );
        return;
      }
 
     if (!Json_has_member ( msg, "etat" ))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque etat" );
+    { Info( __func__, "phidget", thread_tech_id, LOG_ERR, "Requete mal formée manque etat" );
        return;
      }
 
     gboolean etat = Json_get_bool ( msg, "etat" );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
+    Info( __func__, "phidget", thread_tech_id, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
               msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
 
     GSList *liste = vars->Liste_sensors;
@@ -503,25 +504,25 @@ error:
     gchar *hostname    = Json_get_string ( module->config, "hostname" );
     gchar *description = Json_get_string ( module->config, "description" );
 
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "%s: Loading %s('%s')", thread_tech_id, hostname, description );
+    Info( __func__, "phidget", thread_tech_id, LOG_INFO, "%s: Loading %s('%s')", thread_tech_id, hostname, description );
 
     PhidgetReturnCode result = PhidgetNet_addServer( hostname, hostname, 5661, Json_get_string(module->config, "password"), 0);
     if (result != EPHIDGET_OK)
      { const gchar *error;
        Phidget_getErrorDescription ( result, &error );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "PhidgetNet_addServer failed: '%s'", error );
+       Info( __func__, "phidget", thread_tech_id, LOG_ERR, "PhidgetNet_addServer failed: '%s'", error );
        goto connect_failed;
-     } else Info_new ( __func__, module->Thread_debug, LOG_INFO, "PhidgetNet_addServer '%s' success: '%s'", hostname );
+     } else Info( __func__, "phidget", thread_tech_id, LOG_INFO, "PhidgetNet_addServer '%s' success: '%s'", hostname );
 
-    JsonNode *RootNode = Json_node_create ();                                                     /* Envoi de la conf a l'API */
+    JsonNode *RootNode = Json_create ();                                                     /* Envoi de la conf a l'API */
     if (RootNode)
-     { Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
+     { Json_add_string ( RootNode, "thread_tech_id", thread_tech_id );
        JsonNode *API_result = Http_Post_to_global_API ( "/run/phidget/add/io", RootNode );
-       Json_node_unref ( API_result );
-       Json_node_unref ( RootNode );
+       Json_unref ( API_result );
+       Json_unref ( RootNode );
      }
 /* Chargement des I/O */
-    Json_node_foreach_array_element ( module->config, "IO", Phidget_Charger_un_IO, module );
+    Json_foreach_array_element ( module->config, "IO", Phidget_Charger_un_IO, module );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
@@ -543,7 +544,7 @@ error:
            { gchar *token_lvl0 = Json_get_string ( request, "token_lvl0" );
              if ( !strcasecmp( token_lvl0, "SET_DO" ) ) { Phidget_SET_DO ( module, request ); }
            }
-          Json_node_unref (request);
+          Json_unref (request);
         }
      }
 

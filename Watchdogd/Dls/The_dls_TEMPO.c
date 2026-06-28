@@ -45,14 +45,14 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_TEMPO *bit = g_try_malloc0 ( sizeof(struct DLS_TEMPO) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+    { Info( __func__, "dls", plugin->tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_TEMPO = g_slist_prepend ( plugin->Dls_data_TEMPO, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info( __func__, "dls", plugin->tech_id, LOG_INFO,
               "Create bit DLS_TEMPO '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -96,14 +96,14 @@
           tempo->delai_off = 0;
         }
        tempo->date_on = Partage->top + tempo->delai_on;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d, WAIT_FOR_DELAI_ON",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
 
     if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
      { tempo->status = DLS_TEMPO_NOT_COUNTING;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d, NOT_COUNTING",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
@@ -111,7 +111,7 @@
     if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON && tempo->date_on <= Partage->top)
      { tempo->status = DLS_TEMPO_WAIT_FOR_MIN_ON;
        tempo->state = TRUE;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_MIN_ON",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
@@ -122,7 +122,7 @@
             { tempo->date_off = tempo->date_on+tempo->min_on; }
        else { tempo->date_off = Partage->top+tempo->delai_off; }
        tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_OFF",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
@@ -131,7 +131,7 @@
         tempo->date_on + tempo->min_on <= Partage->top )
      { tempo->date_off = Partage->top+tempo->delai_off;
        tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_OFF",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
@@ -139,7 +139,7 @@
     if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
         tempo->date_on + tempo->min_on <= Partage->top )
      { tempo->status = DLS_TEMPO_WAIT_FOR_MAX_ON;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_MAX_ON",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
@@ -152,7 +152,7 @@
             }
        else { tempo->date_off = Partage->top+tempo->delai_off; }
        tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_OFF",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
@@ -161,7 +161,7 @@
         tempo->date_on + tempo->max_on <= Partage->top )
      { tempo->date_off = tempo->date_on+tempo->max_on;
        tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_DELAI_OFF",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
@@ -170,14 +170,14 @@
      { tempo->date_on = tempo->date_off = 0;
        tempo->status = DLS_TEMPO_WAIT_FOR_COND_OFF;
        tempo->state = FALSE;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d WAIT_FOR_COND_OFF",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
 
     if (tempo->status == DLS_TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
      { tempo->status = DLS_TEMPO_NOT_COUNTING;
-       Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG,
                  "ligne %04d: Changing DLS_TEMPO '%s:%s'=%d NOT_COUNTING",
                  (vars ? vars->num_ligne : -1), tempo->tech_id, tempo->acronyme, tempo->state );
      }
@@ -196,7 +196,7 @@
        tempo->delai_off = delai_off;
        tempo->random    = random;
        tempo->init      = TRUE;
-       Info_new( __func__, Config.log_dls, LOG_DEBUG, "%s: Initializing TEMPO '%s:%s'",
+      Info( __func__, "dls", tempo->tech_id, LOG_DEBUG, "%s: Initializing TEMPO '%s:%s'",
                  __func__, tempo->tech_id, tempo->acronyme );
      }
     ST_local ( vars, tempo, etat );                                                               /* Recopie dans la variable */
@@ -224,15 +224,15 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_TEMPO_to_json ( JsonNode *element, struct DLS_TEMPO *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool ( element, "etat",   bit->state );
-    Json_node_add_int  ( element, "daa", bit->delai_on );
-    Json_node_add_int  ( element, "dma", bit->min_on );
-    Json_node_add_int  ( element, "dMa", bit->max_on );
-    Json_node_add_int  ( element, "dad", bit->delai_off );
-    Json_node_add_int  ( element, "date_on", bit->date_on );
-    Json_node_add_int  ( element, "date_off", bit->date_off );
+  { Json_add_string ( element, "tech_id",  bit->tech_id );
+    Json_add_string ( element, "acronyme", bit->acronyme );
+    Json_add_bool ( element, "etat",   bit->state );
+    Json_add_int  ( element, "daa", bit->delai_on );
+    Json_add_int  ( element, "dma", bit->min_on );
+    Json_add_int  ( element, "dMa", bit->max_on );
+    Json_add_int  ( element, "dad", bit->delai_off );
+    Json_add_int  ( element, "date_on", bit->date_on );
+    Json_add_int  ( element, "date_off", bit->date_off );
     gchar *status;
     switch ( bit->status )
      { default:
@@ -243,6 +243,6 @@
        case DLS_TEMPO_WAIT_FOR_MAX_ON:    status = "WAIT_FOR_MAX_ON";    break;
        case DLS_TEMPO_WAIT_FOR_COND_OFF:  status = "WAIT_FOR_COND_OFF";  break;
      }
-    Json_node_add_string ( element, "status", status );
+    Json_add_string ( element, "status", status );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

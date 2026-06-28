@@ -39,24 +39,25 @@
  static void Charger_un_gpio (JsonArray *array, guint index_, JsonNode *element, gpointer user_data )
   { struct THREAD *module = user_data;
     struct GPIOD_VARS *vars = module->vars;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     gint num = Json_get_int ( element, "num" );
     if (num >= vars->num_lines)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: num %d is out of range (>=%d)",
+     { Info( __func__, "gpiod", thread_tech_id, LOG_ERR, "%s: num %d is out of range (>=%d)",
                  Json_get_string ( element, "thread_acronyme" ), num, vars->num_lines );
        return;
      }
-    Json_node_add_bool ( element, "need_sync", TRUE );
+    Json_add_bool ( element, "need_sync", TRUE );
     vars->lignes[num].element        = element;
     vars->lignes[num].mode_inout     = Json_get_int ( element, "mode_inout" );
     vars->lignes[num].mode_activelow = Json_get_int ( element, "mode_activelow" );
-    Info_new( __func__, module->Thread_debug, LOG_INFO,
+    Info( __func__, "gpiod", thread_tech_id, LOG_INFO,
               "Chargement du GPIO%02d en mode_inout %d, mode_activelow=%d",
               num, vars->lignes[num].mode_inout, vars->lignes[num].mode_activelow );
 
     struct gpiod_line_settings *settings = gpiod_line_settings_new();
     if (!settings)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d: gpiod_line_settings_new error", num );
+     { Info( __func__, "gpiod", thread_tech_id, LOG_ERR, "GPIO%02d: gpiod_line_settings_new error", num );
        return;
      }
 
@@ -65,7 +66,7 @@
 
     struct gpiod_line_config *line_cfg = gpiod_line_config_new();
     if (!line_cfg)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d: gpiod_line_config_new error", num );
+     { Info( __func__, "gpiod", thread_tech_id, LOG_ERR, "GPIO%02d: gpiod_line_config_new error", num );
        return;
      }
 
@@ -75,7 +76,7 @@
        if (req_cfg) gpiod_request_config_set_consumer(req_cfg, "WATCHDOG GPIO Thread");
        vars->lignes[num].gpio_ligne = gpiod_chip_request_lines(vars->chip, req_cfg, line_cfg);
        if (!vars->lignes[num].gpio_ligne)
-        { Info_new( __func__, module->Thread_debug, LOG_ERR, "GPIO%02d: gpiod_chip_request_lines error", num );
+        { Info( __func__, "gpiod", thread_tech_id, LOG_ERR, "GPIO%02d: gpiod_chip_request_lines error", num );
           return;
         }
        if (req_cfg) gpiod_request_config_free(req_cfg);
@@ -89,7 +90,7 @@
         }
        else                                                                                                /* Pour une sortie */
         { vars->lignes[num].etat = gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, vars->lignes[num].mode_activelow ); }
-       Json_node_add_int ( element, "etat", vars->lignes[num].etat );
+       Json_add_int ( element, "etat", vars->lignes[num].etat );
      }
   }
 /******************************************************************************************************************************/
@@ -104,37 +105,37 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     vars->chip = gpiod_chip_open("/dev/gpiochip0");
     if (!vars->chip)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error while loading chip 'gpiochip0'" );
+     { Info( __func__, "gpiod", thread_tech_id, LOG_ERR, "Error while loading chip 'gpiochip0'" );
        goto end;
      }
-    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Chip 'gpiochip0' loaded" );
+    else Info( __func__, "gpiod", thread_tech_id, LOG_NOTICE, "Chip 'gpiochip0' loaded" );
 
     struct gpiod_chip_info *info = gpiod_chip_get_info(vars->chip);
     if (!info) goto end;
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s [%s] %d lines",
+    Info( __func__, "gpiod", thread_tech_id, LOG_NOTICE, "%s [%s] %d lines",
               gpiod_chip_info_get_name(info), gpiod_chip_info_get_label(info), gpiod_chip_info_get_num_lines(info) );
     vars->num_lines = gpiod_chip_info_get_num_lines(info);
     gpiod_chip_info_free(info);
 
     if (vars->num_lines > GPIOD_MAX_LINE) vars->num_lines = GPIOD_MAX_LINE;
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Found %d lines", vars->num_lines );
+    Info( __func__, "gpiod", thread_tech_id, LOG_INFO, "Found %d lines", vars->num_lines );
 
-    JsonNode *RootNode = Json_node_create ();                                                     /* Envoi de la conf a l'API */
+    JsonNode *RootNode = Json_create ();                                                     /* Envoi de la conf a l'API */
     if (!RootNode) goto end;
-    Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-    Json_node_add_int    ( RootNode, "nbr_lignes",     vars->num_lines );
+    Json_add_string ( RootNode, "thread_tech_id", thread_tech_id );
+    Json_add_int    ( RootNode, "nbr_lignes",     vars->num_lines );
     JsonNode *API_result = Http_Post_to_global_API ( "/run/gpiod/add/io", RootNode );
-    Json_node_unref ( API_result );
-    Json_node_unref ( RootNode );
+    Json_unref ( API_result );
+    Json_unref ( RootNode );
 
     vars->lignes = g_try_malloc0 ( sizeof( struct GPIOD_LIGNE ) * vars->num_lines );
     if (!vars->lignes)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error while loading lignes" );
+     { Info( __func__, "gpiod", thread_tech_id, LOG_ERR, "Memory Error while loading lignes" );
        goto end;
      }
 
-    Json_node_foreach_array_element ( module->config, "IO", Charger_un_gpio, module );
+    Json_foreach_array_element ( module->config, "IO", Charger_un_gpio, module );
     Thread_send_comm_to_master ( module, TRUE );                                            /* On est bien accroché aux GPIOs */
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
@@ -161,7 +162,7 @@
              for (gint num=0; num<vars->num_lines; num++)
               { if ( vars->lignes[num].gpio_ligne &&
                      !strcasecmp ( Json_get_string( vars->lignes[num].element, "thread_acronyme"), msg_thread_acronyme ) )
-                 { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
+                  { Info( __func__, "gpiod", thread_tech_id, LOG_NOTICE, "SET_DO '%s:%s'/'%s:%s'=%d",
                              msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
                    vars->lignes[num].etat = etat;
                    gpiod_line_request_set_value( vars->lignes[num].gpio_ligne, num, etat );
@@ -169,7 +170,7 @@
                  }
               }
            }
-          Json_node_unref (request);
+          Json_unref (request);
         }
      }
 

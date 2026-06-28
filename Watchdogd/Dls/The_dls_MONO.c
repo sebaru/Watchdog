@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_MONO *bit = g_try_malloc0 ( sizeof(struct DLS_MONO) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+    { Info( __func__, "dls", plugin->tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -53,7 +53,7 @@
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     bit->etat = Json_get_bool ( element, "etat" );
     plugin->Dls_data_MONO = g_slist_prepend ( plugin->Dls_data_MONO, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info( __func__, "dls", plugin->tech_id, LOG_INFO,
               "Create bit DLS_MONO '%s:%s'=%d (%s)", bit->tech_id, bit->acronyme, bit->etat, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -93,7 +93,7 @@
        Partage->com_dls.Set_Dls_MONO_Edge_up   = g_slist_prepend ( Partage->com_dls.Set_Dls_MONO_Edge_up, mono );
      }
     else return; /* Pas de modification, on arrete la */
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info( __func__, "dls", mono->tech_id, LOG_DEBUG,
               "ligne %04d: Changing DLS_MONO '%s:%s'=%d",
               (vars ? vars->num_ligne : -1), mono->tech_id, mono->acronyme, mono->etat );
     if ( (vars && vars->debug) ||
@@ -141,10 +141,10 @@
     GSList *liste = plugin->Dls_data_MONO;
     while ( liste )
      { struct DLS_MONO *bit = liste->data;
-       JsonNode *element = Json_node_create();
-       Json_node_add_string ( element, "tech_id",  bit->tech_id );
-       Json_node_add_string ( element, "acronyme", bit->acronyme );
-       Json_node_add_bool   ( element, "etat",     bit->etat );
+       JsonNode *element = Json_create();
+       Json_add_string ( element, "tech_id",  bit->tech_id );
+       Json_add_string ( element, "acronyme", bit->acronyme );
+       Json_add_bool   ( element, "etat",     bit->etat );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
      }
@@ -155,11 +155,11 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_MONO_export_to_API ( struct DLS_MONO *bit )
-  { JsonNode *element = Json_node_create ();
+  { JsonNode *element = Json_create ();
     if (element)
-     { Json_node_add_bool   ( element, "etat",     bit->etat );
+     { Json_add_bool   ( element, "etat",     bit->etat );
        MQTT_Send_to_API     ( element, "DLS_REPORT/MONO/%s/%s", bit->tech_id, bit->acronyme );
-       Json_node_unref      ( element );
+       Json_unref      ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

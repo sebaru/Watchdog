@@ -58,22 +58,22 @@
     gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
     if (!msg_thread_tech_id)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_tech_id" ); }
+     { Info( __func__, "modbus", thread_tech_id, LOG_ERR, "requete mal formée manque msg_thread_tech_id" ); }
     else if (!msg_thread_acronyme)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_acronyme" ); }
+     { Info( __func__, "modbus", thread_tech_id, LOG_ERR, "requete mal formée manque msg_thread_acronyme" ); }
     else if (strcasecmp (msg_thread_tech_id, thread_tech_id))
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Pas pour nous" ); }
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "Pas pour nous" ); }
     else if (!Json_has_member ( msg, "etat" ))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque etat" ); }
+     { Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Requete mal formée manque etat" ); }
     else
      { gboolean etat = Json_get_bool ( msg, "etat" );
        pthread_mutex_lock ( &module->synchro );
        for (gint num=0; num<vars->nbr_sortie_tor; num++)
         { if ( vars->DO && vars->DO[num] &&
                !strcasecmp ( Json_get_string(vars->DO[num], "thread_acronyme"), msg_thread_acronyme ) )
-           { Info_new( __func__, module->Thread_debug, LOG_INFO, "SET_DO '%s:%s'/'%s:%s'=%d",
+           { Info( __func__, "modbus", thread_tech_id, LOG_INFO, "SET_DO '%s:%s'/'%s:%s'=%d",
                        msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, etat );
-             Json_node_add_bool ( vars->DO[num], "etat", etat );
+             Json_add_bool ( vars->DO[num], "etat", etat );
              break;
            }
         }
@@ -94,13 +94,13 @@
     gchar *msg_acronyme        = Json_get_string ( msg, "acronyme" );
 
     if (!msg_thread_tech_id)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_tech_id" ); }
+     { Info( __func__, "modbus", thread_tech_id, LOG_ERR, "requete mal formée manque msg_thread_tech_id" ); }
     else if (!msg_thread_acronyme)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_acronyme" ); }
+     { Info( __func__, "modbus", thread_tech_id, LOG_ERR, "requete mal formée manque msg_thread_acronyme" ); }
     else if (strcasecmp (msg_thread_tech_id, thread_tech_id))
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Pas pour nous" ); }
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "Pas pour nous" ); }
     else if (!Json_has_member ( msg, "valeur" ))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Requete mal formée manque etat" ); }
+     { Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Requete mal formée manque etat" ); }
     else
      { gdouble valeur = Json_get_double ( msg, "valeur" );
        pthread_mutex_lock ( &module->synchro );
@@ -122,8 +122,8 @@
                                   break;*/
                 default: new_val_int = 0;
               }
-             Json_node_add_int ( vars->AO[num], "val_int", new_val_int );
-             Info_new( __func__, module->Thread_debug, LOG_NOTICE, "SET_AO '%s:%s'/'%s:%s'=%f (val_int=%d)",
+             Json_add_int ( vars->AO[num], "val_int", new_val_int );
+             Info( __func__, "modbus", thread_tech_id, LOG_NOTICE, "SET_AO '%s:%s'/'%s:%s'=%f (val_int=%d)",
                        msg_thread_tech_id, msg_thread_acronyme, msg_tech_id, msg_acronyme, valeur, new_val_int );
              break;
            }
@@ -137,14 +137,15 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Modbus_Sync_INPUT_to_master ( struct THREAD *module )
-  { Info_new( __func__, module->Thread_debug, LOG_INFO, "Syncing IO to master" );
+  { gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
+    Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Syncing IO to master" );
     struct MODBUS_VARS *vars = module->vars;
 
     for ( gint cpt = 0; cpt<vars->nbr_entree_tor; cpt++)
-     { if (vars->DI[cpt]) Json_node_add_bool ( vars->DI[cpt], "need_sync", TRUE ); }
+     { if (vars->DI[cpt]) Json_add_bool ( vars->DI[cpt], "need_sync", TRUE ); }
 
     for ( gint cpt = 0; cpt<vars->nbr_entree_ana; cpt++)
-     { if (vars->AI[cpt]) Json_node_add_bool ( vars->AI[cpt], "need_sync", TRUE ); }
+     { if (vars->AI[cpt]) Json_add_bool ( vars->AI[cpt], "need_sync", TRUE ); }
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -156,6 +157,7 @@
     if (!module) return;
     if (vars->started == FALSE) return;
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     close ( vars->connexion );
@@ -173,7 +175,7 @@
     vars->nbr_sortie_ana = 0;
     vars->nbr_sortie_tor = 0;
     Thread_send_comm_to_master ( module, FALSE );
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Module '%s' disconnected", hostname );
+    Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Module '%s' disconnected", hostname );
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -187,6 +189,7 @@
     struct addrinfo hints;
     gint connexion = 0, s;
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     memset(&hints, 0, sizeof(struct addrinfo));
@@ -198,11 +201,11 @@
     sndtimeout.tv_sec  = 10;
     sndtimeout.tv_usec =  0;
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Trying to connect module to '%s'", hostname );
+    Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "Trying to connect module to '%s'", hostname );
 
     s = getaddrinfo( hostname, "502", &hints, &result);
     if (s != 0)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "modbus", thread_tech_id, LOG_ERR,
                 "getaddrinfo Failed for module %s (%s)", hostname, gai_strerror(s) );
        return(FALSE);
      }
@@ -215,25 +218,25 @@
     for (rp = result; rp != NULL; rp = rp->ai_next)
      { connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
        if (connexion == -1)
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+        { Info( __func__, "modbus", thread_tech_id, LOG_ERR,
                    "Socket creation failed for modbus '%s'", hostname );
           continue;
         }
 
        if ( setsockopt ( connexion, SOL_SOCKET, SO_SNDTIMEO, (char *)&sndtimeout, sizeof(sndtimeout)) < 0 )
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+        { Info( __func__, "modbus", thread_tech_id, LOG_ERR,
                    "Socket Set Options failed for modbus '%s'", hostname );
           continue;
         }
 
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
-        { Info_new( __func__, module->Thread_debug, LOG_INFO,
+        { Info( __func__, "modbus", thread_tech_id, LOG_INFO,
                    "Using family=%d for host '%s'", rp->ai_family, hostname );
 
           break;  /* Success */
         }
        else
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+        { Info( __func__, "modbus", thread_tech_id, LOG_ERR,
                    "'connexion refused by module '%s' family=%d error '%s'",
                    hostname, rp->ai_family, strerror(errno) );
         }
@@ -249,7 +252,7 @@
     vars->transaction_id = 1;
     vars->started        = TRUE;
     vars->mode           = MODBUS_GET_DESCRIPTION;
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Module Connected" );
+    Info( __func__, "modbus", thread_tech_id, LOG_NOTICE, "Module Connected" );
 
     return(TRUE);
   }
@@ -261,6 +264,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -274,12 +278,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                                      /* Une requete a élé lancée */
      }
   }
@@ -291,6 +295,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -304,12 +309,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -322,6 +327,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -335,12 +341,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -353,6 +359,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -366,12 +373,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -387,6 +394,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -400,12 +408,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -418,6 +426,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -431,12 +440,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                 "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -448,6 +457,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -461,12 +471,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -478,6 +488,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -491,12 +502,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -508,6 +519,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -521,12 +533,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -538,6 +550,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -551,12 +564,12 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                  "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "OK" );
+     { Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "OK" );
        vars->request = TRUE;                                                                      /* Une requete a élé lancée */
      }
   }
@@ -569,6 +582,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -582,7 +596,7 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                  "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
@@ -597,6 +611,7 @@
   { struct MODBUS_VARS *vars = module->vars;
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     vars->transaction_id++;
@@ -610,7 +625,7 @@
 
     gint retour = write ( vars->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                  "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
@@ -626,6 +641,7 @@
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint cpt_poid, cpt_byte, cpt, taille, nbr_data;
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
@@ -652,7 +668,7 @@
 
     gint retour = write ( vars->connexion, &requete, taille+6 );
     if ( retour != taille+6 )                                                                          /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                  "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
@@ -668,6 +684,7 @@
     struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint cpt_byte, cpt, taille;
 
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     gchar *hostname       = Json_get_string ( module->config, "hostname" );
 
     memset(&requete, 0, sizeof(requete) );                                               /* Mise a zero globale de la requete */
@@ -695,7 +712,7 @@
 
     gint retour = write ( vars->connexion, &requete, taille+6 );
     if ( retour != taille+6 )                                                                          /* Envoi de la requete */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                  "Failed for module '%s': error %d/%s", hostname, retour, strerror(errno) );
        Deconnecter_module( module );
      }
@@ -708,9 +725,10 @@
 /******************************************************************************************************************************/
  static void Modbus_load_io_config ( struct THREAD *module )
   { struct MODBUS_VARS *vars = module->vars;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
 /***************************************************** Mapping des AnalogInput ************************************************/
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Allocate %d AI", vars->nbr_entree_ana );
+    Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Allocate %d AI", vars->nbr_entree_ana );
     if(vars->nbr_entree_ana)
      { vars->AI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_ana );
        if (vars->AI)
@@ -720,21 +738,21 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_entree_ana )
               { vars->AI[num] = element;
-                Json_node_add_double ( vars->AI[num], "valeur", 0.0 );
-                Json_node_add_bool   ( vars->AI[num], "in_range", FALSE );
-                Json_node_add_bool   ( vars->AI[num], "need_sync", TRUE );
-                Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AI '%s' (%s, %s)",
+                Json_add_double ( vars->AI[num], "valeur", 0.0 );
+                Json_add_bool   ( vars->AI[num], "in_range", FALSE );
+                Json_add_bool   ( vars->AI[num], "need_sync", TRUE );
+                Info( __func__, "modbus", thread_tech_id, LOG_NOTICE, "New AI '%s' (%s, %s)",
                           Json_get_string ( vars->AI[num], "thread_acronyme" ),
                           Json_get_string ( vars->AI[num], "libelle" ),
                           Json_get_string ( vars->AI[num], "unite" ) );
-              } else Info_new( __func__, module->Thread_debug, LOG_WARNING, "Map AI: num %d out of range '%d'",
+              } else Info( __func__, "modbus", thread_tech_id, LOG_WARNING, "Map AI: num %d out of range '%d'",
                                num, vars->nbr_entree_ana );
            }
         }
-       else Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error for AI" );
+       else Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Memory Error for AI" );
      }
 /***************************************************** Mapping des DigitalInput ***********************************************/
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Allocate %d DI", vars->nbr_entree_tor );
+    Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Allocate %d DI", vars->nbr_entree_tor );
     if(vars->nbr_entree_tor)
      { vars->DI = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_entree_tor );
        if (vars->DI)
@@ -744,20 +762,20 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_entree_tor )
               { vars->DI[num] = element;
-                Json_node_add_bool ( vars->DI[num], "etat", FALSE );
-                Json_node_add_bool ( vars->DI[num], "need_sync", TRUE );
-                Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New DI '%s' (%s), flip=%d",
+                Json_add_bool ( vars->DI[num], "etat", FALSE );
+                Json_add_bool ( vars->DI[num], "need_sync", TRUE );
+                Info( __func__, "modbus", thread_tech_id, LOG_NOTICE, "New DI '%s' (%s), flip=%d",
                           Json_get_string ( vars->DI[num], "thread_acronyme" ),
                           Json_get_string ( vars->DI[num], "libelle" ),
                           Json_get_bool   ( vars->DI[num], "flip" ));
-              } else Info_new( __func__, module->Thread_debug, LOG_WARNING, "Map DI: num %d out of range '%d'",
+              } else Info( __func__, "modbus", thread_tech_id, LOG_WARNING, "Map DI: num %d out of range '%d'",
                                 num, vars->nbr_entree_tor );
            }
         }
-       else Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error for DI" );
+       else Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Memory Error for DI" );
      }
 /***************************************************** Mapping des AnalogOutput ***********************************************/
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Allocate %d AO", vars->nbr_sortie_ana );
+    Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Allocate %d AO", vars->nbr_sortie_ana );
     if(vars->nbr_sortie_ana)
      { vars->AO = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_sortie_ana );
        if (vars->AO)
@@ -767,20 +785,20 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_sortie_ana )
               { vars->AO[num] = element;
-                Json_node_add_double ( vars->AO[num], "valeur", 0.0 );
-                Json_node_add_int    ( vars->AO[num], "val_int", 0 );
-                Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New AO '%s' (%s, %s)",
+                Json_add_double ( vars->AO[num], "valeur", 0.0 );
+                Json_add_int    ( vars->AO[num], "val_int", 0 );
+                Info( __func__, "modbus", thread_tech_id, LOG_NOTICE, "New AO '%s' (%s, %s)",
                           Json_get_string ( vars->AO[num], "thread_acronyme" ),
                           Json_get_string ( vars->AI[num], "libelle" ),
                           Json_get_string ( vars->AI[num], "unite" ) );
-              } else Info_new( __func__, module->Thread_debug, LOG_WARNING, "map AO: num %d out of range '%d'",
+              } else Info( __func__, "modbus", thread_tech_id, LOG_WARNING, "map AO: num %d out of range '%d'",
                                num, vars->nbr_sortie_ana );
            }
         }
-       else Info_new( __func__, module->Thread_debug, LOG_ERR, "Memory Error for AO" );
+       else Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Memory Error for AO" );
      }
 /***************************************************** Mapping des DigitalOutput **********************************************/
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "Allocate %d DO", vars->nbr_sortie_tor );
+    Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Allocate %d DO", vars->nbr_sortie_tor );
     if(vars->nbr_sortie_tor)
      { vars->DO = g_try_malloc0( sizeof(JsonNode *) * vars->nbr_sortie_tor );
        if (vars->DO)
@@ -790,18 +808,18 @@
              gint num = Json_get_int ( element, "num" );
              if ( 0 <= num && num < vars->nbr_sortie_tor )
               { vars->DO[num] = element;
-                Json_node_add_bool   ( vars->DO[num], "etat", FALSE );
-                Info_new( __func__, module->Thread_debug, LOG_NOTICE, "New DO '%s' (%s)",
+                Json_add_bool   ( vars->DO[num], "etat", FALSE );
+                Info( __func__, "modbus", thread_tech_id, LOG_NOTICE, "New DO '%s' (%s)",
                           Json_get_string ( vars->DO[num], "thread_acronyme" ),
                           Json_get_string ( vars->DO[num], "libelle" ));
-              } else Info_new( __func__, module->Thread_debug, LOG_WARNING, "map DO: num %d out of range '%d'",
+              } else Info( __func__, "modbus", thread_tech_id, LOG_WARNING, "map DO: num %d out of range '%d'",
                                num, vars->nbr_sortie_tor );
            }
         }
-       else Info_new( __func__, module->Thread_debug, LOG_ERR, " Memory Error for DO" );
+       else Info( __func__, "modbus", thread_tech_id, LOG_ERR, " Memory Error for DO" );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Module '%s' : io config done",
+    Info( __func__, "modbus", thread_tech_id, LOG_NOTICE, "Module '%s' : io config done",
               Json_get_string ( module->config, "description" ) );
   }
 /******************************************************************************************************************************/
@@ -817,7 +835,7 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if ( (guint16) vars->response.proto_id )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING, "Wrong proto_id" );
+    { Info( __func__, "modbus", thread_tech_id, LOG_WARNING, "Wrong proto_id" );
        Deconnecter_module( module );
      }
 
@@ -825,11 +843,11 @@
     vars->date_last_reponse = Partage->top;                                                        /* Estampillage de la date */
     Thread_send_comm_to_master ( module, TRUE );
     if (ntohs(vars->response.transaction_id) != vars->transaction_id)                                     /* Mauvaise reponse */
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Wrong transaction_id: attendu %d, recu %d",
+    { Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Wrong transaction_id: attendu %d, recu %d",
                  vars->transaction_id, ntohs(vars->response.transaction_id) );
      }
     if ( vars->response.fct >=0x80 )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Erreur Reponse, Error %d, Exception code %d",
+    { Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Erreur Reponse, Error %d, Exception code %d",
                  vars->response.fct, (int)vars->response.data[0] );
        Deconnecter_module( module );
        return;
@@ -893,7 +911,7 @@
             chaine[0] = ntohs( (gint16)vars->response.data[1] );
             chaine[2] = ntohs( (gint16)vars->response.data[3] );
             chaine[taille] = 0;
-            Info_new( __func__, module->Thread_debug, LOG_INFO, "Description (size %d) = '%s'", taille, chaine );
+            Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Description (size %d) = '%s'", taille, chaine );
             vars->mode = MODBUS_GET_FIRMWARE;
             break;
          }
@@ -906,33 +924,33 @@
             chaine[0] = ntohs( (gint16)vars->response.data[1] );
             chaine[2] = ntohs( (gint16)vars->response.data[3] );
             chaine[taille] = 0;
-            Info_new( __func__, module->Thread_debug, LOG_INFO, "Firmware (size %d) = '%s'", taille, chaine );
+            Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Firmware (size %d) = '%s'", taille, chaine );
             vars->mode = MODBUS_INIT_WATCHDOG1;
             break;
          }
        case MODBUS_INIT_WATCHDOG1:
-            Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Watchdog1 = %d %d",
+            Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "Watchdog1 = %d %d",
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
                     );
             vars->mode = MODBUS_INIT_WATCHDOG2;
             break;
        case MODBUS_INIT_WATCHDOG2:
-            Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Watchdog2 = %d %d",
+            Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "Watchdog2 = %d %d",
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
                     );
             vars->mode = MODBUS_INIT_WATCHDOG3;
             break;
        case MODBUS_INIT_WATCHDOG3:
-            Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Watchdog3 = %d %d",
+            Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "Watchdog3 = %d %d",
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
                     );
             vars->mode = MODBUS_INIT_WATCHDOG4;
             break;
        case MODBUS_INIT_WATCHDOG4:
-            Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Watchdog4 = %d %d",
+            Info( __func__, "modbus", thread_tech_id, LOG_DEBUG, "Watchdog4 = %d %d",
                      ntohs( *(gint16 *)((gchar *)&vars->response.data + 0) ),
                       ntohs( *(gint16 *)((gchar *)&vars->response.data + 2) )
                     );
@@ -940,13 +958,13 @@
             break;
        case MODBUS_GET_NBR_AI:
              { vars->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
-               Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Entree ANA", vars->nbr_entree_ana );
+               Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Get %03d Entree ANA", vars->nbr_entree_ana );
                vars->mode = MODBUS_GET_NBR_AO;
              }
             break;
        case MODBUS_GET_NBR_AO:
              { vars->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) ) / 16;
-               Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Sortie ANA", vars->nbr_sortie_ana );
+               Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Get %03d Sortie ANA", vars->nbr_sortie_ana );
                vars->mode = MODBUS_GET_NBR_DI;
              }
             break;
@@ -954,24 +972,24 @@
              { gint nbr;
                nbr = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
                vars->nbr_entree_tor = nbr;
-               Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Entree TOR", vars->nbr_entree_tor );
+               Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Get %03d Entree TOR", vars->nbr_entree_tor );
                vars->mode = MODBUS_GET_NBR_DO;
              }
             break;
        case MODBUS_GET_NBR_DO:
              { vars->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&vars->response.data + 1) );
-               Info_new( __func__, module->Thread_debug, LOG_INFO, "Get %03d Sortie TOR", vars->nbr_sortie_tor );
+               Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Get %03d Sortie TOR", vars->nbr_sortie_tor );
                Modbus_load_io_config( module );                                                  /* Initialise les IO modules */
-               JsonNode *RootNode = Json_node_create ();                                          /* Envoi de la conf a l'API */
+               JsonNode *RootNode = Json_create ();                                          /* Envoi de la conf a l'API */
                if (!RootNode) break;
-               Json_node_add_string ( RootNode, "thread_tech_id", thread_tech_id );
-               Json_node_add_int    ( RootNode, "nbr_entree_tor", vars->nbr_entree_tor );
-               Json_node_add_int    ( RootNode, "nbr_entree_ana", vars->nbr_entree_ana );
-               Json_node_add_int    ( RootNode, "nbr_sortie_tor", vars->nbr_sortie_tor );
-               Json_node_add_int    ( RootNode, "nbr_sortie_ana", vars->nbr_sortie_ana );
+               Json_add_string ( RootNode, "thread_tech_id", thread_tech_id );
+               Json_add_int    ( RootNode, "nbr_entree_tor", vars->nbr_entree_tor );
+               Json_add_int    ( RootNode, "nbr_entree_ana", vars->nbr_entree_ana );
+               Json_add_int    ( RootNode, "nbr_sortie_tor", vars->nbr_sortie_tor );
+               Json_add_int    ( RootNode, "nbr_sortie_ana", vars->nbr_sortie_ana );
                JsonNode *API_result = Http_Post_to_global_API ( "/run/modbus/add/io", RootNode );
-               Json_node_unref ( API_result );
-               Json_node_unref ( RootNode );
+               Json_unref ( API_result );
+               Json_unref ( RootNode );
                vars->mode = MODBUS_GET_DI;
              }
             break;
@@ -987,9 +1005,10 @@
     fd_set fdselect;
     struct timeval tv;
     gint retval, cpt;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (vars->date_last_reponse + 600 < Partage->top)                                      /* Detection attente trop longue */
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+     { Info( __func__, "modbus", thread_tech_id, LOG_WARNING,
                 "Timeout module started=%d, mode=%02d, "
                 "transactionID=%06d, nbr_deconnect=%02d, last_reponse=%03ds ago, retente=in %03ds, date_next_eana=in %03ds",
                  vars->started, vars->mode, vars->transaction_id, vars->nbr_deconnect,
@@ -1014,7 +1033,7 @@
        else { bute = TAILLE_ENTETE_MODBUS + ntohs(vars->response.taille); }
 
        if (bute>=sizeof(struct TRAME_MODBUS_REPONSE))
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+        { Info( __func__, "modbus", thread_tech_id, LOG_ERR,
                    "bute = %d >= %d (sizeof(module->reponse)=%d, taille recue = %d)",
                     bute, sizeof(struct TRAME_MODBUS_REPONSE), sizeof(vars->response), ntohs(vars->response.taille) );
           Deconnecter_module( module );
@@ -1028,7 +1047,7 @@
            { Modbus_Processer_trame( module ); }                                    /* Si l'on a trouvé une trame complète !! */
         }
        else
-        { Info_new( __func__, module->Thread_debug, LOG_WARNING, "Read Error. Get %d, error %s", cpt, strerror(errno) );
+        { Info( __func__, "modbus", thread_tech_id, LOG_WARNING, "Read Error. Get %d, error %s", cpt, strerror(errno) );
           Deconnecter_module ( module );
         }
       }
@@ -1041,6 +1060,7 @@
  void Run_thread ( struct THREAD *module )
   { Thread_init ( module, sizeof(struct MODBUS_VARS) );
     struct MODBUS_VARS *vars = module->vars;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     while(module->Thread_run == TRUE)                                                        /* On tourne tant que necessaire */
      { Thread_loop ( module );                                            /* Loop sur thread pour mettre a jour la telemetrie */
@@ -1056,12 +1076,12 @@
              else if ( !strcasecmp (token_lvl0, "SET_AO") )  Modbus_SET_AO ( module, request );
              else if ( !strcasecmp (token_lvl0, "SYNC_INPUT") ) Modbus_Sync_INPUT_to_master ( module );
            }
-          Json_node_unref ( request );
+          Json_unref ( request );
         }
 /********************************************* Début de l'interrogation du module *********************************************/
        if ( vars->started == FALSE )                                               /* Si attente retente, on change de module */
         { if ( vars->date_retente <= Partage->top && Connecter_module(module)==FALSE )
-           { Info_new( __func__, module->Thread_debug, LOG_INFO, "Module DOWN. retrying in %ds", MODBUS_RETRY/10 );
+           { Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Module DOWN. retrying in %ds", MODBUS_RETRY/10 );
              vars->date_retente = Partage->top + MODBUS_RETRY;
            }
         }

@@ -45,7 +45,7 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_DO *bit = g_try_malloc0 ( sizeof(struct DLS_DO) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+    { Info( __func__, "dls", tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
@@ -55,7 +55,7 @@
     bit->etat      = Json_get_bool ( element, "etat" );
     bit->mono = Json_get_bool ( element, "mono" );
     plugin->Dls_data_DO = g_slist_prepend ( plugin->Dls_data_DO, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info( __func__, "dls", tech_id, LOG_INFO,
               "Create bit DLS_DO '%s:%s'=%d (%s) mono=%d  archivage=%d",
                bit->tech_id, bit->acronyme, bit->etat, bit->libelle, bit->mono, bit->archivage );
   }
@@ -97,32 +97,32 @@
   { if (!dout) return;
     if (dout->etat == etat) return;
     dout->etat = etat;
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info( __func__, "dls", dout->tech_id, LOG_DEBUG,
               "ligne %04d: Changing DLS_DO '%s:%s'=%d ",
               (vars ? vars->num_ligne : -1), dout->tech_id, dout->acronyme, dout->etat );
     Dls_DO_export_to_API ( dout );                                                                           /* envoi a l'API */
     MQTT_Send_archive_to_API( dout->tech_id, dout->acronyme, dout->etat*1.0 );                         /* Archivage si besoin */
     dout->last_arch = Partage->top;
 
-    JsonNode *RootNode = Json_node_create ();
+    JsonNode *RootNode = Json_create ();
     if (RootNode)
      { Dls_DO_to_json ( RootNode, dout );
        pthread_rwlock_wrlock ( &Partage->Liste_DO_synchro );                      /* Envoie au MSRV pour dispatch aux threads */
        Partage->Liste_DO = g_slist_append ( Partage->Liste_DO, RootNode );
        pthread_rwlock_unlock ( &Partage->Liste_DO_synchro );
      }
-    else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+    else Info( __func__, "dls", dout->tech_id, LOG_ERR, "JSon RootNode creation failed" );
 
     if (etat == TRUE && dout->mono)                             /* Si sortie de type monostable, elle redescend tout de suite */
-     { JsonNode *RootNode = Json_node_create ();
+     { JsonNode *RootNode = Json_create ();
        if (RootNode)
         { Dls_DO_to_json ( RootNode, dout );
-          Json_node_add_bool ( RootNode, "etat", FALSE );                                    /* Passage a zero dans la foulée */
+          Json_add_bool ( RootNode, "etat", FALSE );                                    /* Passage a zero dans la foulée */
           pthread_rwlock_wrlock ( &Partage->Liste_DO_synchro );                   /* Envoie au MSRV pour dispatch aux threads */
           Partage->Liste_DO = g_slist_append ( Partage->Liste_DO, RootNode );
           pthread_rwlock_unlock ( &Partage->Liste_DO_synchro );                   /* Envoie au MSRV pour dispatch aux threads */
         }
-       else Info_new( __func__, Config.log_msrv, LOG_ERR, "JSon RootNode creation failed" );
+      else Info( __func__, "dls", dout->tech_id, LOG_ERR, "JSon RootNode creation failed" );
      }
     Partage->audit_bit_interne_per_sec++;
   }
@@ -148,9 +148,9 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_DO_to_json ( JsonNode *element, struct DLS_DO *bit )
-  { Json_node_add_string ( element, "tech_id",  bit->tech_id );
-    Json_node_add_string ( element, "acronyme", bit->acronyme );
-    Json_node_add_bool   ( element, "etat",     bit->etat );
+  { Json_add_string ( element, "tech_id",  bit->tech_id );
+    Json_add_string ( element, "acronyme", bit->acronyme );
+    Json_add_bool   ( element, "etat",     bit->etat );
   }
 /******************************************************************************************************************************/
 /* Dls_all_DO_to_json: Transforme tous les bits en JSON                                                                       */
@@ -162,7 +162,7 @@
     GSList *liste = plugin->Dls_data_DO;
     while ( liste )
      { struct DLS_DO *bit = liste->data;
-       JsonNode *element = Json_node_create();
+       JsonNode *element = Json_create();
        Dls_DO_to_json ( element, bit );
        Json_array_add_element ( RootArray, element );
        liste = g_slist_next(liste);
@@ -174,11 +174,11 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_DO_export_to_API ( struct DLS_DO *bit )
-  { JsonNode *element = Json_node_create ();
+  { JsonNode *element = Json_create ();
     if (element)
-     { Json_node_add_bool ( element, "etat", bit->etat );
+     { Json_add_bool ( element, "etat", bit->etat );
        MQTT_Send_to_API   ( element, "DLS_REPORT/DO/%s/%s", bit->tech_id, bit->acronyme );
-       Json_node_unref    ( element );
+       Json_unref    ( element );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

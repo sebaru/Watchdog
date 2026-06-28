@@ -6,6 +6,7 @@
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/Watchdogd/Include
+  ${ABLS_LIBS_INCLUDE_DIRS}
 )
 
 # Sous-modules (shared libraries dlopen-ables)
@@ -28,9 +29,7 @@ add_subdirectory(Shelly)
 add_executable(Watchdogd
   Watchdogd.c
   thread.c
-  Erreur.c
   shm.c
-  json.c
   Config.c
   http_common.c
   Mnemonique.c
@@ -55,6 +54,7 @@ target_compile_options(Watchdogd PRIVATE
   ${LIBSYSTEMD_CFLAGS}
   ${LIBJWT_CFLAGS}
   ${MOSQUITTO_CFLAGS}
+  ${ABLS_LIBS_CFLAGS}
 )
 
 target_link_options(Watchdogd PRIVATE -rdynamic)
@@ -72,6 +72,7 @@ target_link_libraries(Watchdogd PRIVATE
   ${LIBSYSTEMD_LIBRARIES}
   ${LIBJWT_LIBRARIES}
   ${MOSQUITTO_LIBRARIES}
+  ${ABLS_LIBS_LIBRARIES}
 )
 
 target_link_directories(Watchdogd PRIVATE
@@ -83,6 +84,7 @@ target_link_directories(Watchdogd PRIVATE
   ${LIBSYSTEMD_LIBRARY_DIRS}
   ${LIBJWT_LIBRARY_DIRS}
   ${MOSQUITTO_LIBRARY_DIRS}
+  ${ABLS_LIBS_LIBRARY_DIRS}
 )
 
 ##################################################################################################################################

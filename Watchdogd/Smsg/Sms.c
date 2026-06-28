@@ -67,7 +67,7 @@
 
     system_bus = g_bus_get_sync ( G_BUS_TYPE_SYSTEM, NULL, &error );
     if (!system_bus)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                  "%s: Cannot connect to system D-Bus (%s)", thread_tech_id, error ? error->message : "unknown" );
        g_clear_error(&error);
        return(FALSE);
@@ -86,7 +86,7 @@
                                           &error );
 
     if (!reply)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                  "%s: GetManagedObjects failed (%s)", thread_tech_id, error ? error->message : "unknown" );
        g_clear_error(&error);
        g_object_unref(system_bus);
@@ -111,7 +111,7 @@
     g_object_unref(system_bus);
 
     if (*modem_path == NULL)
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "smsg", thread_tech_id, LOG_WARNING,
                  "%s: No ModemManager modem with Messaging interface found", thread_tech_id );
        return(FALSE);
      }
@@ -134,7 +134,7 @@
 
     system_bus = g_bus_get_sync ( G_BUS_TYPE_SYSTEM, NULL, &error );
     if (!system_bus)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                  "%s: Cannot connect to system D-Bus (%s)", thread_tech_id, error ? error->message : "unknown" );
        g_clear_error(&error);
        g_free(modem_path);
@@ -154,7 +154,7 @@
                                           &error );
 
     if (!reply)
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "smsg", thread_tech_id, LOG_WARNING,
                  "%s: Cannot read signal quality (%s)", thread_tech_id, error ? error->message : "unknown" );
        g_clear_error(&error);
        g_object_unref(system_bus);
@@ -170,7 +170,7 @@
     else if ( g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32) )
      { quality = g_variant_get_uint32(value); }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "smsg", thread_tech_id, LOG_WARNING,
                  "%s: Unsupported SignalQuality type '%s'", thread_tech_id, g_variant_get_type_string(value) );
        g_variant_unref(value);
        g_variant_unref(reply);
@@ -204,12 +204,12 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (!telephone)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: telephone is NULL", thread_tech_id );
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "%s: telephone is missing", thread_tech_id );
        return(FALSE);
      }
 
     if (!Smsg_get_modem_path(module, &modem_path))
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                  "%s: No modem available, cannot send SMS to '%s'", thread_tech_id, telephone );
        return(FALSE);
      }
@@ -218,12 +218,12 @@
     if (dls_shortname) g_snprintf( libelle, sizeof(libelle), "%s: %s", dls_shortname, Json_get_string( msg, "libelle") );
                   else g_snprintf( libelle, sizeof(libelle), "%s", Json_get_string( msg, "libelle") );
 
-    Info_new( __func__, module->Thread_debug, LOG_DEBUG,
+    Info( __func__, "smsg", thread_tech_id, LOG_DEBUG,
               "%s: Try to send to %s (%s)", thread_tech_id, telephone, libelle );
 
     system_bus = g_bus_get_sync ( G_BUS_TYPE_SYSTEM, NULL, &error );
     if (!system_bus)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                  "%s: Cannot connect to system D-Bus (%s)", thread_tech_id, error ? error->message : "unknown" );
        g_clear_error(&error);
        g_free(modem_path);
@@ -247,7 +247,7 @@
                                           &error );
 
     if (!reply)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                  "%s: ModemManager Create failed (%s)", thread_tech_id, error ? error->message : "unknown" );
        g_clear_error(&error);
        g_object_unref(system_bus);
@@ -273,7 +273,7 @@
                                           &error );
 
     if (!reply)
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "smsg", thread_tech_id, LOG_WARNING,
                  "%s: Envoi SMS Nok to %s (%s) -> %s", thread_tech_id, telephone, libelle,
                  error ? error->message : "unknown" );
        g_clear_error(&error);
@@ -297,7 +297,7 @@
                                           NULL );
     if (reply) g_variant_unref(reply);
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE,
+    Info( __func__, "smsg", thread_tech_id, LOG_NOTICE,
               "%s: Envoi SMS Ok to %s (%s)", thread_tech_id, telephone, libelle );
     g_object_unref(system_bus);
     g_free(modem_path);
@@ -317,19 +317,19 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    JsonNode *RootNode = Json_node_create();
-    Json_node_add_bool  ( RootNode, "noStopClause", TRUE );
-    Json_node_add_string( RootNode, "priority", "high" );
-    Json_node_add_bool  ( RootNode, "senderForResponse", TRUE );
-    Json_node_add_int   ( RootNode, "validityPeriod", 2880 ); /* 2 jours */
-    Json_node_add_string( RootNode, "charset", "UTF-8" );
+    JsonNode *RootNode = Json_create();
+    Json_add_bool  ( RootNode, "noStopClause", TRUE );
+    Json_add_string( RootNode, "priority", "high" );
+    Json_add_bool  ( RootNode, "senderForResponse", TRUE );
+    Json_add_int   ( RootNode, "validityPeriod", 2880 ); /* 2 jours */
+    Json_add_string( RootNode, "charset", "UTF-8" );
 
-    JsonArray *receivers = Json_node_add_array ( RootNode, "receivers" );
+    JsonArray *receivers = Json_add_array ( RootNode, "receivers" );
     Json_array_add_element ( receivers, json_node_init_string ( json_node_alloc(), telephone ) );
 
     gchar libelle[256];
     g_snprintf( libelle, sizeof(libelle), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
-    Json_node_add_string( RootNode, "message", libelle );
+    Json_add_string( RootNode, "message", libelle );
 
     gchar *method = "POST";
     g_snprintf( query, sizeof(query), "https://eu.api.ovh.com/1.0/sms/%s/jobs", Json_get_string ( module->config, "ovh_service_name" ) );
@@ -337,12 +337,12 @@
     g_snprintf( timestamp, sizeof(timestamp), "%ld", time(NULL) );
 
 /******************************************************* Calcul signature *****************************************************/
-    gchar *body = Json_node_to_string( RootNode );
+    gchar *body = Json_to_string( RootNode );
     g_snprintf( clair, sizeof(clair), "%s+%s+%s+%s+%s+%s",
                 Json_get_string ( module->config, "ovh_application_secret" ),
                 Json_get_string ( module->config, "ovh_consumer_key" ),
                 method, query, body, timestamp );
-    Info_new ( __func__, module->Thread_debug, LOG_DEBUG, "Sending to OVH : %s", body );
+    Info( __func__, "smsg", thread_tech_id, LOG_DEBUG, "Sending to OVH : %s", body );
     g_free(body);
 
     mdctx = EVP_MD_CTX_new();                                                                               /* Calcul du SHA1 */
@@ -376,14 +376,14 @@
     JsonNode *response = Http_Request ( query, RootNode, liste );
     gint http_code = Json_get_int ( response, "http_code" );
     g_slist_free_full ( liste, g_free );
-    Json_node_unref ( RootNode );
+    Json_unref ( RootNode );
 
     if (http_code!=200)
      { /*gchar *reason_phrase = soup_message_get_reason_phrase ( soup_msg );*/
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Status %d", thread_tech_id, http_code );
+       Info( __func__, "smsg", thread_tech_id, LOG_ERR, "%s: Status %d", thread_tech_id, http_code );
      }
-    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, telephone );
-    Json_node_unref ( response );
+    else Info( __func__, "smsg", thread_tech_id, LOG_NOTICE, "%s: '%s' sent to '%s'", thread_tech_id, libelle, telephone );
+    Json_unref ( response );
   }
 /******************************************************************************************************************************/
 /* Envoi_sms_smsbox: Envoi un sms par SMSBOX                                                                                  */
@@ -392,10 +392,11 @@
 /******************************************************************************************************************************/
  static void Envoi_sms_freeapi ( struct THREAD *module, JsonNode *msg, JsonNode *user )
   { gchar libelle_utf8[512];
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     g_snprintf( libelle_utf8, sizeof(libelle_utf8), "%s: %s", Json_get_string ( msg, "dls_shortname" ), Json_get_string( msg, "libelle") );
     gchar *libelle = g_uri_escape_string(libelle_utf8, NULL, FALSE);
     if (libelle == NULL)
-     { Info_new( __func__,module->Thread_debug, LOG_ERR, "Convert error for %s. Not sending message.", libelle_utf8 );
+     { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "Convert error for %s. Not sending message.", libelle_utf8 );
        return;
      }
 
@@ -408,13 +409,13 @@
 /********************************************************* Envoi de la requete ************************************************/
     JsonNode *response = Http_Request ( target_uri, NULL, NULL );
     gint http_code = Json_get_int ( response, "http_code" );
-    Json_node_unref ( response );
+    Json_unref ( response );
 
     if (http_code!=200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Status %d for '%s' to '%s'",
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "Status %d for '%s' to '%s'",
                  http_code, libelle_utf8, Json_get_string ( user, "email" ) );
      }
-    else Info_new( __func__, module->Thread_debug, LOG_NOTICE, "'%s' sent to '%s'", libelle_utf8, Json_get_string ( user, "email" ) );
+      else Info( __func__, "smsg", thread_tech_id, LOG_NOTICE, "'%s' sent to '%s'", libelle_utf8, Json_get_string ( user, "email" ) );
   }
 /******************************************************************************************************************************/
 /* Smsg_send_to_all_authorized_recipients : Envoi à tous les portables autorisés                                              */
@@ -427,14 +428,14 @@
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     if (vars->sending_is_disabled == TRUE)                                   /* Si envoi désactivé, on sort de suite de la fonction */
-     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending is disabled. Dropping message", thread_tech_id );
+    { Info( __func__, "smsg", thread_tech_id, LOG_NOTICE, "%s: Sending is disabled. Dropping message", thread_tech_id );
        return;
      }
 
 /********************************************* Chargement des informations en bases *******************************************/
     JsonNode *UsersNode = Http_Get_from_global_API ( "/run/users/wanna_be_notified", NULL );
     if (!UsersNode || Json_get_int ( UsersNode, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USERS from API", thread_tech_id );
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "%s: Could not get USERS from API", thread_tech_id );
        return;
      }
 
@@ -447,24 +448,24 @@
      { JsonNode *user = recipients->data;
        gchar *user_phone = Json_get_string ( user, "phone" );
        if (!user_phone)
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+        { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                     "%s: Warning: User %s does not have an Phone number", thread_tech_id, Json_get_string ( user, "email" ) );
         }
        else if (!strlen(user_phone))
-        { Info_new( __func__, module->Thread_debug, LOG_ERR,
+        { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                     "%s: Warning: User %s has an empty Phone number", thread_tech_id, Json_get_string ( user, "email" ) );
         }
        else switch (notif_sms)
         { case TXT_NOTIF_YES:
                if ( Envoi_sms_gsm ( module, msg, user_phone ) == FALSE )
-                { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error sending with GSM" );
+                { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "Error sending with GSM" );
                   gchar *free_sms_api_user = Json_get_string ( user, "free_sms_api_user" );
                   if (free_sms_api_user && strlen(free_sms_api_user))
-                   { Info_new( __func__, module->Thread_debug, LOG_INFO, "Sending with FREE API" );
+                   { Info( __func__, "smsg", thread_tech_id, LOG_INFO, "Sending with FREE API" );
                      Envoi_sms_freeapi( module, msg, user );
                    }
                   else
-                   { Info_new( __func__, module->Thread_debug, LOG_INFO, "Sending with OVH" );
+                   { Info( __func__, "smsg", thread_tech_id, LOG_INFO, "Sending with OVH" );
                      Envoi_sms_ovh( module, msg, user_phone );
                    }
                 }
@@ -476,7 +477,7 @@
        recipients = g_list_next(recipients);
      }
     g_list_free(Recipients);
-    Json_node_unref ( UsersNode );
+    Json_unref ( UsersNode );
     MQTT_Send_CI_pulse ( module, vars->ci_nbr_sms );
   }
 /******************************************************************************************************************************/
@@ -485,15 +486,15 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_ovh_text ( struct THREAD *module, gchar *texte )
-  { JsonNode *RootNode = Json_node_create();
+  { JsonNode *RootNode = Json_create();
     if (!RootNode) return;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Json_node_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
-    Json_node_add_string ( RootNode, "tech_id", thread_tech_id );
-    Json_node_add_string ( RootNode, "acronyme", "TEST_OVH" );
-    Json_node_add_string ( RootNode, "libelle", texte );
-    Json_node_add_string ( RootNode, "dls_shortname", thread_tech_id );
-    Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_OVH_ONLY );
+    Json_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
+    Json_add_string ( RootNode, "tech_id", thread_tech_id );
+    Json_add_string ( RootNode, "acronyme", "TEST_OVH" );
+    Json_add_string ( RootNode, "libelle", texte );
+    Json_add_string ( RootNode, "dls_shortname", thread_tech_id );
+    Json_add_int    ( RootNode, "notif_sms", TXT_NOTIF_OVH_ONLY );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
@@ -504,15 +505,15 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Envoyer_smsg_gsm_text ( struct THREAD *module, gchar *texte )
-  { JsonNode *RootNode = Json_node_create();
+  { JsonNode *RootNode = Json_create();
     if (!RootNode) return;
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
-    Json_node_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
-    Json_node_add_string ( RootNode, "tech_id", thread_tech_id );
-    Json_node_add_string ( RootNode, "acronyme", "TEST_GSM" );
-    Json_node_add_string ( RootNode, "libelle", texte );
-    Json_node_add_string ( RootNode, "dls_shortname", thread_tech_id );
-    Json_node_add_int    ( RootNode, "notif_sms", TXT_NOTIF_YES );
+    Json_add_string ( RootNode, "token_lvl0", "SEND_SMS" );
+    Json_add_string ( RootNode, "tech_id", thread_tech_id );
+    Json_add_string ( RootNode, "acronyme", "TEST_GSM" );
+    Json_add_string ( RootNode, "libelle", texte );
+    Json_add_string ( RootNode, "dls_shortname", thread_tech_id );
+    Json_add_int    ( RootNode, "notif_sms", TXT_NOTIF_YES );
     pthread_mutex_lock ( &module->synchro );                                                 /* on passe le message au thread */
     module->MQTT_messages = g_slist_append ( module->MQTT_messages, RootNode );
     pthread_mutex_unlock ( &module->synchro );
@@ -527,35 +528,35 @@
 
     gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
-    JsonNode *RootNode = Json_node_create();
+    JsonNode *RootNode = Json_create();
     if ( RootNode == NULL )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Memory Error for '%s'", thread_tech_id, from );
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "%s: Memory Error for '%s'", thread_tech_id, from );
        return;
      }
-    Json_node_add_string ( RootNode, "phone", from );
+    Json_add_string ( RootNode, "phone", from );
 
     JsonNode *UserNode = Http_Post_to_global_API ( "/run/user/can_send_txt_cde", RootNode );
-    Json_node_unref ( RootNode );
+    Json_unref ( RootNode );
     if (!UserNode || Json_get_int ( UserNode, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
        goto end_user;
      }
 
     if ( !Json_has_member ( UserNode, "email" ) )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                 "%s: %s is not an known user. Dropping command '%s'...", thread_tech_id, from, texte );
        goto end_user;
      }
 
     if ( !Json_has_member ( UserNode, "can_send_txt_cde" ) || Json_get_bool ( UserNode, "can_send_txt_cde" ) == FALSE )
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "smsg", thread_tech_id, LOG_WARNING,
                 "%s: %s ('%s') is not allowed to send txt_cde. Dropping command '%s'...", thread_tech_id,
                 from, Json_get_string ( UserNode, "email" ), texte );
        goto end_user;
      }
 
     if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
-     { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Ping Received from '%s'. Sending Pong", thread_tech_id, from );
+    { Info( __func__, "smsg", thread_tech_id, LOG_NOTICE, "%s: Ping Received from '%s'. Sending Pong", thread_tech_id, from );
        Envoyer_smsg_gsm_text ( module, "Pong !" );
        goto end_user;
      }
@@ -563,34 +564,34 @@
     if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
      { vars->sending_is_disabled = TRUE;
        Envoyer_smsg_gsm_text ( module, "Sending SMS is off !" );
-       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending SMS is DISABLED by '%s'", thread_tech_id, from );
+      Info( __func__, "smsg", thread_tech_id, LOG_NOTICE, "%s: Sending SMS is DISABLED by '%s'", thread_tech_id, from );
        goto end_user;
      }
 
     if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
      { Envoyer_smsg_gsm_text ( module, "Sending SMS is on !" );
-       Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending SMS is ENABLED by '%s'", thread_tech_id, from );
+      Info( __func__, "smsg", thread_tech_id, LOG_NOTICE, "%s: Sending SMS is ENABLED by '%s'", thread_tech_id, from );
        vars->sending_is_disabled = FALSE;
        goto end_user;
      }
 
-    RootNode = Json_node_create();
+    RootNode = Json_create();
     if ( RootNode == NULL )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: MapNode Error for '%s'", thread_tech_id, from );
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "%s: MapNode Error for '%s'", thread_tech_id, from );
        goto end_user;
      }
-    Json_node_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
-    Json_node_add_string ( RootNode, "thread_acronyme", texte );
+    Json_add_string ( RootNode, "thread_tech_id", "_COMMAND_TEXT" );
+    Json_add_string ( RootNode, "thread_acronyme", texte );
 
     JsonNode *MapNode = Http_Post_to_global_API ( "/run/mapping/search_txt", RootNode );
-    Json_node_unref ( RootNode );
+    Json_unref ( RootNode );
     if (!MapNode || Json_get_int ( MapNode, "http_code" ) != 200)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "%s: Could not get USER from API for '%s'", thread_tech_id, from );
        goto end_map;
      }
 
     if ( Json_has_member ( MapNode, "nbr_results" ) == FALSE )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "'%s': Error searching Database for '%s'", thread_tech_id, texte );
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR, "'%s': Error searching Database for '%s'", thread_tech_id, texte );
        Envoyer_smsg_gsm_text ( module, "Error searching Database .. Sorry .." );
        goto end_map;
      }
@@ -611,7 +612,7 @@
              gchar *tech_id         = Json_get_string ( element, "tech_id" );
              gchar *acronyme        = Json_get_string ( element, "acronyme" );
              gchar *libelle         = Json_get_string ( element, "libelle" );
-             Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': From '%s' map found for '%s' -> '%s:%s' - %s",
+             Info( __func__, "smsg", thread_tech_id, LOG_INFO, "'%s': From '%s' map found for '%s' -> '%s:%s' - %s",
                        thread_tech_id, from, thread_acronyme, tech_id, acronyme, libelle );
              Envoyer_smsg_gsm_text ( module, thread_acronyme );                                 /* Envoi des différents choix */
              results = g_list_next(results);
@@ -623,7 +624,7 @@
           gchar *tech_id         = Json_get_string ( element, "tech_id" );
           gchar *acronyme        = Json_get_string ( element, "acronyme" );
           gchar *libelle         = Json_get_string ( element, "libelle" );
-          Info_new( __func__, module->Thread_debug, LOG_INFO, "'%s': From '%s' map found for '%s' (%s)-> '%s:%s' - %s",
+          Info( __func__, "smsg", thread_tech_id, LOG_INFO, "'%s': From '%s' map found for '%s' (%s)-> '%s:%s' - %s",
                     thread_tech_id, from, Json_get_string( UserNode, "email" ), thread_acronyme, tech_id, acronyme, libelle );
           MQTT_Send_DI_pulse ( module, tech_id, acronyme );
           gchar chaine[256];
@@ -633,9 +634,9 @@
        g_list_free(Results);
      }
 end_map:
-  if (MapNode) Json_node_unref ( MapNode );
+  if (MapNode) Json_unref ( MapNode );
 end_user:
-  if (UserNode) Json_node_unref ( UserNode );
+  if (UserNode) Json_unref ( UserNode );
   }
 
 /******************************************************************************************************************************/
@@ -659,7 +660,7 @@ end_user:
                                           NULL,
                                           &error );
     if (!reply)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                  "%s: Cannot read SMS property '%s' (%s)", thread_tech_id, property, error ? error->message : "unknown" );
        g_clear_error(&error);
        return(NULL);
@@ -685,7 +686,7 @@ end_user:
 
     system_bus = g_bus_get_sync ( G_BUS_TYPE_SYSTEM, NULL, &error );
     if (!system_bus)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+    { Info( __func__, "smsg", thread_tech_id, LOG_ERR,
                  "%s: Cannot connect to system D-Bus (%s)", thread_tech_id, error ? error->message : "unknown" );
        g_clear_error(&error);
        g_free(modem_path);
@@ -704,7 +705,7 @@ end_user:
                                           NULL,
                                           &error );
     if (!reply)
-     { Info_new( __func__, module->Thread_debug, LOG_WARNING,
+    { Info( __func__, "smsg", thread_tech_id, LOG_WARNING,
                  "%s: Cannot list SMS (%s)", thread_tech_id, error ? error->message : "unknown" );
        g_clear_error(&error);
        g_object_unref(system_bus);
@@ -725,7 +726,7 @@ end_user:
           if (number_v && text_v)
            { const gchar *from = g_variant_get_string(number_v, NULL);
              const gchar *texte = g_variant_get_string(text_v, NULL);
-             Info_new( __func__, module->Thread_debug, LOG_NOTICE,
+             Info( __func__, "smsg", thread_tech_id, LOG_NOTICE,
                       "%s: Recu '%s' from '%s' via %s", thread_tech_id, texte, from, sms_path );
              Traiter_commande_sms ( module, (gchar *)from, (gchar *)texte );
            }
@@ -787,7 +788,7 @@ end_user:
                  Json_has_member ( message, "tech_id" ) && Json_has_member ( message, "acronyme" ) &&
                  Json_has_member ( message, "libelle" )
                 )
-              { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
+              { Info( __func__, "smsg", thread_tech_id, LOG_NOTICE, "%s: Sending msg '%s:%s' (%s)", thread_tech_id,
                           Json_get_string ( message, "tech_id" ), Json_get_string ( message, "acronyme" ),
                           Json_get_string ( message, "libelle" ) );
                 Smsg_send_to_all_authorized_recipients( module, message );
@@ -798,7 +799,7 @@ end_user:
                 if ( !strcasecmp ( test_mode, "OVH" ) ) Envoyer_smsg_ovh_text ( module, "Test SMS OVH OK !" );
               }
            }
-          Json_node_unref(message);
+          Json_unref(message);
         }
 /****************************************************** Lecture de SMS ********************************************************/
        if (Partage->top < next_read) continue;

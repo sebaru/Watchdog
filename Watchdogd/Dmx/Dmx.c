@@ -56,13 +56,13 @@
     gint cpt = 0;
     g_snprintf( critere, sizeof(critere),"%s:AO%%", tech_id );
     if ( ! Recuperer_mnemos_AO_by_text ( &db, "dmx", critere ) )
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "Error searching Database for '%s'", critere ); }
+     { Info( __func__, "dmx", tech_id, LOG_ERR, "Error searching Database for '%s'", critere ); }
     else while ( Recuperer_mnemos_AO_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *map_text = db->row[2], *libelle = db->row[3];
        gchar *min = db->row[4], *max = db->row[5], *type=db->row[6], *valeur = db->row[7];
        gchar debut[80];
        gint num;
-       Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: Match found '%s' '%s:%s' - %s", tech_id,
+      Info( __func__, "dmx", tech_id, LOG_DEBUG, "%s: Match found '%s' '%s:%s' - %s", tech_id,
                  map_text, tech_id, acro, libelle );
        if ( sscanf ( map_text, "%[^:]:AO%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
         { if (1<=num && num<=DMX_CHANNEL)
@@ -72,18 +72,18 @@
              vars->Canal[num-1].max    = atof(max);
              vars->Canal[num-1].type   = atoi(type);
              vars->Canal[num-1].valeur = 0.0;                        /*atof(valeur); a l'init, on considère le canal à zero */
-             Info_new( __func__, module->Thread_debug, LOG_INFO,
+             Info( __func__, "dmx", tech_id, LOG_INFO,
                        "AO Canal %d : '%s:%s'=%s ('%s') loaded", num, tech_id, acro, valeur, libelle );
              cpt++;
            }
-          else Info_new( __func__, module->Thread_debug, LOG_WARNING, "map '%s': num %d out of range '%d'",
+          else Info( __func__, "dmx", tech_id, LOG_WARNING, "map '%s': num %d out of range '%d'",
                          map_text, num, DMX_CHANNEL );
         }
-       else Info_new( __func__, module->Thread_debug, LOG_ERR, "event '%s': Sscanf Error", map_text );
+       else Info( __func__, "dmx", tech_id, LOG_ERR, "event '%s': Sscanf Error", map_text );
      }
-    Info_new( __func__, module->Thread_debug, LOG_INFO, "%d AO loaded", cpt );
+    Info( __func__, "dmx", tech_id, LOG_INFO, "%d AO loaded", cpt );
 
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "DMX '%s' : mapping done", tech_id );
+    Info( __func__, "dmx", tech_id, LOG_NOTICE, "DMX '%s' : mapping done", tech_id );
   }
 /******************************************************************************************************************************/
 /* Dmx_init: Initialisation de la ligne DMX                                                                                   */
@@ -97,14 +97,14 @@
 
     vars->fd = open( device, O_RDWR | O_NOCTTY /*| O_NONBLOCK*/ );
     if (vars->fd<0)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Impossible d'ouvrir le device '%s', retour=%d (%s)",
+    { Info( __func__, "dmx", tech_id, LOG_ERR, "%s: Impossible d'ouvrir le device '%s', retour=%d (%s)",
                  tech_id, device, vars->fd, strerror(errno) );
        return(FALSE);
      }
 
     vars->taille_trame_dmx = sizeof(struct TRAME_DMX);
     memset ( &vars->Trame_dmx, 0, sizeof(struct TRAME_DMX) );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: %s: Ouverture port dmx okay %s",
+    Info( __func__, "dmx", tech_id, LOG_NOTICE, "%s: %s: Ouverture port dmx okay %s",
               __func__, tech_id, device );
     Thread_send_comm_to_master ( module, TRUE );
     Dmx_do_mapping( module );
@@ -119,7 +119,7 @@
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
     if ( vars->fd != -1 )
      { close(vars->fd);
-       Info_new( __func__, module->Thread_debug, LOG_NOTICE,
+      Info( __func__, "dmx", tech_id, LOG_NOTICE,
 		         "%s: Fermeture device '%s' dmx okay", tech_id, Json_get_string ( module->config, "device" ) );
 	   vars->fd = -1;
      }
@@ -142,7 +142,7 @@
     for (gint cpt=0; cpt<DMX_CHANNEL; cpt++) { vars->Trame_dmx.channel[cpt] = (guchar)vars->Canal[cpt].valeur; }
     vars->Trame_dmx.end_delimiter = 0xE7; /* End delimiter */
     if ( write( vars->fd, &vars->Trame_dmx, sizeof(struct TRAME_DMX) ) != sizeof(struct TRAME_DMX) )/* Ecriture de la trame */
-     { Info_new( __func__, module->Thread_debug, LOG_ERR, "%s: Write Trame Error '%s'", tech_id, strerror(errno) );
+    { Info( __func__, "dmx", tech_id, LOG_ERR, "%s: Write Trame Error '%s'", tech_id, strerror(errno) );
        Dmx_close(module);
        return(FALSE);
      }
@@ -173,16 +173,16 @@
              gchar *msg_thread_acronyme = Json_get_string ( request, "token_lvl2" );
              gint   valeur              = Json_get_int    ( request, "valeur" );
              if (!msg_thread_tech_id)
-              { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_tech_id" ); }
+              { Info( __func__, "dmx", thread_tech_id, LOG_ERR, "requete mal formée manque msg_thread_tech_id" ); }
              else if (!msg_thread_acronyme)
-              { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque msg_thread_acronyme" ); }
+              { Info( __func__, "dmx", thread_tech_id, LOG_ERR, "requete mal formée manque msg_thread_acronyme" ); }
              else if (!valeur)
-              { Info_new( __func__, module->Thread_debug, LOG_ERR, "requete mal formée manque valeur" ); }
+              { Info( __func__, "dmx", thread_tech_id, LOG_ERR, "requete mal formée manque valeur" ); }
              else
               { for (gint num=0; num<DMX_CHANNEL; num++)
                  { if (!strcasecmp( vars->Canal[num].tech_id, msg_thread_tech_id) &&
                        !strcasecmp( vars->Canal[num].acronyme, msg_thread_acronyme))
-                    { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Setting %s:%s=%f (Canal %d)",
+                { Info( __func__, "dmx", thread_tech_id, LOG_NOTICE, "Setting %s:%s=%f (Canal %d)",
                                 msg_thread_tech_id, msg_thread_acronyme, valeur, num );
                       vars->Canal[num].valeur = valeur;
                       break;
@@ -192,13 +192,13 @@
                 Envoyer_trame_dmx_request(module);
               }
            }
-          Json_node_unref(request);
+          Json_unref(request);
         }
 
 /************************************************* Traitement opérationnel ****************************************************/
        if (module->comm_status == FALSE && vars->date_next_retry <= Partage->top )
         { vars->date_next_retry = 0;
-          Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Retrying Connexion.", thread_tech_id );
+          Info( __func__, "dmx", thread_tech_id, LOG_NOTICE, "%s: Retrying Connexion.", thread_tech_id );
           if ( Dmx_init(module) == FALSE )
            { vars->date_next_retry = Partage->top + DMX_RETRY_DELAI; }
           else
@@ -211,13 +211,13 @@
           gint retour;
           retour = fstat( vars->fd, &buf );
           if (retour == -1)
-           { Info_new( __func__, module->Thread_debug, LOG_ERR,
+           { Info( __func__, "dmx", thread_tech_id, LOG_ERR,
                       "%s: Fstat Error (%s), closing and re-trying in %ds", thread_tech_id,
                        strerror(errno), DMX_RETRY_DELAI/10 );
              closing = TRUE;
            }
           else if ( buf.st_nlink < 1 )
-           { Info_new( __func__, module->Thread_debug, LOG_ERR,
+           { Info( __func__, "dmx", thread_tech_id, LOG_ERR,
                       "%s: USB device disappeared. Closing and re-trying in %ds", thread_tech_id, DMX_RETRY_DELAI/10 );
              closing = TRUE;
            }

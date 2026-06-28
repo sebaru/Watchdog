@@ -45,14 +45,14 @@
     gchar *acronyme = Json_get_string ( element, "acronyme" );
     struct DLS_WATCHDOG *bit = g_try_malloc0 ( sizeof(struct DLS_WATCHDOG) );
     if (!bit)
-     { Info_new( __func__, Config.log_dls, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
+    { Info( __func__, "dls", plugin->tech_id, LOG_ERR, "Memory error for '%s:%s'", tech_id, acronyme );
        return;
      }
     g_snprintf( bit->tech_id,  sizeof(bit->tech_id),  "%s", tech_id );
     g_snprintf( bit->acronyme, sizeof(bit->acronyme), "%s", acronyme );
     g_snprintf( bit->libelle,  sizeof(bit->libelle),  "%s", Json_get_string ( element, "libelle" ) );
     plugin->Dls_data_WATCHDOG = g_slist_prepend ( plugin->Dls_data_WATCHDOG, bit );
-    Info_new( __func__, Config.log_dls, LOG_INFO,
+    Info( __func__, "dls", plugin->tech_id, LOG_INFO,
               "Create bit DLS_WATCHDOG '%s:%s' (%s)", bit->tech_id, bit->acronyme, bit->libelle );
   }
 /******************************************************************************************************************************/
@@ -84,7 +84,7 @@
  void Dls_data_WATCHDOG_set ( struct DLS_TO_PLUGIN *vars, struct DLS_WATCHDOG *bit, gint consigne )
   { if (!bit) return;
     bit->top = Partage->top + consigne;
-    Info_new( __func__, (Config.log_dls || (vars ? vars->debug : FALSE)), LOG_DEBUG,
+    Info( __func__, "dls", bit->tech_id, LOG_DEBUG,
               "ligne %04d: Changing DLS_WATCHDOG '%s:%s'=%d",
               (vars ? vars->num_ligne : -1), bit->tech_id, bit->acronyme, consigne );
     Partage->audit_bit_interne_per_sec++;
@@ -112,16 +112,16 @@
 /******************************************************************************************************************************/
  gboolean Dls_data_WATCHDOG_set_from_thread_watchdog ( JsonNode *request )
   { if (!Json_has_member ( request, "thread_tech_id" ))
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: missing thread_tech_id" );  return(FALSE); }
+     { Info( __func__, "mqtt", "local", LOG_ERR, "SET_WATCHDOG: missing thread_tech_id" );  return(FALSE); }
     if (!Json_has_member ( request, "thread_acronyme" ) )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: missing thread_acronyme" ); return(FALSE); }
+     { Info( __func__, "mqtt", "local", LOG_ERR, "SET_WATCHDOG: missing thread_acronyme" ); return(FALSE); }
     if (!Json_has_member ( request, "consigne" ) )
-     { Info_new( __func__, Config.log_bus, LOG_ERR, "SET_WATCHDOG: missing consigne" );        return(FALSE); }
+     { Info( __func__, "mqtt", "local", LOG_ERR, "SET_WATCHDOG: missing consigne" );        return(FALSE); }
 
     gchar *thread_tech_id  = Json_get_string ( request, "thread_tech_id" );
     gchar *thread_acronyme = Json_get_string ( request, "thread_acronyme" );
     gint consigne          = Json_get_int ( request, "consigne" );
-    Info_new( __func__, Config.log_bus, LOG_INFO, "SET_WATCHDOG for: '%s:%s'=%d",
+    Info( __func__, "mqtt", "local", LOG_INFO, "SET_WATCHDOG for: '%s:%s'=%d",
               thread_tech_id, thread_acronyme, consigne );
     struct DLS_WATCHDOG *bit = Dls_data_WATCHDOG_lookup ( thread_tech_id, thread_acronyme );
     if (bit) Dls_data_WATCHDOG_set ( NULL, bit, consigne );

@@ -43,18 +43,18 @@
   { if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
     if (Partage->Thread_run  == FALSE) return;
 
-    Info_new( __func__, Config.log_msrv, LOG_DEBUG, "Add Arch in list: '%s:%s'=%f", tech_id, acronyme, valeur );
+    Info( __func__, "mqtt", tech_id, LOG_DEBUG, "Add Arch in list: '%s:%s'=%f", tech_id, acronyme, valeur );
     struct timeval tv;
-    JsonNode *arch = Json_node_create ();
+    JsonNode *arch = Json_create();
     if (!arch) return;
 
     gettimeofday( &tv, NULL );                                                                   /* On prend l'heure actuelle */
-    Json_node_add_string ( arch, "tech_id",   tech_id );
-    Json_node_add_string ( arch, "acronyme",  acronyme );
-    Json_node_add_double ( arch, "valeur",    valeur );
-    Json_node_add_int    ( arch, "date_sec",  tv.tv_sec );
-    Json_node_add_int    ( arch, "date_usec", tv.tv_usec );
+    Json_add_string( arch, "tech_id",   tech_id );
+    Json_add_string( arch, "acronyme",  acronyme );
+    Json_add_double( arch, "valeur",    valeur );
+    Json_add_int( arch, "date_sec",  tv.tv_sec );
+    Json_add_int( arch, "date_usec", tv.tv_usec );
     MQTT_Send_to_API ( arch, "DLS_ARCHIVE" );
-    Json_node_unref ( arch );
+    Json_unref( arch );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

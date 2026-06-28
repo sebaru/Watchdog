@@ -35,17 +35,17 @@
  void AUDIO_Send_to_zone ( gchar *audio_zone_name, gchar *audio_libelle )
   { if (!audio_zone_name) return;
     if (!audio_libelle) return;
-    Info_new( __func__, Config.log_msrv, LOG_NOTICE, "Saying '%s' on audio_zone '%s", audio_libelle, audio_zone_name );
-    JsonNode *AudioNode = Json_node_create();
+    Info( __func__, "audio", Config.audio_tech_id, LOG_NOTICE, "Saying '%s' on audio_zone '%s'", audio_libelle, audio_zone_name );
+    JsonNode *AudioNode = Json_create();
     if (!AudioNode)
-     { Info_new( __func__, Config.log_msrv, LOG_ERR, "Cannot send '%s' to audio_zone '%s': memory error", audio_libelle, audio_zone_name );
+     { Info( __func__, "audio", Config.audio_tech_id, LOG_ERR, "Cannot send '%s' to audio_zone '%s': memory error", audio_libelle, audio_zone_name );
        return;
      }
-    Json_node_add_string ( AudioNode, "audio_libelle", audio_libelle );
+    Json_add_string ( AudioNode, "audio_libelle", audio_libelle );
     struct DLS_DI *bit = Dls_data_DI_lookup ( Config.audio_tech_id, audio_zone_name );
     if (bit) Dls_data_DI_set_pulse ( NULL, bit );
-    else Info_new( __func__, Config.log_msrv, LOG_ERR, "DI '%s:%s' not found", Config.audio_tech_id, audio_zone_name );
+    else Info( __func__, "audio", Config.audio_tech_id, LOG_ERR, "DI '%s:%s' not found", Config.audio_tech_id, audio_zone_name );
     MQTT_Send_to_topic ( Partage->MQTT_local_session, AudioNode, FALSE, "AUDIO_ZONE/%s", audio_zone_name );
-    Json_node_unref ( AudioNode );
+    Json_unref ( AudioNode );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -47,10 +47,11 @@
 /******************************************************************************************************************************/
  static void Stopper_radio ( struct THREAD *module )
   { struct RADIO_VARS *vars = module->vars;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     if (vars->radio_pid>0)
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "Sending kill to radio pid %d", vars->radio_pid );
+     { Info( __func__, "radio", thread_tech_id, LOG_DEBUG, "Sending kill to radio pid %d", vars->radio_pid );
        kill(vars->radio_pid, SIGTERM);
-       Info_new( __func__, module->Thread_debug, LOG_INFO, "Waiting for pid %d termination", vars->radio_pid );
+       Info( __func__, "radio", thread_tech_id, LOG_INFO, "Waiting for pid %d termination", vars->radio_pid );
        waitpid(vars->radio_pid, NULL, 0);
      }
     vars->radio_pid = 0;
@@ -62,21 +63,22 @@
 /******************************************************************************************************************************/
  static gboolean Jouer_radio ( struct THREAD *module, gchar *radio )
   { struct RADIO_VARS *vars = module->vars;
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
     Stopper_radio( module );
-    Info_new( __func__, module->Thread_debug, LOG_NOTICE, "Starting playing radio %s", radio );
+    Info( __func__, "radio", thread_tech_id, LOG_NOTICE, "Starting playing radio %s", radio );
     vars->radio_pid = fork();
     if (vars->radio_pid<0)
-     { Info_new( __func__, module->Thread_debug, LOG_ERR,
+     { Info( __func__, "radio", thread_tech_id, LOG_ERR,
                 "CVLC '%s' fork failed pid=%d", radio, vars->radio_pid );
        return(FALSE);
      }
     else if (!vars->radio_pid)
      { execlp( "cvlc", "cvlc", radio, NULL );
-       Info_new( __func__, module->Thread_debug, LOG_ERR, "CVLC '%s' exec failed pid=%d", radio, vars->radio_pid );
+       Info( __func__, "radio", thread_tech_id, LOG_ERR, "CVLC '%s' exec failed pid=%d", radio, vars->radio_pid );
        _exit(0);
      }
     else
-     { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "CVLC '%s' is playing pid=%d", radio, vars->radio_pid );
+     { Info( __func__, "radio", thread_tech_id, LOG_DEBUG, "CVLC '%s' is playing pid=%d", radio, vars->radio_pid );
      }
     return(TRUE);
   }
@@ -90,6 +92,7 @@
     /*struct RADIO_VARS *vars = module->vars;*/
 
     gchar *tech_id = Json_get_string ( module->config, "tech_id" );
+    gchar *thread_tech_id = Json_get_string ( module->config, "thread_tech_id" );
 
     Thread_send_comm_to_master ( module, TRUE );
 
@@ -104,16 +107,16 @@
           gchar *tag = Json_get_string ( request, "tag" );
           if ( !strcasecmp( tag, "PLAY_RADIO" ) )
            { gchar *radio = Json_get_string ( request, "radio" );
-             Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Diffusing %s", tech_id, radio );
+             Info( __func__, "radio", thread_tech_id, LOG_NOTICE, "%s: Diffusing %s", tech_id, radio );
              Jouer_radio ( module, radio );
            }
           else if ( !strcasecmp( tag, "STOP_RADIO" ) )
-           { Info_new( __func__, module->Thread_debug, LOG_NOTICE, "%s: Stopping radio", tech_id );
+           { Info( __func__, "radio", thread_tech_id, LOG_NOTICE, "%s: Stopping radio", tech_id );
              Stopper_radio( module );
            }
           else
-           { Info_new( __func__, module->Thread_debug, LOG_DEBUG, "%s: tag '%s' not for this thread", tech_id, tag ); }
-          Json_node_unref(request);
+           { Info( __func__, "radio", thread_tech_id, LOG_DEBUG, "%s: tag '%s' not for this thread", tech_id, tag ); }
+          Json_unref(request);
         }
      }
     Stopper_radio( module );

@@ -54,6 +54,7 @@ pkg_check_modules(UUID      REQUIRED uuid)
 pkg_check_modules(LIBSYSTEMD REQUIRED libsystemd)
 pkg_check_modules(LIBJWT    REQUIRED libjwt)
 pkg_check_modules(MOSQUITTO REQUIRED libmosquitto)
+pkg_check_modules(ABLS_LIBS REQUIRED abls-libs)
 
 include(GNUInstallDirs)
 
