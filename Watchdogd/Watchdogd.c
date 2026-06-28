@@ -467,8 +467,8 @@
        Json_add_int   ( DlsAgentNode, "syn_id", 1 );
        if (Dls_auto_create_plugin( DlsAgentNode ) == FALSE)
         { Info( __func__, "watchdogd", NULL, LOG_ERR, "Unable to create plugin DLS '%s'.", tech_id ); }
-       else Info( __func__, "watchdogd", NULL, LOG_INFO, "Plugin DLS '%s' created.", tech_id ); 
-        Json_unref ( DlsAgentNode );
+       else Info( __func__, "watchdogd", NULL, LOG_INFO, "Plugin DLS '%s' created.", tech_id );
+       Json_unref ( DlsAgentNode );
      }
     else Info( __func__, "watchdogd", NULL, LOG_ERR, "Unable to create plugin DLS '%s': Memory error.", tech_id );
 

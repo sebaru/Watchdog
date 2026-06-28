@@ -41,7 +41,7 @@
      { if (Config.instance_is_master)
         { MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI/#" );
           MQTT_Subscribe ( Partage->MQTT_local_session, "SET_DI_PULSE/#" );
-          MQTT_Subscribe ( Partage->MQTT_local_session, "SET_CI_PULSE/#" ); 
+          MQTT_Subscribe ( Partage->MQTT_local_session, "SET_CI_PULSE/#" );
           MQTT_Subscribe ( Partage->MQTT_local_session, "SET_AI/#" );
           MQTT_Subscribe ( Partage->MQTT_local_session, "SET_WATCHDOG/#" );
         }

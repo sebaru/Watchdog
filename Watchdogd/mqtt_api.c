@@ -276,8 +276,8 @@
           gdouble longitude = Json_get_double ( request, "longitude" );
           Json_add_double( user_gps, "latitude",  latitude );
           Json_add_double( user_gps, "longitude", longitude );
-          Info( __func__, "mqtt", "api", LOG_INFO, 
-                    "SET_GPS: Updated GPS for user '%s': latitude=%f, longitude=%f", email, latitude, longitude );
+          Info( __func__, "mqtt", "api", LOG_INFO,
+                "SET_GPS: Updated GPS for user '%s': latitude=%f, longitude=%f", email, latitude, longitude );
         }
      }
 
