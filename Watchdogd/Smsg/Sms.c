@@ -634,9 +634,9 @@
        g_list_free(Results);
      }
 end_map:
-  if (MapNode) Json_unref ( MapNode );
+  Json_unref ( MapNode );
 end_user:
-  if (UserNode) Json_unref ( UserNode );
+  Json_unref ( UserNode );
   }
 
 /******************************************************************************************************************************/

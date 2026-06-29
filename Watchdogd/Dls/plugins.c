@@ -92,10 +92,10 @@
     if (api_result == NULL || Json_get_int ( api_result, "http_code" ) != 200)
      { Info( __func__, "dls", NULL, LOG_ERR,
                  "API Request for DLS CREATE failed. '%s' not created.", tech_id );
-       if (api_result) Json_unref ( api_result );
+       Json_unref ( api_result );
        return(FALSE);
      }
-    if (api_result) Json_unref ( api_result );
+    Json_unref ( api_result );
     return(TRUE);
   }
 /******************************************************************************************************************************/
