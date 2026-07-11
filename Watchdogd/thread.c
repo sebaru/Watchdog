@@ -209,7 +209,7 @@
     if (sizeof_vars)
      { module->vars = g_try_malloc0 ( sizeof_vars );
        if (!module->vars)
-        { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': Memory error for vars.", thread_tech_id );
+        { Info( __func__, "thread", thread_tech_id, LOG_ALERT, "'%s': Memory error for vars.", thread_tech_id );
           Thread_end ( module );                                    /* Pas besoin de return : Thread_end fait un pthread_exit */
         }
      }
@@ -253,7 +253,7 @@
         { Info( __func__, "thread", thread_tech_id, LOG_ERR, "%s: DLS Create ERROR (%s)\n", thread_tech_id, name ); }
        Json_unref ( RootNode );
      }
-    else Info( __func__, "thread", thread_tech_id, LOG_ERR, "%s: Memory error while creating DLS RootNode", thread_tech_id );
+    else Info( __func__, "thread", thread_tech_id, LOG_ALERT, "%s: Memory error while creating DLS RootNode", thread_tech_id );
 
 /* ------------------------------------------------ Création des IOs --------------------------------------------------------- */
     module->IOs = Json_create();
@@ -387,7 +387,7 @@
 
     struct THREAD *module = g_try_malloc0( sizeof(struct THREAD) );
     if (!module)
-    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': Not Enought Memory", thread_tech_id );
+    { Info( __func__, "thread", thread_tech_id, LOG_ALERT, "'%s': Not Enought Memory", thread_tech_id );
        return;
      }
 

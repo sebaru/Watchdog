@@ -131,7 +131,7 @@
 
     vars->lignes = g_try_malloc0 ( sizeof( struct GPIOD_LIGNE ) * vars->num_lines );
     if (!vars->lignes)
-     { Info( __func__, "gpiod", thread_tech_id, LOG_ERR, "Memory Error while loading lignes" );
+     { Info( __func__, "gpiod", thread_tech_id, LOG_ALERT, "Memory Error while loading lignes" );
        goto end;
      }
 

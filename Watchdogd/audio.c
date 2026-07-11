@@ -38,7 +38,7 @@
     Info( __func__, "audio", Config.audio_tech_id, LOG_NOTICE, "Saying '%s' on audio_zone '%s'", audio_libelle, audio_zone_name );
     JsonNode *AudioNode = Json_create();
     if (!AudioNode)
-     { Info( __func__, "audio", Config.audio_tech_id, LOG_ERR, "Cannot send '%s' to audio_zone '%s': memory error", audio_libelle, audio_zone_name );
+     { Info( __func__, "audio", Config.audio_tech_id, LOG_ALERT, "Cannot send '%s' to audio_zone '%s': memory error", audio_libelle, audio_zone_name );
        return;
      }
     Json_add_string ( AudioNode, "audio_libelle", audio_libelle );

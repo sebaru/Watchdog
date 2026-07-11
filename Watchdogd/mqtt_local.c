@@ -190,7 +190,7 @@ end:
     va_end ( ap );
     gchar *topic = g_try_malloc(taille+1);
     if (!topic)
-     { Info( __func__, "mqtt", "local", LOG_ERR, "Memory Error for '%s'", format );
+     { Info( __func__, "mqtt", "local", LOG_ALERT, "Memory Error for '%s'", format );
        return;
      }
 

@@ -331,7 +331,7 @@
 
     Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
     if (!Partage)
-     { Info( __func__, "watchdogd", NULL, LOG_CRIT, "Shared memory failed to allocate" );
+     { Info( __func__, "watchdogd", NULL, LOG_ALERT, "Shared memory failed to allocate" );
        error_code = EXIT_FAILURE;
        goto first_stage_end;
      }
@@ -470,7 +470,7 @@
        else Info( __func__, "watchdogd", NULL, LOG_INFO, "Plugin DLS '%s' created.", tech_id );
        Json_unref ( DlsAgentNode );
      }
-    else Info( __func__, "watchdogd", NULL, LOG_ERR, "Unable to create plugin DLS '%s': Memory error.", tech_id );
+    else Info( __func__, "watchdogd", NULL, LOG_ALERT, "Unable to create plugin DLS '%s': Memory error.", tech_id );
 
 /***************************************** Prépration D.L.S (AVANT les threads pour préparer les bits IO **********************/
     if (Config.instance_is_master)                                                                        /* Démarrage D.L.S. */

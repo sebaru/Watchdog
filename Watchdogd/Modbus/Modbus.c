@@ -749,7 +749,7 @@
                                num, vars->nbr_entree_ana );
            }
         }
-       else Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Memory Error for AI" );
+       else Info( __func__, "modbus", thread_tech_id, LOG_ALERT, "Memory Error for AI" );
      }
 /***************************************************** Mapping des DigitalInput ***********************************************/
     Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Allocate %d DI", vars->nbr_entree_tor );
@@ -772,7 +772,7 @@
                                 num, vars->nbr_entree_tor );
            }
         }
-       else Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Memory Error for DI" );
+       else Info( __func__, "modbus", thread_tech_id, LOG_ALERT, "Memory Error for DI" );
      }
 /***************************************************** Mapping des AnalogOutput ***********************************************/
     Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Allocate %d AO", vars->nbr_sortie_ana );
@@ -795,7 +795,7 @@
                                num, vars->nbr_sortie_ana );
            }
         }
-       else Info( __func__, "modbus", thread_tech_id, LOG_ERR, "Memory Error for AO" );
+       else Info( __func__, "modbus", thread_tech_id, LOG_ALERT, "Memory Error for AO" );
      }
 /***************************************************** Mapping des DigitalOutput **********************************************/
     Info( __func__, "modbus", thread_tech_id, LOG_INFO, "Allocate %d DO", vars->nbr_sortie_tor );
@@ -816,7 +816,7 @@
                                num, vars->nbr_sortie_tor );
            }
         }
-       else Info( __func__, "modbus", thread_tech_id, LOG_ERR, " Memory Error for DO" );
+       else Info( __func__, "modbus", thread_tech_id, LOG_ALERT, " Memory Error for DO" );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     Info( __func__, "modbus", thread_tech_id, LOG_NOTICE, "Module '%s' : io config done",

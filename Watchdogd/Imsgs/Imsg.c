@@ -121,7 +121,7 @@
 
     JsonNode *RootNode = Json_create();
     if ( RootNode == NULL )
-    { Info( __func__, "imsg", thread_tech_id, LOG_ERR, "%s: Memory Error for '%s'", thread_tech_id, from );
+    { Info( __func__, "imsg", thread_tech_id, LOG_ALERT, "%s: Memory Error for '%s'", thread_tech_id, from );
        goto end_message;
      }
 
