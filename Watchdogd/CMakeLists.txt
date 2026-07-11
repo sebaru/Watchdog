@@ -19,7 +19,6 @@ add_subdirectory(TeleinfoEDF)
 add_subdirectory(Radio)
 add_subdirectory(Imsgs)
 add_subdirectory(Meteo)
-add_subdirectory(Phidget)
 add_subdirectory(Gpiod)
 add_subdirectory(Shelly)
 
@@ -105,9 +104,6 @@ endif()
 install(TARGETS Watchdogd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES Watchdogd.service DESTINATION ${SYSTEMD_SYSTEM_UNIT_DIR})
 install(FILES abls-habitat-agent.conf.sample DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
-install(FILES watchdogd_sudo
-        DESTINATION /etc/sudoers.d
-        PERMISSIONS OWNER_READ GROUP_READ)
 install(FILES 49-modemmanager-abls.rules
   DESTINATION /etc/polkit-1/rules.d
   PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
