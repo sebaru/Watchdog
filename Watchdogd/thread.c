@@ -327,7 +327,8 @@
     GSList *liste = Partage->Threads;                                                                 /* Parcours de la liste */
     while(liste)
      { struct THREAD *search_module = liste->data;
-       if (!strcasecmp ( thread_tech_id, Json_get_string ( search_module->config, "thread_tech_id" ) ) )
+       gchar *compare_to = Json_get_string ( search_module->config, "thread_tech_id" );
+       if (compare_to && !strcasecmp ( thread_tech_id, compare_to ) )
         { module = search_module;                                                                    /* On a trouvé le thread */
           Partage->Threads = g_slist_remove( Partage->Threads, module );
           break;
