@@ -392,17 +392,9 @@
      }
 
     module->config = Http_Get_from_global_API ( "/run/thread/config", "thread_tech_id=%s", thread_tech_id );
-    if (module->config && Json_get_int ( module->config, "http_code" ) == 200)
-     { module->Thread_run   = Json_get_bool ( module->config, "enable" );
-     }
+    if (module->config && Json_get_int ( module->config, "http_code" ) == 200) { module->Thread_run = TRUE; }
     else
-    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': GET_CONFIG from API Failed. Unloading.", thread_tech_id );
-       Thread_Stop_safe ( module );
-       return;
-     }
-
-    if (!module->Thread_run)
-    { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s' is not enabled. Unloading.", thread_tech_id );
+     { Info( __func__, "thread", thread_tech_id, LOG_ERR, "'%s': GET_CONFIG from API Failed. Unloading.", thread_tech_id );
        Thread_Stop_safe ( module );
        return;
      }
